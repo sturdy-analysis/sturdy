@@ -20,8 +20,8 @@ object ApronAlloc:
 trait ApronAlloc:
   type Var <: ApronVar
 
-  def allocateDoubleVariable(site: ApronAllocationSite): Var
-  def allocateIntVariable(site: ApronAllocationSite): Var
+  def allocateDoubleVariable(site: ApronAllocationSite, apron: Apron): Var
+  def allocateIntVariable(site: ApronAllocationSite, apron: Apron): Var
 
   /** returns true if the constraint variable should be freed as well */
   def freeVariable(v: Var, apron: Apron): Boolean

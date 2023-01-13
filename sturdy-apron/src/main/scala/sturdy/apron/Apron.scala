@@ -35,13 +35,14 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   private[apron] inline def env: Environment = apronState.getEnvironment
 
-  private var _freedReferences: mutable.WeakHashMap[ApronVar, ApronExpr] = mutable.WeakHashMap()
+  private var _freedReferences: mutable.WeakHashMap[ApronVar.UID, ApronExpr] = mutable.WeakHashMap()
 
-  inline def getFreedReference(v: ApronVar): Option[ApronExpr] = _freedReferences.get(v)
+  inline def getFreedReference(v: ApronVar): Option[ApronExpr] = _freedReferences.get(v.uid)
   private[apron] def freeReference(v: ApronVar, e: ApronExpr): Unit =
-    _freedReferences.update(v, e)
-  inline def getFreedReferences: Map[ApronVar, ApronExpr] = _freedReferences.toMap
+    _freedReferences.update(v.uid, e)
+  inline def getFreedReferences: Map[ApronVar.UID, ApronExpr] = _freedReferences.toMap
   inline def inScope(v: ApronVar): Boolean = getFreedReference(v).isEmpty
+
   def getBound(v: ApronVar): Interval = getFreedReference(v) match
     case Some(e) => getBound(e)
     case None => apronState.getBound(apronManager, v.av)
@@ -50,22 +51,17 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     apronState.getBound(apronManager, av)
 
   inline def getBound(v: ApronExpr): Interval =
-    getBound(v.toApron(this))
+    apronState.getBound(apronManager, v.toIntern(this))
 
   def getBound(v: Texpr1Node): Interval =
-    val vIntern = try {
-      new Texpr1Intern(env, v)
-    } catch {
-      case e: IllegalArgumentException if e.getMessage == "no such variable" =>
-        return null
-    }
+    val vIntern = new Texpr1Intern(env, v)
     apronState.getBound(apronManager, vIntern)
 
   def addDoubleVariable(site: ApronAllocationSite): alloc.Var =
-    alloc.allocateDoubleVariable(site)
+    alloc.allocateDoubleVariable(site, this)
 
   def addIntVariable(site: ApronAllocationSite): alloc.Var =
-    alloc.allocateIntVariable(site)
+    alloc.allocateIntVariable(site, this)
 
   def freeVariable(v: alloc.Var): Unit =
     if (!inScope(v))
@@ -94,7 +90,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
     if (!isInitialized) {
       initializeVar(v)
-      val expIntern = new Texpr1Intern(env, exp.toApron(this))
+      val expIntern = exp.toIntern(this)
       if (Apron.debugAssign) {
         println(s"assigning uninitialized $v = $exp = ${apronState.getBound(apronManager, expIntern)}, was uninitialized")
       }
@@ -104,14 +100,14 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       freeReference(v, ApronExpr.Constant(oldVal))
 
       val vnew = alloc.freshReference(v)
-      val expIntern = new Texpr1Intern(env, exp.toApron(this))
+      val expIntern = exp.toIntern(this)
       if (Apron.debugAssign) {
         println(s"assigning strong $vnew = $exp = ${apronState.getBound(apronManager, expIntern)}, was $oldVal")
       }
       apronState.assign(apronManager, vnew.av, expIntern, null)
       newV = Some(vnew)
     } else {
-      val expIntern = new Texpr1Intern(env, exp.toApron(this))
+      val expIntern = exp.toIntern(this)
       println(this)
       val old = getBound(v)
       val expBound = apronState.getBound(apronManager, expIntern)
@@ -134,7 +130,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     v
 
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
-    val v = alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar)
+    val v = alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar, this)
     val res = try f(v)
     finally {
       freeVariable(v)
@@ -142,21 +138,21 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     res
 
   def withTemporaryIntVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
-    val vs = (1 to n).toList.map(i => alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar))
+    val vs = (1 to n).toList.map(i => alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar, this))
     try f(vs)
     finally {
       vs.foreach(freeVariable)
     }
 
   def withTemporaryDoubleVariable[A](f: alloc.Var => A): A =
-    val v = alloc.allocateDoubleVariable(ApronAllocationSite.TemporaryVar)
+    val v = alloc.allocateDoubleVariable(ApronAllocationSite.TemporaryVar, this)
     try f(v)
     finally {
       freeVariable(v)
     }
 
   def withTemporaryDoubleVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
-    val vs = (1 to n).toList.map(i => alloc.allocateDoubleVariable(ApronAllocationSite.TemporaryVar))
+    val vs = (1 to n).toList.map(i => alloc.allocateDoubleVariable(ApronAllocationSite.TemporaryVar, this))
     try f(vs)
     finally {
       vs.foreach(freeVariable)
@@ -279,9 +275,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
         val oldBound = getBound(e1)
 
         initializeVar(x)
-        val e1Intern = new Texpr1Intern(env, e1.toApron(this))
+        val e1Intern = e1.toIntern(this)
         val a1 = apronState.assignCopy(apronManager, x.av, e1Intern, null)
-        val e2Intern = new Texpr1Intern(env, e2.toApron(this))
+        val e2Intern = e2.toIntern(this)
         val a2 = apronState.assignCopy(apronManager, x.av, e2Intern, null)
         a1.join(apronManager, a2)
 
@@ -295,34 +291,42 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   def combineVars(joinedApronState: Abstract1, v1: alloc.Var, v2: alloc.Var, widen: Boolean): MaybeChanged[alloc.Var] =
     if (v1 == v2)
       MaybeChanged.Unchanged(v1)
-    else {
-      (getFreedReference(v1), getFreedReference(v2)) match
-        case (None, None) => ???
-        case (None, Some(e2)) =>
-          // join e2 into constraints for v1
-          val e2intern = new Texpr1Intern(env, e2.toApron(this))
-          val assigned = apronState.assignCopy(apronManager, v1.av, e2intern, null)
-          assigned.join(apronManager, apronState)
-          val changed = !apronState.isEqual(apronManager, assigned)
-          if (changed) {
-            apronState = assigned
-            MaybeChanged.Changed(v1)
-          } else {
-            MaybeChanged.Unchanged(v1)
-          }
-        case (Some(e1), None) =>
+    else getFreedReference(v1) match
+      case None =>
+        // join v2 into constraints for v1
+        val e2intern = v2.expr.toIntern(this)
+        val assigned = apronState.assignCopy(apronManager, v1.av, e2intern, null)
+        assigned.join(apronManager, apronState)
+        val changed = !apronState.isEqual(apronManager, assigned)
+        if (changed) {
+          apronState = assigned
+          MaybeChanged.Changed(v1)
+        } else {
+          MaybeChanged.Unchanged(v1)
+        }
+      case Some(e1) => getFreedReference(v2) match
+        case None =>
           // join e1 into constraints for v2
-          val e1intern = new Texpr1Intern(env, e1.toApron(this))
+          val e1intern = e1.toIntern(this)
           val assigned = apronState.assignCopy(apronManager, v2.av, e1intern, null)
-          assigned.join(apronManager, apronState)
-          val changed = !apronState.isEqual(apronManager, assigned)
-          if (changed) {
-            apronState = assigned
-            MaybeChanged.Changed(v2)
+          assigned.joinCopy(apronManager, apronState)
+          val oldState = apronState
+          apronState = assigned
+          if (widen) {
+            // force termination
+            val v2Bound = getBound(v2.av)
+            val v1Bound = apronState.getBound(apronManager, e1intern)
+            val boundChanged = !v1Bound.isEqual(v2Bound)
+            if (boundChanged) {
+              freeReference(v2, ApronExpr.Constant(v2Bound))
+              MaybeChanged.Changed(v2)
+            } else {
+              MaybeChanged.Unchanged(v1)
+            }
           } else {
-            MaybeChanged.Unchanged(v2)
+            MaybeChanged(v2, !oldState.isEqual(apronManager, assigned))
           }
-        case (Some(e1), Some(e2)) =>
+        case Some(e2) =>
           // join e1 and e2, since neither v1 nor v2 is managed by apron
           val MaybeChanged(eJoined, changed) = joinApronExpr(v1.expr, v2.expr, widen = false)
           if (changed) {
@@ -331,39 +335,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
           } else {
             MaybeChanged.Unchanged(v1)
           }
-    }
-
-  /**
-    *
-    * x join y = t
-    * iff
-    * t:=x join t:=y
-    *
-    *
-    * cs(x)
-    * ds(y)
-    *
-    * [1,4] j [2,5]
-    * iff
-    * t:=[1,4] j t:=[2,5]
-    *
-    */
-
-  //    else if (v1.av == v2.av) {
-//      getFreedReference(v1) match
-//        case None =>
-//          freeReference(v1, v2.expr)
-//          MaybeChanged.Changed(v2)
-//        case Some(e1) => getFreedReference(v2) match
-//          case None =>
-//            freeReference(v2, e1)
-//            MaybeChanged.Unchanged(v1)
-//          case Some(e2) =>
-//            ???
-//            // joinApronExpr(e1, e2, widen)
-//    } else {
-//      ???
-//    }
 
   override type State = ApronState
 
@@ -409,7 +380,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     private val snapshot = new Abstract1(apronManager, apronState)
     private val snapshotFreedReferences = getFreedReferences
     private var fState: Abstract1 = _
-    private var fFreedReferences: Map[ApronVar, ApronExpr] = _
+    private var fFreedReferences: Map[ApronVar.UID, ApronExpr] = _
 
     override def inbetween(): Unit =
       fState = apronState

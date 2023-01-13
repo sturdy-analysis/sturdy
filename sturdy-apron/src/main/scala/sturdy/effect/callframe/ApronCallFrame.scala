@@ -280,3 +280,24 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       setVarsConsistentWithState(joinedVars)
   }
 
+//  class ApronCallFrameState(val as: apron.ApronState, val vars: List[Val]):
+//    override def equals(obj: Any): Boolean = obj match
+//      case that: ApronCallFrameState =>
+//        this.vars.size == that.vars.size && this.as == that.as && this.vars.zip(that.vars).forall {
+//          case (null, null) => true
+//          case (Val.Int(v1), Val.Int(v2)) => v1.isEqual(v2, apron)
+//          case (Val.Double(v1), Val.Double(v2)) => v1.isEqual(v2, apron)
+//          case (Val.Other(v1), Val.Other(v2)) => v1 == v2
+//          case _ => false
+//        }
+//      case _ =>
+//        false
+//
+//    override def hashCode(): Int =
+//      s.hashCode(apronManager)
+//
+//    override def toString: String =
+//      "(env = " + s.getEnvironment.toString + ", state = " + s.toString(apronManager) + ")"
+//
+//
+//

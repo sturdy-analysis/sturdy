@@ -38,6 +38,10 @@ enum ApronExpr:
     case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron(apron))
     case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(apron), r.toApron(apron))
 
+  def toIntern(apron: Apron): Texpr1Intern =
+    val expr = this.toApron(apron)
+    new Texpr1Intern(apron.env, expr)
+
 object ApronExpr:
   def num(i: Int): Constant = 
     Constant(new MpqScalar(new Mpz(i)))
