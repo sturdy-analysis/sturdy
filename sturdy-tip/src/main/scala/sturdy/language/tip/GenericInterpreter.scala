@@ -1,8 +1,9 @@
 package sturdy.language.tip
 
+import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.DecidableMutableCallFrame
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
@@ -86,7 +87,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableMutableCallFrame[String, String, V]
+  val callFrame: DecidableCallFrame[String, String, V] with MutableCallFrame[String, String, V, NoJoin]
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
@@ -95,7 +96,13 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val failure: Failure
 
   // effect stack
-  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, assert, input, failure))
+  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, assert, print, input, failure), {
+    case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, assert, print, failure)
+    case _: FixIn.Eval => List(callFrame, store, alloc, input, failure)
+  }, {
+    case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, assert, print, failure)
+    case _: FixIn.Eval => List(callFrame, alloc, failure)
+  })
   given EffectStack = effectStack
 
   // analysis state

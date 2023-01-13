@@ -35,7 +35,7 @@ trait Fix extends Interpreter:
 
   final def parameters(callFrame: DecidableCallFrame[String, String, Value]): context.Sensitivity[FixIn, Parameters[String, Value]] =
     context.parameters[FixIn, String, Value] {
-      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
+      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).getOrElse(null)).toMap)
       case _ => None
     }
 

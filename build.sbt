@@ -31,19 +31,44 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     )
   )
 
-lazy val sturdy_apron_domain = (project in file("sturdy-apron-domain"))
+val copyApronBinaries = taskKey[Unit]("Copies the platform-dependent Apron binaries to the project root, so that sbt loads them automatically")
+
+lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
   .dependsOn(sturdy_core % "compile->compile")
   .settings(
-    name := "sturdy_apron_domain",
+    name := "sturdy_apron",
     libraryDependencies ++= Seq(
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
+    ),
+    copyApronBinaries := {
+      println("Copies Apron binaries")
+      val (os, ext) = System.getProperty("os.name").toLowerCase match {
+        case s if s.contains("darwin") || s.contains("mac") => ("darwin", "dylib")
+        case s if s.contains("win") => ("win", "dll")
+        case s if s.contains("nix") => ("unix", "so")
+      }
+      val arch = System.getProperty("os.arch")
+      val nativeDir = baseDirectory.value / "lib_extra" / s"$os-$arch"
+      if (!nativeDir.exists) {
+        println(s"No Apron binaries for $os on $arch available in ${baseDirectory.value / "lib_extra"}.")
+        println(s"Please create $nativeDir and add Apron binaries there.")
+        throw new FeedbackProvidedException {}
+      }
+      val files = Seq() ++ nativeDir.listFiles().filter(_.name.endsWith(ext))
+      for (source <- files) {
+        val target = baseDirectory.value / source.name
+        println(s"Copies $source to $target")
+        java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+      }
+    },
+    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
   )
+
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile")
-  .dependsOn(sturdy_apron_domain % "compile->compile")
+  .dependsOn(sturdy_apron % "compile->compile")
   .settings(
     name := "sturdy_tip",
     libraryDependencies ++= Seq(
@@ -71,7 +96,7 @@ val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
-  .dependsOn(sturdy_apron_domain % "compile->compile")
+  .dependsOn(sturdy_apron % "compile->compile")
   .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
   .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
   .settings(

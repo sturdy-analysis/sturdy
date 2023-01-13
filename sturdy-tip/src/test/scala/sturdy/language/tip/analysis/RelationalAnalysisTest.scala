@@ -86,9 +86,6 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
 
-      println(s"CONCRETE : $cresult")
-      println(s"ABSTRACT : $aresult")
-
       // compute number of assertions in program
       val unprovedAsserts = aresult match 
         case AFallible.Failing(msgs) => msgs.size
@@ -98,6 +95,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
       println("=> #assertions proved or unreachable " + (program.assertCount - unprovedAsserts))
 
+      println(s"CONCRETE : ${interp.store.entries}")
+      println(s"ABSTRACT : ${analysis.store.getState}")
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given
