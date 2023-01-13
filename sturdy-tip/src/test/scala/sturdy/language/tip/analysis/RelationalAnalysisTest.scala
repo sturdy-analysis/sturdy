@@ -89,6 +89,16 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"CONCRETE : $cresult")
       println(s"ABSTRACT : $aresult")
 
+      // compute number of assertions in program
+      val unprovedAsserts = aresult match 
+        case AFallible.Failing(msgs) => msgs.size
+        case AFallible.MaybeFailing(_, msgs) => msgs.size
+        case _ => 0
+      // subtract number of maybefailing assertions
+      // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
+      println("=> #assertions proved or unreachable " + (program.assertCount - unprovedAsserts))
+
+
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
