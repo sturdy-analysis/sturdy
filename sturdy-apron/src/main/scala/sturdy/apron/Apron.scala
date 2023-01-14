@@ -66,7 +66,6 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   def freeVariable(v: alloc.Var): Unit =
     if (!inScope(v))
       return
-//      throw new IllegalStateException(s"Cannot free out-of-scope variable $v in $this")
     val isStrong = alloc.freeVariable(v, this)
     if (Apron.debugAlloc) {
       println(s"Freeing ${if (isStrong) "strong" else "weak"} $v = ${getBound(v.av)}")
@@ -95,6 +94,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
         println(s"assigning uninitialized $v = $exp = ${apronState.getBound(apronManager, expIntern)}, was uninitialized")
       }
       apronState.assign(apronManager, v.av, expIntern, null)
+      println(this)
     } else if (isStrong) {
       val oldVal = getBound(v.av)
       freeReference(v, ApronExpr.Constant(oldVal))

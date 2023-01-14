@@ -29,4 +29,5 @@ trait ApronAlloc:
   
   def freshReference(v: Var): Var
 
-  scala.collection.immutable.ArraySeq
+  def boundIntVars: Iterable[Var]
+  def boundDoubleVars: Iterable[Var]

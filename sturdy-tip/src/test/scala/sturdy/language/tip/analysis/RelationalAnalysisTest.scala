@@ -94,6 +94,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
       println(s"ABSTRACT : ${analysis.callFrame.apron.getFreedReferences}")
 
+      assert(analysis.apronAlloc.boundIntVars.isEmpty)
+
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))

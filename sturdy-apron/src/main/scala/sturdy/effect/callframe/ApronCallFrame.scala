@@ -62,8 +62,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
   object Val:
     def getVar(v: Val): Option[alloc.Var] = v match
-      case Val.Int(v) => Some(v)
-      case Val.Double(v) => Some(v)
+      case Val.Int(av) => Some(av)
+      case Val.Double(av) => Some(av)
       case _ => None
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
@@ -160,6 +160,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
             case Val.Int(av) =>
               apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Int(av2))
             case Val.Double(av) =>
+              apron.freeVariable(av)
               addNewVariable(ix, isInt = true, name, exp)
             case _ =>
               addNewVariable(ix, isInt = true, name, exp)
@@ -169,10 +170,12 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
               case Val.Double(av) =>
                 apron.assign(av, exp).foreach(av2 => vars(ix) = Val.Double(av2))
               case Val.Int(av) =>
+                apron.freeVariable(av)
                 addNewVariable(ix, isInt = false, name, exp)
               case _ =>
                 addNewVariable(ix, isInt = false, name, exp)
           case None =>
+            Val.getVar(oldVal).foreach(apron.freeVariable)
             vars(ix) = Val.Other(v)
       JOptionC.some(())
     } else {
@@ -205,6 +208,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       case v@Val.Double(av) => if (!apron.inScope(av)) Val.Double(apron.alloc.freshReference(av)) else v
       case v => v
     }
+
 
   override def getState: State =
     val frozenVars = vars.toList
@@ -245,7 +249,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     override def inbetween(): Unit =
       super.inbetween()
       fVars = vars
-      setVarsConsistentWithState(snapshot.toArray)
+      val snapshotWithNewVars = snapshot.zip(fVars).map { case (null, v: (Val.Int | Val.Double)) => v; case (v, _) => v }
+      setVarsConsistentWithState(snapshotWithNewVars.toArray)
 
     override def retainNone(): Unit =
       super.retainNone()

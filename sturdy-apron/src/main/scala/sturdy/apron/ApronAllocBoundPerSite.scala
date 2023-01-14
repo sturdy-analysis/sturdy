@@ -36,6 +36,9 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   private var intTempCount = 0
   private var doubleTempCount = 0
 
+  def boundIntVars: Iterable[Var] = intVarCount.values.filter(_._1 > 0).map(_._2)
+  def boundDoubleVars: Iterable[Var] = ???
+
   def allocateIntVariable(site: ApronAllocationSite, apron: Apron): Var =
     val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
