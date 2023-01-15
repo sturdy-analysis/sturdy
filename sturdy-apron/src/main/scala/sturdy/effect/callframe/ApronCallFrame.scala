@@ -230,6 +230,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
            |  vars1 = ${st1._2}
            |  vars2 = ${st2._2}
            |  vars  = $vars
+           |  apron = $combinedState
            |  apronChanged = $apronChanged
            |  varsChanged = $varsChanged""".stripMargin)
 
