@@ -134,8 +134,8 @@ enum CompareOp:
 
 given JoinApronExpr(using ap: Apron): Join[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joinApronExpr(v1, v2, widen = false)
+    ap.joins.combineExprs(v1, v2, ap.getState, widen = false)
 
 given WidenApronExpr(using ap: Apron): Widen[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joinApronExpr(v1, v2, widen = true)
+    ap.joins.combineExprs(v1, v2, ap.getState, widen = true)

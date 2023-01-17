@@ -59,7 +59,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.contains("/rec.tip") &&
+    p.toString.contains("/rec.") &&
       p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {

@@ -47,6 +47,14 @@ trait Combine[V, W <: Widening]:
 type Join[V] = Combine[V, Widening.No]
 type Widen[V] = Combine[V, Widening.Yes]
 
+trait CombineStateful[S, V, W <: Widening]:
+  def apply(st: S, v1: V, v2: V): MaybeChanged[(V, S)]
+  
+
+type JoinStateful[S, V] = CombineStateful[S, V, Widening.No]
+type WidenStateful[S, V] = CombineStateful[S, V, Widening.Yes]
+
+
 object Combine:
   inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): MaybeChanged[V] = (v1, v2) match {
     case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)

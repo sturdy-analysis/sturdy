@@ -101,7 +101,7 @@ final class StackedStates[Dom, Codom](val state: State)
         Option(outCache.get(stateFrame)) match
           case None =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame:$currentOut")
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
             if (Fixpoint.DEBUG)

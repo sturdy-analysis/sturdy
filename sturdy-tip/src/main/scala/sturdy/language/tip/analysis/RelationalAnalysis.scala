@@ -20,7 +20,7 @@ import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.apron.{ApronAllocRoundRobin, Apron, given}
+import sturdy.apron.{Apron, given}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context
