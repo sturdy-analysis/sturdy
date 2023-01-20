@@ -94,17 +94,22 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars
+    val snapBounds = this.vars.flatMap(Val.getVar).map(apron.getBound)
     this._data = d
+    val apStateBefore = apron.getState
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
     setVars(vars)
     val vs = this.allocatedVars
     try f finally {
+      val apStateAfter = apron.getState
       this._data = snapData
       this.names = snapNames
       vs.foreach(v => apron.freeVariable(v.asInstanceOf[apron.alloc.Var]))
       this.vars = snapVars
-//      if (Apron.debugAlloc)
+      val boundsAfter = this.vars.flatMap(Val.getVar).map(apron.getBound)
+      println()
+      //      if (Apron.debugAlloc)
 //        println(apron.alloc)
     }
   }
@@ -193,10 +198,12 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def setState(st: State): Unit =
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
+    if (Apron.debugJoinWiden || Apron.debugAlloc)
+      println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.getFreedReferences}")
     apron.setState(st._1)
     setVarsConsistentWithState(st._2.toArray)
     if (Apron.debugJoinWiden || Apron.debugAlloc)
-      println(s"Restored ApronCallFrame state ${vars.toList} in $apron")
+      println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.getFreedReferences}")
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
 

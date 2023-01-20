@@ -60,7 +60,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
 
 
     if (Apron.debugAlloc)
-      println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
+      println(s"allocating ${if (isStrong) "strong" else "weak"} $v for $site")
     v
 
   def allocateDoubleVariable(site: ApronAllocationSite, apron: Apron): Var =
@@ -76,7 +76,7 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
         (x, oldCount == 0)
 
     if (Apron.debugAlloc)
-      println(s"allocating ${if (isStrong) "strong" else "weak"} $v")
+      println(s"allocating ${if (isStrong) "strong" else "weak"} $v for $site")
     v
 
   override def freeVariable(v: Var, apron: Apron): Boolean =

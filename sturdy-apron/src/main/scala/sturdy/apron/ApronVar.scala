@@ -41,7 +41,8 @@ trait ApronVar:
       s"$av#$instCount"
     else
       ap.getFreedReference(this) match
-        case None => s"$av#$instCount"
+        case None if ap.env.hasVar(av) => s"$av#$instCount~${ap.getBound(av)}"
+        case None => s"$av#$instCount=null"
         case Some(e) => s"$av#$instCount=${ap.getBound(e)}"
 
   override def equals(obj: Any): Boolean = obj match

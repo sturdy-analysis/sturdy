@@ -70,7 +70,7 @@ final class StackedStates[Dom, Codom](val state: State)
     val stateFrame = (dom, widenedIn.get)
 
     if (Fixpoint.DEBUG)
-      widenedIn.toOption.foreach(win => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
+      widenedIn.toOption.foreach(_ => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
 
     Option(stack.get(stateFrame)) match
       case None =>
@@ -92,20 +92,20 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
-        PushResult.Continue(Some(widenedIn.get))
+        PushResult.Continue(widenedIn.toOption)
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
-        if (Fixpoint.DEBUG)
-          println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
         Option(outCache.get(stateFrame)) match
           case None =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame:$currentOut")
+              println(s"${stackHeightIndent}BOTTOM RECURRENT  $stateFrame:$currentOut")
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
-            if (Fixpoint.DEBUG)
+            if (Fixpoint.DEBUG) {
+              println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+            }
             PushResult.Recurrent(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -135,7 +135,7 @@ final class StackedStates[Dom, Codom](val state: State)
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}")
+        println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}:$out")
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
@@ -143,7 +143,7 @@ final class StackedStates[Dom, Codom](val state: State)
       val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, out)}
 
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
+        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
       if (changed) {
         outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))
@@ -181,7 +181,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in.head, in)}
+        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(in, ce.in.head)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 

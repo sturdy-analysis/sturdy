@@ -13,6 +13,28 @@ trait Stateful:
 trait Effect extends Stateful:
   def makeComputationJoiner[A]: Option[ComputationJoiner[A]]
 
+  protected def defaultComputationJoiner[A] = new ComputationJoiner[A] {
+    val snapshot = getState
+    var firstState: State = _
+
+    override def inbetween(): Unit =
+      firstState = getState
+      setState(snapshot)
+
+    override def retainNone(): Unit =
+      setState(snapshot)
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      setState(firstState)
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      {} // nothing
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      val joined = join(firstState, getState)
+      setState(joined.get)
+  }
+
 trait Monotone extends Effect:
   final override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None
 

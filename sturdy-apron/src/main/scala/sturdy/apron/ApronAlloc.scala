@@ -15,7 +15,9 @@ enum ApronAllocationSite:
     case TemporaryVar => "$$temporary"
 
 object ApronAlloc:
-  def default(manager: Manager) = new ApronAllocBoundPerSite(manager)
+  def default(manager: Manager) =
+//    new ApronAllocSingle(manager)
+    new ApronAllocBoundPerSite(manager)
 
 trait ApronAlloc:
   type Var <: ApronVar

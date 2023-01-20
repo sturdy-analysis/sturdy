@@ -82,7 +82,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       throw new IllegalStateException(s"Cannot assign to out-of-scope variable $v")
 
     val isStrong = alloc.useStrongUpdate(v)
-    val isInitialized = apronState.getEnvironment.hasVar(v.av)
+    val isInitialized = env.hasVar(v.av)
     var newV: Option[alloc.Var] = None
 
     if (!isInitialized) {
@@ -105,12 +105,13 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       newV = Some(vnew)
     } else {
       val expIntern = exp.toIntern(this)
+      val expString = exp.toString
       val old = getBound(v)
       val expBound = apronState.getBound(apronManager, expIntern)
       val assigned = apronState.assignCopy(apronManager, v.av, expIntern, null)
       apronState.join(apronManager, assigned)
       if (Apron.debugAssign) {
-        println(s"assigning weak $v = old join $exp = $old join $expBound = ${getBound(v)}, $this")
+        println(s"assigning weak $v = old join $expString = $old join $expBound = ${getBound(v)}, $this")
       }
     }
     if (apronState.isBottom(apronManager))
@@ -237,6 +238,13 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
     // TODO review this code on first widening in cfgloop.tip
+    if (debugJoinWiden) {
+      println(
+        s"""${if (widen) "Widening" else "Joining"} apron
+           |  s1 = $s1
+           |  s2 = $s2""".stripMargin)
+    }
+
     val vars1 = s1.getEnvironment.getVars.toSet
     val vars2 = s2.getEnvironment.getVars.toSet
     val inboth = (vars1 intersect vars2).toArray
@@ -249,6 +257,15 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
         combinable1.widening(apronManager, combinable2)
       else
         combinable1.joinCopy(apronManager, combinable2)
+
+    if (debugJoinWiden) {
+      println(
+        s"""  joined = $combined""".stripMargin)
+    }
+    if (Apron.debugJoinWiden && !combinable1.isIncluded(apronManager, combined))
+      throw new IllegalStateException(s"$combinable1 not included in $combined")
+    if (Apron.debugJoinWiden && !combinable2.isIncluded(apronManager, combined))
+      throw new IllegalStateException(s"$combinable2 not included in $combined")
 
     val s1Only = combinable1.forgetCopy(apronManager, inboth, false)
     val s2Only = combinable2.forgetCopy(apronManager, inboth, false)
