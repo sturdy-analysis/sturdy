@@ -1,10 +1,7 @@
 package sturdy.values.ordering
 
 import apron.Texpr1BinNode
-import sturdy.apron.Apron
-import sturdy.apron.ApronCons
-import sturdy.apron.ApronExpr
-import sturdy.apron.BinOp
+import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp}
 
 given ApronOrderingOps: OrderingOps[ApronExpr, ApronCons] with
   override def lt(v1: ApronExpr, v2: ApronExpr): ApronCons = ApronCons.lt(v1, v2)

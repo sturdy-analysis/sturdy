@@ -3,8 +3,7 @@ package sturdy.apron
 import org.scalatest.funsuite.AnyFunSuite
 import apron.*
 import gmp.*
-import sturdy.data.{JOptionC, CombineUnit, noJoin}
-import sturdy.apron.JoinApronExpr
+import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.EffectStack
 import sturdy.effect.callframe.{ApronCallFrame, given}
 import sturdy.values.Join

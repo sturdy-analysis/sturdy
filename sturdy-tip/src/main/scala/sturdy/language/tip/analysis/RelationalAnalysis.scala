@@ -20,13 +20,13 @@ import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.apron.{Apron, given}
+import sturdy.apron.given
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
-import sturdy.language.tip.abstractions.{Fix, References, Functions, isFunOrWhile, Records}
+import sturdy.language.tip.abstractions.{Fix, Functions, Records, References, isFunOrWhile}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -97,7 +97,7 @@ object RelationalAnalysis extends Interpreter,
       apron,
       "$main",
       { 
-        case Value.IntValue(Topped.Top) => scala.Some(ApronExpr.top)
+        case Value.IntValue(Topped.Top) => scala.Some(ApronExpr.topConstant)
         case Value.IntValue(Topped.Actual(v)) => scala.Some(v)
         case _ => None 
       },

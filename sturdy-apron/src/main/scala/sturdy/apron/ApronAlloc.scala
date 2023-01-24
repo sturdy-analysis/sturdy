@@ -1,10 +1,6 @@
 package sturdy.apron
 
-import apron.Interval
-import apron.Texpr1CstNode
-import apron.Texpr1Node
-import apron.Texpr1VarNode
-import apron.{Var, Abstract1, Environment, Manager}
+import apron.*
 
 enum ApronAllocationSite:
   case LocalVar(name: String)
@@ -16,8 +12,7 @@ enum ApronAllocationSite:
 
 object ApronAlloc:
   def default(manager: Manager) =
-//    new ApronAllocSingle(manager)
-    new ApronAllocBoundPerSite(manager)
+    new ApronAllocScoped(manager)
 
 trait ApronAlloc:
   type Var <: ApronVar

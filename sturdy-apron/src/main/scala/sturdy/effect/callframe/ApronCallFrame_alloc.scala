@@ -20,13 +20,7 @@ import scala.reflect.ClassTag
 import reflect.Selectable.reflectiveSelectable
 import scala.language.reflectiveCalls
 
-@FunctionalInterface
-trait CallFrameSite[D] extends (D => String):
-  def apply(d: D): String
-
-given CallFrameSite[String] = identity
-
-class ApronCallFrame[Data, Var, V](val apron: Apron,
+class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
                                    initData: Data,
                                    getIntVal: V => Option[ApronExpr],
                                    getDoubleVal: V => Option[ApronExpr],
@@ -38,8 +32,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
 
   val vals: ApronVal[V] = new ApronVal(apron, makeIntVal, makeDoubleVal)
-
   import vals.Val
+
   import apron.{apronManager, alloc}
 
   protected var _data: Data = initData
@@ -48,7 +42,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
   setVars(initVars)
 
-  private def activeVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
+  private def allocatedVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
 //      case (Int(v1), Int(v2)) => apron.getBound(v1) == apron.getBound(v2)
@@ -65,8 +59,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     names = newVars.zipWithIndex.map(t => t._1._1 -> t._2).toMap
 
     vars = Array.ofDim(newVars.size)
-    val argVarAssignments: ListBuffer[(alloc.Var, ApronExpr)] = ListBuffer()
-    val localAssignments: ListBuffer[(alloc.Var, ApronExpr)] = ListBuffer()
+    val newApronAssignments: ListBuffer[(alloc.Var, ApronExpr)] = ListBuffer()
 
     newVars.zipWithIndex.foreach {
       case ((_, None), ix) =>
@@ -74,46 +67,46 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       case ((x, Some(v)), ix) =>
         getIntVal(v) match
           case Some(exp) =>
-            val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg$$$ix"))
             val av = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-            argVarAssignments += argV -> exp
-            localAssignments += av -> ApronExpr.Var(argV)
+            newApronAssignments += av -> exp
             vars(ix) = Val.Int(av)
           case None => getDoubleVal(v) match
             case Some(exp) =>
-              val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg$$$ix"))
               val av = apron.addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-              argVarAssignments += argV -> exp
-              localAssignments += av -> ApronExpr.Var(argV)
+              newApronAssignments += av -> exp
               vars(ix) = Val.Double(av)
             case None =>
               vars(ix) = Val.Other(v)
     }
 
-    argVarAssignments.foreach { case (av, exp) => apron.assign(av, exp) }
-    localAssignments.foreach { case (av, exp) => apron.assign(av, exp) }
+    newApronAssignments.foreach { case (av, exp) => apron.assign(av, exp) }
   }
+
+  setVars(initVars)
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars
-    val snapApron = apron.getState
-
+//    val snapBounds = this.vars.flatMap(Val.getVar).map(apron.getBound)
     this._data = d
+    val apStateBefore = apron.getState
+//    if (Apron.debugAlloc)
+//      println(apron.alloc)
     setVars(vars)
-    val res = util.Try(f)
-    {
-      val vs = activeVars
-      vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
-      val stateAfter = apron.getState
-      apron.setState(snapApron)
-
+    val vs = this.allocatedVars
+    try f finally {
+      val apStateAfter = apron.getState
       this._data = snapData
       this.names = snapNames
+      val vs2 = this.allocatedVars
+      vs.foreach(v => apron.freeVariable(v.asInstanceOf[apron.alloc.Var]))
       this.vars = snapVars
+//      val boundsAfter = this.vars.flatMap(Val.getVar).map(apron.getBound)
+//      println()
+      //      if (Apron.debugAlloc)
+//        println(apron.alloc)
     }
-    res.get
   }
 
   override def data: Data = _data

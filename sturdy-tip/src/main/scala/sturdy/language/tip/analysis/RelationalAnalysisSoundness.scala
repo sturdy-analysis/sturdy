@@ -1,6 +1,5 @@
 package sturdy.language.tip.analysis
 
-import sturdy.apron.Apron
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
 import sturdy.language.tip.analysis.RelationalAnalysis.*
 import sturdy.language.tip.{Field, Function, ConcreteInterpreter, AllocationSite}
@@ -14,8 +13,7 @@ import sturdy.values.{*, given}
 import sturdy.{*, given}
 import _root_.apron.Texpr1CstNode
 import _root_.apron.MpqScalar
-import sturdy.apron.ApronCons
-import sturdy.apron.ApronExpr
+import sturdy.apron.{Apron, ApronCons, ApronExpr}
 
 class RelationalAnalysisSoundness(_apron: Apron):
   implicit val apron: Apron = _apron

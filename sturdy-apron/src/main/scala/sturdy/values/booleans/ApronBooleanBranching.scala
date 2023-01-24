@@ -2,8 +2,7 @@ package sturdy.values.booleans
 
 import sturdy.data.CombineUnit
 import apron.Tcons1
-import sturdy.apron.Apron
-import sturdy.apron.ApronCons
+import sturdy.apron.{Apron, ApronCons}
 import sturdy.effect.EffectStack
 import sturdy.values.{Join, Topped}
 

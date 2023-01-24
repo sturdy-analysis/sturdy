@@ -1,13 +1,13 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
-import apron.{Texpr1Node, Polka, *}
+import apron.*
 import gmp.*
-import sturdy.data.{JOptionC, CombineUnit, noJoin}
+import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
+import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
-import sturdy.effect.failure.{FailureKind, CollectedFailures, ConcreteFailure, Failure, AFallible}
+import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
@@ -187,7 +187,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     val posInf = new MpqScalar()
     posInf.setInfty(1)
     val posIV = new Interval(new MpqScalar(new Mpz(1)), posInf)
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(posIV))) == ApronExpr.top.coeff)
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(posIV))) == ApronExpr.topConstant.coeff)
   }
 
   test("Division : unconstrained negative") {
@@ -195,12 +195,12 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     val negInf = new MpqScalar()
     negInf.setInfty(-1)
     val negIV = new Interval(negInf, new MpqScalar(new Mpz(-1)))
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(negIV))) == ApronExpr.top.coeff)
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(negIV))) == ApronExpr.topConstant.coeff)
   }
 
   test("Division : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == ApronExpr.top.coeff)
+    assert(apron.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == ApronExpr.topConstant.coeff)
   }
 
   test("Modulo") {

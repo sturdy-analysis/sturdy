@@ -1,13 +1,10 @@
 package sturdy.apron
 
-import apron.{Abstract1, Environment, Interval, Linexpr1, Manager, MpqScalar, StringVar, Tcons0, Tcons1, Texpr0UnNode, Texpr1BinNode, Texpr1CstNode, Texpr1Intern, Texpr1Node, Texpr1UnNode, Texpr1VarNode}
-import sturdy.apron.Apron.debugAssert
-import sturdy.apron.Apron.debugJoinWiden
+import apron.*
+import sturdy.apron.Apron.{debugAssert, debugJoinWiden}
 import sturdy.data.CombineUnit
-import sturdy.effect.ComputationJoiner
-import sturdy.effect.Effect
-import sturdy.effect.{CombineTrySturdy, EffectStack, SturdyFailure, TrySturdy}
-import sturdy.values.{Combine, Join, MaybeChanged, Topped, Widen, Widening}
+import sturdy.effect.*
+import sturdy.values.*
 
 import java.lang
 import java.lang.IllegalStateException
@@ -46,7 +43,10 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     case None => apronState.getBound(apronManager, v.av)
 
   inline private[apron] def getBound(av: apron.Var): Interval =
-    apronState.getBound(apronManager, av)
+    if (env.hasVar(av))
+      apronState.getBound(apronManager, av)
+    else
+      ApronExpr.topInterval
 
   inline def getBound(v: ApronExpr): Interval =
     apronState.getBound(apronManager, v.toIntern(this))
@@ -71,9 +71,11 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     if (isStrong) {
       val oldVal = getBound(v.av)
       freeReference(v, ApronExpr.Constant(oldVal))
-      apronState.forget(apronManager, v.av, false)
-      val newEnv = apronState.getEnvironment.remove(Array(v.av))
-      apronState.changeEnvironment(apronManager, newEnv, false)
+      if (env.hasVar(v.av)) {
+        apronState.forget(apronManager, v.av, false)
+        val newEnv = apronState.getEnvironment.remove(Array(v.av))
+        apronState.changeEnvironment(apronManager, newEnv, false)
+      }
     }
 
   /** Assigns v := exp. In case of a strong assignment, invalidates previous references of v and yields a fresh copy of v to use for future references. */
@@ -134,7 +136,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     }
   
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
-    val v = alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar, this)
+    val v = addIntVariable(ApronAllocationSite.TemporaryVar)
     val res = try f(v)
     finally {
       freeVariable(v)
@@ -142,7 +144,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     res
 
   def withTemporaryIntVariables[A](n: Int)(f: PartialFunction[List[alloc.Var], A]): A =
-    val vs = (1 to n).toList.map(i => alloc.allocateIntVariable(ApronAllocationSite.TemporaryVar, this))
+    val vs = (1 to n).toList.map(i => addIntVariable(ApronAllocationSite.TemporaryVar))
     try f(vs)
     finally {
       vs.foreach(freeVariable)
@@ -274,11 +276,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     val changed = !combined.isEqual(apronManager, combinable1)
     if (debugJoinWiden) {
       println(
-        s"""${if (widen) "Widening" else "Joining"} apron
-           |  s1 = $s1
-           |  s2 = $s2
-           |  joined = $combined
-           |  changed = $changed""".stripMargin)
+        s"""  changed = $changed""".stripMargin)
     }
     if (debugJoinWiden && changed && combined.toString(apronManager) == combinable1.toString(apronManager))
       throw new IllegalStateException()

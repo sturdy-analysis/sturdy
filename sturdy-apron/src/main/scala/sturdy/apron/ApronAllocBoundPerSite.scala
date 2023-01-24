@@ -1,12 +1,6 @@
 package sturdy.apron
 
-import apron.Texpr1VarNode
-import apron.Abstract1
-import apron.Dimchange
-import apron.Environment
-import apron.Manager
-import apron.StringVar
-import apron.Var
+import apron.*
 
 class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   enum Var extends ApronVar:

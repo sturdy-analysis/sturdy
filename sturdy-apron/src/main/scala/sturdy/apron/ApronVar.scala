@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Abstract1, Interval, Texpr1CstNode, Texpr1Node, Texpr1VarNode}
+import apron.*
 
 import java.util.Objects
 

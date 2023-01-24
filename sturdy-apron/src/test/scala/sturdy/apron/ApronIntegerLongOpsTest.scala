@@ -3,13 +3,13 @@ package sturdy.apron
 import apron.*
 import gmp.*
 import org.scalatest.funsuite.AnyFunSuite
-import sturdy.data.{JOptionC, CombineUnit, noJoin}
+import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.failure.*
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
+import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
 import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
-import sturdy.values.{Widen, Join, Topped, given}
+import sturdy.values.{Join, Topped, Widen, given}
 import sturdy.values.utils.given
 
 import scala.language.reflectiveCalls

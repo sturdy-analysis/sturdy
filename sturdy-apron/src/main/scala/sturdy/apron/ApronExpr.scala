@@ -1,18 +1,6 @@
 package sturdy.apron
 
-import apron.Abstract1
-import apron.Coeff
-import apron.Environment
-import apron.Interval
-import apron.Manager
-import apron.MpqScalar
-import apron.Tcons1
-import apron.Texpr1BinNode
-import apron.Texpr1CstNode
-import apron.Texpr1Intern
-import apron.Texpr1Node
-import apron.Texpr1UnNode
-import apron.Texpr1VarNode
+import apron.*
 import gmp.Mpz
 import sturdy.apron.ApronCons.False
 import sturdy.apron.ApronExpr.{Binary, Unary}
@@ -47,10 +35,12 @@ object ApronExpr:
     Constant(new MpqScalar(new Mpz(i)))
   def num(iv: Interval): Constant =
     Constant(iv)
-  def top: Constant =
+  def topInterval: Interval =
     val topItv = new Interval()
     topItv.setTop()
-    Constant(topItv)
+    topItv
+  def topConstant: Constant =
+    Constant(topInterval)
 
 enum UnOp:
   case Negate

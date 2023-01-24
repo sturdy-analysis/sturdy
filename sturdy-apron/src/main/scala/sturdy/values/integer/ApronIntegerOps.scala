@@ -4,8 +4,7 @@ import apron.Interval
 import sturdy.data.CombineUnit
 import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 import gmp.{Mpq, Mpz}
-import sturdy.apron.ApronCons
-import sturdy.apron.{Apron, ApronExpr, BinOp, JoinApronExpr, UnOp}
+import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.callframe.ApronCallFrame
 
@@ -39,7 +38,7 @@ given ApronIntegerOps[B](using Numeric[B])
 
   override def integerLit(i: B): ApronExpr = ApronExpr.Constant(new MpqScalar(new Mpz(i.toLong)))
 
-  override def randomInteger(): ApronExpr = ApronExpr.top
+  override def randomInteger(): ApronExpr = ApronExpr.topConstant
 
   override def add(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Add, v1, v2)
   override def sub(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Sub, v1, v2)
@@ -195,6 +194,6 @@ def extract[B: Numeric](from : ApronExpr)(using ap: Apron)(using ConvertCoeff[Mp
 def extract[B: Numeric](from : ApronExpr)(using ap: Apron, c: ConvertInterval[B]) : NumericInterval[B] = c(ap.getBound(from.toApron(ap)))
 
 def inject[B: Numeric](from : Topped[B]): ApronExpr = from match
-  case Topped.Top => ApronExpr.top
+  case Topped.Top => ApronExpr.topConstant
   case Topped.Actual(i) => ApronExpr.Constant(new MpqScalar(new Mpq(i.toDouble)))
 def inject[B: Numeric](from : NumericInterval[B])(using c: ConvertInterval[B]): ApronExpr = ApronExpr.Constant(c(from))

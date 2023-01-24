@@ -4,13 +4,11 @@ import apron.Interval
 import apron.Texpr1VarNode
 import sturdy.data.CombineUnit
 import apron.{MpfrScalar, Tcons1, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode}
-import sturdy.apron.{Apron, JoinApronExpr}
 import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
-import sturdy.apron.ApronCons
-import sturdy.apron.{ApronExpr, BinOp, UnOp}
+import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Topped, config}
@@ -31,7 +29,7 @@ given ApronFloatOps[B](using Fractional[B])
 
   override def floatingLit(f: B): ApronExpr = ApronExpr.Constant(new MpfrScalar(f.toDouble, 2))
 
-  override def randomFloat(): ApronExpr = ApronExpr.top
+  override def randomFloat(): ApronExpr = ApronExpr.topConstant
 
   override def add(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Add, v1, v2)
   override def sub(v1: ApronExpr, v2: ApronExpr): ApronExpr = ApronExpr.Binary(BinOp.Sub, v1, v2)
@@ -117,5 +115,5 @@ given ApronConvertBytesDouble(using Apron, EffectStack, Failure) : ConvertBytesD
 def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpfr, B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
 
 def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
-  case Topped.Top => ApronExpr.top
+  case Topped.Top => ApronExpr.topConstant
   case Topped.Actual(i) => ApronExpr.Constant(new MpfrScalar(i.toDouble, 0))

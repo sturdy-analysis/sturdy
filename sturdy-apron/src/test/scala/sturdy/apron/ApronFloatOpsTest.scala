@@ -1,13 +1,13 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
-import apron.{Texpr1Node, Polka, *}
+import apron.*
 import gmp.*
-import sturdy.data.{JOptionC, CombineUnit, noJoin}
+import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure}
-import sturdy.values.integer.{ConcreteIntegerOps, IntegerDivisionByZero, ApronIntegerOps, IntervalIntegerOps, given}
+import sturdy.values.integer.{ApronIntegerOps, ConcreteIntegerOps, IntegerDivisionByZero, IntervalIntegerOps, given}
 import sturdy.effect.callframe.ApronCallFrame
-import sturdy.effect.failure.{FailureKind, CollectedFailures, ConcreteFailure, Failure, AFallible}
+import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure, FailureKind}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.floating.ApronFloatOps

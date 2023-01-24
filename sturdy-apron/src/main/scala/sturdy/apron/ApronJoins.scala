@@ -1,11 +1,11 @@
 package sturdy.apron
 
 import apron.{Abstract1, Manager}
-import sturdy.values.{Join, MaybeChanged, Changed, Unchanged}
+import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
 
 class ApronJoins(val apron: Apron) {
 
-  import apron.{alloc, apronManager, getFreedReference, freeReference, inScope}
+  import apron.*
 
   def combineVars(state: ApronState, v1: ApronVar, v2: ApronVar, widen: Boolean): MaybeChanged[(ApronVar, ApronState)] =
     val joinedApronState = state.s
@@ -65,9 +65,10 @@ class ApronJoins(val apron: Apron) {
 
         apron.initializeVar(x)
         val e1Intern = e1.toIntern(apron)
-        val a1 = apronState.s.assignCopy(apronManager, x.av, e1Intern, null)
         val e2Intern = e2.toIntern(apron)
-        val a2 = apronState.s.assignCopy(apronManager, x.av, e2Intern, null)
+        e1Intern.extendEnvironment(apron.env)
+        val a1 = apron.getState.s.assignCopy(apronManager, x.av, e1Intern, null)
+        val a2 = apron.getState.s.assignCopy(apronManager, x.av, e2Intern, null)
         val aJoined =
           if (widen)
             a1.widening(apronManager, a2)
