@@ -1,87 +1,136 @@
 package sturdy.apron
 
-import apron.{Abstract1, Manager}
+import apron.{Abstract1, Manager, StringVar}
+import sturdy.apron.Apron.debugJoinWiden
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
 
-class ApronJoins(val apron: Apron) {
+class ApronJoins(val apronManager: Manager) {
 
-  import apron.*
+  def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
+    // TODO review this code on first widening in cfgloop.tip
+    if (debugJoinWiden) {
+      println(
+        s"""${if (widen) "Widening" else "Joining"} apron
+           |  s1 = $s1
+           |  s2 = $s2""".stripMargin)
+    }
+
+    val vars1 = s1.getEnvironment.getVars.toSet
+    val vars2 = s2.getEnvironment.getVars.toSet
+    val inboth = (vars1 intersect vars2).toArray
+
+    val lce = s1.getEnvironment.lce(s2.getEnvironment)
+    val combinable1 = s1.changeEnvironmentCopy(apronManager, lce, false)
+    val combinable2 = s2.changeEnvironmentCopy(apronManager, lce, false)
+    val combined =
+      if (widen)
+        combinable1.widening(apronManager, combinable2)
+      else
+        combinable1.joinCopy(apronManager, combinable2)
+
+    if (debugJoinWiden) {
+      println(
+        s"""  joined = $combined""".stripMargin)
+    }
+    if (Apron.debugJoinWiden && !combinable1.isIncluded(apronManager, combined))
+      throw new IllegalStateException(s"$combinable1 not included in $combined")
+    if (Apron.debugJoinWiden && !combinable2.isIncluded(apronManager, combined))
+      throw new IllegalStateException(s"$combinable2 not included in $combined")
+
+    val s1Only = combinable1.forgetCopy(apronManager, inboth, false)
+    val s2Only = combinable2.forgetCopy(apronManager, inboth, false)
+    combined.meet(apronManager, s1Only)
+    combined.meet(apronManager, s2Only)
+    val changed = !combined.isEqual(apronManager, combinable1)
+    if (debugJoinWiden) {
+      println(
+        s"""  changed = $changed""".stripMargin)
+    }
+    if (debugJoinWiden && changed && combined.toString(apronManager) == combinable1.toString(apronManager))
+      throw new IllegalStateException()
+    if (combined.isBottom(apronManager))
+      throw Apron.Bottom()
+    MaybeChanged(combined, changed)
+  }
 
   def combineVars(state: ApronState, v1: ApronVar, v2: ApronVar, widen: Boolean): MaybeChanged[(ApronVar, ApronState)] =
-    val joinedApronState = state.s
-    if (v1 == v2)
+    if (v1.isEqual(v2, state))
       Unchanged((v1, state))
-    else getFreedReference(v1) match
+    else state.freed.get(v1.uid) match
       case None =>
-        // join v2 into constraints for v1
-        val e2intern = v2.expr.toIntern(apron)
-        val assigned = joinedApronState.assignCopy(apronManager, v1.av, e2intern, null)
-        assigned.join(apronManager, joinedApronState)
-        val changed = !joinedApronState.isEqual(apronManager, assigned)
-        if (inScope(v2))
-          freeReference(v2, ApronExpr.Var(v1))
+        // v1 := v1 join v2
+        val e2intern = v2.expr.toIntern(state)
+        val assigned = state.cs.assignCopy(apronManager, v1.av, e2intern, null)
+        assigned.join(apronManager, state.cs)
+        // if v2 is also free, v2 := v1
+        if (!state.freed.contains(v2.uid))
+          assigned.assign(apronManager, v2.av, v1.expr.toIntern(state), null)
+        val changed = !state.cs.isEqual(apronManager, assigned)
         if (changed) {
-          Changed((v1, new ApronState(apronManager, assigned)))
+          Changed((v1, state.copy(assigned)))
         } else {
           Unchanged((v1, state))
         }
-      case Some(e1) => getFreedReference(v2) match
+      case Some(e1) => state.freed.get(v2.uid) match
         case None =>
-          // join e1 into constraints for v2
-          val e1intern = e1.toIntern(apron)
-          val assigned = joinedApronState.assignCopy(apronManager, v2.av, e1intern, null)
-          assigned.join(apronManager, joinedApronState)
-          val assignedState = new ApronState(apronManager, assigned)
+          // v2 := v1 join v2
+          val e1intern = e1.toIntern(state)
+          val assigned = state.cs.assignCopy(apronManager, v2.av, e1intern, null)
+          assigned.join(apronManager, state.cs)
           if (widen) {
             // force termination
+            val v1Bound = state.cs.getBound(apronManager, e1intern)
             val v2Bound = assigned.getBound(apronManager, v2.av)
-            val v1Bound = joinedApronState.getBound(apronManager, e1intern)
             val boundChanged = !v1Bound.isEqual(v2Bound)
             if (boundChanged) {
-              freeReference(v2, ApronExpr.Constant(v2Bound))
-              Changed((v2, assignedState))
+              val newState = state.copy(assigned, state.freed + (v2.uid -> ApronExpr.Constant(v2Bound)))
+              Changed((v2, newState))
             } else {
-              Unchanged((v1, assignedState))
+              Unchanged((v1, state.copy(assigned)))
             }
           } else {
-            MaybeChanged((v2, assignedState), !joinedApronState.isEqual(apronManager, assigned))
+            MaybeChanged((v2, state.copy(assigned)), !state.cs.isEqual(apronManager, assigned))
           }
         case Some(e2) =>
           // join e1 and e2, since neither v1 nor v2 is managed by apron
           val MaybeChanged(eJoined, changed) = combineExprs(v1.expr, v2.expr, state, widen = false)
           if (changed) {
-            freeReference(v1, eJoined)
-            Changed((v1, state))
+            val newState = state.copy(state.freed + (v1.uid -> eJoined))
+            Changed((v1, newState))
           } else {
             Unchanged((v1, state))
           }
 
-  def combineExprs(e1: ApronExpr, e2: ApronExpr, apronState: ApronState, widen: Boolean): MaybeChanged[ApronExpr] =
-    if (e1 == e2) {
+  def combineExprs(e1: ApronExpr, e2: ApronExpr, state: ApronState, widen: Boolean): MaybeChanged[ApronExpr] =
+    if (e1.isEqual(e2, state)) {
       Unchanged(e1)
     } else {
-      apron.withLocal(apronState)(apron.withTemporaryIntVariable { x =>
-        val oldBound = apron.getBound(e1)
+      val oldBound = state.getBound(e1)
 
-        apron.initializeVar(x)
-        val e1Intern = e1.toIntern(apron)
-        val e2Intern = e2.toIntern(apron)
-        e1Intern.extendEnvironment(apron.env)
-        val a1 = apron.getState.s.assignCopy(apronManager, x.av, e1Intern, null)
-        val a2 = apron.getState.s.assignCopy(apronManager, x.av, e2Intern, null)
-        val aJoined =
-          if (widen)
-            a1.widening(apronManager, a2)
-          else {
-            a1.join(apronManager, a2)
-            a1
-          }
+      val e1Intern = e1.toIntern(state, allowOpen = false)
+      val e2Intern = e2.toIntern(state, allowOpen = false)
+      val av = new StringVar("$$combineExprs$$")
+      val env = state.apronEnv
+        .lce(e1Intern.getEnvironment)
+        .lce(e2Intern.getEnvironment)
+        .add(Array(av): Array[apron.Var], null: Array[apron.Var])
+      e1Intern.extendEnvironment(env)
+      e2Intern.extendEnvironment(env)
+      val cs = state.cs.changeEnvironmentCopy(apronManager, env, false)
+      val a1 = cs.assignCopy(apronManager, av, e1Intern, null)
+      cs.assign(apronManager, av, e2Intern, null)
+      val aJoined =
+        if (widen)
+          a1.widening(apronManager, cs)
+        else {
+          a1.join(apronManager, cs)
+          a1
+        }
 
-        val xBound = aJoined.getBound(apronManager, x.av)
-        if (Apron.debugJoinWiden)
-          println(s"Join values $e1 and $e2 is $x, widen = $widen")
-        MaybeChanged(x.expr, !xBound.isEqual(oldBound))
-      })
+      val bound = aJoined.getBound(apronManager, av)
+      if (Apron.debugJoinWiden)
+        println(s"Join values $e1 and $e2 is $bound, widen = $widen")
+      MaybeChanged(ApronExpr.num(bound), !bound.isEqual(oldBound))
     }
 
   def combineVals[V](vals: ApronVal[V])(joinedApronState: ApronState, v1: vals.Val, v2: vals.Val, widen: Boolean)(using Join[V]): MaybeChanged[(vals.Val, ApronState)] =
@@ -100,7 +149,7 @@ class ApronJoins(val apron: Apron) {
     var rsChanged = false
     val rs = vs1.zip(vs2).map {
       case (v1, v2) =>
-        val MaybeChanged((v, st), changed) = apron.joins.combineVals(vals)(state, v1, v2, widen)
+        val MaybeChanged((v, st), changed) = combineVals(vals)(state, v1, v2, widen)
         rsChanged |= changed
         state = st
         v

@@ -51,7 +51,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r)
 
     // z is bound within the new frame
-    assert(apron.getBound(r) == interval(-1, -1))
+    assert(apron.currentScope.getBound(r) == interval(-1, -1))
     // but now it is unbound
     assert(callFrame.getLocalByName("z") == JOptionC.none)
   }
@@ -79,7 +79,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r)
 
     // z is x + y
-    assert(apron.getBound(r) == interval(9, 9))
+    assert(apron.currentScope.getBound(r) == interval(9, 9))
   }
 
   test("ApronCallFrame (z = x + y) join (z = x - y)") {
@@ -112,7 +112,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r)
 
     // z is (x + y) join (x - y)
-    assert(apron.getBound(r) == interval(1, 9))
+    assert(apron.currentScope.getBound(r) == interval(1, 9))
   }
 
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
@@ -281,8 +281,8 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r2)
 
     assert(r1 != r2)
-    assert(apron.getBound(r1) == interval(9, 9))
-    assert(apron.getBound(r2) == interval(1, 1))
+    assert(apron.currentScope.getBound(r1) == interval(9, 9))
+    assert(apron.currentScope.getBound(r2) == interval(1, 1))
   }
 
   test("ApronCallFrame frame_1:z = x + y, frame_1:z = x - y") {
@@ -316,8 +316,8 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r2)
 
     assert(r1 == r2)
-    assert(apron.getBound(r1) == interval(-1, 9))
-    assert(apron.getBound(r2) == interval(-1, 9))
+    assert(apron.currentScope.getBound(r1) == interval(-1, 9))
+    assert(apron.currentScope.getBound(r2) == interval(-1, 9))
   }
 
   test("ApronCallFrame frame_1:z = x + y, free z, frame_1:z = x - y") {
@@ -351,6 +351,6 @@ class ApronCallFrameTest extends AnyFunSuite:
     println(r3)
 
 //    assert(r2 == r3)
-    assert(apron.getBound(r2) == interval(-1, 1))
-    assert(apron.getBound(r3) == interval(9, 9))
+    assert(apron.currentScope.getBound(r2) == interval(-1, 1))
+    assert(apron.currentScope.getBound(r3) == interval(9, 9))
   }

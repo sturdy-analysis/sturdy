@@ -51,14 +51,14 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   private def activeVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
-//      case (Int(v1), Int(v2)) => apron.getBound(v1) == apron.getBound(v2)
-//      case (Double(v1), Double(v2)) => apron.getBound(v1) == apron.getBound(v2)
+//      case (Int(v1), Int(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
+//      case (Double(v1), Double(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
 //      case (Other(v1), Other(v2)) => v1 == v2
 //      case _ => false
 //
 //    override def hashCode: scala.Int = this match
-//      case Int(v) => apron.getBound(v).hashCode
-//      case Double(v) => apron.getBound(v).hashCode
+//      case Int(v) => apron.currentScope.getBound(v).hashCode
+//      case Double(v) => apron.currentScope.getBound(v).hashCode
 //      case Other(v) => v.hashCode
 
   def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
@@ -74,17 +74,19 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       case ((x, Some(v)), ix) =>
         getIntVal(v) match
           case Some(exp) =>
-            val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg$$$ix"))
+//            val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg_$ix"))
             val av = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-            argVarAssignments += argV -> exp
-            localAssignments += av -> ApronExpr.Var(argV)
+//            argVarAssignments += argV -> exp
+//            localAssignments += av -> ApronExpr.Var(argV)
+            localAssignments += av -> exp
             vars(ix) = Val.Int(av)
           case None => getDoubleVal(v) match
             case Some(exp) =>
-              val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg$$$ix"))
+//              val argV = apron.addIntVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:arg_$ix"))
               val av = apron.addDoubleVariable(ApronAllocationSite.LocalVar(s"${site(_data)}:$x"))
-              argVarAssignments += argV -> exp
-              localAssignments += av -> ApronExpr.Var(argV)
+//              argVarAssignments += argV -> exp
+//              localAssignments += av -> ApronExpr.Var(argV)
+              localAssignments += av -> exp
               vars(ix) = Val.Double(av)
             case None =>
               vars(ix) = Val.Other(v)
@@ -97,23 +99,22 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
-    val snapVars = this.vars
-    val snapApron = apron.getState
+    val snapVars = this.vars.toList
 
     this._data = d
-    setVars(vars)
-    val res = util.Try(f)
-    {
-      val vs = activeVars
-      vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
-      val stateAfter = apron.getState
-      apron.setState(snapApron)
+    apron.locally {
+      setVars(vars)
+      val res = util.Try(f)
+      {
+        val vs = activeVars
+        vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
 
-      this._data = snapData
-      this.names = snapNames
-      this.vars = snapVars
+        this._data = snapData
+        this.names = snapNames
+        setVarsConsistentWithState(snapVars.toArray)
+      }
+      res.get
     }
-    res.get
   }
 
   override def data: Data = _data
@@ -183,46 +184,45 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     case None => JOptionC.none
     case Some(ix) => setLocal(ix, x, v)
 
-  type State = (ApronState, List[vals.Val])
-
   private def setVarsConsistentWithState(vars: Array[Val]): Unit =
     this.vars = vars.map {
       case null => null
-      case v@Val.Int(av) => if (!apron.inScope(av)) Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
-      case v@Val.Double(av) => if (!apron.inScope(av)) Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
+      case v@Val.Int(av) => if (apron.currentScope.isFreed(av)) Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
+      case v@Val.Double(av) => if (apron.currentScope.isFreed(av)) Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
       case v => v
     }
 
+  type State = ApronCallFrameState
+
   override def getState: State =
-    val frozenVars = vars.toList
-    (apron.getState, frozenVars)
+    new ApronCallFrameState(apron.getState, vars.toList)
 
   override def setState(st: State): Unit =
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
     if (Apron.debugJoinWiden || Apron.debugAlloc)
-      println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.getFreedReferences}")
-    apron.setState(st._1)
-    setVarsConsistentWithState(st._2.toArray)
+      println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.currentScope}")
+    apron.setState(st.as)
+    setVarsConsistentWithState(st.vars.toArray)
     if (Apron.debugJoinWiden || Apron.debugAlloc)
-      println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.getFreedReferences}")
+      println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.currentScope}")
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
 
   def combine(st1: State, st2: State, widen: Boolean): MaybeChanged[State] =
-    val MaybeChanged(state, apronChanged) = if (widen) apron.widen(st1._1, st2._1) else apron.join(st1._1, st2._1)
-    val MaybeChanged((vars, combinedState), varsChanged) = apron.joins.combineValLists(vals)(state, st1._2, st2._2, widen)
+    val MaybeChanged(state, apronChanged) = if (widen) apron.widen(st1.as, st2.as) else apron.join(st1.as, st2.as)
+    val MaybeChanged((vars, combinedState), varsChanged) = apron.joins.combineValLists(vals)(state, st1.vars, st2.vars, widen)
     if (Apron.debugJoinWiden)
       println(
         s"""${if (widen) "Widening" else "Joining"} apron call frame
-           |  vars1 = ${st1._2}
-           |  vars2 = ${st2._2}
+           |  vars1 = ${st1.vars}
+           |  vars2 = ${st2.vars}
            |  vars  = $vars
            |  apron = $combinedState
            |  apronChanged = $apronChanged
            |  varsChanged = $varsChanged""".stripMargin)
 
-    MaybeChanged((combinedState, vars), apronChanged || varsChanged)
+    MaybeChanged(new ApronCallFrameState(combinedState, vars), apronChanged || varsChanged)
 
   override def join: Join[State] = combine(_, _, widen = false)
 
@@ -275,24 +275,19 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       setVarsConsistentWithState(joinedVars.toArray)
   }
 
-//  class ApronCallFrameState(val as: ApronState, val vars: List[Val]):
-//    override def equals(obj: Any): Boolean = obj match
-//      case that: ApronCallFrameState =>
-//        this.vars.size == that.vars.size && this.as == that.as && this.vars.zip(that.vars).forall {
-//          case (null, null) => true
-//          case (Val.Int(v1), Val.Int(v2)) => v1.isEqual(v2, apron)
-//          case (Val.Double(v1), Val.Double(v2)) => v1.isEqual(v2, apron)
-//          case (Val.Other(v1), Val.Other(v2)) => v1 == v2
-//          case _ => false
-//        }
-//      case _ =>
-//        false
-//
-//    override def hashCode(): Int =
-//      s.hashCode(apronManager)
-//
-//    override def toString: String =
-//      "(env = " + s.getEnvironment.toString + ", state = " + s.toString(apronManager) + ")"
-//
-//
-//
+  class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val]):
+    import vals.*
+    override def equals(obj: Any): Boolean = obj match
+      case that: ApronCallFrameState =>
+        this.vars.size == that.vars.size && this.as == that.as && this.vars.zip(that.vars).forall((v1,v2) => if (v1 == null) v2 == null else v1.isEqual(v2, as))
+      case _ =>
+        false
+
+    override def hashCode(): Int =
+      as.hashCode + vars.map(v => if (v == null) -1 else v.hashCode(as)).hashCode()
+
+    override def toString: String =
+      s"CallFrame($vars, $as)"
+
+
+

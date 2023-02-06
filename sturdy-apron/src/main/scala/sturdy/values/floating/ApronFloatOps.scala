@@ -112,7 +112,7 @@ given ApronConvertDoubleFloat(using Apron, EffectStack, Failure) : ConvertDouble
 given ApronConvertDoubleBytes(using Apron, EffectStack, Failure) : ConvertDoubleBytes[ApronExpr,Seq[ApronExpr]] = new LiftedConvert[Double, Seq[Byte], ApronExpr, Seq[ApronExpr], Topped[Double], Seq[Topped[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => x.map(inject))
 given ApronConvertBytesDouble(using Apron, EffectStack, Failure) : ConvertBytesDouble[Seq[ApronExpr],ApronExpr] = new LiftedConvert[Seq[Byte], Double, Seq[ApronExpr], ApronExpr, Seq[Topped[Byte]], Topped[Double], SomeCC[ByteOrder]](x => x.map(extract), inject)
 
-def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpfr, B]) : Topped[B] = convertToScalarMpfr[B](ap.getBound(expr))
+def extract[B: Numeric](expr : ApronExpr)(using ap: Apron, conv: ConvertCoeff[Mpfr, B]) : Topped[B] = convertToScalarMpfr[B](ap.currentScope.getBound(expr))
 
 def inject[B](cst : Topped[B])(using Numeric[B]): ApronExpr = cst match
   case Topped.Top => ApronExpr.topConstant

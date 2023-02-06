@@ -18,17 +18,35 @@ enum ApronExpr:
 //    case Unary(op, e, rtyp, rdir) => e.vars
 //    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
-  def toApron(apron: Apron): Texpr1Node = this match
-    case Var(v) => apron.getFreedReference(v) match
-      case Some(e) => e.toApron(apron)
-      case None => apron.initializeVar(v).node
-    case Constant(coeff) => new Texpr1CstNode(coeff)
-    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron(apron))
-    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(apron), r.toApron(apron))
+  def normalize(scope: ApronScope): ApronExpr = this match
+    case Var(v) => scope.getFreedReference(v) match
+      case Some(e) => e.normalize(scope)
+      case None => this
+    case Constant(coeff) => this
+    case Unary(op, e, rtyp, rdir) => Unary(op, e.normalize(scope), rtyp, rdir)
+    case Binary(op, l, r, rtyp, rdir) => Binary(op, l.normalize(scope), r.normalize(scope), rtyp, rdir)
 
-  def toIntern(apron: Apron): Texpr1Intern =
-    val expr = this.toApron(apron)
-    new Texpr1Intern(apron.env, expr)
+  def isEqual(that: ApronExpr, scope: ApronScope): Boolean =
+    this.normalize(scope) == that.normalize(scope)
+
+  def hashCode(scope: ApronScope): Int =
+    normalize(scope).hashCode
+
+  def toApron(scope: ApronScope, allowOpen: Boolean = true): Texpr1Node = this match
+    case Var(v) => scope.getFreedReference(v) match
+      case Some(e) => e.toApron(scope, allowOpen)
+      case None =>
+        if (allowOpen || scope.isBound(v))
+          v.node
+        else
+          new Texpr1CstNode(ApronExpr.topInterval)
+    case Constant(coeff) => new Texpr1CstNode(coeff)
+    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron(scope, allowOpen))
+    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(scope, allowOpen), r.toApron(scope, allowOpen))
+
+  def toIntern(scope: ApronScope, allowOpen: Boolean = true): Texpr1Intern =
+    val expr = this.toApron(scope, allowOpen)
+    new Texpr1Intern(scope.apronEnv, expr)
 
 object ApronExpr:
   def num(i: Int): Constant = 
@@ -80,15 +98,15 @@ enum ApronCons:
 //    case False => Set()
 //    case Compare(_, e1, e2) => e1.vars ++ e2.vars
 
-  def toApron(apron: Apron): Seq[Tcons1] = this match
-    case True => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.num(0).toApron(apron)))
-    case False => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.num(1).toApron(apron)))
-    case Compare(Eq, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
-    case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron(apron) ++ Compare(Lt, e1, e2).toApron(apron)
-    case Compare(Lt, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(apron)))
-    case Compare(Le, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(apron)))
-    case Compare(Ge, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
-    case Compare(Gt, e1, e2) => Seq(new Tcons1(apron.env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(apron)))
+  def toApron(scope: ApronScope): Seq[Tcons1] = this match
+    case True => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(0).toApron(scope)))
+    case False => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(1).toApron(scope)))
+    case Compare(Eq, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(scope)))
+    case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron(scope) ++ Compare(Lt, e1, e2).toApron(scope)
+    case Compare(Lt, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(scope)))
+    case Compare(Le, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(scope)))
+    case Compare(Ge, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(scope)))
+    case Compare(Gt, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(scope)))
 
 
   def negated: ApronCons = this match

@@ -4,10 +4,10 @@ import apron.*
 
 class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   enum Var extends ApronVar:
-    case IntVar(local: String)(val ap: Apron)
-    case DoubleVar(local: String)(val ap: Apron)
-    case IntTemp(ix: Int)(val ap: Apron)
-    case DoubleTemp(ix: Int)(val ap: Apron)
+    case IntVar(local: String)
+    case DoubleVar(local: String)
+    case IntTemp(ix: Int)
+    case DoubleTemp(ix: Int)
 
     val av: apron.Var = this match
       case IntVar(local) => new StringVar(s"I_$local")
@@ -16,10 +16,10 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
       case DoubleTemp(ix) => new StringVar(s"D_temp_$ix")
 
     def copy: Var = this match
-      case IntVar(local) => IntVar(local)(this.ap)
-      case DoubleVar(local) => DoubleVar(local)(this.ap)
-      case IntTemp(ix) => IntTemp(ix)(this.ap)
-      case DoubleTemp(ix) => DoubleTemp(ix)(this.ap)
+      case IntVar(local) => IntVar(local)
+      case DoubleVar(local) => DoubleVar(local)
+      case IntTemp(ix) => IntTemp(ix)
+      case DoubleTemp(ix) => DoubleTemp(ix)
 
     override val isInt: Boolean = this match
       case _: IntVar | _: IntTemp => true
@@ -39,13 +39,13 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   def allocateIntVariable(site: ApronAllocationSite, apron: Apron): Var =
     val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
-        val x = Var.IntTemp(intTempCount)(apron)
+        val x = Var.IntTemp(intTempCount)
         intTempCount += 1
         (x, true)
       case ApronAllocationSite.LocalVar(local) =>
         val (oldCount, oldX) = intVarCount(local)
-        val x = if (oldCount == 0 || !apron.inScope(oldX)) {
-          Var.IntVar(local)(apron)
+        val x = if (oldCount == 0) {
+          Var.IntVar(local)
         } else {
           oldX
         }
@@ -60,13 +60,13 @@ class ApronAllocBoundPerSite(manager: Manager) extends ApronAlloc:
   def allocateDoubleVariable(site: ApronAllocationSite, apron: Apron): Var =
     val (v, isStrong) = site match
       case ApronAllocationSite.TemporaryVar =>
-        val x = Var.DoubleTemp(doubleTempCount)(apron)
+        val x = Var.DoubleTemp(doubleTempCount)
         doubleTempCount += 1
         (x, true)
       case ApronAllocationSite.LocalVar(local) =>
         val oldCount = doubleVarCount(local)
         doubleVarCount += local -> (oldCount + 1)
-        val x = Var.DoubleVar(local)(apron)
+        val x = Var.DoubleVar(local)
         (x, oldCount == 0)
 
     if (Apron.debugAlloc)

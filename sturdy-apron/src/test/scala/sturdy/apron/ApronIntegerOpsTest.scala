@@ -31,123 +31,123 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Random Integer"){
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.randomInteger()) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.randomInteger()) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("IntMax"){
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.integerLit(Int.MaxValue)) == Interval(Int.MaxValue, Int.MaxValue))
+    assert(apron.currentScope.getBound(intOps.integerLit(Int.MaxValue)) == Interval(Int.MaxValue, Int.MaxValue))
   }
 
   test("IntMin") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.integerLit(Int.MinValue)) == Interval(Int.MinValue, Int.MinValue))
+    assert(apron.currentScope.getBound(intOps.integerLit(Int.MinValue)) == Interval(Int.MinValue, Int.MinValue))
   }
 
   test("Addition"){
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.add(intOps.integerLit(3), intOps.integerLit(5))) == Interval(8,8))
+    assert(apron.currentScope.getBound(intOps.add(intOps.integerLit(3), intOps.integerLit(5))) == Interval(8,8))
   }
 
   test("Addition : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.add(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.add(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Subtraction") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.sub(intOps.integerLit(3), intOps.integerLit(4))) == Interval(-1, -1))
+    assert(apron.currentScope.getBound(intOps.sub(intOps.integerLit(3), intOps.integerLit(4))) == Interval(-1, -1))
   }
 
   test("Subtraction : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.sub(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.sub(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Multiplication") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.mul(intOps.integerLit(3), intOps.integerLit(5))) == Interval(15,15))
+    assert(apron.currentScope.getBound(intOps.mul(intOps.integerLit(3), intOps.integerLit(5))) == Interval(15,15))
   }
 
   test("Multiplication : negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.mul(intOps.integerLit(-3), intOps.integerLit(5))) == Interval(-15, -15))
+    assert(apron.currentScope.getBound(intOps.mul(intOps.integerLit(-3), intOps.integerLit(5))) == Interval(-15, -15))
   }
 
   test("Multiplication : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.mul(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.mul(intOps.integerLit(3), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Multiplication : unconstrained and zero") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.mul(intOps.randomInteger(), intOps.integerLit(0))) == Interval(0,0))
+    assert(apron.currentScope.getBound(intOps.mul(intOps.randomInteger(), intOps.integerLit(0))) == Interval(0,0))
   }
 
   test("Negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.neg(intOps.integerLit(-6))) == Interval(6,6))
+    assert(apron.currentScope.getBound(intOps.neg(intOps.integerLit(-6))) == Interval(6,6))
   }
 
   test("Negative : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.neg(intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.neg(intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Maximum") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.max(intOps.integerLit(4), intOps.integerLit(2))) == Interval(4,4))
+    assert(apron.currentScope.getBound(intOps.max(intOps.integerLit(4), intOps.integerLit(2))) == Interval(4,4))
   }
 
   test("Maximum : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    val r = apron.getBound(intOps.max(intOps.integerLit(4), intOps.randomInteger()))
+    val r = apron.currentScope.getBound(intOps.max(intOps.integerLit(4), intOps.randomInteger()))
     assert(r== Interval(4, Double.PositiveInfinity))
   }
 
   test("Minimum") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.min(intOps.integerLit(-3), intOps.integerLit(-4))) == Interval(-4, -4))
+    assert(apron.currentScope.getBound(intOps.min(intOps.integerLit(-3), intOps.integerLit(-4))) == Interval(-4, -4))
   }
 
   test("Minimum : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.min(intOps.integerLit(4), intOps.randomInteger())) == Interval(Double.NegativeInfinity, 4))
+    assert(apron.currentScope.getBound(intOps.min(intOps.integerLit(4), intOps.randomInteger())) == Interval(Double.NegativeInfinity, 4))
   }
 
   test("Absolute") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.absolute(intOps.integerLit(-6))) == Interval(6,6))
+    assert(apron.currentScope.getBound(intOps.absolute(intOps.integerLit(-6))) == Interval(6,6))
   }
 
   test("Absolute : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.absolute(intOps.randomInteger())) == Interval(0,Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.absolute(intOps.randomInteger())) == Interval(0,Double.PositiveInfinity))
   }
 
   test("Division") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(16), intOps.integerLit(4))) == Interval(4,4))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(16), intOps.integerLit(4))) == Interval(4,4))
   }
 
   test("Division : mod != 0 ") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(3), intOps.integerLit(2))) == Interval(1, 1))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(3), intOps.integerLit(2))) == Interval(1, 1))
   }
 
   test("Division : negative denominator") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(2), intOps.integerLit(-2))) == Interval(-1,-1))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(2), intOps.integerLit(-2))) == Interval(-1,-1))
   }
 
   test("Division : negative numerator") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(-4), intOps.integerLit(2))) == Interval(-2, -2))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(-4), intOps.integerLit(2))) == Interval(-2, -2))
   }
 
   test("Division : negative numerator and negative denominator") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(-8), intOps.integerLit(-4))) == Interval(2, 2))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(-8), intOps.integerLit(-4))) == Interval(2, 2))
   }
 
   test("Division : by zero") {
@@ -163,12 +163,12 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Division : by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(4), intOps.randomInteger())) == Interval(-4, 4))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(4), intOps.randomInteger())) == Interval(-4, 4))
   }
 
   test("Division : zero by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.integerLit(0), intOps.randomInteger())) == Interval(0,0))
+    assert(apron.currentScope.getBound(intOps.div(intOps.integerLit(0), intOps.randomInteger())) == Interval(0,0))
   }
 
   test("Division : unconstrained by zero") {
@@ -187,7 +187,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     val posInf = new MpqScalar()
     posInf.setInfty(1)
     val posIV = new Interval(new MpqScalar(new Mpz(1)), posInf)
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(posIV))) == ApronExpr.topConstant.coeff)
+    assert(apron.currentScope.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(posIV))) == ApronExpr.topConstant.coeff)
   }
 
   test("Division : unconstrained negative") {
@@ -195,27 +195,27 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     val negInf = new MpqScalar()
     negInf.setInfty(-1)
     val negIV = new Interval(negInf, new MpqScalar(new Mpz(-1)))
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(negIV))) == ApronExpr.topConstant.coeff)
+    assert(apron.currentScope.getBound(intOps.div(intOps.randomInteger(), ApronExpr.num(negIV))) == ApronExpr.topConstant.coeff)
   }
 
   test("Division : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == ApronExpr.topConstant.coeff)
+    assert(apron.currentScope.getBound(intOps.div(intOps.randomInteger(), intOps.randomInteger())) == ApronExpr.topConstant.coeff)
   }
 
   test("Modulo") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.integerLit(4), intOps.integerLit(3))) == Interval(1,1))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.integerLit(4), intOps.integerLit(3))) == Interval(1,1))
   }
 
   test("Modulo : negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.integerLit(-8), intOps.integerLit(3))) == Interval(1, 1))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.integerLit(-8), intOps.integerLit(3))) == Interval(1, 1))
   }
 
   test("Modulo : by negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.integerLit(19), intOps.integerLit(-4))) == Interval(3, 3))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.integerLit(19), intOps.integerLit(-4))) == Interval(3, 3))
   }
 
   test("Modulo : by zero") {
@@ -230,37 +230,37 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Modulo : by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.integerLit(5), intOps.randomInteger())) == Interval(0, 5))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.integerLit(5), intOps.randomInteger())) == Interval(0, 5))
   }
 
   test("Modulo : 0 by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.integerLit(0), intOps.randomInteger())) == Interval(0, 0))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.integerLit(0), intOps.randomInteger())) == Interval(0, 0))
   }
 
   test("Modulo : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.randomInteger(), intOps.integerLit(7))) == Interval(0, 7))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.randomInteger(), intOps.integerLit(7))) == Interval(0, 7))
   }
 
   test("Modulo : unconstrained by unconstrained"){
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.modulo(intOps.randomInteger(), intOps.randomInteger())) == Interval(0, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.modulo(intOps.randomInteger(), intOps.randomInteger())) == Interval(0, Double.PositiveInfinity))
   }
 
   test("Remainder") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.integerLit(4), intOps.integerLit(7))) == Interval(4, 4))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.integerLit(4), intOps.integerLit(7))) == Interval(4, 4))
   }
 
   test("Remainder : negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.integerLit(-18), intOps.integerLit(4))) == Interval(-2, -2))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.integerLit(-18), intOps.integerLit(4))) == Interval(-2, -2))
   }
 
   test("Remainder : by negative") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.integerLit(9), intOps.integerLit(-2))) == Interval(1, 1))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.integerLit(9), intOps.integerLit(-2))) == Interval(1, 1))
   }
 
   test("Remainder : by zero") {
@@ -275,22 +275,22 @@ class ApronIntegerOpsTest extends AnyFunSuite:
 
   test("Remainder : by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.integerLit(5), intOps.randomInteger())) == Interval(0, 5))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.integerLit(5), intOps.randomInteger())) == Interval(0, 5))
   }
 
   test("Remainder : 0 by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.integerLit(0), intOps.randomInteger())) == Interval(0, 0))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.integerLit(0), intOps.randomInteger())) == Interval(0, 0))
   }
 
   test("Remainder : unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.randomInteger(), intOps.integerLit(7))) == Interval(-7, 7))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.randomInteger(), intOps.integerLit(7))) == Interval(-7, 7))
   }
 
   test("Remainder : unconstrained by unconstrained") {
     val (intOps, apron) = instantiateIntOps()
-    assert(apron.getBound(intOps.remainder(intOps.randomInteger(), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(apron.currentScope.getBound(intOps.remainder(intOps.randomInteger(), intOps.randomInteger())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Negate Expr : EQ") {
@@ -327,7 +327,7 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     println(cond)
     println(notCond)
     apron.assertConstrain(notCond)
-    assert(apron.getBound(x) == Interval(Double.NegativeInfinity, 4))
+    assert(apron.currentScope.getBound(x) == Interval(Double.NegativeInfinity, 4))
   }
 
   test("Negate Expr : SUPEQ") {
@@ -339,5 +339,5 @@ class ApronIntegerOpsTest extends AnyFunSuite:
     println(cond)
     println(notCond)
     apron.assertConstrain(notCond)
-    assert(apron.getBound(x) == Interval(Double.NegativeInfinity, 1))
+    assert(apron.currentScope.getBound(x) == Interval(Double.NegativeInfinity, 1))
   }

@@ -13,7 +13,6 @@ object ApronVar:
 trait ApronVar:
   val av: apron.Var
   val isInt: Boolean
-  val ap: Apron
 
   private val instCount: Long = {
     val c = ApronVar.instCount
@@ -37,21 +36,30 @@ trait ApronVar:
   def node: Texpr1Node = new Texpr1VarNode(av)
 
   override def toString: String =
+    s"$av#$instCount"
+
+  def toString(scope: ApronScope): String =
     if (!Apron.debugAlloc)
       s"$av#$instCount"
     else
-      ap.getFreedReference(this) match
-        case None if ap.env.hasVar(av) => s"$av#$instCount~${ap.getBound(av)}"
-        case None => s"$av#$instCount=null"
-        case Some(e) => s"$av#$instCount=${ap.getBound(e)}"
+      scope.getFreedReference(this) match
+        case None => s"$av#$instCount~${scope.getBound(this)}"
+        case Some(e) => s"$av#$instCount=${scope.getBound(e)}"
 
   override def equals(obj: Any): Boolean = obj match
-    case that: ApronVar =>
-      (ap.getFreedReference(this), ap.getFreedReference(that)) match
-        case (None, None) => this.instCount == that.instCount
-        case (Some(e1), Some(e2)) => e1 == e2
-        case _ => false
+    case that: ApronVar => this.instCount == that.instCount
     case _ => false
+
+  def isEqual(that: ApronVar, scope: ApronScope): Boolean = (scope.getFreedReference(this), scope.getFreedReference(that)) match
+      case (None, None) => this.instCount == that.instCount
+      case (Some(e1), Some(e2)) => e1 == e2
+      case _ => false
 
   override def hashCode(): Int =
     av.hashCode()
+
+  def hashCode(scope: ApronScope): Int = scope.getFreedReference(this) match
+    case None => this.instCount.hashCode()
+    case Some(e) => e.hashCode(scope)
+
+

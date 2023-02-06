@@ -31,10 +31,10 @@ given ApronIntegerOps[B](using Numeric[B])
   import ApronOrderingOps.*
 
   def unaryIntervalOp(v: ApronExpr, f: NumericInterval[B] => NumericInterval[B])(using convert: ConvertInterval[B]): ApronExpr =
-    ApronExpr.Constant(convert(f(convert(ap.getBound(v)))))
+    ApronExpr.Constant(convert(f(convert(ap.currentScope.getBound(v)))))
 
   def binaryIntervalOp(v1: ApronExpr, v2: ApronExpr, f: (NumericInterval[B], NumericInterval[B]) => NumericInterval[B])(using convert: ConvertInterval[B]): ApronExpr =
-    ApronExpr.Constant(convert(f(convert(ap.getBound(v1)), convert(ap.getBound(v2)))))
+    ApronExpr.Constant(convert(f(convert(ap.currentScope.getBound(v1)), convert(ap.currentScope.getBound(v2)))))
 
   override def integerLit(i: B): ApronExpr = ApronExpr.Constant(new MpqScalar(new Mpz(i.toLong)))
 
@@ -190,8 +190,8 @@ given ApronConvertLongDouble(using Apron, EffectStack, Failure) : ConvertLongDou
 given ApronConvertLongBytes(using Apron, EffectStack, Failure) : ConvertLongBytes[ApronExpr,Seq[ApronExpr]] = new LiftedConvert[Long, Seq[Byte], ApronExpr, Seq[ApronExpr], NumericInterval[Long], Seq[NumericInterval[Byte]], config.BytesSize && SomeCC[ByteOrder]](extract, x => x.map(inject))
 given ApronConvertBytesLong(using Apron, EffectStack, Failure) : ConvertBytesLong[Seq[ApronExpr],ApronExpr] = new LiftedConvert[Seq[Byte], Long, Seq[ApronExpr], ApronExpr, Seq[NumericInterval[Byte]], NumericInterval[Long], config.BytesSize && SomeCC[ByteOrder] && config.Bits](x => x.map(extract), inject)
 
-def extract[B: Numeric](from : ApronExpr)(using ap: Apron)(using ConvertCoeff[Mpq, B]) : Topped[B] = convertToScalarMpq[B](ap.getBound(from.toApron(ap)))
-def extract[B: Numeric](from : ApronExpr)(using ap: Apron, c: ConvertInterval[B]) : NumericInterval[B] = c(ap.getBound(from.toApron(ap)))
+def extract[B: Numeric](from : ApronExpr)(using ap: Apron)(using ConvertCoeff[Mpq, B]) : Topped[B] = convertToScalarMpq[B](ap.currentScope.getBound(from))
+def extract[B: Numeric](from : ApronExpr)(using ap: Apron, c: ConvertInterval[B]) : NumericInterval[B] = c(ap.currentScope.getBound(from))
 
 def inject[B: Numeric](from : Topped[B]): ApronExpr = from match
   case Topped.Top => ApronExpr.topConstant

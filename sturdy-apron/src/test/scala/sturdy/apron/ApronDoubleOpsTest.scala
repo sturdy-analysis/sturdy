@@ -32,42 +32,42 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Floating Lit : Positive"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(3.4))) == Interval(3.4, 3.4))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(3.4))) == Interval(3.4, 3.4))
   }
 
   test("Floating Lit : Negative"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(-10.5))) == Interval(-10.5, -10.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(-10.5))) == Interval(-10.5, -10.5))
   }
 
   test("Integer Lit : Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(4))) == Interval(4, 4))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(4))) == Interval(4, 4))
   }
 
   test("Integer Lit : Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(-10))) == Interval(-10, -10))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(-10))) == Interval(-10, -10))
   }
 
   test("Floating Lit : MaxDouble"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(Double.MaxValue))) == Interval(Double.MaxValue, Double.MaxValue))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(Double.MaxValue))) == Interval(Double.MaxValue, Double.MaxValue))
   }
 
   test("Floating Lit : MinDouble") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(Double.MinValue))) == Interval(Double.MinValue, Double.MinValue))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(Double.MinValue))) == Interval(Double.MinValue, Double.MinValue))
   }
 
   test("Floating Lit : Smallest Double") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floatingLit(Double.MinPositiveValue))) == Interval(Double.MinPositiveValue, Double.MinPositiveValue))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floatingLit(Double.MinPositiveValue))) == Interval(Double.MinPositiveValue, Double.MinPositiveValue))
   }
 
   test("Floating Lit : Too small") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(Double.MinPositiveValue), doubleOps.floatingLit(2)))) == Interval(0,0))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(Double.MinPositiveValue), doubleOps.floatingLit(2)))) == Interval(0,0))
   }
 
   // This failing test case show that it's not possible to approximate soundly the behavior of floating point operation because of the rational conversion done by apron
@@ -75,193 +75,193 @@ class ApronDoubleOpsTest extends AnyFunSuite:
   /*
   test("Floating Lit : Significand size") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(apron.getBound(doubleOps.sub(doubleOps.floatingLit(Math.pow(2,52) ), doubleOps.add(doubleOps.floatingLit(Math.pow(2,52)), doubleOps.floatingLit(1)))) == Interval(Math.pow(2,53) + 1, Math.pow(2, 53) + 1))
+    assert(apron.currentScope.getBound(doubleOps.sub(doubleOps.floatingLit(Math.pow(2,52) ), doubleOps.add(doubleOps.floatingLit(Math.pow(2,52)), doubleOps.floatingLit(1)))) == Interval(Math.pow(2,53) + 1, Math.pow(2, 53) + 1))
   }
   */
 
   test("Random Integer"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.randomFloat())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.randomFloat())) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Addition"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.floatingLit(-1), doubleOps.floatingLit(1)))) == Interval(-1+1, -1+1))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.add(doubleOps.floatingLit(-1), doubleOps.floatingLit(1)))) == Interval(-1+1, -1+1))
   }
 
   test("Addition : Positive"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.floatingLit(1.5), doubleOps.floatingLit(0.25)))) == Interval(1.5+.25, 1.5+.25))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.add(doubleOps.floatingLit(1.5), doubleOps.floatingLit(0.25)))) == Interval(1.5+.25, 1.5+.25))
   }
 
   test("Addition : Negative"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-10d+6.4d, -10d+6.4d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.add(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-10d+6.4d, -10d+6.4d))
   }
 
   test("Addition : Top"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.add(doubleOps.randomFloat(), doubleOps.floatingLit(3.3)))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.add(doubleOps.randomFloat(), doubleOps.floatingLit(3.3)))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Substraction") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.floatingLit(-1), doubleOps.floatingLit(1)))) == Interval(-1d-1d, -1d-1d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sub(doubleOps.floatingLit(-1), doubleOps.floatingLit(1)))) == Interval(-1d-1d, -1d-1d))
   }
 
   test("Substraction : Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.floatingLit(1.5), doubleOps.floatingLit(0.25)))) == Interval(1.5d-.25d, 1.5d-.25d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sub(doubleOps.floatingLit(1.5), doubleOps.floatingLit(0.25)))) == Interval(1.5d-.25d, 1.5d-.25d))
   }
 
   test("Substraction : Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-10d-6.4d, -10d-6.4d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sub(doubleOps.floatingLit(-10), doubleOps.floatingLit(6.4)))) == Interval(-10d-6.4d, -10d-6.4d))
   }
 
   test("Substraction : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sub(doubleOps.randomFloat(), doubleOps.floatingLit(3.3)))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sub(doubleOps.randomFloat(), doubleOps.floatingLit(3.3)))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Multiplication : Top"){
   val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(2), doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(2), doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Multiplication : Positive Integers"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(1), doubleOps.floatingLit(2)))) == Interval(1*2d, 1*2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(1), doubleOps.floatingLit(2)))) == Interval(1*2d, 1*2d))
   }
 
   test("Multiplication : Negative Integers"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(-2), doubleOps.floatingLit(7)))) == Interval(-2d*7d, -2*7d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(-2), doubleOps.floatingLit(7)))) == Interval(-2d*7d, -2*7d))
   }
 
   test("Multiplication : Zero and Integer"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(0), doubleOps.floatingLit(2)))) == Interval(0d*2d, 0d*2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(0), doubleOps.floatingLit(2)))) == Interval(0d*2d, 0d*2d))
   }
 
   test("Multiplication : Integer and Zero"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(1), doubleOps.floatingLit(0)))) == Interval(1d*0d, 1d*0d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(1), doubleOps.floatingLit(0)))) == Interval(1d*0d, 1d*0d))
   }
 
   test("Multiplication : Top and Zero"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.randomFloat(), doubleOps.floatingLit(0)))) == Interval(0, 0))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.randomFloat(), doubleOps.floatingLit(0)))) == Interval(0, 0))
   }
 
   test("Multiplication : Positive Floats"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(4.5), doubleOps.floatingLit(2)))) == Interval(4.5*2d, 4.5d*2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(4.5), doubleOps.floatingLit(2)))) == Interval(4.5*2d, 4.5d*2d))
   }
 
   test("Multiplication : Positive Floats less than one"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(9), doubleOps.floatingLit(0.3)))) == convertToDouble(Interval(9d*0.3d, 9d*0.3d)))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(9), doubleOps.floatingLit(0.3)))) == convertToDouble(Interval(9d*0.3d, 9d*0.3d)))
   }
 
   test("Multiplication : Negative Floats"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(1d/3d), doubleOps.floatingLit(-12)))) == Interval((1d/3d)*(-12d), (1d/3d)*(-12d)))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(1d/3d), doubleOps.floatingLit(-12)))) == Interval((1d/3d)*(-12d), (1d/3d)*(-12d)))
   }
 
   test("Multiplication : Negative Floats less than one"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.mul(doubleOps.floatingLit(-0.5), doubleOps.floatingLit(math.Pi)))) == Interval(math.Pi * -0.5d, math.Pi * -0.5d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.mul(doubleOps.floatingLit(-0.5), doubleOps.floatingLit(math.Pi)))) == Interval(math.Pi * -0.5d, math.Pi * -0.5d))
   }
 
   test("Divison : Positive Integers"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(5), doubleOps.floatingLit(2)))) == Interval(5d/2d, 5d/2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(5), doubleOps.floatingLit(2)))) == Interval(5d/2d, 5d/2d))
   }
 
   test("Divison : Negative Integers"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(-3), doubleOps.floatingLit(2)))) == Interval(-3d/2d, -3d/2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(-3), doubleOps.floatingLit(2)))) == Interval(-3d/2d, -3d/2d))
   }
 
   test("Divison : Positive Floats"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(5.5), doubleOps.floatingLit(2)))) == Interval(5.5d/2d, 5.5d/2d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(5.5), doubleOps.floatingLit(2)))) == Interval(5.5d/2d, 5.5d/2d))
   }
 
   test("Divison : Positive Floats less than one"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(0.5), doubleOps.floatingLit(0.25)))) == Interval(0.5/0.25, 0.5/0.25))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(0.5), doubleOps.floatingLit(0.25)))) == Interval(0.5/0.25, 0.5/0.25))
   }
 
   test("Divison : Negative Floats"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(-2.5), doubleOps.floatingLit(10)))) == Interval(-0.25, -0.25))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(-2.5), doubleOps.floatingLit(10)))) == Interval(-0.25, -0.25))
   }
 
   test("Divison : Negative Floats less than one"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.div(doubleOps.floatingLit(-0.1), doubleOps.floatingLit(3)))) == Interval(-0.1 / 3d, -0.1 / 3d))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(-0.1), doubleOps.floatingLit(3)))) == Interval(-0.1 / 3d, -0.1 / 3d))
   }
 
   test("Division : by zero") {
     val(doubleOps, apron) = instantiateDoubleOps()
-    assert(apron.getBound(doubleOps.div(doubleOps.randomFloat(), doubleOps.floatingLit(0))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
+    assert(apron.currentScope.getBound(doubleOps.div(doubleOps.randomFloat(), doubleOps.floatingLit(0))) == Interval(Float.NegativeInfinity, Float.PositiveInfinity))
   }
 
   test("Division : zero by zero") {
     val(doubleOps, apron) = instantiateDoubleOps()
-    assert(apron.getBound(doubleOps.div(doubleOps.floatingLit(0), doubleOps.floatingLit(0))) == Interval(0d, 0d))
+    assert(apron.currentScope.getBound(doubleOps.div(doubleOps.floatingLit(0), doubleOps.floatingLit(0))) == Interval(0d, 0d))
   }
 
   test("Min"){
     val(doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.min(doubleOps.floatingLit(2.5), doubleOps.floatingLit(-6.1)))) == Interval(-6.1, -6.1))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.min(doubleOps.floatingLit(2.5), doubleOps.floatingLit(-6.1)))) == Interval(-6.1, -6.1))
   }
 
   test("Min : Top"){
     val(doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.min(doubleOps.floatingLit(2.5), doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, 2.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.min(doubleOps.floatingLit(2.5), doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, 2.5))
   }
 
   test("Max") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.max(doubleOps.floatingLit(2.5), doubleOps.floatingLit(-6.1)))) == Interval(2.5, 2.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.max(doubleOps.floatingLit(2.5), doubleOps.floatingLit(-6.1)))) == Interval(2.5, 2.5))
   }
 
   test("Max : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.max(doubleOps.floatingLit(2.5), doubleOps.randomFloat()))) == Interval(2.5, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.max(doubleOps.floatingLit(2.5), doubleOps.randomFloat()))) == Interval(2.5, Double.PositiveInfinity))
   }
 
   test("Absolute") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.absolute(doubleOps.floatingLit(-3.4)))) == Interval(3.4, 3.4))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.absolute(doubleOps.floatingLit(-3.4)))) == Interval(3.4, 3.4))
   }
 
   test("Absolute : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.absolute(doubleOps.randomFloat()))) == Interval(0, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.absolute(doubleOps.randomFloat()))) == Interval(0, Double.PositiveInfinity))
   }
 
   test("Negated : Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.negated(doubleOps.floatingLit(3.2)))) == Interval(-3.2, -3.2))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.negated(doubleOps.floatingLit(3.2)))) == Interval(-3.2, -3.2))
   }
 
   test("Negated : Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.negated(doubleOps.floatingLit(-6.666)))) == Interval(6.666, 6.666))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.negated(doubleOps.floatingLit(-6.666)))) == Interval(6.666, 6.666))
   }
 
   test("Negated : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.negated(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.negated(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Squareroot : Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sqrt(doubleOps.floatingLit(8f)))) == Interval(Math.sqrt(8).floor, Math.sqrt(8).ceil))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sqrt(doubleOps.floatingLit(8f)))) == Interval(Math.sqrt(8).floor, Math.sqrt(8).ceil))
   }
 
   test("Squareroot : Negative") {
@@ -278,81 +278,81 @@ class ApronDoubleOpsTest extends AnyFunSuite:
 
   test("Squareroot : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.sqrt(doubleOps.randomFloat()))) == Interval(0, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.sqrt(doubleOps.randomFloat()))) == Interval(0, Double.PositiveInfinity))
   }
 
   test("Ceiling"){
   val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.ceil(doubleOps.floatingLit(4.5)))) == Interval(5, 5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.ceil(doubleOps.floatingLit(4.5)))) == Interval(5, 5))
   }
 
   test("Ceiling : Top"){
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.ceil(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.ceil(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Floor") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floor(doubleOps.floatingLit(4.5)))) == Interval(4, 4))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floor(doubleOps.floatingLit(4.5)))) == Interval(4, 4))
   }
 
   test("Floor : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.floor(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.floor(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Truncate") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.truncate(doubleOps.floatingLit(4.5)))) == Interval(4, 4))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.truncate(doubleOps.floatingLit(4.5)))) == Interval(4, 4))
   }
 
   test("Truncate : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.truncate(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.truncate(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   // Bad behavior from apron implementation
   /*test("Nearest") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.nearest(doubleOps.floatingLit(4.6f)))) == Interval(5, 5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.nearest(doubleOps.floatingLit(4.6f)))) == Interval(5, 5))
   }*/
 
   test("Nearest : Top") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.nearest(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.nearest(doubleOps.randomFloat()))) == Interval(Double.NegativeInfinity, Double.PositiveInfinity))
   }
 
   test("Copysign : Positive Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.floatingLit(4.5), doubleOps.floatingLit(-6)))) == Interval(-4.5, -4.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.floatingLit(4.5), doubleOps.floatingLit(-6)))) == Interval(-4.5, -4.5))
   }
 
   test("Copysign : Positive Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.floatingLit(4.5), doubleOps.floatingLit(6)))) == Interval(4.5, 4.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.floatingLit(4.5), doubleOps.floatingLit(6)))) == Interval(4.5, 4.5))
   }
 
   test("Copysign : Negative Negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.floatingLit(-4.5), doubleOps.floatingLit(-6)))) == Interval(-4.5, -4.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.floatingLit(-4.5), doubleOps.floatingLit(-6)))) == Interval(-4.5, -4.5))
   }
 
   test("Copysign : Negative Positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.floatingLit(-4.5), doubleOps.floatingLit(6)))) == Interval(4.5, 4.5))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.floatingLit(-4.5), doubleOps.floatingLit(6)))) == Interval(4.5, 4.5))
   }
 
   test("Copysign : Top negative") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.randomFloat(), doubleOps.floatingLit(-1)))) == Interval(Double.NegativeInfinity, 0))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.randomFloat(), doubleOps.floatingLit(-1)))) == Interval(Double.NegativeInfinity, 0))
   }
 
   test("Copysign : Top positive") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.randomFloat(), doubleOps.floatingLit(8)))) == Interval(0, Double.PositiveInfinity))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.randomFloat(), doubleOps.floatingLit(8)))) == Interval(0, Double.PositiveInfinity))
   }
 
   test("Copysign : Positive TOP") {
     val (doubleOps, apron) = instantiateDoubleOps()
-    assert(convertToDouble(apron.getBound(doubleOps.copysign(doubleOps.floatingLit(-6), doubleOps.randomFloat()))) == Interval(-6, 6))
+    assert(convertToDouble(apron.currentScope.getBound(doubleOps.copysign(doubleOps.floatingLit(-6), doubleOps.randomFloat()))) == Interval(-6, 6))
   }

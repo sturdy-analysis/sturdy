@@ -4,10 +4,10 @@ import apron.*
 
 class ApronAllocScoped(manager: Manager) extends ApronAlloc:
   enum Var extends ApronVar:
-    case IntVar(local: String)(val ap: Apron)
-    case DoubleVar(local: String)(val ap: Apron)
-    case IntTemp(ix: Int)(val ap: Apron)
-    case DoubleTemp(ix: Int)(val ap: Apron)
+    case IntVar(local: String)
+    case DoubleVar(local: String)
+    case IntTemp(ix: Int)
+    case DoubleTemp(ix: Int)
 
     val av: apron.Var = this match
       case IntVar(local) => new StringVar(s"I_$local")
@@ -16,10 +16,10 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
       case DoubleTemp(ix) => new StringVar(s"D_temp_$ix")
 
     def copy: Var = this match
-      case IntVar(local) => IntVar(local)(this.ap)
-      case DoubleVar(local) => DoubleVar(local)(this.ap)
-      case IntTemp(ix) => IntTemp(ix)(this.ap)
-      case DoubleTemp(ix) => DoubleTemp(ix)(this.ap)
+      case IntVar(local) => IntVar(local)
+      case DoubleVar(local) => DoubleVar(local)
+      case IntTemp(ix) => IntTemp(ix)
+      case DoubleTemp(ix) => DoubleTemp(ix)
 
     override val isInt: Boolean = this match
       case _: IntVar | _: IntTemp => true
@@ -38,13 +38,13 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
 
   def allocateIntVariable(site: ApronAllocationSite, apron: Apron): Var = site match
     case ApronAllocationSite.TemporaryVar =>
-      val v = Var.IntTemp(intTempCount)(apron)
+      val v = Var.IntTemp(intTempCount)
       intTempCount += 1
       if (Apron.debugAlloc)
         println(s"allocating strong $v for $site")
       v
     case ApronAllocationSite.LocalVar(local) =>
-      val v = Var.IntVar(local)(apron)
+      val v = Var.IntVar(local)
       activeIntVars.get(local) match
         case Some(active) =>
           if (Apron.debugAlloc)

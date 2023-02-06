@@ -1,9 +1,9 @@
 package sturdy.values
 
 import apron.Texpr1Node
-import sturdy.apron.{Apron, ApronExpr}
+import sturdy.apron.{Apron, ApronExpr, ApronScope}
 
-given ApronPartialOrder(using ap: Apron): PartialOrder[ApronExpr] with
+given ApronPartialOrder(using scope: ApronScope): PartialOrder[ApronExpr] with
   override def lteq(x: ApronExpr, y: ApronExpr): Boolean =
-    println(s"$x (${ap.getBound(x)}) <= $y (${ap.getBound(y)})   in $ap")
-    ap.getBound(x).isLeq(ap.getBound(y))
+    println(s"$x (${scope.getBound(x)}) <= $y (${scope.getBound(y)})   in $scope")
+    scope.getBound(x).isLeq(scope.getBound(y))

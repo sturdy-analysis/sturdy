@@ -2,7 +2,7 @@ package sturdy.apron
 
 import apron.*
 import sturdy.apron.Apron.{debugAssert, debugJoinWiden}
-import sturdy.data.CombineUnit
+import sturdy.data.{CombineUnit, JoinMap, WidenFiniteKeyMap, combineMaps}
 import sturdy.effect.*
 import sturdy.values.*
 
@@ -20,8 +20,13 @@ object Apron:
 
   case class Bottom() extends SturdyFailure
 
+/**
+  * Provides apron as an effectful analysis component.
+  *
+  * State = (Manager, apron.Abstract1, FreedRefs)
+  */
 class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
-  val joins: ApronJoins = new ApronJoins(this)
+  val joins: ApronJoins = ApronJoins(apronManager)
 
   override def toString: String =
     env.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
@@ -30,30 +35,29 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   private[apron] inline def env: Environment = apronState.getEnvironment
 
-  private var _freedReferences: mutable.WeakHashMap[ApronVar.UID, ApronExpr] = mutable.WeakHashMap()
+  private var _freedReferences: Map[ApronVar.UID, ApronExpr] = Map()
 
-  inline def getFreedReference(v: ApronVar): Option[ApronExpr] = _freedReferences.get(v.uid)
-  private[apron] def freeReference(v: ApronVar, e: ApronExpr): Unit =
-    _freedReferences.update(v.uid, e)
-  inline def getFreedReferences: Map[ApronVar.UID, ApronExpr] = _freedReferences.toMap
-  inline def inScope(v: ApronVar): Boolean = getFreedReference(v).isEmpty
+  private def freeReference(v: ApronVar, e: ApronExpr): Unit =
+    if (Apron.debugAlloc)
+      println(s"Free reference $v = $e")
+    _freedReferences += v.uid -> e
+  private inline def getFreedReferences: Map[ApronVar.UID, ApronExpr] = _freedReferences
 
-  def getBound(v: ApronVar): Interval = getFreedReference(v) match
-    case Some(e) => getBound(e)
-    case None => apronState.getBound(apronManager, v.av)
-
-  inline private[apron] def getBound(av: apron.Var): Interval =
-    if (env.hasVar(av))
-      apronState.getBound(apronManager, av)
-    else
-      ApronExpr.topInterval
-
-  inline def getBound(v: ApronExpr): Interval =
-    apronState.getBound(apronManager, v.toIntern(this))
-
-  def getBound(v: Texpr1Node): Interval =
-    val vIntern = new Texpr1Intern(env, v)
-    apronState.getBound(apronManager, vIntern)
+  val currentScope: ApronScope = new ApronScope:
+    override def toString: String = s"Current scope: free = $_freedReferences"
+    override def apronEnv: Environment = apronState.getEnvironment
+    override def getBound(v: ApronVar): Interval = getFreedReference(v) match
+      case Some(e) => getBound(e)
+      case None =>
+        if (env.hasVar(v.av))
+          apronState.getBound(apronManager, v.av)
+        else
+          ApronExpr.topInterval
+    override def getBound(e: ApronExpr): Interval =
+      apronState.getBound(apronManager, e.toIntern(this, allowOpen = false))
+    override def getFreedReference(v: ApronVar): Option[ApronExpr] =
+      _freedReferences.get(v.uid)
+  import currentScope.*
 
   def addDoubleVariable(site: ApronAllocationSite): alloc.Var =
     alloc.allocateDoubleVariable(site, this)
@@ -62,14 +66,14 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     alloc.allocateIntVariable(site, this)
 
   def freeVariable(v: alloc.Var): Unit =
-    if (!inScope(v))
+    if (isFreed(v))
       return
     val isStrong = alloc.freeVariable(v, this)
     if (Apron.debugAlloc) {
-      println(s"Freeing ${if (isStrong) "strong" else "weak"} $v = ${getBound(v.av)}")
+      println(s"Freeing ${if (isStrong) "strong" else "weak"} $v = ${getBound(v)}")
     }
     if (isStrong) {
-      val oldVal = getBound(v.av)
+      val oldVal = getBound(v)
       freeReference(v, ApronExpr.Constant(oldVal))
       if (env.hasVar(v.av)) {
         apronState.forget(apronManager, v.av, false)
@@ -80,7 +84,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   /** Assigns v := exp. In case of a strong assignment, invalidates previous references of v and yields a fresh copy of v to use for future references. */
   def assign(v: alloc.Var, exp: ApronExpr): Option[alloc.Var] =
-    if (!inScope(v))
+    if (isFreed(v))
       throw new IllegalStateException(s"Cannot assign to out-of-scope variable $v")
 
     val isStrong = alloc.useStrongUpdate(v)
@@ -89,24 +93,25 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
     if (!isInitialized) {
       initializeVar(v)
-      val expIntern = exp.toIntern(this)
+      val expIntern = exp.toIntern(currentScope)
       if (Apron.debugAssign) {
         println(s"assigning uninitialized $v = $exp = ${apronState.getBound(apronManager, expIntern)}, was uninitialized")
       }
       apronState.assign(apronManager, v.av, expIntern, null)
     } else if (isStrong) {
-      val oldVal = getBound(v.av)
-      freeReference(v, ApronExpr.Constant(oldVal))
+      val oldVal = getBound(v)
 
       val vnew = alloc.freshReference(v)
-      val expIntern = exp.toIntern(this)
+      val expIntern = exp.toIntern(currentScope)
       if (Apron.debugAssign) {
         println(s"assigning strong $vnew = $exp = ${apronState.getBound(apronManager, expIntern)}, was $oldVal")
       }
       apronState.assign(apronManager, vnew.av, expIntern, null)
+      freeReference(v, ApronExpr.Constant(oldVal))
+
       newV = Some(vnew)
     } else {
-      val expIntern = exp.toIntern(this)
+      val expIntern = exp.toIntern(currentScope)
       val expString = exp.toString
       val old = getBound(v)
       val expBound = apronState.getBound(apronManager, expIntern)
@@ -121,20 +126,20 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     newV
 
   private[apron] def initializeVar(v: ApronVar): ApronVar =
-    if (inScope(v) && !env.hasVar(v.av)) {
+    if (!isFreed(v) && !env.hasVar(v.av)) {
       val intAr = if (v.isInt) Array(v.av) else null
       val floAr = if (v.isInt) null else Array(v.av)
-      apronState.changeEnvironment(apronState.getCreationManager, env.add(intAr, floAr), false)
+      apronState.changeEnvironment(apronManager, env.add(intAr, floAr), false)
     }
     v
 
   def withLocal[A](st: ApronState)(f: => A) =
     val snapshot = apronState
-    apronState = st.s
+    apronState = st.cs
     try f finally {
       apronState = snapshot
     }
-  
+
   def withTemporaryIntVariable[A](f: alloc.Var => A): A =
     val v = addIntVariable(ApronAllocationSite.TemporaryVar)
     val res = try f(v)
@@ -165,7 +170,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     }
 
   def assertConstrain(ac: ApronCons): Unit =
-    val c = ac.toApron(this)
+    val c = ac.toApron(currentScope)
     if (c.size != 1)
       throw new IllegalStateException(s"Cannot assert $ac here, since it translates to multiple constraints $c")
     assertConstrain(c.head)
@@ -190,9 +195,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     ifThenElse(cond, cond.negated)(ifTrue)(ifFalse)
 
   def ifThenElse[A](condTrue: ApronCons, condFalse: ApronCons)(ifTrue: => A)(ifFalse: => A)(using effects: EffectStack): Join[A] ?=> A =
-    val cTrue = condTrue.toApron(this)
+    val cTrue = condTrue.toApron(currentScope)
     val condTrueStr = condTrue.toString
-    val cFalse = condFalse.toApron(this)
+    val cFalse = condFalse.toApron(currentScope)
     val condFalseStr = condFalse.toString
 
     effects.joinComputations {
@@ -221,8 +226,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   private def ifThenElsePure[A](condTrue: ApronCons, condFalse: ApronCons, widen: Boolean)(ifTrue: A)(ifFalse: A): Join[A] ?=> A =
     val snapshot = apronState
 
-    val cTrue = condTrue.toApron(this)
-    val cFalse = condFalse.toApron(this)
+    val cTrue = condTrue.toApron(currentScope)
+    val cFalse = condFalse.toApron(currentScope)
 
     val resTrue = cTrue.map(c => TrySturdy {
       apronState = new Abstract1(apronManager, snapshot)
@@ -238,86 +243,66 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     apronState = snapshot
     (resTrue ++ resFalse).flatten.reduce(Join(_, _).get)
 
-  def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
-    // TODO review this code on first widening in cfgloop.tip
-    if (debugJoinWiden) {
-      println(
-        s"""${if (widen) "Widening" else "Joining"} apron
-           |  s1 = $s1
-           |  s2 = $s2""".stripMargin)
-    }
 
-    val vars1 = s1.getEnvironment.getVars.toSet
-    val vars2 = s2.getEnvironment.getVars.toSet
-    val inboth = (vars1 intersect vars2).toArray
-
-    val lce = s1.getEnvironment.lce(s2.getEnvironment)
-    val combinable1 = s1.changeEnvironmentCopy(apronManager, lce, false)
-    val combinable2 = s2.changeEnvironmentCopy(apronManager, lce, false)
-    val combined =
-      if (widen)
-        combinable1.widening(apronManager, combinable2)
-      else
-        combinable1.joinCopy(apronManager, combinable2)
-
-    if (debugJoinWiden) {
-      println(
-        s"""  joined = $combined""".stripMargin)
-    }
-    if (Apron.debugJoinWiden && !combinable1.isIncluded(apronManager, combined))
-      throw new IllegalStateException(s"$combinable1 not included in $combined")
-    if (Apron.debugJoinWiden && !combinable2.isIncluded(apronManager, combined))
-      throw new IllegalStateException(s"$combinable2 not included in $combined")
-
-    val s1Only = combinable1.forgetCopy(apronManager, inboth, false)
-    val s2Only = combinable2.forgetCopy(apronManager, inboth, false)
-    combined.meet(apronManager, s1Only)
-    combined.meet(apronManager, s2Only)
-    val changed = !combined.isEqual(apronManager, combinable1)
-    if (debugJoinWiden) {
-      println(
-        s"""  changed = $changed""".stripMargin)
-    }
-    if (debugJoinWiden && changed && combined.toString(apronManager) == combinable1.toString(apronManager))
-      throw new IllegalStateException()
-    if (apronState.isBottom(apronManager))
-      throw Apron.Bottom()
-    MaybeChanged(combined, changed)
-  }
+  def locally[A](f: => A): A =
+    val snapState = new Abstract1(apronManager, apronState)
+    val snapshotFreedReferences = getFreedReferences
+    try f finally
+      apronState = snapState
+//      _freedReferences = snapshotFreedReferences
 
   override type State = ApronState
   override def getState: ApronState =
-    new ApronState(apronManager, new Abstract1(apronManager, apronState))
+    new ApronState(apronManager, new Abstract1(apronManager, apronState), getFreedReferences)
   override def setState(as: ApronState): Unit =
-    val st = new Abstract1(apronManager, as.s)
+    val st = new Abstract1(apronManager, as.cs)
     apronState = st
+    _freedReferences = as.freed
     if (apronState.isBottom(apronManager))
       throw new SturdyFailure {}
 
   override def join: Join[ApronState] = (as1, as2) => {
-    val s1 = as1.s
-    val s2 = as2.s
+    val s1 = as1.cs
+    val s2 = as2.cs
     if (s1.isBottom(apronManager))
-      MaybeChanged.Changed(as2)
+      MaybeChanged(as2, !s2.isBottom(apronManager))
     else if (s2.isBottom(apronManager))
       MaybeChanged.Unchanged(as1)
     else {
-      val joined = combineApronStates(s1, s2, widen = false)
-      val result = joined.map(new ApronState(apronManager, _))
+      val joined = joins.combineApronStates(s1, s2, widen = false)
+      val freedJoined = JoinMap(using JoinApronExpr(using this))(as1.freed, as2.freed)
+      if (debugJoinWiden) {
+        println(
+          s"""Joining apron freed
+             |  freed1 = ${as1.freed}
+             |  freed2 = ${as2.freed}
+             |  joined = ${freedJoined.get}
+             |  changed = ${freedJoined.hasChanged}""".stripMargin)
+      }
+      val result = MaybeChanged(new ApronState(apronManager, joined.get, freedJoined.get), joined.hasChanged)
       result
     }
   }
 
   override def widen: Widen[ApronState] = (as1, as2) => {
-    val s1 = as1.s
-    val s2 = as2.s
+    val s1 = as1.cs
+    val s2 = as2.cs
     if (s1.isBottom(apronManager))
-      MaybeChanged.Changed(as2)
+      MaybeChanged(as2, !s2.isBottom(apronManager))
     else if (s2.isBottom(apronManager))
       MaybeChanged.Unchanged(as1)
     else {
-      val widened = combineApronStates(s1, s2, widen = true)
-      val result = widened.map(new ApronState(apronManager, _))
+      val widened = joins.combineApronStates(s1, s2, widen = true)
+      val freedWidened = WidenFiniteKeyMap(using WidenApronExpr(using this), new Finite[(Var,Long)] {})(as1.freed, as2.freed)
+      if (debugJoinWiden) {
+        println(
+          s"""Widening apron freed
+             |  freed1 = ${as1.freed.toList.sortBy(_._1._2)}
+             |  freed2 = ${as2.freed.toList.sortBy(_._1._2)}
+             |  joined = ${freedWidened.get.toList.sortBy(_._1._2)}
+             |  changed = ${freedWidened.hasChanged}""".stripMargin)
+      }
+      val result = MaybeChanged(new ApronState(apronManager, widened.get, freedWidened.get), widened.hasChanged)
       result
     }
   }
@@ -325,8 +310,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ApronComputationJoiner[A])
 
   class ApronComputationJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = new Abstract1(apronManager, apronState)
     private val snapshotFreedReferences = getFreedReferences
+    private val snapshot = new Abstract1(apronManager, apronState)
     private var fState: Abstract1 = _
     private var fFreedReferences: Map[ApronVar.UID, ApronExpr] = _
 
@@ -334,42 +319,74 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       fState = apronState
       fFreedReferences = getFreedReferences
       apronState = new Abstract1(apronManager, snapshot)
-      _freedReferences = mutable.WeakHashMap.from(snapshotFreedReferences)
+      _freedReferences = snapshotFreedReferences
 //      extendEnvironment(fState.getEnvironment)
 
     override def retainNone(): Unit =
       apronState = snapshot
-      _freedReferences = mutable.WeakHashMap.from(snapshotFreedReferences)
+      _freedReferences = snapshotFreedReferences
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       apronState = fState
-      _freedReferences = mutable.WeakHashMap.from(fFreedReferences)
+      _freedReferences = fFreedReferences
 
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       val gState = apronState
-      apronState = combineApronStates(fState, gState, widen = false).get
+      val combined = joins.combineApronStates(fState, gState, widen = false).get
+      val fFree = fFreedReferences
+      val gFree = _freedReferences
+      apronState = combined
       val st = getState
-      for ((v, e1) <- fFreedReferences)
-        _freedReferences.updateWith(v) {
-          case None => Some(e1)
-          case Some(e2) => Some(joins.combineExprs(e1, e2, st, widen = false).get)
-        }
+      _freedReferences = combineMaps(fFreedReferences,_freedReferences, joins.combineExprs(_, _, st, widen = false).get)
+      println(
+        s"""Joiner apron
+           |  fState = $fState
+           |  gState = $gState
+           |  combined = $combined
+           |  fFree = ${fFree.toList.sortBy(_._1._2)}
+           |  gFree = ${gFree.toList.sortBy(_._1._2)}
+           |  free = ${_freedReferences.toList.sortBy(_._1._2)}""".stripMargin)
   }
 
-class ApronState(apronManager: apron.Manager, val s: Abstract1):
+class ApronState(apronManager: apron.Manager, val cs: Abstract1, val freed: Map[ApronVar.UID, ApronExpr]) extends ApronScope:
   override def equals(obj: Any): Boolean = obj match
     case other: ApronState =>
-      s.getEnvironment.isEqual(other.s.getEnvironment) && s.isEqual(apronManager, other.s)
+      inline def sameEnv = cs.getEnvironment.isEqual(other.cs.getEnvironment)
+      inline def sameState = cs.isEqual(apronManager, other.cs)
+      inline def sameFreed = true // freed == other.freed
+      sameEnv && sameState && sameFreed
     case _ =>
       false
 
   override def hashCode(): Int =
-    s.hashCode(apronManager)
+    cs.hashCode(apronManager) //  + freed.hashCode()
 
   override def toString: String =
-    "(env = " + s.getEnvironment.toString + ", state = " + s.toString(apronManager) + ")"
+    s"(env = ${cs.getEnvironment}, state = ${cs.toString(apronManager)}, freed = $freed)"
 
+  override def apronEnv: Environment = cs.getEnvironment
 
+  override def getBound(v: ApronVar): Interval = getFreedReference(v) match
+    case Some(e) => getBound(e)
+    case None =>
+      if (cs.getEnvironment.hasVar(v.av))
+        cs.getBound(apronManager, v.av)
+      else
+        ApronExpr.topInterval
 
+  override def getBound(v: ApronExpr): Interval =
+    cs.getBound(apronManager, v.toIntern(this, allowOpen = false))
+
+  override def getFreedReference(v: ApronVar): Option[ApronExpr] =
+    freed.get(v.uid)
+
+  def copy(newCs: Abstract1) =
+    new ApronState(apronManager, newCs, freed)
+
+  def copy(newFreed: Map[ApronVar.UID, ApronExpr]) =
+    new ApronState(apronManager, cs, newFreed)
+
+  def copy(newCs: Abstract1, newFreed: Map[ApronVar.UID, ApronExpr]) =
+    new ApronState(apronManager, newCs, newFreed)

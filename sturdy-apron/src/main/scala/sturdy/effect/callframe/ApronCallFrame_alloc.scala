@@ -45,14 +45,14 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
   private def allocatedVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
-//      case (Int(v1), Int(v2)) => apron.getBound(v1) == apron.getBound(v2)
-//      case (Double(v1), Double(v2)) => apron.getBound(v1) == apron.getBound(v2)
+//      case (Int(v1), Int(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
+//      case (Double(v1), Double(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
 //      case (Other(v1), Other(v2)) => v1 == v2
 //      case _ => false
 //
 //    override def hashCode: scala.Int = this match
-//      case Int(v) => apron.getBound(v).hashCode
-//      case Double(v) => apron.getBound(v).hashCode
+//      case Int(v) => apron.currentScope.getBound(v).hashCode
+//      case Double(v) => apron.currentScope.getBound(v).hashCode
 //      case Other(v) => v.hashCode
 
   def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
@@ -88,7 +88,7 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars
-//    val snapBounds = this.vars.flatMap(Val.getVar).map(apron.getBound)
+//    val snapBounds = this.vars.flatMap(Val.getVar).map(apron.currentScope.getBound)
     this._data = d
     val apStateBefore = apron.getState
 //    if (Apron.debugAlloc)
@@ -102,7 +102,7 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
       val vs2 = this.allocatedVars
       vs.foreach(v => apron.freeVariable(v.asInstanceOf[apron.alloc.Var]))
       this.vars = snapVars
-//      val boundsAfter = this.vars.flatMap(Val.getVar).map(apron.getBound)
+//      val boundsAfter = this.vars.flatMap(Val.getVar).map(apron.currentScope.getBound)
 //      println()
       //      if (Apron.debugAlloc)
 //        println(apron.alloc)
@@ -181,8 +181,8 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
   private def setVarsConsistentWithState(vars: Array[Val]): Unit =
     this.vars = vars.map {
       case null => null
-      case v@Val.Int(av) => if (!apron.inScope(av)) Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
-      case v@Val.Double(av) => if (!apron.inScope(av)) Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
+      case v@Val.Int(av) => if (apron.currentScope.isFreed(av)) Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
+      case v@Val.Double(av) => if (apron.currentScope.isFreed(av)) Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
       case v => v
     }
 
@@ -194,11 +194,11 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
     if (Apron.debugJoinWiden || Apron.debugAlloc)
-      println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.getFreedReferences}")
+      println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.currentScope}")
     apron.setState(st._1)
     setVarsConsistentWithState(st._2.toArray)
     if (Apron.debugJoinWiden || Apron.debugAlloc)
-      println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.getFreedReferences}")
+      println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.currentScope}")
 //    if (Apron.debugAlloc)
 //      println(apron.alloc)
 
