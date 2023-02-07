@@ -339,9 +339,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       val gFree = _freedReferences
       apronState = combined
       val st = getState
-      _freedReferences = combineMaps(fFreedReferences,_freedReferences, joins.combineExprs(_, _, st, widen = false).get)
+      _freedReferences = combineMaps(fFree, gFree, joins.combineExprs(_, _, st, widen = false).get)
       println(
-        s"""Joiner apron
+        s"""Computation joiner apron
            |  fState = $fState
            |  gState = $gState
            |  combined = $combined

@@ -55,8 +55,9 @@ inline def combineMaps[K, V](m1: Map[K, V], m2: Map[K, V], inline combine: (V, V
   val (small, large) = if (m1.size >= m2.size) (m1, m2) else (m2, m1)
   var result = large
   for ((k, v1) <- small)
-    val v = m1.get(k) match
-      case None => v1
-      case Some(v2) => combine(v1, v2)
-    result += k -> v
+    large.get(k) match
+      case None =>
+        result += k -> v1
+      case Some(v2) =>
+        result += k -> combine(v1, v2)
   result
