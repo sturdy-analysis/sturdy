@@ -1,21 +1,21 @@
 package sturdy.language.tip.analysis
 
-import apron.{Texpr1Node, Polka}
-import cats.parse.{Numbers, Parser0 as P0, Parser as P}
+import apron.{Polka, Texpr1Node}
+import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.{*, given}
 import sturdy.data.given
 import sturdy.Soundness
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.{AFallible, falliblePO, afallibleAbstractly, given}
+import sturdy.effect.failure.{AFallible, AssertionFailure, afallibleAbstractly, falliblePO, given}
 import sturdy.effect.print.given
 import sturdy.fix.StackConfig
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.abstractions.isFunOrWhile
 import sturdy.language.tip.*
-import sturdy.util.{Profiler, Labeled, LinearStateOperationCounter}
+import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
@@ -24,10 +24,10 @@ import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
-import java.nio.file.{Path, Paths, Files}
+import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
@@ -89,10 +89,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"ABSTRACT : $aresult")
 
       // compute number of assertions in program
-      val unprovedAsserts = aresult match 
-        case AFallible.Failing(msgs) => msgs.size
-        case AFallible.MaybeFailing(_, msgs) => msgs.size
-        case _ => 0
+      val unprovedAsserts = aresult.failures.set.count(_._1.isInstanceOf[AssertionFailure[_]])
+
       // subtract number of maybefailing assertions
       // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
       println("=> #assertions proved or unreachable " + (program.assertCount - unprovedAsserts))

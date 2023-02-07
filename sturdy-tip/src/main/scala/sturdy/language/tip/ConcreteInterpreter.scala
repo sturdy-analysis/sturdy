@@ -5,7 +5,6 @@ import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.print.CPrint
-import sturdy.effect.assert.{Assert,CAssert}
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
@@ -71,7 +70,6 @@ object ConcreteInterpreter extends Interpreter:
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     override val print: CPrint[Value] = new CPrint
-    override val assert: CAssert[Value, Exp] = new CAssert()
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]

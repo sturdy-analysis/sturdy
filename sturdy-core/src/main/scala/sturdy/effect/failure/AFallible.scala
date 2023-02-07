@@ -1,6 +1,7 @@
 package sturdy.effect.failure
 
 import sturdy.effect.RecurrentCall
+import sturdy.effect.failure.AFallible.{Diverging, MaybeFailing}
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Powerset
@@ -21,6 +22,12 @@ enum AFallible[T]:
     case Unfailing(t) => t
     case MaybeFailing(t, _) => t
     case _ => throw new MatchError(this)
+  
+  def failures: Powerset[(FailureKind, String)] = this match
+    case Unfailing(_) => Powerset.empty
+    case MaybeFailing(_, fails) => fails
+    case Failing(fails) => fails
+    case Diverging(_) => throw new MatchError(this)
 
 given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
   override def apply(c: CFallible[C]): AFallible[A] = c match
