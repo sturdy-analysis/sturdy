@@ -59,7 +59,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-      p.toString.endsWith(".tip") && p.toString.contains("rel_")
+      p.toString.endsWith(".tip") && p.toString.contains("rel_id")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -85,8 +85,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
 
-      println(s"CONCRETE : $cresult")
-      println(s"ABSTRACT : $aresult")
+//      println(s"CONCRETE : $cresult")
+//      println(s"ABSTRACT : $aresult")
 
       // compute number of assertions in program
       val unprovedAsserts = aresult.failures.set.filter(_._1.isInstanceOf[AssertionFailure[_]])

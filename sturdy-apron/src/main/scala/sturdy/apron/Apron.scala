@@ -13,11 +13,12 @@ import scala.collection.mutable
 import scala.language.reflectiveCalls
 
 object Apron:
-  val debugAll: Boolean = true
+  val debugAll: Boolean = false
   val debugAlloc: Boolean = debugAll
   val debugAssign: Boolean = debugAll
   val debugJoinWiden: Boolean = debugAll
   val debugAssert: Boolean = debugAll
+  val debugScope: Boolean = debugAll || true
 
   case object Bottom extends FailureKind
 
@@ -339,14 +340,15 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
       apronState = combined
       val st = getState
       _freedReferences = combineMaps(fFree, gFree, joins.combineExprs(_, _, st, widen = false).get)
-      println(
-        s"""Computation joiner apron
-           |  fState = $fState
-           |  gState = $gState
-           |  combined = $combined
-           |  fFree = ${fFree.toList.sortBy(_._1._2)}
-           |  gFree = ${gFree.toList.sortBy(_._1._2)}
-           |  free = ${_freedReferences.toList.sortBy(_._1._2)}""".stripMargin)
+      if (Apron.debugJoinWiden)
+        println(
+          s"""Computation joiner apron
+             |  fState = $fState
+             |  gState = $gState
+             |  combined = $combined
+             |  fFree = ${fFree.toList.sortBy(_._1._2)}
+             |  gFree = ${gFree.toList.sortBy(_._1._2)}
+             |  free = ${_freedReferences.toList.sortBy(_._1._2)}""".stripMargin)
   }
 
 class ApronState(apronManager: apron.Manager, val cs: Abstract1, val freed: Map[ApronVar.UID, ApronExpr]) extends ApronScope:

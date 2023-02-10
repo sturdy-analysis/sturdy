@@ -48,6 +48,9 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
   setVars(initVars)
 
+  override def toString: String =
+    s"CallFrame(${vars.mkString(", ")}: $apron)"
+
   private def activeVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
@@ -100,12 +103,16 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars.toList
+    if (Apron.debugScope)
+      println(s"Before frame: $this")
 
     this._data = d
     try {
       apron.locally {
         setVars(vars)
         try f finally {
+          if (Apron.debugScope)
+            println(s"End of frame: $this")
           // TODO: observe new relations
           val vs = activeVars
           vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
@@ -115,6 +122,8 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
       this._data = snapData
       this.names = snapNames
       setVarsConsistentWithState(snapVars.toArray)
+      if (Apron.debugScope)
+        println(s"After frame:  $this")
       // TODO: augment current apron state with identified relations
     }
 
