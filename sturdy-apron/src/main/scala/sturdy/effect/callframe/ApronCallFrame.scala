@@ -102,20 +102,22 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     val snapVars = this.vars.toList
 
     this._data = d
-    apron.locally {
-      setVars(vars)
-      val res = util.Try(f)
-      
-      // identify relations
-      val vs = activeVars
-      vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
-
+    try {
+      apron.locally {
+        setVars(vars)
+        try f finally {
+          // TODO: observe new relations
+          val vs = activeVars
+          vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
+        }
+      }
+    } finally {
       this._data = snapData
       this.names = snapNames
       setVarsConsistentWithState(snapVars.toArray)
-      res.get
+      // TODO: augment current apron state with identified relations
     }
-    // augment current apron state with identified relations
+
   }
 
   override def data: Data = _data
