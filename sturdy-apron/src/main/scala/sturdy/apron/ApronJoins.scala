@@ -2,11 +2,12 @@ package sturdy.apron
 
 import apron.{Abstract1, Manager, StringVar}
 import sturdy.apron.Apron.debugJoinWiden
+import sturdy.effect.failure.Failure
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
 
 class ApronJoins(val apronManager: Manager) {
 
-  def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] = {
+  def combineApronStates(s1: Abstract1, s2: Abstract1, widen: Boolean)(using Failure): MaybeChanged[Abstract1] = {
     // TODO review this code on first widening in cfgloop.tip
     if (debugJoinWiden) {
       println(
@@ -49,7 +50,7 @@ class ApronJoins(val apronManager: Manager) {
     if (debugJoinWiden && changed && combined.toString(apronManager) == combinable1.toString(apronManager))
       throw new IllegalStateException()
     if (combined.isBottom(apronManager))
-      throw Apron.Bottom()
+      Failure(Apron.Bottom, s"combine($s1, $s2) is bottom")
     MaybeChanged(combined, changed)
   }
 

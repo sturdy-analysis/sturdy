@@ -59,7 +59,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-      p.toString.endsWith(".tip")
+      p.toString.endsWith("rel_id.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -89,12 +89,20 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"ABSTRACT : $aresult")
 
       // compute number of assertions in program
-      val unprovedAsserts = aresult.failures.set.count(_._1.isInstanceOf[AssertionFailure[_]])
+      val unprovedAsserts = aresult.failures.set.filter(_._1.isInstanceOf[AssertionFailure[_]])
+      val unprovedAssertsCount = unprovedAsserts.size
 
       // subtract number of maybefailing assertions
       // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
-      println("=> #assertions proved or unreachable " + (program.assertCount - unprovedAsserts))
-
+      val allAsserts = program.assertCount
+      val successfulAsserts = program.assertCount - unprovedAssertsCount
+      val successfulFraction = if (allAsserts == 0) 1.0 else successfulAsserts.toDouble / allAsserts
+      val failingFraction = if (allAsserts == 0) 0.0 else unprovedAssertsCount.toDouble / allAsserts
+      if (unprovedAssertsCount == 0)
+        println("All assertions proved or unreachable")
+      else
+        println(s"Failing assertions found in ${p.getFileName}: $unprovedAsserts out of $allAsserts failed (${failingFraction * 100}% failed)")
+      assert(unprovedAsserts.isEmpty, ", assertion(s) have failed")
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given

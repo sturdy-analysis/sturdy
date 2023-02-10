@@ -4,6 +4,7 @@ import apron.*
 import sturdy.apron.Apron.{debugAssert, debugJoinWiden}
 import sturdy.data.{CombineUnit, JoinMap, WidenFiniteKeyMap, combineMaps}
 import sturdy.effect.*
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.values.*
 
 import java.lang
@@ -18,14 +19,14 @@ object Apron:
   val debugJoinWiden: Boolean = debugAll
   val debugAssert: Boolean = debugAll
 
-  case class Bottom() extends SturdyFailure
+  case object Bottom extends FailureKind
 
 /**
   * Provides apron as an effectful analysis component.
   *
   * State = (Manager, apron.Abstract1, FreedRefs)
   */
-class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
+class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) extends Effect:
   val joins: ApronJoins = ApronJoins(apronManager)
 
   override def toString: String =
@@ -186,7 +187,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
       println(s"Asserting $c\n  was $apronState\n  now $newState")
     apronState = newState
     if (apronState.isBottom(apronManager))
-      throw Apron.Bottom()
+      Failure(Apron.Bottom, s"Asserting $c\n  was $apronState\n  now $newState")
 
   def ifThenElseUnit[A, B](cond: ApronCons)(ifTrue: => A)(ifFalse: => B)(using EffectStack): Unit =
     ifThenElse(cond, cond.negated)({ifTrue; ()})({ifFalse; ()})
@@ -246,10 +247,8 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
 
   def locally[A](f: => A): A =
     val snapState = new Abstract1(apronManager, apronState)
-    val snapshotFreedReferences = getFreedReferences
     try f finally
       apronState = snapState
-//      _freedReferences = snapshotFreedReferences
 
   override type State = ApronState
   override def getState: ApronState =
@@ -259,7 +258,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc) extends Effect:
     apronState = st
     _freedReferences = as.freed
     if (apronState.isBottom(apronManager))
-      throw new SturdyFailure {}
+      Failure(Apron.Bottom, s"Cannot set bottom state")
 
   override def join: Join[ApronState] = (as1, as2) => {
     val s1 = as1.cs

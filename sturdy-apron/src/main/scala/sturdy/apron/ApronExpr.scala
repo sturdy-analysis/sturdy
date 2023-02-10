@@ -12,6 +12,12 @@ enum ApronExpr:
   case Unary(op: UnOp, e: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr, r: ApronExpr, roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
 
+  override def toString: String = this match
+    case Var(v) => v.av.toString
+    case Constant(coeff) => coeff.toString
+    case Unary(op, e, _, _) => s"$op $e"
+    case Binary(op, l, r, _, _) => s"($l $op $r)"
+
 //  def vars: Set[ApronVar] = this match
 //    case Var(v) => Set(v)
 //    case Constant(coeff) => Set()
@@ -65,6 +71,11 @@ enum UnOp:
   case Cast
   case Sqrt
 
+  override def toString: String = this match
+    case Negate => "-"
+    case Cast => "cast"
+    case Sqrt => "sqrt"
+
   def toApron: Int = this match
     case Negate => Texpr1UnNode.OP_NEG
     case Cast => Texpr1UnNode.OP_CAST
@@ -77,6 +88,14 @@ enum BinOp:
   case Div
   case Mod
   case Pow
+
+  override def toString: String = this match
+    case Add => "+"
+    case Sub => "-"
+    case Mul => "*"
+    case Div => "/"
+    case Mod => "%"
+    case Pow => "^"
 
   def toApron: Int = this match
     case Add => Texpr1BinNode.OP_ADD
@@ -92,6 +111,11 @@ enum ApronCons:
   case Compare(op: CompareOp, e1: ApronExpr, e2: ApronExpr)
 
   import CompareOp.*
+
+  override def toString: String = this match
+    case True => "true"
+    case False => "false"
+    case Compare(op, e1, e2) => s"($e1 $op $e2)"
 
 //  def vars: Set[ApronVar] = this match
 //    case True => Set()
@@ -139,6 +163,13 @@ enum CompareOp:
   case Ge
   case Gt
 
+  override def toString: String = this match
+    case Eq => "=="
+    case Neq => "!="
+    case Lt => "<"
+    case Le => "<="
+    case Ge => ">="
+    case Gt => ">"
 
 given JoinApronExpr(using ap: Apron): Join[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =

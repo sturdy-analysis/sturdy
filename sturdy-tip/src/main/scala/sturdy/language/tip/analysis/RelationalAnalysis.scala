@@ -72,12 +72,13 @@ object RelationalAnalysis extends Interpreter,
   class Instance(apronManager: Manager, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-    val apronAlloc: ApronAlloc = ApronAlloc.default(apronManager)
-    implicit val apron: Apron = new Apron(apronManager, apronAlloc)
-    override def jv: WithJoin[Value] = implicitly
-
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
+
+    val apronAlloc: ApronAlloc = ApronAlloc.default(apronManager)
+    implicit val apron: Apron = new Apron(apronManager, apronAlloc)(using failure)
+    
+    override def jv: WithJoin[Value] = implicitly
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 

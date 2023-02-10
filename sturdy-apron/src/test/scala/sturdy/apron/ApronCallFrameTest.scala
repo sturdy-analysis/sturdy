@@ -6,6 +6,7 @@ import gmp.*
 import sturdy.data.{CombineUnit, JOptionC, noJoin}
 import sturdy.effect.EffectStack
 import sturdy.effect.callframe.{ApronCallFrame, given}
+import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.values.Join
 import sturdy.values.Widen
 import sturdy.values.{Topped, given}
@@ -34,6 +35,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame bound vars after frame_push and pop") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -59,6 +61,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame z = x + y") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -85,6 +88,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x + y) join (z = x - y)") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -118,6 +122,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z < 1) unreachable else true") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -163,6 +168,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z > 20) unreachable else true") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -205,6 +211,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame (z = x +- y); if (z > 5) false else true") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -253,6 +260,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame frame_1:z = x + y, frame_2:z = x - y") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -288,6 +296,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame frame_1:z = x + y, frame_1:z = x - y") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
@@ -323,6 +332,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("ApronCallFrame frame_1:z = x + y, free z, frame_1:z = x - y") {
     val manager = new Polka(false)
     val alloc = ApronAlloc.default(manager)
+    implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
