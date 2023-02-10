@@ -103,30 +103,52 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars.toList
+    val snapState = apron.getState.cs
+
     if (Apron.debugScope)
       println(s"Before frame: $this")
 
     this._data = d
-    try {
-      apron.locally {
-        setVars(vars)
-        try f finally {
-          if (Apron.debugScope)
-            println(s"End of frame: $this")
-          // TODO: observe new relations
-          val vs = activeVars
-          vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
-        }
-      }
-    } finally {
-      this._data = snapData
-      this.names = snapNames
-      setVarsConsistentWithState(snapVars.toArray)
-      if (Apron.debugScope)
-        println(s"After frame:  $this")
-      // TODO: augment current apron state with identified relations
-    }
+    setVars(vars)
 
+    val fres = util.Try(f)
+    val fval = fres.getOrElse(null)
+    if (Apron.debugScope)
+      println(s"End of frame: $this <- $fval")
+
+    // introduce apron variable for function result to retain relation on function inputs.
+    // TODO: the result variable may be weak, but is currently incorrectly treated as strong
+    val fresVarSite = ApronAllocationSite.LocalVar(s"call_$snapData:$d")
+    val fresVal: Option[V] = fval match
+      case v: V => getIntVal(v) match
+        case Some(exp) =>
+          val av = apron.addIntVariable(fresVarSite)
+          apron.assign(av, exp)
+          Some(makeIntVal(ApronExpr.Var(av)))
+        case None => getDoubleVal(v) match
+          case Some(exp) =>
+            val av = apron.addDoubleVariable(fresVarSite)
+            apron.assign(av, exp)
+            Some(makeDoubleVal(ApronExpr.Var(av)))
+          case None => None
+      case _ => None
+
+    val vs = activeVars
+    vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
+    if (Apron.debugScope)
+      println(s"After free:   $this <- ${fresVal.getOrElse(fval)}")
+
+//    apron.setInternalState(snapState)
+    // TODO: forget all locally bound apron variables at the end of a call frame
+    this._data = snapData
+    this.names = snapNames
+    setVarsConsistentWithState(snapVars.toArray)
+    if (Apron.debugScope)
+      println(s"After frame:  $this")
+
+    fresVal match
+      case Some(v) => v.asInstanceOf[A]
+      case None => fres.get
   }
 
   override def data: Data = _data

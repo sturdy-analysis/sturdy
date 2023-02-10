@@ -7,7 +7,7 @@ import java.util.Objects
 object ApronVar:
   val DEBUG: Boolean = true
   private var instCount: Long = 0
-  type UID = (apron.Var, Long)
+  type UID = ApronVar
 
 
 trait ApronVar:
@@ -20,7 +20,7 @@ trait ApronVar:
     c
   }
   
-  def uid: ApronVar.UID = (av, instCount)
+  def uid: ApronVar.UID = this
 
 //  def initialize(apronState: Abstract1): Unit =
 //    if (!freed) {

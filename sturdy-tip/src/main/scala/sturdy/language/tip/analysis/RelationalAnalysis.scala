@@ -96,7 +96,7 @@ object RelationalAnalysis extends Interpreter,
 
     override val callFrame: ApronCallFrame[String, String, Value] = new ApronCallFrame(
       apron,
-      "$main",
+      "$root",
       { 
         case Value.IntValue(Topped.Top) => scala.Some(ApronExpr.topConstant)
         case Value.IntValue(Topped.Actual(v)) => scala.Some(v)

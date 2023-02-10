@@ -64,10 +64,10 @@ class ApronJoins(val apronManager: Manager) {
         val assigned = state.cs.assignCopy(apronManager, v1.av, e2intern, null)
         assigned.join(apronManager, state.cs)
         // if v2 is also free, v2 := v1
-        if (!state.freed.contains(v2.uid))
-          assigned.assign(apronManager, v2.av, v1.expr.toIntern(state), null)
-        val changed = !state.cs.isEqual(apronManager, assigned)
-        if (changed) {
+        if (!state.freed.contains(v2.uid)) {
+          val newState = state.copy(assigned).copy(state.freed + (v2.uid -> ApronExpr.Var(v1)))
+          Changed((v1, newState))
+        } else if (!state.cs.isEqual(apronManager, assigned)) {
           Changed((v1, state.copy(assigned)))
         } else {
           Unchanged((v1, state))

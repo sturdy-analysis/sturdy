@@ -31,7 +31,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
   val joins: ApronJoins = ApronJoins(apronManager)
 
   override def toString: String =
-    env.getVars.mkString("Array(", ", ", ") : ") + apronState.toString(apronManager)
+    s"env = [${env.getVars.mkString(",")}], state = ${apronState.toString(apronManager)}, free = $_freedReferences"
 
   private var apronState: Abstract1 = new Abstract1(apronManager, new Environment())
 
@@ -251,6 +251,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
     try f finally
       apronState = snapState
 
+  def setInternalState(st: Abstract1): Unit =
+    apronState = st
+
   override type State = ApronState
   override def getState: ApronState =
     new ApronState(apronManager, new Abstract1(apronManager, apronState), getFreedReferences)
@@ -293,13 +296,13 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
       MaybeChanged.Unchanged(as1)
     else {
       val widened = joins.combineApronStates(s1, s2, widen = true)
-      val freedWidened = WidenFiniteKeyMap(using WidenApronExpr(using this), new Finite[(Var,Long)] {})(as1.freed, as2.freed)
+      val freedWidened = WidenFiniteKeyMap(using WidenApronExpr(using this), new Finite[ApronVar.UID] {})(as1.freed, as2.freed)
       if (debugJoinWiden) {
         println(
           s"""Widening apron freed
-             |  freed1 = ${as1.freed.toList.sortBy(_._1._2)}
-             |  freed2 = ${as2.freed.toList.sortBy(_._1._2)}
-             |  joined = ${freedWidened.get.toList.sortBy(_._1._2)}
+             |  freed1 = ${as1.freed.toList}
+             |  freed2 = ${as2.freed.toList}
+             |  joined = ${freedWidened.get.toList}
              |  changed = ${freedWidened.hasChanged}""".stripMargin)
       }
       val result = MaybeChanged(new ApronState(apronManager, widened.get, freedWidened.get), widened.hasChanged)
@@ -346,9 +349,9 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
              |  fState = $fState
              |  gState = $gState
              |  combined = $combined
-             |  fFree = ${fFree.toList.sortBy(_._1._2)}
-             |  gFree = ${gFree.toList.sortBy(_._1._2)}
-             |  free = ${_freedReferences.toList.sortBy(_._1._2)}""".stripMargin)
+             |  fFree = ${fFree.toList}
+             |  gFree = ${gFree.toList}
+             |  free = ${_freedReferences.toList}""".stripMargin)
   }
 
 class ApronState(apronManager: apron.Manager, val cs: Abstract1, val freed: Map[ApronVar.UID, ApronExpr]) extends ApronScope:
