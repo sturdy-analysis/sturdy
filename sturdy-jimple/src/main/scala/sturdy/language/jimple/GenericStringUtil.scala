@@ -69,9 +69,9 @@ abstract class GenericStringUtil {
     P.charsWhile0(c => c >= ' ' && c != '"' && c != '\\')
 
   def escapedString(q: Char): P[String] = {
-    val end: P[Unit] = P.char(q)
-    end *> ((simpleString <* end).backtrack
-      .orElse(undelimitedString(end) <* end))
+    val ends: P[Unit] = P.char(q)
+    ends *> ((simpleString <* ends).backtrack
+      .orElse(undelimitedString(ends) <* ends))
   }
 
   def escape(quoteChar: Char, str: String): String = {
@@ -101,7 +101,7 @@ abstract class GenericStringUtil {
           catch { case _: NumberFormatException => ~idx }
         sb.append(asInt.toChar)
         end
-      } else ~(str.length)
+      } else ~ str.length
     }
     @annotation.tailrec
     def loop(idx: Int): Int =

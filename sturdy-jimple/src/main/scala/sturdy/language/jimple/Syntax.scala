@@ -1,20 +1,17 @@
 package sturdy.language.jimple
 
-
 import sturdy.util.Labeled
-import com.sun.source.tree.IdentifierTree
-
 import scala.collection.Seq
-import cats.data.NonEmptyList
 
-
+// Using the names used in the paper for clarity.
 type Label = Identifier
 type Identifier = String
+// Non empty array dimensions
 type SizedDims = Seq[Option[Immediate]]
-type EmptyDims = Int  //(empty_dims = "[]" empty_dims | ;)
+// Amount of empty array dimensions
+type EmptyDims = Int
 
-// String.class
-
+// Immediates can be constants, locals or classes represented by their name.
 enum Immediate:
   case ConstI(c: Constant)
   case LocalI(l: Local)
@@ -25,6 +22,7 @@ enum Immediate:
     case LocalI(l) => s"LocalI($l)"
     case ClassI(n) => s"ClassI($n)"
 
+// Elements on the right side of assignments can be array references, constants, expressions, field references, locals, and classes.
 enum RVal:
   case ArrayRefR(i1: Immediate, i2: Immediate)
   case ConstR(c: Constant)
@@ -33,7 +31,6 @@ enum RVal:
   case StaticFieldRefR(f: FieldSignature)
   case LocalR(l: Local)
   case ClassR(s: String)
-//TODO: case NextNextStmtAddr
 
   override def toString: String = this match
     case ArrayRefR(i1, i2) => s"ArrayRefR($i1, $i2)"
@@ -44,6 +41,7 @@ enum RVal:
     case LocalR(l) => s"LocalR($l)"
     case ClassR(n) => s"ClassR($n)"
 
+// Elements on the left side of assignments can be array references, field references, and locals.
 enum Var:
   case ArrayRefV(i1: Immediate, i2: Immediate)
   case InstanceFieldRefV(i: Immediate, f: FieldSignature)
@@ -56,6 +54,9 @@ enum Var:
     case StaticFieldRefV(f) => s"StaticFieldRefV($f)"
     case LocalV(l) => s"LocalV($l)"
 
+// Statements can be breakpoints, assignments, identity statements, exceptions,
+// enter or exit monitors, goto statements, if statements, invoke statements, lookup or table switches,
+// return statements, labels, and throw or catch statements.
 enum Stmt extends Labeled:
   case BreakpointS
   case AssignS(v: Var, newVal: RVal)//variable = rvalue
@@ -91,11 +92,13 @@ enum Stmt extends Labeled:
     case RetS(l) => s"RetS($l)@${this.label}"
     case ReturnS(i) => s"ReturnS($i)@${this.label}"
     case ReturnVoidS => s"ReturnVoidS@${this.label}"
-    case TableSwitchS(i, cs, l) => s"TableswitchS@${this.label}"
-    case ThrowS(i) => s"ThrowS@${this.label}"
+    case TableSwitchS(_, _, _) => s"TableswitchS@${this.label}"
+    case ThrowS(_) => s"ThrowS@${this.label}"
     case LabelS(l) => s"LabelS($l)@${this.label}"
     case CatchS(e) => s"CatcHS($e)@${this.label}"
 
+// Expressions can be binary or unary operations, conditional operations, cast expressions, instantiations, invocations, and
+// new expressions.
 enum Exp extends Labeled:
   case BinopE(i1: Immediate, i2: Immediate, op: BinOp)
   case ConditionE(i1: Immediate, i2: Immediate, op: CondOp)
@@ -120,7 +123,8 @@ enum Exp extends Labeled:
     case NewMultArrE(t, dim) => s"NewMultArrayE($t, $dim)@${this.label}"
     case UnopE(i, op) => s"UnOpE($i, $op)@${this.label}"
 
-
+// Binary operations can be addition, logical and, comparisons, division, multiplication, logical or,
+// remainder, left or right shift, subtraction, and logical exclusive or.
 enum BinOp:
   case Add
   case And
@@ -153,6 +157,7 @@ enum BinOp:
     case Ushr => s"Ushr"
     case Xor => s"Xor"
 
+// Conditioanl operators can be equal, greater and equal, less and equal, not equal, greater than, and less than.
 enum CondOp: //does not compare floating point or long values
   case Eq
   case Ge
@@ -169,6 +174,7 @@ enum CondOp: //does not compare floating point or long values
     case Gt => s"Gt"
     case Lt => s"Lt"
 
+// Unary operators can be length and negation as a keyword or with a minus symbol.
 enum UnOp:
   case Length
   case Neg
@@ -179,9 +185,10 @@ enum UnOp:
     case Neg => s"Neg"
     case NegWord => s"NegWord"
 
+// Different types of invocations.
 enum InvokeType:
   case InterfaceI
-  case SpecialI //TODO: only invokes <init>
+  case SpecialI
   case VirtualI
 
   override def toString: String = this match
@@ -189,6 +196,7 @@ enum InvokeType:
     case SpecialI => s"SpecialI"
     case VirtualI => s"VirtualI"
 
+// Constants can be numbers, strings, null, (negative) infinity, and NaN.
 enum Constant:
   case DoubleC(v: Double)
   case FloatC(v: Float)
@@ -217,7 +225,7 @@ enum Constant:
     case FloatNegInfinityC => s"FloatNegInfinityC"
     case FloatNanC => s"FloatNanC"
 
-
+// Identity statements can exist for exceptions, parameter and this
 enum IdentityVal:
   case CaughtExcRef()
   case ParamRef(c: Constant.IntC, t: Type)
@@ -228,24 +236,26 @@ enum IdentityVal:
     case ParamRef(c, t) => s"ParamRef($c, $t)"
     case ThisRef(t) => s"ThisRef($t)"
 
+// The existing types are Integer, Long, Float, Double, Void, and reference types with the referenced class name as a string.
+// All types can occurr in arrays.
 enum Type:
   case IntT
   case LongT
   case FloatT
   case DoubleT
   case RefT(s: String)
-  //case StmtAddressT
   case VoidT
   case ArrayT(t: Type, dim: Int)
 
+  // Method to return an empty value based on the given type.
   def getEmpty: Constant = this match
     case IntT => Constant.IntC(-1)
     case LongT => Constant.LongC(-1)
     case FloatT => Constant.FloatC(-1)
     case DoubleT => Constant.DoubleC(-1)
-    case RefT(s) => Constant.NullC
-    case ArrayT(t, dim) => Constant.NullC
-    case VoidT => throw new IllegalArgumentException
+    case RefT(_) => Constant.NullC
+    case ArrayT(_, _) => Constant.NullC
+    case VoidT => Constant.NullC
 
   override def toString: String = this match
     case IntT => s"IntT"
@@ -253,35 +263,38 @@ enum Type:
     case FloatT => s"FloatT"
     case DoubleT => s"DoubleT"
     case RefT(s) => s"RefT($s)"
-   // case StmtAddressT => s"StmtAddressT"
     case VoidT => s"VoidT"
     case ArrayT(t, dim) => s"ArrayT($t, $dim)"
 
-
-
+// LocalDecs are the initialisation of all locals occurring in a method.
 case class LocalDec(t: Type, name: Identifier)
 
+// Cases from table or lookup switches.
 case class Case(i: Constant.IntC, l: Label)
 
+// Method signatures occur in invocations.
 case class MethodSignature(id: Identifier, params: Seq[Type], ret: Type, classOrigin: String)
 
+// Field signatures occur in field references.
 case class FieldSignature(id: Identifier, t: Type, classOrigin: String)
 
+// Exception ranges of methods.
 case class ExceptionRange(ref: Type.RefT, start: Label, end: Label, catchBlock: Label)
 
-//case class Method(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
-
+// Only looks at the header of a method.
+// Method headers can occur without method bodies.
 case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isStrict: Boolean, isTransient: Boolean, isSynchronized: Boolean, isVolatile: Boolean, isAbstract: Boolean, ret: Type, id: Identifier, params: Seq[Type], throws: Seq[Type.RefT]):
   def getID: Identifier =
     this match
       case MethodHeader(_, _, _, _, _, _, _, _, _, _, _, id, _, _) => id
 
-case class Program(funs: Seq[Container])//:
-//  def fold[A]: Seq[Char => ((Char, Char) => Char) => Char] =
-//    funs.map(_.fold)
+// A program is defined as a sequence of classes or interfaces.
+case class Program(funs: Seq[Container])
 
+// Sticking to the names from the paper for clarity.
 case class Local(id: Identifier)
 
+// Containers can be classes or methods, as they contain all other elements.
 enum Container:
   case ClassC(isPublic: Boolean, isPrivate: Boolean, isAbstract: Boolean, isStatic: Boolean, isFinal: Boolean, isEnum: Boolean, id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], body: Seq[ClassBodyElement])
   case InterfaceC(isPublic: Boolean, isPrivate: Boolean, id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], body: Seq[ClassBodyElement])
@@ -295,7 +308,7 @@ enum Container:
     case ClassC(isPublic,isPrivate,isAbstract,isStatic,isFinal,isEnum,id,extend,implement,body) => s"ClassC($isPublic,$isPrivate,$isAbstract,$isStatic,$isFinal,$isEnum,$id,$extend,$implement,$body)"
     case InterfaceC(isPublic, isPrivate, id, extend, implement, body) => s"InterfaceC($isPublic,$isPrivate,$id,$extend,$implement,$body)"
 
-
+// ClassBodyElements can be globals, native method calls, methods, and method headers.
 enum ClassBodyElement:
   case GlobalVarCB(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isEnum: Boolean, isTransient: Boolean, isVolatile: Boolean, t: Type, id: Identifier)
   case NativeCallCB(isPublic: Boolean, isPrivate: Boolean, isProtected: Boolean, isStatic: Boolean, isFinal: Boolean, isSynchronized: Boolean, isNative: Boolean, t: Type, id: Identifier, params: Seq[Type], except: Option[Type.RefT])
@@ -314,4 +327,3 @@ enum ClassBodyElement:
     case NativeCallCB(isPublic, isPrivate, isProtected, isStatic, isFinal, isSynchronized, isNative, t, id, params, except) => s"NativeCallCB($isPublic,$isPrivate,$isProtected,$isStatic,$isFinal,$isSynchronized,$isNative,$t,$id,$params,$except)"
     case MethodCB(header, locals, idStmts, stmts, excRanges) => s"MethodCB($header,$locals,$idStmts,$stmts,$excRanges)"
     case MethodHeaderCB(header) => s"MethodHeaderCB($header)"
-

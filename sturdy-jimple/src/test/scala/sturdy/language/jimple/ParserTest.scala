@@ -1,58 +1,68 @@
 package sturdy.language.jimple
 
-
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
-import sturdy.language.jimple.Parser.LanguageKeywords.KRETURN
-import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import cats.parse.Parser as P
 import Parser.*
+import java.net.URI
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class ParserTest extends AnyFlatSpec, Matchers:
+// Testing the Parser Jimple -> Syntax
+class ParserTest extends AnyFlatSpec:
   behavior of "Jimple parser"
 
-  val jdkUri = classOf[ParserTest].getResource("/sturdy/language/jimple/jdk").toURI;
+  // path to the jdk jimple files
+  val jdkUri: URI = classOf[ParserTest].getResource("/sturdy/language/jimple/jdk").toURI
 
-  val testsUri = classOf[ParserTest].getResource("/sturdy/language/jimple").toURI;
+  // path to the test jimple files
+  val testsUri: URI = classOf[ParserTest].getResource("/sturdy/language/jimple").toURI
 
+  // Testing whether one file returns the exact right result
   it must s"Test.jimple must parse into Test.ast.txt" in{
+    // path to specific test files
     val file = Source.fromURI(classOf[ParserTest].getResource("/sturdy/language/jimple/Test.jimple").toURI)
+    // reading the code to a string
     val sourceCode = file.getLines().mkString("\n")
     file.close()
 
+    // path to the expected results file
     val compareFile = Source.fromURI(classOf[ParserTest].getResource("/sturdy/language/jimple/Test.ast.txt").toURI)
+    // reading the expected results to a string
     val compareAST = compareFile.getLines().mkString("\n")
     compareFile.close()
 
+    // parsing the source code
     val tree = parse(sourceCode)
+
+    // Equality assertion between results and expected results
     assert(tree.toString.equals(compareAST))
   }
 
+  // parsing all files of the jdk rt.jar
   Files.list(Paths.get(jdkUri)).toScala(List).filter(p => p.toString.endsWith(".jimple")).sorted.foreach { p =>
-    it must s"execute ${p.getFileName}" in {
-      val file = Source.fromURI(p.toUri)
-      val sourceCode = file.getLines().mkString("\n")
-      file.close()
-      val tree = parse(sourceCode)
-      println(tree)
-      assert(tree.isRight)
-    }
+    runTest(p)
   }
 
+  // parsing all test files
   Files.list(Paths.get(testsUri)).toScala(List).filter(p => p.toString.endsWith(".jimple")).sorted.foreach { p =>
-    it must s"execute ${p.getFileName}" in {
+    runTest(p)
+  }
+
+  def runTest(p: Path): Unit =
+    it must s"parse ${p.getFileName}" in {
+      // reading file to a string
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")
       file.close()
+      // parsing source code
       val tree = parse(sourceCode)
-      println(tree)
+
+      // assertion that parsing did not fail
       assert(tree.isRight)
     }
-  }
 
+  // Calling the parse function from the parser.
   def parse(s: String): Either[P.Error, Program] =
     Parser.programs.parseAll(s)
