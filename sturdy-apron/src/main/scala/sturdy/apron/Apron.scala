@@ -14,7 +14,7 @@ import scala.language.reflectiveCalls
 
 object Apron:
   val debugAll: Boolean = false
-  val debugAlloc: Boolean = debugAll
+  val debugAlloc: Boolean = debugAll || true
   val debugAssign: Boolean = debugAll
   val debugJoinWiden: Boolean = debugAll
   val debugAssert: Boolean = debugAll

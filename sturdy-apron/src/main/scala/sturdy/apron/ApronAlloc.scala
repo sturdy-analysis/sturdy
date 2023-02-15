@@ -4,10 +4,12 @@ import apron.*
 
 enum ApronAllocationSite:
   case LocalVar(name: String)
+  case CallReturnVar(name: String)
   case TemporaryVar
 
   override def toString: String = this match
     case LocalVar(name) => name
+    case CallReturnVar(name) => name
     case TemporaryVar => "$$temporary"
 
 object ApronAlloc:

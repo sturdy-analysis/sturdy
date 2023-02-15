@@ -94,7 +94,7 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ApronCallFrame[String, String, Value] = new ApronCallFrame(
+    override val callFrame: ApronCallFrame[String, String, Value, Exp.Call] = new ApronCallFrame(
       apron,
       "$root",
       { 

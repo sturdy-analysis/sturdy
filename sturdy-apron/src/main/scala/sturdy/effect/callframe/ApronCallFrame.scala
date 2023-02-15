@@ -26,7 +26,7 @@ trait CallFrameSite[D] extends (D => String):
 
 given CallFrameSite[String] = identity
 
-class ApronCallFrame[Data, Var, V](val apron: Apron,
+class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
                                    initData: Data,
                                    getIntVal: V => Option[ApronExpr],
                                    getDoubleVal: V => Option[ApronExpr],
@@ -35,7 +35,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
                                    initVars: Iterable[(Var, Option[V])] = Iterable.empty)
                                   (using site: CallFrameSite[Data])
                                   (using Join[V], Widen[V], ClassTag[V])
-  extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
+  extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
 
   val vals: ApronVal[V] = new ApronVal(apron, makeIntVal, makeDoubleVal)
 
@@ -99,11 +99,12 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
     localAssignments.foreach { case (av, exp) => apron.assign(av, exp) }
   }
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
+  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])], site: Site)(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars.toList
     val snapState = apron.getState.cs
+    val snapEnv = snapState.getEnvironment
 
     if (Apron.debugScope)
       println(s"Before frame: $this")
@@ -118,7 +119,7 @@ class ApronCallFrame[Data, Var, V](val apron: Apron,
 
     // introduce apron variable for function result to retain relation on function inputs.
     // TODO: the result variable may be weak, but is currently incorrectly treated as strong
-    val fresVarSite = ApronAllocationSite.LocalVar(s"call_$snapData:$d")
+    val fresVarSite = ApronAllocationSite.CallReturnVar(s"$snapData:$d")
     val fresVal: Option[V] = fval match
       case v: V => getIntVal(v) match
         case Some(exp) =>

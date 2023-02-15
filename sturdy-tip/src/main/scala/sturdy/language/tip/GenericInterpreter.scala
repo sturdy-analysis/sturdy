@@ -86,7 +86,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableCallFrame[String, String, V] with MutableCallFrame[String, String, V, NoJoin]
+  val callFrame: DecidableCallFrame[String, String, V, Exp.Call] with MutableCallFrame[String, String, V, Exp.Call, NoJoin]
   val store: Store[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
@@ -122,8 +122,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val v1 = eval(e1)
       val v2 = eval(e2)
       equ(v1, v2)
-    case Exp.Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case site@Exp.Call(fun, args) =>
+      invokeFun(eval(fun), args.map(eval(_)))(call(site))
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
       store.write(addr, eval(e))
@@ -187,11 +187,11 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
 
-  def call(fun: Function, args: Seq[V])(using Fixed): V =
+  def call(site: Exp.Call)(fun: Function, args: Seq[V])(using Fixed): V =
     val locals: Iterable[(String, Option[V])] =
       fun.params.zip(args.map(Some.apply)) ++
       fun.locals.map(x => (x, None))
-    callFrame.withNew(fun.name, locals) {
+    callFrame.withNew(fun.name, locals, site) {
       enterFunction(fun)
     }
 

@@ -29,7 +29,7 @@ class ApronCallFrameTest extends AnyFunSuite:
 
 
   def createCallFrame(apron: Apron, initData: String, initVars: Iterable[(String, Option[ApronExpr])] = Iterable.empty)(using Join[ApronExpr], Widen[ApronExpr])
-    : ApronCallFrame[String, String, ApronExpr]
+    : ApronCallFrame[String, String, ApronExpr, Unit]
     = new ApronCallFrame(apron, initData, Some.apply, _ => None, identity, identity, initVars)
 
   test("ApronCallFrame bound vars after frame_push and pop") {
@@ -45,7 +45,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val r = callFrame.withNew("frame_1", vars) {
+    val r = callFrame.withNew("frame_1", vars, ()) {
       callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
     }
 
@@ -71,7 +71,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val r = callFrame.withNew("frame_1", vars) {
+    val r = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       callFrame.setLocalByName("z", add(x, y))
@@ -98,7 +98,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val r = callFrame.withNew("frame_1", vars) {
+    val r = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       println(apron)
@@ -132,7 +132,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val z = callFrame.withNew("frame_1", vars) {
+    val z = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {
@@ -178,7 +178,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val z = callFrame.withNew("frame_1", vars) {
+    val z = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {
@@ -221,7 +221,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val z = callFrame.withNew("frame_1", vars) {
+    val z = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       effects.joinComputations {
@@ -270,12 +270,12 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val (r1, r2) = callFrame.withNew("frame_1", vars) {
+    val (r1, r2) = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       callFrame.setLocalByName("z", add(x, y))
       val r1 = callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
-      val r2 = callFrame.withNew("frame_2", vars) {
+      val r2 = callFrame.withNew("frame_2", vars, ()) {
         val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
         val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
         callFrame.setLocalByName("z", sub(x, y))
@@ -306,12 +306,12 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val (r1, r2) = callFrame.withNew("frame_1", vars) {
+    val (r1, r2) = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
       callFrame.setLocalByName("z", add(x, y))
       val r1 = callFrame.getLocalByName("z").getOrElse(throw new IllegalStateException("z not found"))
-      val r2 = callFrame.withNew("frame_1", vars) {
+      val r2 = callFrame.withNew("frame_1", vars, ()) {
         val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
         val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
         callFrame.setLocalByName("z", sub(x, y))
@@ -342,10 +342,10 @@ class ApronCallFrameTest extends AnyFunSuite:
     val zval = integerLit(-1)
     val vars = Iterable("x" -> Some(xval), "y" -> Some(yval), "z" -> Some(zval))
 
-    val (r2, r3) = callFrame.withNew("frame_1", vars) {
+    val (r2, r3) = callFrame.withNew("frame_1", vars, ()) {
       val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
       val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
-      val r2 = callFrame.withNew("frame_1", vars) {
+      val r2 = callFrame.withNew("frame_1", vars, ()) {
         val x = callFrame.getLocalByName("x").getOrElse(throw new IllegalStateException("x not found"))
         val y = callFrame.getLocalByName("y").getOrElse(throw new IllegalStateException("y not found"))
         callFrame.setLocalByName("z", sub(x, y))

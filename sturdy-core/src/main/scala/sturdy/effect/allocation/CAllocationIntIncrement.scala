@@ -4,14 +4,14 @@ import sturdy.effect.Concrete
 
 import scala.collection.mutable.ListBuffer
 
-class CAllocationIntIncrement[Context] extends Allocation[Int, Context], Concrete:
+class CAllocationIntIncrement[Site] extends Allocation[Int, Site], Concrete:
   private var next = 0
 
-  private val addressContexts: ListBuffer[(Int, Context)] = ListBuffer()
-  def getAddressContexts: List[(Int, Context)] = addressContexts.toList
+  private val addressContexts: ListBuffer[(Int, Site)] = ListBuffer()
+  def getAddressContexts: List[(Int, Site)] = addressContexts.toList
 
-  override def apply(ctx: Context): Int =
+  override def apply(site: Site): Int =
     val a = next
     next = next + 1
-    addressContexts += a -> ctx
+    addressContexts += a -> site
     a

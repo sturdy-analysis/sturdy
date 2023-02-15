@@ -20,7 +20,7 @@ import scala.reflect.ClassTag
 import reflect.Selectable.reflectiveSelectable
 import scala.language.reflectiveCalls
 
-class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
+class ApronCallFrame_alloc[Data, Var, V, Site](val apron: Apron,
                                    initData: Data,
                                    getIntVal: V => Option[ApronExpr],
                                    getDoubleVal: V => Option[ApronExpr],
@@ -29,7 +29,7 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
                                    initVars: Iterable[(Var, Option[V])] = Iterable.empty)
                                   (using site: CallFrameSite[Data])
                                   (using Join[V], Widen[V], ClassTag[V])
-  extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
+  extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
 
   val vals: ApronVal[V] = new ApronVal(apron, makeIntVal, makeDoubleVal)
   import vals.Val
@@ -84,7 +84,7 @@ class ApronCallFrame_alloc[Data, Var, V](val apron: Apron,
 
   setVars(initVars)
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])])(f: => A): A = {
+  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])], site: Site)(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars

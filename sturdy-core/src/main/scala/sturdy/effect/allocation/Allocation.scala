@@ -2,5 +2,5 @@ package sturdy.effect.allocation
 
 import sturdy.effect.Effect
 
-trait Allocation[Addr, -Context] extends Effect:
-  def apply(ctx: Context): Addr
+trait Allocation[Addr, -Site] extends Effect:
+  def apply(site: Site): Addr
