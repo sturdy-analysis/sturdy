@@ -6,16 +6,16 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
   enum Var extends ApronVar:
     case IntVar(local: String)
     case DoubleVar(local: String)
-    case IntCallReturn(name: String)
-    case DoubleCallReturn(name: String)
+    case IntCallReturn(site: Any)
+    case DoubleCallReturn(site: Any)
     case IntTemp(ix: Int)
     case DoubleTemp(ix: Int)
 
     val av: apron.Var = this match
       case IntVar(local) => new StringVar(s"I_$local")
       case DoubleVar(local) => new StringVar(s"D_$local")
-      case IntCallReturn(name) => new StringVar(s"I_ret_$name")
-      case DoubleCallReturn(name) => new StringVar(s"D_ret_$name")
+      case IntCallReturn(site) => new StringVar(s"I_ret_$site")
+      case DoubleCallReturn(site) => new StringVar(s"D_ret_$site")
       case IntTemp(ix) => new StringVar(s"I_temp_$ix")
       case DoubleTemp(ix) => new StringVar(s"D_temp_$ix")
 
@@ -33,7 +33,7 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
 
   private var intTempCount = 0
   private var activeIntVars: Map[String, Var] = Map()
-  private var intCallReturnCount: Map[String, Int] = Map().withDefaultValue(0)
+  private var intCallReturnCount: Map[Any, Int] = Map().withDefaultValue(0)
 
   def boundIntVars: Iterable[Var] = activeIntVars.values
   def boundDoubleVars: Iterable[Var] = ???
@@ -62,10 +62,10 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
             println(s"allocating strong $v for $site")
       activeIntVars += local -> v
       v
-    case ApronAllocationSite.CallReturnVar(name) =>
-      val count = intCallReturnCount(name)
-      intCallReturnCount += name -> (count + 1)
-      val v = Var.IntCallReturn(name)
+    case ApronAllocationSite.CallReturnVar(site) =>
+      val count = intCallReturnCount(site)
+      intCallReturnCount += site -> (count + 1)
+      val v = Var.IntCallReturn(site)
       if (Apron.debugAlloc)
         println(s"allocating ${if (count == 0) "strong" else "weak"} $v for $site")
       v

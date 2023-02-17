@@ -9,6 +9,11 @@ class ApronVal[V](val apron: Apron,
     case Double(v: ApronVar)
     case Other(v: V)
 
+    def replaceVar(v: ApronVar): Val = this match
+      case Int(_) => Int(v)
+      case Double(_) => Double(v)
+      case _ => this
+    
     def asV: V = this match
       case Int(v) => makeIntVal(ApronExpr.Var(v))
       case Double(v) => makeDoubleVal(ApronExpr.Var(v))

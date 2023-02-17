@@ -52,7 +52,10 @@ enum ApronExpr:
 
   def toIntern(scope: ApronScope, allowOpen: Boolean = true): Texpr1Intern =
     val expr = this.toApron(scope, allowOpen)
-    new Texpr1Intern(scope.apronEnv, expr)
+    try new Texpr1Intern(scope.apronEnv, expr)
+    catch {
+      case ex: IllegalArgumentException => throw new IllegalArgumentException(s"Cannot close $this in $scope", ex)
+    }
 
 object ApronExpr:
   def num(i: Int): Constant = 

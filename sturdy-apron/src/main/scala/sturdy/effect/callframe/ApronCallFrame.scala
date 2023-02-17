@@ -51,7 +51,8 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
   override def toString: String =
     s"CallFrame(${vars.mkString(", ")}: $apron)"
 
-  private def activeVars: Iterable[ApronVar] = vars.toSeq.flatMap(Val.getVar)
+  private var additionalVars: Set[ApronVar] = Set()
+  private def activeVars: Iterable[ApronVar] = additionalVars ++ vars.iterator.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
 //      case (Int(v1), Int(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
@@ -103,53 +104,70 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars.toList
-    val snapState = apron.getState.cs
-    val snapEnv = snapState.getEnvironment
+    val snapAdditionalVars = this.additionalVars
+    val snapState = apron.getState
 
     if (Apron.debugScope)
       println(s"Before frame: $this")
 
     this._data = d
+    this.additionalVars = Set()
     setVars(vars)
 
     val fres = util.Try(f)
-    val fval = fres.getOrElse(null)
     if (Apron.debugScope)
-      println(s"End of frame: $this <- $fval")
+      println(s"End of frame: $this <- $fres")
 
     // introduce apron variable for function result to retain relation on function inputs.
-    // TODO: the result variable may be weak, but is currently incorrectly treated as strong
-    val fresVarSite = ApronAllocationSite.CallReturnVar(s"$snapData:$d")
-    val fresVal: Option[V] = fval match
-      case v: V => getIntVal(v) match
+    val fresVarSite = ApronAllocationSite.CallReturnVar(site)
+    var newVar: Option[ApronVar] = None
+    val fresUpdated: util.Try[A] = fres match
+      case util.Success(v: V) => getIntVal(v) match
         case Some(exp) =>
           val av = apron.addIntVariable(fresVarSite)
+          newVar = Some(av)
           apron.assign(av, exp)
-          Some(makeIntVal(ApronExpr.Var(av)))
+          util.Success(makeIntVal(ApronExpr.Var(av)).asInstanceOf[A])
         case None => getDoubleVal(v) match
           case Some(exp) =>
             val av = apron.addDoubleVariable(fresVarSite)
+            newVar = Some(av)
             apron.assign(av, exp)
-            Some(makeDoubleVal(ApronExpr.Var(av)))
-          case None => None
-      case _ => None
+            util.Success(makeDoubleVal(ApronExpr.Var(av)).asInstanceOf[A])
+          case None => fres
+      case _ => fres
 
+    // free active variables
     val vs = activeVars
     vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
     if (Apron.debugScope)
-      println(s"After free:   $this <- ${fresVal.getOrElse(fval)}")
+      println(s"After free:   $this <- $fresUpdated")
 
-//    apron.setInternalState(snapState)
-    // TODO: forget all locally bound apron variables at the end of a call frame
     this._data = snapData
     this.names = snapNames
-    setVarsConsistentWithState(snapVars.toArray)
+    this.vars = snapVars.map { v => Val.getVar(v) match
+      case None => v
+      case Some(av) =>
+        val freed = apron.currentScope.getFreedReference(av).orElse {
+          if (snapState.isBound(av) && !apron.currentScope.isBound(av))
+            Some(ApronExpr.num(snapState.getBound(av)))
+          else
+            None
+        }
+        // restore shadowed/forgotten variables from before
+        if (freed.isDefined) {
+          val av2 = apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])
+          apron.assign(av2, freed.get)
+          v.replaceVar(av2)
+        }
+        else
+          v
+    }.toArray
+    this.additionalVars = snapAdditionalVars ++ newVar
     if (Apron.debugScope)
       println(s"After frame:  $this")
 
-    fresVal match
-      case Some(v) => v.asInstanceOf[A]
-      case None => fres.get
+    fresUpdated.get
   }
 
   override def data: Data = _data
@@ -222,15 +240,15 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
   private def setVarsConsistentWithState(vars: Array[Val]): Unit =
     this.vars = vars.map {
       case null => null
-      case v@Val.Int(av) => if (apron.currentScope.isFreed(av)) Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
-      case v@Val.Double(av) => if (apron.currentScope.isFreed(av)) Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var])) else v
+      case Val.Int(av) if apron.currentScope.isFreed(av) => Val.Int(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var]))
+      case Val.Double(av) if apron.currentScope.isFreed(av) => Val.Double(apron.alloc.freshReference(av.asInstanceOf[apron.alloc.Var]))
       case v => v
     }
 
   type State = ApronCallFrameState
 
   override def getState: State =
-    new ApronCallFrameState(apron.getState, vars.toList)
+    new ApronCallFrameState(apron.getState, vars.toList, additionalVars)
 
   override def setState(st: State): Unit =
 //    if (Apron.debugAlloc)
@@ -239,6 +257,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.currentScope}")
     apron.setState(st.as)
     setVarsConsistentWithState(st.vars.toArray)
+    this.additionalVars = st.additionalVars
     if (Apron.debugJoinWiden || Apron.debugAlloc)
       println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.currentScope}")
 //    if (Apron.debugAlloc)
@@ -257,7 +276,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
            |  apronChanged = $apronChanged
            |  varsChanged = $varsChanged""".stripMargin)
 
-    MaybeChanged(new ApronCallFrameState(combinedState, vars), apronChanged || varsChanged)
+    MaybeChanged(new ApronCallFrameState(combinedState, vars, st1.additionalVars ++ st2.additionalVars), apronChanged || varsChanged)
 
   override def join: Join[State] = combine(_, _, widen = false)
 
@@ -267,21 +286,27 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
 
   protected class CallFrameJoiner[A] extends apron.ApronComputationJoiner[A] {
     private val snapshot = vars.toList
+    private val snapAdditionalVars = additionalVars
     private var fVars: Array[Val] = _
+    private var fAdditionalValrs: Set[ApronVar] = _
 
     override def inbetween(): Unit =
       super.inbetween()
       fVars = vars
+      fAdditionalValrs = additionalVars
       val snapshotWithNewVars = snapshot.zip(fVars).map { case (null, v: (Val.Int | Val.Double)) => v; case (v, _) => v }
       setVarsConsistentWithState(snapshotWithNewVars.toArray)
+      additionalVars = snapAdditionalVars
 
     override def retainNone(): Unit =
       super.retainNone()
       setVarsConsistentWithState(snapshot.toArray)
+      additionalVars = snapAdditionalVars
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       super.retainFirst(fRes)
       setVarsConsistentWithState(fVars)
+      additionalVars = fAdditionalValrs
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       super.retainSecond(gRes)
@@ -308,13 +333,17 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       }
 
       setVarsConsistentWithState(joinedVars.toArray)
+      additionalVars ++= fAdditionalValrs
   }
 
-  class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val]):
+  class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val], val additionalVars: Set[ApronVar]):
     import vals.*
     override def equals(obj: Any): Boolean = obj match
       case that: ApronCallFrameState =>
-        this.vars.size == that.vars.size && this.as == that.as && this.vars.zip(that.vars).forall((v1,v2) => if (v1 == null) v2 == null else v1.isEqual(v2, as))
+        this.vars.size == that.vars.size &&
+          this.additionalVars == that.additionalVars &&
+          this.as == that.as &&
+          this.vars.zip(that.vars).forall((v1,v2) => if (v1 == null) v2 == null else v1.isEqual(v2, as))
       case _ =>
         false
 

@@ -14,7 +14,7 @@ import scala.language.reflectiveCalls
 
 object Apron:
   val debugAll: Boolean = false
-  val debugAlloc: Boolean = debugAll || true
+  val debugAlloc: Boolean = debugAll
   val debugAssign: Boolean = debugAll
   val debugJoinWiden: Boolean = debugAll
   val debugAssert: Boolean = debugAll
@@ -46,7 +46,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
   private inline def getFreedReferences: Map[ApronVar.UID, ApronExpr] = _freedReferences
 
   val currentScope: ApronScope = new ApronScope:
-    override def toString: String = s"Current scope: free = $_freedReferences"
+    override def toString: String = Apron.this.toString
     override def apronEnv: Environment = apronState.getEnvironment
     override def getBound(v: ApronVar): Interval = getFreedReference(v) match
       case Some(e) => getBound(e)
