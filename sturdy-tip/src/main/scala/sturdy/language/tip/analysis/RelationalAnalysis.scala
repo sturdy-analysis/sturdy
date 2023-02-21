@@ -26,7 +26,7 @@ import sturdy.fix.StackConfig
 import sturdy.fix.context
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
-import sturdy.language.tip.abstractions.{Fix, Functions, Records, References, isFunOrWhile}
+import sturdy.language.tip.abstractions.{CfgConfig, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -42,7 +42,7 @@ import sturdy.values.utils.{ConvertInterval, given}
 
 
 object RelationalAnalysis extends Interpreter,
-  Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, ControlFlow, Fix:
 
   override type J[A] = WithJoin[A]
   override type VInt = Topped[ApronExpr]
@@ -124,9 +124,15 @@ object RelationalAnalysis extends Interpreter,
       super.copyState(from)
     }
 
+    val cfg = controlFlow[CallString](CfgConfig.AllNodes(sensitive = false))
+
     final override val fixpoint =
-      callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
-        fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
+      callSiteSensitive(callSites,
+        fix.log(cfg.logger,
+          fix.dispatch(isFunOrWhile, Seq(
+            fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig))
+          )
+        )
       ).fixpoint
 
     override def newInstance: sturdy.Executor = new Instance(apronManager, stackConfig, callSites)

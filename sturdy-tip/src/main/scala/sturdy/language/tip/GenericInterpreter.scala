@@ -163,8 +163,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       body.foreach(run(_))
     case Stm.Output(e) =>
       print(eval(e))
-    case Stm.Assert(e) =>
-      assert(eval(e), e)  
+    case a@Stm.Assert(e) =>
+      assert(eval(e), a)  
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
 

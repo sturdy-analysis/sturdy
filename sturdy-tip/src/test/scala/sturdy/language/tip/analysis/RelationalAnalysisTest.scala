@@ -11,9 +11,10 @@ import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, AssertionFailure, afallibleAbstractly, falliblePO, given}
 import sturdy.effect.print.given
 import sturdy.fix.StackConfig
+import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.abstractions.isFunOrWhile
+import sturdy.language.tip.abstractions.{CfgNode, isFunOrWhile}
 import sturdy.language.tip.*
 import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
 import sturdy.values.booleans.{*, given}
@@ -59,7 +60,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
     "code.tip")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-      p.toString.endsWith(".tip") && p.toString.contains("factorial_rec")
+      p.toString.endsWith(".tip") && p.toString.contains("")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -89,20 +90,20 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 //      println(s"ABSTRACT : $aresult")
 
       // compute number of assertions in program
-      val unprovedAsserts = aresult.failures.set.filter(_._1.isInstanceOf[AssertionFailure[_]])
-      val unprovedAssertsCount = unprovedAsserts.size
+      val allAsserts = program.assertions
+      if (allAsserts.nonEmpty) {
+        val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
+        val unreachableAsserts = allAsserts.diff(reachableAsserts)
+        val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
+        val failedAsserts = aresult.failures.set.collect{case (AssertionFailure(a: Stm.Assert), _) => a}
+        val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
+        val provedAsserts = reachableAsserts.diff(failedAsserts)
+        val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
 
-      // subtract number of maybefailing assertions
-      // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
-      val allAsserts = program.assertCount
-      val successfulAsserts = program.assertCount - unprovedAssertsCount
-      val successfulFraction = if (allAsserts == 0) 1.0 else successfulAsserts.toDouble / allAsserts
-      val failingFraction = if (allAsserts == 0) 0.0 else unprovedAssertsCount.toDouble / allAsserts
-      if (unprovedAssertsCount == 0)
-        println("All assertions proved or unreachable")
-      else
-        println(s"Failing assertions found in ${p.getFileName}: $unprovedAsserts out of $allAsserts failed (${failingFraction * 100}% failed)")
-      assert(unprovedAsserts.isEmpty, s", ${unprovedAsserts.size} assertion(s) have failed")
+        println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
+        assert(failedAsserts.isEmpty, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")
+        assert(unreachableAsserts.isEmpty, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")
+      }
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)
       import soundness.given

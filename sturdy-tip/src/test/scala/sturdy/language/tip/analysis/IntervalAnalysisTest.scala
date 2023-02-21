@@ -87,7 +87,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
         case _ => 0
       // subtract number of maybefailing assertions
       // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
-      println("=> #assertions proved or unreachable " + (program.assertCount - unprovedAsserts))
+      println("=> #assertions proved or unreachable " + (program.assertions.size - unprovedAsserts))
 
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))

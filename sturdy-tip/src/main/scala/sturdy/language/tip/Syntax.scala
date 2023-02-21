@@ -61,14 +61,6 @@ enum Exp extends Labeled:
     case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
     case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
-  def intLiterals: Set[Int] =
-    fold(using e => e match
-      case NumLit(n: Int) => Set(n)
-      case _ => Set()
-    )
-
-  def assertCount: Int = 0
-
 enum Stm extends Labeled:
   case Assign(lhs: Assignable, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
@@ -99,13 +91,6 @@ enum Stm extends Labeled:
     case Assert(e) => s"Assert@${this.label}"
     case Error(e) => s"Error@${this.label}"
 
-  def intLiterals: Set[Int] =
-    fold(using _ => Set(), _.intLiterals)
-
-  def assertCount: Int = this match 
-    case Assert(_) => 1
-    case _ => 0
-
 enum Assignable:
   case AVar(name: String)
   case ADeref(e: Exp)
@@ -117,28 +102,17 @@ enum Assignable:
     case ADerefField(rec, _) => g(rec)
     case _ => m.empty
 
-  def intLiterals: Set[Int] = this match
-    case AVar(_) => Set()
-    case ADeref(e) => e.intLiterals
-    case AField(_, _) => Set()
-    case ADerefField(rec, _) => rec.intLiterals
-  
-  def assertCount: Int = 0
-
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
   override def toString: String = s"function $name"
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))
 
-  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
-  def assertCount: Int = fold(using _ => 0, _.assertCount, _.assertCount)
-
 case class Program(funs: Seq[Function]):
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))
 
-  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
-  def assertCount: Int = fold(using _ => 0, _.assertCount, _.assertCount)
+  def intLiterals: Set[Int] = fold(using _ => Set(), _ => Set(), {case Exp.NumLit(n) => Set(n); case _ => Set()})
+  def assertions: Set[Stm.Assert] = fold(using _ => Set(), {case a: Stm.Assert => Set(a); case _ => Set()}, _ => Set())
 
 given StructuralFunction: Structural[Function] with {}
 given FiniteFunction: Finite[Function] with {}
