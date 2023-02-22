@@ -18,7 +18,7 @@ object Apron:
   val debugAssign: Boolean = debugAll
   val debugJoinWiden: Boolean = debugAll
   val debugAssert: Boolean = debugAll
-  val debugScope: Boolean = debugAll || true
+  val debugScope: Boolean = debugAll
 
   case object Bottom extends FailureKind
 
@@ -46,7 +46,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
   private inline def getFreedReferences: Map[ApronVar.UID, ApronExpr] = _freedReferences
 
   val currentScope: ApronScope = new ApronScope:
-    override def toString: String = Apron.this.toString
+    override def toString: String = "current scope " + Apron.this.toString
     override def apronEnv: Environment = apronState.getEnvironment
     override def getBound(v: ApronVar): Interval = getFreedReference(v) match
       case Some(e) => getBound(e)

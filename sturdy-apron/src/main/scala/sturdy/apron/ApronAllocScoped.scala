@@ -28,7 +28,7 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
       case DoubleTemp(ix) => DoubleTemp(ix)
 
     override val isInt: Boolean = this match
-      case _: IntVar | _: IntTemp => true
+      case _: IntVar | _: IntTemp | _: IntCallReturn => true
       case _ => false
 
   private var intTempCount = 0

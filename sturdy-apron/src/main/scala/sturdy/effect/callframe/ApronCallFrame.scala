@@ -51,8 +51,8 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
   override def toString: String =
     s"CallFrame(${vars.mkString(", ")}: $apron)"
 
-  private var additionalVars: Set[ApronVar] = Set()
-  private def activeVars: Iterable[ApronVar] = additionalVars ++ vars.iterator.flatMap(Val.getVar)
+  private var additionalVars: Map[String, ApronVar] = Map()
+  private def activeVars: Iterable[ApronVar] = additionalVars.values ++ vars.iterator.flatMap(Val.getVar)
 
 //    override def equals(obj: Any): Boolean = (this, obj) match
 //      case (Int(v1), Int(v2)) => apron.currentScope.getBound(v1) == apron.currentScope.getBound(v2)
@@ -111,7 +111,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       println(s"Before frame: $this")
 
     this._data = d
-    this.additionalVars = Set()
+    this.additionalVars = Map()
     setVars(vars)
 
     val fres = util.Try(f)
@@ -163,7 +163,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
         else
           v
     }.toArray
-    this.additionalVars = snapAdditionalVars ++ newVar
+    this.additionalVars = snapAdditionalVars ++ newVar.map(v => v.av.toString -> v)
     if (Apron.debugScope)
       println(s"After frame:  $this")
 
@@ -276,7 +276,8 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
            |  apronChanged = $apronChanged
            |  varsChanged = $varsChanged""".stripMargin)
 
-    MaybeChanged(new ApronCallFrameState(combinedState, vars, st1.additionalVars ++ st2.additionalVars), apronChanged || varsChanged)
+    val additionalVars = st1.additionalVars ++ st2.additionalVars
+    MaybeChanged(new ApronCallFrameState(combinedState, vars, additionalVars), apronChanged || varsChanged)
 
   override def join: Join[State] = combine(_, _, widen = false)
 
@@ -288,12 +289,12 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
     private val snapshot = vars.toList
     private val snapAdditionalVars = additionalVars
     private var fVars: Array[Val] = _
-    private var fAdditionalValrs: Set[ApronVar] = _
+    private var fAdditionalVars: Map[String, ApronVar] = _
 
     override def inbetween(): Unit =
       super.inbetween()
       fVars = vars
-      fAdditionalValrs = additionalVars
+      fAdditionalVars = additionalVars
       val snapshotWithNewVars = snapshot.zip(fVars).map { case (null, v: (Val.Int | Val.Double)) => v; case (v, _) => v }
       setVarsConsistentWithState(snapshotWithNewVars.toArray)
       additionalVars = snapAdditionalVars
@@ -306,7 +307,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       super.retainFirst(fRes)
       setVarsConsistentWithState(fVars)
-      additionalVars = fAdditionalValrs
+      additionalVars = fAdditionalVars
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       super.retainSecond(gRes)
@@ -333,10 +334,10 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       }
 
       setVarsConsistentWithState(joinedVars.toArray)
-      additionalVars ++= fAdditionalValrs
+      additionalVars ++= fAdditionalVars
   }
 
-  class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val], val additionalVars: Set[ApronVar]):
+  class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val], val additionalVars: Map[String, ApronVar]):
     import vals.*
     override def equals(obj: Any): Boolean = obj match
       case that: ApronCallFrameState =>
