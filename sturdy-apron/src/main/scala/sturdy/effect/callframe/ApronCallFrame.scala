@@ -127,6 +127,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
           val av = apron.addIntVariable(fresVarSite)
           newVar = Some(av)
           apron.assign(av, exp)
+          println(s"Introducing additional var $av = $exp")
           util.Success(makeIntVal(ApronExpr.Var(av)).asInstanceOf[A])
         case None => getDoubleVal(v) match
           case Some(exp) =>
@@ -138,8 +139,10 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       case _ => fres
 
     // free active variables
-    val vs = activeVars
-    vs.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
+    val oldActiveVars = activeVars
+    val newAdditionalVars = snapAdditionalVars ++ newVar.map(v => v.av.toString -> v)
+
+    oldActiveVars.foreach(v => apron.freeVariable(v.asInstanceOf[alloc.Var]))
     if (Apron.debugScope)
       println(s"After free:   $this <- $fresUpdated")
 
@@ -163,7 +166,8 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
         else
           v
     }.toArray
-    this.additionalVars = snapAdditionalVars ++ newVar.map(v => v.av.toString -> v)
+    println(s"Replace addtional vars $additionalVars with ${(snapAdditionalVars ++ newVar.map(v => v.av.toString -> v)).values}")
+    this.additionalVars = newAdditionalVars
     if (Apron.debugScope)
       println(s"After frame:  $this")
 
@@ -257,6 +261,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       println(s"Restoring ApronCallFrame from ${vars.toList} in $apron with ${apron.currentScope}")
     apron.setState(st.as)
     setVarsConsistentWithState(st.vars.toArray)
+    println(s"Replace addtional vars $additionalVars with ${st.additionalVars.values}")
     this.additionalVars = st.additionalVars
     if (Apron.debugJoinWiden || Apron.debugAlloc)
       println(s"Restoring ApronCallFrame to   ${vars.toList} in $apron with ${apron.currentScope}")
@@ -265,19 +270,20 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
 
   def combine(st1: State, st2: State, widen: Boolean): MaybeChanged[State] =
     val MaybeChanged(state, apronChanged) = if (widen) apron.widen(st1.as, st2.as) else apron.join(st1.as, st2.as)
-    val MaybeChanged((vars, combinedState), varsChanged) = apron.joins.combineValLists(vals)(state, st1.vars, st2.vars, widen)
+    val MaybeChanged((vars, combinedState1), varsChanged) = apron.joins.combineValLists(vals)(state, st1.vars, st2.vars, widen)
+    val MaybeChanged((joinedAdditionalVars, combinedState2), additionalVarsChanged) = apron.joins.combineAdditionalVars(combinedState1, st1.additionalVars, st2.additionalVars, widen)
+
     if (Apron.debugJoinWiden)
       println(
         s"""${if (widen) "Widening" else "Joining"} apron call frame
            |  vars1 = ${st1.vars}
            |  vars2 = ${st2.vars}
            |  vars  = $vars
-           |  apron = $combinedState
+           |  apron = $combinedState2
            |  apronChanged = $apronChanged
            |  varsChanged = $varsChanged""".stripMargin)
 
-    val additionalVars = st1.additionalVars ++ st2.additionalVars
-    MaybeChanged(new ApronCallFrameState(combinedState, vars, additionalVars), apronChanged || varsChanged)
+    MaybeChanged(new ApronCallFrameState(combinedState2, vars, joinedAdditionalVars), apronChanged || varsChanged)
 
   override def join: Join[State] = combine(_, _, widen = false)
 
@@ -321,8 +327,10 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       val fVarsStr = if (Apron.debugJoinWiden) fVars.toList.toString else ""
       val varsStr = if (Apron.debugJoinWiden) vars.toList.toString else ""
 
-      val MaybeChanged((joinedVars, st), _) = apron.joins.combineValLists(vals)(apron.getState, fVars.toList, vars.toList, widen = false)
-      apron.setState(st)
+      val MaybeChanged((joinedVars, st1), _) = apron.joins.combineValLists(vals)(apron.getState, fVars.toList, vars.toList, widen = false)
+      val MaybeChanged((joinedAdditionalVars, st2), _) = apron.joins.combineAdditionalVars(st1, fAdditionalVars, additionalVars, widen = false)
+      apron.setState(st2)
+      additionalVars = joinedAdditionalVars
 
       if (Apron.debugJoinWiden) {
         println(
@@ -334,7 +342,6 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
       }
 
       setVarsConsistentWithState(joinedVars.toArray)
-      additionalVars ++= fAdditionalVars
   }
 
   class ApronCallFrameState(val as: ApronState, val vars: List[vals.Val], val additionalVars: Map[String, ApronVar]):
@@ -342,9 +349,8 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
     override def equals(obj: Any): Boolean = obj match
       case that: ApronCallFrameState =>
         this.vars.size == that.vars.size &&
-          this.additionalVars == that.additionalVars &&
-          this.as == that.as &&
-          this.vars.zip(that.vars).forall((v1,v2) => if (v1 == null) v2 == null else v1.isEqual(v2, as))
+        this.as == that.as &&
+        this.vars.zip(that.vars).forall((v1,v2) => if (v1 == null) v2 == null else v1.isEqual(v2, as))
       case _ =>
         false
 

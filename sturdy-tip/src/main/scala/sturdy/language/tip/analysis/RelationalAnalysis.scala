@@ -57,7 +57,7 @@ object RelationalAnalysis extends Interpreter,
   final def asInt(v: Value)(using inst: Instance): VInt = v match
     case Value.BoolValue(toppedBool) =>
       toppedBool.flatMap { bv =>
-        import inst.{given_EffectStack, apron, failure}
+        import inst.{given_EffectStack, apron, failure, apronState}
         given Failure = failure
         val vIntOps = summon[IntegerOps[Int, VInt]]
         inst.apron.ifThenElsePure(bv, widen = false)(vIntOps.integerLit(1))(vIntOps.integerLit(0))
@@ -77,6 +77,7 @@ object RelationalAnalysis extends Interpreter,
 
     val apronAlloc: ApronAlloc = ApronAlloc.default(apronManager)
     implicit val apron: Apron = new Apron(apronManager, apronAlloc)(using failure)
+    implicit def apronState: ApronState = apron.getState
     
     override def jv: WithJoin[Value] = implicitly
 
@@ -130,7 +131,7 @@ object RelationalAnalysis extends Interpreter,
       callSiteSensitive(callSites,
         fix.log(cfg.logger,
           fix.dispatch(isFunOrWhile, Seq(
-            fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig))
+            fix.iter.topmost(stackConfig), fix.iter.topmost(stackConfig))
           )
         )
       ).fixpoint

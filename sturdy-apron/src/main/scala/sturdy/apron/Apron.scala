@@ -2,6 +2,7 @@ package sturdy.apron
 
 import apron.*
 import sturdy.apron.Apron.{debugAssert, debugJoinWiden}
+import sturdy.apron.ApronVar.UID
 import sturdy.data.{CombineUnit, JoinMap, WidenFiniteKeyMap, combineMaps}
 import sturdy.effect.*
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -13,7 +14,7 @@ import scala.collection.mutable
 import scala.language.reflectiveCalls
 
 object Apron:
-  val debugAll: Boolean = false
+  val debugAll: Boolean = true
   val debugAlloc: Boolean = debugAll
   val debugAssign: Boolean = debugAll
   val debugJoinWiden: Boolean = debugAll
@@ -28,7 +29,7 @@ object Apron:
   * State = (Manager, apron.Abstract1, FreedRefs)
   */
 class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) extends Effect:
-  val joins: ApronJoins = ApronJoins(apronManager)
+  val joins = ApronJoins
 
   override def toString: String =
     s"env = [${env.getVars.mkString(",")}], state = ${apronState.toString(apronManager)}, free = $_freedReferences"
@@ -273,7 +274,12 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
       MaybeChanged.Unchanged(as1)
     else {
       val joined = joins.combineApronStates(s1, s2, widen = false)
-      val freedJoined = JoinMap(using JoinApronExpr(using this))(as1.freed, as2.freed)
+      val joinedState = new ApronState(apronManager, joined.get, Map())
+      val freedJoined = JoinMap[ApronVar.UID, ApronExpr] (using (e1, e2) =>
+        val e1norm = e1.normalize(as1)
+        val e2norm = e2.normalize(as2)
+        joins.combineExprs(e1norm, e2norm, joinedState, widen = false)
+      )(as1.freed, as2.freed)
       if (debugJoinWiden) {
         println(
           s"""Joining apron freed
@@ -296,7 +302,13 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
       MaybeChanged.Unchanged(as1)
     else {
       val widened = joins.combineApronStates(s1, s2, widen = true)
-      val freedWidened = WidenFiniteKeyMap(using WidenApronExpr(using this), new Finite[ApronVar.UID] {})(as1.freed, as2.freed)
+      val widenedState = new ApronState(apronManager, widened.get, Map())
+      val freedWidened = WidenFiniteKeyMap[ApronVar.UID, ApronExpr](using (e1, e2) =>
+        val e1norm = e1.normalize(as1)
+        val e2norm = e2.normalize(as2)
+        joins.combineExprs(e1norm, e2norm, widenedState, widen = false)
+        , new Finite[ApronVar.UID] {}
+      )(as1.freed, as2.freed)
       if (debugJoinWiden) {
         println(
           s"""Widening apron freed
@@ -354,7 +366,7 @@ class Apron(val apronManager: Manager, val alloc: ApronAlloc)(using Failure) ext
              |  free = ${_freedReferences.toList}""".stripMargin)
   }
 
-class ApronState(apronManager: apron.Manager, val cs: Abstract1, val freed: Map[ApronVar.UID, ApronExpr]) extends ApronScope:
+class ApronState(val apronManager: apron.Manager, val cs: Abstract1, val freed: Map[ApronVar.UID, ApronExpr]) extends ApronScope:
   override def equals(obj: Any): Boolean = obj match
     case other: ApronState =>
       inline def sameEnv = cs.getEnvironment.isEqual(other.cs.getEnvironment)

@@ -10,7 +10,7 @@ object ApronVar:
   type UID = ApronVar
 
 
-trait ApronVar:
+trait ApronVar extends Ordered[ApronVar]:
   val av: apron.Var
   val isInt: Boolean
 
@@ -22,6 +22,10 @@ trait ApronVar:
   
   def uid: ApronVar.UID = this
 
+  override def compare(that: ApronVar): Int = this.av.toString.compare(that.av.toString) match
+    case 0 => this.instCount.compare(that.instCount)
+    case n => n
+  
 //  def initialize(apronState: Abstract1): Unit =
 //    if (!freed) {
 //      val intAr = if (isInt) Array(av) else null

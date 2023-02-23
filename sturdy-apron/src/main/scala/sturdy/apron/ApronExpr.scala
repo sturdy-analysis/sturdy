@@ -174,10 +174,10 @@ enum CompareOp:
     case Ge => ">="
     case Gt => ">"
 
-given JoinApronExpr(using ap: Apron): Join[ApronExpr] with
+given JoinApronExpr(using state: ApronState): Join[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joins.combineExprs(v1, v2, ap.getState, widen = false)
+    ApronJoins.combineExprs(v1, v2, state, widen = false)
 
-given WidenApronExpr(using ap: Apron): Widen[ApronExpr] with
+given WidenApronExpr(using state: ApronState): Widen[ApronExpr] with
   def apply(v1: ApronExpr, v2: ApronExpr): MaybeChanged[ApronExpr] =
-    ap.joins.combineExprs(v1, v2, ap.getState, widen = true)
+    ApronJoins.combineExprs(v1, v2, state, widen = true)

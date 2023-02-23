@@ -37,6 +37,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -63,6 +64,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -90,6 +92,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -124,6 +127,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -170,6 +174,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -213,6 +218,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -262,6 +268,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -298,6 +305,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 
@@ -334,6 +342,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     val alloc = ApronAlloc.default(manager)
     implicit val failure: Failure = new ConcreteFailure
     implicit val apron: Apron = new Apron(manager, alloc)
+    implicit def apronState: ApronState = apron.getState
     val callFrame = createCallFrame(apron, "initial call frame")
     implicit val effects: EffectStack = new EffectStack(List(callFrame))
 

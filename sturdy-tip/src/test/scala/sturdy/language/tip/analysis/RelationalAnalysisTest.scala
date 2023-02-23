@@ -101,8 +101,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
         val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
 
         println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
-        assert(failedAsserts.isEmpty, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")
-        assert(unreachableAsserts.isEmpty, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")
+        assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
+        assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
       }
 
       val soundness = new RelationalAnalysisSoundness(analysis.apron)

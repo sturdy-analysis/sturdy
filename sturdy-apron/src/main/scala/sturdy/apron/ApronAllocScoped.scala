@@ -33,7 +33,7 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
 
   private var intTempCount = 0
   private var activeIntVars: Map[String, Var] = Map()
-  private var intCallReturnCount: Map[Any, Int] = Map().withDefaultValue(0)
+  private var intCallReturnCount: Map[Any, (Int, Var)] = Map().withDefaultValue((0, null.asInstanceOf[Var]))
 
   def boundIntVars: Iterable[Var] = activeIntVars.values
   def boundDoubleVars: Iterable[Var] = ???
@@ -63,12 +63,19 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
       activeIntVars += local -> v
       v
     case ApronAllocationSite.CallReturnVar(site) =>
-      val count = intCallReturnCount(site)
-      intCallReturnCount += site -> (count + 1)
-      val v = Var.IntCallReturn(site)
-      if (Apron.debugAlloc)
-        println(s"allocating ${if (count == 0) "strong" else "weak"} $v for $site")
-      v
+      val (count, oldV) = intCallReturnCount(site)
+      if (count >= 1) {
+        if (Apron.debugAlloc)
+          println(s"allocating weak $oldV for $site")
+        intCallReturnCount += site -> (count + 1, oldV)
+        oldV
+      } else {
+        val v = Var.IntCallReturn(site)
+        if (Apron.debugAlloc)
+          println(s"allocating strong $v for $site")
+        intCallReturnCount += site -> (1, v)
+        v
+      }
 
   def allocateDoubleVariable(site: ApronAllocationSite, apron: Apron): Var =
     ???
@@ -80,18 +87,19 @@ class ApronAllocScoped(manager: Manager) extends ApronAlloc:
       true
     case v: Var.DoubleVar =>
       ???
-    case Var.IntCallReturn(name) =>
-      val count = intCallReturnCount(name)
-      intCallReturnCount += name -> (count - 1)
-      count == 1
-    case Var.DoubleCallReturn(name) =>
+    case Var.IntCallReturn(site) =>
+      val (count, x) = intCallReturnCount(site)
+      intCallReturnCount += site -> (count - 1, x)
+      // TODO count == 1
+      false
+    case Var.DoubleCallReturn(site) =>
       ???
 
 
   override def useStrongUpdate(v: Var): Boolean = v match
     case _: (Var.IntTemp | Var.DoubleTemp | Var.IntVar | Var.DoubleVar) => true
-    case Var.IntCallReturn(name) => intCallReturnCount(name) == 1
-    case Var.DoubleCallReturn(name) => ???
+    case Var.IntCallReturn(site) => false // TODO intCallReturnCount(site)._1 == 1
+    case Var.DoubleCallReturn(site) => ???
 
   override def freshReference(v: Var): Var = v match
     case v: Var.IntVar =>

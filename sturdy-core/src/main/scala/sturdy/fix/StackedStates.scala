@@ -104,7 +104,7 @@ final class StackedStates[Dom, Codom](val state: State)
           case Some(OutCacheEntry(res, previousOut, _)) =>
             if (Fixpoint.DEBUG) {
               println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame \n${stackHeightIndent}  <- $res:$previousOut")
             }
             PushResult.Recurrent(res, Some(previousOut))
 
@@ -120,7 +120,7 @@ final class StackedStates[Dom, Codom](val state: State)
       storeCorecurrentOutput(stateFrame, result, out)
     } else {
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
+        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
       PopResult.Stable
     }
     val previousInfo = stack.remove(stateFrame)
@@ -135,7 +135,7 @@ final class StackedStates[Dom, Codom](val state: State)
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}:$out")
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- ${Changed(result)}:$out")
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
@@ -143,7 +143,7 @@ final class StackedStates[Dom, Codom](val state: State)
       val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, out)}
 
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult:$newOut")
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
       if (changed) {
         outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))

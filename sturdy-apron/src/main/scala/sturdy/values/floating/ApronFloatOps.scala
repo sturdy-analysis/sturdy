@@ -8,7 +8,7 @@ import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
-import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
+import sturdy.apron.{Apron, ApronCons, ApronExpr, ApronState, BinOp, JoinApronExpr, UnOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Topped, config}
@@ -26,6 +26,8 @@ given ApronFloatOps[B](using Fractional[B])
                       : FloatOps[B, ApronExpr] with
 
   import ApronOrderingOps.*
+
+  implicit def state: ApronState = ap.getState
 
   override def floatingLit(f: B): ApronExpr = ApronExpr.Constant(new MpfrScalar(f.toDouble, 2))
 
