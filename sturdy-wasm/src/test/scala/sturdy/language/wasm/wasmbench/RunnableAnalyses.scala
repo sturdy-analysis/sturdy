@@ -5,10 +5,10 @@ import sturdy.fix.cfg.ControlLogger
 import sturdy.language.wasm
 import sturdy.language.wasm.{Interpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{ConstantAnalysis, IntervalAnalysis, ConstantTaintAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, ModuleInstance}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, IntervalAnalysis, TypeAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, InstLoc, ModuleInstance}
 import sturdy.util.Profiler
-import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
+import swam.syntax.{CallIndirect, LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.nio.file.{Files, Path}
 
@@ -322,6 +322,21 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
 
+    import ConstantAnalysis.Value.*
+    val indirectCalls: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: CallIndirect,loc) =>loc }
+    val preciselyResolvedIndirectCalls = indirectCalls.filter(loc =>
+      constants.get(loc) match
+        case List(value) =>
+          value match
+            case TopValue => false
+            case Int32(v) => v.isActual
+            case Int64(v) => v.isActual
+            case Float32(v) => v.isActual
+            case Float64(v) => v.isActual
+        case _ => throw new Exception("indirect calls read exactly one argument from the stack")
+    ).size
+    val preciselyResolvedIndirectCallsPercentage = (10000.0 * preciselyResolvedIndirectCalls.toDouble / indirectCalls.size.toDouble) / 100.0
+
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
 
@@ -353,6 +368,8 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
       "constantInstructions" -> constantInstructions,
       "constantInstructionPercent" -> constantInstructionPercent,
       "liveInstructions" -> liveInstructions,
+      "preciselyResolvedIndirectCalls" -> preciselyResolvedIndirectCalls,
+      "preciselyResolvedIndirectCallsPercentage" -> preciselyResolvedIndirectCallsPercentage
     )
 }
 object ConstantRunnable:
