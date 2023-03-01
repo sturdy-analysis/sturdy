@@ -105,8 +105,8 @@ object RunnerConfig:
   val default: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
-//      Analysis.Constant(AnalysisConfig.callSite1),
-//      Analysis.Type(AnalysisConfig.nocontext),
+      Analysis.Constant(AnalysisConfig.callSite1),
+      Analysis.Type(AnalysisConfig.nocontext),
       Analysis.Taint(AnalysisConfig.callSite1)
     ),
     "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
@@ -121,8 +121,9 @@ object RunnerConfig:
   ).asInstanceOf[RunnerConfig]
 
 object AnalysisConfig:
+  val timeout = 120
   val nocontext: AnalysisConfig = RRecord(
-    "timeLimit" -> new GrainOfTime(60).seconds,
+    "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = Insensitive,
       fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
@@ -135,7 +136,7 @@ object AnalysisConfig:
   ).asInstanceOf[AnalysisConfig]
 
   val callSite1: AnalysisConfig = RRecord(
-    "timeLimit" -> new GrainOfTime(60).seconds,
+    "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = CallSites(1),
       fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
