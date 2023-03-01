@@ -323,19 +323,28 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
 
     import ConstantAnalysis.Value.*
+    def isConstant(value: ConstantAnalysis.Value): Boolean =
+      value match
+        case TopValue => false
+        case Int32(v) => v.isActual
+        case Int64(v) => v.isActual
+        case Float32(v) => v.isActual
+        case Float64(v) => v.isActual
+
     val indirectCalls: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: CallIndirect,loc) =>loc }
-    val preciselyResolvedIndirectCalls = indirectCalls.filter(loc =>
+    val preciselyResolvedIndirectCalls = indirectCalls.count(loc =>
       constants.get(loc) match
-        case List(value) =>
-          value match
-            case TopValue => false
-            case Int32(v) => v.isActual
-            case Int64(v) => v.isActual
-            case Float32(v) => v.isActual
-            case Float64(v) => v.isActual
-        case _ => throw new Exception("indirect calls read exactly one argument from the stack")
-    ).size
+        case List(value) => isConstant(value)
+        case _ => throw new Exception("indirect calls read exactly one argument from the stack"))
     val preciselyResolvedIndirectCallsPercentage = (10000.0 * preciselyResolvedIndirectCalls.toDouble / indirectCalls.size.toDouble) / 100.0
+
+    val loads: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: LoadInst | _: LoadNInst, loc) =>loc }
+    val constantLoads = loads.count(loc =>
+      constants.get(loc) match
+        case List(value) => isConstant(value)
+        case _ => throw new Exception("loads read exactly one argument from the stack"))
+    val constantLoadsPercentage = (10000.0 * constantLoads.toDouble / loads.size.toDouble) / 100.0
+
 
     val endTimeMillis = System.currentTimeMillis()
     val duration = endTimeMillis - startTimeMillis
@@ -369,7 +378,9 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
       "constantInstructionPercent" -> constantInstructionPercent,
       "liveInstructions" -> liveInstructions,
       "preciselyResolvedIndirectCalls" -> preciselyResolvedIndirectCalls,
-      "preciselyResolvedIndirectCallsPercentage" -> preciselyResolvedIndirectCallsPercentage
+      "preciselyResolvedIndirectCallsPercentage" -> preciselyResolvedIndirectCallsPercentage,
+      "constantLoads" -> constantLoads,
+      "constantLoadsPercent" -> constantLoadsPercentage
     )
 }
 object ConstantRunnable:
