@@ -4,7 +4,7 @@ WASMOPT=/Volumes/sebahome/projects/external/binaryen/bin/wasm-opt
 
 INDIR=filtered
 
-TIMEOUT_SECONDS=60
+TIMEOUT_SECONDS=120
 FILES=considered-files-${TIMEOUT_SECONDS}s.txt
 OUTDIR=binaryen-out-${TIMEOUT_SECONDS}s
 
