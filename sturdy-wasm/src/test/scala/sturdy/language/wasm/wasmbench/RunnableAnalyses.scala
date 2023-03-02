@@ -331,18 +331,28 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
         case Float32(v) => v.isActual
         case Float64(v) => v.isActual
 
-    val indirectCalls: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: CallIndirect,loc) =>loc }
+    var indirectCalls: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: CallIndirect,loc) =>loc }
     val preciselyResolvedIndirectCalls = indirectCalls.count(loc =>
-      constants.get(loc) match
-        case List(value) => isConstant(value)
-        case _ => throw new Exception("indirect calls read exactly one argument from the stack"))
+      constants.get.get(loc) match
+        case Some(List(value)) => isConstant(value)
+        case Some(_) => throw new Exception("indirect calls read exactly one argument from the stack")
+        case None =>
+          // Indirect call has not been logged. So we remove it from the set of all loads.
+          indirectCalls -= loc
+          false
+    )
     val preciselyResolvedIndirectCallsPercentage = (10000.0 * preciselyResolvedIndirectCalls.toDouble / indirectCalls.size.toDouble) / 100.0
 
-    val loads: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: LoadInst | _: LoadNInst, loc) =>loc }
+    var loads: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: LoadInst | _: LoadNInst, loc) =>loc }
     val constantLoads = loads.count(loc =>
-      constants.get(loc) match
-        case List(value) => isConstant(value)
-        case _ => throw new Exception("loads read exactly one argument from the stack"))
+      constants.get.get(loc) match
+        case Some(List(value)) => isConstant(value)
+        case Some(_) => throw new Exception("loads read exactly one argument from the stack")
+        case None =>
+          // Load has not been logged. So we remove it from the set of all loads.
+          loads -= loc
+          false
+    )
     val constantLoadsPercentage = (10000.0 * constantLoads.toDouble / loads.size.toDouble) / 100.0
 
 
