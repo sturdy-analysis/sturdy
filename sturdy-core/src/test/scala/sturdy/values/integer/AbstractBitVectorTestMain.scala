@@ -1,33 +1,30 @@
 package sturdy.values.integer
 
-import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
+import sturdy.data.*
 import sturdy.effect.EffectStack
-import sturdy.effect.failure.Failure
-import sturdy.effect.failure.ConcreteFailure //instance of failure
+import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.values.*
 import sturdy.values.booleans.*
-import sturdy.values.config.Bits
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{Bits, UnsupportedConfiguration}
 import sturdy.values.convert.*
-import sturdy.values.relational.*
-
-import java.nio.{ByteBuffer, ByteOrder}
-import java.lang.Math
-import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
-import Ordering.Implicits.infixOrderingOps
-import Numeric.Implicits.infixNumericOps
-import Integral.Implicits.infixIntegralOps
-import scala.annotation.tailrec
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.control.Breaks.{break, breakable}
-import scala.math.*
-
-import java.nio.file.{Path, Paths}
-import sturdy.{Soundness, IsSound, AbstractlySound, given}
 import sturdy.values.integer.AbstractBitVector.*
+import sturdy.values.relational.*
+import sturdy.{AbstractlySound, IsSound, Soundness, given}
+
+import java.lang.Math
+import java.nio.file.{Path, Paths}
+import java.nio.{ByteBuffer, ByteOrder}
+import scala.annotation.tailrec
+import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.math.*
+import scala.math.Integral.Implicits.infixIntegralOps
+import scala.math.Numeric.Implicits.infixNumericOps
+import scala.math.Ordering.Implicits.infixOrderingOps
+import scala.util.control.Breaks.{break, breakable}
 
 
-object AbstractBitVectorTest:
+object AbstractBitVectorTestMain:
   def main(args: Array[String]): Unit = {
     //abstractBitTest(args)
     //abstractBitVectorTest(args)
