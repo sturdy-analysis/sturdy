@@ -1,11 +1,11 @@
 package sturdy.language.tip
 
-import sturdy.util.Labeled
-import sturdy.values.{Structural, Finite}
-
+import sturdy.util.{Eq, Labeled}
+import sturdy.values.{Finite, Structural}
 import cats.Monoid
+import sturdy.incremental.Identifiable
 
-enum Exp extends Labeled:
+enum Exp extends Labeled derives sturdy.util.Eq:
   case NumLit(n: Int)
   case Input()
   case Var(name: String)
@@ -67,7 +67,7 @@ enum Exp extends Labeled:
       case _ => Set()
     )
 
-enum Stm extends Labeled:
+enum Stm extends Labeled derives sturdy.util.Eq:
   case Assign(lhs: Assignable, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
   case While(cond: Exp, body: Stm)
@@ -97,7 +97,7 @@ enum Stm extends Labeled:
   def intLiterals: Set[Int] =
     fold(using _ => Set(), _.intLiterals)
 
-enum Assignable:
+enum Assignable derives sturdy.util.Eq:
   case AVar(name: String)
   case ADeref(e: Exp)
   case AField(rec: String, field: String)
@@ -121,12 +121,19 @@ case class Function(name: String, params: Seq[String], locals: Seq[String], body
 
   def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
 
-case class Program(funs: Seq[Function]):
+given FunctionIdentifier: Identifiable[Function] with
+  type Id = String
+  extension (f: Function)
+    inline override def id: String = f.name
+
+  inline override def eqv(x: Function, y: Function): Boolean =
+    Eq.derived[Function].eqv(x,y)
+
+case class Program(funs: Seq[Function]) derives Eq:
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))
 
   def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
-
 
 given StructuralFunction: Structural[Function] with {}
 given FiniteFunction: Finite[Function] with {}

@@ -36,23 +36,23 @@ import scala.util.Try
  *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
  *
  */
-final class StackedFrames[Dom, Codom, Ctx](val state: State)
-                                          (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
-                                          (using Finite[Dom], Finite[Ctx], Widen[Codom])
+class StackedFrames[Dom, Codom, Ctx](val state: State)
+                                    (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
+                                    (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
    */
-  private val stack: MutableMap[Frame[Dom, Ctx], FrameInstanceInfo] = Maps.mutable.empty()
-  private var stackHeight: Int = 0
+  protected val stack: MutableMap[Frame[Dom, Ctx], FrameInstanceInfo] = Maps.mutable.empty()
+  protected var stackHeight: Int = 0
 
   /** Cache of the inputs of previously executed stack frames.
    */
-  private val inCache: MutableMap[Frame[Dom, Ctx], state.In] = Maps.mutable.empty()
+  protected val inCache: MutableMap[Frame[Dom, Ctx], state.In] = Maps.mutable.empty()
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
-  private val outCache: MutableMap[Frame[Dom, Ctx], OutCacheEntry] = Maps.mutable.empty()
+  protected val outCache: MutableMap[Frame[Dom, Ctx], OutCacheEntry] = Maps.mutable.empty()
 
   case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
     def isStable: Boolean = stability eq Stability.Stable
@@ -260,3 +260,5 @@ class FrameInstanceInfo(var frameIdWithInStateOfCache: Option[Int]):
     frameCounter -= 1
 //    assert(frameCounter >= 0)
     frameCounter == 0
+
+  override def toString: String = s"FrameInfo(${frameIdWithInStateOfCache.getOrElse(-1)})"

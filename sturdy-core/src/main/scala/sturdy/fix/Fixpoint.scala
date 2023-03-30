@@ -8,6 +8,7 @@ import scala.collection.mutable.ListBuffer
 trait Fixpoint[Dom, Codom]:
   def apply(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom
 
+
 trait CombinatorFixpoint[Dom, Codom] extends Fixpoint[Dom, Codom]:
   lazy val phi: Combinator[Dom, Codom]
 

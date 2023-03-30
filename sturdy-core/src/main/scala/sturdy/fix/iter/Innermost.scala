@@ -18,14 +18,21 @@ def innermost[Dom, Codom, Ctx]
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Innermost[Dom, Codom, Ctx] =
-  new Innermost(config, state, context)
+  new Innermost(state)(Stack(state)(config, context))
+
+def innermost[Dom, Codom, Ctx]
+  (using state: State)
+  (stack: Stack[Dom, Codom, state.In, state.Out])
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
+  : Innermost[Dom, Codom, Ctx] =
+  new Innermost(state)(stack)
 
 final class Innermost[Dom, Codom, Ctx]
-  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (val state: State)
+  (stack: Stack[Dom, Codom, state.In, state.Out])
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 
-  private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
   private var iterationCounts: Map[Dom, Int] = Map()
 
   /** Runs `f` until a fixed point is reached as soon as something is looping. */

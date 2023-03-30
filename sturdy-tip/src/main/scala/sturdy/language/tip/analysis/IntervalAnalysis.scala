@@ -1,9 +1,9 @@
 package sturdy.language.tip.analysis
 
-import sturdy.{Executor, fix, data}
+import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
-import sturdy.effect.given
+import sturdy.effect.{EffectStack, store, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.JoinableDecidableCallFrame
@@ -11,13 +11,12 @@ import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
-import sturdy.effect.store
-import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix
-import sturdy.fix.StackConfig
+import sturdy.fix.iter.{IncrementalInnermost, StackLogger}
+import sturdy.fix.{Combinator, CombinatorFixpoint, ContextualInStateWidening, InStateWidening, Stack, StackConfig, StackedStates}
+import sturdy.incremental.Change
 import sturdy.language.tip.TipFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -28,7 +27,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
@@ -72,10 +71,45 @@ object IntervalAnalysis extends Interpreter,
       bounds = from.asInstanceOf[Instance].bounds
     }
 
-    final override val fixpoint =
+    override val fixpoint =
       callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
         fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
       ).fixpoint
 
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
+
+  class InitialRunInstance(initEnvironment: Environment, initStore: Store, callSites: Int)
+    extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
+
+    var stackLogger: StackLogger[FixIn, FixOut[Value]] = null
+
+    /** Fixpoint algorithm for initial run.
+     * The fixpoint algorithm logs the stacks that occur during the analysis. */
+    override val fixpoint =
+      callSiteSensitive(callSites, {
+        val inStateWidening = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
+        val stack: StackedStates[FixIn, FixOut[Value]] = new StackedStates(effectStack)(inStateWidening, true)
+        stackLogger = new fix.iter.StackLogger(stack)
+        val stackSuperclass = stack.asInstanceOf[Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out]]
+        fix.dispatch(isFunOrWhile, Seq(
+          fix.log(stackLogger, fix.iter.innermost(stackSuperclass)), fix.iter.innermost(StackConfig.StackedStates())))
+      }).fixpoint
+
+  class IncrementalUpdateInstance(changes: Iterator[Change[FixIn]],
+                                  stackLogger: StackLogger[FixIn, FixOut[Value]],
+                                  initEnvironment: Environment,
+                                  initStore: Store,
+                                  callSites: Int)
+    extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
+
+    /** Fixpoint algorithm for an incremental update.
+     * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
+    override val fixpoint =
+      callSiteSensitive(callSites, {
+        def inStateWidening: InStateWidening[FixIn, effectStack.In] = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
+        given isw: InStateWidening[FixIn, effectStack.In] = inStateWidening
+        fix.dispatch(isFunOrWhile, Seq(
+          new IncrementalInnermost(changes,stackLogger), fix.iter.innermost(StackConfig.StackedStates())))
+      }).fixpoint
+
 

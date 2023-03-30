@@ -76,7 +76,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
-      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
+      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult)(using implicitly))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
       (aresult, analysis)

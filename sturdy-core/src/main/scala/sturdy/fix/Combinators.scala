@@ -12,6 +12,9 @@ trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]:
   def fixpoint: CombinatorFixpoint[Dom, Codom] = new CombinatorFixpoint {
     override lazy val phi: Combinator[Dom, Codom] = Combinator.this
   }
+
+  def compose(other: Combinator[Dom, Codom]): Combinator[Dom, Codom] =
+    (f: Dom => Codom) => this(other(f))
   
 trait ContextualCombinator[Ctx, Dom, Codom] extends Function[Contextual[Ctx, Dom, Codom] ?=> Dom => Codom, Dom => Codom]:
   type Context = Contextual[Ctx, Dom, Codom]
