@@ -29,7 +29,7 @@ object NumericInterval:
     else
       throw new IllegalArgumentException(s"Illegal interval bounds $low, $high")
 
-case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
+case class NumericInterval[@specialized(Int, Float, Double) I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
   override def toString: String = s"[$low, $high]"

@@ -53,7 +53,6 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalIncrementalAnalysis(p, update)
     }
-
   }
 
   def runIntervalIncrementalAnalysis(initial: Path, update: Path) =
@@ -66,7 +65,7 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
     if (initialProgram.funs.exists(_.name == "main")) {
       val initialRun = new IntervalAnalysis.InitialRunInstance(Map(), Map(),0)
       val aresult = initialRun.failure.fallible(initialRun.execute(initialProgram))
-      val incrementalUpdate = new IncrementalUpdateInstance(changes, initialRun.stackLogger, Map(), Map(), callSites=0)
+      val incrementalUpdate = new IncrementalUpdateInstance(changes, initialRun)
       val incResult = incrementalUpdate.failure.fallible(incrementalUpdate.execute(updatedProgram))
     } else {
       null

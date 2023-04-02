@@ -10,6 +10,11 @@ given JoinTuple2[T1, T2, W <: Widening](using j1: Combine[T1, W], j2: Combine[T2
     val v2 = j2(old._2, now._2)
     MaybeChanged((v1.get, v2.get), v1.hasChanged || v2.hasChanged)
 
+class JoinSecond[T1, T2, W <: Widening](using j2: Combine[T2, W]) extends Combine[(T1, T2), W]:
+  def apply(old: (T1, T2), now: (T1, T2)): MaybeChanged[(T1, T2)] =
+    val v2 = j2(old._2, now._2)
+    MaybeChanged((now._1, v2.get), v2.hasChanged)
+
 given JoinTuple3[T1, T2, T3, W <: Widening](using j1: Combine[T1, W], j2: Combine[T2, W], j3: Combine[T3, W]): Combine[(T1, T2, T3), W] with
   def apply(old: (T1, T2, T3), now: (T1, T2, T3)): MaybeChanged[(T1, T2, T3)] =
     val v1 = j1(old._1, now._1)

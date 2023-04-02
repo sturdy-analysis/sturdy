@@ -7,19 +7,20 @@ import sturdy.effect.TrySturdy
 import sturdy.values.{Join, Widen}
 import sturdy.{IsSound, Soundness, seqIsSound}
 
-
+import scala.collection.immutable.HashMap
+import scala.collection.mutable
 import scala.reflect.ClassTag
 
 trait DecidableCallFrame[Data, Var, V] extends CallFrame[Data, Var, V, NoJoin]
 
 abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
   protected var _data: Data = initData
-  protected var vars: Array[V] = _
+  protected var vars: mutable.ArraySeq[V] = _
   protected var names: Map[Var, Int] = _
 
   def setVars(newVars: Iterable[(Var, V)]): Unit = {
     val builder = Map.newBuilder[Var, Int]
-    vars = Array.ofDim(newVars.size)
+    vars = mutable.ArraySeq.make(Array.ofDim(newVars.size))
     var i = 0
     for ((name, v) <- newVars) {
       builder += name -> i
@@ -78,21 +79,22 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
     val cVals = c.vars.toList
     seqIsSound.isSound(cVals, aVals)
 
-
 class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars), Concrete
 
 class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars):
-  override type State = List[V]
-  override def getState: List[V] = vars.toList
-  override def setState(s: List[V]): Unit =
-    s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
-  override def join: Join[List[V]] = implicitly
-  override def widen: Widen[List[V]] = implicitly
+  override type State = (Map[Var,Int],mutable.ArraySeq[V])
+  override def getState: State = (names,vars.clone())
+  override def setState(s: State): Unit =
+    names = s._1
+    Array.copy(s._2.array, 0, vars.array, 0, vars.length)
+
+  override def join: Join[State] = new JoinSecond
+  override def widen: Widen[State] = new JoinSecond
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = vars
-    private var fVars: Array[V] = _
+    private var fVars: mutable.ArraySeq[V] = _
 
     override def inbetween(): Unit =
       fVars = vars

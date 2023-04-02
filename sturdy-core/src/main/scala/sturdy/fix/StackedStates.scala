@@ -5,6 +5,7 @@ import org.eclipse.collections.api.factory.Maps
 import org.eclipse.collections.api.map.MutableMap
 import org.eclipse.collections.api.tuple.Pair
 import org.eclipse.collections.impl.tuple.Tuples
+
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
@@ -151,18 +152,6 @@ class StackedStates[Dom, Codom](val state: State)
         PopResult.Stable
       }
 
-  /** s1.equals(s2) iff s1.stack.equals(s2.stack) */
-  override def equals(obj: Any): Boolean =
-    obj match {
-      case other: StackedStates[Dom, Codom] =>
-        this.stack.equals(other.stack)
-      case _ => false
-    }
-
-  /** s1.hashcode == s1.stack.hashcode */
-  override def hashCode(): Int =
-    stack.hashCode()
-
   /** Clear the contents of the stack (leaves cache unchanged). */
   def clearStack: Unit =
     stack.clear()
@@ -170,26 +159,26 @@ class StackedStates[Dom, Codom](val state: State)
     inStateWidening.clear
 
   /** Load data from another stack (leaves cache unchanged) */
-  def loadStack(oldStack: RichIterable[Pair[(Dom, state.In), FrameInstanceInfo]]): Unit =
+  def loadStack(stack: Iterable[(Dom, state.In)]): Unit =
     clearStack
-    oldStack.forEach((p: Pair[(Dom, state.In),FrameInstanceInfo]) =>
-      this.inStateWidening.push(p.getOne._1, p.getOne._2)
-      this.stack.put((p.getOne._1, p.getOne._2), p.getTwo)
+    for((dom, in) <- stack) {
+      this.stack.put((dom,in), new FrameInstanceInfo(stackHeight))
+      this.inStateWidening.push(dom, in)
       stackHeight += 1
-    )
+    }
 
   /** Load data from a cache into the current cache (leaves stack unchanged) */
-  def loadCache(oldCache: RichIterable[Pair[(Dom, state.In), OutCacheEntry]]): Unit =
+  def loadCache(oldCache: RichIterable[Pair[(Dom, state.In), (TrySturdy[Codom], state.Out)]]): Unit =
     outCache.clear()
 
-    oldCache.forEach((p: Pair[(Dom, state.In), OutCacheEntry]) =>
+    oldCache.forEach((p: Pair[(Dom, state.In), (TrySturdy[Codom], state.Out)]) =>
       val dom = p.getOne._1
       val in = p.getOne._2
       val outCacheEntry: OutCacheEntry =
         OutCacheEntry(
-          result = p.getTwo.result,
-          out = p.getTwo.out,
-          stability = Stability.Unstable // TODO: Possible place to optimize. Set to stable if `in` did not change.
+          result = p.getTwo._1,
+          out = p.getTwo._2,
+          stability = Stability.Stable
         )
       outCache.put((dom, in), outCacheEntry)
       {}
@@ -216,6 +205,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
   def push(dom: Dom, in: In): MaybeChanged[In] =
+    println(s"PUSH INSTATEWIDEN $dom $in")
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None =>
@@ -227,6 +217,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         widenedIn
 
   def pop(dom: Dom, in: In): Unit =
+    println(s"POP INSTATEWIDEN $dom $in")
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None => throw new IllegalStateException()
@@ -237,4 +228,5 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
           case _ => ce.in = ce.in.tail
 
   override def clear: Unit =
+    println(s"CLEAR INSTATEWIDEN")
     contexts = Map()

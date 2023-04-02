@@ -2,6 +2,8 @@ package sturdy.data
 
 import sturdy.values.*
 
+import scala.collection.mutable
+
 given FiniteSeq[V](using Finite[V]): Finite[Seq[V]] with {}
 
 given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], W] with
@@ -44,3 +46,15 @@ given CombineEquiVector[V, W <: Widening](using j: Combine[V, W]): Combine[Vecto
     }
     MaybeChanged(vs, changed)
 
+given CombineEquiArraySeq[V, W <: Widening](using j: Combine[V, W]): Combine[mutable.ArraySeq[V], W] with
+  override def apply(v1: mutable.ArraySeq[V], v2: mutable.ArraySeq[V]): MaybeChanged[mutable.ArraySeq[V]] =
+    if (v1.length != v2.length)
+      throw new IllegalStateException()
+    var changed = false
+    val result = v1.clone()
+    for(i <- v1.indices) {
+      val v = j(v1(i), v2(i))
+      changed |= v.hasChanged
+      result(i) = v.get
+    }
+    MaybeChanged(result, changed)

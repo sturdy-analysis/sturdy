@@ -14,6 +14,7 @@ lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
     sturdy_core,
+    sturdy_bench,
     sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial
@@ -29,6 +30,18 @@ lazy val sturdy_core = (project in file("sturdy-core"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
+  )
+
+lazy val sturdy_bench = (project in file("sturdy-bench"))
+  .dependsOn(sturdy_core % "test->test")
+  .enablePlugins(JmhPlugin)
+  .settings(
+    Jmh / sourceDirectory := (Test / sourceDirectory).value,
+    Jmh / classDirectory := (Test / classDirectory).value,
+    Jmh / dependencyClasspath := (Test / dependencyClasspath).value,
+    // rewire tasks, so that 'bench/Jmh/run' automatically invokes 'bench/Jmh/compile' (otherwise a clean 'bench/Jmh/run' would fail)
+    Jmh / compile := (Jmh / compile).dependsOn(Test / compile).value,
+    Jmh / run := (Jmh / run).dependsOn(Jmh / compile).evaluated
   )
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))

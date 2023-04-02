@@ -78,38 +78,35 @@ object IntervalAnalysis extends Interpreter,
 
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 
-  class InitialRunInstance(initEnvironment: Environment, initStore: Store, callSites: Int)
+  class InitialRunInstance(val initEnvironment: Environment, val initStore: Store, val callSites: Int)
     extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
 
     var stackLogger: StackLogger[FixIn, FixOut[Value]] = null
+    var stack: StackedStates[FixIn, FixOut[Value]] = null
 
     /** Fixpoint algorithm for initial run.
      * The fixpoint algorithm logs the stacks that occur during the analysis. */
     override val fixpoint =
       callSiteSensitive(callSites, {
         val inStateWidening = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
-        val stack: StackedStates[FixIn, FixOut[Value]] = new StackedStates(effectStack)(inStateWidening, true)
-        stackLogger = new fix.iter.StackLogger(stack)
+        stack = new StackedStates(effectStack)(inStateWidening, true)
+        stackLogger = new fix.iter.StackLogger(effectStack)
         val stackSuperclass = stack.asInstanceOf[Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out]]
         fix.dispatch(isFunOrWhile, Seq(
           fix.log(stackLogger, fix.iter.innermost(stackSuperclass)), fix.iter.innermost(StackConfig.StackedStates())))
       }).fixpoint
 
   class IncrementalUpdateInstance(changes: Iterator[Change[FixIn]],
-                                  stackLogger: StackLogger[FixIn, FixOut[Value]],
-                                  initEnvironment: Environment,
-                                  initStore: Store,
-                                  callSites: Int)
-    extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
+                                  initialRun: InitialRunInstance)
+    extends Instance(initialRun.initEnvironment, initialRun.initStore, StackConfig.StackedStates(), initialRun.callSites):
 
     /** Fixpoint algorithm for an incremental update.
      * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
     override val fixpoint =
-      callSiteSensitive(callSites, {
-        def inStateWidening: InStateWidening[FixIn, effectStack.In] = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
-        given isw: InStateWidening[FixIn, effectStack.In] = inStateWidening
+      callSiteSensitive(initialRun.callSites, {
+        given isw: InStateWidening[FixIn, effectStack.In] = initialRun.stack.inStateWidening.asInstanceOf[InStateWidening[FixIn, effectStack.In]]
         fix.dispatch(isFunOrWhile, Seq(
-          new IncrementalInnermost(changes,stackLogger), fix.iter.innermost(StackConfig.StackedStates())))
+          new IncrementalInnermost(changes, initialRun.stackLogger), fix.iter.innermost(StackConfig.StackedStates())))
       }).fixpoint
 
 
