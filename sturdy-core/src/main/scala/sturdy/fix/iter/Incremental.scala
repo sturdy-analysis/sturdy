@@ -9,89 +9,89 @@ import org.eclipse.collections.api.map.{ImmutableMap, MutableMap}
 import org.eclipse.collections.api.set.MutableSet
 import org.eclipse.collections.api.tuple.Pair
 import org.eclipse.collections.impl.factory.primitive.IntLists
-
 import sturdy.data.given
 import sturdy.effect.{EffectStack, RecurrentCall, TrySturdy}
 import sturdy.fix.*
-import sturdy.incremental.{Change, Changes, Delta}
+import sturdy.incremental.{Change, Changes, Delta, ListDelta}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.{Finite, Join, MaybeChanged, Widen}
 
 import scala.annotation.tailrec
-import scala.collection.mutable
+import scala.collection.{IterableOps, mutable}
 import scala.util.Try
 import scala.jdk.CollectionConverters.*
 
-class IncrementalInnermost[Dom, Codom]
-                          (changes: Iterator[Change[Dom]], stackLogger: StackLogger[Dom, Codom])
-                          (using val dstate: State)
-                          (using inStateWidening: => InStateWidening[Dom, dstate.In])
-                          (using Finite[Dom], Widen[Codom])
-  extends Combinator[Dom, Codom]:
-
-  var updated = false
-
+class IncrementalFixpoint[Dom, Codom]
+                         (stackLogger: StackLogger[Dom, Codom])
+                         (using val dstate: State)
+                         (using inStateWidening: => InStateWidening[Dom, dstate.In])
+                         (using Finite[Dom], Widen[Codom]):
 
   /** Cache that accumulates the differences between the old and new analysis result */
-  private val dstack: StackedStates[Dom, Codom] & Stack[Dom, Codom, dstate.In, dstate.Out] =
+  val dstack: StackedStates[Dom, Codom] & Stack[Dom, Codom, dstate.In, dstate.Out] =
     new StackedStates(dstate)(inStateWidening, readPriorOutput = true)
       .asInstanceOf[StackedStates[Dom, Codom] & Stack[Dom, Codom, dstate.In, dstate.Out]]
   dstack.loadCache(
     stackLogger.cache.keyValuesView().asInstanceOf[RichIterable[Pair[(Dom, dstack.state.In), (TrySturdy[Codom],dstack.state.Out)]]])
 
-  def update(change: Change[Dom], f: Dom => Codom): Unit =
-    change match
-      case Change.Nil(_) =>
-      case Change.Add(newDom) =>
-      case Change.Replace(from, to) =>
-        for (stack <- getStacksAndSetState(from)) {
-          @tailrec
-          def loop(st: CachedHashStack[(Dom,dstate.In)]): Unit =
-            if(st.nonEmpty){
-              val (Some(dom, in), rest) = st.pop
-              println(s"\nUPDATE $dom")
-              dstate.setInState(dom, in)
-              dstack.loadStack(rest.asInstanceOf[Iterable[(Dom, dstack.state.In)]])
-              dstack.outCache.remove((dom,in.asInstanceOf[dstack.state.Out]))
-              val res = innermost(dstack)(f)(dom)
-              loop(rest)
-            }
-          loop(stack)
-        }
+  def update(changes: ListDelta[Dom], f: Dom => Codom): Unit =
+    for(change <- changes.delta.values)
+      change match
+        case Change.Nil(_) =>
 
-      case Change.Remove(oldDom) =>
-        dstack.outCache.select((k: (Dom, dstack.state.In), v: dstack.OutCacheEntry) =>
-          oldDom != k._1
-        )
+        case Change.Add(_) =>
+          // There is nothing to do.
+          // If the added function was used from somewhere else, then it will be analyzed then.
+          // Otherwise, the added function is dead code and does not need to be analyzed.
 
-  // TODO: This class cannot be a fixpoint combinator. Otherwise, this function is called repeadatly.
-  def apply(f: Dom => Codom): Dom => Codom =
-    if(! updated) {
-      println(s"\nINCREMENTAL UPDATE")
-      for(change <- changes) update(change, f)
-      updated = true
-      println(s"INCREMENTAL UPDATE DONE\n")
-    }
+        case Change.Remove(oldDom) =>
+          dstack.outCache.select((k: (Dom, dstack.state.In), v: dstack.OutCacheEntry) =>
+            oldDom != k._1
+          )
 
-    dstack.clearStack
-    innermost(dstack.asInstanceOf[Stack[Dom, Codom, dstate.In, dstate.Out]])(f)
+        case Change.Replace(from, to) =>
+          for (stack <- getStacksAndSetState(from)) {
+
+            // Clear the cache for elements on the stack
+            for((dom,in) <- stack)
+              dstack.outCache.remove((dom, in.asInstanceOf[dstack.state.Out]))
+
+            // Replace domains on the stack with new domains
+            val newStack = changes.replace[(Dom,dstate.In)](f => {case (dom:Dom,in) => f(dom).iterator.map(newDom => (newDom,in))}, stack)
+
+            // Update analysis results for each element on the stack in bottom-up order
+            @tailrec
+            def loop(st: Iterable[(Dom,dstate.In)]): Unit =
+              st.headOption match
+                case None =>
+                case Some(dom,in) =>
+                  val rest = st.tail
+                  println(s"\nUPDATE $dom")
+                  dstate.setInState(dom, in)
+                  dstack.loadStack(rest.asInstanceOf[Iterable[(Dom, dstack.state.In)]])
+                  val result = TrySturdy(f(dom))
+                  val out = dstate.getOutState(dom)
+                  dstack.outCache.put((dom,in.asInstanceOf[dstack.state.In]), dstack.OutCacheEntry(result, out.asInstanceOf[dstack.state.Out], dstack.Stability.Stable))
+                  loop(rest)
+
+            loop(newStack)
+          }
 
   /** Get all stacks in which a `dom` appeared */
-  def getStacksAndSetState(dom: Dom): Iterator[CachedHashStack[(Dom,dstate.In)]] =
+  private def getStacksAndSetState(dom: Dom): Iterator[CachedHashStack[(Dom,dstate.In)]] =
     stackLogger.stacks.get(dom) match
       case sts => sts.iterator().asScala.asInstanceOf[Iterator[CachedHashStack[(Dom,dstate.In)]]]
       case null => Iterator()
 
   extension (stack: StackedStates[Dom, Codom])
-    def getDependers: Iterable[Dom] =
+    private def getDependers: Iterable[Dom] =
       stack.stack.keysView().collect(_._1).toSet.asScala
 
-    def hasChanged(dom: Dom): Boolean =
+    private def hasChanged(dom: Dom): Boolean =
       val (codomOld, outOld) = stackLogger.cache.get(dom)
       val outEntry = dstack.outCache.get(dom)
       val (codomNew, outNew) = (outEntry.result, outEntry.out)
       codomOld != codomNew || outOld != outNew
-
 
 enum CachedHashStack[A] extends Iterable[A]:
   case Empty()
@@ -110,6 +110,24 @@ enum CachedHashStack[A] extends Iterable[A]:
       case Empty() => 0
       case Cons(_,_,h) => h
   override def toString: String = toList.toString()
+
+  override def headOption: Option[A] =
+    this match
+      case Empty() => None
+      case Cons(h,_,_) => Some(h)
+
+  override def tail: Iterable[A] =
+    this match
+      case Empty() => throw new UnsupportedOperationException
+      case Cons(_,t,_) => t
+
+  override def map[B](f: A => B): Iterable[B] =
+    def _map(c: CachedHashStack[A]): CachedHashStack[B] =
+      c match
+        case Empty() => Empty()
+        case Cons(h,t,_) =>
+          _map(t).push(f(h))
+    _map(this)
 
   override def iterator: Iterator[A] =
     val that = this
@@ -140,7 +158,7 @@ final class StackLogger[Dom, Codom: Widen](val state: State) extends Logger[Dom,
   val cache: MutableMap[(Dom, state.In), (TrySturdy[Codom], state.Out)] = Maps.mutable.empty()
 
   /** Log the stack on each recursive call, so we can later recompute an incremental update with it. */
-  final override def enter(dom: Dom): Unit =
+  override def enter(dom: Dom): Unit =
     val in = state.getInState(dom)
     stack = stack.push((dom,in))
     stacks.compute(dom, (_dom, sts) =>
@@ -149,7 +167,7 @@ final class StackLogger[Dom, Codom: Widen](val state: State) extends Logger[Dom,
       res
     )
 
-  final override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
+  override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
     val (Some(_,in), rest) = stack.pop
     stack = rest
 

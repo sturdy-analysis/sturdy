@@ -28,7 +28,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
       s = s.tail
     }
   }
-  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine {
+  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine[List[Any], W] {
     override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
       var effs = eff
       var s1 = st1
@@ -62,7 +62,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
   override def joinOut(dom: Any): Join[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
   override def widenOut(dom: Any): Widen[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
 
-  private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
+  private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()
     override def inbetween(): Unit = joinSwitch()
     override def retainNone(): Unit = joinEnd()
@@ -71,7 +71,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd()
   }
   
-  def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
+  def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     val joiners: Seq[ComputationJoiner[A]] = baseJoiner +: effects.flatMap(_.makeComputationJoiner[A])
     override def inbetween(): Unit = joiners.foreach(_.inbetween())
     override def retainNone(): Unit = joiners.foreach(_.retainNone())
@@ -134,6 +134,9 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     else {
       joinComputations(f(a))(joinFoldIt(as, f))
     }
+
+  override def toString: String =
+    getAllState.toString()
 
 object EffectStack:
   def localEffect(eff: Effect): EffectStack =

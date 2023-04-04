@@ -86,7 +86,10 @@ class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterabl
   override def getState: State = (names,vars.clone())
   override def setState(s: State): Unit =
     names = s._1
-    Array.copy(s._2.array, 0, vars.array, 0, vars.length)
+    val newVars = s._2.array
+    if(newVars.length != vars.length)
+      vars = mutable.ArraySeq.make(Array.ofDim(newVars.length))
+    Array.copy(newVars, 0, vars.array, 0, newVars.length)
 
   override def join: Join[State] = new JoinSecond
   override def widen: Widen[State] = new JoinSecond

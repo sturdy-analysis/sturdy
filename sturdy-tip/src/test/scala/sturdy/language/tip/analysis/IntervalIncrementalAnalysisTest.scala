@@ -31,6 +31,7 @@ import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
 import sturdy.language.tip.abstractions.isFunOrWhile
 
+import java.net.URI
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
@@ -40,8 +41,8 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip interval incremental analysis"
 
-  val uri = classOf[IntervalIncrementalAnalysisTest].getResource("/sturdy/language/tip").toURI;
-  val updateUri = classOf[IntervalIncrementalAnalysisTest].getResource("/sturdy/language/tip/incremental.update").toURI;
+  val uri: URI = classOf[IntervalIncrementalAnalysisTest].getResource("/sturdy/language/tip").toURI
+  val updateUri: URI = classOf[IntervalIncrementalAnalysisTest].getResource("/sturdy/language/tip/incremental.update").toURI
 
   Files.list(Paths.get(uri)).toScala(List).flatMap(p =>
     val update = Paths.get(updateUri.getPath, p.getFileName.toString)
@@ -55,20 +56,16 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
     }
   }
 
-  def runIntervalIncrementalAnalysis(initial: Path, update: Path) =
+  def runIntervalIncrementalAnalysis(initial: Path, update: Path): Unit =
     val initialProgram = parse(initial)
     val updatedProgram = parse(update)
-    val deltaProgram =
-      ListDelta.sub(initialProgram.funs.toList, updatedProgram.funs.toList)
-    val changes = deltaProgram.delta.iterator.map(_.map(FixIn.EnterFunction(_)))
 
     if (initialProgram.funs.exists(_.name == "main")) {
       val initialRun = new IntervalAnalysis.InitialRunInstance(Map(), Map(),0)
       val aresult = initialRun.failure.fallible(initialRun.execute(initialProgram))
-      val incrementalUpdate = new IncrementalUpdateInstance(changes, initialRun)
-      val incResult = incrementalUpdate.failure.fallible(incrementalUpdate.execute(updatedProgram))
-    } else {
-      null
+      val incrementalUpdate = new IncrementalUpdateInstance(initialRun)
+      incrementalUpdate(initialProgram, updatedProgram)
+//      val incResult = incrementalUpdate.failure.fallible(incrementalUpdate.execute(updatedProgram))
     }
 
   def parse(p: Path): Program =
@@ -76,13 +73,3 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     Parser.parse(sourceCode)
-
-//
-//given FixInIdentifier: Identifiable[FixIn] with
-//  type Id = String
-//  extension (f: FixIn)
-//    override def id: String =
-//      f match
-//        case FixIn.EnterFunction(f) => f.id
-//        case FixIn.Eval(e) => e.toString
-//        case FixIn.Run(s) => s.toString

@@ -54,7 +54,7 @@ class StackedStates[Dom, Codom](val state: State)
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
 
-  def stackHeightIndent: String = "  " * (height)
+  def stackHeightIndent: String = "  " * height
   def stackHeightMinusOneIndent: String = "  " * (height - 1)
 
   /** Pushes a frame on top of the stack and detects if the frame is recurrent.
@@ -153,14 +153,14 @@ class StackedStates[Dom, Codom](val state: State)
       }
 
   /** Clear the contents of the stack (leaves cache unchanged). */
-  def clearStack: Unit =
+  def clearStack(): Unit =
     stack.clear()
     stackHeight = 0
     inStateWidening.clear
 
   /** Load data from another stack (leaves cache unchanged) */
   def loadStack(stack: Iterable[(Dom, state.In)]): Unit =
-    clearStack
+    clearStack()
     for((dom, in) <- stack) {
       this.stack.put((dom,in), new FrameInstanceInfo(stackHeight))
       this.inStateWidening.push(dom, in)
@@ -193,19 +193,18 @@ object StackedStates:
 trait InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In]
   def pop(dom: Dom, in: In): Unit
-  def clear: Unit
+  def clear(): Unit
 
 class FiniteInStateWidening[Dom, In](using Finite[In]) extends InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In] = MaybeChanged.Unchanged(in)
   def pop(dom: Dom, in: In): Unit = ()
-  def clear = {}
+  def clear() = {}
 
 class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => Widen[In]) extends InStateWidening[Dom, In]:
   class ContextEntry(var in: List[In])
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
   def push(dom: Dom, in: In): MaybeChanged[In] =
-    println(s"PUSH INSTATEWIDEN $dom $in")
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None =>
@@ -217,7 +216,6 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         widenedIn
 
   def pop(dom: Dom, in: In): Unit =
-    println(s"POP INSTATEWIDEN $dom $in")
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None => throw new IllegalStateException()
@@ -227,6 +225,5 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
           case _::Nil => contexts -= ((dom, ctx))
           case _ => ce.in = ce.in.tail
 
-  override def clear: Unit =
-    println(s"CLEAR INSTATEWIDEN")
+  override def clear(): Unit =
     contexts = Map()

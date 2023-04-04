@@ -105,7 +105,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
-      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      case None =>
+        callFrame.getLocalByName(x).getOrElse({System.err.println(s"Unbound variable $x"); failure(UnboundVariable, x)})
     case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
     case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -188,7 +189,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   inline def run(s: Stm)(using rec: Fixed): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
   private inline def enterFunction(fun: Function)(using rec: Fixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
-  private lazy val fixed = {
+  protected[tip] lazy val fixed = {
     fixpoint {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
       case FixIn.Run(s) => run_open(s); FixOut.Run()
