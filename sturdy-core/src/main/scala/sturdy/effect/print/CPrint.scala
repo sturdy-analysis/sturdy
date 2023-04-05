@@ -1,11 +1,13 @@
 package sturdy.effect.print
 
+import sturdy.effect.Concrete
+
 import scala.collection.mutable.ListBuffer
 
-trait CPrint[A] extends Print[A]:
-  private var printed: ListBuffer[A] = ListBuffer()
+class CPrint[A] extends Print[A], Concrete:
+  private val printed: ListBuffer[A] = ListBuffer()
 
   def getPrinted: List[A] = printed.toList
 
-  override def print(a: A): Unit =
+  override def apply(a: A): Unit =
     printed += a

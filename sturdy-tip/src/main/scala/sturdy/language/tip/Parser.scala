@@ -13,7 +13,7 @@ object Parser:
   def parse(source: String): Program =
     program.parseAll(source) match
       case Right(p) => p
-      case Left(err) => throw new IllegalArgumentException(err.toString)
+      case Left(err) => throw new IllegalArgumentException(s"Parse error at ${source.slice(err.failedAtOffset, err.failedAtOffset+10)}: $err")
 
   /* LEXICAL */
 
@@ -56,7 +56,7 @@ object Parser:
   )
 
   def keyword(s: String): P[Unit] =
-    spaced(P.string(s))
+    spaced(P.string(s) *> P.not(letterDigit))
 
   val letter: P[Unit] = P.ignoreCaseCharIn('a' to 'z').void
   val digit: P[Unit] = P.charIn('0' to '9').void
@@ -98,15 +98,13 @@ object Parser:
     case (e1, Some(f)) => f(e1)
   }
 
-  private val recAtom: P[Exp] = P.defer(atom)
   private val recExpression = P.defer(expression)
   private val recStatement = P.defer(statement)
-
 
   val variable: P[Exp] = identifier.map(Exp.Var.apply)
 
   val deref: P[Exp] =
-    (op('*') *> recAtom).map(Exp.Deref.apply)
+    (op('*') *> P.defer(atom)).map(Exp.Deref.apply)
 
   lazy val atom: P[Exp] =
     ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) |
@@ -125,28 +123,28 @@ object Parser:
       .map { case (e, fields) => fields.foldLeft(e)(Exp.FieldAccess.apply) }
       .backtrack
 
-  val term: P[Exp] =
+  lazy val term: P[Exp] =
     access |
     (atom ~ (
-      (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) |
-      (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
+      (op('*') *> P.defer(term)).map(e2 => Exp.Mul(_, e2)) |
+      (op('/') *> P.defer(term)).map(e2 => Exp.Div(_, e2))
     ).?).map(maybeBinOp)
 
-  val operation: P[Exp] =
+  lazy val operation: P[Exp] =
     (term ~ (
-      (op('+') *> recExpression).map(e2 => Exp.Add(_, e2)) |
-      (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2))
+      (op('+') *> P.defer(operation)).map(e2 => Exp.Add(_, e2)) |
+      (op('-') *> P.defer(operation)).map(e2 => Exp.Sub(_, e2))
     ).?).map(maybeBinOp)
 
   lazy val expression: P[Exp] =
     (operation ~ (
-      (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
-      (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
+      (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
+      (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
     ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =
-    (op('*') *> recExpression).map(Assignable.ADeref.apply) |
-    (inParens(op('*') *> recExpression) ~ (op('.') *> identifier)).map(Assignable.ADerefField.apply) |
+    (op('*') *> atom).map(Assignable.ADeref.apply) |
+    (inParens(op('*') *> atom) ~ (op('.') *> identifier)).map(Assignable.ADerefField.apply) |
     (identifier ~ (op('.') *> identifier).?)
       .map {
         case (x, None) => Assignable.AVar(x)

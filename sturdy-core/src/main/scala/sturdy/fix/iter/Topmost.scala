@@ -1,54 +1,73 @@
 package sturdy.fix.iter
 
-import sturdy.effect.AnalysisState
-import sturdy.effect.JoinComputation
-import sturdy.fix.Widening
-import sturdy.fix.{RecurrentCall, Combinator, Stack, Contextual}
-import sturdy.values.JoinValue
+import sturdy.effect.EffectStack
+import sturdy.effect.TrySturdy
+import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, State}
+import sturdy.values.Finite
+import sturdy.values.MaybeChanged
+import sturdy.values.{Join, Widen}
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
-def topmost[Dom, Codom, In, Out, Ctx]
+def topmost[Dom, Codom, In, Out, All, Ctx]
+  (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[In, Out])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
-  : Topmost[Dom, Codom, In, Out, Ctx] = new Topmost(state, context)
+  (using state: State)
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
+  : Topmost[Dom, Codom, In, Out, All, Ctx] =
+  new Topmost(config, state, context)
 
-final class Topmost[Dom, Codom, In, Out, Ctx]
-  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
+final class Topmost[Dom, Codom, In, Out, All, Ctx]
+  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 
-  private val stack: Stack[Dom, Codom, In, Out, Ctx] = new Stack(state, context)
-  private var hasLoop: Boolean = false
+  override def equals(obj: Any): Boolean = super.equals(obj)
+
+  private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
+  private var someComponentIsLooping: Boolean = false
+  private var iterationCount: Int = 1
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
+    @tailrec
     def apply_(dom: Dom): Codom =
-      if (stack.height > 0) {
-        step(f, dom, state.getInState()).get
+      if (stack.height == 0) {
+        val allState: state.All = state.getAllState
+        val result = step(f, dom)
+        if (someComponentIsLooping) {
+          if (Fixpoint.DEBUG) {
+            iterationCount += 1
+            println(s"## REPEAT (Iteration $iterationCount) of $dom")
+          }
+          someComponentIsLooping = false
+          state.setAllState(allState)
+          apply_(dom)
+        } else
+          result.getOrThrow
       } else {
-        // this is the topmost call
-        stack.repeatUntilStable { () =>
-          hasLoop = false
-          val result = step(f, dom, state.getInState())
-          if (!hasLoop)
-            return result.get
-          result
-        }.get
+        step(f, dom).getOrThrow
       }
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom, inState: In): Try[Codom] =
-    stack.push(dom, inState) match
-      case Some(result) => 
+  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
+    val in = state.getInState(dom)
+    val outBefore = state.getOutState(dom)
+    stack.push(dom, in, outBefore) match
+      case stack.PushResult.Recurrent(result, widenedOut) =>
+        widenedOut.foreach(state.setOutState(dom, _))
         result
-      case None =>
-        val result = Try(f(dom))
-        val (widenedResult, looping) = stack.pop(dom, inState, result)
-        hasLoop = hasLoop || looping
-        widenedResult
+      case stack.PushResult.Continue(widenedIn) =>
+        widenedIn.foreach(state.setInState(dom, _))
+        val result = TrySturdy(f(dom))
+        val out = state.getOutState(dom)
+        stack.pop(dom, widenedIn.getOrElse(in), result, out) match
+          case stack.PopResult.Stable =>
+            result
+          case stack.PopResult.Unstable(newresult, newout) =>
+            newout.foreach(state.setOutState(dom, _))
+            someComponentIsLooping = true
+            newresult

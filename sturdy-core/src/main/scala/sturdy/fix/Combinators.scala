@@ -1,8 +1,20 @@
 package sturdy.fix
 
+import sturdy.effect.ObservableJoin
+import sturdy.effect.TrySturdy
+import sturdy.effect.except.ObservableExcept
+import sturdy.fix.cfg.ControlFlowGraph
+import sturdy.fix.cfg.ControlLogger
+
 import scala.reflect.ClassTag
 
-trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]
+trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]:
+  def fixpoint: CombinatorFixpoint[Dom, Codom] = new CombinatorFixpoint {
+    override lazy val phi: Combinator[Dom, Codom] = Combinator.this
+  }
+  
+trait ContextualCombinator[Ctx, Dom, Codom] extends Function[Contextual[Ctx, Dom, Codom] ?=> Dom => Codom, Dom => Codom]:
+  type Context = Contextual[Ctx, Dom, Codom]
 
 def identity[Dom, Codom]: Identity[Dom, Codom] = new Identity
 final class Identity[Dom, Codom] extends Combinator[Dom, Codom] {
@@ -14,8 +26,8 @@ final class Const[Dom, Codom](c: Dom => Codom) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = c
 }
 
-def filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boolean, phi: Phi): Filter[Dom, Codom, Phi] = new Filter(pred, phi)
-final class Filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boolean, val phi: Phi) extends Combinator[Dom, Codom] {
+def filter[Dom, Codom](pred: Dom => Boolean, phi: Combinator[Dom, Codom]): Filter[Dom, Codom] = new Filter(pred, phi)
+final class Filter[Dom, Codom](pred: Dom => Boolean, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     if (pred(dom))
       phi(f)(dom)
@@ -23,8 +35,10 @@ final class Filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boole
       f(dom)
 }
 
-def unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, phi: Phi): Unwind[Dom, Codom, Phi] = new Unwind(steps, phi)
-final class Unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, val phi: Phi) extends Combinator[Dom, Codom] {
+val UnwindingProperty = "loop unwinding"
+
+def unwind[Dom, Codom](steps: Int, phi: Combinator[Dom, Codom]): Unwind[Dom, Codom] = new Unwind(steps, phi)
+final class Unwind[Dom, Codom](steps: Int, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   private var stepsLeft: Int = steps
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     stepsLeft -= 1
@@ -34,11 +48,10 @@ final class Unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, val ph
       phi(f)(dom)
 }
 
-def dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]]
-  (choose: Dom => Int, phis: Iterable[Phi])
-  (using ClassTag[Phi])
-  : Dispatch[Dom, Codom, Phi] = new Dispatch(choose, phis.toArray)
-final class Dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]](choose: Dom => Int, val phis: Array[Phi]) extends Combinator[Dom, Codom] {
+def dispatch[Dom, Codom]
+  (choose: Dom => Int, phis: Iterable[Combinator[Dom, Codom]])
+  : Dispatch[Dom, Codom] = new Dispatch(choose, phis.toArray)
+final class Dispatch[Dom, Codom](choose: Dom => Int, val phis: Array[Combinator[Dom, Codom]]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     val ix = choose(dom)
     if (ix >= 0)
@@ -47,14 +60,22 @@ final class Dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]](choose: Dom => I
       f(dom)
 }
 
-trait Logger[Dom]:
-  def enter(d: Dom): Unit
-  def exit(d: Dom): Unit
-
-def log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], phi: Phi): Log[Dom, Codom, Phi] = new Log(logger, phi)
-final class Log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], val phi: Phi) extends Combinator[Dom, Codom] {
+def conditional[Dom, Codom]
+  (cond: Dom => Boolean, ifTrue: Combinator[Dom, Codom], ifFalse: Combinator[Dom, Codom])
+  : Conditional[Dom, Codom] = new Conditional(cond, ifTrue, ifFalse)
+final class Conditional[Dom, Codom](cond: Dom => Boolean, phiIfTrue: Combinator[Dom, Codom], phiIfFalse: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
-    logger.enter(dom)
-    try phi(f)(dom) finally
-      logger.exit(dom)
+    val bool = cond(dom)
+    if (bool)
+      phiIfTrue(f)(dom)
+    else
+      phiIfFalse(f)(dom)
 }
+
+def control[Ctx, Dom, Codom, Exc, Node <: ControlFlowGraph.Node]
+  (contextSensitive: Boolean, startNode: Node)
+  (getDomNode: Dom => Option[Node])
+  (getCodomNode: (Dom, Codom) => Option[Node])
+  (using obsJoin: ObservableJoin, obsExcept: ObservableExcept[Exc])
+  : ControlLogger[Ctx, Dom, Codom, Exc, Node] =
+  new ControlLogger(contextSensitive, startNode, getDomNode, getCodomNode, obsJoin, obsExcept)

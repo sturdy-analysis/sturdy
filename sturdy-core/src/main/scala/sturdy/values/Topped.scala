@@ -1,34 +1,60 @@
 package sturdy.values
 
-enum Topped[+V]:
+enum Topped[+V] extends Iterable[V]:
   case Top
   case Actual(v: V)
 
-  def foreach[A](f: V => A): Unit = this match
+  def isActual: Boolean = this match
+    case Top => false
+    case Actual(_) => true
+
+  def isTop: Boolean = this match
+    case Top => true
+    case Actual(_) => false
+
+  override def iterator: Iterator[V] = this match
+    case Top => Iterator.empty
+    case Actual(v) => Iterator.single(v)
+
+  inline def get: V = this match
+    case Top => throw new MatchError(this)
+    case Actual(v) => v
+
+  override def foreach[A](f: V => A): Unit = this match
     case Top => // nothing
     case Actual(v) => f(v)
 
-  def filter(f: V => Boolean): Topped[V] = this match
+  override def filter(f: V => Boolean): Topped[V] = this match
     case Top => Top
     case Actual(v) => if (f(v)) this else Top
 
-  def withFilter(f: V => Boolean): Topped[V] =
-    filter(f)
+  override def toString(): String = this match
+    case Top => s"Top"
+    case Actual(v) => v.toString
 
   final def toString(suffix: String): String = this match
     case Top => s"Top$suffix"
     case Actual(v) => v.toString
 
-  final def map[A](f: V => A): Topped[A] = this match
+  override final def map[A](f: V => A): Topped[A] = this match
     case Top => Top
     case Actual(v) => Actual(f(v))
 
-  final def flatMap[A](f: V => Topped[A]): Topped[A] = this match
+  inline final def flatMap[A](f: V => Topped[A]): Topped[A] = this match
     case Top => Top
     case Actual(v) => f(v)
 
+  inline def binary[B, AA >: V](f: (V, AA) => B, other: Topped[AA]): Topped[B] =
+    for (i1 <- this; i2 <- other) yield f(i1, i2)
+
+  inline def unary[B](f: V => B): Topped[B] = map(f)
+
+  def toOption: scala.Option[V] = this match
+    case Top => scala.None
+    case Actual(v) => scala.Some(v)
+
 given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
-  override def abstractly(c: C): Topped[A] = Topped.Actual(abs.abstractly(c))
+  override def apply(c: C): Topped[A] = Topped.Actual(abs.apply(c))
 
 given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] with
   override def lteq(x: Topped[A], y: Topped[A]): Boolean = (x, y) match
@@ -39,16 +65,15 @@ given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] 
 given TopTopped[V]: Top[Topped[V]] with
   override def top: Topped[V] = Topped.Top
 
-object Topped:
-  given flatToppedJoin[V]: JoinValue[Topped[V]] with
-    def joinValues(v1: Topped[V], v2: Topped[V]): Topped[V] =
-      if v1 == v2 then
-        v1
-      else
-        Topped.Top
+given JoinToppedFlat[V, W <: Widening](using Structural[V]): Combine[Topped[V], W] with
+  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) => if (x1 == x2) Unchanged(v1) else Changed(Topped.Top)
 
-  given nestedToppedJoin[V](using j: JoinValue[V]): JoinValue[Topped[V]] with
-    def joinValues(v1: Topped[V], v2: Topped[V]): Topped[V] = (v1, v2) match
-      case (Top, _) => Top
-      case (_, Top) => Top
-      case (Actual(x1), Actual(x2)) => Actual(j.joinValues(x1, x2))
+given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
+  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) => j(x1, x2).map(Topped.Actual.apply)
+

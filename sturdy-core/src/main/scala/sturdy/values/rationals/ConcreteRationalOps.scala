@@ -1,6 +1,7 @@
 package sturdy.values.rationals
 
 import sturdy.effect.failure.Failure
+import sturdy.values.convert.NilCC
 import org.apache.commons.math3.exception.MathArithmeticException
 import org.apache.commons.math3.fraction.Fraction
 
@@ -46,11 +47,11 @@ given concreteRationalOps(using f: Failure): RationalOps[Rational] with
   }
 
 given ConcreteConvertIntRational: ConvertIntRational[Int, Rational] with
-  override def apply(i: Int, conf: Unit): Rational = Rational(i)
+  override def apply(i: Int, conf: NilCC.type): Rational = Rational(i)
 given ConcreteConvertRationalInt: ConvertRationalInt[Rational, Int] with
-  override def apply(r: Rational, conf: Unit): Int = r.f.intValue()
+  override def apply(r: Rational, conf: NilCC.type): Int = r.f.intValue()
 
 given ConcreteConvertDoubleRational: ConvertDoubleRational[Double, Rational] with
-  override def apply(d: Double, conf: Unit): Rational = Rational(new Fraction(d))
+  override def apply(d: Double, conf: NilCC.type): Rational = Rational(new Fraction(d))
 given ConcreteConvertRationalDouble: ConvertRationalDouble[Rational, Double] with
-  override def apply(r: Rational, conf: Unit): Double = r.f.doubleValue()
+  override def apply(r: Rational, conf: NilCC.type): Double = r.f.doubleValue()

@@ -12,7 +12,7 @@ object Labeled:
     val n = _next
     _next += 1
     n
-  def reset(): Unit = 
+  def reset(): Unit =
     _next = 0
 
 trait Labeled:

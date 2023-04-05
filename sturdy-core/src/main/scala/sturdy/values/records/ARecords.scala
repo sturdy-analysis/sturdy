@@ -1,12 +1,11 @@
 package sturdy.values.records
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
-import sturdy.fix.Widening
-import sturdy.util.{*, given}
-import sturdy.values.{JoinValue, MayMust, PartialOrder, Top, joinMayMust, mayMustPO}
+import sturdy.util.*
+import sturdy.values.*
+import sturdy.values.booleans.{BooleanBranching, BooleanSelection}
 import sturdy.values.relational.EqOps
-import sturdy.values.Topped
 
 import reflect.Selectable.reflectiveSelectable
 
@@ -14,51 +13,42 @@ enum ARecord[F, V]:
   case Top()
   case Map(m: Predef.Map[F, V])
 
-given ARecordOps[F, V](using Failure, JoinValue[V], Top[V])(using j: JoinComputation): RecordOps[F, V, ARecord[F, V]] with
+given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: EffectStack): RecordOps[F, V, ARecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): ARecord[F, V] =
     ARecord.Map(fields.toMap)
   override def lookupRecordField(rec: ARecord[F, V], field: F): V = rec match
-    case ARecord.Top() => j.joinComputations(Top.top)(UnboundRecordField(field).failedLookup(rec))
+    case ARecord.Top() => j.joinWithFailure(Top.top)(UnboundRecordField(field).failedLookup(rec))
     case ARecord.Map(m) => m.get(field) match
       case None => UnboundRecordField(field).failedLookup(rec)
       case Some(v) => v
   override def updateRecordField(rec: ARecord[F, V], field: F, newval: V): ARecord[F, V] = rec match
     case ARecord.Top() =>
-      given Lazy[JoinValue[V]] = implicitly
-      j.joinComputations(ARecord.Top())(UnboundRecordField(field).failedLookup(rec))
+      given Lazy[Join[V]] = lazily(implicitly)
+      j.joinWithFailure(ARecord.Top())(UnboundRecordField(field).failedLookup(rec))
     case ARecord.Map(m) => m.get(field) match
       case None => UnboundRecordField(field).failedUpdate(rec)
       case Some(_) => ARecord.Map(m + (field -> newval))
 
-given ARecordJoin[F, V](using Lazy[JoinValue[V]]): JoinValue[ARecord[F, V]] with
-  override def joinValues(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
-    case (ARecord.Top(), _ ) | (_, ARecord.Top()) => ARecord.Top()
+given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
+  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): MaybeChanged[ARecord[F, V]] = (rec1, rec2) match
+    case (ARecord.Top(), _ ) => Unchanged(rec1)
+    case (_, ARecord.Top()) => Changed(rec2)
     case (ARecord.Map(m1), ARecord.Map(m2)) =>
       if (m1.size != m2.size)
-        return ARecord.Top()
+        return Changed(ARecord.Top())
       var joined =  m1
+      var changed = false
       for ((f, v2) <- m2)
         joined.get(f) match
-          case None => return ARecord.Top()
+          case None => return Changed(ARecord.Top())
           case Some(v1) =>
-            val joinedV = JoinValue.join(v1, v2)(using force)
-            joined += f -> joinedV
-      ARecord.Map(joined)
+            Combine[V, W](v1, v2)(using force).ifChanged { changedV =>
+              joined += f -> changedV
+              changed = true
+            }
+      MaybeChanged(ARecord.Map(joined), changed)
 
-given ARecordWidening[F, V](using Lazy[Widening[V]]): Widening[ARecord[F, V]] with
-  override def widen(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
-    case (ARecord.Top(), _ ) | (_, ARecord.Top()) => ARecord.Top()
-    case (ARecord.Map(m1), ARecord.Map(m2)) =>
-      if (m1.size != m2.size)
-        return ARecord.Top()
-      var joined =  m1
-      for ((f, v2) <- m2)
-        joined.get(f) match
-          case None => return ARecord.Top()
-          case Some(v1) =>
-            val joinedV = Widening.widen(v1, v2)(using force)
-            joined += f -> joinedV
-      ARecord.Map(joined)
+given FiniteARecord[F, V](using Finite[F], Lazy[Finite[V]]): Finite[ARecord[F, V]] with {}
 
 given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[ARecord[F, V]] with
   override def lteq(rec1: ARecord[F, V], rec2: ARecord[F, V]): Boolean = (rec1, rec2) match
@@ -70,13 +60,13 @@ given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[AReco
         return false
       // all entries e1 of rec1 have a corresponding e2 in rec2 that s.t. e1 <= e2
       for ((f, v1) <- m1) {
-        val v2 = m2.get(f).getOrElse(return false)
+        val v2 = m2.getOrElse(f, return false)
         if (!PartialOrder[V](using force).lteq(v1, v2))
           return false
       }
       true
 
-given ARecordEqOps[F, V, B <: {def asBoolean: Topped[Boolean]}](using Lazy[EqOps[V, B]]): EqOps[ARecord[F, V], Topped[Boolean]] with
+given ARecordEqOps[F, V, B](using Lazy[EqOps[V, B]], BooleanSelection[B, Topped[Boolean]]): EqOps[ARecord[F, V], Topped[Boolean]] with
   override def equ(rec1: ARecord[F, V], rec2: ARecord[F, V]): Topped[Boolean] = (rec1, rec2) match
     case (ARecord.Top(), _) | (_, ARecord.Top()) => Topped.Top
     case (ARecord.Map(m1), ARecord.Map(m2)) =>
@@ -85,8 +75,9 @@ given ARecordEqOps[F, V, B <: {def asBoolean: Topped[Boolean]}](using Lazy[EqOps
         return Topped.Actual(false)
 
       for ((f, v1) <- m1) {
-        val v2 = m2.get(f).getOrElse(return Topped.Actual(false))
-        EqOps.equ(v1, v2)(using force).asBoolean match
+        val v2 = m2.getOrElse(f, return Topped.Actual(false))
+        val b = EqOps.equ(v1, v2)(using force)
+        BooleanSelection(b, Topped.Actual(true), Topped.Actual(false)) match
           case Topped.Top => return Topped.Top
           case Topped.Actual(false) => return Topped.Actual(false)
           case _ => // nothing

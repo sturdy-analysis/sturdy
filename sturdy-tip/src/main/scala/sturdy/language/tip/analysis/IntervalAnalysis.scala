@@ -1,92 +1,81 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.{JoinComputation, AnalysisState}
+import sturdy.{Executor, fix, data}
+import sturdy.data.MayJoin
+import sturdy.data.{WithJoin, given}
+import sturdy.effect.given
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.branching.ABoolBranching
-import sturdy.effect.callframe.CCallFrame
-import sturdy.effect.failure.{AFailureCollect, Failure}
-import sturdy.effect.print.{APrintPrefix, given}
+import sturdy.effect.allocation.Allocation
+import sturdy.effect.callframe.JoinableDecidableCallFrame
+import sturdy.effect.failure.{CollectedFailures, Failure}
+import sturdy.effect.print.Print
+import sturdy.effect.print.PrintBound
+import sturdy.effect.print.given
+import sturdy.effect.store
+import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
-import sturdy.effect.store.AStoreGenericThreadded.StoreState
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
-import sturdy.fix.given
+import sturdy.fix.StackConfig
+import sturdy.language.tip.TipFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.ints.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut}
+import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
-import Fix.*
 
 object IntervalAnalysis extends Interpreter,
-  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
+  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
-  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
+  override type J[A] = WithJoin[A]
 
-  class Effects(initEnvironment: Environment, initStore: Store)
-    extends ABoolBranching[Value]
-      with CCallFrame[Unit, String, Addr]((), initEnvironment)
-      with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
-      with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
-      with APrintPrefix[Value]
-      with AUserInput[Value](Value.IntValue(IntIntervalApron.Top))
-      with AFailureCollect
-      with AnalysisState[Store, (Store, APrintPrefix.PrintResult[Value])]:
-    override def getInState(): InState = getStore
-    override def setInState(in: InState): Unit = setStore(in)
-    override def getOutState(): OutState = (getStore, getPrinted)
-    override def setOutState(out: OutState): Unit =
-      setStore(out._1)
-      setPrinted(out._2)
-    override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
+  given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
-    val effects = new Effects(initEnvironment, initStore)
-    given Effects = effects
-    new Instance(effects, steps)
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+    override def jv: WithJoin[Value] = implicitly
 
-  class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
-    extends Interpreter with GenericInterpreter[Value, Addr, Effects](effects):
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
+    private given Failure = failure
 
-    given Effects = effects
+    given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+    override val intOps: IntegerOps[Int, Value] = implicitly
+    override val compareOps: OrderingOps[Value, Value] = implicitly
+    override val eqOps: EqOps[Value, Value] = implicitly
+    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val refOps: ReferenceOps[Addr, Value] = implicitly
+    override val recOps: RecordOps[Field, Value, Value] = implicitly
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    final val vintOps: IntOps[VInt] = implicitly
-    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
-    final val vintEqOps: EqOps[VInt, VBool] = implicitly
-    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
-    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
-    final val vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
-    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
-    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
+    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
+    override val print: PrintBound[Value] = new PrintBound
+    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))
 
-    var bounds: Set[Int] = Set.empty
-    given fix.Widening[IntIntervalApron] = new IntIntervalApronWiden(bounds)
-    given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
+    var bounds: Set[Int] = Set()
+    given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)
+    given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
 
-    val callSites = callSitesLogger()
+    override def copyState(from: Executor): Unit = {
+      super.copyState(from)
+      bounds = from.asInstanceOf[Instance].bounds
+    }
 
-    val phi =
-      fix.log(callSites,
-        fix.contextSensitive(callSites.callString(2),
-          fix.dispatch(isCallOrWhile, Seq(
-            // call
-            fix.iter.topmost,
-            // while
-            fix.unwind(steps,
-              fix.iter.innermost
-            )
-          ))
-        )
-      )
+    final override val fixpoint =
+      callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
+        fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
+      ).fixpoint
+
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
+

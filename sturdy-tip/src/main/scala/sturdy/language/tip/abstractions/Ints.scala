@@ -1,44 +1,66 @@
 package sturdy.language.tip.abstractions
 
+import sturdy.effect.failure.Failure
+import sturdy.language.tip.TipFailure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
-import sturdy.values.ints.{IntInterval, IntIntervalApron, IntSign, given}
+import sturdy.values.ints.{IntInterval, IntSign, given}
 import sturdy.language.tip.Interpreter
 
 object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
-    final type VInt = IntIntervalApron
+    final type VInt = IntInterval
 
-    final def topInt(using Interpreter): IntIntervalApron = IntIntervalApron.Top
+    final def topInt(using Interpreter): IntInterval = IntInterval.Top
 
     final def asBoolean(v: Value): VBool = v match
-      case Value.IntValue(i) => EqOps.equ(i, IntIntervalApron(0, 0)).map(!_)
+      case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
       case Value.TopValue => Topped.Top
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => IntIntervalApron(0, 1)
-      case Topped.Actual(true) => IntIntervalApron(1, 1)
-      case Topped.Actual(false) => IntIntervalApron(0, 0)
+      case Topped.Top => IntInterval(0, 1)
+      case Topped.Actual(true) => IntInterval(1, 1)
+      case Topped.Actual(false) => IntInterval(0, 0)
     )
 
   trait Sign extends Interpreter :
     final type VBool = Topped[Boolean]
     final type VInt = IntSign
 
-    final def topInt(using Interpreter): IntSign = IntSign.TopSign
+    final def topInt: IntSign = IntSign.TopSign
+    final def topBool: Topped[Boolean] = Topped.Top
 
-    final def asBoolean(v: Value): VBool = v match
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
       case Value.IntValue(i) => i match
         case IntSign.Zero => Topped.Actual(false)
         case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
         case _ => Topped.Top
       case Value.TopValue => Topped.Top
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
       case Topped.Top => IntSign.ZeroOrPos
       case Topped.Actual(true) => IntSign.Pos
       case Topped.Actual(false) => IntSign.Zero
+    )
+
+  trait BitVectors extends Interpreter :
+    final type VBool = Topped[Boolean]
+    final type VInt = AbstractBitVector[Int]
+
+    final def topInt: AbstractBitVector[Int] = TopAbstractBitVectorInt.top
+
+    final def topBool: Topped[Boolean] = Topped.Top
+
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
+      case Value.IntValue(i) => i.toBoolean
+      case Value.TopValue => Topped.Top
+      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
+
+    final def boolean(b: VBool): Value = Value.IntValue(b match
+      case Topped.Top => Join(AbstractBitVector.constant(0), AbstractBitVector.constant(1)).get
+      case Topped.Actual(true) => AbstractBitVector.constant(1)
+      case Topped.Actual(false) => AbstractBitVector.constant(0)
     )

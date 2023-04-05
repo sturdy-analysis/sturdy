@@ -1,78 +1,64 @@
 package sturdy.effect.store
 
-import sturdy.effect.AnalysisState
-import sturdy.effect.JoinComputation
-import sturdy.effect.store.AStoreGenericThreadded.StoreState
-import sturdy.values.JoinValue
+import sturdy.data.given
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.Effect
+import sturdy.effect.TrySturdy
+import sturdy.values.{Finite, Join, Widen}
 
 import scala.collection.mutable.ListBuffer
 
-/*
+/**
  * An abstract threadded store. The store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
-  extends JoinComputation:
+trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) extends Effect:
 
   protected var store: Map[Addr, V] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
-
-  def getStore: Map[Addr, V] = store
-  protected def setStore(s: Map[Addr, V]): Unit =
-    this.store = s
-    this.dirtyAddrs = s.keySet
 
   protected def weakUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
-      case Some(old) => store += x -> j.joinValues(old, v)
+      case Some(old) => Join(old, v).ifChanged(store += x -> _)
 
-  override def joinComputations[A](f: => A)(g: => A): Join[A] =
-    val snapshot = store
-    var snapshotDirtyAddrs = dirtyAddrs
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new AStoreGenericJoiner)
+  private class AStoreGenericJoiner[A] extends ComputationJoiner[A] {
+    private val snapshot = store
+    private val snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
+    private var fStore: Map[Addr, V] = _
+    private var fDirtyAddrs: Set[Addr] = _
 
-    var fStore: Map[Addr, V] = null
-    var fDirtyAddrs: Set[Addr] = null
-
-    val joinedResult = super.joinComputations(f) {
+    override def inbetween(): Unit =
       fStore = store
       fDirtyAddrs = dirtyAddrs
-
       store = snapshot
       dirtyAddrs = Set()
-      g
-    }
 
-    for (x <- fDirtyAddrs)
-      weakUpdate(x, fStore(x))
+    override def retainNone(): Unit =
+      store = snapshot
 
-    dirtyAddrs ++= snapshotDirtyAddrs
-    dirtyAddrs ++= fDirtyAddrs
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      store = fStore
+      dirtyAddrs = snapshotDirtyAddrs ++ fDirtyAddrs
 
-    joinedResult
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      dirtyAddrs ++= snapshotDirtyAddrs
 
-  def getStoreJoinedWith(other: Map[Addr, V]): Map[Addr, V] =
-    var joined = other
-    for (x <- this.dirtyAddrs)
-      joined.get(x) match
-        case None => joined += x -> store(x)
-        case Some(otherV) =>
-          val thisV = store(x)
-          val joinedV = j.joinValues(otherV, thisV)
-          joined += x -> joinedV
-    joined
-
-object AStoreGenericThreadded:
-  case class StoreState[Addr, V](store: Map[Addr, V])(using j: JoinValue[V]) {
-    def join(other: StoreState[Addr, V]): StoreState[Addr, V] =
-      var joined = this.store
-      for ((x, v) <- other.store)
-        joined.get(x) match
-          case None => joined += x -> v
-          case Some(thisV) =>
-            val joinedV = j.joinValues(v, thisV)
-            joined += x -> joinedV
-      StoreState(joined)
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      for (x <- fDirtyAddrs)
+        weakUpdate(x, fStore(x))
+      dirtyAddrs ++= snapshotDirtyAddrs
+      dirtyAddrs ++= fDirtyAddrs
   }
+
+  override type State = Map[Addr, V]
+  override def getState: Map[Addr, V] = store
+  override def setState(s: Map[Addr, V]): Unit =
+    this.store = s
+    this.dirtyAddrs = s.keySet
+  override def join: Join[Map[Addr, V]] = implicitly
+  override def widen: Widen[Map[Addr, V]] = implicitly
+

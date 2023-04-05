@@ -2,7 +2,6 @@ package sturdy.language.tip
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import Parser.*
@@ -14,9 +13,9 @@ import scala.jdk.StreamConverters.*
 class ParserTest extends AnyFlatSpec, Matchers:
   behavior of "Tip parser"
 
-  val uri = classOf[ParserTest].getResource("/sturdy/language/tip").toURI();
+  val uri = classOf[ParserTest].getResource("/sturdy/language/tip").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")

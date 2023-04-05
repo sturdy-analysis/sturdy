@@ -1,4 +1,6 @@
 package sturdy.effect.userinput
 
-trait AUserInput[A](approx: A) extends UserInput[A]:
-  override def readInput() = approx
+import sturdy.effect.Stateless
+
+class AUserInput[A](approx: A) extends UserInput[A], Stateless:
+  override def read(): A = approx

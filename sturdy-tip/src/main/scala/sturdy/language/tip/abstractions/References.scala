@@ -1,21 +1,21 @@
 package sturdy.language.tip.abstractions
 
+import sturdy.data.WithJoin
 import sturdy.language.tip.Interpreter
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.values.Powerset
 import sturdy.values.references.AllocationSiteRef
 import sturdy.values.references.AllocationSiteAddr
-import sturdy.language.tip.GenericInterpreter.AllocationSite
-import sturdy.language.tip.GenericInterpreter.GenericEffects
+import sturdy.language.tip.AllocationSite
+
+import reflect.Selectable.reflectiveSelectable
 
 object References:
-  trait AllocationSites extends Interpreter :
+  trait AllocationSites extends Interpreter:
     final type Addr = Powerset[AllocationSiteAddr]
     final type VRef = Powerset[AllocationSiteRef]
-    final type Environment = Map[String, Addr]
+    final type Environment = Map[String, Value]
     final type Store = Map[AllocationSiteAddr, Value]
-
-    type Effects <: GenericEffects[Value, Addr] & AStoreMultiAddrThreadded[AllocationSiteAddr, Value]
 
     def fromAllocationSite(asite: AllocationSite): Addr = Powerset(asite match
       case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)
@@ -24,6 +24,6 @@ object References:
       case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
     )
 
-    final def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
-      val addrs = self.effects.getStore.keySet
+    final def topReference(using self: Instance): Powerset[AllocationSiteRef] =
+      val addrs = self.store.getState.asInstanceOf[Map[AllocationSiteAddr, _]].keySet
       Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)

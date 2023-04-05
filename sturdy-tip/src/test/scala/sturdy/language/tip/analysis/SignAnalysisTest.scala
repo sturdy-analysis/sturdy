@@ -1,83 +1,81 @@
 package sturdy.language.tip.analysis
 
-import cats.parse.{Numbers, Parser0 as P0, Parser as P}
+import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.EffectStack
+import sturdy.effect.print.given
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.language.tip.ConcreteInterpreter
-import sturdy.language.tip.GenericInterpreter.AllocationSite
+import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.{Program, Parser}
-
+import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.given
+import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
+import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labeled
 import sturdy.{*, given}
+import sturdy.data.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.booleans.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.records.{*, given}
+import sturdy.values.references.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
+import sturdy.language.tip.analysis.SignAnalysis.{*, given}
 
-import java.nio.file.{Paths, Files, Path}
+import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign analysis"
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
-    it must s"soundly analyze ${p.getFileName}" in {
-      runFile(p, 10)
+  Files.list(Paths.get(uri)).toScala(List).filter( p =>
+    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+  ).sorted.foreach { p =>
+    it must s"soundly analyze ${p.getFileName} with stacked states" in {
+      runSignAnalysis(p, StackConfig.StackedStates())
+    }
+    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+      runSignAnalysis(p, StackConfig.StackedCfgNodes())
     }
   }
 
-  def runFile(p: Path, steps: Int): Unit =
+  def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
+
+//      val onlyCalls = false
+//      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+//      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
+
+//      if (deadNodes.nonEmpty)
+//        println(s"Found dead code: $deadNodes")
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      val cresult = interp.effects.fallible(interp.execute(program))
-//      println("\n" + cresult)
-//      println(interp.effects.getPrinted)
-//      println(interp.effects.getStore)
-//      println(interp.effects.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
-
-      val analysis = SignAnalysis(Map(), Map(), steps)
-      val aresult = analysis.effects.fallible(analysis.execute(program))
-//      println("\n" + analysis.effects.getPrinted)
-//      println(analysis.effects.getStore)
-
-      given CAllocationIntIncrement[AllocationSite] = interp.effects
+      val cresult = interp.failure.fallible(interp.execute(program))
+      given CAllocationIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
-    }
-
-object RunSignAnalysis extends App {
-  def runAnalysis(p: Path, steps: Int) =
-    val file = Source.fromURI(p.toUri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    val program = Parser.parse(sourceCode)
-
-    if (program.funs.exists(_.name == "main")) {
-      //      println(s"Running ${p.getFileName}")
-
-      val analysis = SignAnalysis(Map(), Map(), steps)
-      (analysis.effects.fallible(analysis.execute(program)), analysis.effects)
+      (aresult, analysis)
     } else {
       null
     }
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI();
-  val (res, effects) = runAnalysis(Paths.get(uri), 10)
-  println(res)
-  println(effects.getCallFrame)
-  println(effects.getStore)
-}

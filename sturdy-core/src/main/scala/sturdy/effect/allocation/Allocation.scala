@@ -1,4 +1,6 @@
 package sturdy.effect.allocation
 
-trait Allocation[Addr, -Context]:
-  def alloc(ctx: Context): Addr
+import sturdy.effect.Effect
+
+trait Allocation[Addr, -Context] extends Effect:
+  def apply(ctx: Context): Addr

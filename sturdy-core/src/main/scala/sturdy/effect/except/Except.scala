@@ -1,18 +1,45 @@
 package sturdy.effect.except
 
-case class ExceptException[E](e: E) extends Throwable
+import sturdy.data.JEither
+import sturdy.data.MayJoin
+import sturdy.effect.Effect
+import sturdy.effect.SturdyException
+import sturdy.values.exceptions.Exceptional
 
-trait Except[E]:
-  @throws[ExceptException[E]]
-  def throws(ex: E): Nothing
 
-  def tries[A, B](f: => A)(success: A => B)(fail: E => B): B
+trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effect, ObservableExcept[Exc]:
+  val exceptional: Exceptional[Exc, E, J]
 
-  final def catches[A](f: => A)(fail: E => A): A =
-    tries(f)(identity)(fail)
+  @throws[SturdyException]
+  def throws(ex: Exc): Nothing
 
-  final def finalizes[A](f: => A)(g: => Unit): A =
-    tries(f)(a => {g; a})(e => {g; throws(e)})
+  protected def tries[A](f: => A): JEither[J, A, E]
 
-  final def catchFinally[A](f: => A)(fail: E => A)(g: => Unit): A =
-    tries(f)(a => {g; a})(e => try fail(e) finally g)
+  final def tryCatch[A](f: => A)(handle: Exc => A): J[A] ?=> A =
+    tryStart()
+    try tries(f).either(identity){ e =>
+      catchStart()
+      try exceptional.handle(e)(exc => handling(exc, handle))
+      finally catchEnd()
+    } finally {
+      tryEnd()
+    }
+
+  final def tryFinally[A](f: => A)(g: => Unit): J[A] ?=> A =
+    tryStart()
+    try tries(f).either(a => {g; a}){ e =>
+      catchStart()
+      try exceptional.handle(e) { exc =>
+        handling(exc)
+        g
+        throws(exc)
+      } finally {
+        catchEnd()
+      }
+    } finally {
+      tryEnd()
+    }
+
+//  final def tryCatchFinally[A](f: => A)(handle: Exc => A)(g: => Unit): MayJoin[A] ?=> A =
+//    val tried = tries(f)
+//    tried.either(a => {g; a})(e => try exceptional.handle(e)(handle) finally g)

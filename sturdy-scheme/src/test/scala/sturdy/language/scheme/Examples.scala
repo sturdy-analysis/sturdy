@@ -2,7 +2,7 @@ package sturdy.language.scheme
 
 import sturdy.language.scheme.Literal.*
 import sturdy.language.scheme.Exp.*
-import sturdy.util.Labeled
+import sturdy.util.Labled
 
 object Examples:
   

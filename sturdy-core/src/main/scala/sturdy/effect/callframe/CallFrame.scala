@@ -1,14 +1,24 @@
 package sturdy.effect.callframe
 
-import sturdy.effect.MayCompute
+import sturdy.data.MayJoin
+import sturdy.data.{NoJoin, JOption}
+import sturdy.effect.Effect
 
-trait CallFrame[Data, Var, V]:
-  type CallFrameJoin[A]
-  type CallFrameJoinComp
+trait CallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends Effect:
+  def data: Data
+  def getLocal(x: Int): JOption[J, V]
+  def getLocalByName(x: Var): JOption[J, V]
+  def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
 
-  def getFrameData: Data
-  def getLocal(x: Var): MayCompute[V, CallFrameJoin, CallFrameJoinComp]
-  def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
+  final def getLocalOrElse(x: Int, default:  => V)(using J[V]): V =
+    getLocal(x).getOrElse(default)
+  final def getLocalByNameOrElse(x: Var, default:  => V)(using J[V]): V =
+    getLocalByName(x).getOrElse(default)
 
-trait MutableCallFrame[Data, Var, V] extends CallFrame[Data, Var, V]:
-  def setLocal(x: Var, v: V): MayCompute[Unit, CallFrameJoin, CallFrameJoinComp]
+trait MutableCallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends CallFrame[Data, Var, V, J]:
+  def setLocal(x: Int, v: V): JOption[J, Unit]
+  def setLocalByName(x: Var, v: V): JOption[J, Unit]
+
+  final def setLocalOrElse(x: Int, v: V, default: => Unit)(using J[Unit]): Unit =
+    setLocal(x, v).getOrElse(default)
+

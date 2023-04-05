@@ -1,6 +1,6 @@
 package sturdy.fix.context
 
-import sturdy.effect.AnalysisState
+import sturdy.fix.State
 
 trait Sensitivity[Dom, Ctx] extends Function[Dom, Ctx]:
   def emptyContext: Ctx
@@ -10,6 +10,9 @@ trait Sensitivity[Dom, Ctx] extends Function[Dom, Ctx]:
 
   /** Returns the context that might be new. */
   override def apply(dom: Dom): Ctx
+  
+  def &&[OtherCtx](s: Sensitivity[Dom, OtherCtx]): Sensitivity[Dom, (Ctx, OtherCtx)] =
+    new Product(this, s)
 
 final class Product[Dom, Ctx1, Ctx2](s1: Sensitivity[Dom, Ctx1], s2: Sensitivity[Dom, Ctx2]) extends Sensitivity[Dom, (Ctx1, Ctx2)]:
   override def emptyContext: (Ctx1, Ctx2) = (s1.emptyContext, s2.emptyContext)
@@ -22,14 +25,20 @@ final class Product[Dom, Ctx1, Ctx2](s1: Sensitivity[Dom, Ctx1], s2: Sensitivity
   override def apply(dom: Dom): (Ctx1, Ctx2) = (s1(dom), s2(dom))
 
 
-def full[Dom, In](using state: AnalysisState[In, _]) = new Sensitivity[Dom, In] {
-  override def emptyContext = null.asInstanceOf[In]
+def full[Dom, In](using state: State) = new Sensitivity[Dom, state.In] {
+  override def emptyContext = null.asInstanceOf[state.In]
   override def switchCall(dom: Dom): Boolean = true
-  override def apply(dom: Dom) = state.getInState()
+  override def apply(dom: Dom) = state.getInState(dom)
 }
 
 def none[Dom] = new Sensitivity[Dom, Unit] {
   override def emptyContext: Unit = ()
   override def switchCall(dom: Dom): Boolean = false
   override def apply(dom: Dom) = ()
+}
+
+def nonePoly[Dom, Ctx] = new Sensitivity[Dom, Ctx] {
+  override def emptyContext = null.asInstanceOf[Ctx]
+  override def switchCall(dom: Dom): Boolean = false
+  override def apply(dom: Dom) = null.asInstanceOf[Ctx]
 }

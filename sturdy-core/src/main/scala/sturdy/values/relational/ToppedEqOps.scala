@@ -1,8 +1,8 @@
 package sturdy.values.relational
 
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 
 given ToppedCertainEqOps[V, B](using ops: EqOps[V, B]): EqOps[Topped[V], Topped[B]] with
   override def equ(v1: Topped[V], v2: Topped[V]): Topped[B] =

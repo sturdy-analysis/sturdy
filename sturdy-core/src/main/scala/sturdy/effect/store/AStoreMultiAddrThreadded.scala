@@ -2,10 +2,9 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.AMayComputeMany
-import sturdy.effect.AMayComputeMany.*
-import sturdy.effect.JoinComputation
-import sturdy.values.*
+import sturdy.data.{*, given}
+import sturdy.effect.EffectStack
+import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
 import reflect.Selectable.reflectiveSelectable
@@ -16,30 +15,30 @@ import reflect.Selectable.reflectiveSelectable
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
-  extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
+class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
+  extends Store[Powerset[Addr], V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
 
-  override type StoreJoin[A] = JoinValue[A]
-  override type StoreJoinComp = JoinComputation
-  
-  override def read(xs: Powerset[Addr]): AMayComputeMany[V] = {
+  override def read(xs: Powerset[Addr]): JOptionA[V] = {
     var needsNotFound = false
-    var vs = ListBuffer[V]()
+    var vs: Option[V] = None
     for (x <- xs.set)
       if (!x.isManaged)
         needsNotFound = true
       store.get(x) match
         case None =>
           needsNotFound = true
-        case Some(v) => vs += v
+        case Some(v) =>
+          vs = vs match
+            case None => Some(v)
+            case Some(v_) => Some(Join(v_, v).get)
     if (vs.isEmpty)
-      ComputesNot()
+      JOptionA.None()
     else if (needsNotFound)
-      MaybeComputes(vs)
+      JOptionA.NoneSome(vs.get)
     else
-      Computes(vs)
+      JOptionA.Some(vs.get)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =
@@ -51,13 +50,13 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
     () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
-    import sturdy.values.given
+    import sturdy.values
 
-    val abstractedKeys = c.getStore.keySet.flatMap(k => varAbstractly.abstractly(k).set)
+    val abstractedKeys = c.entries.keySet.flatMap(k => varAbstractly.apply(k).set)
     if (!abstractedKeys.subsetOf(store.keySet)) {
-      val missing = c.getStore.flatMap{ kv =>
+      val missing = c.entries.flatMap{ kv =>
         val k = kv._1
-        val ak = varAbstractly.abstractly(k)
+        val ak = varAbstractly.apply(k)
         if (ak.set.subsetOf(store.keySet))
           None
         else
@@ -65,8 +64,11 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       }
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
-      c.getStore.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x)).withDefault(Powerset[V]())(Powerset(_))(using this)
+      c.entries.foreachEntry { case (x, v) =>
+        val avs = this.read(varAbstractly.apply(x)) match
+          case JOptionA.None() => Powerset()
+          case JOptionA.NoneSome(a) => Powerset(a)
+          case JOptionA.Some(a) => Powerset(a)
         val subSound = Soundness.isSound(v, avs)
         if (subSound.isNotSound)
           return subSound

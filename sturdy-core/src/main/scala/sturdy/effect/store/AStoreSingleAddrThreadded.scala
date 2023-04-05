@@ -2,11 +2,12 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.AMayComputeOne
-import sturdy.effect.AMayComputeOne.*
-import sturdy.effect.JoinComputation
+import sturdy.data.*
+import sturdy.values.Join
+import sturdy.effect.Effect
 import sturdy.values.Abstractly
-import sturdy.values.JoinValue
+import sturdy.values.Finite
+import sturdy.values.Widen
 
 import scala.collection.mutable.ListBuffer
 
@@ -16,22 +17,19 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
-  extends Store[Addr, V], AStoreGenericThreadded[Addr, V]:
+class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
+  extends Store[Addr, V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
   
-  override type StoreJoin[A] = JoinValue[A]
-  override type StoreJoinComp = JoinComputation
-
-  override def read(x: Addr): AMayComputeOne[V] =
+  override def read(x: Addr): JOptionA[V] =
     store.get(x) match
-      case None => ComputesNot()
-      case Some(v) =>
+      case scala.None => JOptionA.none
+      case scala.Some(v) =>
         if (x.isManaged)
-          Computes(v)
+          JOptionA.some(v)
         else
-          MaybeComputes(v)
+          JOptionA.noneSome(v)
 
   override def write(x: Addr, v: V): Unit =
     weakUpdate(x, v)
@@ -40,10 +38,10 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
     () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
-    val abstractedKeys = c.getStore.keySet.map(varAbstractly.abstractly)
+    val abstractedKeys = c.entries.keySet.map(varAbstractly.apply)
     if (!abstractedKeys.subsetOf(store.keySet)) {
-      val missing = c.getStore.keySet.flatMap{ k =>
-        val ak = varAbstractly.abstractly(k)
+      val missing = c.entries.keySet.flatMap{ k =>
+        val ak = varAbstractly.apply(k)
         if (store.keySet.contains(ak))
           None
         else
@@ -51,8 +49,8 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
       }
       IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
-      c.getStore.foreachEntry { case (x, v) =>
-        val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x)))
+      c.entries.foreachEntry { case (x, v) =>
+        val subSound = vSoundness.isSound(v, store(varAbstractly.apply(x)))
         if (subSound.isNotSound)
           return subSound
       }

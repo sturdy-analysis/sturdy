@@ -1,7 +1,7 @@
 package sturdy.values.rationals
 
 import sturdy.effect.failure.FailureKind
-import sturdy.values.convert.Convert
+import sturdy.values.convert.{Convert, NilCC}
 
 case object RationalDivisionByZero extends FailureKind
 
@@ -20,7 +20,7 @@ trait RationalOps[V]:
   def ceil(v: V): V
 
 
-type ConvertIntRational[VFrom, VTo] = Convert[Int, Rational, VFrom, VTo, Unit]
-type ConvertRationalInt[VFrom, VTo] = Convert[Rational, Int, VFrom, VTo, Unit]
-type ConvertDoubleRational[VFrom, VTo] = Convert[Double, Rational, VFrom, VTo, Unit]
-type ConvertRationalDouble[VFrom, VTo] = Convert[Rational, Double, VFrom, VTo, Unit]
+type ConvertIntRational[VFrom, VTo] = Convert[Int, Rational, VFrom, VTo, NilCC.type]
+type ConvertRationalInt[VFrom, VTo] = Convert[Rational, Int, VFrom, VTo, NilCC.type]
+type ConvertDoubleRational[VFrom, VTo] = Convert[Double, Rational, VFrom, VTo, NilCC.type]
+type ConvertRationalDouble[VFrom, VTo] = Convert[Rational, Double, VFrom, VTo, NilCC.type]
