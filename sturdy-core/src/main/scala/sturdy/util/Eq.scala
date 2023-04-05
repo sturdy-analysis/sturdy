@@ -14,6 +14,7 @@ trait Eq[T] {
 }
 
 object Eq {
+  inline def eqv[T: Eq](x: T, y: T) = summon[Eq[T]].eqv(x,y)
 
   import scala.compiletime.{erasedValue, summonFrom}
   import compiletime.*

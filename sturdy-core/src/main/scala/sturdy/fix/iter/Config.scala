@@ -22,7 +22,7 @@ enum Config:
   def get[Dom, Codom, Ctx]
   (using Widen[Codom], EffectStack)
   (using Finite[Dom], Finite[Ctx])
-  : Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = this match
+  : Contextual[Ctx, Dom] ?=> Combinator[Dom, Codom] = this match
     case Innermost(config) => fix.iter.innermost(config)
     case Outermost(config) => fix.iter.outermost(config)
     case Topmost(config) => fix.iter.topmost(config)

@@ -16,8 +16,8 @@ trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]:
   def compose(other: Combinator[Dom, Codom]): Combinator[Dom, Codom] =
     (f: Dom => Codom) => this(other(f))
   
-trait ContextualCombinator[Ctx, Dom, Codom] extends Function[Contextual[Ctx, Dom, Codom] ?=> Dom => Codom, Dom => Codom]:
-  type Context = Contextual[Ctx, Dom, Codom]
+trait ContextualCombinator[Ctx, Dom, Codom] extends Function[Contextual[Ctx, Dom] ?=> Dom => Codom, Dom => Codom]:
+  type Context = Contextual[Ctx, Dom]
 
 def identity[Dom, Codom]: Identity[Dom, Codom] = new Identity
 final class Identity[Dom, Codom] extends Combinator[Dom, Codom] {

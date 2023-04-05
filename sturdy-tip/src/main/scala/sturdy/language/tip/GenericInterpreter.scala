@@ -189,7 +189,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   inline def run(s: Stm)(using rec: Fixed): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
   private inline def enterFunction(fun: Function)(using rec: Fixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
-  protected[tip] lazy val fixed = {
+  protected[tip] lazy val fixed: Fixed = {
     fixpoint {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
       case FixIn.Run(s) => run_open(s); FixOut.Run()

@@ -13,14 +13,14 @@ import scala.util.Try
 
 def outermost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
-  (using context: Contextual[Ctx, Dom, Codom])
+  (using context: Contextual[Ctx, Dom])
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Outermost[Dom, Codom, In, Out, All, Ctx] =
   new Outermost(config, state, context)
 
 final class Outermost[Dom, Codom, In, Out, All, Ctx]
-  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (config: StackConfig, state: State, context: Contextual[Ctx, Dom])
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 

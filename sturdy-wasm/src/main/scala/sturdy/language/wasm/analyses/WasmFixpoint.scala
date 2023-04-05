@@ -46,7 +46,7 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(Stac
     (using EffectStack)
     (using Widen[V])
     (using Finite[Ctx])
-    : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
+    : Contextual[Ctx, FixIn] ?=> Combinator[FixIn, FixOut[V]] =
 
     if (loopUnwinding <= 0)
       fix.filter(isFunOrLoop, iter.get)

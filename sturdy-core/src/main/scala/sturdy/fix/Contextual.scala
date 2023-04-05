@@ -8,32 +8,32 @@ val ContextProperty = "context"
 
 def contextSensitive
   [Ctx, Dom, Codom]
-  (sensitivity: Sensitivity[Dom, Ctx], phi: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom])
+  (sensitivity: Sensitivity[Dom, Ctx], phi: Contextual[Ctx, Dom] ?=> Combinator[Dom, Codom])
   : ContextSensitive[Ctx, Dom, Codom] =
-    val contextual = new Contextual[Ctx, Dom, Codom](sensitivity)
+    val contextual = new Contextual[Ctx, Dom](sensitivity)
     new ContextSensitive(contextual, phi(using contextual))
 
 def notContextSensitive
   [Dom, Codom, Phi <: Combinator[Dom, Codom]]
-  (phi: Contextual[Unit, Dom, Codom] ?=> Phi)
+  (phi: Contextual[Unit, Dom] ?=> Phi)
   : ContextSensitive[Unit, Dom, Codom] =
-    val contextual = new Contextual[Unit, Dom, Codom](context.none)
+    val contextual = new Contextual[Unit, Dom](context.none)
     new ContextSensitive(contextual, phi(using contextual))
 
 final class ContextSensitive
   [Ctx, Dom, Codom]
-  (contextual: Contextual[Ctx, Dom, Codom], phi : Combinator[Dom, Codom])
+  (contextual: Contextual[Ctx, Dom], phi : Combinator[Dom, Codom])
   extends Combinator[Dom, Codom]:
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     contextual.withContext(phi(f), dom)
 
-final class Contextual[Ctx, Dom, Codom](sensitivity: Sensitivity[Dom, Ctx]):
+final class Contextual[Ctx, Dom](sensitivity: Sensitivity[Dom, Ctx]):
   private var currentContext: Ctx = sensitivity.emptyContext
   def getCurrentContext: Ctx = currentContext
 
   private var previousContexts: List[Ctx] = List()
 
-  def withContext(f: Dom => Codom, dom: Dom): Codom =
+  def withContext[Codom](f: Dom => Codom, dom: Dom): Codom =
     if (!sensitivity.switchCall(dom))
       return f(dom)
 

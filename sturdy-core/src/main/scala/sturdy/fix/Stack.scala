@@ -9,7 +9,7 @@ import sturdy.values.MaybeChanged
 
 object Stack:
   def apply[Dom, Codom, Ctx](state: State)
-                            (config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
+                            (config: StackConfig, contextual: Contextual[Ctx, Dom])
                             (using Finite[Dom], Finite[Ctx], Widen[Codom])
                             : Stack[Dom, Codom, state.In, state.Out] = config match
     case StackConfig.StackedStates(readPriorOutput) =>

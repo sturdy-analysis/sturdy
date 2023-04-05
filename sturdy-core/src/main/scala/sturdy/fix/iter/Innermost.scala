@@ -14,7 +14,7 @@ import scala.util.Try
 
 def innermost[Dom, Codom, Ctx]
   (config: StackConfig)
-  (using context: Contextual[Ctx, Dom, Codom])
+  (using context: Contextual[Ctx, Dom])
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Innermost[Dom, Codom, Ctx] =

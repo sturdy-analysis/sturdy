@@ -7,8 +7,8 @@ import sturdy.values.Finite
 import scala.util.Try
 
 def callSites[Dom, Call](call: Dom => Option[Call]): CallSiteLogger[Dom, Call] = new CallSiteLogger(call)
-class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom, Any]:
-  private var calls = List[Call]()
+class CallSiteLogger[Dom, Call](val getCall: Dom => Option[Call]) extends Logger[Dom, Any]:
+  private var calls: List[Call] = List.empty
 
   def enter(dom: Dom): Unit = getCall(dom) match
     case Some(c) => calls = c :: calls
@@ -23,6 +23,8 @@ class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom
     override def switchCall(dom: Dom): Boolean = getCall(dom).isDefined
     override def apply(dom: Dom) = CallString(calls.take(k))
   }
+
+  def getCalls: List[Call] = calls
 
 
 def previousCallSites[Dom, Call](k: Int)(call: Dom => Option[Call]): PreviousCallSiteLogger[Dom, Call] = new PreviousCallSiteLogger(k, call)

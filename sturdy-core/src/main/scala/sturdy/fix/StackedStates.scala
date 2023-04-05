@@ -156,7 +156,7 @@ class StackedStates[Dom, Codom](val state: State)
   def clearStack(): Unit =
     stack.clear()
     stackHeight = 0
-    inStateWidening.clear
+    inStateWidening.clear()
 
   /** Load data from another stack (leaves cache unchanged) */
   def loadStack(stack: Iterable[(Dom, state.In)]): Unit =
@@ -200,7 +200,7 @@ class FiniteInStateWidening[Dom, In](using Finite[In]) extends InStateWidening[D
   def pop(dom: Dom, in: In): Unit = ()
   def clear() = {}
 
-class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => Widen[In]) extends InStateWidening[Dom, In]:
+class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom])(using widenIn: Dom => Widen[In]) extends InStateWidening[Dom, In]:
   class ContextEntry(var in: List[In])
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 

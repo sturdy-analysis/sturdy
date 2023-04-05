@@ -13,14 +13,14 @@ import scala.util.Try
 
 def topmost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
-  (using context: Contextual[Ctx, Dom, Codom])
+  (using context: Contextual[Ctx, Dom])
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Topmost[Dom, Codom, In, Out, All, Ctx] =
   new Topmost(config, state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
-  (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
+  (config: StackConfig, state: State, context: Contextual[Ctx, Dom])
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Combinator[Dom, Codom]:
 

@@ -41,22 +41,22 @@ trait Fix extends Interpreter:
 
 
 
-  def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]])
+  def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, FixIn] ?=> Combinator[FixIn, FixOut[Value]])
                                       (using Widen[Value], Widen[In], Widen[Out], Finite[Ctx], EffectStack)
-    : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
+    : Contextual[Ctx, FixIn] ?=> Combinator[FixIn, FixOut[Value]]
     = conditional({
         case FixIn.Run(Stm.While(_, _)) => true
         case _ => false
       }, sturdy.fix.unwind(loopUnwindingSteps, phi), phi)
 
-  def contextInsensitive(phi: (Contextual[Unit, FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
+  def contextInsensitive(phi: (Contextual[Unit, FixIn]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
     notContextSensitive(phi)
 
-  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
+  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], FixIn]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
     contextSensitive(parameters(analysis.callFrame), phi)
 
-  def callSiteSensitive(k: Int, phi: (Contextual[CallString, FixIn, FixOut[Value]], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
-    val callSites = callSitesLogger()
+  def callSiteSensitive(k: Int, phi: (CallSiteLogger[FixIn, Exp.Call], Contextual[CallString, FixIn], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
+    given callSites: CallSiteLogger[FixIn, Exp.Call] = callSitesLogger()
     log(callSites, contextSensitive(callSites.callString(k), phi))
 
 //  def callSiteSensitiveFixpoint[In, Out, All](loopUnwindingSteps: Int): AnalysisState[FixIn, In, Out, All] ?=> ContextualFixpoint[FixIn, FixOut[Value]] = new ContextualFixpoint {

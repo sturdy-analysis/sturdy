@@ -37,7 +37,7 @@ import scala.util.Try
  *
  */
 class StackedFrames[Dom, Codom, Ctx](val state: State)
-                                    (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
+                                    (contextual: Contextual[Ctx, Dom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
                                     (using Finite[Dom], Finite[Ctx], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
@@ -240,7 +240,7 @@ class StackedFrames[Dom, Codom, Ctx](val state: State)
 
 object StackedFrames:
   def apply[Dom, Codom, Ctx](state: State)
-                            (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
+                            (contextual: Contextual[Ctx, Dom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
                             (using Finite[Dom], Finite[Ctx], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
     new StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 

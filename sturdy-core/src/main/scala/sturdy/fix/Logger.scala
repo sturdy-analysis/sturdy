@@ -7,11 +7,13 @@ trait Logger[-Dom, -Codom]:
   def exit(dom: Dom, codom: TrySturdy[Codom]): Unit
   final def &&[DDom <: Dom, CCodom <: Codom](other: Logger[DDom, CCodom]): Logger[DDom, CCodom] = new ProductLogger(this, other)
 
-def manyLogger[Dom, Codom](loggers: Iterable[Logger[Dom, Codom]]) = loggers.size match
+def manyLogger[Dom, Codom](loggers: Logger[Dom, Codom]*): Logger[Dom,Codom] = loggers.size match
   case 0 => throw new UnsupportedOperationException
   case 1 => loggers.head
   case 2 => loggers.head && loggers.tail.head
   case _ => new ManyLogger(loggers)
+
+inline def manyLogger[Dom, Codom](loggers: Iterable[Logger[Dom, Codom]]): Logger[Dom, Codom] = manyLogger(loggers.toArray: _*)
 
 class ManyLogger[-Dom, -Codom](loggers: Iterable[Logger[Dom, Codom]]) extends Logger[Dom, Codom]:
   inline override def enter(dom: Dom): Unit =
