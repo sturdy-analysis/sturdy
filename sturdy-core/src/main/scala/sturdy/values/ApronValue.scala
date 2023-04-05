@@ -2,8 +2,11 @@ package sturdy.values
 
 import apron.{Abstract1, DoubleScalar, Environment, Interval, Manager, MpqScalar, Scalar, Texpr1CstNode, Texpr1Intern, Texpr1Node, Texpr1VarNode, Var}
 
-final class ApronValue(val domain: Abstract1,
-                       val expr: Texpr1Node):
+final case class ApronValue(val domain: Abstract1,
+                            val expr: Texpr1Node):
+
+  import ApronValue.join
+
   def getBound: apron.Interval =
     domain.getBound(domain.getCreationManager, Texpr1Intern(domain.getEnvironment, expr))
 
@@ -21,7 +24,7 @@ final class ApronValue(val domain: Abstract1,
   def joinWith(t: Var, other: ApronValue): ApronValue =
     val v1 = this.assign(t)
     val v2 = other.assign(t)
-    v1.domain.join(v1.domain.getCreationManager, v2.domain)
+    v1.domain.join(v2.domain)
     v1
 
   def meet(other: ApronValue): ApronValue =
@@ -33,6 +36,18 @@ final class ApronValue(val domain: Abstract1,
     val v2 = other.assign(t)
     v1.domain.meet(v1.domain.getCreationManager, v2.domain)
     v1
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: ApronValue =>
+        this.getBound.equals(other.getBound)
+      case _ => false
+
+  override def hashCode(): Int =
+    // The hashCode implementation of apron.Interval is weired.
+    // Therefore we overwrite it here.
+    val iv = this.getBound
+    (iv.sup(),iv.inf()).hashCode()
 
 object ApronValue {
   inline def scalar(double: Double): Scalar = DoubleScalar(double)
@@ -59,6 +74,21 @@ object ApronValue {
       val res = Array[Double](0)
       x.toDouble(res,0)
       res(0)
+
+  extension(d1: Abstract1)
+    /** joins two abstract values, mutating both abstract values. */
+    def join(d2: Abstract1): Unit =
+      val env = d1.getEnvironment.lce(d2.getEnvironment)
+      d1.changeEnvironment(d1.getCreationManager, env, true)
+      d2.changeEnvironment(d2.getCreationManager, env, true)
+      d1.join(d1.getCreationManager, d2)
+
+    def joinCopy(d2: Abstract1): Abstract1 =
+      val env = d1.getEnvironment.lce(d2.getEnvironment)
+      val d1New = d1.changeEnvironmentCopy(d1.getCreationManager, env, true)
+      val d2New = d2.changeEnvironmentCopy(d2.getCreationManager, env, true)
+      d1New.join(d1New.getCreationManager, d2New)
+      d1New
 }
 
 given JoinApronValue: Join[ApronValue] with
@@ -90,10 +120,12 @@ given WidenApronValue: Widen[ApronValue] with
 final case class TempVar(x: Int) extends Var:
   override def compareTo(other: Var): Int =
     other match
-      case TempVar(y) if x == y => 0
+      case TempVar(y) => x.compareTo(y)
       case _ => -1
 
   override def clone(): Var = TempVar(x)
+
+  override def toString: String = s"t$x"
 
 object TempVar:
   private var latestVar = 0

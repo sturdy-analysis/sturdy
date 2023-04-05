@@ -8,7 +8,7 @@ import sturdy.data.MayJoin
 import sturdy.values.{Combine, MaybeChanged, Unchanged, Widening}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.ApronValue
-import ApronValue.toDouble
+import ApronValue.{toDouble,join,joinCopy}
 
 import scala.compiletime.ops.int
 
@@ -16,21 +16,21 @@ class ApronIntegerOps(using manager: Manager) extends IntegerOps[Int, ApronValue
   override def integerLit(i: Int): ApronValue =
     ApronValue.interval(DoubleScalar(i),DoubleScalar(i))
   override def add(v1: ApronValue, v2: ApronValue): ApronValue =
-    ApronValue(domain = v1.domain.joinCopy(manager, v2.domain),
+    ApronValue(domain = v1.domain.joinCopy(v2.domain),
                expr = Texpr1BinNode(Texpr1BinNode.OP_ADD, v1.expr, v2.expr))
   override def sub(v1: ApronValue, v2: ApronValue): ApronValue =
-    ApronValue(domain = v1.domain.joinCopy(manager, v2.domain),
+    ApronValue(domain = v1.domain.joinCopy(v2.domain),
       expr = Texpr1BinNode(Texpr1BinNode.OP_SUB, v1.expr, v2.expr))
 
   override def mul(v1: ApronValue, v2: ApronValue): ApronValue =
-    ApronValue(domain = v1.domain.joinCopy(manager, v2.domain),
+    ApronValue(domain = v1.domain.joinCopy(v2.domain),
       expr = Texpr1BinNode(Texpr1BinNode.OP_MUL, v1.expr, v2.expr))
 
   override def div(v1: ApronValue, v2: ApronValue): ApronValue =
-    ApronValue(domain = v1.domain.joinCopy(manager, v2.domain),
+    ApronValue(domain = v1.domain.joinCopy(v2.domain),
       expr = Texpr1BinNode(Texpr1BinNode.OP_DIV, v1.expr, v2.expr))
   override def modulo(v1: ApronValue, v2: ApronValue): ApronValue =
-    ApronValue(domain = v1.domain.joinCopy(manager, v2.domain),
+    ApronValue(domain = v1.domain.joinCopy(v2.domain),
       expr = Texpr1BinNode(Texpr1BinNode.OP_MOD, v1.expr, v2.expr))
 
   /** absolute(v) = sqrt(v*v) */

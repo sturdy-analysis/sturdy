@@ -5,7 +5,7 @@ import sturdy.effect.failure.Failure
 import sturdy.language.tip.TipFailure
 import sturdy.values.relational.EqOps
 import sturdy.values.{Join, Topped}
-import sturdy.values.integer.{AbstractBitVector, ApronValue, IntSign, NumericInterval, given}
+import sturdy.values.integer.{AbstractBitVector, IntSign, NumericInterval, given}
 import sturdy.language.tip.Interpreter
 
 object Ints:
