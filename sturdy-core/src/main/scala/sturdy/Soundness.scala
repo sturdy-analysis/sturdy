@@ -21,7 +21,7 @@ enum IsSound:
     else
       this
 
-trait Soundness[C, A]:
+trait Soundness[-C, -A]:
   def isSound(c: C, a: A): IsSound
 
 object Soundness:

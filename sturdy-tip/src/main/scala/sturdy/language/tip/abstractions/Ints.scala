@@ -1,28 +1,30 @@
 package sturdy.language.tip.abstractions
 
+import apron.{Linexpr1, Texpr1CstNode}
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.TipFailure
 import sturdy.values.relational.EqOps
-import sturdy.values.Topped
-import sturdy.values.ints.{IntInterval, IntSign, given}
+import sturdy.values.{Join, Topped}
+import sturdy.values.integer.{AbstractBitVector, ApronValue, IntSign, NumericInterval, given}
 import sturdy.language.tip.Interpreter
 
 object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
-    final type VInt = IntInterval
+    final type VInt = NumericInterval[Int]
 
-    final def topInt(using Interpreter): IntInterval = IntInterval.Top
+    final def topInt: NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
+    final def topBool: Topped[Boolean] = Topped.Top
 
-    final def asBoolean(v: Value): VBool = v match
-      case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
+    final def asBoolean(v: Value)(using failure: Failure): VBool = v match
+      case Value.IntValue(i) => i.toBoolean
       case Value.TopValue => Topped.Top
       case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => IntInterval(0, 1)
-      case Topped.Actual(true) => IntInterval(1, 1)
-      case Topped.Actual(false) => IntInterval(0, 0)
+      case Topped.Top => NumericInterval(0, 1)
+      case Topped.Actual(true) => NumericInterval(1, 1)
+      case Topped.Actual(false) => NumericInterval(0, 0)
     )
 
   trait Sign extends Interpreter :

@@ -41,7 +41,7 @@ object SignAnalysisSoundness:
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 
-  given Soundness[ConcreteInterpreter.Instance, SignAnalysis.Instance] with
+  given soundness: Soundness[ConcreteInterpreter.Instance, SignAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: SignAnalysis.Instance): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.alloc
 

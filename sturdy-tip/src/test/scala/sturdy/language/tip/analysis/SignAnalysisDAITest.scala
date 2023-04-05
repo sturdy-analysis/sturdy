@@ -44,8 +44,8 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignAnalysisDAITest].getResource("/sturdy/language/tip").toURI
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    !p.toString.contains("record") &&
-//    p.toString.contains("fib") &&
+    //    !p.toString.contains("record") &&
+    //    p.toString.contains("fib") &&
     p.toString.endsWith("pushdown.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
@@ -66,11 +66,12 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
       val analysis = new SignAnalysis.DAIInstance(Map(), Map())
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
-//      println(comp.outCache)
+      //      println(comp.outCache)
       Profiler.printLastMeasured()
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocationIntIncrement[AllocationSite] = interp.alloc
+      given Soundness[ConcreteInterpreter.Instance, SignAnalysis.DAIInstance] = SignAnalysisSoundness.soundness
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       (aresult, analysis)
