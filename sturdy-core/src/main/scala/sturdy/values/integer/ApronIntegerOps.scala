@@ -26,6 +26,7 @@ class ApronIntegerOps(using manager: Manager) extends IntegerOps[Int, ApronValue
       expr = Texpr1BinNode(Texpr1BinNode.OP_MUL, v1.expr, v2.expr))
 
   override def div(v1: ApronValue, v2: ApronValue): ApronValue =
+    // TODO: Add field to ApronValue that collects arithmetic exceptions like "divide by zero" exceptions
     ApronValue(domain = v1.domain.joinCopy(v2.domain),
       expr = Texpr1BinNode(Texpr1BinNode.OP_DIV, v1.expr, v2.expr))
 
