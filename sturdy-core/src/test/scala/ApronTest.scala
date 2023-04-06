@@ -15,7 +15,7 @@ class ApronTest extends AnyFlatSpec with should.Matchers:
   tests(using apron.Polka(true))
   tests(using apron.PolkaEq())
 
-  def tests(using manager: Manager) =
+  def tests(using manager: Manager): Unit =
     behavior of manager.toString
 
     val intops = new ApronIntegerOps
@@ -46,6 +46,12 @@ class ApronTest extends AnyFlatSpec with should.Matchers:
       intops.absolute(three).getBound should overapproximate (Interval(3, 3))
       intops.absolute(minusThree.join(five)).getBound should overapproximate (Interval(0, 5))
       intops.absolute(minusThree).getBound should overapproximate (Interval(3, 3))
+    }
+
+    it should "compute the maximum of two numeric values by computing the maximum of their interval bounds" in {
+      intops.max(three, five).getBound should overapproximate (Interval(5,5))
+      intops.max(five, three).getBound should overapproximate (Interval(5,5))
+      intops.max(three.join(five), minusThree).getBound should overapproximate (Interval(3, 5))
     }
 
   def overapproximate(expected: Interval): Matcher[Interval] =
