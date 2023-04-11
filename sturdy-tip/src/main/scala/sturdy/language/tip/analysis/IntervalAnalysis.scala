@@ -1,9 +1,8 @@
 package sturdy.language.tip.analysis
 
 import sturdy.{Executor, data, fix}
-import sturdy.data.MayJoin
-import sturdy.data.{WithJoin, given}
-import sturdy.effect.{EffectStack, store, given}
+import sturdy.data.{JoinTuple2, MayJoin, WithJoin, given}
+import sturdy.effect.{EffectStack, TrySturdy, store, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.JoinableDecidableCallFrame
@@ -15,7 +14,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix.callgraph.CallGraphLogger
-import sturdy.fix.iter.InputOutputLogger
+import sturdy.fix.summary.{CacheSummary, ContextSensitiveSummary, SingletonSummary, SummaryLogger}
 import sturdy.fix.{Combinator, CombinatorFixpoint, Contextual, ContextualInStateWidening, InStateWidening, Stack, StackConfig, StackedStates}
 import sturdy.incremental.{Change, Identifiable, ListDelta}
 import sturdy.language.tip.TipFailure
@@ -83,28 +82,34 @@ object IntervalAnalysis extends Interpreter,
     extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
 
     var callGraphLogger: CallGraphLogger[FixIn, CallString, Exp.Call, Function] = null
-    var inputOutputLogger: InputOutputLogger[FixIn, FixOut[Value]] = null
+    var summaryLogger: SummaryLogger[FixIn, FixOut[Value]] = null
     var stack: StackedStates[FixIn, FixOut[Value]] & Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out] = null
 
     /** Fixpoint algorithm for initial run.
      * The fixpoint algorithm logs the stacks that occur during the analysis. */
     override val fixpoint: ContextFunction1[EffectStack, CombinatorFixpoint[FixIn, FixOut[IntervalAnalysis.Value]]] =
       callSiteSensitive(callSites, {
-
-        val inStateWidening = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
-
+        
         // Setup loggers that record data needed for incremental updates
         callGraphLogger = new CallGraphLogger(implicitly)({
           case FixIn.EnterFunction(f) => Some(f)
           case _ => None
         })
 
-        inputOutputLogger = new InputOutputLogger
+        given Structural[List[Any]] with {}
+        summaryLogger = new SummaryLogger(using effectStack)(dom =>
+          ContextSensitiveSummary[CallString, effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](
+            SingletonSummary[effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](
+              effectStack.widenIn(dom),
+              JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)))
+          )
+        )
 
+        val inStateWidening = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
         stack = new StackedStates[FixIn,FixOut[Value]](effectStack)(inStateWidening, true).asInstanceOf
 
         fix.dispatch(isFunOrWhile, Seq(
-          fix.log(fix.manyLogger(callGraphLogger,inputOutputLogger), fix.iter.innermost(stack)), fix.iter.innermost(StackConfig.StackedStates())))
+          fix.log(fix.manyLogger(callGraphLogger,summaryLogger), fix.iter.innermost(stack)), fix.iter.innermost(StackConfig.StackedStates())))
       }).fixpoint
 //
 //  class IncrementalUpdateInstance(initialRun: InitialRunInstance)

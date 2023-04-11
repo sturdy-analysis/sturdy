@@ -5,7 +5,7 @@ import org.eclipse.collections.api.map.MutableMap
 import sturdy.effect.TrySturdy
 import sturdy.fix.context.CallSiteLogger
 import sturdy.fix.{Contextual, Logger, State}
-
+import sturdy.data.MutableMap.updateWith
 
 /**
  * A call graph where an edge indicates where a function was called from and with which input state.
@@ -31,10 +31,6 @@ final class CallGraphLogger[Dom,Ctx,Caller,Callee](callSiteLogger: CallSiteLogge
       case _ =>
 
   override def exit(dom: Dom, codom: TrySturdy[Any]): Unit = {}
-
-  extension[K, V] (m: MutableMap[K, V])
-    private inline def updateWith(k: K, default: V, f: V => V): Unit =
-      m.compute(k, (_, value) => if (value == null) f(default) else f(value))
 
 
 final case class Iterations[A](initialIteration: A, latestIteration: A):

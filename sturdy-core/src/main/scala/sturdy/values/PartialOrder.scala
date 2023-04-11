@@ -32,3 +32,9 @@ given eitherPartialOrder[T1, T2](using po1: PartialOrder[T1], po2: PartialOrder[
     case (Left(x1), Left(y1)) => po1.lteq(x1, y1)
     case (Right(x2), Right(y2)) => po2.lteq(x2, y2)
     case _ => false
+
+given optionPartialOrder[T](using po: PartialOrder[T]): PartialOrder[Option[T]] with
+  override def lteq(x: Option[T], y: Option[T]): Boolean = (x,y) match
+    case (Some(x), Some(y)) => po.lteq(x,y)
+    case (None, None) => true
+    case (_,_) => false

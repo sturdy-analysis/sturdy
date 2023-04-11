@@ -27,7 +27,10 @@ final class ContextSensitive
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     contextual.withContext(phi(f), dom)
 
-final class Contextual[Ctx, Dom](sensitivity: Sensitivity[Dom, Ctx]):
+trait HasContext[Ctx]:
+  def getCurrentContext: Ctx
+
+final class Contextual[Ctx, Dom](sensitivity: Sensitivity[Dom, Ctx]) extends HasContext[Ctx]:
   private var currentContext: Ctx = sensitivity.emptyContext
   def getCurrentContext: Ctx = currentContext
 
