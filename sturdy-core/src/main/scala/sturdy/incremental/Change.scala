@@ -107,3 +107,9 @@ class ListDelta[A](using val idA: Identifiable[A])(val delta: Map[idA.Id, Change
     val b = a.map(f)
     (b.get.id, b)
   ))
+
+  def isReplaced(old: A): Boolean =
+    delta(old.id) match
+      case Change.Nil(_) | Change.Remove(_) => false
+      case Change.Replace(_,_) => true
+      case Change.Add(_) => throw new IllegalStateException("Cannot add element with existing id.")

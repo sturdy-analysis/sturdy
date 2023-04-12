@@ -21,9 +21,14 @@ trait Summary[In, Out]:
   def apply(x: In): Result
 
   enum Result:
-    case Excact(in: In, out: Out)
+    case Exact(in: In, out: Out)
     case Overapproximate(in: In, out: Out)
     case None
+    def getIn: Option[In] =
+      this match
+        case Exact(in,_) => Some(in)
+        case Overapproximate(in,_) => Some(in)
+        case None => Option.empty
 
 object SingletonSummary:
   def apply[In: PartialOrder,Out](widenIn: Widen[In], widenOut: Widen[Out]): SingletonSummary[In,Out] =
@@ -51,7 +56,7 @@ final class SingletonSummary[In: PartialOrder: Widen, Out: Widen] extends Summar
         if (overapproximate || i != queryIn)
           Result.Overapproximate(i, o)
         else
-          Result.Excact(i, o)
+          Result.Exact(i, o)
       case (_,_) => Result.None
 
 
@@ -69,25 +74,34 @@ final class CacheSummary[In, Out: Widen] extends Summary[In, Out]:
   override def apply(in: In): Result =
     cache.get(in) match
       case null => Result.None
-      case out => Result.Excact(in, out)
+      case out => Result.Exact(in, out)
 
   override def toString: String =
     cache.toString
 
-final class ContextSensitiveSummary[Ctx, In, Out](using context: HasContext[Ctx]) extends Summary[In, Out]:
+final class ContextSensitiveSummary[Ctx, In: Widen, Out: Widen](using context: HasContext[Ctx]) extends Summary[In, Out]:
   val cache: MutableMap[Ctx, Result] = Maps.mutable.empty()
 
   override def addMapping(in: In, out: Out): Unit =
     val ctx = context.getCurrentContext
-    cache.merge(ctx, (in,out), ((oldIn,oldOut), (newIn, newOut)) =>
-      (Widen(oldIn, OldOut).get, Widen(oldOut, newOut).get))
+    cache.merge(ctx, Result.Exact(in,out), {
+      case (Result.Exact(oldIn,oldOut),Result.Exact(newIn,newOut)) =>
+        val widenedIn = Widen(oldIn, newIn)
+        val widenedOut = Widen(oldOut, newOut)
+        if(widenedIn.hasChanged)
+          Result.Overapproximate(widenedIn.get,widenedOut.get)
+        else
+          Result.Exact(widenedIn.get,widenedOut.get)
+      case (Result.Overapproximate(oldIn,oldOut),Result.Exact(newIn,newOut)) => Result.Overapproximate(Widen(oldIn, newIn).get, Widen(oldOut, newOut).get)
+      case _ => throw new IllegalStateException()
+    })
 
-  override def apply(x: In): Result =
+  override def apply(in: In): Result =
     val ctx = context.getCurrentContext
     cache.get(ctx) match
       case null => Result.None
-      case (in,out) =>
-
+      case res if(res.getIn.contains(in)) => res
+      case _ => Result.None
 
   override def toString: String =
     cache.toString

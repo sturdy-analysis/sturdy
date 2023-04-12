@@ -63,9 +63,8 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
     if (initialProgram.funs.exists(_.name == "main")) {
       val initialRun = new IntervalAnalysis.InitialRunInstance(Map(), Map(),0)
       val aresult = initialRun.failure.fallible(initialRun.execute(initialProgram))
-      println("hllo")
-//      val incrementalUpdate = new IncrementalUpdateInstance(initialRun)
-//      incrementalUpdate(initialProgram, updatedProgram)
+      val incrementalUpdate = new IntervalAnalysis.IncrementalUpdateInstance(initialRun)
+      incrementalUpdate(initialProgram, updatedProgram)
     }
 
   def parse(p: Path): Program =

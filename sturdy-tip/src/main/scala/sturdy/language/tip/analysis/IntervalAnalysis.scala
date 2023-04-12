@@ -14,6 +14,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix.callgraph.CallGraphLogger
+import sturdy.fix.iter.IncrementalFixpoint
 import sturdy.fix.summary.{CacheSummary, ContextSensitiveSummary, SingletonSummary, SummaryLogger}
 import sturdy.fix.{Combinator, CombinatorFixpoint, Contextual, ContextualInStateWidening, InStateWidening, Stack, StackConfig, StackedStates}
 import sturdy.incremental.{Change, Identifiable, ListDelta}
@@ -81,7 +82,7 @@ object IntervalAnalysis extends Interpreter,
   class InitialRunInstance(val initEnvironment: Environment, val initStore: Store, val callSites: Int)
     extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
 
-    var callGraphLogger: CallGraphLogger[FixIn, CallString, Exp.Call, Function] = null
+    var callGraphLogger: CallGraphLogger[FixIn, Function, CallString, Exp.Call] = null
     var summaryLogger: SummaryLogger[FixIn, FixOut[Value]] = null
     var stack: StackedStates[FixIn, FixOut[Value]] & Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out] = null
 
@@ -99,9 +100,9 @@ object IntervalAnalysis extends Interpreter,
         given Structural[List[Any]] with {}
         summaryLogger = new SummaryLogger(using effectStack)(dom =>
           ContextSensitiveSummary[CallString, effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](
-            SingletonSummary[effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](
-              effectStack.widenIn(dom),
-              JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)))
+            using effectStack.widenIn(dom),
+            JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)),
+            implicitly
           )
         )
 
@@ -111,32 +112,21 @@ object IntervalAnalysis extends Interpreter,
         fix.dispatch(isFunOrWhile, Seq(
           fix.log(fix.manyLogger(callGraphLogger,summaryLogger), fix.iter.innermost(stack)), fix.iter.innermost(StackConfig.StackedStates())))
       }).fixpoint
-//
-//  class IncrementalUpdateInstance(initialRun: InitialRunInstance)
-//    extends Instance(initialRun.initEnvironment, initialRun.initStore, StackConfig.StackedStates(), initialRun.callSites):
-//
-//    given inStateWidening: InStateWidening[FixIn, effectStack.In] = initialRun.stack.inStateWidening.asInstanceOf[InStateWidening[FixIn, effectStack.In]]
-//    val incremental: IncrementalFixpoint[FixIn, FixOut[Value]] = new IncrementalFixpoint(initialRun.stackLogger)
-//
-//    def apply(initialProgram: Program, updatedProgram: Program) =
-//      val changes = ListDelta.sub(initialProgram.funs.toList, updatedProgram.funs.toList)
-//      this.functions = changes.keepOld.asInstanceOf[Map[String,sturdy.language.tip.Function]]
-//      incremental.update(changes.map(FixIn.EnterFunction(_,None)), fixed)
-//
-//    /** Fixpoint algorithm for an incremental update.
-//     * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
-//    override val fixpoint =
-//      callSiteSensitive(initialRun.callSites, {
-//        fix.dispatch(isFunOrWhile, Seq(fix.iter.innermost(incremental.dstack.asInstanceOf[Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out]]), fix.iter.innermost(StackConfig.StackedStates())))
-//      }).fixpoint
 
-given FixInIdentifier: Identifiable[FixIn] with
-  type Id = String
-  extension (f: FixIn)
-    override def id: String =
-      f match
-        case FixIn.EnterFunction(f) => f.id
-        case FixIn.Eval(e) => e.toString
-        case FixIn.Run(s) => s.toString
+  class IncrementalUpdateInstance(initialRun: InitialRunInstance)
+    extends Instance(initialRun.initEnvironment, initialRun.initStore, StackConfig.StackedStates(), initialRun.callSites):
 
-  override def eqv(x: FixIn, y: FixIn) = Eq.derived[FixIn].eqv(x,y)
+    given inStateWidening: InStateWidening[FixIn, effectStack.In] = initialRun.stack.inStateWidening.asInstanceOf[InStateWidening[FixIn, effectStack.In]]
+    val incremental: IncrementalFixpoint[FixIn, FixOut[Value], Function, CallString, Exp.Call] = new IncrementalFixpoint(initialRun.callGraphLogger,initialRun.summaryLogger)
+
+    def apply(initialProgram: Program, updatedProgram: Program) =
+      val changes = ListDelta.sub(initialProgram.funs.toList, updatedProgram.funs.toList)
+      this.functions = changes.keepOld.asInstanceOf[Map[String,sturdy.language.tip.Function]]
+      incremental.update(changes, fixed)
+
+    /** Fixpoint algorithm for an incremental update.
+     * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
+    override val fixpoint =
+      callSiteSensitive(initialRun.callSites, {
+        fix.dispatch(isFunOrWhile, Seq(fix.iter.innermost(incremental.dstack.asInstanceOf[Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out]]), fix.iter.innermost(StackConfig.StackedStates())))
+      }).fixpoint
