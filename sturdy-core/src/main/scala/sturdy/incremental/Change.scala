@@ -9,18 +9,18 @@ enum Change[A]:
   case Replace(from: A, to: A) extends Change[A]
   case Add(_new: A) extends Change[A]
   case Remove(old: A) extends Change[A]
-  case Nil(old: A) extends Change[A]
+  case Nil(old: A, _new: A) extends Change[A]
 
   def map[B](f: A => B): Change[B] =
     this match
-      case Change.Nil(x) => Change.Nil(f(x))
+      case Change.Nil(old, _new) => Change.Nil(f(old), f(_new))
       case Change.Remove(old) => Change.Remove(f(old))
       case Change.Add(_new) => Change.Add(f(_new))
       case Change.Replace(from, to) => Change.Replace(f(from), f(to))
 
   def get: A =
     this match
-      case Change.Nil(x) => x
+      case Change.Nil(_, _new) => _new
       case Change.Remove(x) => x
       case Change.Add(y) => y
       case Change.Replace(from, _) => from
@@ -42,7 +42,7 @@ object ListDelta:
     ListDelta()(Map.empty).sub(xs, ys)
 
 class ListDelta[A](using val idA: Identifiable[A])(val delta: Map[idA.Id, Change[A]]) extends Delta[List[A]]:
-  override def nil(x: List[A]): ListDelta[A] = ListDelta()(x.map(x => (x.id, Change.Nil(x))).toMap)
+  override def nil(x: List[A]): ListDelta[A] = ListDelta()(x.map(x => (x.id, Change.Nil(x,x))).toMap)
 
   /**
    * Computes a list of differences between two lists xs and ys, which contains
@@ -56,7 +56,7 @@ class ListDelta[A](using val idA: Identifiable[A])(val delta: Map[idA.Id, Change
       (xs,ys) match
         case (x :: xRest, y :: yRest) =>
           if(x.id.equals(y.id))
-            if(x === y) Change.Nil(x) :: _sub(xRest,yRest)
+            if(x === y) Change.Nil(x,y) :: _sub(xRest,yRest)
             else Change.Replace(from=x, to=y) :: _sub(xRest,yRest)
           else
             val (eqX, neqX) = yRest.partition(_.id.equals(x.id))
@@ -71,45 +71,55 @@ class ListDelta[A](using val idA: Identifiable[A])(val delta: Map[idA.Id, Change
   override def add(xs: List[A]): List[A] =
     xs.flatMap(x =>
       delta.get(x.id) match
-        case Some(Change.Nil(y)) => Iterator(y)
+        case Some(Change.Nil(_,y)) => Iterator(y)
         case Some(Change.Add(y)) => Iterator(y)
         case Some(Change.Remove(_)) => Iterator()
         case Some(Change.Replace(_, y)) => Iterator(y)
         case None => Iterator()
     )
 
-  def replace[B](f: (A => IterableOnce[A]) => B => IterableOnce[B], old: Iterable[B]): Iterable[B] =
-    old.flatMap(b =>
-      f(x =>
-        delta.get(x.id) match
-          case Some(Change.Nil(y)) => Iterator(y)
-          case Some(Change.Add(y)) => throw new IllegalStateException(s"Found element $x@${x.id} in old collection, which was added by an incremental update ${Change.Add(y)}")
-          case Some(Change.Remove(_)) => Iterator()
-          case Some(Change.Replace(_, y)) => Iterator(y)
-          case None => Iterator()
-      )(b))
+  def replace(x: A): A =
+    delta.get(x.id) match
+      case Some(Change.Nil(_,y)) => y
+      case Some(Change.Add(y)) => y
+      case Some(Change.Remove(_)) => x
+      case Some(Change.Replace(_, y)) => y
+      case None => throw new IllegalArgumentException(s"$x does not appear in the list of changes")
+
+  override def isNilChange: Boolean =
+    delta.forall{
+      case (_,Change.Nil(_,_)) => true
+      case _ => false
+    }
+
 
   def keepOld: Map[idA.Id, A] =
     delta.flatMap {
-      case (id, Change.Nil(y)) => Iterator((id,y))
+      case (id, Change.Nil(x,_)) => Iterator((id,x))
       case (id, Change.Add(y)) => Iterator((id,y))
       case (id, Change.Replace(_, y)) => Iterator((id, y))
       case (_, Change.Remove(_)) => Iterator()
     }
 
-  override def isNilChange: Boolean =
-    delta.forall{
-      case (_,Change.Nil(_)) => true
-      case _ => false
-    }
-
-  def map[B](f: A => B)(using idB: Identifiable[B]): ListDelta[B] = ListDelta()(delta.map((_,a) =>
-    val b = a.map(f)
-    (b.get.id, b)
-  ))
-
-  def isReplaced(old: A): Boolean =
-    delta(old.id) match
-      case Change.Nil(_) | Change.Remove(_) => false
-      case Change.Replace(_,_) => true
-      case Change.Add(_) => throw new IllegalStateException("Cannot add element with existing id.")
+//  def replace[B](f: (A => IterableOnce[A]) => B => IterableOnce[B], old: Iterable[B]): Iterable[B] =
+//    old.flatMap(b =>
+//      f(x =>
+//        delta.get(x.id) match
+//          case Some(Change.Nil(_,y)) => Iterator(y)
+//          case Some(Change.Add(y)) => throw new IllegalStateException(s"Found element $x@${x.id} in old collection, which was added by an incremental update ${Change.Add(y)}")
+//          case Some(Change.Remove(_)) => Iterator()
+//          case Some(Change.Replace(_, y)) => Iterator(y)
+//          case None => Iterator()
+//      )(b))
+//
+//
+//  def map[B](f: A => B)(using idB: Identifiable[B]): ListDelta[B] = ListDelta()(delta.map((_,a) =>
+//    val b = a.map(f)
+//    (b.get.id, b)
+//  ))
+//
+//  def isReplaced(old: A): Boolean =
+//    delta(old.id) match
+//      case Change.Nil(_) | Change.Remove(_) => false
+//      case Change.Replace(_,_) => true
+//      case Change.Add(_) => throw new IllegalStateException("Cannot add element with existing id.")

@@ -2,9 +2,13 @@ package sturdy.fix.summary
 
 import org.eclipse.collections.api.factory.Maps
 import org.eclipse.collections.api.map.MutableMap
+import org.eclipse.collections.impl.tuple.Tuples
 import sturdy.data.MutableMap.updateWith
+import sturdy.fix.summary.Summary.Result
 import sturdy.fix.{Contextual, HasContext}
 import sturdy.values.{PartialOrder, Widen, given}
+
+import scala.jdk.CollectionConverters.*
 
 /** Summary of how a monotone function maps inputs to outputs. */
 trait Summary[In, Out]:
@@ -18,17 +22,23 @@ trait Summary[In, Out]:
    *   - The summary does not contain an input `x`, but contains a greater input x' ⊒ x.
    *     In this case the summary may return the output `f(x')` which overapproximates `f(x)`, because `f` is monotone.
  *     - The summary does not contain an input greater or equal to `x`, in which case it returns `None`.` */
-  def apply(x: In): Result
+  def apply(x: In): Result[In,Out]
 
-  enum Result:
+  def domain: Iterable[In]
+
+object Summary {
+
+  enum Result[+In, +Out]:
     case Exact(in: In, out: Out)
     case Overapproximate(in: In, out: Out)
-    case None
+    case None extends Result[Nothing,Nothing]
+
     def getIn: Option[In] =
       this match
-        case Exact(in,_) => Some(in)
-        case Overapproximate(in,_) => Some(in)
+        case Exact(in, _) => Some(in)
+        case Overapproximate(in, _) => Some(in)
         case None => Option.empty
+}
 
 object SingletonSummary:
   def apply[In: PartialOrder,Out](widenIn: Widen[In], widenOut: Widen[Out]): SingletonSummary[In,Out] =
@@ -50,15 +60,26 @@ final class SingletonSummary[In: PartialOrder: Widen, Out: Widen] extends Summar
       case Some(oldOut) => out = Some(Widen(oldOut, newOut).get)
       case None => out = Some(newOut)
 
-  override def apply(queryIn: In): Result =
+  override def apply(queryIn: In): Result[In,Out] =
     (in,out) match
       case (Some(i), Some(o)) if PartialOrder[Option[In]].lteq(Some(queryIn),in)  =>
         if (overapproximate || i != queryIn)
           Result.Overapproximate(i, o)
         else
           Result.Exact(i, o)
-      case (_,_) => Result.None
+      case (_,_) =>
+        Result.None
 
+  override def domain: Iterable[In] = in
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: SingletonSummary[In, Out] =>
+        this.in.equals(other.in) && this.out.equals(other.out)
+      case _ => false
+
+  override def hashCode(): Int =
+    (this.in,this.out).hashCode()
 
   override def toString: String =
     (in,out) match
@@ -66,21 +87,40 @@ final class SingletonSummary[In: PartialOrder: Widen, Out: Widen] extends Summar
       case (_, _) => "None"
 
 final class CacheSummary[In, Out: Widen] extends Summary[In, Out]:
-  val cache: MutableMap[In, Out] = Maps.mutable.empty()
+  var cache: MutableMap[In, Out] = Maps.mutable.empty()
 
   override def addMapping(in: In, out: Out): Unit =
     cache.merge(in, out, (oldOut, newOut) => Widen(oldOut, newOut).get)
 
-  override def apply(in: In): Result =
+  override def apply(in: In): Result[In,Out] =
     cache.get(in) match
       case null => Result.None
       case out => Result.Exact(in, out)
 
+  override def domain: Iterable[In] = cache.keysView().asScala
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: CacheSummary[In, Out] =>
+        this.cache.equals(other.cache)
+      case _ => false
+
+  override def hashCode(): Int = this.cache.hashCode()
+
   override def toString: String =
-    cache.toString
+    val builder = StringBuilder()
+    for(entry <- cache.entrySet().asScala) {
+      builder.append("in = ")
+             .append(entry.getKey)
+             .append("\n")
+             .append("out = ")
+             .append(entry.getValue)
+             .append("\n\n")
+    }
+    builder.toString
 
 final class ContextSensitiveSummary[Ctx, In: Widen, Out: Widen](using context: HasContext[Ctx]) extends Summary[In, Out]:
-  val cache: MutableMap[Ctx, Result] = Maps.mutable.empty()
+  var cache: MutableMap[Ctx, Result[In,Out]] = Maps.mutable.empty()
 
   override def addMapping(in: In, out: Out): Unit =
     val ctx = context.getCurrentContext
@@ -96,12 +136,22 @@ final class ContextSensitiveSummary[Ctx, In: Widen, Out: Widen](using context: H
       case _ => throw new IllegalStateException()
     })
 
-  override def apply(in: In): Result =
+  override def apply(in: In): Result[In,Out] =
     val ctx = context.getCurrentContext
     cache.get(ctx) match
       case null => Result.None
       case res if(res.getIn.contains(in)) => res
       case _ => Result.None
+
+  override def domain: Iterable[In] = cache.valuesView().asScala.flatMap(_.getIn)
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: ContextSensitiveSummary[Ctx, In, Out] =>
+        this.cache.equals(other.cache)
+      case _ => false
+
+  override def hashCode(): Int = this.cache.hashCode()
 
   override def toString: String =
     cache.toString

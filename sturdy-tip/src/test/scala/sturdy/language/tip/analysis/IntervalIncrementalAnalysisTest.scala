@@ -1,6 +1,7 @@
 package sturdy.language.tip.analysis
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
@@ -52,19 +53,38 @@ class IntervalIncrementalAnalysisTest extends AnyFlatSpec, Matchers:
       Iterator()
   ).sorted.foreach { case (p: Path, update: Path) =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
-      runIntervalIncrementalAnalysis(p, update)
+      runIntervalIncrementalAnalysis(p, update, StackConfig.StackedStates())
+    }
+    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+      runIntervalIncrementalAnalysis(p, update, StackConfig.StackedCfgNodes())
     }
   }
 
-  def runIntervalIncrementalAnalysis(initial: Path, update: Path): Unit =
+  def runIntervalIncrementalAnalysis(initial: Path, update: Path, stackConfig: StackConfig): Unit =
     val initialProgram = parse(initial)
     val updatedProgram = parse(update)
 
     if (initialProgram.funs.exists(_.name == "main")) {
-      val initialRun = new IntervalAnalysis.InitialRunInstance(Map(), Map(),0)
-      val aresult = initialRun.failure.fallible(initialRun.execute(initialProgram))
+      val initialRun = new IntervalAnalysis.InitialRunInstance(Map(), Map(), stackConfig, callSites = 0)
+      initialRun.failure.fallible(initialRun.execute(initialProgram))
+
+      println("\n\nINCREMENTAL UPDATE")
       val incrementalUpdate = new IntervalAnalysis.IncrementalUpdateInstance(initialRun)
-      incrementalUpdate(initialProgram, updatedProgram)
+      val changes = ListDelta.sub(initialProgram.funs.toList, updatedProgram.funs.toList)
+      incrementalUpdate(changes)
+
+      println("\n\nFROM SCRATCH")
+      val fromScratch = new IntervalAnalysis.InitialRunInstance(Map(), Map(), stackConfig, callSites = 0)
+      fromScratch.failure.fallible(fromScratch.execute(Program(changes.keepOld.values.toSeq)))
+
+      incrementalUpdate.summaryLogger.cache.forEach((callee, incrementalSummary) =>
+        fromScratch.summaryLogger.cache.get(callee) match
+          case null => {}
+          case fromScratchSummary =>
+            inside(s"summary of $callee") { _ =>
+              incrementalSummary shouldBe fromScratchSummary
+            }
+      )
     }
 
   def parse(p: Path): Program =

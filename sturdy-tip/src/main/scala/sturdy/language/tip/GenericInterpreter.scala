@@ -93,11 +93,11 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val failure: Failure
 
   // effect stack
-  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure))
+  val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure))
   given EffectStack = effectStack
 
   // analysis state
-  protected var functions: Map[String, Function] = Map()
+  var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
   def eval_open(e: Exp)(using Fixed): V = e match {

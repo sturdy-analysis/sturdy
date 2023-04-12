@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import org.eclipse.collections.api.map.MutableMap
 import sturdy.{Executor, data, fix}
 import sturdy.data.{JoinTuple2, MayJoin, WithJoin, given}
 import sturdy.effect.{EffectStack, TrySturdy, store, given}
@@ -14,8 +15,8 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix.callgraph.CallGraphLogger
-import sturdy.fix.iter.IncrementalFixpoint
-import sturdy.fix.summary.{CacheSummary, ContextSensitiveSummary, SingletonSummary, SummaryLogger}
+import sturdy.fix.iter.IncrementalTopDown
+import sturdy.fix.summary.{CacheSummary, ContextSensitiveSummary, SingletonSummary, Summary, SummaryLogger}
 import sturdy.fix.{Combinator, CombinatorFixpoint, Contextual, ContextualInStateWidening, InStateWidening, Stack, StackConfig, StackedStates}
 import sturdy.incremental.{Change, Identifiable, ListDelta}
 import sturdy.language.tip.TipFailure
@@ -79,54 +80,68 @@ object IntervalAnalysis extends Interpreter,
 
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 
-  class InitialRunInstance(val initEnvironment: Environment, val initStore: Store, val callSites: Int)
-    extends Instance(initEnvironment, initStore, StackConfig.StackedStates() ,callSites):
+  class InitialRunInstance(val initEnvironment: Environment, val initStore: Store, val stackConfig: StackConfig, val callSites: Int)
+    extends Instance(initEnvironment, initStore, stackConfig ,callSites):
 
-    var callGraphLogger: CallGraphLogger[FixIn, Function, CallString, Exp.Call] = null
-    var summaryLogger: SummaryLogger[FixIn, FixOut[Value]] = null
+    var callGraphLogger: CallGraphLogger[FixIn, Function, Exp.Call, CallString] = null
+    var summaryLogger: SummaryLogger[FixIn, FixOut[Value], Function] = null
     var stack: StackedStates[FixIn, FixOut[Value]] & Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out] = null
 
     /** Fixpoint algorithm for initial run.
      * The fixpoint algorithm logs the stacks that occur during the analysis. */
     override val fixpoint: ContextFunction1[EffectStack, CombinatorFixpoint[FixIn, FixOut[IntervalAnalysis.Value]]] =
       callSiteSensitive(callSites, {
-        
+
         // Setup loggers that record data needed for incremental updates
-        callGraphLogger = new CallGraphLogger(implicitly)({
-          case FixIn.EnterFunction(f) => Some(f)
-          case _ => None
-        })
+        callGraphLogger = new CallGraphLogger(implicitly)(getCallee)
 
         given Structural[List[Any]] with {}
-        summaryLogger = new SummaryLogger(using effectStack)(dom =>
-          ContextSensitiveSummary[CallString, effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](
-            using effectStack.widenIn(dom),
-            JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)),
-            implicitly
-          )
+        summaryLogger = new SummaryLogger(using effectStack)(
+          getCallee = getCallee,
+          newSummary = dom =>
+            CacheSummary[effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](using
+              JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)))
         )
 
-        val inStateWidening = new ContextualInStateWidening(implicitly)(using effectStack.widenIn)
-        stack = new StackedStates[FixIn,FixOut[Value]](effectStack)(inStateWidening, true).asInstanceOf
-
         fix.dispatch(isFunOrWhile, Seq(
-          fix.log(fix.manyLogger(callGraphLogger,summaryLogger), fix.iter.innermost(stack)), fix.iter.innermost(StackConfig.StackedStates())))
+          fix.log(fix.manyLogger(callGraphLogger,summaryLogger), fix.iter.innermost(stackConfig)), fix.iter.innermost(stackConfig)))
       }).fixpoint
 
   class IncrementalUpdateInstance(initialRun: InitialRunInstance)
-    extends Instance(initialRun.initEnvironment, initialRun.initStore, StackConfig.StackedStates(), initialRun.callSites):
+    extends InitialRunInstance(initialRun.initEnvironment, initialRun.initStore, initialRun.stackConfig, initialRun.callSites):
 
     given inStateWidening: InStateWidening[FixIn, effectStack.In] = initialRun.stack.inStateWidening.asInstanceOf[InStateWidening[FixIn, effectStack.In]]
-    val incremental: IncrementalFixpoint[FixIn, FixOut[Value], Function, CallString, Exp.Call] = new IncrementalFixpoint(initialRun.callGraphLogger,initialRun.summaryLogger)
+    val incremental: IncrementalTopDown[FixIn, FixOut[Value], Function, CallString, Exp.Call] =
+      new IncrementalTopDown(initialRun.callGraphLogger,initialRun.summaryLogger)(
+        f => FixIn.EnterFunction(f)
+      )
 
-    def apply(initialProgram: Program, updatedProgram: Program) =
-      val changes = ListDelta.sub(initialProgram.funs.toList, updatedProgram.funs.toList)
-      this.functions = changes.keepOld.asInstanceOf[Map[String,sturdy.language.tip.Function]]
-      incremental.update(changes, fixed)
+    def apply(changes: ListDelta[Function]) =
+      incremental.clearSummaries(changes)
+      this.execute(Program(changes.keepOld.values.toSeq))
 
     /** Fixpoint algorithm for an incremental update.
      * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
     override val fixpoint =
       callSiteSensitive(initialRun.callSites, {
-        fix.dispatch(isFunOrWhile, Seq(fix.iter.innermost(incremental.dstack.asInstanceOf[Stack[FixIn, FixOut[Value], effectStack.In, effectStack.Out]]), fix.iter.innermost(StackConfig.StackedStates())))
+
+        callGraphLogger = new CallGraphLogger(implicitly)(getCallee)
+        summaryLogger = new SummaryLogger(using effectStack)(
+          getCallee = getCallee,
+          newSummary = dom =>
+            CacheSummary[effectStack.In, (TrySturdy[FixOut[Value]], effectStack.Out)](using
+              JoinTuple2[TrySturdy[FixOut[Value]], effectStack.Out, Widening.Yes](using implicitly, effectStack.widenOut(dom)))
+        )
+
+        fix.dispatch(isFunOrWhile, Seq(
+          fix.log(fix.manyLogger(callGraphLogger,summaryLogger),
+            fix.summary.reuseSummaries(overapproximate = false,
+              initialRun.summaryLogger, fix.iter.innermost(initialRun.stackConfig))
+          ),
+          fix.iter.innermost(initialRun.stackConfig)))
       }).fixpoint
+
+def getCallee(dom: FixIn): Option[Function] =
+  dom match
+    case FixIn.EnterFunction(f) => Some(f)
+    case _ => None

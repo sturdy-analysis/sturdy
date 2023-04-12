@@ -114,7 +114,7 @@ enum Assignable derives sturdy.util.Eq:
     case AField(_, _) => Set()
     case ADerefField(rec, _) => rec.intLiterals
 
-case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
+case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp) extends Labeled:
   override def toString: String = s"function $name"
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))

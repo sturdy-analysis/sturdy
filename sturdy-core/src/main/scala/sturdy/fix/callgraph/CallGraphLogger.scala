@@ -7,53 +7,89 @@ import sturdy.effect.TrySturdy
 import sturdy.fix.context.CallSiteLogger
 import sturdy.fix.{Contextual, Logger, State}
 import sturdy.data.MutableMap.updateWith
+
+import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
 
 /**
  * A call graph where an edge indicates where a function was called from and with which input state.
  */
-final class CallGraphLogger[Dom,Callee,Ctx,CallSite](callSiteLogger: CallSiteLogger[Dom,CallSite])
+final class CallGraphLogger[Dom,Callee,CallSite,Ctx](callSiteLogger: CallSiteLogger[Dom,CallSite])
                                                     (getCallee: Dom => Option[Callee])
-                                                    (using val state: State, contextual: Contextual[Ctx,Dom])
+                                                    (using contextual: Contextual[Ctx,Dom])
                                                   extends Logger[Dom,Any]:
-  val calledFrom: MutableMap[Callee, MutableMap[CallSite, MutableMap[Ctx,Iterations[state.In]]]] = Maps.mutable.empty()
-  val calls: MutableMap[Callee, MutableSet[Callee]] = Maps.mutable.empty()
+  val calledFrom: MutableMap[Callee, MutableSet[(Callee,CallSite,Ctx)]] = Maps.mutable.empty()
+  val calls: MutableMap[Callee, MutableSet[(Callee,CallSite,Ctx)]] = Maps.mutable.empty()
+  val entryPoints: MutableSet[Callee] = Sets.mutable.empty()
   var calleeStack: List[Callee] = List.empty
 
   override def enter(dom: Dom): Unit =
     getCallee(dom) match
       case Some(callee) =>
-        callSiteLogger.getCalls match
-          case caller::_ =>
-            val in = state.getInState(dom)
+        (calleeStack, callSiteLogger.getCalls) match
+          case (caller::_, callSite::_) =>
             val ctx = contextual.getCurrentContext
-            calledFrom.updateWith(callee, Maps.mutable.empty(), callers =>
-              callers.updateWith(caller, Maps.mutable.empty(), ctxs =>
-                ctxs.updateWith(ctx, Iterations.initial(in), _.addIteration(in))
-                ctxs
-              )
+
+            calledFrom.updateWith(callee, Sets.mutable.empty(), callers =>
+              callers.add((caller, callSite, ctx))
               callers
             )
-          case _ =>
 
-        calls.putIfAbsent(callee, Sets.mutable.empty())
-        calleeStack match
-          case caller::_ =>
-            calls.compute(caller, (_,callees) =>
-              callees.add(callee)
+            calls.updateWith(caller, Sets.mutable.empty(), callees =>
+              callees.add((callee, callSite, ctx))
               callees
             )
+
           case _ =>
-        calleeStack = callee :: calleeStack
+
+          if(calleeStack.isEmpty)
+            entryPoints.add(callee)
+
+          calleeStack = callee :: calleeStack
       case _ =>
 
   override def exit(dom: Dom, codom: TrySturdy[Any]): Unit =
     calleeStack = calleeStack.tail
 
-  final def callsTransitively(caller: Callee): Iterator[Callee] =
-    calls.get(caller) match
-      case null => Iterator()
-      case callees => callees.iterator().asScala ++ callees.iterator().asScala.flatMap(callsTransitively)
+  def getEntryPoints: Iterator[Callee] =
+    entryPoints.iterator().asScala
+
+  def callsTransitively(initialCaller: Callee): Iterable[Callee] =
+    val callees: MutableSet[Callee] = Sets.mutable.empty()
+    val callers: mutable.Queue[Callee] = mutable.Queue(initialCaller)
+
+    while(callers.nonEmpty) {
+      val caller = callers.dequeue()
+
+      calls.get(caller) match
+        case null =>
+        case cs =>
+          for((callee,_,_) <- cs.iterator().asScala)
+            if(! callees.contains(callee))
+              callers.enqueue(callee)
+              callees.add(callee)
+    }
+
+    callees.asScala
+
+
+  def calledFromTransitively(initialCallee: Callee): Iterable[Callee] =
+    val callers: MutableSet[Callee] = Sets.mutable.empty()
+    val callees: mutable.Queue[Callee] = mutable.Queue(initialCallee)
+
+    while (callees.nonEmpty) {
+      val caller = callees.dequeue()
+
+      calledFrom.get(caller) match
+        case null =>
+        case cs =>
+          for ((callee, _, _) <- cs.iterator().asScala)
+            if (!callers.contains(callee))
+              callees.enqueue(callee)
+              callers.add(callee)
+    }
+
+    callers.asScala
 
 final case class Iterations[A](initialIteration: A, latestIteration: A):
   def addIteration(iteration: A): Iterations[A] = this.copy(latestIteration = iteration)
