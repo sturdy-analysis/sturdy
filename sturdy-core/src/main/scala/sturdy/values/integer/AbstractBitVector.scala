@@ -78,6 +78,12 @@ enum AbstractBit:
     case (Zer, Zer) => Unchanged(a)
     case (_, Bit) => Unchanged(a)
     case _ => Changed(Bit)
+  def lteq(a: AbstractBit): Boolean = (this,a) match
+    case (_, Bit) => true
+    case (One, One) => true
+    case (Zer, Zer) => true
+    case (_,_) => false
+
   def lt(a: AbstractBit): Topped[Boolean] = (this, a) match
     case (Zer, One) => Topped.Actual(true)
     case (_, Zer) | (One, _) => Topped.Actual(false)
@@ -605,6 +611,9 @@ given AbstractBitVectorJoin[I](using Numeric[I], Ordering[I]): Join[AbstractBitV
   override def apply(v1: AbstractBitVector[I], v2: AbstractBitVector[I]): MaybeChanged[AbstractBitVector[I]] =
     val joined = for(i <- v1.bits.indices) yield v1.bits(i).joinWith(v2.bits(i)).get
     MaybeChanged(AbstractBitVector(joined.toArray),v1)
+
+  override def lteq(x: AbstractBitVector[I], y: AbstractBitVector[I]): Boolean =
+    x.bits.indices.forall(i => x.bits(i).lteq(y.bits(i)))
 
 //tested
 given AbstractBitVectorOrderingOps[I]

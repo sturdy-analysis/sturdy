@@ -4,7 +4,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Concrete
 import sturdy.effect.TrySturdy
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Join, Widen, Widening}
 import sturdy.{IsSound, Soundness, seqIsSound}
 
 import scala.collection.immutable.HashMap
@@ -82,17 +82,18 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
 class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars), Concrete
 
 class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars):
-  override type State = (Map[Var,Int],mutable.ArraySeq[V])
-  override def getState: State = (names,vars.clone())
+  override type State = mutable.ArraySeq[V]
+  override def getState: State = vars.clone()
   override def setState(s: State): Unit =
-    names = s._1
-    val newVars = s._2.array
+    val newVars = s.array
     if(newVars.length != vars.length)
       vars = mutable.ArraySeq.make(Array.ofDim(newVars.length))
     Array.copy(newVars, 0, vars.array, 0, newVars.length)
 
-  override def join: Join[State] = new JoinSecond
-  override def widen: Widen[State] = new JoinSecond
+  override def join: Join[State] = _join
+  private val _join = CombineEquiArraySeq[V, Widening.No]
+  override def widen: Widen[State] = _widen
+  private val _widen = CombineEquiArraySeq[V, Widening.Yes]
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {

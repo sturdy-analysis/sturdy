@@ -30,6 +30,9 @@ given JoinPowerset[A]: Join[Powerset[A]] with
     val joinedSet = v1.set ++ v2.set
     MaybeChanged(new Powerset(joinedSet), joinedSet.size > v1.set.size)
 
+  override def lteq(x: Powerset[A], y: Powerset[A]): Boolean =
+    x.set.subsetOf(y.set)
+
 given powersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
     if (v1.set.size == 1 && v2.set.size == 1)

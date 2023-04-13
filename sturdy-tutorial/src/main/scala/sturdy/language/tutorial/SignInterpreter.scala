@@ -30,7 +30,7 @@ class SignInterpreter extends GenericInterpreter[Sign, WithJoin]:
   override val fixpoint: Fixpoint[FixIn, FixOut[Sign]] = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Sign]] {
     // we need to configure the context insensitive fixpoint algorithm by providing a fixpoint combinator
     // we choose to apply the topmost iteration strategy to while loop statements (all other statements can't diverge)
-    override protected def contextInsensitive: fix.Contextual[Unit, FixIn, FixOut[Sign]] ?=> fix.Combinator[FixIn, FixOut[Sign]] =
+    override protected def contextInsensitive: fix.Contextual[Unit, FixIn] ?=> fix.Combinator[FixIn, FixOut[Sign]] =
       fix.filter(isLoop, fix.iter.topmost(StackConfig.StackedCfgNodes()))
 
     private def isLoop(dom: FixIn): Boolean = dom match

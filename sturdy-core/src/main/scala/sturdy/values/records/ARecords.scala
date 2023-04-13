@@ -29,7 +29,7 @@ given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: EffectStack): Re
       case None => UnboundRecordField(field).failedUpdate(rec)
       case Some(_) => ARecord.Map(m + (field -> newval))
 
-given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
+given CombineARecord[F, V, W <: Widening](using l: Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
   override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): MaybeChanged[ARecord[F, V]] = (rec1, rec2) match
     case (ARecord.Top(), _ ) => Unchanged(rec1)
     case (_, ARecord.Top()) => Changed(rec2)
@@ -42,11 +42,19 @@ given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[AR
         joined.get(f) match
           case None => return Changed(ARecord.Top())
           case Some(v1) =>
-            Combine[V, W](v1, v2)(using force).ifChanged { changedV =>
+            l.force(v1, v2).ifChanged { changedV =>
               joined += f -> changedV
               changed = true
             }
       MaybeChanged(ARecord.Map(joined), changed)
+
+  override def lteq(x: ARecord[F, V], y: ARecord[F, V]): Boolean = (x,y) match
+    case (_,ARecord.Top()) => true
+    case (ARecord.Map(m1), ARecord.Map(m2)) =>
+      m1.keySet == m2.keySet &&
+      m1.forall((k1,v1) =>
+        l.force.lteq(v1, m2(k1))
+      )
 
 given FiniteARecord[F, V](using Finite[F], Lazy[Finite[V]]): Finite[ARecord[F, V]] with {}
 

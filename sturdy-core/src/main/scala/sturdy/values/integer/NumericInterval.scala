@@ -1156,6 +1156,9 @@ given NumericIntervalJoin[I](using Ordering[I]): Join[NumericInterval[I]] with
   override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] =
     MaybeChanged(NumericInterval.safe(v1.low.min(v2.low), v1.high.max(v2.high)), v1)
 
+  override def lteq(x: NumericInterval[I], y: NumericInterval[I]): Boolean =
+    y.low <= x.low && x.high <= y.high
+
 class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using Numeric[I]) extends Widen[NumericInterval[I]]:
   private lazy val treeSet: TreeSet[I] = TreeSet.from(bounds)
   override def apply(v1: NumericInterval[I], v2: NumericInterval[I]): MaybeChanged[NumericInterval[I]] =
@@ -1166,6 +1169,10 @@ class NumericIntervalWiden[I](bounds: => Set[I], minValue: I, maxValue: I)(using
       if (v1.high >= v2.high) v1.high
       else treeSet.minAfter(v2.high).getOrElse(maxValue)
     MaybeChanged(NumericInterval.safe(low, high), v1)
+
+  override def lteq(x: NumericInterval[I], y: NumericInterval[I]): Boolean =
+    y.low <= x.low && x.high <= y.high
+
 
 given NumericIntervalOrderingOps[I](using Ordering[I]): OrderingOps[NumericInterval[I], Topped[Boolean]] with
   def lt(iv1: NumericInterval[I], iv2: NumericInterval[I]): Topped[Boolean] =

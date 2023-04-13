@@ -44,7 +44,6 @@ given CombineMayMustRecord[F, V, W <: Widening](using j: Combine[V, W]): Combine
           }
     MaybeChanged(MayMustRecord(joined), changed)
 
-given MayMustRecordPO[F, V](using PartialOrder[V]): PartialOrder[MayMustRecord[F, V]] with
   override def lteq(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): Boolean =
     // all must entries of rec2 have a must entry in rec1
     for ((f, v1) <- rec2.m; if v1.isMust)

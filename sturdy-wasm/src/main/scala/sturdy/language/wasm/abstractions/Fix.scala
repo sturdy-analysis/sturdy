@@ -6,11 +6,10 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
-import sturdy.values.Finite
-import sturdy.values.{Combine, MaybeChanged, Widening, Unchanged}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, InstLoc}
+import sturdy.values.{Combine, Finite, MaybeChanged, PartialOrder, Unchanged, Widening}
 import swam.FuncIdx
-import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
+import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
 
 object Fix:
   final def isFunOrLoop(dom: FixIn): Boolean = isFunOrLoopToIndex(dom) > -1
@@ -38,3 +37,8 @@ object Fix:
       case (FixOut.Eval(), FixOut.Eval()) => Unchanged(FixOut.Eval())
       case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => Combine[List[V], W](vs1, vs2).map(FixOut.ExitWasmFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
+
+    override def lteq(x: FixOut[V], y: FixOut[V]): Boolean = (x,y) match
+      case (FixOut.Eval(), FixOut.Eval()) => true
+      case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => summon[PartialOrder[List[V]]].lteq(vs1,vs2)
+      case _ => false

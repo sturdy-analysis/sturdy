@@ -169,6 +169,25 @@ object ConstantAddressMemory:
             Changed(TopMem(newDefinite, newUpperBound))
           }
 
+    override def lteq(x: Mem[B], y: Mem[B]): Boolean =
+      (
+        (x.isDefinite,y.isDefinite) match
+          case (true,_) => true
+          case (_, false) => true
+          case (_,_) => false
+      ) &&
+      summon[PartialOrder[B]].lteq(x.upperBound, y.upperBound) &&
+      (
+        (x,y) match
+          case (_,_:TopMem[B]) => true
+          case (xm: ImmutableByteMem[B], ym: ImmutableByteMem[B]) =>
+            xm.size == ym.size && xm.sizeLimit == ym.sizeLimit && JoinIntMap[Word[B], W](using ConstantAddressMemory.CombineWord).lteq(xm.words, ym.words)
+          case (xm: ImmutableByteMem[B], ym: SizeMem[B]) =>
+            xm.size == ym.size && xm.sizeLimit == ym.sizeLimit
+          case (xm: SizeMem[B], ym: SizeMem[B]) =>
+            xm.size == ym.size && xm.sizeLimit == ym.sizeLimit
+      )
+
   sealed trait Mem[B: ClassTag]:
     def upperBound: B
     protected def newBound(bs: Iterable[B])(using Join[B]): MaybeChanged[B] =
@@ -266,6 +285,12 @@ object ConstantAddressMemory:
       val b4 = Combine(v1.b4, v2.b4)
       MaybeChanged(Word(b1.get, b2.get, b3.get, b4.get), b1.hasChanged || b2.hasChanged || b3.hasChanged || b4.hasChanged)
     }
+
+    override def lteq(x: Word[B], y: Word[B]): Boolean =
+      summon[PartialOrder[B]].lteq(x.b1, y.b1) &&
+      summon[PartialOrder[B]].lteq(x.b2, y.b2) &&
+      summon[PartialOrder[B]].lteq(x.b3, y.b3) &&
+      summon[PartialOrder[B]].lteq(x.b4, y.b4)
 
   object ImmutableByteMem:
     def ofSize[B: ClassTag](size: Int, sizeLimit: Option[Int], emptyB: B): ImmutableByteMem[B] =

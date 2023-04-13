@@ -52,6 +52,13 @@ given CombineFloatSign[W <: Widening]: Combine[FloatSign, W] with
       case (Pos, Zero) => Changed(ZeroOrPos)
       case _ => Changed(TopSign)
 
+  override def lteq(x: FloatSign, y: FloatSign): Boolean = (x,y) match
+    case (_,TopSign) => true
+    case (Zero, Zero) | (Pos, Pos) | (Neg, Neg) => true
+    case (Neg, NegOrZero) | (Zero, NegOrZero) => true
+    case (Zero, ZeroOrPos) | (Pos, ZeroOrPos) => true
+    case (_,_) => false
+
 
 given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
   def floatingLit(f: B): FloatSign =

@@ -5,6 +5,38 @@ object Widening:
   final class Yes extends Widening
   final class No extends Widening
 
+trait Combine[V, W <: Widening] extends PartialOrder[V]:
+  /**
+   * Computes an upper bound `u` of its arguments `v1` and `v2`, i.e, `v1 ⊑ u ⊒ v2`.
+   * If `Widening.No`, then `u` is the least upper bound `v1 ⊔ v2` of `v1` and `v2`.
+   * If `Widening.Yes`, then the fixpoint iteration `x_{n+1} = apply(x_n, f(x_n))` is guaranteed to have a limit, i.e., there exits a `k` such that `x_{k+1} = x_k`.
+   * `apply(v1,v2)` returns `Changed(u)` if `v1 ⊏ u` and `Unchanged(u)` if `u ⊑ v2`.
+   */
+  def apply(v1: V, v2: V): MaybeChanged[V]
+
+type Join[V] = Combine[V, Widening.No]
+type Widen[V] = Combine[V, Widening.Yes]
+
+object Combine:
+  inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
+    case _ => j(v1, v2)
+  }
+object Join:
+  inline def apply[V](v1: V, v2: V)(using j: Join[V]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
+    case _ => j(v1, v2)
+  }
+object Widen:
+  inline def apply[V](v1: V, v2: V)(using j: Widen[V]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
+    case _ => j(v1, v2)
+  }
+
+given finitely[V](using Join[V], Finite[V]): Widen[V] with
+  def apply(v1: V, v2: V) = Join(v1, v2)
+  override def lteq(v1: V, v2: V): Boolean = summon[Join[V]].lteq(v1,v2)
+
 enum MaybeChanged[+A]:
   case Changed(a: A)
   case Unchanged(a: A)
@@ -40,46 +72,3 @@ object MaybeChanged:
 
 def Changed[A](a: A) = MaybeChanged.Changed(a)
 def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
-
-trait Combine[V, W <: Widening]:
-  def apply(v1: V, v2: V): MaybeChanged[V]
-
-type Join[V] = Combine[V, Widening.No]
-type Widen[V] = Combine[V, Widening.Yes]
-
-object Combine:
-  inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): MaybeChanged[V] = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
-    case _ => j(v1, v2)
-  }
-object Join:
-  inline def apply[V](v1: V, v2: V)(using j: Join[V]): MaybeChanged[V] = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
-    case _ => j(v1, v2)
-  }
-object Widen:
-  inline def apply[V](v1: V, v2: V)(using j: Widen[V]): MaybeChanged[V] = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
-    case _ => j(v1, v2)
-  }
-
-given finitely[V](using Join[V], Finite[V]): Widen[V] with
-  def apply(v1: V, v2: V) = Join(v1, v2)
-
-//trait Combinable[V]:
-//  type CombineCtx[W]
-//  def combine[W <: Widening](that: V): CombineCtx[W] ?=> V
-//given CombineCombinable[V <: Combinable[V], W <: Widening]: Combine[V, W] with
-//  inline def apply(v1: V, v2: V): v1.CombineCtx[W] ?=> V = v1.combine[W](v2)
-//
-//trait Joinable[V]:
-//  type JoinCtx
-//  def join(that: V): JoinCtx ?=> V
-//given JoinJoinable[V <: Joinable[V]]: Join[V] with
-//  inline def apply(v1: V, v2: V): v1.JoinCtx ?=> V = v1.join(v2)
-//
-//trait Widenable[V]:
-//  type WidenCtx
-//  def widen(that: V): WidenCtx ?=> V
-//given WidenWidenable[V <: Widenable[V]]: Join[V] with
-//  inline def apply(v1: V, v2: V): v1.WidenCtx ?=> V = v1.widen(v2)

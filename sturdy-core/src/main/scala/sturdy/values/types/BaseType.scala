@@ -26,6 +26,7 @@ object BaseType:
 
 given CombineBaseType[B: ClassTag, W <: Widening]: Combine[BaseType[B], W] with
   override def apply(v1: BaseType[B], v2: BaseType[B]): MaybeChanged[BaseType[B]] = MaybeChanged.Unchanged(v1)
+  override def lteq(x: BaseType[B], y: BaseType[B]): Boolean = true
 
 given TopBaseType[B: ClassTag]: Top[BaseType[B]] with
   def top: BaseType[B] = BaseType[B]

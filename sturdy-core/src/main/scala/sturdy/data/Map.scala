@@ -1,6 +1,6 @@
 package sturdy.data
 
-import sturdy.values.{Combine, MaybeChanged, Finite, Widening, Join, Widen}
+import sturdy.values.{Combine, Finite, Join, MaybeChanged, PartialOrder, Widen, Widening}
 
 import scala.collection.immutable.IntMap
 
@@ -21,6 +21,14 @@ given JoinMap[K, V](using j: Join[V]): Join[Map[K, V]] with
           changed |= joinedV.hasChanged
     MaybeChanged(joined, changed)
 
+  override def lteq(x: Map[K, V], y: Map[K, V]): Boolean =
+    x.iterator.forall((k1,v1) =>
+      y.get(k1) match
+        case Some(v2) => summon[PartialOrder[V]].lteq(v1,v2)
+        case None => false
+    )
+
+
 given JoinIntMap[V, W <: Widening](using j: Combine[V, W]): Join[IntMap[V]] with
   override def apply(vs1: IntMap[V], vs2: IntMap[V]): MaybeChanged[IntMap[V]] =
     var joined = vs1
@@ -36,6 +44,13 @@ given JoinIntMap[V, W <: Widening](using j: Combine[V, W]): Join[IntMap[V]] with
           changed |= joinedV.hasChanged
     MaybeChanged(joined, changed)
 
+  override def lteq(x: IntMap[V], y: IntMap[V]): Boolean =
+    x.iterator.forall((k1, v1) =>
+      y.get(k1) match
+        case Some(v2) => summon[PartialOrder[V]].lteq(v1, v2)
+        case None => false
+    )
+
 given WidenFiniteKeyMap[K, V](using j: Widen[V], fk: Finite[K]): Widen[Map[K, V]] with
   override def apply(v1: Map[K, V], v2: Map[K, V]): MaybeChanged[Map[K, V]] =
     var joined = v1
@@ -50,6 +65,13 @@ given WidenFiniteKeyMap[K, V](using j: Widen[V], fk: Finite[K]): Widen[Map[K, V]
           joined += x -> joinedV.get
           changed |= joinedV.hasChanged
     MaybeChanged(joined, changed)
+
+  inline override def lteq(x: Map[K, V], y: Map[K, V]): Boolean =
+    x.iterator.forall((k1, v1) =>
+      y.get(k1) match
+        case Some(v2) => summon[PartialOrder[V]].lteq(v1, v2)
+        case None => false
+    )
 
 inline def combineMaps[K, V](m1: Map[K, V], m2: Map[K, V], inline combine: (V, V) => V): Map[K, V] =
   val (small, large) = if (m1.size >= m2.size) (m1, m2) else (m2, m1)

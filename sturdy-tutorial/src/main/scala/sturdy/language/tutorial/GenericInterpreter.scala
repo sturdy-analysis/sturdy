@@ -6,7 +6,7 @@ import sturdy.effect.*
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
 import sturdy.language.tutorial.GenericInterpreter.FixIn
-import sturdy.values.{Finite, Combine, MaybeChanged, Unchanged, Widening}
+import sturdy.values.{Combine, Finite, MaybeChanged, PartialOrder, Unchanged, Widening}
 
 /*
  * We now want to use sturdy to write abstract interpreters for the while language. To this end we need to
@@ -157,6 +157,11 @@ object GenericInterpreter:
       case (Eval(v1), Eval(v2)) => Combine[V,W](v1,v2).map(Eval.apply)
       case (Run(), Run()) => Unchanged(Run())
       case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $v1 and $v2")
+
+    override def lteq(x: FixOut[V], y: FixOut[V]): Boolean = (x,y) match
+      case (Eval(v1), Eval(v2)) => summon[PartialOrder[V]].lteq(v1,v2)
+      case (Run(), Run()) => true
+      case (_,_) => false
 
 import GenericInterpreter.*
 

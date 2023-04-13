@@ -1,9 +1,7 @@
 package sturdy.effect
 
 import sturdy.fix.Frame
-import sturdy.values.Combine
-import sturdy.values.MaybeChanged
-import sturdy.values.Widening
+import sturdy.values.{Combine, MaybeChanged, PartialOrder, Widening}
 
 import java.security.cert.TrustAnchor
 
@@ -80,6 +78,15 @@ object TrySturdy:
     case (TrySturdy.Failure(_), TrySturdy.Failure(_)) => MaybeChanged.Unchanged(v1)
     case _ => throw new IllegalArgumentException(s"Cannot join $v1 and $v2")
 
+  inline def lteq[A: PartialOrder](x: TrySturdy[A], y: TrySturdy[A]): Boolean = (x, y) match
+    case (TrySturdy.Success(a1), TrySturdy.Success(a2)) => summon[PartialOrder[A]].lteq(a1, a2)
+    case (_, TrySturdy.Success(_)) => true
+    case (TrySturdy.Recurrent(_),_) => true
+    case (TrySturdy.Failure(_), TrySturdy.Exception(_)) => true
+    case (TrySturdy.Failure(_), TrySturdy.Failure(_)) => true
+    case (TrySturdy.Exception(_), TrySturdy.Exception(_)) => true
+    case (_, _) => false
 
 given CombineTrySturdy[A, W <: Widening](using Combine[A, W]): Combine[TrySturdy[A], W] with
   override def apply(v1: TrySturdy[A], v2: TrySturdy[A]): MaybeChanged[TrySturdy[A]] = TrySturdy.combine(v1, v2)
+  override def lteq(x: TrySturdy[A], y: TrySturdy[A]): Boolean = TrySturdy.lteq(x,y)

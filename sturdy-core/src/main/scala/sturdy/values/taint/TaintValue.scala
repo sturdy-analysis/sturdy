@@ -28,6 +28,12 @@ given CombineTaint[W <: Widening]: Combine[Taint, W] with
     case (TopTaint, _) => Unchanged(TopTaint)
     case (_, _) => Changed(TopTaint)
 
+  override def lteq(x: Taint, y: Taint): Boolean = (x,y) match
+    case (Tainted, Tainted) => true
+    case (Untainted, Untainted) => true
+    case (_, TopTaint) => true
+    case (_, _) => false
+
 case class TaintProduct[V](taint: Taint, value: V):
 
   def map[W](f: V => W): TaintProduct[W] =
@@ -53,6 +59,10 @@ given CombineTaintProduct[V, W <: Widening](using comb: Combine[V, W]): Combine[
     val joinedTaint = Join(v1.taint, v2.taint)
     val joinedVal = comb(v1.value, v2.value)
     MaybeChanged(TaintProduct(joinedTaint.get, joinedVal.get), joinedTaint.hasChanged || joinedVal.hasChanged)
+
+  override def lteq(x: TaintProduct[V], y: TaintProduct[V]): Boolean =
+    summon[PartialOrder[Taint]].lteq(x.taint, y.taint) &&
+    summon[PartialOrder[V]].lteq(x.value, y.value)
 
 
 given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintProduct[V]] with

@@ -51,6 +51,14 @@ given CombineIntSign[W <: Widening]: Combine[IntSign, W] with
       case (Pos, Zero) => Changed(ZeroOrPos)
       case _ => Changed(TopSign)
 
+  override def lteq(x: IntSign, y: IntSign): Boolean =
+    (x, y) match
+      case (_, TopSign) => true
+      case (Zero, Zero) | (Pos, Pos) | (Neg, Neg) => true
+      case (Neg, NegOrZero) | (Zero, NegOrZero) => true
+      case (Zero, ZeroOrPos) | (Pos, ZeroOrPos) => true
+      case (_, _) => false
+
 given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, IntSign] with
   def integerLit(i: B): IntSign =
     if base.lt(i, base.zero) then Neg

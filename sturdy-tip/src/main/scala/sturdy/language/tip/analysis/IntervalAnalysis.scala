@@ -15,7 +15,6 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix.callgraph.CallGraphLogger
-import sturdy.fix.iter.IncrementalTopDown
 import sturdy.fix.summary.{CacheSummary, ContextSensitiveSummary, SingletonSummary, Summary, SummaryLogger}
 import sturdy.fix.{Combinator, CombinatorFixpoint, Contextual, ContextualInStateWidening, InStateWidening, Stack, StackConfig, StackedStates}
 import sturdy.incremental.{Change, Identifiable, ListDelta}
@@ -62,7 +61,7 @@ object IntervalAnalysis extends Interpreter,
 
     var bounds: Set[Int] = Set()
     given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)
-    given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
+    given widenVal: Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals
@@ -111,14 +110,10 @@ object IntervalAnalysis extends Interpreter,
     extends InitialRunInstance(initialRun.initEnvironment, initialRun.initStore, initialRun.stackConfig, initialRun.callSites):
 
     given inStateWidening: InStateWidening[FixIn, effectStack.In] = initialRun.stack.inStateWidening.asInstanceOf[InStateWidening[FixIn, effectStack.In]]
-    val incremental: IncrementalTopDown[FixIn, FixOut[Value], Function, CallString, Exp.Call] =
-      new IncrementalTopDown(initialRun.callGraphLogger,initialRun.summaryLogger)(
-        f => FixIn.EnterFunction(f)
-      )
 
-    def apply(changes: ListDelta[Function]) =
-      incremental.clearSummaries(changes)
-      this.execute(Program(changes.keepOld.values.toSeq))
+    def execute(changes: ListDelta[Function]) =
+      sturdy.incremental.clearSummaries(changes, initialRun.callGraphLogger, initialRun.summaryLogger)
+      super.execute(Program(changes.keepOld.values.toSeq))
 
     /** Fixpoint algorithm for an incremental update.
      * The fixpoint algorithm reanalyzes changes bottom-up from a changed `dom` to its dependencies. */
@@ -135,8 +130,7 @@ object IntervalAnalysis extends Interpreter,
 
         fix.dispatch(isFunOrWhile, Seq(
           fix.log(fix.manyLogger(callGraphLogger,summaryLogger),
-            fix.summary.reuseSummaries(overapproximate = false,
-              initialRun.summaryLogger, fix.iter.innermost(initialRun.stackConfig))
+            fix.summary.reuseSummaries(overapproximate = false, initialRun.summaryLogger, fix.iter.innermost(initialRun.stackConfig))
           ),
           fix.iter.innermost(initialRun.stackConfig)))
       }).fixpoint

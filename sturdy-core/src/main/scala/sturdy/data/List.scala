@@ -19,6 +19,9 @@ given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], 
     }
     MaybeChanged(vs, changed)
 
+  override def lteq(x: Seq[V], y: Seq[V]): Boolean =
+    x.size == y.size && x.zip(y).forall((l,r) => summon[PartialOrder[V]].lteq(l,r))
+
 
 given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V], W] with
   override def apply(vs1: List[V], vs2: List[V]): MaybeChanged[List[V]] =
@@ -33,6 +36,9 @@ given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V]
     }
     MaybeChanged(vs, changed)
 
+  override def lteq(x: List[V], y: List[V]): Boolean =
+    x.size == y.size && x.zip(y).forall((l,r) => summon[PartialOrder[V]].lteq(l,r))
+
 given CombineEquiVector[V, W <: Widening](using j: Combine[V, W]): Combine[Vector[V], W] with
   override def apply(vs1: Vector[V], vs2: Vector[V]): MaybeChanged[Vector[V]] =
     if (vs1.size != vs2.size)
@@ -46,6 +52,9 @@ given CombineEquiVector[V, W <: Widening](using j: Combine[V, W]): Combine[Vecto
     }
     MaybeChanged(vs, changed)
 
+  override def lteq(x: Vector[V], y: Vector[V]): Boolean =
+    x.size == y.size && x.zip(y).forall((l, r) => summon[PartialOrder[V]].lteq(l, r))
+
 given CombineEquiArraySeq[V, W <: Widening](using j: Combine[V, W]): Combine[mutable.ArraySeq[V], W] with
   override def apply(v1: mutable.ArraySeq[V], v2: mutable.ArraySeq[V]): MaybeChanged[mutable.ArraySeq[V]] =
     if (v1.length != v2.length)
@@ -58,3 +67,6 @@ given CombineEquiArraySeq[V, W <: Widening](using j: Combine[V, W]): Combine[mut
       result(i) = v.get
     }
     MaybeChanged(result, changed)
+
+  override def lteq(x: mutable.ArraySeq[V], y: mutable.ArraySeq[V]): Boolean =
+    x.size == y.size && x.zip(y).forall((l, r) => summon[PartialOrder[V]].lteq(l, r))

@@ -28,7 +28,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
       s = s.tail
     }
   }
-  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine[List[Any], W] {
+  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => Combine[Any, W]): Combine[List[Any], W] = new Combine[List[Any], W] {
     override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
       var effs = eff
       var s1 = st1
@@ -37,7 +37,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
       var changed = false
       while (effs.nonEmpty) {
         val e = effs.head
-        comb(e)(s1.head, s2.head) match
+        comb(e).apply(s1.head, s2.head) match
           case MaybeChanged.Changed(a) =>
             res += a
             changed |= true
@@ -48,6 +48,11 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
         s2 = s2.tail
       }
       MaybeChanged(res.toList, changed)
+
+    override def lteq(x: List[Any], y: List[Any]): Boolean =
+      eff.zip(x.zip(y)).forall{
+        case (e, (l, r)) => comb(e).lteq(l,r)
+      }
   }
 
   override def getAllState: All = getEffectState(effects)
@@ -57,10 +62,10 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
   override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects(dom), in)
   override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects(dom), out)
 
-  override def joinIn(dom: Any): Join[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def widenIn(dom: Any): Widen[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def joinOut(dom: Any): Join[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def widenOut(dom: Any): Widen[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
+  override def joinIn(dom: Any): Join[In] = joinEffectulState(inEffects(dom), e => e.join.asInstanceOf[Join[Any]])
+  override def widenIn(dom: Any): Widen[In] = joinEffectulState(inEffects(dom), e => e.widen.asInstanceOf[Widen[Any]])
+  override def joinOut(dom: Any): Join[Out] = joinEffectulState(outEffects(dom), e => e.join.asInstanceOf[Join[Any]])
+  override def widenOut(dom: Any): Widen[Out] = joinEffectulState(outEffects(dom), e => e.widen.asInstanceOf[Widen[Any]])
 
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()

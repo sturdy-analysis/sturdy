@@ -64,6 +64,12 @@ given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V]
     case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
     case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
+  override def lteq(x: FixOut[V], y: FixOut[V]): Boolean = (x, y) match
+    case (FixOut.Eval(v1), FixOut.Eval(v2)) => summon[PartialOrder[V]].lteq(v1,v2)
+    case (FixOut.Run(), FixOut.Run()) => true
+    case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => summon[PartialOrder[V]].lteq(v1,v2)
+    case _ => false
+
 import TipFailure.*
 
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:

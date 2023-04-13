@@ -49,17 +49,33 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   override type State = Tables[Key, Symbol, Entry]
   def getState: Tables[Key, Symbol, Entry] = tables
   def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
-  override def join: Join[Tables[Key, Symbol, Entry]] = JoinMap(using {
-    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
-    case (v1@Right(_), Left(_)) => Unchanged(v1)
-    case (Left(_), v2@Right(_)) => Changed(v2)
-    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+  override def join: Join[Tables[Key, Symbol, Entry]] = _join
+  private val _join = JoinMap[Key,Eith[Table[Symbol, Entry], Entry]](using new Join[Eith[Table[Symbol, Entry], Entry]] {
+    final override def apply(v1: Eith[Table[Symbol, Entry], Entry], v2: Eith[Table[Symbol, Entry], Entry]): MaybeChanged[Eith[Table[Symbol, Entry], Entry]] = (v1,v2) match
+      case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+      case (v1@Right(_), Left(_)) => Unchanged(v1)
+      case (Left(_), v2@Right(_)) => Changed(v2)
+      case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+
+    final override def lteq(x: Eith[Table[Symbol, Entry], Entry], y: Eith[Table[Symbol, Entry], Entry]): Boolean = (x,y) match
+      case (Right(a), Right(b)) => summon[PartialOrder[Entry]].lteq(a,b)
+      case (Left(a), Left(b)) => summon[PartialOrder[Table[Symbol, Entry]]].lteq(a,b)
+      case (_, Right(_)) => true
+      case (Left(_), _) => true
   })
-  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
-    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
-    case (v1@Right(_), Left(_)) => Unchanged(v1)
-    case (Left(_), v2@Right(_)) => Changed(v2)
-    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+  override def widen: Widen[Tables[Key, Symbol, Entry]] = _widen
+  private val _widen = WidenFiniteKeyMap[Key,Eith[Table[Symbol, Entry], Entry]](using new Widen[Eith[Table[Symbol, Entry], Entry]]{
+    final override def apply(v1: Eith[Table[Symbol, Entry], Entry], v2: Eith[Table[Symbol, Entry], Entry]): MaybeChanged[Eith[Table[Symbol, Entry], Entry]] = (v1,v2) match
+      case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+      case (v1@Right(_), Left(_)) => Unchanged(v1)
+      case (Left(_), v2@Right(_)) => Changed(v2)
+      case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+
+    final override def lteq(x: Eith[Table[Symbol, Entry], Entry], y: Eith[Table[Symbol, Entry], Entry]): Boolean = (x, y) match
+      case (Right(a), Right(b)) => summon[PartialOrder[Entry]].lteq(a, b)
+      case (Left(a), Left(b)) => summon[PartialOrder[Table[Symbol, Entry]]].lteq(a, b)
+      case (_, Right(_)) => true
+      case (Left(_), _) => true
   })
 
 
@@ -181,6 +197,15 @@ object ConstantSymbolTable:
         }
       }
       MaybeChanged(Table(tab, dirty), changed)
+
+    override def lteq(x: Table[Symbol, Entry], y: Table[Symbol, Entry]): Boolean =
+      x.dirtySymbols.subsetOf(y.dirtySymbols) &&
+      x.underlying.iterator.forall((k1, v1) =>
+        y.underlying.get(k1) match
+          case Some(v2) => summon[PartialOrder[MayMust[Entry]]].lteq(v1, v2)
+          case None => false
+      )
+
 
   case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
     def entries: Set[Entry] = underlying.values.map(_.get).toSet

@@ -34,6 +34,10 @@ given CombineSign[W <: Widening]: Combine[Sign,W] with
       case (TopSign, _) => Unchanged(TopSign)
       case _ => Changed(TopSign)
 
+  override def lteq(x: Sign, y: Sign): Boolean = (x,y) match
+    case (_,TopSign) => true
+    case (x,y) => x == y
+
 given valuesAbstractly: Abstractly[Int, Sign] with
   override def apply(c: Int): Sign =
     if (c < 0) then Neg else if (c == 0) then Zero else Pos

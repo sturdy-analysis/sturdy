@@ -27,6 +27,12 @@ given CombineMayMust[T, W <: Widening](using j: Combine[T, W]): Combine[MayMust[
     case (MayMust.Must(t1), MayMust.Must(t2)) => j(t1, t2).map(MayMust.Must.apply)
     case _ => j(v1.get, v2.get).map(MayMust.May.apply)
 
+  override def lteq(x: MayMust[T], y: MayMust[T]): Boolean = (x,y) match
+    case (MayMust.Must(t1), MayMust.Must(t2)) => summon[PartialOrder[T]].lteq(t1,t2)
+    case (MayMust.Must(t1), MayMust.May(t2)) => summon[PartialOrder[T]].lteq(t1,t2)
+    case (MayMust.May(t1), MayMust.May(t2)) => summon[PartialOrder[T]].lteq(t1, t2)
+    case (_, _) => false
+
 given mayMustPO[T](using po: PartialOrder[T]): PartialOrder[MayMust[T]] with
   override def lteq(x: MayMust[T], y: MayMust[T]): Boolean =
     if (!x.isMust && y.isMust)

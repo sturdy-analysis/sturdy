@@ -38,6 +38,19 @@ object Summary {
         case Exact(in, _) => Some(in)
         case Overapproximate(in, _) => Some(in)
         case None => Option.empty
+
+  given ResultOrder[In: PartialOrder, Out: PartialOrder]: PartialOrder[Result[In,Out]] with
+    override def lteq(x: Result[In, Out], y: Result[In, Out]): Boolean =
+      (x,y) match
+        case (Result.Exact(in1,out1), Result.Exact(in2,out2)) =>
+          summon[PartialOrder[In]].lteq(in1,in2) && summon[PartialOrder[Out]].lteq(out1,out2)
+        case (Result.Exact(in1, out1), Result.Overapproximate(in2, out2)) =>
+          summon[PartialOrder[In]].lteq(in1,in2) && summon[PartialOrder[Out]].lteq(out1,out2)
+        case (Result.Overapproximate(in1, out1), Result.Overapproximate(in2, out2)) =>
+          summon[PartialOrder[In]].lteq(in1,in2) && summon[PartialOrder[Out]].lteq(out1,out2)
+        case (Result.None, Result.None) => true
+        case (_,_) => false
+
 }
 
 object SingletonSummary:

@@ -77,7 +77,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
 
-  def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
+  inline def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false
     val joinedFrame = ops1.zipAll[V,V](ops2, null.asInstanceOf[V], null.asInstanceOf[V]).map {
       case (v1, null) => v1
@@ -88,9 +88,17 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
         v.get
     }
     MaybeChanged(joinedFrame, hasChanged)
-  override def join: Join[List[V]] = combineFrames(_, _, summon[Join[V]].apply)
-  override def widen: Widen[List[V]] = combineFrames(_, _, summon[Widen[V]].apply)
 
+  override def join: Join[List[V]] = _join
+  private val _join = new Join[List[V]] {
+    final override def apply(v1: List[V], v2: List[V]): MaybeChanged[List[V]] = combineFrames(v1, v2, summon[Join[V]].apply)
+    final override def lteq(x: List[V], y: List[V]): Boolean = CombineEquiList[V,Widening.No].lteq(x,y)
+  }
+  override def widen: Widen[List[V]] = _widen
+  private val _widen = new Widen[List[V]] {
+    final override def apply(v1: List[V], v2: List[V]): MaybeChanged[List[V]] = combineFrames(v1, v2, summon[Widen[V]].apply)
+    final override def lteq(x: List[V], y: List[V]): Boolean = CombineEquiList[V,Widening.No].lteq(x, y)
+  }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
   private class OperandStackJoiner[A] extends ComputationJoiner[A] {

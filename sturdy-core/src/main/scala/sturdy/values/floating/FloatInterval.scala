@@ -44,6 +44,9 @@ given JoinFfloatInterval: Join[FloatInterval] with
   override def apply(v1: FloatInterval, v2: FloatInterval): MaybeChanged[FloatInterval] =
     MaybeChanged(FloatInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h)), v1)
 
+  override def lteq(x: FloatInterval, y: FloatInterval): Boolean =
+    y.l <= x.l && x.h <= y.h
+
 given WidenFloatInterval: Widen[FloatInterval] with
   override def apply(v1: FloatInterval, v2: FloatInterval): MaybeChanged[FloatInterval] =
     val low =
@@ -57,6 +60,9 @@ given WidenFloatInterval: Widen[FloatInterval] with
       else
         Float.PositiveInfinity
     MaybeChanged(FloatInterval(low, high), v1)
+
+  override def lteq(x: FloatInterval, y: FloatInterval): Boolean =
+    y.l <= x.l && x.h <= y.h
 
 given IntervalFloatOps: FloatOps[Float, FloatInterval] with
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)

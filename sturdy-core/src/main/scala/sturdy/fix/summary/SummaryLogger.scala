@@ -44,9 +44,6 @@ final class SummaryLogger[Dom, Codom: Widen, Callee](using val state: State)
   def clearSummary(callee: Callee): Unit =
     cache.removeKey(callee)
 
-  def loadSummaries(other: SummaryLogger[Dom, Codom, Callee]): Unit =
-    cache.withMap(other.cache.asInstanceOf)
-
   override def equals(obj: Any): Boolean =
     obj match
       case other: SummaryLogger[Dom, Codom, Callee] =>

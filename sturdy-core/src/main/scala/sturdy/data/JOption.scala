@@ -1,11 +1,7 @@
 package sturdy.data
 
 import sturdy.effect.Effect
-import sturdy.values.Combine
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
-import sturdy.values.Powerset
-import sturdy.values.Widening
+import sturdy.values.{Combine, Join, MaybeChanged, PartialOrder, Powerset, Widening}
 
 trait JOption[J[_] <: MayJoin[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
@@ -107,6 +103,14 @@ given CombineJOptionA[A, W <: Widening] (using Combine[A, W]): Combine[JOptionA[
     case (JOptionA.Some(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
     case (JOptionA.NoneSome(a1), JOptionA.Some(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
     case (JOptionA.NoneSome(a1), JOptionA.NoneSome(a2)) => Combine[A, W](a1, a2).map(JOptionA.NoneSome.apply)
+
+  override def lteq(x: JOptionA[A], y: JOptionA[A]): Boolean = (x,y) match
+    case (JOptionA.None(), JOptionA.None()) => true
+    case (JOptionA.None(), JOptionA.NoneSome(_)) => true
+    case (JOptionA.Some(a1), JOptionA.Some(a2)) => summon[PartialOrder[A]].lteq(a1,a2)
+    case (JOptionA.Some(a1), JOptionA.NoneSome(a2)) => summon[PartialOrder[A]].lteq(a1,a2)
+    case (JOptionA.NoneSome(a1), JOptionA.NoneSome(a2)) => summon[PartialOrder[A]].lteq(a1,a2)
+    case (_,_) => false
 
 //case class JOptionPower[A](opt: JOption[WithJoin, Powerset[A]]) extends JOption[WithJoin, A]:
 //  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B =

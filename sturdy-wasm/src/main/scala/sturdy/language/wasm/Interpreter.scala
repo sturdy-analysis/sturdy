@@ -88,6 +88,14 @@ trait Interpreter:
       case (Float64(d1), Float64(d2)) => Combine[F64, W](d1, d2).map(Float64.apply)
       case _ => MaybeChanged(TopValue, v1)
 
+    override def lteq(x: Value, y: Value): Boolean = (x,y) match
+      case (Int32(i1), Int32(i2)) => summon[PartialOrder[I32]].lteq(i1,i2)
+      case (Int64(l1), Int64(l2)) => summon[PartialOrder[I64]].lteq(l1,l2)
+      case (Float32(f1), Float32(f2)) => summon[PartialOrder[F32]].lteq(f1,f2)
+      case (Float64(d1), Float64(d2)) => summon[PartialOrder[F64]].lteq(d1,d2)
+      case (_, TopValue) => true
+      case _ => false
+
   type Addr
   type Bytes
   type Size

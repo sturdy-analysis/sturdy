@@ -1,4 +1,4 @@
-package sturdy.fix.iter
+package sturdy.incremental
 
 import org.eclipse.collections.api.RichIterable
 import org.eclipse.collections.api.factory.{Lists, Maps, Sets}
@@ -20,23 +20,20 @@ import sturdy.values.{Finite, Join, MaybeChanged, Widen}
 
 import scala.annotation.tailrec
 import scala.collection.{IterableOps, mutable}
-import scala.util.Try
 import scala.jdk.CollectionConverters.*
+import scala.util.Try
 
-class IncrementalTopDown[Dom, Codom, Callee, Ctx, CallSite]
-                        (callGraph: CallGraphLogger[Dom, Callee, CallSite, Ctx],
-                         summaryLogger: SummaryLogger[Dom, Codom, Callee])
-                        (domForCallee: Callee => Dom)
-                        (using val state: State):
-
-  def clearSummaries(changes: ListDelta[Callee]): Unit =
-    val replaced: Iterable[Callee] = changes.delta.values.flatMap {
-      case c@Change.Replace(from, _to) => Iterable(from)
-      case _ => Iterable()
-    }
-    for(r <- replaced) {
-      summaryLogger.clearSummary(r)
-      for(caller <- callGraph.calledFromTransitively(r))
-        summaryLogger.clearSummary(caller)
-    }
+def clearSummaries[Dom, Codom, Callee, Ctx, CallSite]
+                  (changes: ListDelta[Callee],
+                   callGraph: CallGraphLogger[Dom, Callee, CallSite, Ctx],
+                   summaryLogger: SummaryLogger[Dom, Codom, Callee]): Unit =
+  val replaced: Iterable[Callee] = changes.delta.values.flatMap {
+    case c@Change.Replace(from, _to) => Iterable(from)
+    case _ => Iterable()
+  }
+  for(r <- replaced) {
+    summaryLogger.clearSummary(r)
+    for(caller <- callGraph.calledFromTransitively(r))
+      summaryLogger.clearSummary(caller)
+  }
 

@@ -68,6 +68,14 @@ trait Interpreter:
       case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
       case _ => MaybeChanged(TopValue, v1)
 
+    override def lteq(x: Value, y: Value): Boolean = (x,y) match
+      case (_,TopValue) => true
+      case (IntValue(i1), IntValue(i2)) => summon[Combine[VInt, W]].lteq(i1,i2)
+      case (FunValue(funs1), FunValue(funs2)) => summon[Combine[VFun, W]].lteq(funs1,funs2)
+      case (RefValue(addrs1), RefValue(addrs2)) => summon[Combine[VRef, W]].lteq(addrs1, addrs2)
+      case (RecValue(rec1), RecValue(rec2)) => summon[Combine[VRecord, W]].lteq(rec1, rec2)
+      case (_,_) => false
+
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
