@@ -9,14 +9,11 @@ import sturdy.values.{*, given}
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.toppedPartialOrder
-import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.taint.TaintProduct
 
 object ConstantTaintAnalysisSoundness {
-
   given valueIsSound(using constantSoundness: Soundness[ConcreteInterpreter.Value, ConstantAnalysis.Value]): Soundness[ConcreteInterpreter.Value, Value] with
     override def isSound(c: ConcreteInterpreter.Value, a: Value): IsSound =
       constantSoundness.isSound(c, untaint(a))

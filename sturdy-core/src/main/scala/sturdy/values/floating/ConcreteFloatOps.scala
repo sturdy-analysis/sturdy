@@ -1,8 +1,7 @@
 package sturdy.values.floating
 
 import sturdy.effect.failure.Failure
-import sturdy.values.Structural
-import sturdy.values.config
+import sturdy.values.{Combine, MaybeChanged, PartialOrder, Structural, Widening, config}
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.relational.OrderingOps
@@ -13,8 +12,6 @@ import java.lang.Float as JFloat
 import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-given Structural[Float] with {}
 
 given ConcreteFloatOps: FloatOps[Float, Float] with
   def floatingLit(f: Float): Float = f

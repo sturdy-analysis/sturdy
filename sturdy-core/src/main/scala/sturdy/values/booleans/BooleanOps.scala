@@ -1,7 +1,7 @@
 package sturdy.values.booleans
 
 import sturdy.data.MayJoin
-import sturdy.values.Structural
+import sturdy.values.{Combine, DiscretelyOrdered, Structural, Widening}
 
 trait BooleanOps[V]:
   def boolLit(b: Boolean): V
@@ -16,4 +16,5 @@ given ConcreteBooleanOps: BooleanOps[Boolean] with
   def not(v: Boolean): Boolean = !v
   def or(v1: Boolean, v2: Boolean): Boolean = v1 || v2
 
-given Structural[Boolean] with {}
+given DiscreteOrderedBoolean[W <: Widening]: Combine[Boolean, W] = DiscretelyOrdered[Boolean, W]
+

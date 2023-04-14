@@ -5,7 +5,7 @@ import sturdy.data.MayJoin.NoJoin
 
 import scala.util.Random
 import sturdy.effect.failure.Failure
-import sturdy.values.{Structural, Topped, config}
+import sturdy.values.{Combine, DiscretelyOrdered, MaybeChanged, Structural, Topped, Widening, config}
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
@@ -16,9 +16,6 @@ import java.lang.Long as JLong
 import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-
-given Structural[Long] with {}
 
 given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def integerLit(l: Long): Long = l

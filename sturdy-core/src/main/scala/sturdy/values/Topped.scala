@@ -56,31 +56,19 @@ enum Topped[+V] extends Iterable[V]:
 given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
   override def apply(c: C): Topped[A] = Topped.Actual(abs.apply(c))
 
-given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] with
-  override def lteq(x: Topped[A], y: Topped[A]): Boolean = (x, y) match
-    case (_, Topped.Top) => true
-    case (Topped.Top, _) => false
-    case (Topped.Actual(a1), Topped.Actual(a2)) => po.lteq(a1, a2)
-
 given TopTopped[V]: Top[Topped[V]] with
   override def top: Topped[V] = Topped.Top
 
-given JoinToppedFlat[V, W <: Widening](using Structural[V]): Combine[Topped[V], W] with
+given CombineTopped[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
   def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
     case (Topped.Top, _) => Unchanged(Topped.Top)
     case (_, Topped.Top) => Changed(Topped.Top)
-    case (Topped.Actual(x1), Topped.Actual(x2)) => if (x1 == x2) Unchanged(v1) else Changed(Topped.Top)
-
-  override def lteq(x: Topped[V], y: Topped[V]): Boolean = (x, y) match
-    case (_, Topped.Top) => true
-    case (Topped.Actual(x),Topped.Actual(y)) => x == y
-    case (_,_) => false
-
-given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
-  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
-    case (Topped.Top, _) => Unchanged(Topped.Top)
-    case (_, Topped.Top) => Changed(Topped.Top)
-    case (Topped.Actual(x1), Topped.Actual(x2)) => j(x1, x2).map(Topped.Actual.apply)
+    case (Topped.Actual(x1), Topped.Actual(x2)) =>
+      try {
+        j(x1, x2).map(Topped.Actual.apply)
+      } catch {
+        case e: Exception => MaybeChanged.Changed(Topped.Top)
+      }
 
   override def lteq(x: Topped[V], y: Topped[V]): Boolean = (x,y) match
     case (_,Topped.Top) => true

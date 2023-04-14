@@ -4,6 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.data.given
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
@@ -12,18 +13,17 @@ import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
-import sturdy.values.Topped
-import sturdy.values.relational.EqOps
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
-import sturdy.{IsSound, Soundness}
-import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
-import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis
+import sturdy.values.{Topped, Abstractly, PartialOrder}
+import sturdy.values.relational.EqOps
+import sturdy.values.given
+import sturdy.{IsSound, Soundness}
+import sturdy.{*, given}
+import sturdy.fix.{Fixpoint, StackConfig}
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module

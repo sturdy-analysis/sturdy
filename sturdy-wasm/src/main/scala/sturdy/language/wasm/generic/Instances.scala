@@ -1,17 +1,13 @@
 package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
+import sturdy.data.given
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.{Soundness, AbstractlySound, seqIsSound, IsSound}
+import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
-import sturdy.values.Finite
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
-import sturdy.values.Structural
-import sturdy.values.concretePO
-import sturdy.values.concreteAbstractly
+import sturdy.values.{Combine, DiscretelyOrdered, Finite, Join, MaybeChanged, Structural, Widening, concreteAbstractly, given}
 
 case class TableAddr(addr: Int) extends AnyVal
 case class MemoryAddr(addr: Int) extends AnyVal
@@ -22,9 +18,16 @@ given Finite[MemoryAddr] with {}
 given Finite[GlobalAddr] with {}
 given Finite[FunctionInstance] with {}
 given Structural[TableAddr] with {}
+given DiscretelyOrderedTableAddr[W <: Widening]: Combine[TableAddr, W] = DiscretelyOrdered[TableAddr, W]
+
 given Structural[MemoryAddr] with {}
+given DiscretelyOrderedMemoryAddr[W <: Widening]: Combine[MemoryAddr, W] = DiscretelyOrdered[MemoryAddr, W]
+
 given Structural[GlobalAddr] with {}
+given DiscretelyOrderedGlobalAddr[W <: Widening]: Combine[GlobalAddr, W] = DiscretelyOrdered[GlobalAddr, W]
+
 given Structural[FunctionInstance] with {}
+given DiscretelyOrderedFunctionInstance[W <: Widening]: Combine[FunctionInstance, W] = DiscretelyOrdered[FunctionInstance, W]
 
 class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
   override def equals(obj: Any): Boolean = obj match
@@ -92,8 +95,15 @@ class ModuleInstance:
   override def toString: Name = Integer.toHexString(this.hashCode)
 
 given Structural[Func] with {}
+given DiscretelyOrderedFunc[W <: Widening]: Combine[Func, W] = DiscretelyOrdered[Func, W]
 given Structural[FuncType] with {}
+given DiscretelyOrderedFuncType[W <: Widening]: Combine[FuncType, W] = DiscretelyOrdered[FuncType, W]
 given Structural[DataInstance] with {}
+given DiscretelyOrderedDataInstance[W <: Widening]: Combine[DataInstance, W] = DiscretelyOrdered[DataInstance, W]
+given Structural[HostFunction] with {}
+given DiscretelyOrderedHostFunction[W <: Widening]: Combine[HostFunction, W] = DiscretelyOrdered[HostFunction, W]
+given Structural[ExternalValue] with {}
+given DiscretelyOrderedExternalValue[W <: Widening]: Combine[ExternalValue, W] = DiscretelyOrdered[ExternalValue, W]
 
 enum FunctionInstance:
   case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)

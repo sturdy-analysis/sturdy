@@ -24,7 +24,12 @@ trait PartialOrder[T] extends PartialOrdering[T]:
 object PartialOrder:
   def apply[T](using po: PartialOrder[T]): PartialOrder[T] = po
 
-given concretePO[T: Structural] : PartialOrder[T] with
+final class DiscretelyOrdered[T, W <: Widening] extends Combine[T,W]:
+  override def apply(v1: T, v2: T): MaybeChanged[T] =
+    if(v1 == v2)
+      MaybeChanged.Unchanged(v1)
+    else
+      throw new IllegalArgumentException()
   def lteq(c1: T, c2: T): Boolean = c1 == c2
 
 given eitherPartialOrder[T1, T2](using po1: PartialOrder[T1], po2: PartialOrder[T2]): PartialOrder[Either[T1, T2]] with

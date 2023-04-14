@@ -8,8 +8,6 @@ import sturdy.values.given
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.toppedPartialOrder
-import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*,given}
 

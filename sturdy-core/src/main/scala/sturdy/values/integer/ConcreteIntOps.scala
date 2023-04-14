@@ -5,7 +5,7 @@ import sturdy.data.JOptionC
 import sturdy.data.MayJoin
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
-import sturdy.values.{Structural, Topped, config}
+import sturdy.values.{Combine, DiscretelyOrdered, MaybeChanged, Structural, Topped, Widening, config}
 import sturdy.values.convert.*
 import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.config.UnsupportedConfiguration
@@ -14,8 +14,6 @@ import scala.util.Random
 import java.lang.Float as JFloat
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-given Structural[Int] with {}
 
 given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def integerLit(i: Int): Int = i
