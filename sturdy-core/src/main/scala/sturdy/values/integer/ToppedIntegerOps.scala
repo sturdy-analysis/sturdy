@@ -27,10 +27,13 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
 
   private inline def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
     if (v2 == Topped.Top)
-      eff.joinWithFailure(v1.binary(op, v2))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+      eff.joinWithFailure(v1.binary(op, v2))({
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+        f.fail(IntegerOverflow, s"$v1 / $v2")
+      })
     else
       v1.binary(op, v2)
-  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1, v2)
+  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1,v2)
   def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.divUnsigned, v1, v2)
   def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainder, v1, v2)
   def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainderUnsigned, v1, v2)
