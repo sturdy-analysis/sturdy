@@ -110,7 +110,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
         checkNaN(res, c.toString)
       case AssertTrap(action: Action, message: String) =>
         val res = runAction(action)
-        assert(res.isFailing, c.toString)
+        assert(res.isFailing, s"Assertion: $c\nresult: $res")
       case AssertModuleTrap(mod,_) =>
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)

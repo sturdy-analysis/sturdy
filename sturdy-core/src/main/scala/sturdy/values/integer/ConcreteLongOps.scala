@@ -31,6 +31,8 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def div(v1: Long, v2: Long): Long =
     if (v2 == 0)
       f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+    else if (v1 == JLong.MIN_VALUE && v2 == -1)
+      f.fail(IntegerOverflow, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Long, v2: Long): Long =
