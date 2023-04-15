@@ -9,14 +9,11 @@ import sturdy.fix.Logger
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
 import sturdy.language.wasm.generic.InstLoc
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
-import sturdy.values.Finite
-import sturdy.values.Join
-import sturdy.values.Topped
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.values.{CombineToppedFlat, Finite, Join, Topped, given}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
 import sturdy.values.integer.given
-import sturdy.values.given
 import swam.OpCode
 import swam.syntax
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
@@ -29,6 +26,12 @@ trait ConstantValues extends Interpreter:
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
+
+  given Join[I32] = new CombineToppedFlat
+  given Join[I64] = new CombineToppedFlat
+  given Join[F32] = new CombineToppedFlat
+  given Join[F64] = new CombineToppedFlat
+  given Join[Bool] = new CombineToppedFlat
 
   final def topI32: I32 = Topped.Top
   final def topI64: I64 = Topped.Top

@@ -10,7 +10,7 @@ import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
-import sturdy.values.{Finite, Join, Topped, given}
+import sturdy.values.{CombineToppedFlat, Finite, Join, Topped, given}
 import sturdy.values.integer.{NumericInterval, given}
 import swam.{OpCode, syntax}
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
@@ -23,6 +23,9 @@ trait IntervalValues extends Interpreter:
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
+  given Join[F32] = new CombineToppedFlat
+  given Join[F64] = new CombineToppedFlat
+  given Join[Bool] = new CombineToppedFlat
 
   final def topI32: I32 = NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)
   final def topI64: I64 = NumericInterval(Long.MinValue, Long.MaxValue)

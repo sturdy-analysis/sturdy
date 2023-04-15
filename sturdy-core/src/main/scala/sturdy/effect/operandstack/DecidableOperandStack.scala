@@ -1,6 +1,6 @@
 package sturdy.effect.operandstack
 
-import sturdy.data.{NoJoin, unit, JOptionC, CombineEquiList}
+import sturdy.data.{CombineEquiList, CombineList, JOptionC, NoJoin, unit}
 import sturdy.effect.Concrete
 import sturdy.values.*
 import sturdy.*
@@ -77,28 +77,10 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
 
-  inline def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
-    var hasChanged = false
-    val joinedFrame = ops1.zipAll[V,V](ops2, null.asInstanceOf[V], null.asInstanceOf[V]).map {
-      case (v1, null) => v1
-      case (null, v2) => v2
-      case (v1, v2) =>
-        val v = comb(v1, v2)
-        hasChanged |= v.hasChanged
-        v.get
-    }
-    MaybeChanged(joinedFrame, hasChanged)
-
   override def join: Join[List[V]] = _join
-  private val _join = new Join[List[V]] {
-    final override def apply(v1: List[V], v2: List[V]): MaybeChanged[List[V]] = combineFrames(v1, v2, summon[Join[V]].apply)
-    final override def lteq(x: List[V], y: List[V]): Boolean = CombineEquiList[V,Widening.No].lteq(x,y)
-  }
+  private val _join: Join[List[V]] = new CombineList
   override def widen: Widen[List[V]] = _widen
-  private val _widen = new Widen[List[V]] {
-    final override def apply(v1: List[V], v2: List[V]): MaybeChanged[List[V]] = combineFrames(v1, v2, summon[Widen[V]].apply)
-    final override def lteq(x: List[V], y: List[V]): Boolean = CombineEquiList[V,Widening.No].lteq(x, y)
-  }
+  private val _widen: Widen[List[V]] = new CombineList
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
   private class OperandStackJoiner[A] extends ComputationJoiner[A] {
@@ -125,7 +107,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       if (fRes.isSuccess && gRes.isSuccess)
-        stack = joinWith(fStack)
+        stack = joinStacks(stack, fStack, 0)
       else if (fRes.isSuccess)
         stack = fStack
       else if (gRes.isSuccess) {
@@ -134,13 +116,22 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
         retainNone()
   }
 
-  private def joinWith(other: List[V]): List[V] =
-    val (frame, rest) = stack.splitAt(stack.size - framePointer)
-    val otherFrame = other.take(stack.size - framePointer)
-    val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
-      case (v1, null) => v1
-      case (null, v2) => v2
-      case (v1, v2) => Join(v1, v2).get
-    }
-    joinedFrame ++ rest
+  private def joinStacks(x: List[V], y: List[V], depth: Int): List[V] =
+    if(depth > framePointer || (x eq y))
+      x
+    else
+      (x,y) match
+        case (hx::rx, hy::ry) => Join(hx,hy).get :: joinStacks(rx,ry, depth + 1)
+        case (_, Nil) => x
+        case (Nil, _) => y
+
+//
+//    val (frame, rest) = stack.splitAt(stack.size - framePointer)
+//    val otherFrame = other.take(stack.size - framePointer)
+//    val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
+//      case (v1, null) => v1
+//      case (null, v2) => v2
+//      case (v1, v2) => Join(v1, v2).get
+//    }
+//    joinedFrame ++ rest
 

@@ -35,5 +35,8 @@ given DiscreteOrderedDouble[W <: Widening]: Combine[Double, W] with
   override def lteq(x: Double, y: Double): Boolean =
     (x.isNaN && y.isNaN) || x == y
 
+given Structural[Boolean] with {}
+given DiscreteOrderedBoolean[W <: Widening]: Combine[Boolean, W] = DiscretelyOrdered[Boolean, W]
+
 given StructuralOption[A](using Structural[A]): Structural[Option[A]] with {}
 given StructuralMap[K, V](using Structural[K], Structural[V]): Structural[Map[K, V]] with {}

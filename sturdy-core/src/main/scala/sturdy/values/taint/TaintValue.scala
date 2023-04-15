@@ -64,6 +64,7 @@ given CombineTaintProduct[V, W <: Widening](using comb: Combine[V, W]): Combine[
     summon[PartialOrder[Taint]].lteq(x.taint, y.taint) &&
     summon[PartialOrder[V]].lteq(x.value, y.value)
 
+given StructuralTaintProduct[V: Structural]: Structural[TaintProduct[V]] with {}
 
 given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintProduct[V]] with
   def integerLit(i: B): TaintProduct[V] = untainted(ops.integerLit(i))

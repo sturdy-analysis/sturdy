@@ -59,7 +59,24 @@ given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[
 given TopTopped[V]: Top[Topped[V]] with
   override def top: Topped[V] = Topped.Top
 
-given CombineTopped[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
+given StructuralTop[V: Structural]: Structural[Topped[V]] with {}
+
+given CombineToppedFlat[V: Structural, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
+  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) =>
+      if(j.equiv(x1,x2))
+        MaybeChanged.Unchanged(Topped.Actual(x1))
+      else
+        MaybeChanged.Changed(Topped.Top)
+
+  override def lteq(x: Topped[V], y: Topped[V]): Boolean = (x, y) match
+    case (_, Topped.Top) => true
+    case (Topped.Actual(a), Topped.Actual(b)) => j.equiv(a,b)
+    case (_, _) => false
+
+final class CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]) extends Combine[Topped[V], W]:
   def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
     case (Topped.Top, _) => Unchanged(Topped.Top)
     case (_, Topped.Top) => Changed(Topped.Top)

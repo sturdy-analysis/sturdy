@@ -39,6 +39,22 @@ given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V]
   override def lteq(x: List[V], y: List[V]): Boolean =
     x.size == y.size && x.zip(y).forall((l,r) => summon[PartialOrder[V]].lteq(l,r))
 
+final class CombineList[V, W <: Widening](using j: Combine[V,W]) extends Combine[List[V], W]:
+  override def apply(vs1: List[V], vs2: List[V]): MaybeChanged[List[V]] =
+    var hasChanged = false
+    val joinedFrame = vs1.zipAll[V,V](vs2, null.asInstanceOf[V], null.asInstanceOf[V]).map {
+      case (v1, null) => v1
+      case (null, v2) => v2
+      case (v1, v2) =>
+        val v = j(v1, v2)
+        hasChanged |= v.hasChanged
+        v.get
+    }
+    MaybeChanged(joinedFrame, hasChanged)
+
+  override def lteq(x: List[V], y: List[V]): Boolean =
+    x.size <= y.size && x.zip(y).forall((l, r) => summon[PartialOrder[V]].lteq(l, r))
+
 given CombineEquiVector[V, W <: Widening](using j: Combine[V, W]): Combine[Vector[V], W] with
   override def apply(vs1: Vector[V], vs2: Vector[V]): MaybeChanged[Vector[V]] =
     if (vs1.size != vs2.size)

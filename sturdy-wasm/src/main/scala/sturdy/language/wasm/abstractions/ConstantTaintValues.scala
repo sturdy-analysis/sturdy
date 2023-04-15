@@ -7,17 +7,14 @@ import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.values.Finite
-import sturdy.values.Topped
+import sturdy.values.{CombineToppedFlat, Finite, Join, Powerset, Topped, Widening, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
 import sturdy.values.integer.given
-import sturdy.values.given
 import sturdy.fix
 import sturdy.fix.Logger
 import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
-import sturdy.values.Powerset
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
 
