@@ -20,8 +20,8 @@ final class CallGraphLogger[Dom,Callee,CallSite,Ctx](callSiteLogger: CallSiteLog
                                                   extends Logger[Dom,Any]:
   val calledFrom: MutableMap[Callee, MutableSet[(Callee,CallSite,Ctx)]] = Maps.mutable.empty()
   val calls: MutableMap[Callee, MutableSet[(Callee,CallSite,Ctx)]] = Maps.mutable.empty()
-  val entryPoints: MutableSet[Callee] = Sets.mutable.empty()
-  var calleeStack: List[Callee] = List.empty
+  private val entryPoints: MutableSet[Callee] = Sets.mutable.empty()
+  private var calleeStack: List[Callee] = List.empty
 
   override def enter(dom: Dom): Unit =
     getCallee(dom) match
@@ -90,9 +90,3 @@ final class CallGraphLogger[Dom,Callee,CallSite,Ctx](callSiteLogger: CallSiteLog
     }
 
     callers.asScala
-
-final case class Iterations[A](initialIteration: A, latestIteration: A):
-  def addIteration(iteration: A): Iterations[A] = this.copy(latestIteration = iteration)
-
-object Iterations:
-  def initial[A](initialIteration: A): Iterations[A] = new Iterations(initialIteration, initialIteration)

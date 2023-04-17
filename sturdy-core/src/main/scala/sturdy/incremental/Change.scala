@@ -3,7 +3,9 @@ package sturdy.incremental
 import sturdy.util.Eq
 import sturdy.util.Eq.===
 
-import scala.collection.IterableOps
+import scala.collection.{IterableOps, mutable}
+import scala.collection.immutable.ArraySeq
+import scala.reflect.ClassTag
 
 enum Change[A]:
   case Replace(from: A, to: A) extends Change[A]
@@ -24,6 +26,11 @@ enum Change[A]:
       case Change.Remove(x) => x
       case Change.Add(y) => y
       case Change.Replace(from, _) => from
+
+  def isNil: Boolean =
+    this match
+      case Change.Nil(_,_) => true
+      case _ => false
 
 type Changes[A] = Iterator[Change[A]]
 
@@ -101,25 +108,66 @@ class ListDelta[A](using val idA: Identifiable[A])(val delta: Map[idA.Id, Change
       case (_, Change.Remove(_)) => Iterator()
     }
 
-//  def replace[B](f: (A => IterableOnce[A]) => B => IterableOnce[B], old: Iterable[B]): Iterable[B] =
-//    old.flatMap(b =>
-//      f(x =>
-//        delta.get(x.id) match
-//          case Some(Change.Nil(_,y)) => Iterator(y)
-//          case Some(Change.Add(y)) => throw new IllegalStateException(s"Found element $x@${x.id} in old collection, which was added by an incremental update ${Change.Add(y)}")
-//          case Some(Change.Remove(_)) => Iterator()
-//          case Some(Change.Replace(_, y)) => Iterator(y)
-//          case None => Iterator()
-//      )(b))
-//
-//
-//  def map[B](f: A => B)(using idB: Identifiable[B]): ListDelta[B] = ListDelta()(delta.map((_,a) =>
-//    val b = a.map(f)
-//    (b.get.id, b)
-//  ))
-//
-//  def isReplaced(old: A): Boolean =
-//    delta(old.id) match
-//      case Change.Nil(_) | Change.Remove(_) => false
-//      case Change.Replace(_,_) => true
-//      case Change.Add(_) => throw new IllegalStateException("Cannot add element with existing id.")
+object IterableDelta:
+  def nil[A: Identifiable: ClassTag](x: Iterable[A]): IterableDelta[A] =
+    IterableDelta()(delta = ArraySeq.empty, added = ArraySeq.empty, remapping = Map.empty).nil(x)
+  def sub[A: Identifiable: ClassTag](xs: Iterable[A], ys: Iterable[A]): IterableDelta[A] =
+    IterableDelta()(delta = ArraySeq.empty, added = ArraySeq.empty, remapping = Map.empty).sub(xs, ys)
+final class IterableDelta[A: ClassTag](using val idA: Identifiable[A])
+                                      (val delta: ArraySeq[Change[A]],
+                                       val added: ArraySeq[A],
+                                       val remapping: Map[Int,Int]) extends Delta[Iterable[A]]:
+  override def nil(x: Iterable[A]): IterableDelta[A] =
+    new IterableDelta()(delta = ArraySeq.from(x.map(a => Change.Nil(a,a))),
+      added = ArraySeq.empty,
+      remapping = Map.empty)
+
+  override def sub(x: Iterable[A], y: Iterable[A]): IterableDelta[A] =
+    val xs: mutable.Map[idA.Id, (Int,A)] = mutable.HashMap.from(x.view.zipWithIndex.map((a,idx) => (a.id, (idx,a))))
+    val ys: mutable.Map[idA.Id, (Int,A)] = mutable.HashMap.from(y.view.zipWithIndex.map((a,idx) => (a.id, (idx,a))))
+    val remapping: mutable.Map[Int,Int] = mutable.Map.empty
+    val delta: mutable.ArraySeq[Change[A]] = mutable.ArraySeq.fill(x.size)(null)
+    val added: mutable.ArrayBuffer[A] = mutable.ArrayBuffer.empty
+
+    val ids = xs.keySet.union(ys.keySet)
+    for(id <- ids) {
+      (xs.get(id), ys.get(id)) match
+        case (Some((idx1,a1)), Some((idx2,a2))) =>
+          if(idA.eqv(a1,a2)) {
+            delta(idx1) = Change.Nil(a1, a2)
+          } else {
+            delta(idx1) = Change.Replace(a1, a2)
+          }
+          remapping += idx2 -> idx1
+        case (Some((idx1,a1)), None) =>
+          delta(idx1) = Change.Remove(a1)
+        case (None, Some((idx2,a2))) =>
+          added += a2
+          remapping += idx2 -> (x.size + added.size - 1)
+
+        case (None,None) => throw IllegalStateException("Cannot happen: The keys we are iterating over are the union of the keys of both maps.")
+    }
+
+    new IterableDelta[A]()(
+      delta = ArraySeq.unsafeWrapArray(delta.array.asInstanceOf[Array[Change[A]]]),
+      added = ArraySeq.unsafeWrapArray(added.toArray),
+      remapping = remapping.toMap
+    )
+
+  override def add(x: Iterable[A]): Iterable[A] = ???
+
+  override def isNilChange: Boolean = delta.forall(_.isNil) && added.isEmpty
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: IterableDelta[A] =>
+        this.delta.equals(other.delta) &&
+        this.added.equals(other.added) &&
+        this.remapping.equals(other.remapping)
+      case _ => false
+
+  override def hashCode(): Int =
+    (delta,added,remapping).hashCode()
+
+  override def toString: String =
+    s"$delta + ${added.map(Change.Add(_))}\nremapping: $remapping"
