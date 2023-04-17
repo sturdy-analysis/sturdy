@@ -107,7 +107,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       if (fRes.isSuccess && gRes.isSuccess)
-        stack = joinStacks(stack, fStack, 0)
+        stack = joinStacks(stack, fStack, stack.size)
       else if (fRes.isSuccess)
         stack = fStack
       else if (gRes.isSuccess) {
@@ -117,21 +117,11 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
   }
 
   private def joinStacks(x: List[V], y: List[V], depth: Int): List[V] =
-    if(depth > framePointer || (x eq y))
+    if(depth == framePointer)
       x
     else
       (x,y) match
-        case (hx::rx, hy::ry) => Join(hx,hy).get :: joinStacks(rx,ry, depth + 1)
+        case (hx::rx, hy::ry) => Join(hx,hy).get :: joinStacks(rx,ry, depth - 1)
         case (_, Nil) => x
         case (Nil, _) => y
-
-//
-//    val (frame, rest) = stack.splitAt(stack.size - framePointer)
-//    val otherFrame = other.take(stack.size - framePointer)
-//    val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
-//      case (v1, null) => v1
-//      case (null, v2) => v2
-//      case (v1, v2) => Join(v1, v2).get
-//    }
-//    joinedFrame ++ rest
 

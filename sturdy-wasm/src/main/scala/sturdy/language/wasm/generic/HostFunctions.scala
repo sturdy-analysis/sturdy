@@ -45,9 +45,6 @@ enum HostFunction(val name: String, val funcType: FuncType) extends Enumeration:
 
   override def toString(): String = name
 
-
-given Structural[HostFunction] with {}
-
 object HostFunction:
   val nameMap: Map[String, HostFunction] = HostFunction.values.map(f => f.name -> f).toMap
   

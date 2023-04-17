@@ -120,6 +120,10 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
+  testFunction(simple, "break-br_if-num-num", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(51)), Value.Int64(Topped.Actual(52))))
+  testFunction(simple, "break-br_if-num-num", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(50)), Value.Int64(Topped.Actual(51))))
+  testFunction(simple, "break-br_if-num-num", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top), Value.Int64(Topped.Top)))
+
   testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Actual(1))))
   (2 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
@@ -135,6 +139,8 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+
+
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))

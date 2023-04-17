@@ -2,7 +2,7 @@ package sturdy.values.integer
 
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.failure.Failure
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.values.{Join, Topped}
 import sturdy.values.config
 import sturdy.values.config.Bits
@@ -25,15 +25,25 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
   def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)
 
-  private inline def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
-    if (v2 == Topped.Top)
-      eff.joinWithFailure(v1.binary(op, v2))({
-        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-        f.fail(IntegerOverflow, s"$v1 / $v2")
-      })
-    else
-      v1.binary(op, v2)
-  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1,v2)
+  private def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
+    (v1, v2) match
+      case (_, Topped.Top) =>
+        eff.joinWithFailure(Topped.Top)({
+          eff.joinWithFailure(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+                             (f.fail(IntegerOverflow, s"$v1 / $v2"))
+        })
+      case (Topped.Top, Topped.Actual(n)) =>
+        if (n == 0)
+          f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+        else if (n == -1)
+          eff.joinWithFailure(Topped.Top)({
+            f.fail(IntegerOverflow, s"$v1 / $v2")
+          })
+        else
+          Topped.Top
+      case (Topped.Actual(m), Topped.Actual(n)) =>
+        Topped.Actual(op(m,n))
+  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1, v2)
   def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.divUnsigned, v1, v2)
   def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainder, v1, v2)
   def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainderUnsigned, v1, v2)

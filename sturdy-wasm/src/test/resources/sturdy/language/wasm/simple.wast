@@ -378,4 +378,8 @@
       (local.get 1)
     )
 
+  (func (export "break-br_if-num-num") (param i32) (result i32 i64)
+    (drop (drop (br_if 0 (i32.const 50) (i64.const 51) (local.get 0))))
+    (i32.const 51) (i64.const 52)
+  )
 )
