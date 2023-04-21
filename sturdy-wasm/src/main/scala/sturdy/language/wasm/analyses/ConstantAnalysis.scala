@@ -90,7 +90,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
 //    override def widenState: Widen[State] = implicitly
-
     
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
@@ -114,3 +113,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override val fixpointSuper = fixpoint
     override def toString: String = s"constant $config"
+
+    final class ReduceConstIntFunctionPointer(instance: Instance) extends Reduce[Topped[Int], FunctionPointers]:
+      extension (p: ReducedProduct[Topped[Int], FunctionPointers])
+        def reduce: ReducedProduct[Topped[Int], FunctionPointers] =
+          p match
+            case ReducedProduct(Topped.Actual(x), _) =>
+              instance.module.functions.lift(x) match
+                case Some(fun) => ReducedProduct(Topped.Actual(x), Topped.Actual(Powerset(fun)))
+                case None => p
+            case ReducedProduct(Topped.Top, funs@Topped.Actual(ps)) if ps.size == 1 =>
+              ReducedProduct(Topped.Actual(ps(0).funcId), funs)
+            case _ => p
