@@ -26,7 +26,7 @@ enum ApronExpr:
 
   def normalize(scope: ApronScope): ApronExpr = this match
     case Var(v) => scope.getFreedReference(v) match
-      case Some(e) => e.normalize(scope)
+      case Some(e) => e.normalize(scope) // TODO: cache e.normalize in scope
       case None => this
     case Constant(coeff) => this
     case Unary(op, e, rtyp, rdir) => Unary(op, e.normalize(scope), rtyp, rdir)
