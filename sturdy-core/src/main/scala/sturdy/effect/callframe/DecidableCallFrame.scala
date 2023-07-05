@@ -89,7 +89,6 @@ class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterabl
   override def join: Join[List[V]] = implicitly
   override def widen: Widen[List[V]] = implicitly
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = vars
     private var fVars: Array[V] = _

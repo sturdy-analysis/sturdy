@@ -21,7 +21,6 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new UpperBoundSymbolTableJoiner[A])
   private class UpperBoundSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Entry] = _

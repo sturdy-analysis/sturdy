@@ -42,7 +42,5 @@ class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using 
   override def join: Join[constantAddressMemory.State] = constantAddressMemory.join
   override def widen: Widen[constantAddressMemory.State] = constantAddressMemory.widen
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = constantAddressMemory.makeComputationJoiner
-
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     constantAddressMemory.memoryIsSound(c)

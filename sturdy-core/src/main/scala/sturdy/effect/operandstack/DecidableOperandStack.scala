@@ -92,7 +92,6 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
   override def widen: Widen[List[V]] = combineFrames(_, _, summon[Widen[V]].apply)
 
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
   private class OperandStackJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = stack
     private var fStack: List[V] = _

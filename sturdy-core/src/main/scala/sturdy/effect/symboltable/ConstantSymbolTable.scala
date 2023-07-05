@@ -63,7 +63,6 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   })
 
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
   class ToppedSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables

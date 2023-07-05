@@ -54,7 +54,6 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
       this.exception = originalException
     }
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ExceptJoiner)
   private class ExceptJoiner[A] extends ComputationJoiner[A] {
     val snapshot = exception
     var fExcept: JOptionA[E] = null

@@ -44,7 +44,6 @@ class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[
   override def join: Join[Map[Key, Map[Symbol, Entry]]] = implicitly
   override def widen: Widen[Map[Key, Map[Symbol, Entry]]] = implicitly
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Map[Symbol, Entry]] = null

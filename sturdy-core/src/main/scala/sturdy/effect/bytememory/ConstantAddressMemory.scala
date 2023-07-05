@@ -48,7 +48,6 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
       case Topped.Actual(size) =>
         memories += key -> ImmutableByteMem.ofSize(size * pageSize, sizeLimit.flatMap(_.toOption), emptyB)
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ConstantAddressMemoryJoiner[A])
   private class ConstantAddressMemoryJoiner[A] extends ComputationJoiner[A] {
     val snapshot = memories
     var fmemories: Map[Key, Mem[B]] = _

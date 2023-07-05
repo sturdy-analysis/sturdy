@@ -32,10 +32,3 @@ class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Mono
       case recur: RecurrentCall => AFallible.Diverging(recur)
       case ex => throw ex
     }
-
-  override type State = Powerset[FailureKind]
-  override def getState: Powerset[FailureKind] = Powerset(failureKinds)
-  override def setState(s: Powerset[FailureKind]): Unit = failureKinds = s.set
-  override def join: Join[Powerset[FailureKind]] = implicitly
-  override def widen: Widen[Powerset[FailureKind]] = implicitly
-
