@@ -14,7 +14,7 @@ import sturdy.effect.TrySturdy
 
 class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
 
-  protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
+  protected var tables: Map[Key, Either[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
   override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
@@ -42,6 +42,19 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
         case Topped.Actual(sym) =>
           tables += key -> Left(tab.updated(sym, newEntry))
 
+
+  override def size(key: Key, symbol: Topped[Symbol]): Int = ???
+
+  /*override def grow(key: Key, delta: Int): Int = ???
+
+  override def fill(key: Key, range: Int, newEntry: Entry): Unit = ???
+
+  override def copy(key: Key, dest: Addr): Unit = ???
+
+  override def init(key: Key, newEntry: Entry): Unit = ???
+
+  override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
+  */
   override def putNew(key: Key): Unit =
     tables += key -> Left(Table(Map(), Set()))
     dirtyTables += key

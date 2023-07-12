@@ -4,6 +4,7 @@
   (table funcref
     (elem
       $noop $const
+      $noop2 $const
     )
   )
 
@@ -23,6 +24,10 @@
     (local.get 1)
   )
 
+  (func $third (export "third") (param i32 i32 i32) (result i32 i32)
+    (local.get 0)(local.get 1)
+  )
+
   (func (export "call-first") (result i32)
     i32.const 0
     i32.const 1
@@ -33,7 +38,11 @@
     (i32.const 0)
   )
 
-  (func $test1 (result i32)
+  (func $noop2 (export "noop2") (result i32 i32)
+     (i32.const 0)(i32.const 1)
+  )
+
+  (func $test1 (export "test1") (result i32)
     (i32.const 1)
     (call $noop)
     (i32.add)

@@ -18,10 +18,10 @@ object TypeAnalysisSoundness {
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(topI32)
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(topI64)
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(topF32)
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(topF64)
+      case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(topI32))
+      case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(topI64))
+      case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(topF32))
+      case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(topF64))
 
   given poFloat: PartialOrder[Float] with
     override def lteq(f1: Float, f2: Float): Boolean =

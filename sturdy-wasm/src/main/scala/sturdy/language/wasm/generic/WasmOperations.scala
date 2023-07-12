@@ -53,7 +53,8 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, J[_] <: MayJoin[_]]:
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
-
+  def intToVal(i: Int): V
+  //def refvtoVal(r: RefValue): V
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

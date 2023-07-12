@@ -34,23 +34,26 @@ trait TypeValues extends Interpreter:
   final type F32 = BaseType[Float]
   final type F64 = BaseType[Double]
   final type Bool = BaseType[Boolean]
+  final type FuncReference = BaseType[Int]
 
   final def topI32: I32 = BaseType[Int]
   final def topI64: I64 = BaseType[Long]
   final def topF32: F32 = BaseType[Float]
   final def topF64: F64 = BaseType[Double]
+  final def topFuncRef: FuncReference = BaseType[Int]
 
   final def asBoolean(v: Value)(using Failure): Bool =
     val _ = v.asInt32
     BaseType[Boolean]
   final def boolean(b: Bool): Value =
-    Value.Int32(topI32)
+    Value.Num(NumValue.Int32(topI32))
 
   def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match
     case ConcreteInterpreter.Value.TopValue => Value.TopValue
-    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(topI32)
-    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(topI64)
-    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(topF32)
-    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(topF64)
+    case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(topI32))
+    case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(topI64))
+    case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(topF32))
+    case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(topF64))
+    //case ConcreteInterpreter.Value.FuncRef(f) => Value.FuncRef(topFuncRef)
 
 

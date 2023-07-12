@@ -2,8 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.values.Structural
 import swam.{FuncType, ValType}
-
-import ValType.*
+import swam.NumType.*
 
 enum HostFunction(val name: String, val funcType: FuncType) extends Enumeration:
   case args_sizes_get extends HostFunction("args_sizes_get", FuncType(Vector(I32,I32), Vector(I32)))

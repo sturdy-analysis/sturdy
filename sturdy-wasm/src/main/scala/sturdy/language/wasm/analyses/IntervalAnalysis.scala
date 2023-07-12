@@ -49,7 +49,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
-    override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
+    override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
+    override def intToVal(i: Int): Value = ???
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
@@ -77,10 +78,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval.constant(i))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval.constant(l))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(NumericInterval.constant(i)))
+      case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(NumericInterval.constant(l)))
+      case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
