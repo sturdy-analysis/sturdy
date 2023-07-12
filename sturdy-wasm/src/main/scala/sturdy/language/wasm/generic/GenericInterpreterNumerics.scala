@@ -9,7 +9,7 @@ import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
-import swam.ValType
+import swam.{NumType, ValType}
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
@@ -249,7 +249,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case i64.TruncSatUF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
 
   def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => evalNumeric(i32.Const(0))
-    case ValType.I64 => evalNumeric(i64.Const(0))
-    case ValType.F32 => evalNumeric(f32.Const(0))
-    case ValType.F64 => evalNumeric(f64.Const(0))
+    case NumType.I32 => evalNumeric(i32.Const(0))
+    case NumType.I64 => evalNumeric(i64.Const(0))
+    case NumType.F32 => evalNumeric(f32.Const(0))
+    case NumType.F64 => evalNumeric(f64.Const(0))

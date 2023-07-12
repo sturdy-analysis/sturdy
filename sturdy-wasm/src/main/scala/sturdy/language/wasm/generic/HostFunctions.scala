@@ -2,8 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.values.Structural
 import swam.{FuncType, ValType}
-
-import ValType.*
+import swam.NumType.*
 
 class HostFunction(val name: String, val funcType: FuncType):
   HostFunction.instances :+= this

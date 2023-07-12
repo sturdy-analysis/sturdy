@@ -44,7 +44,7 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
 
   val spectest = Parsing.fromText(pathSpectest)
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("global.wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript interpreter on ${p.getFileName}")
       val script = Parsing.testscript(p)

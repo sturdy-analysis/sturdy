@@ -38,18 +38,20 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type F32 = Float
   override type F64 = Double
   override type Bool = Boolean
+  override type FuncReference = Int
 
   override def topI32: Int = throw new UnsupportedOperationException
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
+  override def topFuncRef: Int = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   override def boolean(b: Boolean): Value =
     if (b)
-      Value.Int32(1)
+      Value.Num(NumValue.Int32(1))
     else
-      Value.Int32(0)
+      Value.Num(NumValue.Int32(0))
 
   override type Addr = Int
   override type Bytes = Seq[Byte]
@@ -62,7 +64,9 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
-    override def sizeToVal(sz: Int): Value = Value.Int32(sz)
+    override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
+    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
+    override def refvtoVal(r: FunV): Value = Value.Ref(RefValue.Func(r))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
@@ -100,7 +104,7 @@ object ConcreteInterpreter extends Interpreter with Control:
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
-    override def jvUnit: NoJoin[Unit] = implicitly
+    override def jvUnit: NoJoin[Unit] = implicitly(sturdy.data.MayJoin.NoJoin()) //not correct but works for now, to be fixed
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
 

@@ -49,8 +49,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
-    override def sizeToVal(sz: Size): Value = Value.Int32(sz)
-
+    override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
+    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -75,10 +75,11 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(Topped.Actual(i)))
+      case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(Topped.Actual(l)))
+      case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
+      //case ConcreteInterpreter.Value.FuncRef(f) => Value.FuncRef(Topped.Actual(f))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
