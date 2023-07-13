@@ -2,16 +2,16 @@ package sturdy.effect.allocation
 
 import sturdy.effect.Concrete
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
-class CAllocationIntIncrement[Context] extends Allocation[Int, Context], Concrete:
-  private var next = 0
+class CAllocationIntIncrement[Context] extends Allocation[(Context,Int), Context], Concrete:
+  private val next: mutable.Map[Context, Int] = mutable.Map()
 
-  private val addressContexts: ListBuffer[(Int, Context)] = ListBuffer()
-  def getAddressContexts: List[(Int, Context)] = addressContexts.toList
-
-  override def apply(ctx: Context): Int =
-    val a = next
-    next = next + 1
-    addressContexts += a -> ctx
-    a
+  override def apply(ctx: Context): (Context,Int) =
+    next.get(ctx) match
+      case Some(n) =>
+        next += ctx -> (n+1)
+        (ctx,n)
+      case None =>
+        next += ctx -> 2
+        (ctx,1)

@@ -40,10 +40,11 @@ object ConcreteInterpreter extends Interpreter:
   override def boolean(b: Boolean): Value = Value.IntValue(if (b) 1 else 0)
 
   given Structural[VRecord] with {}
+  given Structural[Addr] with {}
 
-  override type Addr = Int
+  override type Addr = (AllocationSite,Int)
   type Environment = Map[String, Value]
-  type Store = Map[Int, Value]
+  type Store = Map[Addr, Value]
 
   class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance:
 
