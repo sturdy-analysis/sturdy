@@ -2,7 +2,7 @@ package sturdy.effect
 
 trait ComputationJoiner[A]:
   // put before() code as part of the initializer
-  def inbetween(): Unit
+  def inbetween(fFailed: Boolean): Unit
   def retainNone(): Unit
   def retainFirst(fRes: TrySturdy[A]): Unit
   def retainSecond(gRes: TrySturdy[A]): Unit

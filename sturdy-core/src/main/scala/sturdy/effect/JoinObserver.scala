@@ -2,8 +2,8 @@ package sturdy.effect
 
 trait JoinObserver:
   def joinStart(): Unit
-  def joinSwitch(): Unit
-  def joinEnd(): Unit
+  def joinSwitch(leftFailed: Boolean): Unit
+  def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit
   def repeating(): Unit
 
 trait ObservableJoin:
@@ -13,9 +13,9 @@ trait ObservableJoin:
 
   def joinStart(): Unit =
     observers.foreach(_.joinStart())
-  def joinSwitch(): Unit =
-    observers.foreach(_.joinSwitch())
-  def joinEnd(): Unit =
-    observers.foreach(_.joinEnd())
+  def joinSwitch(leftFailed: Boolean): Unit =
+    observers.foreach(_.joinSwitch(leftFailed))
+  def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit =
+    observers.foreach(_.joinEnd(leftFailed, rightFailed))
   def repeating(): Unit =
     observers.foreach(_.repeating())

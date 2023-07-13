@@ -64,16 +64,16 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
 
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
     joinStart()
-    override def inbetween(): Unit = joinSwitch()
-    override def retainNone(): Unit = joinEnd()
-    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd()
+    override def inbetween(fFailed: Boolean): Unit = joinSwitch(fFailed)
+    override def retainNone(): Unit = joinEnd(true, true)
+    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd(false, true)
+    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd(true, false)
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd(false, false)
   }
   
   def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
     val joiners: Seq[ComputationJoiner[A]] = baseJoiner +: effects.flatMap(_.makeComputationJoiner[A])
-    override def inbetween(): Unit = joiners.foreach(_.inbetween())
+    override def inbetween(fFailed: Boolean): Unit = joiners.foreach(_.inbetween(fFailed))
     override def retainNone(): Unit = joiners.foreach(_.retainNone())
     override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
     override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
@@ -84,7 +84,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     val joiner = makeComputationJoiner[A]
 
     val triedF = TrySturdy(f)
-    joiner.inbetween()
+    joiner.inbetween(triedF.isBottom)
     val triedG = TrySturdy(g)
 
     (triedF.isBottom, triedG.isBottom) match
@@ -100,7 +100,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     val joiner = makeComputationJoiner[A]
 
     val triedF = TrySturdy(f)
-    joiner.inbetween()
+    joiner.inbetween(triedF.isBottom)
     val triedG = TrySturdy[A](g)
 
     (triedF.isBottom, triedG.isBottom) match

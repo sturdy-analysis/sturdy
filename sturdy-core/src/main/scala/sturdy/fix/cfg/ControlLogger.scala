@@ -89,15 +89,24 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
     joinStack = predecessors :: joinStack
 //    exceptions = Map()
 
-  override def joinSwitch(): Unit =
+  override def joinSwitch(leftFailed: Boolean): Unit =
     val otherPredecessors = joinStack.head
-    joinStack = predecessors :: joinStack.tail
+    if (leftFailed)
+      joinStack = Map() :: joinStack.tail
+    else
+      joinStack = predecessors :: joinStack.tail
     predecessors = otherPredecessors
 
-  override def joinEnd(): Unit =
+  override def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit =
     val otherPredecessors = joinStack.head
     joinStack = joinStack.tail
-    predecessors = combinePredecessors(predecessors, otherPredecessors)
+    if (rightFailed) {
+      predecessors = otherPredecessors
+    } else if (leftFailed) {
+      // keep predecessors
+    } else {
+      predecessors = combinePredecessors(predecessors, otherPredecessors)
+    }
 
   private inline def combinePredecessors(preds1: Predecessors, preds2: Predecessors): Predecessors =
     combineMaps(preds1, preds2, _.combine(_))
@@ -105,8 +114,17 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
   private inline def combineExceptions(excs1: Exceptions, excs2: Exceptions): Exceptions =
     combineMaps(excs1, excs2, combinePredecessors(_, _))
 
+  // TODO
+//  override def recurrent(in: In, result: Option[TrySturdy[Out]]): Unit = result match
+//    case None =>
+//      // recurrent call yields bottom
+//      predecessors = Set()
+//    case Some(out) =>
+//      enterNode(in)
+//      exitNode(in, out)
 
   override def repeating(): Unit =
+    // We have already logged the edges to `in` from its original predecessor.
     predecessors = Map()
 
   def clear(): Unit =
