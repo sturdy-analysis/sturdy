@@ -23,6 +23,10 @@ trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) ext
       case None => store += x -> v
       case Some(old) => Join(old, v).ifChanged(store += x -> _)
 
+  protected def strongUpdate(x: Addr, v: V): Unit =
+    dirtyAddrs += x
+    store += x -> v
+
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new AStoreGenericJoiner)
   private class AStoreGenericJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = store
