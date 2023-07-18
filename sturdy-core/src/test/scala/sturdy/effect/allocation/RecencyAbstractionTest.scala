@@ -1,11 +1,11 @@
 package sturdy.effect.allocation
 
 import org.scalatest.funsuite.AnyFunSuite
-import Recency.*
+import sturdy.effect.store.Recency.*
 import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.store.RecencyStore
+import sturdy.effect.store.{PhysicalAddress, RecencyStore, VirtualAddress}
 import sturdy.values.{Finite, Widen}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 
@@ -111,6 +111,40 @@ class RecencyAbstractionTest extends AnyFunSuite:
     store.read(a3) should be (JOptionA.noneSome(NumericInterval(8, 9)))
   }
 
+  test("Allocation of the same context in two different branches") {
+    val alloc = new RecencyAllocator[Ctx]
+    val store = new RecencyStore[Ctx, NumericInterval[Int]](alloc, Map())
+    val effectStack: EffectStack = new EffectStack(List(alloc, store))
+
+    val ctx1 = "ctx1"
+    val a1 = alloc(ctx1)
+    store.write(a1, NumericInterval(1, 2))
+
+    var a2: VirtualAddress[Ctx] = null
+    var a3: VirtualAddress[Ctx] = null
+
+    effectStack.joinComputations {
+      a2 = alloc(ctx1)
+      store.write(a2, NumericInterval(3, 4))
+    } {
+      //      a3 = alloc(ctx1)
+
+      // a1 should be old, since a3 is a more recent allocation of ctx1
+      a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Old)
+
+      store.read(a1) should be(JOptionA.noneSome(NumericInterval(1, 2)))
+
+      //      store.write(a3, NumericInterval(5, 6))
+      //
+
+      //
+      //      // a2 should be recent, since it appears in a different branch than a3.
+      //      a2.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+
+      unit
+    }
+  }
+
   test("Recency store joins strong updates in separate branches") {
     val alloc = new RecencyAllocator[Ctx]
     val store = new RecencyStore[Ctx, NumericInterval[Int]](alloc, Map())
@@ -124,6 +158,23 @@ class RecencyAbstractionTest extends AnyFunSuite:
       store.write(a1, NumericInterval(5, 6))
     )
     store.read(a1) should be(JOptionA.noneSome(NumericInterval(1, 6)))
+  }
+
+  test("Recency store joins strong updates in separate branches 2") {
+    val alloc = new RecencyAllocator[Ctx]
+    val store = new RecencyStore[Ctx, NumericInterval[Int]](alloc, Map())
+    val effectStack: EffectStack = new EffectStack(List(store, alloc))
+
+    val ctx1 = "ctx1"
+    val a1 = alloc(ctx1)
+    var a2: VirtualAddress[Ctx] = null
+    var a3: VirtualAddress[Ctx] = null
+    effectStack.joinComputations(
+      a2 = alloc(ctx1)
+    )(
+      a3 = alloc(ctx1)
+    )
+    a2.lookupPhysicalAddress
   }
 
   test("Recency store should handle reallocation that happens in while loops") {
