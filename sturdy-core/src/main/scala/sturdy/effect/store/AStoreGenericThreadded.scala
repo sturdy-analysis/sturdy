@@ -17,13 +17,13 @@ trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) ext
   protected var store: Map[Addr, V] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
 
-  protected def weakUpdate(x: Addr, v: V): Unit =
+  def weakUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
       case Some(old) => Join(old, v).ifChanged(store += x -> _)
 
-  protected def strongUpdate(x: Addr, v: V): Unit =
+  def strongUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
     store += x -> v
 
@@ -43,6 +43,7 @@ trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) ext
 
     override def retainNone(): Unit =
       store = snapshot
+      dirtyAddrs = snapshotDirtyAddrs
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       store = fStore
