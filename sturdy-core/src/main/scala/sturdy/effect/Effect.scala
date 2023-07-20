@@ -14,7 +14,7 @@ trait Effect:
     private val original = getState
     private var afterFirst: State = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       afterFirst = getState
       setState(original)
 

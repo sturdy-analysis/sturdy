@@ -30,7 +30,7 @@ trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) ext
     private var fStore: Map[Addr, V] = _
     private var fDirtyAddrs: Set[Addr] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fStore = store
       fDirtyAddrs = dirtyAddrs
       store = snapshot

@@ -134,7 +134,7 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
     private val snapshot = store
     private var fStore: Map[String, MayMust[Sign]] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fStore = store
       store = snapshot
 

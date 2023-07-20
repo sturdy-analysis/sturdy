@@ -93,7 +93,7 @@ class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterabl
     private val snapshot = vars
     private var fVars: Array[V] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fVars = vars
       vars = snapshot
 
