@@ -1,6 +1,6 @@
 package sturdy.effect.store
 
-import sturdy.data.{JOption, JOptionA, WithJoin}
+import sturdy.data.{JOption, JOptionA, WithJoin, given}
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.store.{AStoreGenericThreadded, ManageableAddr, Store}
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
@@ -10,12 +10,6 @@ import sturdy.values.{Finite, *}
 import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
-
-/**
- * - TODO: Free remove from address translation map
- * - TODO: Invariant: Ensure that all addresses in address translation are bound on the heap.
- *   This is violated when heaps are snapshotted during
- */
 
 enum Recency:
   case Recent
@@ -47,7 +41,6 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
           Store[VirtualAddress[Context], V, WithJoin]:
 
   protected var store: Map[PhysicalAddress[Context], V] = Map()
-  protected var dirtyAddrs: Set[PhysicalAddress[Context]] = Set()
   protected var addressTranslation: Map[(Context, Int), PhysicalAddress[Context]] = Map()
   protected var mostRecent: HashMap[Context, Set[Int]] = HashMap()
   protected var next: Int = 0
@@ -100,13 +93,11 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
       case Old => weakUpdate(phys, v)
 
   def weakUpdate(x: PhysicalAddress[Context], v: V): Unit =
-    dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
       case Some(old) => Join(old, v).ifChanged(store += x -> _)
 
   def strongUpdate(x: PhysicalAddress[Context], v: V): Unit =
-    dirtyAddrs += x
     store += x -> v
 
   override def free(virt: VirtualAddress[Context]): Unit =
@@ -120,78 +111,26 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new RecencyStoreJoiner)
 
   private class RecencyStoreJoiner[A] extends ComputationJoiner[A]:
-    private val snapshotStore = store
-    private val snapshotDirtyAddrs = dirtyAddrs
-    private val snapshotAddrTrans = addressTranslation
-    private val snapshotMostRecent = mostRecent
-
-    private var firstBranchStore: Map[PhysicalAddress[Context], V] = _
-    private var firstBranchDirtyAddrs: Set[PhysicalAddress[Context]] = _
-    private var firstBranchAddrTrans: Map[(Context,Int), PhysicalAddress[Context]] = _
-    private var firstBranchMostRecent: HashMap[Context, Set[Int]] = _
-
-    dirtyAddrs = Set()
+    private val snapshot: RecencyStoreState = getState
+    private var firstBranch: RecencyStoreState = _
 
     override def inbetween(): Unit =
-      firstBranchStore = store
-      firstBranchDirtyAddrs = dirtyAddrs
-      firstBranchAddrTrans = addressTranslation
-      firstBranchMostRecent = mostRecent
-
-      store = snapshotStore
-      dirtyAddrs = Set()
-      addressTranslation = snapshotAddrTrans
-      mostRecent = snapshotMostRecent
+      firstBranch = getState
+      setState(snapshot)
 
     override def retainNone(): Unit =
-      store = snapshotStore
-      dirtyAddrs = snapshotDirtyAddrs
-      addressTranslation = snapshotAddrTrans
-      mostRecent = snapshotMostRecent
+      setState(snapshot)
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      store = firstBranchStore
-      dirtyAddrs = snapshotDirtyAddrs ++ firstBranchDirtyAddrs
-      addressTranslation = firstBranchAddrTrans
-      mostRecent = firstBranchMostRecent
+      setState(firstBranch)
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
-      dirtyAddrs ++= snapshotDirtyAddrs
+      // The current state is already the state of the second branch.
+      // Nothing to do.
+      unit
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      for (x <- firstBranchDirtyAddrs)
-        weakUpdate(x, firstBranchStore(x))
-
-      def maybeUpdateStore(phys: PhysicalAddress[Context], o1: Option[V], o2: Option[V]): Unit =
-        (o1, o2) match
-          case (None, None) => // Do nothing
-          case (Some(v1), None) =>
-            store += phys -> v1
-            dirtyAddrs += phys
-          case (None, Some(v2)) =>
-            store += phys -> v2
-            dirtyAddrs += phys
-          case (Some(v1), Some(v2)) =>
-            val join = Join(v1, v2)
-            store += phys -> join.get
-            dirtyAddrs += phys
-
-      for((virt1,phys1) <- firstBranchAddrTrans)
-        addressTranslation.get(virt1) match
-          case None =>
-            addressTranslation += virt1 -> phys1
-          case Some(phys2) =>
-            (phys1,phys2) match
-              case (PhysicalAddress(ctx1,Recent),PhysicalAddress(ctx2,Old)) if ctx1 == ctx2 =>
-                maybeUpdateStore(phys2, firstBranchStore.get(phys1), store.get(phys2))
-              case (PhysicalAddress(ctx1,Old), PhysicalAddress(ctx2,Recent)) if ctx1 == ctx2 =>
-                maybeUpdateStore(phys1, firstBranchStore.get(phys1), store.get(phys2))
-              case (_,_) if phys1 == phys2 =>
-                maybeUpdateStore(phys1, firstBranchStore.get(phys1), store.get(phys2))
-              case (_,_) /* if phys1 != phys2 */ =>
-                throw new IllegalStateException(s"virtual address ${virt1} maps to physical addresses with different contexts: ${phys1}, ${phys2}")
-      for((ctx,oldVirts) <- firstBranchMostRecent)
-        mostRecent += ctx -> mostRecent.getOrElse(ctx,Set()).union(oldVirts)
+      setState(join(firstBranch, getState).get)
 
   override type State = RecencyStoreState
 
@@ -199,64 +138,77 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
                                addrTrans: Map[(Context, Int), PhysicalAddress[Context]],
                                mostRecent: HashMap[Context, Set[Int]])
 
-
-  override def getState: State =
+  override def getState: RecencyStoreState =
     RecencyStoreState(this.store, this.addressTranslation, this.mostRecent)
 
-  override def setState(st: RecencyStoreState): Unit =
+  override inline def setState(st: RecencyStoreState): Unit =
     store = st.store
     addressTranslation = st.addrTrans
     mostRecent = st.mostRecent
 
-  override def join: Join[RecencyStoreState] = (v1: RecencyStoreState, v2: RecencyStoreState) =>
-    var store: Map[PhysicalAddress[Context], V] = Map()
-    var addrTrans: Map[(Context, Int), PhysicalAddress[Context]] = Map()
-    val mostRecent: HashMap[Context, Set[Int]] = v1.mostRecent.merged(v2.mostRecent){case ((ctx1,rec1),(_,rec2)) => (ctx1, rec1.union(rec2))}
-    var changed = false
+  override def join: Join[RecencyStoreState] = new CombineRecencyStoreState
+  override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState
 
-    def maybeUpdateStore(phys: PhysicalAddress[Context], o1: Option[V], o2: Option[V]): Unit =
-      (o1, o2) match
-        case (None, None) => // Do nothing
-        case (Some(v1), None) =>
-          store += phys -> v1
-          changed = true
-        case (None, Some(v2)) =>
-          store += phys -> v2
-          changed = true
-        case (Some(v1), Some(v2)) =>
-          val join = Join(v1, v2)
-          store += phys -> join.get
-          changed ||= join.hasChanged
+  private class CombineRecencyStoreState[W <: Widening](using Combine[V, W]) extends Combine[RecencyStoreState, W]:
+    override def apply(state1: RecencyStoreState, state2: RecencyStoreState): MaybeChanged[RecencyStoreState] =
+      var store: Map[PhysicalAddress[Context], V] = Map()
+      var addrTrans: Map[(Context, Int), PhysicalAddress[Context]] = Map()
+      var mostRecent: HashMap[Context, Set[Int]] = HashMap()
+      var changed = false
 
-    for(virt <- v1.addrTrans.keySet.union(v2.addrTrans.keySet))
-      (v1.addrTrans.get(virt), v2.addrTrans.get(virt)) match
-        case (Some(phys),None) =>
-          addrTrans += virt -> phys
-          maybeUpdateStore(phys, v1.store.get(phys), None)
-          changed = true
-        case (None, Some(phys)) =>
-          addrTrans += virt -> phys
-          maybeUpdateStore(phys, None, v2.store.get(phys))
-          changed = true
-        case (Some(phys1@PhysicalAddress(ctx1,Recent)), Some(phys2@PhysicalAddress(ctx2,Old))) if ctx1 == ctx2 =>
-          addrTrans += virt -> phys2
-          maybeUpdateStore(phys2, v1.store.get(phys1), v2.store.get(phys2))
-          changed = true
-        case (Some(phys1@PhysicalAddress(ctx1,Old)), Some(phys2@PhysicalAddress(ctx2,Recent))) if ctx1 == ctx2 =>
-          addrTrans += virt -> phys1
-          maybeUpdateStore(phys1, v1.store.get(phys1), v2.store.get(phys2))
-          changed = true
-        case (Some(phys1), Some(phys2)) if phys1 == phys2 =>
-          addrTrans += virt -> phys1
-          maybeUpdateStore(phys1, v1.store.get(phys1), v2.store.get(phys2))
-        case (Some(phys1), Some(phys2)) /* if phys1.ctx != phys2.ctx */ =>
-          throw new IllegalStateException(s"virtual address ${virt} maps to physical addresses with different contexts: ${phys1}, ${phys2}")
-        case (None, None) =>
-          throw new IllegalStateException(s"virtual address ${virt} appear in neither address translation map")
+      def updateAddrTrans(virt: (Context,Int), phys: PhysicalAddress[Context]): Unit =
+        addrTrans += virt -> phys
+        updateMostRecent(virt, phys)
 
-    MaybeChanged(RecencyStoreState(store, addrTrans, mostRecent), changed)
+      def updateMostRecent(virt: (Context,Int), phys: PhysicalAddress[Context]): Unit =
+        if (phys.recency == Recent)
+          val (ctx,n) = virt
+          mostRecent += ctx -> (mostRecent.getOrElse(ctx, Set()) + n)
 
-  override def widen: Widen[RecencyStoreState] = ???
+      // Update store at physical address `phys` by joining optional values `o1` and `o2`.
+      def updateStore(phys: PhysicalAddress[Context], o1: Option[V], o2: Option[V]): Unit =
+        val joinArgs = Join(JOptionA(o1),JOptionA(o2))
+        joinArgs.get.map(v =>
+          if (store.contains(phys))
+            store += phys -> Join(store(phys), v).get
+          else
+            store += phys -> v
+        )
+        changed ||= joinArgs.hasChanged
+
+
+      // This loop binds all virtual addresses in state1.addrTrans and state2.addrTrans
+      // Furthermore, it joins store bindings of physical addresses bound by the final address translation.
+      for(virt <- state1.addrTrans.keySet.union(state2.addrTrans.keySet))
+        (state1.addrTrans.get(virt), state2.addrTrans.get(virt)) match
+          case (Some(phys1), None) =>
+            // This case can happen if state2 frees a recent address.
+            updateAddrTrans(virt, phys1)
+            updateStore(phys1, state1.store.get(phys1), state1.store.get(phys1))
+          case (None, Some(phys2)) =>
+            // This case can happen if state2 allocates an address for a context not bound in state1
+            updateAddrTrans(virt, phys2)
+            updateStore(phys2, state1.store.get(phys2), state2.store.get(phys2))
+          case (Some(phys1), Some(phys2)) if phys1 == phys2 =>
+            updateAddrTrans(virt, phys1)
+            updateStore(phys1, state1.store.get(phys1), state2.store.get(phys1))
+          case (Some(phys1@PhysicalAddress(ctx1,Old)), Some(phys2@PhysicalAddress(ctx2,Recent))) if ctx1 == ctx2 =>
+            updateAddrTrans(virt, phys1)
+            // The order of arguments state1.store.get(phys1) and state2.store.get(phys2) is important.
+            // The other way around leads to the join not detecting that the result has stabilized.
+            updateStore(phys1, state1.store.get(phys1), state2.store.get(phys2))
+          case (Some(phys1@PhysicalAddress(ctx1,Recent)), Some(phys2@PhysicalAddress(ctx2,Old))) if ctx1 == ctx2 =>
+            // This case can happen if state2 allocates a new virtual address for ctx2.
+            updateAddrTrans(virt, phys2)
+            // The order of arguments state2.store.get(phys2) and state1.store.get(phys1) is important.
+            // The other way around leads to the join not detecting that the result has stabilized.
+            updateStore(phys2, state2.store.get(phys2), state1.store.get(phys1))
+          case (Some(phys1), Some(phys2)) /* if phys1.ctx != phys2.ctx */ =>
+            throw new IllegalStateException(s"virtual address ${virt} maps to physical addresses with different contexts: ${phys1}, ${phys2}")
+          case (None, None) =>
+            throw new IllegalStateException(s"This case cannot happen. The virtual address must either be bound in state1.addrTrans or state2.addrTrans")
+
+      MaybeChanged(RecencyStoreState(store, addrTrans, mostRecent), changed)
 
 //class RecencyAbstractly[Addr, Context](c: CAllocationIntIncrement[Context], addr: Context => Addr) extends Abstractly[(Context,Int), Addr]:
 //  override def apply(caddr: (Context,Int)): Addr = addr(caddr._1)

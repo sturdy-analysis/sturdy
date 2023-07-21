@@ -197,3 +197,90 @@ class RecencyAbstractionTest extends AnyFunSuite:
       // When condition is false, exit loop
     }
   }
+
+  test("Join with write in second branch, but not in first branch") {
+    val store = new RecencyStore[Ctx, NumericInterval[Int]]
+    val ctx1 = "ctx1"
+
+    val a1 = store.alloc(ctx1)
+    val state1 = store.getState
+    store.write(a1, NumericInterval(1,2))
+    val state2 = store.getState
+    val join = store.join(state1.asInstanceOf,state2.asInstanceOf)
+    store.setState(join.get.asInstanceOf[store.State])
+
+    a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+    store.read(a1) should be(JOptionA.noneSome(NumericInterval(1,2)))
+    join.hasChanged should be(true)
+  }
+
+  test("Join with two allocations of the same context") {
+    val store = new RecencyStore[Ctx, NumericInterval[Int]]
+    val ctx1 = "ctx1"
+
+    val a1 = store.alloc(ctx1)
+    val state1 = store.getState
+    val a2 = store.alloc(ctx1)
+    val state2 = store.getState
+    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
+    store.setState(join.get.asInstanceOf[store.State])
+
+    a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Old)
+    a2.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+    join.hasChanged should be(false)
+  }
+
+  test("Join with writes in both branches") {
+    val store = new RecencyStore[Ctx, NumericInterval[Int]]
+    val ctx1 = "ctx1"
+
+    val a1 = store.alloc(ctx1)
+    store.write(a1, NumericInterval(1, 2))
+    val state1 = store.getState
+    store.write(a1, NumericInterval(3, 4))
+    val state2 = store.getState
+    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
+    store.setState(join.get.asInstanceOf[store.State])
+
+    a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+    store.read(a1) should be(JOptionA.noneSome(NumericInterval(1, 4)))
+    join.hasChanged should be(true)
+  }
+
+  test("Join with free in second branch") {
+    val store = new RecencyStore[Ctx, NumericInterval[Int]]
+    val ctx1 = "ctx1"
+
+    val a1 = store.alloc(ctx1)
+    store.write(a1, NumericInterval(1, 2))
+    val state1 = store.getState
+    store.free(a1)
+    val state2 = store.getState
+    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
+    store.setState(join.get.asInstanceOf[store.State])
+
+    a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+    store.read(a1) should be(JOptionA.noneSome(NumericInterval(1,2)))
+    join.hasChanged should be(false)
+  }
+
+  test("Reaching fixpoint") {
+    val store = new RecencyStore[Ctx, NumericInterval[Int]]
+    val ctx1 = "ctx1"
+
+    val a1 = store.alloc(ctx1)
+    val a2 = store.alloc(ctx1)
+    store.write(a1, NumericInterval(1, 4))
+    store.write(a2, NumericInterval(3, 4))
+    val state1 = store.getState
+    val a3 = store.alloc(ctx1)
+    store.write(a3, NumericInterval(3, 4))
+    val state2 = store.getState
+    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
+    store.setState(join.get.asInstanceOf[store.State])
+
+    a1.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Old)
+    a2.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Old)
+    a3.lookupPhysicalAddress shouldBe PhysicalAddress(ctx1, Recent)
+    join.hasChanged should be(false)
+  }
