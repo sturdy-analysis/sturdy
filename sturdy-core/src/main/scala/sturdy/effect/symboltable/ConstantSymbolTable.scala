@@ -55,7 +55,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     case (Left(_), v2@Right(_)) => Changed(v2)
     case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
   })
-  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
+  override def widen: Widen[Tables[Key, Symbol, Entry]] = CombineFiniteKeyMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
