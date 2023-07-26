@@ -95,10 +95,10 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
 
   def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
-      case (ConcreteInterpreter.Value.Int32(i1), ConcreteInterpreter.Value.Int32(i2)) => i1 == i2
-      case (ConcreteInterpreter.Value.Int64(l1), ConcreteInterpreter.Value.Int64(l2)) => l1 == l2
-      case (ConcreteInterpreter.Value.Float32(f1), ConcreteInterpreter.Value.Float32(f2)) => f1.isNaN && f2.isNaN || f1 == f2
-      case (ConcreteInterpreter.Value.Float64(d1), ConcreteInterpreter.Value.Float64(d2)) => d1.isNaN && d2.isNaN || d1 == d2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
       case _ => false
     }
 
@@ -263,10 +263,10 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
 
   def constExprToVal(inst: unresolved.Inst): ConcreteInterpreter.Value =
     inst match
-      case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Int32(i)
-      case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Int64(l)
-      case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Float32(f)
-      case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
+      case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i))
+      case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l))
+      case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f))
+      case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToAVals(e: unresolved.Expr): List[TypeAnalysis.Value] =
@@ -274,10 +274,10 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
 
   def constExprToAVal(inst: unresolved.Inst): TypeAnalysis.Value =
     inst match
-      case unresolved.i32.Const(i) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
-      case unresolved.i64.Const(l) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
-      case unresolved.f32.Const(f) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
-      case unresolved.f64.Const(d) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+      case unresolved.i32.Const(i) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int32(TypeAnalysis.topI32))
+      case unresolved.i64.Const(l) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int64(TypeAnalysis.topI64))
+      case unresolved.f32.Const(f) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float32(TypeAnalysis.topF32))
+      case unresolved.f64.Const(d) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float64(TypeAnalysis.topF64))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToTops(e: unresolved.Expr): List[TypeAnalysis.Value] =
@@ -285,14 +285,14 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
 
   def constExprToTop(inst: unresolved.Inst): TypeAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
-      case unresolved.i64.Const(_) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
-      case unresolved.f32.Const(_) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
-      case unresolved.f64.Const(_) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+      case unresolved.i32.Const(_) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int32(TypeAnalysis.topI32))
+      case unresolved.i64.Const(_) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int64(TypeAnalysis.topI64))
+      case unresolved.f32.Const(_) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float32(TypeAnalysis.topF32))
+      case unresolved.f64.Const(_) => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float64(TypeAnalysis.topF64))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =
     value match
-      case ConcreteInterpreter.Value.Float32(f) => f.isNaN
-      case ConcreteInterpreter.Value.Float64(d) => d.isNaN
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => f.isNaN
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => d.isNaN
       case _ => false

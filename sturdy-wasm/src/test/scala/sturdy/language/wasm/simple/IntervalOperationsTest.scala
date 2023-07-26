@@ -12,7 +12,7 @@ import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.analyses.IntervalAnalysis.Value
+import sturdy.language.wasm.analyses.IntervalAnalysis.{I32, Value}
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
@@ -26,6 +26,7 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
 
+
 class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   behavior of "interval operations"
 
@@ -33,8 +34,8 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 
   def b(l: Int, h: Int): NumericInterval[Int] = NumericInterval(l, h)
   def c(constant: Int): NumericInterval[Int] = NumericInterval.constant(constant)
-  def maybeFailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.MaybeFailing(List(Value.Int32(res)), Powerset())
-  def unfailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.Unfailing(List(Value.Int32(res)))
+  def maybeFailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.MaybeFailing(List(Value.Num(IntervalAnalysis.NumValue.Int32(res))), Powerset())
+  def unfailing(res: NumericInterval[Int]): AFallible[List[Value]] = AFallible.Unfailing(List(Value.Num(IntervalAnalysis.NumValue.Int32(res))))
   def failing(): AFallible[List[Value]] = AFallible.Failing(Powerset())
 
 
@@ -61,7 +62,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   def testOperation(operationName: String, args: List[NumericInterval[Int]], expected: AFallible[List[Value]], createExtraTest: Boolean, forcePrecise: Boolean): Unit =
     def assertCorrect(expected: Value, result: Value): Unit = {
       val (e, r) = (expected, result) match {
-        case (Value.Int32(exp), Value.Int32(res)) => (exp, res)
+        case (Value.Num(IntervalAnalysis.NumValue.Int32(exp)), Value.Num(IntervalAnalysis.NumValue.Int32(res))) => (exp, res)
       }
       if (forcePrecise)
         assertResult(e, s"for $operationName of $args")(r)
@@ -71,9 +72,14 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
           println(s"$operationName with args $args = $r. This is imprecise, since the real result is $e")
     }
 
+    def intervalAnalysisI32(a: I32): Value.Num = {
+      Value.Num(IntervalAnalysis.NumValue.Int32.apply(a))
+    }
+
     import AFallible.*
     def doTheTest() = {
-      val res = runIntervalAnalysis(test, operationName, args.map(Value.Int32.apply), StackConfig.StackedStates())
+      //val res = runIntervalAnalysis(test, operationName, args.map(Value.Num(IntervalAnalysis.NumValue.Int32).apply), StackConfig.StackedStates())
+      val res = runIntervalAnalysis(test, operationName, args.map(intervalAnalysisI32), StackConfig.StackedStates())
       (res, expected) match
         case (Unfailing(vals), Unfailing(expectedVals)) => assertCorrect(expectedVals.head, vals.head)
         case (MaybeFailing(vals, _), MaybeFailing(expectedVals, _)) => assertCorrect(expectedVals.head, vals.head)

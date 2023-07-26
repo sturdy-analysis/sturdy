@@ -19,7 +19,7 @@ import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.{f32, f64, i32, i64}
-import swam.{FuncType, NumType, RefType, ReferenceType, ValType}
+import swam.{FuncType, NumType, ReferenceType, ValType}
 
 import java.nio.ByteOrder
 import WasmFailure.*
@@ -33,7 +33,9 @@ trait Interpreter:
   type F32
   type F64
   type Bool
-
+  type FuncReference
+  //type FunV
+  
   enum NumValue:
     case Top
     case Int32(i: I32)
@@ -43,7 +45,7 @@ trait Interpreter:
 
   enum RefValue:
     case Null(t: RefType)
-    case Func(f: FunV)
+    case Func(f: FuncReference)
     //case Extern(e: ?)
     
   enum Value:
@@ -83,7 +85,7 @@ trait Interpreter:
   def topI64: I64
   def topF32: F32
   def topF64: F64
-  def topFuncRef: FunV
+  def topFuncRef: FuncReference
   
   def typedTop(ty: ValType): Value = ty match
     case NumType.I32 => Value.Num(NumValue.Int32(topI32))
@@ -170,12 +172,12 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, J]
+     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -292,4 +294,5 @@ trait Interpreter:
   type Instance <: GenericInstance
 
   abstract class GenericInstance
+    //extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
     extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]

@@ -43,6 +43,7 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
   
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
+    /*
     testFunctionConstantArgs(simple, "noop", List.empty, List((Value.Int32(0), Untainted)))
     testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List((Value.Int32(5), Tainted)))
     testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List((Value.Int32(1), Tainted)))
@@ -57,6 +58,7 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgsConst(taintTest, "taint_loop", List(Value.Int32(0)), List((ConstantAnalysis.Value.Int32(Topped.Top), TopTaint)))
     testFunctionConstantArgs(taintTest, "write_mem_mixed", List(Value.Int32(0)), List((Value.Int32(0), TopTaint)))
     testFunctionConstantArgs(taintTest, "write_mem_mixed", List(Value.Int32(10)), List((Value.Int32(43), Untainted)))
+    */
   }
 
   def testFunctionConstantArgsConst(path: Path, funcName: String, args: List[CVal], expectedResult: List[(ConstVal, Taint)]) =

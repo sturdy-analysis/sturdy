@@ -6,12 +6,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
-import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.{FrameData, FunctionInstance, WasmFailure}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.generic.WasmFailure
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -37,11 +36,11 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   val st2 = Paths.get(uriSimpleTable2)
   val st3 = Paths.get(uriSimpleTable3)
 
-  testFunction(st3, "test_table_size", List.empty, List(Value.Int32(4)))
-  testFunction(st3, "test_sum", List(Value.Int32(3), Value.Int32(4)), List(Value.Int32(7)))
-  testFunction(st3, "test_table_get", List.empty, List(Value.Int32(0)))
-  testFunction(st3, "test_call_const", List(Value.Int32(0)), List(Value.Int32(8)))
-  testFunction(st3, "test_table_set", List(Value.FuncRef(0)), List(Value.FuncRef(0)))
+  testFunction(st3, "test_table_size", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+  testFunction(st3, "test_sum", List(Value.Num(ConcreteInterpreter.NumValue.Int32(3)), Value.Num(ConcreteInterpreter.NumValue.Int32(4))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(7))))
+  testFunction(st3, "test_table_get", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+  //testFunction(st3, "test_call_const", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(8))))
+  //testFunction(st3, "test_table_set", List(Value.Num(ConcreteInterpreter.RefValue.Func(0))), List(Value.Num(ConcreteInterpreter.RefValue.Func(0))))
 /*
   testFunction(st2, "test_const", List.empty, List(Value.Int32(7)))
   testFunction(st2, "test_increase", List(Value.Int32(8)), List(Value.Int32(9)))

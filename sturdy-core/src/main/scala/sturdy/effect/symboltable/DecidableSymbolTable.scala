@@ -21,17 +21,18 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
 
   override def size(key: Key, symbol: Symbol): Int =
     tables(key).size
-/*
-  override def grow(key: Key, delta: Int): Int = ???
 
-  override def fill(key: Key, range: Int, newEntry: Entry): Unit = ???
+  override def grow(key: Key, delta: Byte, initEntry: Entry): Byte = ???
 
-  override def copy(key: Key, dest: Byte): Unit = ???
+  override def fill(key: Key, range: Byte, newEntry: Entry, length: Byte): Unit = ???
+
+  override def copy(key: Key, range: Byte, dest: Key): Unit = ???
 
   override def init(key: Key, newEntry: Entry): Unit = ???
 
-  override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
-*/
+  //override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
+  //override def drop(key: Key, symbol: Symbol): Unit = ???
+
   override def putNew(key: Key): Unit =
     tables += key -> Map()
 

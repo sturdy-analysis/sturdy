@@ -52,8 +52,8 @@ trait IntervalValues extends Interpreter:
       case Value.TopValue => false
       case Value.Num(NumValue.Int32(v)) => v.isConstant
       case Value.Num(NumValue.Int32(v)) => v.isConstant
-      case Value.Num(NumValue.Int32(v)) => v.isActual
-      case Value.Num(NumValue.Int32(v)) => v.isActual
+      //case Value.Num(NumValue.Int32(v)) => v.isActual
+      //case Value.Num(NumValue.Int32(v)) => v.isActual
     })
 
     def grouped: Map[String, Map[InstLoc, List[Value]]] =

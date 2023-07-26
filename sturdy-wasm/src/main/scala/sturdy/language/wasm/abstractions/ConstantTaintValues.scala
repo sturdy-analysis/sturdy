@@ -24,6 +24,7 @@ import swam.{OpCode, syntax}
 import scala.collection.MapView
 import java.security.KeyStore.TrustedCertificateEntry
 
+
 trait ConstantTaintValues extends Interpreter:
   final type I32 = TaintProduct[Topped[Int]]
   final type I64 = TaintProduct[Topped[Long]]
@@ -58,25 +59,25 @@ trait ConstantTaintValues extends Interpreter:
   def liftConcreteValue(cv: ConcreteInterpreter.Value, taint: Taint = Taint.Untainted): Value =
     cv match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint, Topped.Actual(i))))
-      case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint, Topped.Actual(l))))
-      case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint, Topped.Actual(f))))
-      case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint, Topped.Actual(d))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint, Topped.Actual(i))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint, Topped.Actual(l))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint, Topped.Actual(f))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint, Topped.Actual(d))))
 
   def liftConstantValue(cv: ConstantAnalysis.Value, taint: Taint = Taint.Untainted): Value =
     cv match
       case ConstantAnalysis.Value.TopValue => Value.TopValue
-      case ConstantAnalysis.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint,i)))
-      case ConstantAnalysis.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint,l)))
-      case ConstantAnalysis.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint,f)))
-      case ConstantAnalysis.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint,d)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint,i)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint,l)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint,f)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint,d)))
 
   def untaint(v: Value): ConstantAnalysis.Value = v match
     case Value.TopValue => ConstantAnalysis.Value.TopValue
-    case Value.Num(NumValue.Int32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(NumValue.Int32(v1))
-    case Value.Num(NumValue.Int64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(NumValue.Int64(v1))
-    case Value.Num(NumValue.Float32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(NumValue.Float32(v1))
-    case Value.Num(NumValue.Float64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(NumValue.Float64(v1))
+    case Value.Num(NumValue.Int32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(v1))
+    case Value.Num(NumValue.Int64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(v1))
+    case Value.Num(NumValue.Float32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(v1))
+    case Value.Num(NumValue.Float64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(v1))
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
@@ -92,7 +93,7 @@ trait ConstantTaintValues extends Interpreter:
       case Value.Num(NumValue.Int32(TaintProduct(_, Topped.Top))) => false
       case Value.Num(NumValue.Int64(TaintProduct(_, Topped.Top))) => false
       case Value.Num(NumValue.Float32(TaintProduct(_, Topped.Top))) => false
-      case Value.Num(NumValue.Floa64(TaintProduct(_, Topped.Top))) => false
+      case Value.Num(NumValue.Float64(TaintProduct(_, Topped.Top))) => false
       case _ => true
     })
 
