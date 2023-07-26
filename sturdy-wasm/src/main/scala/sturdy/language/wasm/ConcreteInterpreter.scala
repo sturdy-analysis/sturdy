@@ -38,12 +38,14 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type F32 = Float
   override type F64 = Double
   override type Bool = Boolean
+  // override type FuncReference = FunctionInstance
   override type FuncReference = Int
 
   override def topI32: Int = throw new UnsupportedOperationException
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
+  //override def topFuncRef: FunctionInstance = throw new UnsupportedOperationException
   override def topFuncRef: Int = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
@@ -60,13 +62,13 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type FuncIx = Int
   override type FunV = FunctionInstance
 
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, NoJoin] with
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
-    override def refvtoVal(r: FunV): Value = Value.Ref(RefValue.Func(r))
+    //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32

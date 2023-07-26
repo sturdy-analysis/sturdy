@@ -120,7 +120,8 @@ enum FixOut[V]:
 given finiteFixIn: Finite[FixIn] with {}
 
 
-trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJoin[_]]:
+//trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
 
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
@@ -129,11 +130,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
   // joins
   implicit def jvUnit: J[Unit]
   implicit def jvV: J[V]
-  implicit def jvFunV: J[RefV]
-  //implicit def jvFunV: J[V]
+ // implicit def jvFunV: J[V]
+  implicit def jvFunV: J[FunV]
 
   // value components
-  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J]
+  //val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J]
+  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
   import wasmOps.*
   import specialOps.*
 
@@ -141,7 +143,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
   val stack: DecidableOperandStack[V]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
-  val funTable: SymbolTable[TableAddr, FuncIx, RefV, J]
+  val funTable: SymbolTable[TableAddr, FuncIx, FunV, J]
+  //val funTable: SymbolTable[TableAddr, FuncIx, RefV, J]
   val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
@@ -194,21 +197,35 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
     inst match {
     case TableGet(ix) =>
       val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
-     // val table = getTableValue(tableIdx)
-     // print(table)
-      val v = funTable.get(TableAddr(ix.toInt), valueToFuncIx(intToVal(0)))
-      // v = Some(Wasm(1af146,0,Func(0,Vector(),Vector(Const(7))),FuncType(Vector(),Vector(I32))))
-       val v2 = v.getOrElse(fail(UnboundGlobal, ix.toString))
-      stack.push(v2)
-      //stack.push(intToVal(0))
-    case TableSet(ix) => ???
+      val v = funTable.get(TableAddr(ix), valueToFuncIx(intToVal(0)))
+      val v2 = v.getOrElse(fail(UnboundGlobal, ix.toString))
+     // val v3 = v2
+     // stack.push(v2)
+    case TableSet(ix) =>
+      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
+      val v = stack.popOrAbort()
+      val _ =
+      writeTableValue(tableIdx, v)
     case TableSize(ix) =>
-      stack.push(intToVal(funTable.size(TableAddr(ix.toInt), valueToFuncIx(intToVal(0)))))
-    case TableGrow(ix) => ???
-    case TableFill(ix) => ???
-    //case TableCopy(ix1, ix2) => ???
-    //case TableInit(ix1, ix2) => ???
-    //case ElemDrop(ix) => ???
+      //print("Generic", ix, funTable.size(TableAddr(ix), valueToFuncIx(intToVal(0))))
+      //print("Generic", funTable.size(TableAddr(ix), valueToFuncIx(intToVal(1))))
+      stack.push(intToVal(funTable.size(TableAddr(ix), valueToFuncIx(intToVal(0)))))
+    case TableGrow(ix) =>
+      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
+      val delta = stack.popOrAbort()
+      //val initEntry = stack.popOrAbort()
+      //funTable.grow(tableIdx, delta.toString.toInt.toByte, initEntry)
+    case TableFill(ix) =>
+      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
+      val range_begin = stack.popOrAbort()
+      val fillEntry = stack.popOrAbort()
+      val range_length = stack.popOrAbort()
+      //funTable.fill(tableIdx, range_begin.toString.toInt.toByte, fillEntry, range_length.toString.toInt.toByte)
+    case TableCopy(ix1, ix2) =>
+      val tableIdx1 = module.tableAddrs.lift(ix1).getOrElse(fail(UnboundGlobal, ix1.toString))
+      val tableIdx2 = module.tableAddrs.lift(ix2).getOrElse(fail(UnboundGlobal, ix2.toString))
+    case TableInit(ix1, ix2) => ???
+    case ElemDrop(ix) => ???
   }
 
   def evalMemoryInst(inst: Inst): Unit = inst match
@@ -271,6 +288,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
   def writeGlobalValue(ga: GlobalAddr, v: V): Unit =
     globals.set((), ga, v)
 
+  //def getTableValue(addr: TableAddr): V =
+    //val x = funTable.getOrElse(addr,valueToFuncIx(intToVal(0)), fail(UnboundGlobal, addr.toString))
+    //stack.pu
+
+  def writeTableValue(addr: TableAddr, v: V): Unit = ???
+    //funTable.set(addr, valueToFuncIx(intToVal(0)), v)
+
   def eval_open(inst: Inst, loc: InstLoc)(using Fixed): Unit =
     val opcode = inst.opcode
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
@@ -332,11 +356,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func, loc)
-    case CallIndirect(tableIdx) =>
+    case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(tableIdx)
       val funcIx = stack.popOrAbort() //0 = const, 1 = increase ...
       val func = funTable.getOrElse(tableIndex(tableIdx), valueToFuncIx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      invokeIndirect(func, ftExpected, funcIx, loc)
+      //invokeIndirect(func, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -416,7 +440,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJo
     }
     stack.peekNOrAbort(returnN)
 
-  def invokeIndirect(funV: RefV, ftExpected: swam.FuncType, funcIx: V, loc: InstLoc)(using Fixed): Unit =
+  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V, loc: InstLoc)(using Fixed): Unit =
     functionOps.invokeFun(funV, ftExpected) {
       case (func, _) =>
         val ftActual = func.funcType

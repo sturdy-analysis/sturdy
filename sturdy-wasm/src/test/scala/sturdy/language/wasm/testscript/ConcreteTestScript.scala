@@ -70,10 +70,10 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
 
   def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
-      case (Value.Int32(i1), Value.Int32(i2)) => i1 == i2
-      case (Value.Int64(l1), Value.Int64(l2)) => l1 == l2
-      case (Value.Float32(f1), Value.Float32(f2)) => f1.isNaN && f2.isNaN || f1 == f2
-      case (Value.Float64(d1), Value.Float64(d2)) => d1.isNaN && d2.isNaN || d1 == d2
+      case (Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
+      case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
+      case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
+      case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
       case _ => false
     }
 
@@ -176,14 +176,14 @@ def constExprToVals(e: unresolved.Expr): List[Value] =
 
 def constExprToVal(inst: unresolved.Inst): Value =
   inst match
-    case unresolved.i32.Const(i) => Value.Int32(i)
-    case unresolved.i64.Const(l) => Value.Int64(l)
-    case unresolved.f32.Const(f) => Value.Float32(f)
-    case unresolved.f64.Const(d) => Value.Float64(d)
+    case unresolved.i32.Const(i) => Value.Num(ConcreteInterpreter.NumValue.Int32(i))
+    case unresolved.i64.Const(l) => Value.Num(ConcreteInterpreter.NumValue.Int64(l))
+    case unresolved.f32.Const(f) => Value.Num(ConcreteInterpreter.NumValue.Float32(f))
+    case unresolved.f64.Const(d) => Value.Num(ConcreteInterpreter.NumValue.Float64(d))
     case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 def isNaN(value: Value): Boolean =
   value match
-    case Value.Float32(f) => f.isNaN
-    case Value.Float64(d) => d.isNaN
+    case Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => f.isNaN
+    case Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => d.isNaN
     case _ => false

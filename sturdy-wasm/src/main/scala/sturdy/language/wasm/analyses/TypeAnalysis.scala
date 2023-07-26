@@ -42,12 +42,13 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
+    //override def refvtoVal(r: FuncReference): Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()

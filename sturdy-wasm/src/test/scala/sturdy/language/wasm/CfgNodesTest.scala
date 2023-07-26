@@ -16,7 +16,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
   val uri = this.getClass.getResource("/sturdy/language/wasm/cfg_test.wast").toURI;
   val path = Paths.get(uri)
 
-  testCfgNodes(path, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))
+  testCfgNodes(path, "fac-rec", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Actual(3)))))
 
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
@@ -25,13 +25,13 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(
-    interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Top)))
+    interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))))
   )
   interp.failure.fallible(
-    interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Top)))
+    interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))))
   )
   interp.failure.fallible(
-    interp.invokeExported(modInst, "fac-iter", List(ConstantAnalysis.Value.Int64(Topped.Top)))
+    interp.invokeExported(modInst, "fac-iter", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))))
   )
   println(cfg.toGraphViz)
 

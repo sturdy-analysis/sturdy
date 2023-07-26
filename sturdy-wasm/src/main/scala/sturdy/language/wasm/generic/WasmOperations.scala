@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.JOption
 import sturdy.data.MayJoin
+import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.values.booleans.BooleanBranching
 import swam.{FuncType, GlobalIdx}
 import sturdy.values.convert.*
@@ -19,6 +20,7 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 
 trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
+//trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, J[_] <: MayJoin[_]]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
@@ -38,23 +40,24 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
   val convert_f64_i32: ConvertDoubleInt[V, V]
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
+  //val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, J[_] <: MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, J[_] <: MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
-  //def refvtoVal(r: RefValue): V
+  //def refvtoVal(r: FuncReference): V
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
