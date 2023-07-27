@@ -27,7 +27,7 @@ import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
 import sturdy.values.relational.*
-import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
+import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, ReferenceType, TableType, ValType}
 import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
@@ -219,6 +219,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case ElemDrop(ix) => ???
   }
 
+  def evalRefInst(inst: Inst): Unit =
+    inst match {
+      case RefNull(t) =>
+        //val refIdx = module.refAddrs.lift(t).getOrElse(fail(UnboundGlobal, t.toString))
+        //stack.push()
+      case RefIsNull(t) => ???
+      case RefFunc(x) => ???
+    }
+
   def evalMemoryInst(inst: Inst): Unit = inst match
     case i: LoadInst => load(i)
     case i: LoadNInst => load(i)
@@ -276,8 +285,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   def getGlobalValue(ga: GlobalAddr): V =
     globals.getOrElse((), ga, fail(UnboundGlobal, ga.toString))
+
   def writeGlobalValue(ga: GlobalAddr, v: V): Unit =
     globals.set((), ga, v)
+
 
   //def getTableValue(addr: TableAddr): V =
     //val x = funTable.getOrElse(addr,valueToFuncIx(intToVal(0)), fail(UnboundGlobal, addr.toString))
@@ -297,6 +308,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     else inst match
       case i: VarInst => evalVarInst(i)
       case i: TableInst => evalTableInst(i)
+      case i: ReferenceInst => evalRefInst(i)
       case op: Miscop =>
         val v = stack.popOrAbort()
         stack.push(num.evalMiscop(op, v))
@@ -589,6 +601,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
                 // TODO: check mutability (=> add mut to GlobalInstance)
                 globs += glob
               case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
+          /*case Import.Reference(_, _, ReferenceType.FuncRef()) =>
+            exp match
+              case ExternalValue.Global(addr) =>
+                val glob = from.globalAddrs(addr)
+                // TODO: check mutability (=> add mut to GlobalInstance)
+                globs += glob
+              case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")*/
           case Import.Table(_, _, tpe) =>
             exp match
               case ExternalValue.Table(addr) =>
@@ -623,12 +642,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
-    modInst.globalAddrs = globImports
+   // modInst.globalAddrs = globImports
     val globValues = module.globals.map { glob =>
       val id = BlockId(glob)
       loc = modInst.registerBlockSizes(id, loc, glob.init)
       evalInstructionSequence(id, glob.init, modInst)
     }
+
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
 

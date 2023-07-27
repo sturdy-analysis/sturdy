@@ -38,7 +38,8 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
   testFunction(st3, "test_table_size", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
   testFunction(st3, "test_sum", List(Value.Num(ConcreteInterpreter.NumValue.Int32(3)), Value.Num(ConcreteInterpreter.NumValue.Int32(4))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(7))))
-  testFunction(st3, "test_table_get", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+  testFunction(st3, "test_ref_null", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Null)))
+ // testFunction(st3, "test_table_get", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
   //testFunction(st3, "test_call_const", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(8))))
   //testFunction(st3, "test_table_set", List(Value.Num(ConcreteInterpreter.RefValue.Func(0))), List(Value.Num(ConcreteInterpreter.RefValue.Func(0))))
 /*
@@ -115,7 +116,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = Parsing.fromText(path)
-  //print("Concrete", module)
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(

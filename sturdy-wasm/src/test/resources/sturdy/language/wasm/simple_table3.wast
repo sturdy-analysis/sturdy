@@ -1,4 +1,6 @@
 (module
+  (global $a i32 (i32.const 4))
+
   (table $ftbl1 0 funcref)
     (elem (i32.const 0)
       $test_table_size
@@ -30,6 +32,6 @@
        ;;table.get $ftbl1
   ;;)
   (func $test_ref_null (export "test_ref_null") (result externref)
-       ;;ref.null extern
-       ref.null
+      ref.null 1
+  )
 )

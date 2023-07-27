@@ -34,6 +34,7 @@ trait Interpreter:
   type F64
   type Bool
   type FuncReference
+  type ExternReference
   //type FunV
   
   enum NumValue:
@@ -44,9 +45,9 @@ trait Interpreter:
     case Float64(d: F64)
 
   enum RefValue:
-    case Null(t: RefType)
+    case Null
     case Func(f: FuncReference)
-    //case Extern(e: ?)
+    case Extern(e: ExternReference)
     
   enum Value:
     case TopValue
