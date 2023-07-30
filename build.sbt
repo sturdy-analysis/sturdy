@@ -16,7 +16,8 @@ lazy val root = (project in file("."))
     sturdy_core,
     sturdy_tip,
     sturdy_wasm,
-    sturdy_tutorial
+    sturdy_tutorial,
+    sturdy_jvm_bytecode
   )
   .settings(skip / publish := true)
 
@@ -82,6 +83,15 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
       "org.typelevel" %% "cats-parse" % "0.3.4",
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
+  .dependsOn(sturdy_core % "compile->compile")
+  .settings(
+    name := "sturdy_jvm_bytecode",
+    libraryDependencies ++= Seq(
+      "de.opal-project" % "framework_2.13" % "5.0.0"
     )
   )
 
