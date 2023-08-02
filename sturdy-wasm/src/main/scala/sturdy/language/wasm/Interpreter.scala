@@ -11,6 +11,7 @@ import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
+import sturdy.values.references.ReferenceOps
 import sturdy.values.integer.*
 import sturdy.values.relational.*
 import swam.syntax.LoadInst
@@ -172,10 +173,12 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
+    // , refOps: ReferenceOps[Addr, WasmReference]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
+    //final val referenceOps: ReferenceOps[Addr, WasmReference] = refOps
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps

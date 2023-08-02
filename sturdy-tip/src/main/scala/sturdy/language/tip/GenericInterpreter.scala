@@ -13,12 +13,12 @@ import sturdy.values.*
 import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
+import sturdy.values.references.ReferenceOps
 import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
 import sturdy.effect.EffectStack
-import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
 
@@ -80,7 +80,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
-  val refOps: ReferenceOps[Addr, V]; import refOps.*
+  val referenceOps: ReferenceOps[Addr, V]; import referenceOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 

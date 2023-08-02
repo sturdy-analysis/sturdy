@@ -27,6 +27,7 @@ import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
 import sturdy.values.relational.*
+import sturdy.values.references.ReferenceOps
 import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, ReferenceType, TableType, ValType}
 import swam.syntax.*
 
@@ -109,7 +110,10 @@ enum FixOut[V]:
 
 given finiteFixIn: Finite[FixIn] with {}
 
-
+enum WasmReference:
+  case Func(fun: FunctionInstance)
+  case Extern(any: Any)
+  
 //trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, RefV, J[_] <: MayJoin[_]]:
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
 
@@ -222,9 +226,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def evalRefInst(inst: Inst): Unit =
     inst match {
       case RefNull(t) =>
-        //val refIdx = module.refAddrs.lift(t).getOrElse(fail(UnboundGlobal, t.toString))
-        //stack.push()
-      case RefIsNull(t) => ???
+        //stack.push(referenceOps.nullValue)
+      case RefIsNull() => ???
       case RefFunc(x) => ???
     }
 

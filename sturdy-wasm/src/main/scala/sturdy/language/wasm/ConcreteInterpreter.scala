@@ -20,6 +20,7 @@ import sturdy.values.convert.*
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 

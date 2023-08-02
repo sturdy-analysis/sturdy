@@ -9,6 +9,7 @@ import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
+import sturdy.values.references.ReferenceOps
 import sturdy.values.integer.*
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
@@ -40,7 +41,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
   val convert_f64_i32: ConvertDoubleInt[V, V]
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
-  //val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, V]
+  //val referenceOps: ReferenceOps[Addr, WasmReference]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
