@@ -35,10 +35,10 @@ given Finite[AllocationSiteRef] with {}
 given Finite[AllocationSiteAddr] with {}
 
 given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteAddr, AllocationSiteRef] with
-  override def nullValue: AllocationSiteRef = AllocationSiteRef.Null
-  override def refValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr)
-  override def unmanagedRefValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr.unmanaged)
-  override def refAddr(r: AllocationSiteRef): AllocationSiteAddr = r match
+  override def mkNullRef: AllocationSiteRef = AllocationSiteRef.Null
+  override def mkManagedRef(trg: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(trg)
+  override def mkRef(trg: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(trg.unmanaged)
+  override def deref(r: AllocationSiteRef): AllocationSiteAddr = r match
     case AllocationSiteRef.Null => f.fail(NullDereference, "")
     case AllocationSiteRef.Addr(a) => a
 

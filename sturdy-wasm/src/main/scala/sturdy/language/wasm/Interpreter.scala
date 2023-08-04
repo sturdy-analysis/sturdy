@@ -173,12 +173,12 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-    // , refOps: ReferenceOps[Addr, WasmReference]
+     , refOps: ReferenceOps[Addr, Value]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
-    //final val referenceOps: ReferenceOps[Addr, WasmReference] = refOps
+    final val referenceOps: ReferenceOps[Addr, Value] = refOps
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps

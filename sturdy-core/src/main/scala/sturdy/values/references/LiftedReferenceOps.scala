@@ -2,8 +2,9 @@ package sturdy.values.references
 
 import sturdy.effect.failure.Failure
 
-class LiftedReferenceOps[V, Addr, UV](extract: V => UV, inject: UV => V)(using ops: ReferenceOps[Addr, UV]) extends ReferenceOps[Addr, V]:
-  def nullValue: V = inject(ops.nullValue)
-  def refValue(addr: Addr): V = inject(ops.refValue(addr))
-  def unmanagedRefValue(addr: Addr): V = inject(ops.unmanagedRefValue(addr))
-  def refAddr(v: V): Addr = ops.refAddr(extract(v))
+class LiftedReferenceOps[V, Trg, UV](extract: V => UV, inject: UV => V)(using ops: ReferenceOps[Trg, UV]) extends ReferenceOps[Trg, V]:
+  def mkNullRef: V = inject(ops.mkNullRef)
+  def mkManagedRef(trg: Trg): V = inject(ops.mkManagedRef(trg))
+  def mkRef(trg: Trg): V = inject(ops.mkRef(trg))
+  def deref(v: V): Trg = ops.deref(extract(v))
+

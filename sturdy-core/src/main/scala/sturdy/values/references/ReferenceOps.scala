@@ -7,21 +7,21 @@ import sturdy.values.Powerset
 
 case object NullDereference extends FailureKind
 
-trait ReferenceOps[Addr, V] {
-  def nullValue: V
-  def refValue(addr: Addr): V
-  def unmanagedRefValue(addr: Addr): V
-  def refAddr(v: V): Addr
-}
+trait ReferenceOps[Trg, V]:
+  def mkNullRef: V
+  def mkRef(trg: Trg): V
+  def mkManagedRef(trg: Trg): V
+  def deref(v: V): Trg
 
-given ConcreteReferenceOps[Addr](using f: Failure): ReferenceOps[Addr, Option[Addr]] with
-  def nullValue: Option[Addr] = None
-  def refValue(addr: Addr): Option[Addr] = Some(addr)
-  def unmanagedRefValue(addr: Addr): Option[Addr] = Some(addr)
-  def refAddr(v: Option[Addr]): Addr = v.getOrElse(f.fail(NullDereference, ""))
+given ConcreteReferenceOps[Trg] (using f: Failure): ReferenceOps[Trg, Option[Trg]] with
+  def mkNullRef: Option[Trg] = None
+  def mkRef(trg: Trg): Option[Trg] = Some(trg)
+  def mkManagedRef(trg: Trg): Option[Trg] = Some(trg)
+  def deref(v: Option[Trg]): Trg = v.getOrElse(f.fail(NullDereference, ""))
 
-given PowersetReferenceOps[Addr, V](using ops: ReferenceOps[Addr, V], j: EffectStack): ReferenceOps[Powerset[Addr], Powerset[V]] with
-  override def nullValue: Powerset[V] = Powerset(ops.nullValue)
-  override def refValue(addr: Powerset[Addr]): Powerset[V] = addr.mapJoin(ops.refValue)
-  override def unmanagedRefValue(addr: Powerset[Addr]): Powerset[V] = addr.mapJoin(ops.unmanagedRefValue)
-  override def refAddr(v: Powerset[V]): Powerset[Addr] = v.mapJoin(ops.refAddr)
+given PowersetReferenceOps[Trg, V](using ops: ReferenceOps[Trg, V], j: EffectStack): ReferenceOps[Powerset[Trg], Powerset[V]] with
+  override def mkNullRef: Powerset[V] = Powerset(ops.mkNullRef)
+  override def mkRef(trg: Powerset[Trg]): Powerset[V] = trg.mapJoin(ops.mkRef)
+  override def mkManagedRef(trg: Powerset[Trg]): Powerset[V] = trg.mapJoin(ops.mkManagedRef)
+  override def deref(v: Powerset[V]): Powerset[Trg] = v.mapJoin(ops.deref)
+

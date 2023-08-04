@@ -226,7 +226,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def evalRefInst(inst: Inst): Unit =
     inst match {
       case RefNull(t) =>
-        //stack.push(referenceOps.nullValue)
+        stack.push(referenceOps.mkNullRef)
       case RefIsNull() => ???
       case RefFunc(x) => ???
     }
