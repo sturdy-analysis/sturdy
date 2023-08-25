@@ -35,12 +35,14 @@ trait TypeValues extends Interpreter:
   final type F64 = BaseType[Double]
   final type Bool = BaseType[Boolean]
   final type FuncReference = BaseType[Int]
+  final type ExternReference = BaseType[Int]
 
   final def topI32: I32 = BaseType[Int]
   final def topI64: I64 = BaseType[Long]
   final def topF32: F32 = BaseType[Float]
   final def topF64: F64 = BaseType[Double]
   final def topFuncRef: FuncReference = BaseType[Int]
+  final def topExternRef: ExternReference = BaseType[Int]
 
   final def asBoolean(v: Value)(using Failure): Bool =
     val _ = v.asInt32

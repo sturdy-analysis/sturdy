@@ -32,12 +32,14 @@ trait ConstantTaintValues extends Interpreter:
   final type F64 = TaintProduct[Topped[Double]]
   final type Bool = TaintProduct[Topped[Boolean]]
   final type FuncReference = TaintProduct[Topped[Int]]
+  final type ExternReference = TaintProduct[Topped[Int]]
 
   final def topI32: I32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topI64: I64 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF32: F32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF64: F64 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topFuncRef: FuncReference = TaintProduct(Taint.TopTaint, Topped.Top)
+  final def topExternRef: ExternReference = TaintProduct(Taint.TopTaint, Topped.Top)
 
   def getTaint(v: Value): Taint = v match
     case Value.TopValue => Taint.TopTaint

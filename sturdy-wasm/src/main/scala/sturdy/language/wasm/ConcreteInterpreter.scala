@@ -21,13 +21,19 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.references.{*, given}
+import sturdy.values.references.given
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
+
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import WasmFailure.*
 import sturdy.effect.symboltable.ConcreteSymbolTable
+
+enum WasmReference:
+  case Func(fun: FunctionInstance)
+  case Extern(any: Any)
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -38,6 +44,7 @@ object ConcreteInterpreter extends Interpreter:
   override type Bool = Boolean
   // override type FuncReference = FunctionInstance
   override type FuncReference = Int
+  override type ExternReference = Int
 
   override def topI32: Int = throw new UnsupportedOperationException
   override def topI64: Long = throw new UnsupportedOperationException
@@ -45,6 +52,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topF64: Double = throw new UnsupportedOperationException
   //override def topFuncRef: FunctionInstance = throw new UnsupportedOperationException
   override def topFuncRef: Int = throw new UnsupportedOperationException
+  override def topExternRef: Int = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   override def boolean(b: Boolean): Value =
@@ -116,10 +124,11 @@ object ConcreteInterpreter extends Interpreter:
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
-    
+
+    //import sturdy.values.references.{given ConcreteReferenceOps[Value]}
+
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
     //val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, NoJoin] = implicitly
-
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
     override val fixpointSuper = fixpoint
 

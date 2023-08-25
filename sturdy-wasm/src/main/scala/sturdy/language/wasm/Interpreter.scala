@@ -19,6 +19,7 @@ import swam.syntax.LoadNInst
 import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
+import swam.syntax.ReferenceInst
 import swam.syntax.{f32, f64, i32, i64}
 import swam.{FuncType, NumType, ReferenceType, ValType}
 
@@ -88,6 +89,7 @@ trait Interpreter:
   def topF32: F32
   def topF64: F64
   def topFuncRef: FuncReference
+  def topExternRef: ExternReference
   
   def typedTop(ty: ValType): Value = ty match
     case NumType.I32 => Value.Num(NumValue.Int32(topI32))
@@ -95,6 +97,7 @@ trait Interpreter:
     case NumType.F32 => Value.Num(NumValue.Float32(topF32))
     case NumType.F64 => Value.Num(NumValue.Float64(topF64))
     case ReferenceType.FuncRef => Value.Ref(RefValue.Func(topFuncRef))
+    case ReferenceType.ExternRef => Value.Ref(RefValue.Extern(topExternRef))
   
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
@@ -173,13 +176,13 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-     , refOps: ReferenceOps[Addr, Value]
+     , refOps: ReferenceOps[WasmReference, Value]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
-    final val referenceOps: ReferenceOps[Addr, Value] = refOps
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
+    final val referenceOps: ReferenceOps[WasmReference, Value] = refOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)

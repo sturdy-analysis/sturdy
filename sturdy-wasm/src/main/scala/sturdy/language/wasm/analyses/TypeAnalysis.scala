@@ -27,6 +27,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.references.given
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

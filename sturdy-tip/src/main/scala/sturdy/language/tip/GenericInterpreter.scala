@@ -66,6 +66,10 @@ given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V]
 
 import TipFailure.*
 
+enum WasmReference:
+  case Func(fun: FunctionInstance)
+  case Extern(any: Any)
+
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // fixpoint
@@ -80,7 +84,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
-  val referenceOps: ReferenceOps[Addr, V]; import referenceOps.*
+  val referenceOps: ReferenceOps[WasmReference, V]; import referenceOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
