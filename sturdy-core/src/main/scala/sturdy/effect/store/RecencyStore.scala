@@ -47,11 +47,12 @@ case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends
 
 given finitePhysicalAddr[Context]: Finite[PhysicalAddress[Context]] with {}
 
-class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
+class RecencyStore[Context, V](val initStore: AStore[PhysicalAddress[Context], V])
+                              (using Join[V], Widen[V], Finite[Context])
   extends Allocation[VirtualAddress[Context], Context],
           Store[VirtualAddress[Context], V, WithJoin]:
 
-  protected var store: Map[PhysicalAddress[Context], V] = Map()
+  protected var store: AStore[PhysicalAddress[Context], V] = initStore
   protected var addressTranslation: Map[(Context,Int), PowRecency] = Map()
   protected var mostRecent: Map[Context, Powerset[Int]] = HashMap()
   protected var next: Int = 0
@@ -73,8 +74,8 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
         mostRecent += ctx -> Powerset(fresh)
         val virt = VirtualAddress(ctx, fresh, lookupPhysicalAddress)
         addressTranslation += virt.identifier -> PowRecency.Recent
-        this.read(PhysicalAddress(ctx, Recency.Recent)).map { oldVal =>
-          weakUpdate(PhysicalAddress(ctx, Recency.Old), oldVal)
+        store.read(PhysicalAddress(ctx, Recency.Recent)).map { oldVal =>
+          store.weakUpdate(PhysicalAddress(ctx, Recency.Old), oldVal)
         }
         for(mostRecentVirt <- mostRecentVirts)
           addressTranslation += (ctx,mostRecentVirt) -> PowRecency.Old
@@ -87,35 +88,17 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
 
   override def read(virt: VirtualAddress[Context]): JOptionA[V] =
     addressTranslation(virt.ctx,virt.n) match
-      case PowRecency.Recent => read(PhysicalAddress(virt.ctx, Recency.Recent))
-      case PowRecency.Old => read(PhysicalAddress(virt.ctx, Recency.Old))
-      case PowRecency.RecentOld => Join(read(PhysicalAddress(virt.ctx, Recency.Old)), read(PhysicalAddress(virt.ctx, Recency.Old))).get
-
-  private def read(phys: PhysicalAddress[Context]): JOptionA[V] =
-    store.get(phys) match
-      case scala.None =>
-        JOptionA.none
-      case scala.Some(v) =>
-        if (phys.isManaged)
-          JOptionA.some(v)
-        else
-          JOptionA.noneSome(v)
+      case PowRecency.Recent => store.read(PhysicalAddress(virt.ctx, Recency.Recent))
+      case PowRecency.Old => store.read(PhysicalAddress(virt.ctx, Recency.Old))
+      case PowRecency.RecentOld => Join(store.read(PhysicalAddress(virt.ctx, Recency.Old)), store.read(PhysicalAddress(virt.ctx, Recency.Old))).get
 
   def write(virt: VirtualAddress[Context], v: V): Unit =
     addressTranslation(virt.identifier) match
-      case PowRecency.Recent => strongUpdate(PhysicalAddress(virt.ctx,Recency.Recent), v)
-      case PowRecency.Old => weakUpdate(PhysicalAddress(virt.ctx,Recency.Old), v)
+      case PowRecency.Recent => store.strongUpdate(PhysicalAddress(virt.ctx,Recency.Recent), v)
+      case PowRecency.Old => store.weakUpdate(PhysicalAddress(virt.ctx,Recency.Old), v)
       case PowRecency.RecentOld =>
-        weakUpdate(PhysicalAddress(virt.ctx, Recency.Old), v)
-        weakUpdate(PhysicalAddress(virt.ctx, Recency.Recent), v)
-
-  def weakUpdate(x: PhysicalAddress[Context], v: V): Unit =
-    store.get(x) match
-      case None => store += x -> v
-      case Some(old) => Join(old, v).ifChanged(store += x -> _)
-
-  def strongUpdate(x: PhysicalAddress[Context], v: V): Unit =
-    store += x -> v
+        store.weakUpdate(PhysicalAddress(virt.ctx, Recency.Old), v)
+        store.weakUpdate(PhysicalAddress(virt.ctx, Recency.Recent), v)
 
   override def free(virt: VirtualAddress[Context]): Unit =
     val freedRecency = addressTranslation(virt.identifier)
@@ -124,14 +107,15 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
     freedRecency match
       case PowRecency.Recent | PowRecency.RecentOld =>
         if(addressTranslation.forall { case ((ctx, _), recency) => !(ctx == virt.ctx && recency == Recency.Recent) })
-          store -= PhysicalAddress(virt.ctx, Recency.Recent)
+          store.delete(PhysicalAddress(virt.ctx, Recency.Recent))
       case PowRecency.Old => // do nothing
 
-  override def join: Join[RecencyStoreState] = new CombineRecencyStoreState
-  override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState
-  private class CombineRecencyStoreState[W <: Widening](using Combine[V, W]) extends Combine[RecencyStoreState, W]:
+  override def join: Join[RecencyStoreState] = new CombineRecencyStoreState(initStore.join)
+  override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(initStore.widen)
+  private class CombineRecencyStoreState[W <: Widening](combineStore: Combine[initStore.State, W])(using Combine[V, W]) extends Combine[RecencyStoreState, W]:
     override def apply(state1: RecencyStoreState, state2: RecencyStoreState): MaybeChanged[RecencyStoreState] =
-      val combinedStores = Combine(state1.store, state2.store)
+      // TODO: I would like to use `initStore.combine`, but it does not exist.
+      val combinedStores = combineStore(state1.store, state2.store)
       val combinedAddrTrans = Combine(state1.addrTrans, state2.addrTrans)
       val combinedMostRecent = Combine(state1.mostRecent, state2.mostRecent)
       MaybeChanged(RecencyStoreState(combinedStores.get, combinedAddrTrans.get, combinedMostRecent.get),
@@ -163,15 +147,15 @@ class RecencyStore[Context, V](using Join[V], Widen[V], Finite[Context])
 
   override type State = RecencyStoreState
 
-  case class RecencyStoreState(store: Map[PhysicalAddress[Context], V],
+  case class RecencyStoreState(store: initStore.State,
                                addrTrans: Map[(Context,Int), PowRecency],
                                mostRecent: Map[Context, Powerset[Int]])
 
   override def getState: RecencyStoreState =
-    RecencyStoreState(this.store, this.addressTranslation, this.mostRecent)
+    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation, this.mostRecent)
 
   override inline def setState(st: RecencyStoreState): Unit =
-    store = st.store
+    store.setState(st.store.asInstanceOf)
     addressTranslation = st.addrTrans
     mostRecent = st.mostRecent
 

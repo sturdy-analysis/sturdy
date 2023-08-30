@@ -4,7 +4,7 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.*
 import sturdy.values.Join
-import sturdy.effect.Effect
+import sturdy.effect.{ComputationJoiner, Effect}
 import sturdy.values.Abstractly
 import sturdy.values.Finite
 import sturdy.values.Widen
@@ -18,9 +18,9 @@ import scala.collection.mutable.ListBuffer
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
-  extends Store[Addr, V, WithJoin], AStoreGenericThreadded[Addr, V]:
+  extends AStore[Addr, V]:
 
-  this.store = _init
+  protected val store: AStoreGenericThreadded[Addr, V] = AStoreGenericThreadded(_init)
   
   override def read(x: Addr): JOptionA[V] =
     store.get(x) match
@@ -33,16 +33,32 @@ class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
 
   override def write(x: Addr, v: V): Unit =
     weakUpdate(x, v)
-  
+
+  override def strongUpdate(addr: Addr, value: V): Unit =
+    store.strongUpdate(addr, value)
+
+  override def weakUpdate(addr: Addr, value: V): Unit =
+    store.weakUpdate(addr, value)
+
   override def free(x: Addr): Unit =
     () // nothing
 
+  override def delete(x: Addr): Unit =
+    store.delete(x)
+
+  override final def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = store.makeComputationJoiner
+  override final type State = store.State
+  override final def getState: State = store.getState
+  override final def setState(st: State): Unit = store.setState(st)
+  override final def join: Join[State] = store.join
+  override final def widen: Widen[State] = store.widen
+
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
     val abstractedKeys = c.entries.keySet.map(varAbstractly.apply)
-    if (!abstractedKeys.subsetOf(store.keySet)) {
+    if (!abstractedKeys.subsetOf(store.addrs)) {
       val missing = c.entries.keySet.flatMap{ k =>
         val ak = varAbstractly.apply(k)
-        if (store.keySet.contains(ak))
+        if (store.addrs.contains(ak))
           None
         else
           Some((k, ak))

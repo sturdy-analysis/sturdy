@@ -3,7 +3,7 @@ package sturdy.effect.store
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{*, given}
-import sturdy.effect.EffectStack
+import sturdy.effect.{ComputationJoiner, EffectStack}
 import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
@@ -16,9 +16,9 @@ import reflect.Selectable.reflectiveSelectable
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
-  extends Store[Powerset[Addr], V, WithJoin], AStoreGenericThreadded[Addr, V]:
+  extends AStore[Powerset[Addr], V]:
 
-  this.store = _init
+  protected val store = AStoreGenericThreadded(_init)
 
   override def read(xs: Powerset[Addr]): JOptionA[V] = {
     var needsNotFound = false
@@ -41,23 +41,43 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       JOptionA.Some(vs.get)
   }
 
-  override def write(xs: Powerset[Addr], v: V): Unit =
+  override def write(xs: Powerset[Addr], v: V): Unit = weakUpdate(xs,v)
+
+  override def strongUpdate(xs: Powerset[Addr], v: V): Unit =
     val addrs = xs.set
     for x <- addrs do
-      weakUpdate(x, v)
+      store.strongUpdate(x, v)
+
+  override def weakUpdate(xs: Powerset[Addr], v: V): Unit =
+    val addrs = xs.set
+    for x <- addrs do
+      store.weakUpdate(x, v)
 
   override def free(xs: Powerset[Addr]): Unit =
     () // nothing
+
+  override def delete(xs: Powerset[Addr]): Unit =
+    val addrs = xs.set
+    for x <- addrs do
+      store.delete(x)
+
+  override final def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = store.makeComputationJoiner
+  override final type State = store.State
+  override final def getState: State = store.getState
+  override final def setState(st: State): Unit = store.setState(st)
+  override final def join: Join[State] = store.join
+  override final def widen: Widen[State] = store.widen
+
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
     import sturdy.values
 
     val abstractedKeys = c.entries.keySet.flatMap(k => varAbstractly.apply(k).set)
-    if (!abstractedKeys.subsetOf(store.keySet)) {
+    if (!abstractedKeys.subsetOf(store.addrs)) {
       val missing = c.entries.flatMap{ kv =>
         val k = kv._1
         val ak = varAbstractly.apply(k)
-        if (ak.set.subsetOf(store.keySet))
+        if (ak.set.subsetOf(store.addrs))
           None
         else
           Some(s"abs($k->${kv._2})=$ak")

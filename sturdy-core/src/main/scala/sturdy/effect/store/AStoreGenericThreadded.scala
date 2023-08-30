@@ -6,26 +6,35 @@ import sturdy.effect.Effect
 import sturdy.effect.TrySturdy
 import sturdy.values.{Finite, Join, Widen}
 
+import scala.annotation.targetName
 import scala.collection.mutable.ListBuffer
 
 /**
  * An abstract threadded store. The store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreGenericThreadded[Addr, V](using Join[V], Widen[V], Finite[Addr]) extends Effect:
+final class AStoreGenericThreadded[Addr, V](_init: Map[Addr,V])(using Join[V], Widen[V], Finite[Addr]) extends Effect:
 
-  protected var store: Map[Addr, V] = Map()
+  protected var store: Map[Addr, V] = _init
   protected var dirtyAddrs: Set[Addr] = Set()
 
-  def weakUpdate(x: Addr, v: V): Unit =
-    dirtyAddrs += x
-    store.get(x) match
-      case None => store += x -> v
-      case Some(old) => Join(old, v).ifChanged(store += x -> _)
+  def apply(addr: Addr): V = get(addr).get
+  def get(addr: Addr): Option[V] = store.get(addr)
+  def addrs: Set[Addr] = store.keySet
 
-  def strongUpdate(x: Addr, v: V): Unit =
-    dirtyAddrs += x
-    store += x -> v
+  def weakUpdate(addr: Addr, value: V): Unit =
+    dirtyAddrs += addr
+    store.get(addr) match
+      case None => store += addr -> value
+      case Some(old) => Join(old, value).ifChanged(store += addr -> _)
+
+  def strongUpdate(addr: Addr, value: V): Unit =
+    dirtyAddrs += addr
+    store += addr -> value
+
+  def delete(addr: Addr): Unit =
+    dirtyAddrs -= addr
+    store -= addr
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new AStoreGenericJoiner)
   private class AStoreGenericJoiner[A] extends ComputationJoiner[A] {
