@@ -9,44 +9,6 @@ import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
 
-enum Recency:
-  case Recent
-  case Old
-
-enum PowRecency:
-  case Recent
-  case Old
-  case RecentOld
-
-given CombinePowRencency[W <: Widening]: Combine[PowRecency, W] with
-  override def apply(v1: PowRecency, v2: PowRecency): MaybeChanged[PowRecency] =
-    (v1,v2) match
-      case (PowRecency.Recent, PowRecency.Recent) => Unchanged(PowRecency.Recent)
-      case (PowRecency.Old, PowRecency.Old) => Unchanged(PowRecency.Old)
-      case (PowRecency.RecentOld, PowRecency.RecentOld) => Unchanged(PowRecency.RecentOld)
-      case (_,_) => Changed(PowRecency.RecentOld)
-
-class VirtualAddress[Context](val ctx: Context, val n: Int,
-                              addressTranslation: (Context,Int) => Iterable[PhysicalAddress[Context]]):
-
-  final override def equals(obj: Any): Boolean =
-    obj match
-      case other: VirtualAddress[?] => this.lookupPhysicalAddress == other.lookupPhysicalAddress
-      case _ => false
-
-  final override def hashCode(): Int =
-    lookupPhysicalAddress.hashCode()
-
-  final def identifier: (Context,Int) = (ctx,n)
-
-  final def lookupPhysicalAddress: Set[PhysicalAddress[Context]] =
-    addressTranslation(ctx,n).toSet
-
-case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends
-  ManageableAddr(false)
-
-given finitePhysicalAddr[Context]: Finite[PhysicalAddress[Context]] with {}
-
 class RecencyStore[Context, V](val initStore: AStore[PhysicalAddress[Context], V])
                               (using Join[V], Widen[V], Finite[Context])
   extends Allocation[VirtualAddress[Context], Context],
