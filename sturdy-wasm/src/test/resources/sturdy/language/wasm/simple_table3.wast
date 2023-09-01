@@ -9,8 +9,8 @@
     
   (table $ftbl2 1 funcref)  
     (elem 1 (i32.const 1)
-      $test_sum
       $test_table_size_t2
+      $test_sum
     )
 
   (table $ftbl3 1 funcref)
@@ -39,5 +39,13 @@
 
   (func $test_ref_null (export "test_ref_null") (result externref)
      ref.null extern 1
+  )
+
+  (func $test_call_indirect (export "test_call_indirect") (result i32)
+     i32.const 1
+     i32.const 3
+     i32.const 2
+     i32.const 6
+     call_indirect (param i32 i32)(result i32)
   )
 )

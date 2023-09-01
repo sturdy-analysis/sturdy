@@ -7,11 +7,11 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable, given}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -22,6 +22,7 @@ import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
@@ -34,6 +35,7 @@ import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
+import sturdy.values.references.ReferenceOps
 
 object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
@@ -50,7 +52,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
-    //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
+    override def valToInt(v: Value): Int = ???
+    override def valToRef(v: Value): Value = ???
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
@@ -105,6 +108,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     given Failure = failure
 
+    //implicit val z: ReferenceOps[WasmReference, ConstantTaintAnalysis.Value] = implicitly
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     override def toString: String = s"constant-taint $config"

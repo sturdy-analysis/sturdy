@@ -176,13 +176,13 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-     , refOps: ReferenceOps[WasmReference, Value]
+     , refOps: ReferenceOps[WasmReference, Option[WasmReference]]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
-    final val referenceOps: ReferenceOps[WasmReference, Value] = refOps
+    final val referenceOps: ReferenceOps[WasmReference, Option[WasmReference]] = refOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)

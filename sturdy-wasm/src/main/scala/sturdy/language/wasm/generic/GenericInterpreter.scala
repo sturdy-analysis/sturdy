@@ -227,10 +227,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     inst match {
       case RefNull(t) =>
         //stack.push(referenceOps.mkNullRef)
-        print(t)
-        stack.push(intToVal(1))
+        //print(t)
+        stack.push(valToRef(intToVal(1)))
+       // stack.push(intToVal(1))
       case RefIsNull() => ???
-      case RefFunc(x) => //stack.push(referenceOps.mkRef(x))
+      case RefFunc(x) => ???
     }
 
   def evalMemoryInst(inst: Inst): Unit = inst match
@@ -365,10 +366,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
     case CallIndirect(tableIdx, typeIdx) =>
-      val ftExpected = module.functionTypes(tableIdx)
+      val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort() //0 = const, 1 = increase ...
-      val func = funTable.getOrElse(tableIndex(tableIdx), valueToFuncIx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      //invokeIndirect(func, ftExpected, funcIx)
+      val tabIx = stack.popOrAbort()
+      val func = funTable.getOrElse(tableIndex(valToInt(tabIx)), valueToFuncIx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+      invokeIndirect(func, ftExpected, funcIx)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =

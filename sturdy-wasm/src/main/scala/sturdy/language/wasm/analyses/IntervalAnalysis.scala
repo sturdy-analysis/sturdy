@@ -12,20 +12,21 @@ import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.config.BytesSize
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
@@ -33,9 +34,10 @@ import swam.FuncType
 import swam.syntax.*
 import swam.traversal.Traverser
 
-import java.nio.{ByteOrder, ByteBuffer}
+import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.values.references.ReferenceOps
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
   type J[A] = WithJoin[A]
@@ -51,7 +53,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     override def intToVal(i: Int): Value = ???
-    //override def refvtoVal(r: FuncReference): Value = ???
+    override def valToInt(v: IntervalAnalysis.Value): Int = ???
+    override def valToRef(v: Value): Value = ???
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
@@ -142,6 +145,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         Convert(bytes, conf)
       }
 
+    //implicit val z: ReferenceOps[WasmReference, IntervalAnalysis.Value] = implicitly
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)

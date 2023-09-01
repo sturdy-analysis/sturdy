@@ -10,11 +10,11 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -49,8 +49,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
+    override def valToInt(v: Value): Int = ???
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
-    //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
+
+    override def valToRef(v: Value): Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -104,6 +106,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     private given Failure = failure
 
+    implicit val z: ReferenceOps[WasmReference, ConstantAnalysis.Value] = implicitly
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {

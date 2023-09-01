@@ -21,7 +21,7 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.references.given
+//import sturdy.values.references.given
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 
@@ -31,9 +31,6 @@ import java.nio.ByteOrder
 import WasmFailure.*
 import sturdy.effect.symboltable.ConcreteSymbolTable
 
-enum WasmReference:
-  case Func(fun: FunctionInstance)
-  case Extern(any: Any)
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -74,6 +71,8 @@ object ConcreteInterpreter extends Interpreter:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
+    override def valToInt(v: Value): Int = v.asInt32
+    override def valToRef(v: Value): Value = Value.Ref(RefValue.Null)
     //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
@@ -124,9 +123,8 @@ object ConcreteInterpreter extends Interpreter:
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
-
     //import sturdy.values.references.{given ConcreteReferenceOps[Value]}
-
+    //implicit val z: ConcreteReferenceOps[WasmReference] = implicitly
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
     //val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, NoJoin] = implicitly
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]

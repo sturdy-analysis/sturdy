@@ -55,7 +55,7 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
     )
   )
 
-val swamCommit = "450eb49a10a36bc3ebd67c21da710cd27c54b2c8"
+val swamCommit = "0a2ed2dcb8855e0d4528d5f9d7c0f363920f361a"
 val swam = uri(s"https://gitlab.rlp.net/npinkern/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))

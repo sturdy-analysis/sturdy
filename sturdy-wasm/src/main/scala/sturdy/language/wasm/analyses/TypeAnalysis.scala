@@ -11,7 +11,7 @@ import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, UpperBoundSymbol
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -27,7 +27,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
-import sturdy.values.references.given
+import sturdy.values.references.{ReferenceOps, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -48,7 +48,8 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
-    //override def refvtoVal(r: FuncReference): Value = ???
+    override def valToRef(v: Value): Value = ???
+    override def valToInt(v: Value): Int = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
@@ -93,6 +94,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     given Failure = failure
 
+    implicit val z: ReferenceOps[WasmReference, TypeAnalysis.Value] = implicitly
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

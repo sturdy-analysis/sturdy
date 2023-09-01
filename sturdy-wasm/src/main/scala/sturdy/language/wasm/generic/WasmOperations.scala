@@ -10,8 +10,7 @@ import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
-import sturdy.values.references.ReferenceOps
-import sturdy.values.references.given
+import sturdy.values.references.{ReferenceOps, given}
 import sturdy.values.integer.*
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
@@ -45,7 +44,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-  val referenceOps: ReferenceOps[WasmReference, V]
+  val referenceOps: ReferenceOps[WasmReference, Option[WasmReference]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
@@ -61,7 +60,8 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, J[_] <: MayJoin[_]]:
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
-  //def refvtoVal(r: FuncReference): V
+  def valToInt(v: V): Int
+  def valToRef(v: V): V
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
