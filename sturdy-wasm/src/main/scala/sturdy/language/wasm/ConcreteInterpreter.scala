@@ -72,7 +72,16 @@ object ConcreteInterpreter extends Interpreter:
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
     override def valToInt(v: Value): Int = v.asInt32
-    override def valToRef(v: Value): Value = Value.Ref(RefValue.Null)
+    override def valToRef(v: Value): Value = {
+      v match {
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(-1)) => Value.Ref(RefValue.FuncNull)
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(-2)) => Value.Ref(RefValue.ExternNull)
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(x)) => Value.Ref(RefValue.Func(x))
+        case ConcreteInterpreter.Value.Ref(RefValue.Func(f)) => Value.Num(NumValue.Int32(f))
+        case _ => print("fail", v); Value.Ref(RefValue.FuncNull)
+      }
+    }
+
     //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =

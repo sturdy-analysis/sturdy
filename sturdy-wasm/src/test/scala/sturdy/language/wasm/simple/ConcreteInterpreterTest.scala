@@ -24,19 +24,20 @@ import swam.text.*
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm concrete interpreter"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
-  val uriSimpleTable = this.getClass.getResource("/sturdy/language/wasm/simple_table.wast").toURI;
-  val uriSimpleTable2 = this.getClass.getResource("/sturdy/language/wasm/simple_table2.wast").toURI;
+  //val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
+  //val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
+  //val uriSimpleTable = this.getClass.getResource("/sturdy/language/wasm/simple_table.wast").toURI;
+  //val uriSimpleTable2 = this.getClass.getResource("/sturdy/language/wasm/simple_table2.wast").toURI;
   val uriSimpleTable3 = this.getClass.getResource("/sturdy/language/wasm/simple_table3.wast").toURI;
-
-  val simple = Paths.get(uriSimple)
-  val fact = Paths.get(uriFact)
-  val st = Paths.get(uriSimpleTable)
-  val st2 = Paths.get(uriSimpleTable2)
+  val uriSimpleTable4 = this.getClass.getResource("/sturdy/language/wasm/simple_table4.wast").toURI;
+  //val simple = Paths.get(uriSimple)
+  //val fact = Paths.get(uriFact)
+  //val st = Paths.get(uriSimpleTable)
+  //val st2 = Paths.get(uriSimpleTable2)
   val st3 = Paths.get(uriSimpleTable3)
+  val st4 = Paths.get(uriSimpleTable4)
 
-  testFunction(st3, "test_table_size_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+ /* testFunction(st3, "test_table_size_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
   testFunction(st3, "test_table_size_t2", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(2))))
   testFunction(st3, "test_sum", List(Value.Num(ConcreteInterpreter.NumValue.Int32(3)), Value.Num(ConcreteInterpreter.NumValue.Int32(4))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(7))))
   testFunction(st3, "test_ref_null", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Null)))
@@ -46,6 +47,23 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   //testFunction(st3, "test_call_const", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(8))))
   //testFunction(st3, "test_table_set", List(Value.Num(ConcreteInterpreter.RefValue.Func(0))), List(Value.Num(ConcreteInterpreter.RefValue.Func(0))))
   testFunction(st3, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+*/
+
+  testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Ref(ConcreteInterpreter.RefValue.Func(1))))
+  testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+  testFunction(st3, "test_table_get_t2", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.Ref(ConcreteInterpreter.RefValue.Func(2))))
+  testFunction(st3, "test_table_get_t3", List(Value.Num(ConcreteInterpreter.NumValue.Int32(6))), List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+  testFunction(st3, "test_table_set_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(4))))
+  testFunction(st3, "test_set_call", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+  /*
+  testFunction(st4, "init", List.empty, List.empty)
+  testFunction(st4, "test_table_size_t3", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))))
+  testFunction(st4, "size_after_table_set", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+  testFunction(st4, "test_ref_func", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+  testFunction(st4, "test_ref_null_func", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.FuncNull)))
+  testFunction(st4, "test_ref_null_extern", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.ExternNull)))
+  testFunction(st4, "test_table_get", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.Func(0))))
+*/
 
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {

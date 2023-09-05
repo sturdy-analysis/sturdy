@@ -47,7 +47,8 @@ trait Interpreter:
     case Float64(d: F64)
 
   enum RefValue:
-    case Null
+    case FuncNull
+    case ExternNull
     case Func(f: FuncReference)
     case Extern(e: ExternReference)
     

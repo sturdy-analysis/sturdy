@@ -196,13 +196,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
       val v = funTable.get(TableAddr(ix), valueToFuncIx(index_in_table))
       val v2 = v.getOrElse(fail(UnboundFunctionIndex, ix.toString))
-      //stack.push(references.mk
-      stack.push(intToVal(0))
+      v2 match {
+        case FunctionInstance.Wasm(_,idx,_,_) => stack.push(valToRef(intToVal(idx)))
+        case _ => print("tableget fail"); stack.push(intToVal(0))
+      }
+
     case TableSet(ix) =>
       val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(UnboundGlobal, ix.toString))
-      val v = stack.popOrAbort()
-      val _ =
-      writeTableValue(tableIdx, v)
+      val index_in_table = stack.popOrAbort()
+      val set_entry = stack.popOrAbort()
+      val fIdx = valToInt(valToRef(set_entry))
+      val f = module.functions.lift(fIdx).getOrElse(fail(UnboundFunctionIndex, fIdx.toString))
+      funTable.set(tableIdx, valueToFuncIx(index_in_table), functionOps.funValue(f))
     case TableSize(ix) =>
       stack.push(intToVal(funTable.size(TableAddr(ix), valueToFuncIx(intToVal(0)))))
     case TableGrow(ix) =>
@@ -228,10 +233,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       case RefNull(t) =>
         //stack.push(referenceOps.mkNullRef)
         //print(t)
-        stack.push(valToRef(intToVal(1)))
-       // stack.push(intToVal(1))
+        t match {
+          case 0 => stack.push(valToRef(intToVal(-1)))
+          case 1 => stack.push(valToRef(intToVal(-2)))
+        }
       case RefIsNull() => ???
-      case RefFunc(x) => ???
+      case RefFunc(x) =>
+        val func = module.functions.lift(x).getOrElse(fail(UnboundFunctionIndex, x.toString))
+        val wasmref = WasmReference.Func(func)
+        stack.push(valToRef(intToVal(x)))
     }
 
   def evalMemoryInst(inst: Inst): Unit = inst match
@@ -300,8 +310,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     //val x = funTable.getOrElse(addr,valueToFuncIx(intToVal(0)), fail(UnboundGlobal, addr.toString))
     //stack.pu
 
-  def writeTableValue(addr: TableAddr, v: V): Unit = ???
-    //funTable.set(addr, valueToFuncIx(intToVal(0)), v)
+  def writeTableValue(addr: TableAddr, set_entry: V): Unit = ???
+    //val funV = functionOps.funValue(v) // funcIx is valid due to validation
+    //funTable.set(addr, valueToFuncIx(idx), funV)
+    //funTable.set(addr, valueToFuncIx(intToVal(0)), Non)
 
   def eval_open(inst: Inst, loc: InstLoc)(using Fixed): Unit =
     val opcode = inst.opcode
