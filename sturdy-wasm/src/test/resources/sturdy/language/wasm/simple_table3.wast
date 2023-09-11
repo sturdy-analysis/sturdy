@@ -37,9 +37,9 @@
      table.get $ftbl2
   )
 
-  (func $test_ref_null (export "test_ref_null") (result externref)
-     ref.null 1
-  )
+  ;;(func $test_ref_null (export "test_ref_null") (result externref)
+    ;; ref.null extern
+  ;;)
 
   (func $test_call_indirect (export "test_call_indirect") (result i32)
      i32.const 1 ;;arg1

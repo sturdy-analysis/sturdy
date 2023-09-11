@@ -17,17 +17,14 @@ trait ReferenceOps[Trg, V]:
 
 given ConcreteReferenceOps[Trg] (using f: Failure): ReferenceOps[Trg, Option[Trg]] with
   def mkNullRef: Option[Trg] = None
-  def mkRef(trg: Trg): Option[Trg] = Some(trg)
+  def mkRef(trg: Trg): Option[Trg] = {
+    print("hallo")
+    Some(trg)
+  }
   def mkManagedRef(trg: Trg): Option[Trg] = Some(trg)
   def deref(v: Option[Trg]): Trg = v.getOrElse(f.fail(NullDereference, ""))
 
-/*
-given ConcreteReferenceOps[Trg] (using f: Failure): ReferenceOps[Trg, Trg] with
-  def mkNullRef: Trg = ???
-  def mkRef(trg: Trg): Trg = trg
-  def mkManagedRef(trg: Trg): Trg = trg
-  def deref(v: Trg): Trg = v
-*/  
+
 
 given PowersetReferenceOps[Trg, V](using ops: ReferenceOps[Trg, V], j: EffectStack): ReferenceOps[Powerset[Trg], Powerset[V]] with
   override def mkNullRef: Powerset[V] = Powerset(ops.mkNullRef)

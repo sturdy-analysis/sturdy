@@ -55,7 +55,10 @@ trait Interpreter:
   enum Value:
     case TopValue
     case Num(n: NumValue)
-    case Ref(r: RefValue)
+    case FuncNull
+    case FuncRef(r: FuncReference)
+    case ExternNull
+    case ExternRef(r: ExternReference)
     //case Vec(v: VecValue)
     
 
@@ -97,8 +100,8 @@ trait Interpreter:
     case NumType.I64 => Value.Num(NumValue.Int64(topI64))
     case NumType.F32 => Value.Num(NumValue.Float32(topF32))
     case NumType.F64 => Value.Num(NumValue.Float64(topF64))
-    case ReferenceType.FuncRef => Value.Ref(RefValue.Func(topFuncRef))
-    case ReferenceType.ExternRef => Value.Ref(RefValue.Extern(topExternRef))
+    case ReferenceType.FuncRef => Value.FuncRef(topFuncRef)
+    case ReferenceType.ExternRef => Value.ExternRef(topExternRef)
   
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
@@ -137,6 +140,7 @@ trait Interpreter:
   type ExcV
   type FuncIx
   type FunV
+  type FuncRef
 
   given ValueWasmOps
     (using failure: Failure
@@ -177,15 +181,17 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-     , refOps: ReferenceOps[WasmReference, Option[WasmReference]]
+     , funcrefOps: ReferenceOps[FunV, FuncRef]
+     , externrefOps: ReferenceOps[WasmReference, Option[WasmReference]]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
+     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
-    final val referenceOps: ReferenceOps[WasmReference, Option[WasmReference]] = refOps
+    final val funcReferenceOps: ReferenceOps[FunV, FuncRef] = funcrefOps
+    final val externReferenceOps: ReferenceOps[WasmReference, Option[WasmReference]] = externrefOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -303,4 +309,4 @@ trait Interpreter:
 
   abstract class GenericInstance
     //extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J]

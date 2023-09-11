@@ -34,7 +34,7 @@
   )
 
   (func $test_ref_null_func (export "test_ref_null_func") (result funcref)
-    ref.null 0
+    ref.null funcref
   )
 
   (func $test_ref_null_extern (export "test_ref_null_extern") (result externref)
@@ -45,4 +45,12 @@
     i32.const 1
     table.get $t3
   )
+
+  (func $test_set_null (export "test_set_null")(result i32)
+    ref.func 0
+    i32.const 2
+    table.set $t3
+    table.size $t3
+  )
+
 )

@@ -64,23 +64,29 @@ object ConcreteInterpreter extends Interpreter:
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
   override type FunV = FunctionInstance
+  override type FuncRef = Int
 
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, NoJoin] with
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
     override def valToInt(v: Value): Int = v.asInt32
-    override def valToRef(v: Value): Value = {
-      v match {
-        case ConcreteInterpreter.Value.Num(NumValue.Int32(-1)) => Value.Ref(RefValue.FuncNull)
-        case ConcreteInterpreter.Value.Num(NumValue.Int32(-2)) => Value.Ref(RefValue.ExternNull)
-        case ConcreteInterpreter.Value.Num(NumValue.Int32(x)) => Value.Ref(RefValue.Func(x))
-        case ConcreteInterpreter.Value.Ref(RefValue.Func(f)) => Value.Num(NumValue.Int32(f))
-        case _ => print("fail", v); Value.Ref(RefValue.FuncNull)
+    override def valToRef(v: Value): Value = ???
+
+    override def funcRefToVal(r: ConcreteInterpreter.FuncRef): ConcreteInterpreter.Value = ???
+
+    override def valToFuncRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.FuncRef = ???
+    /*  v match {
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(-1)) => Value.FuncRef(RefValue.FuncNull)
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(-2)) => Value.ExternRef(RefValue.ExternNull)
+        case ConcreteInterpreter.Value.Num(NumValue.Int32(x)) => Value.FuncRef(RefValue.Func(x))
+        case ConcreteInterpreter.Value.FuncRef(RefValue.FuncNull) => Value.FuncRef(RefValue.FuncNull)
+        case ConcreteInterpreter.Value.FuncRef(RefValue.Func(f)) => Value.Num(NumValue.Int32(f))
+        case _ => print("fail", v); Value.FuncRef(RefValue.FuncNull)
       }
-    }
+    }*/
 
     //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
 
@@ -123,18 +129,20 @@ object ConcreteInterpreter extends Interpreter:
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
 
+    override def jvFuncRef: NoJoin[FuncRef] = implicitly
+
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
+    val tables: ConcreteSymbolTable[TableAddr, FuncIx, FuncRef] = new ConcreteSymbolTable[TableAddr, FuncIx, FuncRef]
    // val funTable: ConcreteSymbolTable[TableAddr, FuncIx] = new ConcreteSymbolTable[TableAddr, FuncIx]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
     //import sturdy.values.references.{given ConcreteReferenceOps[Value]}
-    //implicit val z: ConcreteReferenceOps[WasmReference] = implicitly
-    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
+    implicit val z: ReferenceOps[FunV, FuncRef] = implicitly
+    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, NoJoin] = implicitly
     //val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, NoJoin] = implicitly
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
     override val fixpointSuper = fixpoint

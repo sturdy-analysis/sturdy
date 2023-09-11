@@ -43,16 +43,19 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Size = I32
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
+  type FuncRef = I32
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToInt(v: Value): Int = ???
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
-
     override def valToRef(v: Value): Value = ???
+    override def funcRefToVal(r: Topped[Int]): ConstantAnalysis.Value = ???
+    override def valToFuncRef(v: ConstantAnalysis.Value): Topped[Int] = ???
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -94,20 +97,22 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+
+    override def jvFuncRef: WithJoin[Topped[Int]] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
+    val tables: ConstantSymbolTable[TableAddr, Int, I32] = new ConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     private given Failure = failure
 
-    implicit val z: ReferenceOps[WasmReference, ConstantAnalysis.Value] = implicitly
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    implicit val z: ReferenceOps[FunV, FuncRef] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, WithJoin] = implicitly
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx
