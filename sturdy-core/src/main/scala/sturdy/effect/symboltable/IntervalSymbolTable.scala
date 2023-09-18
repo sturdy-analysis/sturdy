@@ -16,6 +16,8 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
   private val constantSymbolTable: ConstantSymbolTable[Key, I, Entry] = new ConstantSymbolTable
 
   private val one = summon[Numeric[I]].one
+  var min = 0
+  var max = None
 
   def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] =
     if (symbol.countOfNumsInInterval <= rangeLimit) {

@@ -51,10 +51,15 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
     override def valToRef(v: Value): Value = ???
     override def valToInt(v: Value): Int = ???
-
+    override def funcRefToInt(r: Powerset[FunctionInstance]): Int = ???
     override def funcRefToVal(r: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
-
     override def valToFuncRef(v: TypeAnalysis.Value): Powerset[FunctionInstance] = ???
+    override def funcInstToFuncRef(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncRef(f: Powerset[FunctionInstance]): Powerset[FunctionInstance] = ???
+    override def makeNullRef: TypeAnalysis.Value = ???
+    override def makeNullFuncRef: Powerset[FunctionInstance] = ???
+    override def makeExternNullRef: TypeAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
@@ -99,6 +104,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    override var tableLimits: List[(Int, Option[Int])] = List()
     given Failure = failure
 
     implicit val z: ReferenceOps[FunV, FuncRef] = implicitly

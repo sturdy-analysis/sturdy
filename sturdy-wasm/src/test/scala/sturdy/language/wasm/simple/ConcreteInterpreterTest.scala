@@ -31,6 +31,10 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   val uriSimpleTable3 = this.getClass.getResource("/sturdy/language/wasm/simple_table3.wast").toURI;
   val uriSimpleTable4 = this.getClass.getResource("/sturdy/language/wasm/simple_table4.wast").toURI;
   val uriSimpleTable5 = this.getClass.getResource("/sturdy/language/wasm/simple_table5.wast").toURI;
+  val uriSimpleTable6 = this.getClass.getResource("/sturdy/language/wasm/simple_table6.wast").toURI;
+  val uriSimpleTable7 = this.getClass.getResource("/sturdy/language/wasm/simple_table7.wast").toURI;
+  val uriSimpleTable8 = this.getClass.getResource("/sturdy/language/wasm/simple_table8.wast").toURI;
+  val uriSimpleTable9 = this.getClass.getResource("/sturdy/language/wasm/simple_table9.wast").toURI;
   val uriRefNull = this.getClass.getResource("/sturdy/language/wasm/my_ref_null.wast").toURI;
   val uriRefFunc = this.getClass.getResource("/sturdy/language/wasm/my_ref_func.wast").toURI;
   //val simple = Paths.get(uriSimple)
@@ -40,6 +44,10 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   val st3 = Paths.get(uriSimpleTable3)
   val st4 = Paths.get(uriSimpleTable4)
   val st5 = Paths.get(uriSimpleTable5)
+  val st6 = Paths.get(uriSimpleTable6)
+  val st7 = Paths.get(uriSimpleTable7)
+  val st8 = Paths.get(uriSimpleTable8)
+  val st9 = Paths.get(uriSimpleTable9)
   val rn = Paths.get(uriRefNull)
   val rf = Paths.get(uriRefFunc)
 
@@ -60,28 +68,41 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.FuncRef(0)))
   testFunction(st3, "test_table_get_t2", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.FuncRef(2)))
   testFunction(st3, "test_table_get_t3", List(Value.Num(ConcreteInterpreter.NumValue.Int32(6))), List(Value.FuncRef(0)))
-  testFunction(st3, "test_table_set_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(4))))
+  testFunction(st3, "test_table_set_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
   testFunction(st3, "test_set_call", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
+  testFunction(st3, "test_ref_null", List.empty, List(Value.FuncNull))
 
-/*
+  testFunction(st6, "test_table_size_t1", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(2))))
+  testFunction(st6, "test_table_set_t1", List.empty, List.empty)
+  testFunction(st6, "test_set_call", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(4))))
+  testFunction(st6, "test_t3", List.empty, List(Value.FuncNull))
 
   testFunction(st4, "init", List.empty, List.empty)
-  testFunction(st4, "test_table_size_t3", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))))
+  testFunction(st4, "test_table_size_t3", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
   testFunction(st4, "size_after_table_set", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
   testFunction(st4, "test_ref_func", List.empty, List(Value.FuncRef(0)))
   testFunction(st4, "test_ref_null_func", List.empty, List(Value.FuncNull))
   testFunction(st4, "test_ref_null_extern", List.empty, List(Value.ExternNull))
   testFunction(st4, "test_table_get", List.empty, List(Value.FuncRef(0)))
-  testFunction(st4, "test_set_null", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(2))))
+  testFunction(st4, "test_set_null", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
 
 
-  testFunction(rf, "test_table_set", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List.empty)
-  testFunction(rf, "call_after_set", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(4))))
-  testFunction(rf, "test_table_get", List.empty, List(Value.FuncRef(1)))
-  testFunction(rf, "test_table_size", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(5))))
-  testFunction(st5, "test_table_grow", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
-  testFunction(st5, "test_table_fill", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
-*/
+  testFunction(rf, "test_table_set", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List.empty)
+
+  testFunction(st8, "test_random", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0)),Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.FuncNull))
+  testFunction(st8, "test_glob", List.empty, List(Value.FuncNull))
+
+// testFunction(st7, "test_grow", List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))))
+  //testFunction(st7, "test_fill", List.empty, List(Value.FuncNull))
+  //testFunction(st8, "test_random2", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(2))))
+  //testFunction(rf, "call_after_set", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(4))))
+  //testFunction(rf, "test_table_get", List.empty, List(Value.FuncRef(1)))
+  //testFunction(rf, "test_table_size", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(5))))
+  //testFunction(st5, "test_table_grow", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
+  //testFunction(st5, "test_table_fill", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
+
+  testFunction(st9, "test_a", List.empty, List(Value.FuncNull))
+
  // testFunction(rn, "externref", List.empty, List(Value.FuncRef(ConcreteInterpreter.Value.ExternNull)))
  // testFunction(rn, "funcref", List.empty, List(Value.FuncRef(ConcreteInterpreter.RefValue.FuncNull)))
 

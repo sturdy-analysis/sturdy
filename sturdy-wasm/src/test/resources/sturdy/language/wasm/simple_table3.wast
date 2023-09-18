@@ -1,19 +1,19 @@
 (module
 
-  (table $ftbl1 0 funcref)
+  (table $ftbl1 3 funcref)
     (elem (i32.const 0)
       $test_table_size_t1
       $test_sum
       $test_sum
     )
     
-  (table $ftbl2 1 funcref)  
+  (table $ftbl2 2 funcref)  
     (elem 1 (i32.const 1)
       $test_table_size_t2
       $test_sum
     )
 
-  (table $ftbl3 1 funcref)
+  (table $ftbl3 6 funcref)
     (elem 2 (i32.const 6)
       $test_sum
     )
@@ -37,9 +37,9 @@
      table.get $ftbl2
   )
 
-  ;;(func $test_ref_null (export "test_ref_null") (result externref)
-    ;; ref.null extern
-  ;;)
+  (func $test_ref_null (export "test_ref_null") (result funcref)
+     ref.null func
+  )
 
   (func $test_call_indirect (export "test_call_indirect") (result i32)
      i32.const 1 ;;arg1
@@ -65,20 +65,20 @@
    )
 
   (func $test_table_set_t1 (export "test_table_set_t1") (result i32)
+     i32.const 2
      ref.func 0
-     i32.const 3
      table.set $ftbl1
      table.size $ftbl1
    )
 
   (func $test_set_call (export "test_set_call") (result i32)
-     ref.func 0
-     i32.const 3
+     i32.const 2
+     ref.func 0    
      table.set $ftbl1
      i32.const 1 ;;arg1
      i32.const 2 ;;arg2
      i32.const 0 ;;ftbl3
-     i32.const 3 ;;idx
+     i32.const 2 ;;elemidx
      call_indirect (param i32 i32)(result i32)
    )
 )

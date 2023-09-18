@@ -7,4 +7,4 @@ class LiftedReferenceOps[V, Trg, UV](extract: V => UV, inject: UV => V)(using op
   def mkManagedRef(trg: Trg): V = inject(ops.mkManagedRef(trg))
   def mkRef(trg: Trg): V = inject(ops.mkRef(trg))
   def deref(v: V): Trg = ops.deref(extract(v))
-
+  def test(): Int = ???

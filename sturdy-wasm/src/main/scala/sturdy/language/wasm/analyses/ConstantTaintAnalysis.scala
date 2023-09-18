@@ -55,8 +55,15 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
     override def valToInt(v: Value): Int = ???
     override def valToRef(v: Value): Value = ???
+    override def funcRefToInt(r: Topped[Int]): Int = ???
     override def funcRefToVal(r: Topped[Int]): ConstantTaintAnalysis.Value = ???
     override def valToFuncRef(v: ConstantTaintAnalysis.Value): Topped[Int] = ???
+    override def funcInstToFuncRef(f: FunctionInstance): Topped[Int] = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncRef(f: Powerset[FunctionInstance]): Topped[Int] = ???
+    override def makeNullRef: ConstantTaintAnalysis.Value = ???
+    override def makeNullFuncRef: Topped[Int] = ???
+    override def makeExternNullRef: ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>
@@ -110,6 +117,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    override var tableLimits: List[(Int, Option[Int])] = List()
     given Failure = failure
 
     implicit val z: ReferenceOps[FunV, FuncRef] = implicitly

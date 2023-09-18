@@ -56,8 +56,15 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def valToRef(v: Value): Value = ???
+    override def funcRefToInt(r: NumericInterval[Int]): Int = ???
     override def funcRefToVal(r: NumericInterval[Int]): IntervalAnalysis.Value = ???
     override def valToFuncRef(v: IntervalAnalysis.Value): NumericInterval[Int] = ???
+    override def funcInstToFuncRef(f: FunctionInstance): NumericInterval[Int] = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncRef(f: Powerset[FunctionInstance]): NumericInterval[Int] = ???
+    override def makeNullRef: IntervalAnalysis.Value = ???
+    override def makeNullFuncRef: NumericInterval[Int] = ???
+    override def makeExternNullRef: IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -112,6 +119,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    override var tableLimits: List[(Int, Option[Int])] = List()
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =

@@ -63,8 +63,15 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, FuncRef, J[_] <: MayJoi
   def intToVal(i: Int): V
   def valToInt(v: V): Int
   def valToRef(v: V): V
+  def funcRefToInt(r: FuncRef): Int
   def funcRefToVal(r: FuncRef): V
   def valToFuncRef(v: V): FuncRef
+  def funcInstToFuncRef(f: FunctionInstance): FuncRef
+  def funcInstToFunV(f: FunctionInstance): FunV
+  def funVToFuncRef(i: FunV): FuncRef
+  def makeNullRef: V
+  def makeNullFuncRef: FuncRef
+  def makeExternNullRef: V
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

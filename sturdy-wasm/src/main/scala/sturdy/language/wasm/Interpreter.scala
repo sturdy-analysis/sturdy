@@ -87,6 +87,12 @@ trait Interpreter:
       case Num(NumValue.Top) => topF64
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
+      
+    def asFuncRef(using f: Failure): FuncReference = this match
+      case FuncRef(f) => f
+      case FuncRef(Top) => topFuncRef
+      case TopValue => topFuncRef
+      case _ => f.fail(TypeError, s"Expected funcref but got $this")
 
   def topI32: I32
   def topI64: I64

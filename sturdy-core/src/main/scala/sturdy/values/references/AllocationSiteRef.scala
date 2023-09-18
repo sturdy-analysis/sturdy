@@ -41,7 +41,7 @@ given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteA
   override def deref(r: AllocationSiteRef): AllocationSiteAddr = r match
     case AllocationSiteRef.Null => f.fail(NullDereference, "")
     case AllocationSiteRef.Addr(a) => a
-
+  
 given EqOps[AllocationSiteRef, Topped[Boolean]] with
   override def equ(v1: AllocationSiteRef, v2: AllocationSiteRef): Topped[Boolean] = (v1, v2) match
     case (AllocationSiteRef.Null, AllocationSiteRef.Null) => Topped.Actual(true)

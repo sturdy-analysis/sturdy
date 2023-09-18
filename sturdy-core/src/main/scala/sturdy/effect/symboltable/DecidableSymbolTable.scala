@@ -10,6 +10,8 @@ import sturdy.values.*
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
+  var min = 0
+  var max = None
 
   def entries: Map[Key, Map[Symbol, Entry]] = tables
   
