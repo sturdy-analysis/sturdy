@@ -54,7 +54,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
     override def valToInt(v: Value): Int = ???
-    override def valToRef(v: Value): Value = ???
+    override def numToRef(v: Value): Value = ???
     override def funcRefToInt(r: Topped[Int]): Int = ???
     override def funcRefToVal(r: Topped[Int]): ConstantTaintAnalysis.Value = ???
     override def valToFuncRef(v: ConstantTaintAnalysis.Value): Topped[Int] = ???

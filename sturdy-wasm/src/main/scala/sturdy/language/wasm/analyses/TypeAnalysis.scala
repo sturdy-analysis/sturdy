@@ -49,7 +49,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
-    override def valToRef(v: Value): Value = ???
+    override def numToRef(v: Value): Value = ???
     override def valToInt(v: Value): Int = ???
     override def funcRefToInt(r: Powerset[FunctionInstance]): Int = ???
     override def funcRefToVal(r: Powerset[FunctionInstance]): TypeAnalysis.Value = ???

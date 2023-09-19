@@ -62,7 +62,7 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, FuncRef, J[_] <: MayJoi
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
   def valToInt(v: V): Int
-  def valToRef(v: V): V
+  def numToRef(v: V): V
   def funcRefToInt(r: FuncRef): Int
   def funcRefToVal(r: FuncRef): V
   def valToFuncRef(v: V): FuncRef

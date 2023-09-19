@@ -55,6 +55,7 @@ class ModuleInstance:
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
   var elems: Vector[ElemInstance] = Vector.empty
+  var elements: Vector[Elem] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
@@ -128,6 +129,7 @@ given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
     val expSound = summon[Soundness[Vector[(String,ExternalValue)], Vector[(String,ExternalValue)]]].isSound(c.exports, a.exports)
 
     ftSound && fSound && tabSound && memSound && globSound && elemSound && datSound && expSound
+    //ftSound && fSound && tabSound && memSound && globSound && datSound && expSound
 
 given functionInstanceIsSound: Soundness[FunctionInstance, FunctionInstance] with
   override def isSound(c: FunctionInstance, a: FunctionInstance): IsSound = (c,a) match

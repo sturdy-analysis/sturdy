@@ -52,7 +52,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToInt(v: Value): Int = ???
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
-    override def valToRef(v: Value): Value = ???
+    override def numToRef(v: Value): Value = ???
     override def funcRefToInt(r: Topped[Int]): Int = ???
     override def funcRefToVal(r: Topped[Int]): ConstantAnalysis.Value = ???
     override def valToFuncRef(v: ConstantAnalysis.Value): Topped[Int] = ???

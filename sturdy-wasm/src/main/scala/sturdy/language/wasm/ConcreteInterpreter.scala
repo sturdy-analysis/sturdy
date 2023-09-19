@@ -73,7 +73,11 @@ object ConcreteInterpreter extends Interpreter:
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
     override def valToInt(v: Value): Int = v.asInt32
-    override def valToRef(v: Value): Value = funcRefToVal(v.asFuncRef)
+    override def numToRef(v: Value): Value = v match {
+      case Value.Num(NumValue.Int32(-1)) => makeNullRef
+      case Value.Num(NumValue.Int32(r)) => Value.FuncRef(r)
+      case _ => makeNullRef
+    }
     override def funcRefToInt(r: Int): Int = r
     override def funcRefToVal(r: ConcreteInterpreter.FuncRef): ConcreteInterpreter.Value = Value.FuncRef(r)
     override def valToFuncRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.FuncRef = v match {

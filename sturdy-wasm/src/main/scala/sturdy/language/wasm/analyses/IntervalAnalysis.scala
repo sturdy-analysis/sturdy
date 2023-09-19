@@ -55,7 +55,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
-    override def valToRef(v: Value): Value = ???
+    override def numToRef(v: Value): Value = ???
     override def funcRefToInt(r: NumericInterval[Int]): Int = ???
     override def funcRefToVal(r: NumericInterval[Int]): IntervalAnalysis.Value = ???
     override def valToFuncRef(v: IntervalAnalysis.Value): NumericInterval[Int] = ???

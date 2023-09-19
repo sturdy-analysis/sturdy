@@ -46,7 +46,8 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript interpreter on ${p.getFileName}")
       val script = Parsing.testscript(p)
-      val interp = ConcreteTestScriptInterpreter(Some(spectest))
+      //val interp = ConcreteTestScriptInterpreter(Some(spectest))
+      val interp = ConcreteTestScriptInterpreter(None)
       interp.run(script)
     }
   }

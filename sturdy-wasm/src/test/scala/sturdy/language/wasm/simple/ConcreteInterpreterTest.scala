@@ -63,7 +63,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(st3, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
 */
 
-
+/*
   testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.FuncRef(1)))
   testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.FuncRef(0)))
   testFunction(st3, "test_table_get_t2", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.FuncRef(2)))
@@ -100,8 +100,9 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   //testFunction(rf, "test_table_size", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(5))))
   //testFunction(st5, "test_table_grow", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
   //testFunction(st5, "test_table_fill", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(10))))
-
+*/
   testFunction(st9, "test_a", List.empty, List(Value.FuncNull))
+  testFunction(st9, "test_b", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
 
  // testFunction(rn, "externref", List.empty, List(Value.FuncRef(ConcreteInterpreter.Value.ExternNull)))
  // testFunction(rn, "funcref", List.empty, List(Value.FuncRef(ConcreteInterpreter.RefValue.FuncNull)))

@@ -1,7 +1,7 @@
 (module
 
   (table $ftbl1 3 funcref)
-    (elem (i32.const 0)
+    (elem 0 (i32.const 0)
       $test_table_size_t1
       $test_sum
       $test_sum
