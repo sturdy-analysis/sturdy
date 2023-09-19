@@ -17,12 +17,6 @@ class GenericInterpreterNumerics[V]
 
 
   import bytecodeOps.*
-  import convert_i32_i64.*
-  import convert_i32_f64.*
-  import convert_i64_f64.*
-  import convert_i32_f32.*
-  import convert_i64_f32.*
-  import convert_f32_f64.*
 
 
   def evalNumeric(inst: AnnotatedInstruction): V =
@@ -46,7 +40,5 @@ class GenericInterpreterNumerics[V]
       case IADD =>
         i32ops.add(v1, v2)
 
-  
-  val test: Instruction = BIPUSH(5)
-  evalNumeric(AnnotatedInstruction(test))
+
 
