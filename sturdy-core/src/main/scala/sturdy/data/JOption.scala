@@ -67,14 +67,14 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
     case NoneSome(a) => NoneSome(f(a))
     case Some(a) => Some(f(a))
 
-  override def flatMap[B](f: A => JOption[WithJoin, B]): JOption[WithJoin, B] = this match
+  override def flatMap[B](f: A => JOption[WithJoin, B]): JOptionA[B] = this match
     case None() => None()
     case NoneSome(a) => f(a) match
       case None() => None()
       case NoneSome(b) => NoneSome(b)
       case Some(b) => NoneSome(b)
       case other => throw new IllegalArgumentException(s"Cannot flatMap OptionA to different type $other")
-    case Some(a) => f(a)
+    case Some(a) => f(a).asInstanceOf[JOptionA[B]]
 
   def joinDeep[AA <: A](that: JOptionA[AA])(using Join[A]): JOptionA[A] = (this, that) match
     case (None(), None()) => None()

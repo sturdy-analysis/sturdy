@@ -6,7 +6,7 @@ import sturdy.Soundness
 import sturdy.effect.EffectStack
 import sturdy.values.relational.EqOps
 
-case class Powerset[A](val set: Set[A]) extends AnyVal {
+case class Powerset[A](set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
   def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))

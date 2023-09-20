@@ -7,7 +7,7 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.EffectStack
 import sturdy.effect.print.given
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*
@@ -47,9 +47,6 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
     }
-    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runSignAnalysis(p, StackConfig.StackedCfgNodes())
-    }
   }
 
   def runSignAnalysis(p: Path, stackConfig: StackConfig) =
@@ -71,7 +68,6 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //        println(s"Found dead code: $deadNodes")
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
-      given CAllocationIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       (aresult, analysis)

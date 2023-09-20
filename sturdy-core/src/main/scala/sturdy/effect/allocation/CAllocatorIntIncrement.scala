@@ -4,10 +4,10 @@ import sturdy.effect.Concrete
 
 import scala.collection.mutable
 
-class CAllocationIntIncrement[Context] extends Allocation[(Context,Int), Context], Concrete:
+class CAllocatorIntIncrement[Context] extends Allocator[(Context,Int), Context], Concrete:
   private val next: mutable.Map[Context, Int] = mutable.Map()
 
-  override def apply(ctx: Context): (Context,Int) =
+  override def alloc(ctx: Context): (Context,Int) =
     next.get(ctx) match
       case Some(n) =>
         next += ctx -> (n+1)

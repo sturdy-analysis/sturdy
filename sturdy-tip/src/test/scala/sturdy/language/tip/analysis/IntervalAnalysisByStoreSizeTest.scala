@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.AFallible
 import sturdy.effect.print.given
 import sturdy.language.tip.ConcreteInterpreter

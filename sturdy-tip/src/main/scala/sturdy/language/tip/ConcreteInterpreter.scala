@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.data.{NoJoin, noJoin, unit}
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.print.CPrint
@@ -24,7 +24,7 @@ object ConcreteInterpreter extends Interpreter:
 
   override type VBool = Boolean
   override type VInt = Int
-  override type VRef = Option[Addr]
+  override type VRef = Reference[Addr]
   override type VFun = Function
   override type VRecord = Map[Field, Value]
 
@@ -64,7 +64,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override val callFrame: ConcreteCallFrame[Unit, String, Value] = new ConcreteCallFrame((), initEnvironment)
     override val store: CStore[Addr, Value] = new CStore(initStore)
-    override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 

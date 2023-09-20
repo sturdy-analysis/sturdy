@@ -1,36 +1,28 @@
 package sturdy.language.tip.analysis
 
-import sturdy.{Executor, fix, data}
-import sturdy.data.MayJoin
-import sturdy.data.{WithJoin, given}
-import sturdy.effect.given
-import sturdy.effect.allocation.AAllocatorFromContext
-import sturdy.effect.allocation.Allocator
+import sturdy.data.{MayJoin, WithJoin, given}
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
-import sturdy.effect.print.Print
-import sturdy.effect.print.PrintBound
-import sturdy.effect.print.given
-import sturdy.effect.store
-import sturdy.effect.store.{*,given}
+import sturdy.effect.print.{Print, PrintBound, given}
+import sturdy.effect.{Stateless, store, given}
+import sturdy.effect.store.{*, given}
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix
 import sturdy.fix.StackConfig
-import sturdy.language.tip.TipFailure
-import sturdy.values.{*, given}
+import sturdy.language.tip.abstractions.*
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut, TipFailure, *, given}
+import sturdy.util.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.util.{*, given}
-import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
-import sturdy.language.tip.abstractions.*
+import sturdy.values.{*, given}
+import sturdy.{Executor, data, fix}
 
-object IntervalAnalysis extends Interpreter,
-  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+object IntervalRecencyAnalysis extends Interpreter,
+  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSitesRecency, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -52,10 +44,15 @@ object IntervalAnalysis extends Interpreter,
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
-    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
-      PowersetAddr(References.allocationSiteAddr(site))
-    )
+
+    private val initPhysicalStore = initStore.map { (addr,v) => PhysicalAddress(addr, Recency.Recent) -> v }.toMap
+    private val astore: Store[PowPhysicalAddress[AllocationSiteAddr], Value, J] = new AStoreThreaded(initPhysicalStore)
+
+    override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = new RecencyStore(astore)
+    override val alloc: Allocator[Addr, AllocationSite] = new Allocator with Stateless:
+      override def alloc(ctx: AllocationSite): PowersetAddr[VirtualAddress[AllocationSiteAddr], VirtualAddress[AllocationSiteAddr]] =
+        PowersetAddr(store.alloc(References.allocationSiteAddr(ctx)))
+
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))
 

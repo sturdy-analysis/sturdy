@@ -65,3 +65,4 @@ object Ints:
       case Topped.Actual(true) => AbstractBitVector.constant(1)
       case Topped.Actual(false) => AbstractBitVector.constant(0)
     )
+

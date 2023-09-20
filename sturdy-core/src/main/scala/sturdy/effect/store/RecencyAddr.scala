@@ -1,27 +1,41 @@
 package sturdy.effect.store
 
-import sturdy.values.{Changed, Combine, Finite, MaybeChanged, Unchanged, Widening}
+import sturdy.values.references.{AbstractAddr, PowersetAddr}
+import sturdy.values.{Changed, Combine, Finite, Join, MaybeChanged, Structural, Unchanged, Widening}
 
 class VirtualAddress[Context](val ctx: Context, val n: Int,
-                              addressTranslation: (Context,Int) => Iterable[PhysicalAddress[Context]]):
+                              currentPhysical: VirtualAddress[Context] => PowPhysicalAddress[Context])
+  extends AbstractAddr[VirtualAddress[Context]]:
+
+  def physical: PowPhysicalAddress[Context] = currentPhysical(this)
+  override def isEmpty: Boolean = false
+  override def isStrong: Boolean = physical.isStrong
+  override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)
+
+  override def toString: String = s"VirtualAddress($ctx, $n)"
 
   final override def equals(obj: Any): Boolean =
     obj match
-      case other: VirtualAddress[?] => this.lookupPhysicalAddress == other.lookupPhysicalAddress
+      case other: VirtualAddress[?] => this.physical == other.physical
       case _ => false
 
   final override def hashCode(): Int =
-    lookupPhysicalAddress.hashCode()
+    physical.hashCode()
 
   final def identifier: (Context,Int) = (ctx,n)
 
-  final def lookupPhysicalAddress: Set[PhysicalAddress[Context]] =
-    addressTranslation(ctx,n).toSet
+case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
+  override def isEmpty: Boolean = false
+  override def isStrong: Boolean = recency == Recency.Recent
+  override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
 
-case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends
-  ManageableAddr(false)
+type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], PhysicalAddress[Context]]
+type PowVirtualAddress[Context] = PowersetAddr[VirtualAddress[Context], VirtualAddress[Context]]
 
-given finitePhysicalAddr[Context]: Finite[PhysicalAddress[Context]] with {}
+given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}
+
+given finiteVirtualAddr[Context](using Finite[PhysicalAddress[Context]]): Finite[VirtualAddress[Context]] with {}
+given structuralVirtualAddr[Context]: Structural[VirtualAddress[Context]] with {}
 
 enum Recency:
   case Recent

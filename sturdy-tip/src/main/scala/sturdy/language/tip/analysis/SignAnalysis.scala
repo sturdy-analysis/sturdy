@@ -2,12 +2,12 @@ package sturdy.language.tip.analysis
 
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
-import sturdy.effect.allocation.AAllocationFromContext
+import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.PrintFiniteAlphabet
 import sturdy.effect.print.given
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.AStoreThreaded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
@@ -33,7 +33,7 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -49,8 +49,10 @@ object SignAnalysis extends Interpreter,
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
-    override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
+    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
+      PowersetAddr(References.allocationSiteAddr(site))
+    )
     override val print: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
 
@@ -61,6 +63,6 @@ object SignAnalysis extends Interpreter,
         parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
-  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
+  class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)

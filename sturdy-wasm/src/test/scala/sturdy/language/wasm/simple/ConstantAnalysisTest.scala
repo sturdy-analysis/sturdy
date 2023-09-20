@@ -49,17 +49,17 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
   }
 
-  it must s"execute most general client for simple with stacked frames" in {
-    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
-  }
+//  it must s"execute most general client for simple with stacked frames" in {
+//    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+//  }
 
   it must s"execute most general client for fact with stacked states" in {
     runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
   }
 
-  it must s"execute most general client for fact with stacked frames" in {
-    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
-  }
+//  it must s"execute most general client for fact with stacked frames" in {
+//    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+//  }
 
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
@@ -148,15 +148,15 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
-    val expected2 = Option(expectedFrames).getOrElse(expected)
-    it must s"execute $funcName withs args $args with result $expected2 with stacked frames" in {
-      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assertResult(expected2)(vals)
-        case AFallible.MaybeFailing(vals, _) => assertResult(expected2)(vals)
-        case AFallible.Failing(fails) => assert(false, s"Expected $expected2 but execution failed: $fails")
-        case AFallible.Diverging(recur) => assert(false, s"Expected $expected2 but execution diverged: $recur")
-    }
+//    val expected2 = Option(expectedFrames).getOrElse(expected)
+//    it must s"execute $funcName withs args $args with result $expected2 with stacked frames" in {
+//      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assertResult(expected2)(vals)
+//        case AFallible.MaybeFailing(vals, _) => assertResult(expected2)(vals)
+//        case AFallible.Failing(fails) => assert(false, s"Expected $expected2 but execution failed: $fails")
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $expected2 but execution diverged: $recur")
+//    }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {

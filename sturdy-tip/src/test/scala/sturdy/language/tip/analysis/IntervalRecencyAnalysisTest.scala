@@ -7,6 +7,7 @@ import sturdy.data.given
 import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
+import sturdy.effect.store.PowVirtualAddress
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*
@@ -23,8 +24,8 @@ import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
-import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
+import sturdy.language.tip.analysis.IntervalRecencyAnalysisSoundness.given
+import sturdy.language.tip.analysis.IntervalRecencyAnalysis.{*, given}
 import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.nio.file.{Files, Path, Paths}
@@ -32,11 +33,11 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
 
-class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
+class IntervalRecencyAnalysisTest extends AnyFlatSpec, Matchers:
 
-  behavior of "Tip interval analysis"
+  behavior of "Tip interval recency analysis"
 
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[IntervalRecencyAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.toString.contains("") && p.toString.endsWith(".tip")
@@ -53,7 +54,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val analysis = new IntervalRecencyAnalysis.Instance(Map(), Map(), stackConfig, 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -69,6 +70,8 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
+
+      implicit val contextMap: AllocationSiteAddr => PowVirtualAddress[AllocationSiteAddr] = analysis.store.virtualAddressesByContext
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)

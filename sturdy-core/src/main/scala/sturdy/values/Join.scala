@@ -57,13 +57,17 @@ object Join:
     case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
     case _ => j(v1, v2)
   }
+  def compute[V](v1: V, v2: V)(using j: Join[V]): V = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => r1
+    case _ => j(v1, v2).get
+  }
 object Widen:
   inline def apply[V](v1: V, v2: V)(using j: Widen[V]): MaybeChanged[V] = (v1, v2) match {
     case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
     case _ => j(v1, v2)
   }
 
-given finitely[V](using Join[V], Finite[V]): Widen[V] with
+given finiteWidening[V] (using Join[V], Finite[V]): Widen[V] with
   def apply(v1: V, v2: V) = Join(v1, v2)
 
 //trait Combinable[V]:

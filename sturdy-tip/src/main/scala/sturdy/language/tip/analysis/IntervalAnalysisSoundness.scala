@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
+import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocatorIntIncrement}
 import sturdy.values.Abstractly
 import sturdy.language.tip.{ConcreteInterpreter, Function}
 import sturdy.language.tip.{AllocationSite, Field}
@@ -14,20 +14,20 @@ import sturdy.values.relational.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}
-
 import IntervalAnalysis.*
+import sturdy.language.tip.abstractions.References
 
 object IntervalAnalysisSoundness:
-  given addrAbstractly(using calloc: CAllocationIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
-    new AllocationContextAbstractly(calloc, fromAllocationSite)
+  given addrAbstractly: Abstractly[ConcreteInterpreter.Addr, Addr] =
+    c => PowersetAddr(References.allocationSiteAddr(c._1))
 
-  given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
+  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
       case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.apply(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
-        case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
-        case Some(ca) => Value.RefValue(Abstractly.apply(ca).map(AllocationSiteRef.Addr.apply))
+        case Reference.Null => Value.RefValue(AbstractReference.Null)
+        case Reference.Addr(ca, m) => Value.RefValue(AbstractReference.Addr(Abstractly(ca), m))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
       case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
 
@@ -43,10 +43,8 @@ object IntervalAnalysisSoundness:
 
   given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis.Instance): IsSound = {
-      given CAllocationIntIncrement[AllocationSite] = c.alloc
-
       // concrete environment is sound by construction
-      a.store.storeIsSound(c.store) &&
+      a.store.isSound(c.store) &&
       a.print.isSound(c.print)
     }
 

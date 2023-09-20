@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.data.{MayJoin, noJoin}
-import sturdy.effect.allocation.Allocation
+import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -87,7 +87,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   // effect components
   val callFrame: DecidableMutableCallFrame[Unit, String, V]
   val store: Store[Addr, V, J]
-  val alloc: Allocation[Addr, AllocationSite]
+  val alloc: Allocator[Addr, AllocationSite]
   val print: Print[V]
   val input: UserInput[V]
   val failure: Failure

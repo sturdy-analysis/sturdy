@@ -127,7 +127,7 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
   override def join: Join[Map[String, MayMust[Sign]]] = implicitly
   override def widen: Widen[Map[String, MayMust[Sign]]] = {
     given Finite[String] with {}
-    finitely(using join, implicitly)
+    finiteWidening(using join, implicitly)
   }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SignStoreJoiner)

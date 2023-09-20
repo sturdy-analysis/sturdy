@@ -7,7 +7,7 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.EffectStack
 import sturdy.effect.print.{Print, given}
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.{AllocationSite, FixIn}
 import sturdy.language.tip.Parser.*
@@ -19,7 +19,7 @@ import sturdy.language.tip.GenericInterpreter
 import sturdy.util.{Labeled, Profiler}
 import sturdy.{*, given}
 import sturdy.data.given
-import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}
+import sturdy.effect.store.{AStoreThreaded, Store}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -70,7 +70,7 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
       Profiler.printLastMeasured()
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
-      given CAllocationIntIncrement[AllocationSite] = interp.alloc
+      given CAllocatorIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       (aresult, analysis)

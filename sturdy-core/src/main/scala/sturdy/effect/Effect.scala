@@ -11,7 +11,29 @@ trait Stateful:
   def widen: Widen[State]
 
 trait Effect extends Stateful:
-  def makeComputationJoiner[A]: Option[ComputationJoiner[A]]
+  def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
+    private val original = getState
+    private var afterFirst: State = _
+
+    override def inbetween(): Unit =
+      afterFirst = getState
+      setState(original)
+
+    override def retainNone(): Unit =
+      setState(original)
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      setState(afterFirst)
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      () // do nothing
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      val afterSecond = getState
+      val joined = join(afterFirst, afterSecond)
+      setState(joined.get)
+  )
+
 
 trait Monotone extends Effect:
   final override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None
@@ -29,4 +51,4 @@ trait Concrete extends Effect:
   final def setState(st: Unit): Unit = ()
   final def join: Join[Unit] = CombineUnit
   final def widen: Widen[Unit] = CombineUnit
-  final def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None
+  final override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None

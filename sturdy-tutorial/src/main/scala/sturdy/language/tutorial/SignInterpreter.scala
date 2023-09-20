@@ -2,7 +2,7 @@ package sturdy.language.tutorial
 
 import sturdy.values.{Changed, Combine, Finite, Join, MayMust, MaybeChanged, Unchanged, Widening}
 import sturdy.data.{MayJoin, WithJoin}
-import sturdy.values.{CombineMayMust, finitely}
+import sturdy.values.{CombineMayMust, finiteWidening}
 import sturdy.data.{CombineUnit, JoinMap, CombineFiniteKeyMap, finiteUnit}
 import sturdy.IsSound
 import sturdy.fix
