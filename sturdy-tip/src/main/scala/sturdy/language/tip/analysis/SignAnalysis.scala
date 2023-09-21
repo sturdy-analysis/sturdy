@@ -48,7 +48,7 @@ object SignAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site))
@@ -61,8 +61,8 @@ object SignAnalysis extends Interpreter,
     override val fixpoint =
       fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
         parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(stackConfig)
+    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
   class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
-    override def newInstance: sturdy.Executor = new DAIInstance()
+    override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)

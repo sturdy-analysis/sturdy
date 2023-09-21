@@ -3,8 +3,8 @@ package sturdy.language.tip.abstractions
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.TipFailure
 import sturdy.values.ordering.EqOps
-import sturdy.values.Topped
-import sturdy.values.integer.{IntSign, NumericInterval, given}
+import sturdy.values.{Topped, Join}
+import sturdy.values.integer.{IntSign, NumericInterval, AbstractBitVector, given}
 import sturdy.language.tip.Interpreter
 
 object Ints:
@@ -52,6 +52,15 @@ object Ints:
       case Topped.Actual(false) => IntSign.Zero
     )
 
+    final def asInt(v: Value)(using inst: Instance): VInt = v match
+      case Value.BoolValue(b) => b match
+        case Topped.Top => IntSign.ZeroOrPos
+        case Topped.Actual(true) => IntSign.Pos
+        case Topped.Actual(false) => IntSign.Zero
+      case Value.IntValue(i) => i
+      case Value.TopValue => IntSign.TopSign
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
+
   trait BitVectors extends Interpreter :
     final type VBool = Topped[Boolean]
     final type VInt = AbstractBitVector[Int]
@@ -71,11 +80,3 @@ object Ints:
       case Topped.Actual(false) => AbstractBitVector.constant(0)
     )
 
-    final def asInt(v: Value)(using inst: Instance): VInt = v match
-      case Value.BoolValue(b) => b match
-        case Topped.Top => IntSign.ZeroOrPos
-        case Topped.Actual(true) => IntSign.Pos
-        case Topped.Actual(false) => IntSign.Zero
-      case Value.IntValue(i) => i
-      case Value.TopValue => IntSign.TopSign
-      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")

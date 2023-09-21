@@ -67,8 +67,8 @@ object ConcreteInterpreter extends Interpreter:
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ConcreteCallFrame[Unit, String, Value] = new ConcreteCallFrame((), initEnvironment)
-    override val store: CStore[Addr, Value] = new CStore(initStore)
+    override val callFrame: ConcreteCallFrame[String, String, Value, Exp.Call] = new ConcreteCallFrame("$main", Iterable.empty)
+    override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)

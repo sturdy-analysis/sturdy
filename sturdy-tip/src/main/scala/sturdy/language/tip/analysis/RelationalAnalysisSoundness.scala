@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
+import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocatorIntIncrement}
 import sturdy.language.tip.analysis.RelationalAnalysis.*
 import sturdy.language.tip.{AllocationSite, ConcreteInterpreter, Field, Function}
 import sturdy.util.{*, given}
@@ -8,6 +8,7 @@ import sturdy.values.Topped.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.records.{*, given}
+import sturdy.language.tip.abstractions.{References}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.{*, given}
@@ -19,8 +20,9 @@ class RelationalAnalysisSoundness(_apron: Apron):
   implicit val apron: Apron = _apron
   implicit val scope: ApronScope = _apron.currentScope
 
-  given addrAbstractly(using calloc: CAllocationIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
-    new AllocationContextAbstractly(calloc, fromAllocationSite)
+  given addrAbstractly(using calloc: CAllocatorIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
+    new AllocationContextAbstractly(calloc, 
+                                    site => PowersetAddr(References.allocationSiteAddr(site)))
 
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
@@ -28,8 +30,8 @@ class RelationalAnalysisSoundness(_apron: Apron):
       case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Topped.Actual(ApronCons.fromBool(b)))
       case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Topped.Actual(ApronExpr.Constant(new MpqScalar(i))))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
-        case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
-        case Some(ca) => Value.RefValue(Abstractly(ca).map(AllocationSiteRef.Addr.apply))
+        case Reference.Null => Value.RefValue(AbstractReference.Null)
+        case Reference.Addr(ca, m) => Value.RefValue(AbstractReference.Addr(Abstractly(ca), m))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
       case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
 
@@ -45,10 +47,10 @@ class RelationalAnalysisSoundness(_apron: Apron):
 
   given Soundness[ConcreteInterpreter.Instance, RelationalAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound = {
-      given CAllocationIntIncrement[AllocationSite] = c.alloc
+      given CAllocatorIntIncrement[AllocationSite] = c.alloc
 
       // concrete environment is sound by construction
-      a.store.storeIsSound(c.store) &&
+      a.store.isSound(c.store) &&
       a.print.isSound(c.print) /* &&
       a.assert.isSound(c.assert) */
     }

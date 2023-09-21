@@ -8,7 +8,7 @@ import sturdy.Executor
 import sturdy.apron.*
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{EffectStack, given}
-import sturdy.effect.allocation.AAllocationFromContext
+import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.ApronCallFrame
 import sturdy.effect.callframe.ApronCallFrame.given
 import sturdy.effect.callframe.given
@@ -17,7 +17,7 @@ import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.AStoreThreaded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.apron.given
@@ -69,7 +69,7 @@ object RelationalAnalysis extends Interpreter,
   override def topInt(using inst: Instance): VInt = Topped.Top
   override def topBool: VBool = Topped.Top
 
-  class Instance(apronManager: Manager, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+  class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -109,8 +109,9 @@ object RelationalAnalysis extends Interpreter,
       Iterable.empty
     )
 
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(Map.empty)
-    override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
+    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
+      PowersetAddr(References.allocationSiteAddr(site)))
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(Topped.Top))
 
@@ -136,4 +137,4 @@ object RelationalAnalysis extends Interpreter,
         )
       ).fixpoint
 
-    override def newInstance: sturdy.Executor = new Instance(apronManager, stackConfig, callSites)
+    override def newInstance: sturdy.Executor = new Instance(apronManager, initStore, stackConfig, callSites)

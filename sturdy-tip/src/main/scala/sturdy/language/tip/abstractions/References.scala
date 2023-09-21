@@ -25,6 +25,13 @@ object References:
 
     given Widen[VRef] = combineAbstractReference
 
+    def fromAllocationSite(asite: AllocationSite) = Powerset(asite match
+      case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)
+      case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")
+      case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")
+      case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)
+    )
+
     final def topReference(using self: Instance): VRef =
       val addrs = self.store.getState.asInstanceOf[Map[AllocationSiteAddr, _]].keySet
       val aa = PowersetAddr(addrs)

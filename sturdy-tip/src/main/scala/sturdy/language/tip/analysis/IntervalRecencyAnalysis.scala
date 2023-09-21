@@ -17,7 +17,7 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
 import sturdy.{Executor, data, fix}
 
@@ -43,7 +43,7 @@ object IntervalRecencyAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
 
     private val initPhysicalStore = initStore.map { (addr,v) => PhysicalAddress(addr, Recency.Recent) -> v }.toMap
     private val astore: Store[PowPhysicalAddress[AllocationSiteAddr], Value, J] = new AStoreThreaded(initPhysicalStore)

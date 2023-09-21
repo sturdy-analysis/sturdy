@@ -36,6 +36,22 @@ given JoinIntMap[V, W <: Widening](using j: Combine[V, W]): Join[IntMap[V]] with
           changed |= joinedV.hasChanged
     MaybeChanged(joined, changed)
 
+given WidenFiniteKeyMap[K, V](using j: Widen[V], fk: Finite[K]): Widen[Map[K, V]] with
+  override def apply(v1: Map[K, V], v2: Map[K, V]): MaybeChanged[Map[K, V]] =
+    var joined = v1
+    var changed = false
+    for ((x, v2V) <- v2)
+      joined.get(x) match
+        case None =>
+          joined += x -> v2V
+          changed = true
+        case Some(v1V) =>
+          val joinedV = j(v1V, v2V)
+          joined += x -> joinedV.get
+          changed |= joinedV.hasChanged
+    MaybeChanged(joined, changed)
+
+
 given CombineFiniteKeyMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finite[K]): Combine[Map[K, V], W] with
   override def apply(v1: Map[K, V], v2: Map[K, V]): MaybeChanged[Map[K, V]] =
     var joined = v1

@@ -3,7 +3,7 @@ package sturdy.language.tip
 import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.callframe.DecidableMutableCallFrame
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind, assert}
 import sturdy.effect.print.Print
@@ -119,8 +119,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
     case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
     case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
-    case Exp.Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case site@Exp.Call(fun, args) =>
+      invokeFun(eval(fun), args.map(eval(_)))(call(site))
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
       store.write(addr, eval(e))
