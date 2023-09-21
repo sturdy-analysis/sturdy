@@ -5,7 +5,7 @@ import sturdy.effect.failure.Failure
 import sturdy.util.*
 import sturdy.values.*
 import sturdy.values.booleans.{BooleanBranching, BooleanSelection}
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 import reflect.Selectable.reflectiveSelectable
 

@@ -7,6 +7,26 @@ trait ComputationJoiner[A]:
   def retainFirst(fRes: TrySturdy[A]): Unit
   def retainSecond(gRes: TrySturdy[A]): Unit
   def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit
+  
+  def compose(snd: ComputationJoiner[A]): ComputationJoiner[A] =
+    val fst = this
+    new ComputationJoiner[A] {
+      override def inbetween(): Unit = 
+        fst.inbetween()
+        snd.inbetween()
+      override def retainNone(): Unit = 
+        fst.retainNone()
+        snd.retainNone()
+      override def retainFirst(fRes: TrySturdy[A]): Unit = 
+        fst.retainFirst(fRes)
+        snd.retainFirst(fRes)
+      override def retainSecond(gRes: TrySturdy[A]): Unit =
+        fst.retainSecond(gRes)
+        snd.retainSecond(gRes)
+      override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+        fst.retainBoth(fRes, gRes)
+        snd.retainBoth(fRes, gRes)
+    }
 
 //
 //abstract class ComputationJoinerWithSuper[A](sup: ComputationJoiner[A]) extends ComputationJoiner[A]:

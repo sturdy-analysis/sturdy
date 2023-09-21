@@ -12,7 +12,7 @@ import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import swam.syntax.LoadInst
 import swam.syntax.LoadNInst
 import swam.syntax.MemoryInst

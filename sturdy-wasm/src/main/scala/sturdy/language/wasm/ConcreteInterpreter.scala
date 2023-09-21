@@ -21,7 +21,7 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -94,7 +94,7 @@ object ConcreteInterpreter extends Interpreter:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc)(args)
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends GenericInstance:
+  class Instance extends GenericInstance:
 
     override def jvUnit: NoJoin[Unit] = implicitly
     override def jvV: NoJoin[Value] = implicitly
@@ -104,7 +104,7 @@ object ConcreteInterpreter extends Interpreter:
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
     val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
-    val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] = new ConcreteCallFrame(FrameData.empty, Iterable.empty)
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure

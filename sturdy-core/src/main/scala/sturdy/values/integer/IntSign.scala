@@ -3,7 +3,7 @@ package sturdy.values.integer
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 enum IntSign:
   case TopSign

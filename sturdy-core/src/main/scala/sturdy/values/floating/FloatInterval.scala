@@ -8,7 +8,7 @@ import sturdy.values.MaybeChanged
 import sturdy.values.Widen
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 object FloatInterval:
   val Top = FloatInterval(Float.NegativeInfinity, Float.PositiveInfinity)

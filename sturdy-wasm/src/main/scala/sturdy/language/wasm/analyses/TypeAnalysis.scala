@@ -24,7 +24,7 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
 
@@ -61,7 +61,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+  class Instance(config: WasmConfig) extends
     GenericInstance
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
@@ -86,7 +86,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
-    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     given Failure = failure

@@ -7,7 +7,7 @@ import sturdy.values.*
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 import java.nio.{ByteOrder, ByteBuffer}
 import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}

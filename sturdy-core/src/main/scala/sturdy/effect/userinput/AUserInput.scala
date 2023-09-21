@@ -4,3 +4,6 @@ import sturdy.effect.Stateless
 
 class AUserInput[A](approx: A) extends UserInput[A], Stateless:
   override def read(): A = approx
+
+class AUserInputFun[A](approx: => A) extends UserInput[A], Stateless:
+  override def read(): A = approx

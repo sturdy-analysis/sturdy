@@ -24,7 +24,7 @@ import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.language.wasm.Parsing
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.text.unresolved.FreshId
@@ -53,7 +53,7 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
   }
 
 class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
-  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  val interp = new ConcreteInterpreter.Instance()
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
   val imports: mutable.Map[String, ModuleInstance] = mutable.Map()

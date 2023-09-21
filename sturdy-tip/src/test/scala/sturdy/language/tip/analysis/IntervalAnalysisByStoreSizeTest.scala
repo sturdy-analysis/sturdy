@@ -24,7 +24,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
@@ -72,7 +72,7 @@ class IntervalAnalysisByStoreSizeTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val analysis = new IntervalAnalysis.Instance(stackConfig, 0)
 
       var aresult: AFallible[Value] = AFallible.Unfailing(Value.TopValue)
 //      while (true)

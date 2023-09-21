@@ -25,7 +25,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
 import sturdy.language.tip.analysis.SignAnalysis.{*, given}
@@ -42,7 +42,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+    p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -56,7 +56,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
+      val analysis = new SignAnalysis.Instance(stackConfig)
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -66,7 +66,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))

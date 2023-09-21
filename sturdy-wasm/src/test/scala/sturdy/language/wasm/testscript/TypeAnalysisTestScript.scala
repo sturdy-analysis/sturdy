@@ -17,7 +17,7 @@ import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.ModuleInstance
 import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Topped
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.{Soundness, IsSound}
@@ -66,8 +66,8 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
   type CValue = ConcreteInterpreter.Value
   type AValue = TypeAnalysis.Value
 
-  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val cInterp = new ConcreteInterpreter.Instance()
+  val aInterp = new TypeAnalysis.Instance(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

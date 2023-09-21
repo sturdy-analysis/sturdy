@@ -8,7 +8,7 @@ import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import swam.ValType
 import swam.syntax.*
 

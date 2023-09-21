@@ -20,7 +20,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
@@ -61,8 +61,8 @@ object SignAnalysis extends Interpreter,
     override val fixpoint =
       fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
         parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
+    override def newInstance: sturdy.Executor = new Instance(stackConfig)
 
   class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
-    override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)
+    override def newInstance: sturdy.Executor = new DAIInstance()

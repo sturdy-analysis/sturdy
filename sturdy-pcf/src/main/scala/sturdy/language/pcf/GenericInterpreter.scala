@@ -11,7 +11,7 @@ import sturdy.util.{IntLabel, Labeled}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.closures.ClosureOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.relational.{OrderingOps, EqOps}
+import sturdy.values.ordering.{OrderingOps, EqOps}
 
 import scala.collection.immutable.List
 

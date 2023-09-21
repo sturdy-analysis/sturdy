@@ -4,7 +4,7 @@ import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
-import sturdy.values.relational.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
 import sturdy.values.*
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.ConversionFailure

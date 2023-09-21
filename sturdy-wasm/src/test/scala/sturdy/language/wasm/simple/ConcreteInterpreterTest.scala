@@ -87,7 +87,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = Parsing.fromText(path)
-  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  val interp = new ConcreteInterpreter.Instance()
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)

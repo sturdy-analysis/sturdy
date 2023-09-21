@@ -26,7 +26,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
 import sturdy.language.tip.analysis.SignAnalysis.{*, given}
@@ -63,12 +63,12 @@ class SignAnalysisDAITest extends AnyFlatSpec, Matchers:
     Profiler.printByName("init")
     Profiler.reset()
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.DAIInstance(Map(), Map())
+      val analysis = new SignAnalysis.DAIInstance()
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
 //      println(comp.outCache)
       Profiler.printLastMeasured()
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocatorIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))

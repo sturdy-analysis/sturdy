@@ -9,7 +9,7 @@ import sturdy.values.booleans.*
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 import java.nio.{ByteBuffer, ByteOrder}
 import java.lang.Math

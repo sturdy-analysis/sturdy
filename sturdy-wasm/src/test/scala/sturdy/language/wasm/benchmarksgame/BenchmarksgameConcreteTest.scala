@@ -51,7 +51,7 @@ class BenchmarksgameConcreteTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+    val interp = new ConcreteInterpreter.Instance()
 
     println(s"Running $p")
     val modInst = interp.initializeModule(module)

@@ -21,7 +21,7 @@ import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
@@ -64,8 +64,8 @@ class ConstantTaintAnalysisTestScriptInterpreter(spectest: Option[Module] = None
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantTaintAnalysis.Value
 
-  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val cInterp = new ConcreteInterpreter.Instance()
+  val aInterp = new ConstantTaintAnalysis.Instance(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

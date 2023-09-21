@@ -28,7 +28,7 @@ import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
 import swam.syntax.*
 
@@ -134,7 +134,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
   val funTable: SymbolTable[TableAddr, FuncIx, FunV, J]
-  val callFrame: DecidableMutableCallFrame[FrameData, Int, V]
+  val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
 
@@ -301,12 +301,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       throws(WasmException(JumpTarget.Return, operands))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-      invoke(func)
+      invoke(func, loc)
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.popOrAbort()
       val func = funTable.getOrElse(tableIndex, valueToFuncIx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      invokeIndirect(func, ftExpected, funcIx)
+      invokeIndirect(func, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -354,13 +354,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       }
     }
 
-  def invoke(fun: FunctionInstance)(using Fixed): Unit =
+  def invoke(fun: FunctionInstance, loc: InstLoc)(using Fixed): Unit =
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popNOrAbort(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
-        val vars = args.view ++ func.locals.map(num.defaultValue)
-        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
+        val vars = args.view.map(Some.apply) ++ func.locals.map(ty => Some(num.defaultValue(ty)))
+        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
@@ -387,13 +387,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     }
     stack.peekNOrAbort(returnN)
 
-  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed): Unit =
+  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V, loc: InstLoc)(using Fixed): Unit =
     functionOps.invokeFun(funV, ftExpected) {
       case (func, _) =>
         val ftActual = func.funcType
         if (ftExpected != ftActual)
           fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-        invoke(func)
+        invoke(func, loc)
     }
 
 
@@ -446,8 +446,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
           val rtLength = fun.funcType.t.length
           stack.pushN(args)
-          callFrame.withNew(FrameData(0, modInst), Iterable.empty) {
-            eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
+          val loc = InstLoc.InvokeExported(modInst, funcName)
+          callFrame.withNew(FrameData(0, modInst), Iterable.empty, loc) {
+            eval(Call(funcIx), loc)
           }
           stack.popNOrAbort(rtLength)
         case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
@@ -483,9 +484,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance)(using Fixed): V =
+  def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance, loc: InstLoc)(using Fixed): V =
     val frameData = FrameData(1,mod)
-    labelStack.withNew(stack.withNewStack(callFrame.withNew(frameData, Iterable.empty){
+    labelStack.withNew(stack.withNewStack(callFrame.withNew(frameData, Iterable.empty, loc) {
       for ((inst, ix) <- insts.zipWithIndex) {
         val loc = mod.blockInstLocs((block, ix))
         eval(inst, loc)
@@ -582,7 +583,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val globValues = module.globals.map { glob =>
       val id = BlockId(glob)
       loc = modInst.registerBlockSizes(id, loc, glob.init)
-      evalInstructionSequence(id, glob.init, modInst)
+      evalInstructionSequence(id, glob.init, modInst, loc)
     }
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
@@ -647,9 +648,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         assert(memIdx == 0)
         val id = BlockId(data)
         loc = modInst.registerBlockSizes(id, loc, off)
-        val base = evalInstructionSequence(id, off, modInst)
+        val base = evalInstructionSequence(id, off, modInst, loc)
         val bytes = init.toByteVector.toIterable
-        callFrame.withNew(FrameData(1, modInst), Iterable.empty) {
+        callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
           bytes.zipWithIndex.foreach { (byte, byteIdx) =>
             stack.push(base)
             stack.push(num.evalNumeric(i32.Const(byte.toInt)))
@@ -667,7 +668,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       case (elem@Elem(tableIdx, off, init), i) =>
         val id = BlockId(elem)
         loc = modInst.registerBlockSizes(id, loc, off)
-        val base = evalInstructionSequence(id, off, modInst)
+        val base = evalInstructionSequence(id, off, modInst, loc)
         init.zipWithIndex.foreach { (funcIx, i) =>
           stack.push(base)
           stack.push(num.evalNumeric(i32.Const(i)))
@@ -686,8 +687,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         func match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(funcType.t.size, mod)
-            val vars = func.locals.map(num.defaultValue)
-            labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
+            val vars = func.locals.map(ty => Some(num.defaultValue(ty)))
+            val loc = InstLoc.InvokeExported(mod, "$start")
+            labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap), loc) {
               enterFunction(FuncId(mod, ix), func, funcType)
             }))
           case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?

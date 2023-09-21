@@ -39,6 +39,7 @@ object Parser:
     val KNULL = "null"
     val KOUTPUT = "output"
     val KERROR = "error"
+    val KASSERT = "assert"
   }
   import LanguageKeywords.*
 
@@ -52,7 +53,8 @@ object Parser:
     KRETURN,
     KNULL,
     KOUTPUT,
-    KERROR
+    KERROR,
+    KASSERT
   )
 
   def keyword(s: String): P[Unit] =
@@ -157,6 +159,7 @@ object Parser:
     (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) |
     inBraces(recStatement.rep0).map(Stm.Block.apply) |
     (keyword(KOUTPUT) *> recExpression <* semi).map(Stm.Output.apply) |
+    (keyword(KASSERT) *> inParens(recExpression) <* semi).map(Stm.Assert.apply) |
     (keyword(KERROR) *> recExpression <* semi).map(Stm.Error.apply) |
     ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply)
 

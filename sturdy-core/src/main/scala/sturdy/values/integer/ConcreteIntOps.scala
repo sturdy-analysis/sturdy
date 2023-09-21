@@ -7,7 +7,7 @@ import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, Topped, config}
 import sturdy.values.convert.*
-import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random

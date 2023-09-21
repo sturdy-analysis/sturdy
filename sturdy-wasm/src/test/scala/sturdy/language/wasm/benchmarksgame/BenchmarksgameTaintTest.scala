@@ -52,7 +52,7 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
+    val interp = new ConstantTaintAnalysis.Instance(WasmConfig(ctx = CallSites(3)))
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantTaintAnalysis.constantInstructions(interp)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)

@@ -50,7 +50,7 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    val interp = new ConstantAnalysis.Instance(
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
 
     val modInst = interp.initializeModule(module)

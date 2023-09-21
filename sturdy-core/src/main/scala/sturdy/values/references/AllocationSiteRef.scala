@@ -5,7 +5,7 @@ import sturdy.util.Label
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Structural
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.Topped
 
 enum AllocationSiteAddr extends AbstractAddr[AllocationSiteAddr]:

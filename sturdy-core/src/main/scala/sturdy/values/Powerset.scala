@@ -4,7 +4,7 @@ import sturdy.data.{MakeJoined, mapJoin}
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.EffectStack
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 case class Powerset[A](set: Set[A]) extends AnyVal {
   def size: Int = set.size

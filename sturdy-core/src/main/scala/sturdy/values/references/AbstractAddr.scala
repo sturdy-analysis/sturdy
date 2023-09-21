@@ -1,6 +1,6 @@
 package sturdy.values.references
 
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Powerset, Structural, Topped}
 
 trait AbstractAddr[+Addr]:

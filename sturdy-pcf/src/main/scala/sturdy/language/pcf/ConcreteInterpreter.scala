@@ -11,8 +11,8 @@ import sturdy.fix
 import sturdy.values.booleans.{BooleanBranching, given}
 import sturdy.values.closures.{Closure, ClosureOps, given}
 import sturdy.values.integer.{IntegerOps, given}
-import sturdy.values.relational.{EqOps, given}
-import sturdy.values.relational.{OrderingOps, given}
+import sturdy.values.ordering.{EqOps, given}
+import sturdy.values.ordering.{OrderingOps, given}
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]

@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import cats.Monoid
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -21,7 +22,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
@@ -39,7 +40,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.contains("") && p.toString.endsWith(".tip")
+    p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
@@ -53,7 +54,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val analysis = new IntervalAnalysis.Instance(stackConfig, 0)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -67,8 +68,21 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
 
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
+      given CAllocationIntIncrement[AllocationSite] = interp.alloc
+      println("Concrete " + cresult)
+      println("Abstract " + aresult)
+
+      // compute number of assertions in program
+      val unprovedAsserts = aresult match 
+        case AFallible.Failing(msgs) => msgs.size
+        case AFallible.MaybeFailing(_, msgs) => msgs.size
+        case _ => 0
+      // subtract number of maybefailing assertions
+      // println("#assertions = " + program.assertCount + "; #unproved = " + unprovedAsserts)
+      println("=> #assertions proved or unreachable " + (program.assertions.size - unprovedAsserts))
+
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)

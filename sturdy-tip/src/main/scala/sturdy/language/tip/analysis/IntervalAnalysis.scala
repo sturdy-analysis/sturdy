@@ -23,7 +23,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
@@ -77,5 +77,5 @@ object IntervalAnalysis extends Interpreter,
         fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
       ).fixpoint
 
-    override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
+    override def newInstance: sturdy.Executor = new Instance(stackConfig, callSites)
 
