@@ -20,7 +20,7 @@ import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.floating.FloatOps
 import swam.syntax.*
-import swam.FuncType
+import swam.{FuncType, ReferenceType}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -43,9 +43,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Size = I32
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
-  type FuncRef = I32
+  type Ref = I32
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -54,14 +54,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
     override def numToRef(v: Value): Value = ???
     override def funcRefToInt(r: Topped[Int]): Int = ???
-    override def funcRefToVal(r: Topped[Int]): ConstantAnalysis.Value = ???
-    override def valToFuncRef(v: ConstantAnalysis.Value): Topped[Int] = ???
-    override def funcInstToFuncRef(f: FunctionInstance): Topped[Int] = ???
+    override def makeDeref(r: Topped[Int]): ConstantAnalysis.Value = ???
+    override def makeRef(v: ConstantAnalysis.Value): Topped[Int] = ???
+    override def funcInstToVal(f: FunctionInstance): ConstantAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncRef(f: Powerset[FunctionInstance]): Topped[Int] = ???
-    override def makeNullRef: ConstantAnalysis.Value = ???
-    override def makeNullFuncRef: Topped[Int] = ???
-    override def makeExternNullRef: ConstantAnalysis.Value = ???
+    override def makeNullRefValue(t: ReferenceType): ConstantAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): Topped[Int] = ???
+    override def isNull(r: Topped[Int]): ConstantAnalysis.Value = ???
+    override def funcIxToExternRef(f: Int): ConstantAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -115,11 +116,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tabLimits: List[(Int, Option[Int])] = List()
+    override var tabTypes: List[ReferenceType] = List()
     private given Failure = failure
 
-    implicit val z: ReferenceOps[FunV, FuncRef] = implicitly
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, WithJoin] = implicitly
+    implicit val z: ReferenceOps[FunV, Ref] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, WithJoin] = implicitly
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx

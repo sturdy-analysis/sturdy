@@ -49,16 +49,17 @@ trait Interpreter:
   enum RefValue:
     case FuncNull
     case ExternNull
-    case Func(f: FuncReference)
-    case Extern(e: ExternReference)
+    case FuncRef(f: FuncReference)
+    case ExternRef(e: ExternReference)
     
   enum Value:
     case TopValue
     case Num(n: NumValue)
-    case FuncNull
-    case FuncRef(r: FuncReference)
-    case ExternNull
-    case ExternRef(r: ExternReference)
+    case Ref(r: RefValue)
+    //case FuncNull
+    //case FuncRef(r: FuncReference)
+    //case ExternNull
+    //case ExternRef(r: ExternReference)
     //case Vec(v: VecValue)
     
 
@@ -89,10 +90,16 @@ trait Interpreter:
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
       
     def asFuncRef(using f: Failure): FuncReference = this match
-      case FuncRef(f) => f
-      case FuncRef(Top) => topFuncRef
+      case Ref(RefValue.FuncRef(r)) => r
+      case Ref(RefValue.FuncRef(Top)) => topFuncRef
       case TopValue => topFuncRef
       case _ => f.fail(TypeError, s"Expected funcref but got $this")
+
+    def asExternRef(using f: Failure): ExternReference = this match
+      case Ref(RefValue.ExternRef(r)) => r
+      case Ref(RefValue.ExternRef(Top)) => topExternRef
+      case TopValue => topExternRef
+      case _ => f.fail(TypeError, s"Expected externref but got $this")
 
   def topI32: I32
   def topI64: I64
@@ -106,8 +113,8 @@ trait Interpreter:
     case NumType.I64 => Value.Num(NumValue.Int64(topI64))
     case NumType.F32 => Value.Num(NumValue.Float32(topF32))
     case NumType.F64 => Value.Num(NumValue.Float64(topF64))
-    case ReferenceType.FuncRef => Value.FuncRef(topFuncRef)
-    case ReferenceType.ExternRef => Value.ExternRef(topExternRef)
+    case ReferenceType.FuncRef => Value.Ref(RefValue.FuncRef(topFuncRef))
+    case ReferenceType.ExternRef => Value.Ref(RefValue.ExternRef(topExternRef))
   
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
@@ -146,7 +153,7 @@ trait Interpreter:
   type ExcV
   type FuncIx
   type FunV
-  type FuncRef
+  type Ref
 
   given ValueWasmOps
     (using failure: Failure
@@ -187,17 +194,17 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-     , funcrefOps: ReferenceOps[FunV, FuncRef]
+     , funcrefOps: ReferenceOps[FunV, Ref]
      , externrefOps: ReferenceOps[WasmReference, Option[WasmReference]]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, J]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J] with
+     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
-    final val funcReferenceOps: ReferenceOps[FunV, FuncRef] = funcrefOps
+    final val funcReferenceOps: ReferenceOps[FunV, Ref] = funcrefOps
     final val externReferenceOps: ReferenceOps[WasmReference, Option[WasmReference]] = externrefOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -315,4 +322,4 @@ trait Interpreter:
 
   abstract class GenericInstance
     //extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, J]

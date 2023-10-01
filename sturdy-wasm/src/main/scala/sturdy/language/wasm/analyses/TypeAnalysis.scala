@@ -17,7 +17,7 @@ import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.floating.FloatOps
 import swam.syntax.*
-import swam.FuncType
+import swam.{FuncType, ReferenceType}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -41,9 +41,9 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Size = I32
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
-  type FuncRef = Powerset[FunctionInstance]
+  type Ref = Powerset[FunctionInstance]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -52,14 +52,15 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def numToRef(v: Value): Value = ???
     override def valToInt(v: Value): Int = ???
     override def funcRefToInt(r: Powerset[FunctionInstance]): Int = ???
-    override def funcRefToVal(r: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
-    override def valToFuncRef(v: TypeAnalysis.Value): Powerset[FunctionInstance] = ???
-    override def funcInstToFuncRef(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def makeDeref(r: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
+    override def makeRef(v: TypeAnalysis.Value): Powerset[FunctionInstance] = ???
+    override def funcInstToVal(f: FunctionInstance): TypeAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncRef(f: Powerset[FunctionInstance]): Powerset[FunctionInstance] = ???
-    override def makeNullRef: TypeAnalysis.Value = ???
-    override def makeNullFuncRef: Powerset[FunctionInstance] = ???
-    override def makeExternNullRef: TypeAnalysis.Value = ???
+    override def makeNullRefValue(t: ReferenceType): TypeAnalysis.Value = ???
+    override def isNull(r: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): Powerset[FunctionInstance] = ???
+    override def funcIxToExternRef(f: Int): TypeAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
@@ -100,14 +101,15 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: UpperBoundSymbolTable[TableAddr, FuncIx, FuncRef] = new UpperBoundSymbolTable(Powerset())
+    val tables: UpperBoundSymbolTable[TableAddr, FuncIx, Ref] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tabLimits: List[(Int, Option[Int])] = List()
+    override var tabTypes: List[ReferenceType] = List()
     given Failure = failure
 
-    implicit val z: ReferenceOps[FunV, FuncRef] = implicitly
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, WithJoin] = implicitly
+    implicit val z: ReferenceOps[FunV, Ref] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

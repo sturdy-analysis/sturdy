@@ -21,6 +21,8 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.references.{*, given}
+import swam.ReferenceType
+import swam.ReferenceType.{ExternRef, FuncRef}
 //import sturdy.values.references.given
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
@@ -39,7 +41,6 @@ object ConcreteInterpreter extends Interpreter:
   override type F32 = Float
   override type F64 = Double
   override type Bool = Boolean
-  // override type FuncReference = FunctionInstance
   override type FuncReference = Int
   override type ExternReference = Int
 
@@ -47,7 +48,6 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
-  //override def topFuncRef: FunctionInstance = throw new UnsupportedOperationException
   override def topFuncRef: Int = throw new UnsupportedOperationException
   override def topExternRef: Int = throw new UnsupportedOperationException
 
@@ -64,40 +64,84 @@ object ConcreteInterpreter extends Interpreter:
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
   override type FunV = FunctionInstance
-  override type FuncRef = Int
 
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, FuncRef, NoJoin] with
+  enum Ref:
+    case Func(i: Option[FuncIx])
+    case Extern(i: Option[Int])
+
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
     override def valToInt(v: Value): Int = v.asInt32
-    override def numToRef(v: Value): Value = v match {
-      case Value.Num(NumValue.Int32(-1)) => makeNullRef
-      case Value.Num(NumValue.Int32(r)) => Value.FuncRef(r)
-      case _ => makeNullRef
+    override def numToRef(v: Value): Value =
+      v match {
+      case Value.Num(NumValue.Int32(-1)) => makeNullRefValue(FuncRef)
+      case Value.Num(NumValue.Int32(r)) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
+      case _ => makeNullRefValue(FuncRef)
     }
-    override def funcRefToInt(r: Int): Int = r
-    override def funcRefToVal(r: ConcreteInterpreter.FuncRef): ConcreteInterpreter.Value = Value.FuncRef(r)
-    override def valToFuncRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.FuncRef = v match {
-      case Value.FuncNull => -1
-      case _ =>  v.asFuncRef
+    override def funcRefToInt(r: Ref): Int = r match {
+      case Ref.Func(idx) => idx match {
+        case Some(i) => i
+      }
     }
-    override def funcInstToFuncRef(f: FunctionInstance): Int = f match {
-      case FunctionInstance.Wasm(_, funcIx, _, _) => funcIx
-      case _ => print("fail funV"); -1
+    override def makeRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.Ref =
+      v match {
+      case Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Ref.Func(None)
+      case Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Ref.Extern(None)
+      case Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r)) => Ref.Func(Some(r))
+      case Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r)) => Ref.Extern(Some(r))
+      case _ =>  Ref.Func(None)
     }
-    override def funcInstToFunV(f: FunctionInstance): FunctionInstance = f
-    override def funVToFuncRef(f: FunctionInstance): Int = f match {
-      case FunctionInstance.Wasm(_,funcIx,_,_) => funcIx
-      case _ => print("fail funV"); -1
-    }
-    override def makeNullRef: ConcreteInterpreter.Value = Value.FuncNull
-    override def makeNullFuncRef: Int = -1
-    override def makeExternNullRef: ConcreteInterpreter.Value = Value.ExternNull
+    override def makeDeref(r: ConcreteInterpreter.Ref): ConcreteInterpreter.Value =
+      r match {
+        case Ref.Func(None) => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+        case Ref.Extern(None) => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+        case Ref.Func(Some(ref)) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(ref))
+        case Ref.Extern(Some(ref)) => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(ref))
+        case _ => print("fail ref"); Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+      }
+    override def makeNullRef(t: ReferenceType): Ref =
+      t match {
+        case FuncRef => Ref.Func(None)
+        case ExternRef => Ref.Extern(None)
+      }
+    override def makeNullRefValue(t: ReferenceType): ConcreteInterpreter.Value =
+      t match {
+        case FuncRef => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+        case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+      }
 
-    //override def refvtoVal(r: FuncReference): Value = Value.Ref(RefValue.Func(r))
+    override def isNull(r: Ref): ConcreteInterpreter.Value =
+      r match {
+        case Ref.Func(i) => i match {
+          case Some(_) => Value.Num(NumValue.Int32(0))
+          case None => Value.Num(NumValue.Int32(1))
+        }
+        case Ref.Extern(i) => i match {
+          case Some(_) => Value.Num(NumValue.Int32(0))
+          case None => Value.Num(NumValue.Int32(1))
+        }
+      }
+
+    override def funcInstToVal(f: FunctionInstance): ConcreteInterpreter.Value =
+      f match {
+        case FunctionInstance.Wasm(_, funcIx, _, _) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(funcIx))
+        case _ => print("fail funV"); Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+      }
+    override def funcInstToFunV(f: FunctionInstance): FunctionInstance = f
+    override def funVToFuncRef(f: FunctionInstance): Ref =
+      f match {
+      case FunctionInstance.Wasm(_,funcIx,_,_) => Ref.Func(Some(funcIx))
+      case _ => Ref.Func(None)
+    }
+    override def funcIxToExternRef(f: Int): Value =
+      f match {
+        case -1 => makeNullRefValue(ExternRef)
+        case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f))
+      }
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
@@ -138,21 +182,22 @@ object ConcreteInterpreter extends Interpreter:
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
 
-    override def jvFuncRef: NoJoin[FuncRef] = implicitly
+    override def jvFuncRef: NoJoin[Ref] = implicitly
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: ConcreteSymbolTable[TableAddr, FuncIx, FuncRef] = new ConcreteSymbolTable[TableAddr, FuncIx, FuncRef]
+    val tables: ConcreteSymbolTable[TableAddr, FuncIx, Ref] = new ConcreteSymbolTable[TableAddr, FuncIx, Ref]
    // val funTable: ConcreteSymbolTable[TableAddr, FuncIx] = new ConcreteSymbolTable[TableAddr, FuncIx]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
-    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tabLimits: List[(Int, Option[Int])] = List()
+    override var tabTypes: List[ReferenceType] = List()
     private given Failure = failure
     //import sturdy.values.references.{given ConcreteReferenceOps[Value]}
-    implicit val z: ReferenceOps[FunV, FuncRef] = implicitly
-    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, NoJoin] = implicitly
+    implicit val z: ReferenceOps[FunV, Ref] = implicitly
+    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, NoJoin] = implicitly
     //val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, NoJoin] = implicitly
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
     override val fixpointSuper = fixpoint

@@ -14,9 +14,6 @@ import sturdy.effect.Effect
   */
 trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
 
-  var min: Int
-  var max: Option[Int]
-
   def get(key: Key, symbol: Symbol): JOption[J, Entry]
   def set(key: Key, symbol: Symbol, newEntry: Entry): Unit
   def size(key: Key, symbol: Symbol): Int

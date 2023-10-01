@@ -5,7 +5,7 @@ import sturdy.data.MayJoin
 import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.language.wasm.ConcreteInterpreter.ExternReference
 import sturdy.values.booleans.BooleanBranching
-import swam.{FuncType, GlobalIdx}
+import swam.{FuncType, GlobalIdx, ReferenceType}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
@@ -22,7 +22,7 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.ReferenceInst
 
-trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J[_] <: MayJoin[_]]:
+trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, J[_] <: MayJoin[_]]:
 //trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, J[_] <: MayJoin[_]]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
@@ -44,17 +44,17 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, FuncRef, J[_] <: MayJoin
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-  val funcReferenceOps: ReferenceOps[FunV, FuncRef]
+  val funcReferenceOps: ReferenceOps[FunV, Ref]
   val externReferenceOps: ReferenceOps[WasmReference, Option[WasmReference]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, FuncRef, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Ref, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, FuncRef, J[_] <: MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Ref, J[_] <: MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
   
@@ -63,15 +63,20 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, FuncRef, J[_] <: MayJoi
   def intToVal(i: Int): V
   def valToInt(v: V): Int
   def numToRef(v: V): V
-  def funcRefToInt(r: FuncRef): Int
-  def funcRefToVal(r: FuncRef): V
-  def valToFuncRef(v: V): FuncRef
-  def funcInstToFuncRef(f: FunctionInstance): FuncRef
+  def funcRefToInt(r: Ref): Int
+ 
+  def makeRef(v: V): Ref
+  def makeDeref(r: Ref): V
+  def makeNullRef(t: ReferenceType): Ref
+  def makeNullRefValue(t: ReferenceType): V
+  def isNull(r: Ref): V
+  
+  def funcInstToVal(f: FunctionInstance): V
   def funcInstToFunV(f: FunctionInstance): FunV
-  def funVToFuncRef(i: FunV): FuncRef
-  def makeNullRef: V
-  def makeNullFuncRef: FuncRef
-  def makeExternNullRef: V
+  def funVToFuncRef(i: FunV): Ref
+  
+  def funcIxToExternRef(f: Int): V
+
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

@@ -26,6 +26,7 @@ import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.language.wasm.Parsing
 import sturdy.values.relational.EqOps
 import swam.ModuleLoader
+import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.binary.ModuleParser
 import swam.text.unresolved.FreshId
 import swam.text.unresolved.NoId
@@ -39,7 +40,7 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts2").toURI;
+  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts 2.0").toURI;
   val spectest = Parsing.fromText(pathSpectest)
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("table_get.wast")).sorted.foreach { p =>
@@ -72,6 +73,10 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
       case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
+      case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
+      case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
+      case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
+      case (Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
       case _ => false
     }
 
@@ -178,6 +183,19 @@ def constExprToVal(inst: unresolved.Inst): Value =
     case unresolved.i64.Const(l) => Value.Num(ConcreteInterpreter.NumValue.Int64(l))
     case unresolved.f32.Const(f) => Value.Num(ConcreteInterpreter.NumValue.Float32(f))
     case unresolved.f64.Const(d) => Value.Num(ConcreteInterpreter.NumValue.Float64(d))
+    case unresolved.RefNull(t) => t match {
+      case FuncRef => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+      case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+    }
+    case unresolved.RefFunc(x) => x match {
+      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
+      case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+    }
+    case unresolved.RefExtern(x) => x match {
+      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
+      case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+    }
+
     case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 def isNaN(value: Value): Boolean =
