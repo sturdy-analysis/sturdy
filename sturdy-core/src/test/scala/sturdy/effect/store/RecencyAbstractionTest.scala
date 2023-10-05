@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers.{be, *}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.{PhysicalAddress, RecencyStore, VirtualAddress}
-import sturdy.values.{Finite, Widen}
+import sturdy.values.{Finite, Join, Widen}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.PowersetAddr
 
@@ -75,6 +75,55 @@ class RecencyAbstractionTest extends AnyFunSuite:
     store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
     store.read(a2) should be(JOptionA.Some(NumericInterval(1, 6)))
     store.read(a3) should be(JOptionA.Some(NumericInterval(8, 9)))
+  }
+
+  test("Join of powersets of virtual addresses") {
+    val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
+    val ctx1 = "ctx1"
+
+    def joinIsReflexive(virts: PowVirtualAddress[Ctx]) =
+      Join(virts, virts).get shouldBe virts
+      Join(virts, virts).hasChanged shouldBe false
+
+    def joinIsCommutative(virt1: PowVirtualAddress[Ctx], virt2: PowVirtualAddress[Ctx], virt3: PowVirtualAddress[Ctx], changed: Boolean) =
+      Join(virt1, virt2).get shouldBe virt3
+      Join(virt1, virt2).hasChanged shouldBe changed
+      Join(virt2, virt1).get shouldBe virt3
+      Join(virt2, virt1).hasChanged shouldBe changed
+
+    PowVirtualAddress.empty[Ctx].isEmpty shouldBe true
+    PowVirtualAddress.empty[Ctx].isStrong shouldBe true
+
+    joinIsReflexive(PowVirtualAddress.empty[Ctx])
+    joinIsCommutative(PowVirtualAddress.empty[Ctx], PowVirtualAddress.empty[Ctx], PowVirtualAddress.empty[Ctx], false)
+
+    val a1 = store.alloc(ctx1)
+    val virt1 = PowVirtualAddress(a1)
+
+    virt1.isEmpty shouldBe false
+    virt1.isStrong shouldBe true
+
+    joinIsReflexive(virt1)
+    joinIsCommutative(virt1, virt1, virt1, false)
+    joinIsCommutative(PowVirtualAddress.empty[Ctx], virt1, virt1, true)
+
+    val a2 = store.alloc(ctx1)
+    val virt2 = PowVirtualAddress(a2)
+    val virt3 = PowVirtualAddress(a1, a2)
+
+    virt2.isEmpty shouldBe false
+    virt3.isEmpty shouldBe false
+    virt1.isStrong shouldBe false
+    virt2.isStrong shouldBe true
+    virt3.isStrong shouldBe false
+
+    joinIsReflexive(virt1)
+    joinIsReflexive(virt2)
+    joinIsReflexive(virt3)
+
+    joinIsCommutative(virt1, virt2, virt3, true)
+    joinIsCommutative(virt1, virt3, virt3, true)
+    joinIsCommutative(virt2, virt3, virt3, true)
   }
 
   test("Allocation of the same context in two different branches") {
@@ -329,6 +378,6 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx, Recent), PhysicalAddress(ctx, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx, Recent))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(2, 2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
     store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
   }
