@@ -21,7 +21,8 @@ object test extends App{
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
   interp.eval(IADD)
-
+  interp.eval(BIPUSH(3))
+  interp.eval(ISUB)
   val result = interp.stack.pop()
   println(result)
 
