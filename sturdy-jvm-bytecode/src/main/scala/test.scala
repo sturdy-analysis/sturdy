@@ -26,6 +26,12 @@ object test extends App{
   val result = interp.stack.pop()
   println(result)
 
+  interp.eval(LoadFloat(3.2f))
+  interp.eval(LoadFloat(4.2f))
+  interp.eval(FADD)
+  val result2 = interp.stack.pop()
+  println(result2)
+
 
 }
 

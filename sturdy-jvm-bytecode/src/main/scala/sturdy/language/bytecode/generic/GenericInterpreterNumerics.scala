@@ -9,7 +9,6 @@ import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import org.opalj.br.instructions.*
-import sturdy.language.bytecode.generic.AnnotatedInstruction
 
 
 class GenericInterpreterNumerics[V]
@@ -52,7 +51,14 @@ class GenericInterpreterNumerics[V]
       i32ops.integerLit(inst.value)
     case inst: SIPUSH =>
       i32ops.integerLit(inst.value)
-
+    case inst: LoadInt =>
+      i32ops.integerLit(inst.value)
+    case inst: LoadLong =>
+      i64ops.integerLit(inst.value)
+    case inst: LoadFloat =>
+      f32ops.floatingLit(inst.value)
+    case inst: LoadDouble =>
+      f64ops.floatingLit(inst.value)
   def evalNumericUnOP(inst: Instruction, v1: V): V = inst match
       case inst: INEG.type =>
         ???
