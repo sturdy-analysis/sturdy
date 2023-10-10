@@ -61,9 +61,9 @@ class GenericInterpreterNumerics[V]
       f64ops.floatingLit(inst.value)
   def evalNumericUnOP(inst: Instruction, v1: V): V = inst match
       case inst: INEG.type =>
-        ???
+        i32ops.sub(i32ops.integerLit(0), v1)
       case inst: LNEG.type =>
-        ???
+        i64ops.sub(i64ops.integerLit(0), v1)
       case inst: FNEG.type =>
         f32ops.negated(v1)
       case inst: DNEG.type =>
@@ -106,9 +106,15 @@ class GenericInterpreterNumerics[V]
       case LREM =>
         i64ops.remainder(v1, v2)
       case FREM =>
-        ???
+        val convertv1 = convert_f32_i32(v1, (config.Overflow.Fail && config.Bits.Signed))
+        val convertv2 = convert_f32_i32(v2, (config.Overflow.Fail && config.Bits.Signed))
+        val result = i32ops.remainder(convertv1, convertv2)
+        convert_i32_f32(result, config.Bits.Signed)
       case DREM =>
-        ???
+        val convertv1 = convert_f64_i64(v1, (config.Overflow.Fail && config.Bits.Signed))
+        val convertv2 = convert_f64_i64(v2, (config.Overflow.Fail && config.Bits.Signed))
+        val result = i64ops.remainder(convertv1, convertv2)
+        convert_i64_f64(result, config.Bits.Signed)
       case ISHL =>
         i32ops.shiftLeft(v1, v2)
       case LSHL =>
@@ -133,6 +139,38 @@ class GenericInterpreterNumerics[V]
         i32ops.bitXor(v1, v2)
       case LXOR =>
         i64ops.bitXor(v1, v2)
+
+  def evalConvertOp(inst: Instruction, v: V): V = inst match
+    case I2L =>
+      convert_i32_i64(v, config.Bits.Signed)
+    case I2F =>
+      convert_i32_f32(v, config.Bits.Signed)
+    case I2D =>
+      convert_i32_f64(v, config.Bits.Signed)
+    case L2I =>
+      convert_i64_i32(v, NilCC)
+    case L2F =>
+      convert_i64_f32(v, config.Bits.Signed)
+    case L2D =>
+      convert_i64_f64(v, config.Bits.Signed)
+    case F2I =>
+      convert_f32_i32(v, (config.Overflow.Fail && config.Bits.Signed))
+    case F2L =>
+      convert_f32_i64(v, (config.Overflow.Fail && config.Bits.Signed))
+    case F2D =>
+      convert_f32_f64(v, NilCC)
+    case D2I =>
+      convert_f64_i32(v, (config.Overflow.Fail && config.Bits.Signed))
+    case D2L =>
+      convert_f64_i64(v, (config.Overflow.Fail && config.Bits.Signed))
+    case D2F =>
+      convert_f64_f32(v, NilCC)
+    case I2B =>
+      ???
+    case I2C =>
+      ???
+    case I2S =>
+      ???
 
 
 

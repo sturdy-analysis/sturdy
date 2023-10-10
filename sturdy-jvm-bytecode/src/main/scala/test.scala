@@ -23,6 +23,7 @@ object test extends App{
   interp.eval(IADD)
   interp.eval(BIPUSH(3))
   interp.eval(ISUB)
+  interp.eval(INEG)
   val result = interp.stack.pop()
   println(result)
 
@@ -31,6 +32,18 @@ object test extends App{
   interp.eval(FADD)
   val result2 = interp.stack.pop()
   println(result2)
+
+  interp.eval(BIPUSH(12))
+  interp.eval(BIPUSH(5))
+  interp.eval(IREM)
+  val result3 = interp.stack.pop()
+  println(result3)
+
+  interp.eval(LoadFloat(12.3f))
+  interp.eval(LoadFloat(5.0f))
+  interp.eval(FREM)
+  val result4 = interp.stack.pop()
+  println(result4)
 
 
 }

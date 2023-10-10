@@ -125,7 +125,8 @@ trait GenericInterpreter[V]:
 
     // Conversions
     case x if (133 <= x && x <= 147) =>
-      ???
+      val v1 = stack.popOrAbort()
+      stack.push(num.evalConvertOp(inst, v1))
 
     // Numeric Comparison
     case x if (148 <= x && x <= 152) =>
