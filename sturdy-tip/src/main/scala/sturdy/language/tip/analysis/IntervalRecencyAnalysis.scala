@@ -46,9 +46,9 @@ object IntervalRecencyAnalysis extends Interpreter,
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
 
     private val initPhysicalStore = initStore.map { (addr,v) => PhysicalAddress(addr, Recency.Recent) -> v }.toMap
-    private val astore: Store[PowPhysicalAddress[AllocationSiteAddr], Value, J] = new AStoreThreaded(initPhysicalStore)
+    private val astore: AStoreThreaded[PhysicalAddress[AllocationSiteAddr], PowPhysicalAddress[AllocationSiteAddr], Value] = new AStoreThreaded(initPhysicalStore)
 
-    override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = new RecencyStore(astore)
+    override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = new RecencyStore[AllocationSiteAddr, Addr, Value](astore)
     override val alloc: Allocator[Addr, AllocationSite] = new Allocator with Stateless:
       override def alloc(ctx: AllocationSite): PowVirtualAddress[AllocationSiteAddr] =
         PowVirtualAddress(store.alloc(References.allocationSiteAddr(ctx)))

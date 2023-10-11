@@ -6,8 +6,8 @@ import sturdy.effect.store.*
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
-class AddressTranslation[Context] extends Effect:
-  var mapping: Map[(Context,Int), PowRecency] = Map()
+class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) extends Effect:
+  var mapping: Map[(Context,Int), PowRecency] = init
   given finiteVirt: Finite[(Context,Int)] with {}
   given finitePowRecency: Finite[PowRecency] with {}
 
@@ -52,6 +52,11 @@ class AddressTranslation[Context] extends Effect:
     mapping.groupMapReduce(_._1._1){
         case ((ctx, n), _) => PowVirtualAddress(VirtualAddress(ctx, n, this))
       }(Join.compute)
+
+  override def clone(): AddressTranslation[Context] = new AddressTranslation[Context](mapping)
+
+object AddressTranslation:
+  def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
 
 class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslation: AddressTranslation[Context])
   extends AbstractAddr[VirtualAddress[Context]]:

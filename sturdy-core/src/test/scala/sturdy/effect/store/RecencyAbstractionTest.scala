@@ -128,7 +128,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Allocation of the same context in two different branches") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -173,7 +174,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Allocate addresses for the same context in separate branches") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -197,7 +199,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Strong updates on the same address in separate branches") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -211,7 +214,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Recency store should handle reallocation that happens in while loops") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
 
     /**
      * Program:
@@ -341,7 +345,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = AllocSite x Recency") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 
@@ -364,7 +369,8 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = Unit x Recency") {
     val store = new RecencyStore[Ctx, VAddr, NumericInterval[Int]](AStoreThreaded(Map()))
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val closure = new RecencyClosure[Ctx](store.getAddressTranslation, store)(using store.closedEquality)
+    val effectStack: EffectStack = new EffectStack(List(closure))
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 
