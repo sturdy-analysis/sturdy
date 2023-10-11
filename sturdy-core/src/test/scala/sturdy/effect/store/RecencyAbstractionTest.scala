@@ -1,14 +1,14 @@
 package sturdy.effect.store
 
 import org.scalatest.funsuite.AnyFunSuite
-import sturdy.effect.store.Recency.*
-import org.scalatest.matchers.should.Matchers.{be, *}
+import sturdy.values.references.Recency.*
+import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.store.{PhysicalAddress, RecencyStore, VirtualAddress}
-import sturdy.values.{Finite, Join, Widen}
+import sturdy.effect.store.RecencyStore
+import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
-import sturdy.values.references.PowersetAddr
+import sturdy.values.references.{*, given}
 
 class RecencyAbstractionTest extends AnyFunSuite:
 

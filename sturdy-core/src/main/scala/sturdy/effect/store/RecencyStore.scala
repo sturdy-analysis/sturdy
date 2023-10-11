@@ -4,7 +4,7 @@ import sturdy.{IsSound, Soundness}
 import sturdy.data.{JOption, JOptionA, WithJoin, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
-import sturdy.values.references.{AbstractAddr, PowersetAddr, joinPowersetAddr}
+import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
 import scala.collection.immutable.{HashMap, IntMap}
@@ -17,18 +17,13 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 
   private val store: initStore.type = initStore
-  protected var addressTranslation: Map[(Context,Int), PowRecency] = Map()
+  protected val addressTranslation: AddressTranslation[Context] = new AddressTranslation[Context]
   protected var mostRecent: Map[Context, Powerset[Int]] = HashMap()
   protected var next: Int = 0
   def getNext() = { next += 1; next }
 
   private def virtToPhys(v: VirtualAddress[Context]): PowPhysicalAddress[Context] =
-    addressTranslation.get(v.ctx, v.n) match
-      case None =>
-        throw new IllegalStateException(s"Unbound virtual address $v")
-      case Some(PowRecency.Recent) => PowersetAddr(PhysicalAddress(v.ctx, Recency.Recent))
-      case Some(PowRecency.Old) => PowersetAddr(PhysicalAddress(v.ctx, Recency.Old))
-      case Some(PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(v.ctx, Recency.Recent), PhysicalAddress(v.ctx, Recency.Old))
+    addressTranslation(v)
 
   private def virtToPhys(vs: Virt): PowPhysicalAddress[Context] =
     if (vs.isEmpty)
@@ -55,7 +50,7 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
     mostRecent.get(ctx) match
       case Some(mostRecentVirts) =>
         mostRecent += ctx -> Powerset(fresh)
-        val virt = VirtualAddress(ctx, fresh, virtToPhys)
+        val virt = VirtualAddress(ctx, fresh, addressTranslation)
         addressTranslation += virt.identifier -> PowRecency.Recent
         store.read(PowersetAddr(PhysicalAddress(ctx, Recency.Recent))).map { oldVal =>
           store.write(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), oldVal)
@@ -65,7 +60,7 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
         virt
       case None =>
         mostRecent += ctx -> Powerset(fresh)
-        val virt = VirtualAddress(ctx, fresh, virtToPhys)
+        val virt = VirtualAddress(ctx, fresh, addressTranslation)
         addressTranslation += virt.identifier -> PowRecency.Recent
         virt
 
@@ -83,41 +78,28 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   override type State = RecencyStoreState
 
   case class RecencyStoreState(store: initStore.State,
-                               addrTrans: Map[(Context,Int), PowRecency],
+                               addrTrans: addressTranslation.State,
                                mostRecent: Map[Context, Powerset[Int]])
 
   override def getState: RecencyStoreState =
-    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation, this.mostRecent)
+    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
 
   override inline def setState(st: RecencyStoreState): Unit =
     store.setState(st.store.asInstanceOf)
-    addressTranslation = st.addrTrans
+    addressTranslation.setState(st.addrTrans)
     mostRecent = st.mostRecent
 
-  def virtualAddresses: PowersetAddr[VirtualAddress[Context], VirtualAddress[Context]] =
-    PowersetAddr(addressTranslation.keySet.map((ctx, n) => VirtualAddress(ctx, n, virtToPhys)))
+  def virtualAddresses: PowVirtualAddress[Context] =
+    addressTranslation.virtualAddresses
 
-  def virtualAddresses(ctx: Context): PowersetAddr[VirtualAddress[Context], VirtualAddress[Context]] =
-    PowersetAddr(addressTranslation.keySet.filter(_._1 == ctx).map((ctx, n) => VirtualAddress(ctx, n, virtToPhys)))
+  def virtualAddresses(ctx: Context): PowVirtualAddress[Context] =
+    addressTranslation.virtualAddresses(ctx)
 
   def physicalAddressesByContext: Map[Context, PowPhysicalAddress[Context]] =
-    val x = addressTranslation.groupMapReduce
-      (_._1._1)
-      { case ((ctx,_), PowRecency.Old) => PowersetAddr(PhysicalAddress(ctx, Recency.Old))
-        case ((ctx,_), PowRecency.Recent) => PowersetAddr(PhysicalAddress(ctx, Recency.Recent))
-        case ((ctx,_), PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(ctx, Recency.Old), PhysicalAddress(ctx, Recency.Recent))
-      }
-      (Join.compute)
-    x
+    addressTranslation.physicalAddressesByContext
 
   def virtualAddressesByContext: Map[Context, PowVirtualAddress[Context]] =
-    val x = addressTranslation.groupMapReduce
-      (_._1._1)
-      {
-        case ((ctx, n), _) => PowersetAddr(VirtualAddress(ctx, n, virtToPhys))
-      }
-      (Join.compute)
-    x
+    addressTranslation.virtualAddressesByContext
 
   def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Context], vSoundness: Soundness[cV, V]): IsSound =
     val contextMap = physicalAddressesByContext

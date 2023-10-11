@@ -50,8 +50,8 @@ object IntervalRecencyAnalysis extends Interpreter,
 
     override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = new RecencyStore(astore)
     override val alloc: Allocator[Addr, AllocationSite] = new Allocator with Stateless:
-      override def alloc(ctx: AllocationSite): PowersetAddr[VirtualAddress[AllocationSiteAddr], VirtualAddress[AllocationSiteAddr]] =
-        PowersetAddr(store.alloc(References.allocationSiteAddr(ctx)))
+      override def alloc(ctx: AllocationSite): PowVirtualAddress[AllocationSiteAddr] =
+        PowVirtualAddress(store.alloc(References.allocationSiteAddr(ctx)))
 
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))

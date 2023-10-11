@@ -1,13 +1,62 @@
-package sturdy.effect.store
+package sturdy.values.references
 
-import sturdy.values.references.{AbstractAddr, PowersetAddr}
-import sturdy.values.{Changed, Combine, Finite, Join, MaybeChanged, Structural, Unchanged, Widening}
+import sturdy.data.given
+import sturdy.effect.Effect
+import sturdy.effect.store.*
+import sturdy.values.*
+import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
-class VirtualAddress[Context](val ctx: Context, val n: Int,
-                              val currentPhysical: VirtualAddress[Context] => PowPhysicalAddress[Context])
+class AddressTranslation[Context] extends Effect:
+  var mapping: Map[(Context,Int), PowRecency] = Map()
+  given finiteVirt: Finite[(Context,Int)] with {}
+  given finitePowRecency: Finite[PowRecency] with {}
+
+  def apply(virt: VirtualAddress[Context]): PowPhysicalAddress[Context] =
+    mapping.get((virt.ctx, virt.n)) match
+      case Some(PowRecency.Recent) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Recent))
+      case Some(PowRecency.Old) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Old))
+      case Some(PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Recent), PhysicalAddress(virt.ctx, Recency.Old))
+      case None => throw IllegalStateException(s"Virtual address $virt is not bound to a physical address")
+
+  def += (kv: ((Context,Int), PowRecency)): Unit =
+    mapping += kv
+
+  def -=(virt: (Context, Int)): Unit =
+    mapping -= virt
+
+  override type State = Map[(Context,Int), PowRecency]
+
+  override def getState: State = mapping
+
+  override def setState(st: State): Unit =
+    mapping = st
+
+  override def join: Join[State] = implicitly[Join[State]]
+
+  override def widen: Widen[State] = implicitly[Widen[State]]
+
+  def virtualAddresses: PowVirtualAddress[Context] =
+    PowVirtualAddress(mapping.keySet.view.map((ctx,n) => VirtualAddress(ctx, n, this)))
+
+  def virtualAddresses(ctx: Context): PowVirtualAddress[Context] =
+    PowVirtualAddress(mapping.keySet.view.filter(_._1 == ctx).map((ctx,n) => VirtualAddress(ctx, n, this)))
+
+  def physicalAddressesByContext: Map[Context, PowPhysicalAddress[Context]] =
+    mapping.groupMapReduce(_._1._1){
+        case ((ctx, _), PowRecency.Old) => PowersetAddr(PhysicalAddress(ctx, Recency.Old))
+        case ((ctx, _), PowRecency.Recent) => PowersetAddr(PhysicalAddress(ctx, Recency.Recent))
+        case ((ctx, _), PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(ctx, Recency.Old), PhysicalAddress(ctx, Recency.Recent))
+      }(Join.compute)
+
+  def virtualAddressesByContext: Map[Context, PowVirtualAddress[Context]] =
+    mapping.groupMapReduce(_._1._1){
+        case ((ctx, n), _) => PowVirtualAddress(VirtualAddress(ctx, n, this))
+      }(Join.compute)
+
+class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslation: AddressTranslation[Context])
   extends AbstractAddr[VirtualAddress[Context]]:
 
-  def physical: PowPhysicalAddress[Context] = currentPhysical(this)
+  def physical: PowPhysicalAddress[Context] = addressTranslation(this)
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = physical.isStrong
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)
@@ -60,7 +109,7 @@ type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], Physic
  * Invariant: `addrs` is empty iff `addressMap` is `None`.
  * Assumption: The address map of all virtual addresses is the same.
  */
-class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressMap: Option[VirtualAddress[Context] => PowPhysicalAddress[Context]]) extends AbstractAddr[VirtualAddress[Context]]:
+class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressMap: Option[AddressTranslation[Context]]) extends AbstractAddr[VirtualAddress[Context]]:
   def virtualAddresses: Iterable[VirtualAddress[Context]] =
     addressMap match
       case Some(addrMap) =>  addrs.flatMap((ctx,idxs) => idxs.map(idx => VirtualAddress(ctx, idx, addrMap)))
@@ -88,11 +137,13 @@ class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressM
 object PowVirtualAddress:
   def empty[Context]: PowVirtualAddress[Context] = new PowVirtualAddress[Context](Map.empty, None)
   def apply[Context](virtualAddresses: VirtualAddress[Context]*): PowVirtualAddress[Context] =
+    apply(virtualAddresses)
+  def apply[Context](virtualAddresses: Iterable[VirtualAddress[Context]]): PowVirtualAddress[Context] =
     var addrs = Map.empty[Context, Set[Int]]
-    var addrMap: Option[VirtualAddress[Context] => PowPhysicalAddress[Context]] = None
-    for(virt <- virtualAddresses) {
+    var addrMap: Option[AddressTranslation[Context]] = None
+    for (virt <- virtualAddresses) {
       addrs += virt.ctx -> (addrs.getOrElse(virt.ctx, Set.empty[Int]) + virt.n)
-      addrMap = Some(virt.currentPhysical)
+      addrMap = Some(virt.addressTranslation)
     }
     new PowVirtualAddress(addrs, addrMap)
 
@@ -120,3 +171,6 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
               joined += ctx2 -> indices1.union(indices2)
         MaybeChanged(new PowVirtualAddress(joined, v1.addressMap), changed)
 
+given orderingPowersetVirtAddr[Context]: PartialOrder[PowVirtualAddress[Context]] with
+  override def lteq(x: PowVirtualAddress[Context], y: PowVirtualAddress[Context]): Boolean =
+    x.physicalAddresses.subsetOf(y.physicalAddresses)
