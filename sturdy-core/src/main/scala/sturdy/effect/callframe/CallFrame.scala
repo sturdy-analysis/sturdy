@@ -4,6 +4,9 @@ import sturdy.data.MayJoin
 import sturdy.data.{NoJoin, JOption}
 import sturdy.effect.Effect
 
+/** [[CallFrame]] contains local variables valid within a function call.
+ * The variables may be mutable or immutable.
+ */
 trait CallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends Effect:
   def data: Data
   def getLocal(x: Int): JOption[J, V]

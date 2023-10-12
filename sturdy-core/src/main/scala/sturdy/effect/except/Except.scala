@@ -6,7 +6,7 @@ import sturdy.effect.Effect
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
-
+/** Effect [[Except]] causes and handles exceptions */
 trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effect, ObservableExcept[Exc]:
   val exceptional: Exceptional[Exc, E, J]
 

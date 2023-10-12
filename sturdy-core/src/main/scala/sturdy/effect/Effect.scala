@@ -3,13 +3,32 @@ package sturdy.effect
 import sturdy.data.CombineUnit
 import sturdy.values.{Join, Widen}
 
+/**
+ * [[Effect]] is an interface for effectful computations, such as computations mutating variables or causing exceptions.
+ *
+ * [[Effect]]s carry an internal state that changes throughout the program evaluation.
+ */
 trait Effect:
+  /** The internal state of the effect. */
   type State
+
+  /**
+   * Returns the internal state of the effect.
+   * The returned state must not be mutated afterwards.
+   */
   def getState: State
+
+  /** Overwrite the current internal state of the effect with the given state. */
   def setState(st: State): Unit
+
+  /** Joins two internal states of the effect. */
   def join: Join[State]
+
+  /** Widens two internal states of the effect. */
   def widen: Widen[State]
 
+  /** [[ComputationJoiner]] joins two effectful computations, including this effect.
+   */
   final def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
     private val original = getState
     private var afterFirst: State = _

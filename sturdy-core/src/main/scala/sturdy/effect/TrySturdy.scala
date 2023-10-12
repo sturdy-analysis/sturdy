@@ -18,8 +18,13 @@ trait SturdyException extends SturdyThrowable
 case class RecurrentCall(frame: Any) extends SturdyThrowable:
   override def toString: String = s"RecurrentCall $frame"
 
-
-
+/**
+ * `TrySturdy` is the result of an effectful computation:
+ *  - [[TrySturdy.Success]] is the result of a successful computation with a resulting value.
+ *  - [[TrySturdy.Failure]] is the result of a computation that crashed due to a fatal error.
+ *  - [[TrySturdy.Exception]] is the result of a computation that crashed due to an exception within the evaluated program.
+ *  - [[TrySturdy.Recurrent]] is the result of a computation that encountered a recurrent recursive call (a recursive call that reappears further up the stack). 
+ */
 enum TrySturdy[+A]:
   protected case Success(a: A)
   protected case Failure(f: SturdyFailure)

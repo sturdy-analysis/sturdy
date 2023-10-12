@@ -11,6 +11,10 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
+/** Fixpoint combinator [[Outermost]] iterates on the innermost strongly-connected subgraphs of the call graph of the abstract interpreter.
+ * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
+ * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
+ */
 def outermost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])

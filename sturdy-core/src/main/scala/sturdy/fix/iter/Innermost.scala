@@ -12,6 +12,11 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
+/**
+ * Fixpoint combinator [[Innermost]] iterates on the innermost strongly-connected subgraphs of the call graph of the abstract interpreter.
+ * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
+ * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
+ */
 def innermost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
@@ -19,6 +24,7 @@ def innermost[Dom, Codom, Ctx]
   (using Finite[Dom], Finite[Ctx], Widen[Codom])
   : Innermost[Dom, Codom, Ctx] =
   new Innermost(config, state, context)
+
 
 final class Innermost[Dom, Codom, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
