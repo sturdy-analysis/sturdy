@@ -21,6 +21,7 @@ import sturdy.effect.EffectStack
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
+import TipFailure.*
 
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
@@ -64,15 +65,26 @@ given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V]
     case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
     case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
-import TipFailure.*
-
+/**
+ * The generic interpreter for the Tip language (https://github.com/cs-au-dk/TIP).
+ *
+ * The generic interpreter captures the core semantics of the language and
+ * is used to derive abstract interpreters and as well as the concrete interpreter.
+ * This is useful for sharing code between different abstract interpreters,
+ * but also simplifies the soundness proof as no reasoning about the generic interpreter
+ * is necessary (https://doi.org/10.1145/3236767).
+ * @param V The type of values
+ * @param Addr The type of addresses
+ * @param J Abstracts over if the interpreter joins or not.
+ *           - The concrete interpreter defines `J` as [[NoJoin]], meaning the interpreter does not join.
+ *           - The abstract interpreters defines `J` to be [[WithJoin]], meaning the interpreter does join.
+ */
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // fixpoint
   val fixpoint: EffectStack ?=> fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
-  // joins
   implicit def jv: J[V]
 
   // value components
