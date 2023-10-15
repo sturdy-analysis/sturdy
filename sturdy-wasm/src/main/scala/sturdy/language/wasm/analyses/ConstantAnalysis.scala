@@ -43,26 +43,22 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Size = I32
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
-  type Ref = I32
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToInt(v: Value): Int = ???
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
     override def numToRef(v: Value): Value = ???
-    override def funcRefToInt(r: Topped[Int]): Int = ???
-    override def makeDeref(r: Topped[Int]): ConstantAnalysis.Value = ???
-    override def makeRef(v: ConstantAnalysis.Value): Topped[Int] = ???
-    override def funcInstToVal(f: FunctionInstance): ConstantAnalysis.Value = ???
+    override def funcRefToInt(r: Value): Int = ???
+    override def makeRef(f: FunctionInstance): ConstantAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToFuncRef(f: Powerset[FunctionInstance]): Topped[Int] = ???
-    override def makeNullRefValue(t: ReferenceType): ConstantAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): Topped[Int] = ???
-    override def isNull(r: Topped[Int]): ConstantAnalysis.Value = ???
-    override def funcIxToExternRef(f: Int): ConstantAnalysis.Value = ???
+    override def funVToV(f: Powerset[FunctionInstance]): ConstantAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = ???
+    override def isNull(r: Value): ConstantAnalysis.Value = ???
+    override def makeExternRef(f: Int): ConstantAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -91,7 +87,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(Topped.Actual(l)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
-      //case ConcreteInterpreter.Value.FuncRef(f) => Value.FuncRef(Topped.Actual(f))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
@@ -104,24 +99,21 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
-
-    override def jvFuncRef: WithJoin[Topped[Int]] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: ConstantSymbolTable[TableAddr, Int, I32] = new ConstantSymbolTable
+    val tables: ConstantSymbolTable[TableAddr, Int, Value] = new ConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
     override var tabLimits: List[(Int, Option[Int])] = List()
     override var tabTypes: List[ReferenceType] = List()
     private given Failure = failure
-
-    implicit val z: ReferenceOps[FunV, Ref] = implicitly
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, WithJoin] = implicitly
+    
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx

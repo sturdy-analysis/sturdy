@@ -22,7 +22,7 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.ReferenceInst
 
-trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, J[_] <: MayJoin[_]]:
+trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoin[_]]:
 //trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, J[_] <: MayJoin[_]]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
@@ -44,38 +44,33 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, J[_] <: MayJoin[_]]
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-  val funcReferenceOps: ReferenceOps[FunV, Ref]
-  val externReferenceOps: ReferenceOps[WasmReference, Option[WasmReference]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Ref, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Ref, J[_] <: MayJoin[_]]:
-  def valueToAddr(v: V): Addr
-  def valueToFuncIx(v: V): FuncIx
+trait SpecialWasmOperations[V, Addr, Size, Index, FunV, J[_] <: MayJoin[_]]:
+  def valToAddr(v: V): Addr
+  def valToIdx(v: V): Index
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
   def valToInt(v: V): Int
   def numToRef(v: V): V
-  def funcRefToInt(r: Ref): Int
- 
-  def makeRef(v: V): Ref
-  def makeDeref(r: Ref): V
-  def makeNullRef(t: ReferenceType): Ref
-  def makeNullRefValue(t: ReferenceType): V
-  def isNull(r: Ref): V
+  def funcRefToInt(r: V): Int
+
+  def makeNullRef(t: ReferenceType): V
+  def isNull(r: V): V
   
-  def funcInstToVal(f: FunctionInstance): V
+  def makeRef(f: FunctionInstance): V
   def funcInstToFunV(f: FunctionInstance): FunV
-  def funVToFuncRef(i: FunV): Ref
+  def funVToV(i: FunV): V
   
-  def funcIxToExternRef(f: Int): V
+  def makeExternRef(f: Int): V
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 

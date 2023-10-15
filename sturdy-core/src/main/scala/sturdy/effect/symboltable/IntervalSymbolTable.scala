@@ -41,7 +41,7 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     else
       constantSymbolTable.set(key, Topped.Top, newEntry)
 
-  def size(key: Key, symbol: NumericInterval[I]): Int = ???
+  def size(key: Key): Int = ???
 
   override def grow(key: Key, symbol: NumericInterval[I], initEntry: Entry): Int = ???
 

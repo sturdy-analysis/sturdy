@@ -46,7 +46,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           tables += key -> Left(tab.updated(sym, newEntry))
 
 
-  override def size(key: Key, symbol: Topped[Symbol]): Int = ???
+  override def size(key: Key): Int = ???
 
   override def grow(key: Key, symbol: Topped[Symbol], initEntry: Entry): Int = ???
 

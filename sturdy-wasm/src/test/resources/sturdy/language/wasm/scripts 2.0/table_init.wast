@@ -7,6 +7,7 @@
   (elem (i32.const 0) func 2 7 1 8)
   (elem (table $t0) (i32.const 12) func 7 5 2 3 6)
   (elem (i32.const 0) func 5 9 2 7 6)
+  ;;(elem func 0)
 
 
   (func (result i32) (i32.const 0))

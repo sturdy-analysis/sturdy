@@ -46,26 +46,22 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type Size = Topped[Int]
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
-  type Ref = I32
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Ref, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def numToRef(v: Value): Value = ???
-    override def funcRefToInt(r: NumericInterval[Int]): Int = ???
-    override def makeDeref(r: NumericInterval[Int]): IntervalAnalysis.Value = ???
-    override def makeRef(v: IntervalAnalysis.Value): NumericInterval[Int] = ???
-    override def funcInstToVal(f: FunctionInstance): IntervalAnalysis.Value = ???
+    override def funcRefToInt(r: Value): Int = ???
+    override def makeRef(f: FunctionInstance): IntervalAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToFuncRef(f: Powerset[FunctionInstance]): NumericInterval[Int] = ???
-    override def makeNullRefValue(t: ReferenceType): IntervalAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): NumericInterval[Int] = ???
-    override def isNull(r: NumericInterval[Int]): IntervalAnalysis.Value = ???
-    override def funcIxToExternRef(f: Int): IntervalAnalysis.Value = ???
+    override def funVToV(f: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
+    override def isNull(r: Value): IntervalAnalysis.Value = ???
+    override def makeExternRef(f: Int): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -108,15 +104,13 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
-
-    override def jvFuncRef: WithJoin[NumericInterval[Int]] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalSymbolTable[TableAddr, Int, I32] = new IntervalSymbolTable(rangeLimit)
+    val tables: IntervalSymbolTable[TableAddr, Int, Value] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
@@ -158,9 +152,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
         Convert(bytes, conf)
       }
-
-    implicit val z: ReferenceOps[FunV, Ref] = implicitly
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Ref, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
     var longIntervalBounds: Set[Long] = Set(-1, 0, 1)

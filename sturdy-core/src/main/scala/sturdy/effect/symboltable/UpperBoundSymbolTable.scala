@@ -20,7 +20,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
 
-  override def size(key: Key, symbol: Symbol): Int = ???
+  override def size(key: Key): Int = ???
 
   override def grow(key: Key, symbol: Symbol, initEntry: Entry): Int = ???
 
