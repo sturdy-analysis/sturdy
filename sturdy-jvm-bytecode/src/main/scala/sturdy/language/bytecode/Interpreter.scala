@@ -2,9 +2,11 @@ package sturdy.language.bytecode
 
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter}
+import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
+import sturdy.values.relational.*
 trait Interpreter:
   //type I8
   //type I16
@@ -12,6 +14,7 @@ trait Interpreter:
   type I64
   type F32
   type F64
+  type Bool
 
   enum Value:
     case TopValue
@@ -22,7 +25,7 @@ trait Interpreter:
     case Float32(f: F32)
     case Float64(d: F64)
 
-
+    def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
       case Int8(b) => b
       case TopValue => topI8
@@ -67,11 +70,14 @@ trait Interpreter:
 
   */
 
+  def asBoolean(v: Value)(using Failure): Bool
+  def boolean(b: Bool): Value
+
   given ValueBytecodeOps
-    (using
+    (using failure: Failure
       //i8Ops: IntegerOps[Byte, I8]
     //, i16Ops: IntegerOps[Short, I16]
-      i32Ops: IntegerOps[Int, I32]
+    , i32Ops: IntegerOps[Int, I32]
     , i64Ops: IntegerOps[Long, I64]
     , f32Ops: FloatOps[Float, F32]
     , f64Ops: FloatOps[Double, F64]
@@ -87,8 +93,15 @@ trait Interpreter:
     , convertF64I32: ConvertDoubleInt[F64, I32]
     , convertF64I64: ConvertDoubleLong[F64, I64]
     , convertF64F32: ConvertDoubleFloat[F64, F32]
+    , boolBranchOpsV: BooleanBranching[Bool, Value]
+    , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+    , f32CompareOps: OrderingOps[F32, Bool]
+    , f64CompareOps: OrderingOps[F64, Bool]
       ): BytecodeOps[Value] with
 
+
+    val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
+    val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
@@ -109,6 +122,28 @@ trait Interpreter:
     final val convert_f64_i32: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int32.apply)
     final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
     final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
-  
+
+    final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
+      import Value.*
+      override def lt(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.lt(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.lt(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def le(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.le(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.le(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def ge(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.ge(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.ge(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def gt(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.gt(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
+    //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
+    //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
+
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value]

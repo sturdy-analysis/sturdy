@@ -1,5 +1,6 @@
 package sturdy.language.bytecode.generic
 
+import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
@@ -12,8 +13,7 @@ trait BytecodeOps[V]:
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
-  
-  val f32compare: OrderingOps[V, V]
+  val compareOps: OrderingOps[V, V]
   
   val convert_i32_i64: ConvertIntLong[V, V]
   val convert_i32_f32: ConvertIntFloat[V, V]
@@ -27,4 +27,6 @@ trait BytecodeOps[V]:
   val convert_f64_i32: ConvertDoubleInt[V, V]
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
+  val branchOpsV: BooleanBranching[V, V]
+  val branchOpsUnit: BooleanBranching[V, Unit]
   

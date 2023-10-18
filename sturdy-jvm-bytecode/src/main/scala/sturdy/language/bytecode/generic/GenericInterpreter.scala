@@ -32,14 +32,13 @@ val jumpTargets: Map[String, InstructionIndex]
 
 trait GenericInterpreter[V]:
   val bytecodeOps: BytecodeOps[V]
-  val branch: BooleanBranching[V, V]
 
   val stack: DecidableOperandStack[V]
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
 
-  lazy val num = new GenericInterpreterNumerics[V](bytecodeOps, branch)
+  lazy val num = new GenericInterpreterNumerics[V](bytecodeOps)
 
   def run(insts: Iterable[Instruction]): Unit =
     insts.foreach(eval)
@@ -119,7 +118,7 @@ trait GenericInterpreter[V]:
         case inst: POP2.type =>
           stack.pop2()
         case inst: DUP.type =>
-          stack.push(stack.pop())
+          ???
         case inst: DUP_X1.type =>
           ???
         case inst: DUP_X2.type =>
@@ -137,17 +136,17 @@ trait GenericInterpreter[V]:
     // Arithmetic Ops
     case x if (96 <= x && x <= 115) =>
       val (v1, v2) = stack.pop2OrAbort()
-      stack.push(num.evalNumericBinOP(inst, v1, v2))
+      stack.push(num.evalNumericBinOp(inst, v1, v2))
 
     // Negation Ops
     case x if (116 <= x && x <= 119) =>
       val v1 = stack.popOrAbort()
-      stack.push(num.evalNumericUnOP(inst, v1))
+      stack.push(num.evalNumericUnOp(inst, v1))
 
     // Bitshift Ops
     case x if (120 <= x && x <= 131) =>
       val (v1, v2) = stack.pop2OrAbort()
-      stack.push(num.evalNumericBinOP(inst, v1, v2))
+      stack.push(num.evalNumericBinOp(inst, v1, v2))
 
     // iinc
     case x if (x == 132) =>
@@ -160,7 +159,8 @@ trait GenericInterpreter[V]:
 
     // Numeric Comparison
     case x if (148 <= x && x <= 152) =>
-      ???
+      val (v1, v2) = stack.pop2OrAbort()
+      stack.push(num.evalNumericBinOp(inst, v1, v2))
 
     // Branching
     case x if (153 <= x && x <= 166) =>
@@ -244,7 +244,7 @@ trait GenericInterpreter[V]:
       ???
 
   def eval_local_load(inst: Instruction): V = inst match
-    case inst: LoadLocalVariableInstruction => frame.getLocal(inst.lvIndex)
+    case inst: LoadLocalVariableInstruction => ???//frame.getLocal(inst.lvIndex)
 
   def eval_local_store(inst: Instruction, v: V): Unit = inst match
     case inst: StoreLocalVariableInstruction => frame.setLocal(inst.lvIndex, v)
@@ -257,7 +257,7 @@ trait GenericInterpreter[V]:
     case inst: IASTORE.type =>
       ???
 
-  def invokeStatic(c: String, m: String, args: List[V]) =
+  /*def invokeStatic(c: String, m: String, args: List[V]) =
     val cls = ???
     val mth = ???
     val params = ???
@@ -266,5 +266,5 @@ trait GenericInterpreter[V]:
       frame.withNew(???, ???) {
 
       }
-    }
+    }*/
 

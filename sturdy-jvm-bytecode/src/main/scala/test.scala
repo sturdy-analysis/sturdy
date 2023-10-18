@@ -39,11 +39,17 @@ object test extends App{
   val result3 = interp.stack.pop()
   println(result3)
 
-  interp.eval(LoadFloat(12.3f))
+  interp.eval(LoadFloat(12.7f))
   interp.eval(LoadFloat(5.0f))
   interp.eval(FREM)
   val result4 = interp.stack.pop()
   println(result4)
+
+  interp.eval(LoadFloat(12.0f))
+  interp.eval(LoadFloat(5.0f))
+  interp.eval(FCMPL)
+  val result5 = interp.stack.pop()
+  println(result5)
 
 
 }

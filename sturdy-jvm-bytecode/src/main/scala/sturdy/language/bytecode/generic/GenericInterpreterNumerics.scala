@@ -3,7 +3,6 @@ package sturdy.language.bytecode.generic
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
@@ -13,7 +12,7 @@ import org.opalj.br.instructions.*
 
 
 class GenericInterpreterNumerics[V]
-  (bytecodeOps: BytecodeOps[V], branch: BooleanBranching[V, V]):
+  (bytecodeOps: BytecodeOps[V]):
 
 
   import bytecodeOps.*
@@ -60,7 +59,7 @@ class GenericInterpreterNumerics[V]
       f32ops.floatingLit(inst.value)
     case inst: LoadDouble =>
       f64ops.floatingLit(inst.value)
-  def evalNumericUnOP(inst: Instruction, v1: V): V = inst match
+  def evalNumericUnOp(inst: Instruction, v1: V): V = inst match
       case inst: INEG.type =>
         i32ops.sub(i32ops.integerLit(0), v1)
       case inst: LNEG.type =>
@@ -69,7 +68,7 @@ class GenericInterpreterNumerics[V]
         f32ops.negated(v1)
       case inst: DNEG.type =>
         f64ops.negated(v1)
-  def evalNumericBinOP(inst: Instruction, v1: V, v2: V): V = inst match
+  def evalNumericBinOp(inst: Instruction, v1: V, v2: V): V = inst match
       case IADD =>
         i32ops.add(v1, v2)
       case LADD =>
@@ -141,12 +140,12 @@ class GenericInterpreterNumerics[V]
       case LXOR =>
         i64ops.bitXor(v1, v2)
       case FCMPL =>
-        val isLt = f32compare.lt(v1, v2)
-        branch.boolBranch(isLt) {
+        val isLt = compareOps.lt(v1, v2)
+        branchOpsV.boolBranch(isLt) {
           f32ops.floatingLit(-1)
         } {
-          val isGt = f32compare.gt(v1, v2)
-          branch.boolBranch(isGt) {
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsV.boolBranch(isGt) {
             f32ops.floatingLit(1)
           } {
             f32ops.floatingLit(0)
