@@ -4,6 +4,7 @@ import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.floating.*
@@ -12,7 +13,7 @@ import org.opalj.br.instructions.*
 
 
 class GenericInterpreterNumerics[V]
-  (bytecodeOps: BytecodeOps[V]):
+  (bytecodeOps: BytecodeOps[V], branch: BooleanBranching[V, V]):
 
 
   import bytecodeOps.*
@@ -139,6 +140,19 @@ class GenericInterpreterNumerics[V]
         i32ops.bitXor(v1, v2)
       case LXOR =>
         i64ops.bitXor(v1, v2)
+      case FCMPL =>
+        val isLt = f32compare.lt(v1, v2)
+        branch.boolBranch(isLt) {
+          f32ops.floatingLit(-1)
+        } {
+          val isGt = f32compare.gt(v1, v2)
+          branch.boolBranch(isGt) {
+            f32ops.floatingLit(1)
+          } {
+            f32ops.floatingLit(0)
+          }
+        }
+
 
   def evalConvertOp(inst: Instruction, v: V): V = inst match
     case I2L =>

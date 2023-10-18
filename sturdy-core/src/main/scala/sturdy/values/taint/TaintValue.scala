@@ -89,6 +89,10 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
 
 given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[V]] with
   def floatingLit(f: B): TaintProduct[V] =  untainted(ops.floatingLit(f))
+  def NaN: TaintProduct[V] = untainted(ops.NaN)
+  def posInfinity: TaintProduct[V] = untainted(ops.posInfinity)
+  def negInfinity: TaintProduct[V] = untainted(ops.negInfinity)
+
   def randomFloat(): TaintProduct[V] = untainted(ops.randomFloat())
 
   def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)

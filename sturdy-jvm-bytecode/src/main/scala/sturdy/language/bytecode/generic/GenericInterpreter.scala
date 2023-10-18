@@ -6,13 +6,43 @@ import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
+import sturdy.effect.store.Store
+import sturdy.values.booleans.BooleanBranching
+
+/*
+
+1. alles was einfach ist
+2. invoke static: how to manage operand stack
+3. read up on exceptions in Sturdy
+4. how do jumps/branching work on the JVM
+
+  i1
+  i2
+l0:
+  i3
+  jump l3
+  i5
+l3:
+  jump l0
+
+val jumpTargets: Map[String, InstructionIndex]
+
+ */
 
 trait GenericInterpreter[V]:
   val bytecodeOps: BytecodeOps[V]
+  val branch: BooleanBranching[V, V]
 
   val stack: DecidableOperandStack[V]
 
-  lazy val num = new GenericInterpreterNumerics[V](bytecodeOps)
+  type FrameData = Unit
+  val frame: DecidableMutableCallFrame[FrameData, Int, V]
+
+  lazy val num = new GenericInterpreterNumerics[V](bytecodeOps, branch)
+
+  def run(insts: Iterable[Instruction]): Unit =
+    insts.foreach(eval)
 
   def eval(inst: Instruction): Unit = inst.opcode match
     // No Op
@@ -89,7 +119,7 @@ trait GenericInterpreter[V]:
         case inst: POP2.type =>
           stack.pop2()
         case inst: DUP.type =>
-          ???
+          stack.push(stack.pop())
         case inst: DUP_X1.type =>
           ???
         case inst: DUP_X2.type =>
@@ -154,6 +184,11 @@ trait GenericInterpreter[V]:
 
     // Invoke Functions
     case x if (182 <= x && x <= 186) =>
+      val newFrameData = ()
+      val args: List[V] = ???
+      frame.withNew(newFrameData, args.zipWithIndex.map(_.swap)) {
+
+      }
       ???
 
     // NEW
@@ -209,12 +244,10 @@ trait GenericInterpreter[V]:
       ???
 
   def eval_local_load(inst: Instruction): V = inst match
-    case inst: ILOAD =>
-      ???
+    case inst: LoadLocalVariableInstruction => frame.getLocal(inst.lvIndex)
 
   def eval_local_store(inst: Instruction, v: V): Unit = inst match
-    case inst: ISTORE =>
-      ???
+    case inst: StoreLocalVariableInstruction => frame.setLocal(inst.lvIndex, v)
 
   def eval_array_load(inst: Instruction): V = inst match
     case inst: IALOAD.type =>
@@ -223,4 +256,15 @@ trait GenericInterpreter[V]:
   def eval_array_store(inst: Instruction, v: V): Unit = inst match
     case inst: IASTORE.type =>
       ???
+
+  def invokeStatic(c: String, m: String, args: List[V]) =
+    val cls = ???
+    val mth = ???
+    val params = ???
+
+    stack.withNewFrame {
+      frame.withNew(???, ???) {
+
+      }
+    }
 

@@ -18,6 +18,10 @@ given Structural[Double] with {}
 
 given ConcreteDoubleOps: FloatOps[Double, Double] with
   def floatingLit(f: Double): Double = f
+  def NaN: Double = Double.NaN
+  def posInfinity: Double = Double.PositiveInfinity
+  def negInfinity: Double = Double.NegativeInfinity
+
   def randomFloat(): Double = Random.nextDouble()
   def add(v1: Double, v2: Double): Double = v1 + v2
   def sub(v1: Double, v2: Double): Double = v1 - v2

@@ -2,6 +2,10 @@ package sturdy.values.floating
 
 class LiftedFloatOps[B, V, D](extract: V => D, inject: D => V)(using ops: FloatOps[B, D]) extends FloatOps[B, V]:
   def floatingLit(f: B): V = inject(ops.floatingLit(f))
+  def NaN: V = inject(ops.NaN)
+  def posInfinity: V = inject(ops.posInfinity)
+  def negInfinity: V = inject(ops.negInfinity)
+
   def randomFloat(): V = inject(ops.randomFloat())
   def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))
   def sub(v1: V, v2: V): V = inject(ops.sub(extract(v1), extract(v2)))

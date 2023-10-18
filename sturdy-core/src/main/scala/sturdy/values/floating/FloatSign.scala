@@ -59,6 +59,10 @@ given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
     else if base.gt(f, base.zero) then Pos
     else Zero
 
+  override def NaN: FloatSign = TopSign
+  override def posInfinity: FloatSign = Pos
+  override def negInfinity: FloatSign = Neg
+
   def randomFloat(): FloatSign = ZeroOrPos
 
   def add(v1: FloatSign, v2: FloatSign): FloatSign = (v1, v2) match

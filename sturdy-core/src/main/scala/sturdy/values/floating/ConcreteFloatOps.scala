@@ -18,6 +18,10 @@ given Structural[Float] with {}
 
 given ConcreteFloatOps: FloatOps[Float, Float] with
   def floatingLit(f: Float): Float = f
+  def NaN: Float = Float.NaN
+  def posInfinity: Float = Float.PositiveInfinity
+  def negInfinity: Float = Float.NegativeInfinity
+  
   def randomFloat(): Float = Random.nextFloat()
   def add(v1: Float, v2: Float): Float = v1 + v2
   def sub(v1: Float, v2: Float): Float = v1 - v2

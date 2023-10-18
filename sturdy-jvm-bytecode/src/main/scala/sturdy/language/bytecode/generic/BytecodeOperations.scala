@@ -3,6 +3,7 @@ package sturdy.language.bytecode.generic
 import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
+import sturdy.values.relational.*
  
 trait BytecodeOps[V]:
   //val i8ops:  IntegerOps[Byte, V]
@@ -11,6 +12,8 @@ trait BytecodeOps[V]:
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
+  
+  val f32compare: OrderingOps[V, V]
   
   val convert_i32_i64: ConvertIntLong[V, V]
   val convert_i32_f32: ConvertIntFloat[V, V]

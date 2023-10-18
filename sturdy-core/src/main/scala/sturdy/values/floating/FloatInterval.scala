@@ -60,6 +60,11 @@ given WidenFloatInterval: Widen[FloatInterval] with
 
 given IntervalFloatOps: FloatOps[Float, FloatInterval] with
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
+
+  override def NaN: FloatInterval = FloatInterval.Top
+  override def posInfinity: FloatInterval = FloatInterval(Float.PositiveInfinity, Float.PositiveInfinity)
+  override def negInfinity: FloatInterval = FloatInterval(Float.NegativeInfinity, Float.NegativeInfinity)
+
   def randomFloat(): FloatInterval = FloatInterval(0, 1)
   def add(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 + v2
   def sub(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 - v2

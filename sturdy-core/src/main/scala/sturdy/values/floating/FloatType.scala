@@ -19,6 +19,10 @@ import scala.reflect.ClassTag
 
 given TypeFloatOps[B: ClassTag] (using Fractional[B]): FloatOps[B, BaseType[B]] with
   def floatingLit(f: B): BaseType[B] = BaseType[B]
+  override def NaN: BaseType[B] = BaseType[B]
+  override def posInfinity: BaseType[B] = BaseType[B]
+  override def negInfinity: BaseType[B] = BaseType[B]
+
   def randomFloat(): BaseType[B] = BaseType[B]
   def add(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
   def sub(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]

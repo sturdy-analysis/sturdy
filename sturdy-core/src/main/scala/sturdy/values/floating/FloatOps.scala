@@ -7,6 +7,10 @@ import java.nio.ByteOrder
 
 trait FloatOps[B, V]:
   def floatingLit(f: B): V
+  def NaN: V
+  def posInfinity: V
+  def negInfinity: V
+
   def randomFloat(): V
 
   def add(v1: V, v2: V): V
