@@ -16,13 +16,13 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (using Join[V], Widen[V], Finite[Context])
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 
-  private val store: initStore.type = initStore
+  protected val store: initStore.type = initStore
   protected var addressTranslation: Map[(Context,Int), PowRecency] = Map()
   protected var mostRecent: Map[Context, Powerset[Int]] = HashMap()
   protected var next: Int = 0
   def getNext() = { next += 1; next }
 
-  private def virtToPhys(v: VirtualAddress[Context]): PowPhysicalAddress[Context] =
+  protected def virtToPhys(v: VirtualAddress[Context]): PowPhysicalAddress[Context] =
     addressTranslation.get(v.ctx, v.n) match
       case None =>
         throw new IllegalStateException(s"Unbound virtual address $v")
@@ -30,7 +30,7 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
       case Some(PowRecency.Old) => PowersetAddr(PhysicalAddress(v.ctx, Recency.Old))
       case Some(PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(v.ctx, Recency.Recent), PhysicalAddress(v.ctx, Recency.Old))
 
-  private def virtToPhys(vs: Virt): PowPhysicalAddress[Context] =
+  protected def virtToPhys(vs: Virt): PowPhysicalAddress[Context] =
     if (vs.isEmpty)
       PowersetAddr(Set())
     else

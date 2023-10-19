@@ -15,15 +15,13 @@ import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
 
-class ApronVar[Context] extends sturdy.effect.store.PowPhysicalAddress[Context], apron.Var:
-  def compareTo(v : ApronVar[Context]) : Int = 
-    throw new NotImplementedError("ApronVar comparison")
-
 // TODO implement   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin])
 // ApronStore, then tests, then ApronCallFrame stuff
 class ApronStore[Context, V]
   (val apronManager: Manager,  
-       getIntVal: V => Option[ApronExpr])
+       getIntVal: V => Option[ApronExpr[Context]],
+       makeIntVal: ApronExpr[Context] => V,
+       )
   extends Store[ApronVar[Context], V, WithJoin]:
 
   private var apronState : Abstract1 = new Abstract1(apronManager, new Environment())
@@ -32,7 +30,9 @@ class ApronStore[Context, V]
     // FIXME: reading weak variable should be different
     if (apronState.getEnvironment().hasVar(x)) {
       // Which JOption here?
-      JOptionA.Some(ApronExpr.Var(x))
+
+      // TODO: Change ApronExpr.Var. In addition, ApronExpr used to rely on some ApronScope, which I think is no longer necessary 
+      JOptionA.Some(makeIntVal(ApronExpr.Var(x)))
     } 
     else {
       JOptionA.None()
@@ -41,7 +41,7 @@ class ApronStore[Context, V]
   def write(x: ApronVar[Context], v : V): Unit =
     getIntVal(v) match 
       case Some(exp) =>
-        val aexp : apron.Texpr1Intern = ApronExpr.toApron(exp)
+        val aexp : apron.Texpr1Intern = exp.toApron()
         val newState = apronState.assignCopy(apronManager, x, aexp, null)
         if (x.isStrong || ! apronState.getEnvironment().hasVar(x))
           apronState = newState

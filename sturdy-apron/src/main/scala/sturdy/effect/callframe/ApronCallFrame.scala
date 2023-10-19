@@ -1,4 +1,4 @@
-package sturdy.effect.callframe
+/* package sturdy.effect.callframe
 
 import apron.Texpr1Intern
 import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1VarNode}
@@ -359,6 +359,6 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
 
     override def toString: String =
       s"CallFrame($vars, $as)"
-
+*/
 
 
