@@ -4,7 +4,7 @@
   (table $t2 0 2 externref)
   (table $t3 3 8 externref)
 
-  (func (export "size-t0") (result i32) table.size $t0)
+  (func (export "size-t0") (result i32) table.size)
   (func (export "size-t1") (result i32) (table.size $t1))
   (func (export "size-t2") (result i32) (table.size $t2))
   (func (export "size-t3") (result i32) (table.size $t3))
@@ -62,6 +62,7 @@
 (assert_return (invoke "size-t3") (i32.const 7))
 (assert_return (invoke "grow-t3" (i32.const 1)))
 (assert_return (invoke "size-t3") (i32.const 8))
+
 
 ;; Type errors
 

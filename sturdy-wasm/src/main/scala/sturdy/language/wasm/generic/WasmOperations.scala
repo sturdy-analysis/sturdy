@@ -4,6 +4,7 @@ import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.language.wasm.ConcreteInterpreter.ExternReference
+import sturdy.language.wasm.abstractions.CfgNode.Instruction
 import sturdy.values.booleans.BooleanBranching
 import swam.{FuncType, GlobalIdx, ReferenceType}
 import sturdy.values.convert.*
@@ -15,12 +16,7 @@ import sturdy.values.integer.*
 import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 import sturdy.values.relational.UnsignedOrderingOps
-import swam.syntax.LoadInst
-import swam.syntax.LoadNInst
-import swam.syntax.MemoryInst
-import swam.syntax.StoreInst
-import swam.syntax.StoreNInst
-import swam.syntax.ReferenceInst
+import swam.syntax.{Inst, LoadInst, LoadNInst, MemoryInst, ReferenceInst, StoreInst, StoreNInst}
 
 trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoin[_]]:
 //trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, J[_] <: MayJoin[_]]:
@@ -59,19 +55,18 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, J[_] <: MayJoin[_]]:
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
+  def instToVal(i: Inst): V
   def valToInt(v: V): Int
   def numToRef(v: V): V
   def funcRefToInt(r: V): Int
 
   def makeNullRef(t: ReferenceType): V
-  def isNull(r: V): V
-  
   def makeRef(f: FunctionInstance): V
+  def makeExternRef(f: Int): V
+  def isNull(r: V): V
+
   def funcInstToFunV(f: FunctionInstance): FunV
   def funVToV(i: FunV): V
-  
-  def makeExternRef(f: Int): V
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
-
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

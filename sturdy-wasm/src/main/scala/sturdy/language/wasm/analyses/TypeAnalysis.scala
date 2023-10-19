@@ -39,12 +39,12 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
-    override def valToIdx(v: Value): FuncIx = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
@@ -57,6 +57,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def makeNullRef(t: ReferenceType): TypeAnalysis.Value = ???
     override def isNull(r: Value): TypeAnalysis.Value = ???
     override def makeExternRef(f: Int): TypeAnalysis.Value = ???
+    override def instToVal(i: Inst): TypeAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
@@ -95,7 +96,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: UpperBoundSymbolTable[TableAddr, FuncIx, Value] = new UpperBoundSymbolTable(Value.TopValue)
+    val tables: UpperBoundSymbolTable[TableAddr, Index, Value] = new UpperBoundSymbolTable(Value.TopValue)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
@@ -103,6 +104,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override var tabTypes: List[ReferenceType] = List()
     given Failure = failure
     
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

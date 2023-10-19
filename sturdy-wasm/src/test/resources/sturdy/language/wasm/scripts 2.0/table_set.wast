@@ -12,7 +12,7 @@
   )
 
   (func (export "set-externref") (param $i i32) (param $r externref)
-    (table.set $t2 (local.get $i) (local.get $r))
+    (table.set (local.get $i) (local.get $r))
   )
   (func (export "set-funcref") (param $i i32) (param $r funcref)
     (table.set $t3 (local.get $i) (local.get $r))
@@ -47,6 +47,7 @@
 (assert_trap (invoke "set-funcref-from" (i32.const 3) (i32.const 1)) "out of bounds table access")
 (assert_trap (invoke "set-externref" (i32.const -1) (ref.extern 0)) "out of bounds table access")
 (assert_trap (invoke "set-funcref-from" (i32.const -1) (i32.const 1)) "out of bounds table access")
+
 
 ;; Type errors
 

@@ -6,7 +6,7 @@
   )
 
   (func (export "fill-abbrev") (param $i i32) (param $r externref) (param $n i32)
-    (table.fill $t (local.get $i) (local.get $r) (local.get $n))
+    (table.fill (local.get $i) (local.get $r) (local.get $n))
   )
 
   (func (export "get") (param $i i32) (result externref)
@@ -54,7 +54,6 @@
   (invoke "fill" (i32.const 8) (ref.extern 6) (i32.const 3))
   "out of bounds table access"
 )
-
 (assert_return (invoke "get" (i32.const 7)) (ref.null extern))
 (assert_return (invoke "get" (i32.const 8)) (ref.extern 4))
 (assert_return (invoke "get" (i32.const 9)) (ref.null extern))
@@ -68,6 +67,7 @@
   (invoke "fill" (i32.const 11) (ref.null extern) (i32.const 10))
   "out of bounds table access"
 )
+
 
 ;; Type errors
 

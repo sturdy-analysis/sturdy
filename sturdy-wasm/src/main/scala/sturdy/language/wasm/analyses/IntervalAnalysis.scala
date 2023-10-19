@@ -44,12 +44,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type Addr = I32
   type Bytes = Seq[NumericInterval[Byte]]
   type Size = Topped[Int]
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
-    override def valToIdx(v: Value): FuncIx = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     override def intToVal(i: Int): Value = ???
@@ -62,6 +62,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def makeExternRef(f: Int): IntervalAnalysis.Value = ???
+    override def instToVal(i: Inst): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -152,7 +153,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
         Convert(bytes, conf)
       }
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
     var longIntervalBounds: Set[Long] = Set(-1, 0, 1)

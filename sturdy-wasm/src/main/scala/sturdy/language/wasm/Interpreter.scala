@@ -144,7 +144,7 @@ trait Interpreter:
   type Bytes
   type Size
   type ExcV
-  type FuncIx
+  type Index
   type FunV
 //  type Ref
 
@@ -188,12 +188,12 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
+     , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -311,4 +311,4 @@ trait Interpreter:
 
   abstract class GenericInstance
     //extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, Index, FunV, J]

@@ -29,6 +29,7 @@
 
 (assert_return (invoke "funcref" (ref.null func)) (i32.const 1))
 (assert_return (invoke "externref" (ref.null extern)) (i32.const 1))
+
 (assert_return (invoke "externref" (ref.extern 1)) (i32.const 0))
 
 (invoke "init" (ref.extern 0))

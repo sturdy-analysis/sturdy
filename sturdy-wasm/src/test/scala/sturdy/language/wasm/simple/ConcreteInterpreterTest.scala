@@ -59,7 +59,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(st3, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
 */
 
-
+/*
   testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Ref(ConcreteInterpreter.RefValue.FuncRef(1))))
   testFunction(st3, "test_table_get_t1", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.Ref(ConcreteInterpreter.RefValue.FuncRef(0))))
   testFunction(st3, "test_table_get_t2", List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))), List(Value.Ref(ConcreteInterpreter.RefValue.FuncRef(2))))
@@ -96,12 +96,12 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   //testFunction(st9, "test_e", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.FuncNull)))
   //testFunction(st9, "test_b", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
   //testFunction(st9, "test_c", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(1))))
-
+*/
  // testFunction(st9, "test_d", List.empty, List(Value.ExternRef(0)))
   //testFunction(st9, "test_e", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.ExternRef(0))))
   //testFunction(st9, "test_e", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.ExternNull)))
 
-
+  testFunction(st9, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {

@@ -43,12 +43,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
   type AByte = TaintProduct[Topped[Byte]]
   type Bytes = Seq[AByte]
   type Size = Topped[Int]
-  type FuncIx = Topped[Int]
+  type Index = Topped[Int]
   override type FunV = Powerset[FunctionInstance]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32.value
-    override def valToIdx(v: Value): FuncIx = v.asInt32.value
+    override def valToIdx(v: Value): Index = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
@@ -61,6 +61,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def makeNullRef(t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
     override def makeExternRef(f: Int): ConstantTaintAnalysis.Value = ???
+    override def instToVal(i: Inst): ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>
@@ -116,6 +117,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override var tabLimits: List[(Int, Option[Int])] = List()
     override var tabTypes: List[ReferenceType] = List()
     given Failure = failure
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
     override def toString: String = s"constant-taint $config"

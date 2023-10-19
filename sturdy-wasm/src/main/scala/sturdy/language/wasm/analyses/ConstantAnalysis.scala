@@ -41,12 +41,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Addr = I32
   type Bytes = Seq[Topped[Byte]]
   type Size = I32
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
-    override def valToIdx(v: Value): FuncIx = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToInt(v: Value): Int = ???
@@ -59,6 +59,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = ???
     override def isNull(r: Value): ConstantAnalysis.Value = ???
     override def makeExternRef(f: Int): ConstantAnalysis.Value = ???
+    override def instToVal(i: Inst): ConstantAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -113,7 +114,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override var tabTypes: List[ReferenceType] = List()
     private given Failure = failure
     
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx

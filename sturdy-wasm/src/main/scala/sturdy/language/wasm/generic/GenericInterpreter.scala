@@ -188,10 +188,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       writeGlobalValue(globalIdx, v)
 
   def validateTableAccess(t: TableIdx, e: Int): Unit = {
+    val tableIdx = module.tableAddrs.lift(t).getOrElse(fail(TableAccessOutOfBounds, t.toString))
     if (e < 0){
       fail(TableAccessOutOfBounds, "ElemIndex < 0")
     }
-    if (e >= tables.size(TableAddr(t))) {
+    if (e >= tables.size(tableIdx)) {
       fail(TableAccessOutOfBounds, s"ElemIndex $e > Table Size")
     }
   }
@@ -200,48 +201,53 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     var success = true
     val prevSize = tables.size(TableAddr(t))
     val len = n + prevSize
-    if (len > math.pow(2, 32)) {
-      fail(TableAccessOutOfBounds, "Table length > 2^32")
-    }
-    var i = prevSize
-    tabLimits(t)._2 match {
-      case Some(maxLimit) => if (len > maxLimit) {
-        success = false
-      } else {
-        while (i < len) {
-          tables.grow(TableAddr(t), valToIdx(intToVal(i)), ref)
-          i += 1
+    if (len > math.pow(2, 32) | n < 0) {
+      success = false
+    } else {
+      var i = prevSize
+      tabLimits(t)._2 match {
+        case Some(maxLimit) => if (len > maxLimit) {
+          success = false
+        } else {
+          while (i < len) {
+            tables.set(TableAddr(t), valToIdx(intToVal(i)), ref)
+            i += 1
+          }
+          updateLimit(t, len)
         }
+        case _ =>
+          while (i < len) {
+            tables.set(TableAddr(t), valToIdx(intToVal(i)), ref)
+            i += 1
+          }
       }
-      case _ =>
-        while (i < len) {
-          tables.grow(TableAddr(t), valToIdx(intToVal(i)), ref)
-          i += 1
-        }
     }
+
     success
+  }
+
+  def updateLimit(t: Int, len: Int): Unit = {
+    var tabLimitsNew = tabLimits
+
   }
 
   def evalTableInst(inst: Inst): Unit =
     inst match {
     case TableGet(ix) =>
-      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
       val elemIdx = stack.popOrAbort()
       validateTableAccess(ix, valToInt(elemIdx))
       val tpe = tabTypes(ix)
       val ref = tables.getOrElse(TableAddr(ix), valToIdx(elemIdx), makeNullRef(tpe))
       stack.push(ref)
     case TableSet(ix) =>
-      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
       val v = stack.popOrAbort()
       val elemIdx = stack.popOrAbort()
       validateTableAccess(ix, valToInt(elemIdx))
-      tables.set(tableIdx, valToIdx(elemIdx), v)
+      tables.set(TableAddr(ix), valToIdx(elemIdx), v)
     case TableSize(ix) =>
       val sz = intToVal(tables.size(TableAddr(ix)))
       stack.push(sz)
     case TableGrow(ix) =>
-      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
       val n = valToInt(stack.popOrAbort())
       val ref = stack.popOrAbort()
       val sz = tables.size(TableAddr(ix))
@@ -251,7 +257,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         case false => stack.push(intToVal(err))
       }
     case TableFill(ix) =>
-      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
       val rangeLength = stack.popOrAbort()
       val n = valToInt(rangeLength)
       val fillEntry = stack.popOrAbort()
@@ -267,13 +272,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       stack.push(intToVal(n-1))
       evalTableInst(TableFill(ix))
     case TableCopy(x, y) =>
-      val tableIdx1 = module.tableAddrs.lift(x).getOrElse(fail(TableAccessOutOfBounds, x.toString))
-      val tableIdx2 = module.tableAddrs.lift(y).getOrElse(fail(TableAccessOutOfBounds, y.toString))
       val n = valToInt(stack.popOrAbort())
       val s = valToInt(stack.popOrAbort())
       val d = valToInt(stack.popOrAbort())
-      validateTableAccess(x, d+n)
-      validateTableAccess(y, s+n)
+      validateTableAccess(x, d+n-1)
+      validateTableAccess(y, s+n-1)
       if(n == 0){return}
       if(d <= s){
         if(d+1 >= math.pow(2,32) || s+1 >= math.pow(2,32)){return}
@@ -295,25 +298,46 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       stack.push(intToVal(n-1))
       evalTableInst(TableCopy(x,y))
     case TableInit(ix, el) =>
-      val tableIdx = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
       val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
       val n = valToInt(stack.popOrAbort())
       val s = valToInt(stack.popOrAbort())
       val d = valToInt(stack.popOrAbort())
-      val elemLen = elem.init.length
-      if(s+n > elemLen){
-        fail(TableAccessOutOfBounds, "Index > Elem List")
+
+      elem.init match {
+        case Left(in) => val elemLen = in.length
+          if (s + n > elemLen) {
+            fail(TableAccessOutOfBounds, "Index > Elem List")
+          }
+          validateTableAccess(ix, d + n)
+          if (n == 0) {
+            return
+          }
+          val refval = in(s)
+          stack.push(intToVal(d))
+          stack.push(numToRef(intToVal(refval)))
+          evalTableInst(TableSet(ix))
+          stack.push(intToVal(d + 1))
+          stack.push(intToVal(s + 1))
+          stack.push(intToVal(n - 1))
+          evalTableInst(TableInit(ix, el))
+        case Right(in) => val elemLen = in.length
+          if (s + n > elemLen) {
+            fail(TableAccessOutOfBounds, "Index > Elem List")
+          }
+          validateTableAccess(ix, d + n)
+          if (n == 0) {
+            return
+          }
+          val refval = in(s)
+          stack.push(intToVal(d))
+          stack.push(instToVal(refval))
+          evalTableInst(TableSet(ix))
+          stack.push(intToVal(d + 1))
+          stack.push(intToVal(s + 1))
+          stack.push(intToVal(n - 1))
+          evalTableInst(TableInit(ix, el))
       }
-      validateTableAccess(ix, d+n)
-      if(n == 0){return}
-      val refval = elem.init(s)
-      stack.push(intToVal(d))
-      stack.push(numToRef(intToVal(refval)))
-      evalTableInst(TableSet(ix))
-      stack.push(intToVal(d+1))
-      stack.push(intToVal(s+1))
-      stack.push(intToVal(n-1))
-      evalTableInst(TableInit(ix, el))
+
     case ElemDrop(el) =>
       val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
       //if(elem.table != -1){
@@ -325,14 +349,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       while (i < elemSz){
         val currElem = module.elements.lift(i).getOrElse(fail(TableAccessOutOfBounds, el.toString))
         if(currElem == elem){
-          newElems = newElems.appended(Elem(ReferenceType.FuncRef, Vector(), ElemMode.Passive(elem.reftype, elem.init)))
+          newElems = newElems.appended(Elem(ReferenceType.FuncRef, Left(Seq.empty), ElemMode.Passive(elem.reftype, elem.init)))
         } else {
           newElems = newElems.appended(currElem)
         }
         i += 1
       }
       module.elements = newElems
-      stack.push(intToVal(0))
   }
 
   def evalRefInst(inst: Inst): Unit = inst match {
@@ -418,6 +441,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       evalMemoryInst(inst)
     else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
       evalControlInst(inst, loc)
+    else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
+      evalTableInst(inst)
+    else if (opcode >= OpCode.RefNull && opcode <= OpCode.RefFunc)
+      evalRefInst(inst)
     else inst match
       case i: VarInst => evalVarInst(i)
       case i: TableInst => evalTableInst(i)
@@ -474,11 +501,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       invoke(func)
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
-      val funcIx = stack.popOrAbort() //0 = const, 1 = increase ...
-      val tabIx = stack.popOrAbort()
-      val fRef = tables.getOrElse(tableIndex(valToInt(tabIx)), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+      val funcIx = stack.popOrAbort()
+      val fRef = tables.getOrElse(TableAddr(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
       val func = module.functions.lift(funcRefToInt(fRef)).getOrElse(fail(UnboundFunctionIndex, fRef.toString))
       //val funV = funcReferenceOps.deref(func)
+
       val funV = funcInstToFunV(func)
       invokeIndirect(funV, ftExpected, funcIx)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
@@ -765,6 +792,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       loc = modInst.registerBlockSizes(id, loc, glob.init)
       evalInstructionSequence(id, glob.init, modInst)
     }
+    tabCount = 0
+    tabLimits = List.empty
+    tabTypes = List.empty
 
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
@@ -796,7 +826,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         tabTypes = tabTypes.:::(List(ty))
         tabLimits = tabLimits.:::(List((min, max)))
         tabCount += 1
+
         tabAddr
+
     }
     tabTypes = tabTypes.reverse
     tabLimits = tabLimits.reverse
@@ -863,10 +895,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     // tables
     modInst.elements = module.elem
     module.elem.zipWithIndex.foreach {
-      case (elem@Elem(reftype, init, mode), i) =>
+      case (elem@Elem(reftype, Left(init), mode), i) =>
         mode match {
           case ElemMode.Passive(_,_) => None
-          case ElemMode.Active(_,_,-1, off) => None
+          case ElemMode.Declarative(_,_) => None
           case ElemMode.Active(_,_,tableIdx, off) =>
             val id = BlockId(elem)
             loc = modInst.registerBlockSizes(id, loc, off)
@@ -883,17 +915,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
               stack.push(num.evalNumeric(i32.Add)) // adds index to base
               val idx = stack.popOrAbort() // stack is empty
               val tabSz = tables.size(TableAddr(tableIdx))
-              val ix = valToInt(idx)
-              if (ix > tabSz) {
-                fail(TableAccessOutOfBounds, s"Offset $ix in Table $tableIdx is larger than Size $tabSz of Table")
+              val offset = valToInt(idx)
+              if (offset > tabSz) {
+                fail(TableAccessOutOfBounds, s"Offset $offset in Table $tableIdx is larger than Size $tabSz of Table")
               }
               val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
               //tables.set(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funcReferenceOps.mkRef(funV))
+              //print(funV)
+
               tables.set(TableAddr(modInst.tableAddrs(tableIdx).addr), valToIdx(idx), funVToV(funV))
               // TODO add failure conditions for table writing
             }
-        }
 
+        }
+      case _ => None
     }
 
     // invoke the start function
@@ -910,6 +945,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
           case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?
     }
     //stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty after module initialization.")})
+    //tabLimits = List.empty
     modInst
 
   }

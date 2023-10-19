@@ -7,10 +7,8 @@
   (func $f (import "M" "f") (param i32) (result i32))
 
   (func $g (param $x i32) (result i32)
-      (i32.add (local.get $x) (i32.const 1))
+    (i32.add (local.get $x) (i32.const 1))
   )
 
-  (global funcref (ref.null func))
-  (global funcref (ref.func $g))
-
+  (global funcref (ref.func $g)
 )
