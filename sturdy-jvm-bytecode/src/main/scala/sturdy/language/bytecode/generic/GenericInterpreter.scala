@@ -7,8 +7,11 @@ import sturdy.values.integer.*
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.values.booleans.BooleanBranching
+
+import BytecodeFailure.*
 
 /*
 
@@ -32,11 +35,15 @@ val jumpTargets: Map[String, InstructionIndex]
 
 trait GenericInterpreter[V]:
   val bytecodeOps: BytecodeOps[V]
-
   val stack: DecidableOperandStack[V]
+  val failure: Failure
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
+
+
+  private given Failure = failure
+  private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[V](bytecodeOps)
 
@@ -244,10 +251,12 @@ trait GenericInterpreter[V]:
       ???
 
   def eval_local_load(inst: Instruction): V = inst match
-    case inst: LoadLocalVariableInstruction => ???//frame.getLocal(inst.lvIndex)
+    case inst: LoadLocalVariableInstruction =>
+      frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
   def eval_local_store(inst: Instruction, v: V): Unit = inst match
-    case inst: StoreLocalVariableInstruction => frame.setLocal(inst.lvIndex, v)
+    case inst: StoreLocalVariableInstruction =>
+      frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
   def eval_array_load(inst: Instruction): V = inst match
     case inst: IALOAD.type =>
@@ -257,14 +266,18 @@ trait GenericInterpreter[V]:
     case inst: IASTORE.type =>
       ???
 
-  /*def invokeStatic(c: String, m: String, args: List[V]) =
-    val cls = ???
-    val mth = ???
-    val params = ???
+  def invokeStatic(locals: List[ValType], instructionList: List[Instruction], args: List[V]) =
+    //val cls = ???
+    //val mth = ???
+    //val params = ???
+    val newFrameData = ()
+    val localVars = locals.map(num.defaultValue)
 
-    stack.withNewFrame {
-      frame.withNew(???, ???) {
-
+    stack.withNewFrame(0) {
+      frame.withNew(newFrameData, localVars.view.zipWithIndex.map(_.swap)) {
+        for (inst <- instructionList) {
+          eval(inst)
+        }
       }
-    }*/
+    }
 

@@ -1,5 +1,6 @@
 package sturdy.language.bytecode.generic
 
+import org.opalj.br.BaseType
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.failure.Failure
@@ -9,6 +10,9 @@ import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import org.opalj.br.instructions.*
+
+
+import scala.Float.NaN
 
 
 class GenericInterpreterNumerics[V]
@@ -140,6 +144,28 @@ class GenericInterpreterNumerics[V]
       case LXOR =>
         i64ops.bitXor(v1, v2)
       case FCMPL =>
+        val nan = f32ops.NaN
+        println(s"V2: $v2")
+        println(s"nan: $nan")
+        println(eqOps.equ(v2, nan))
+        println(v2 == nan)
+        v2 match
+          case `nan` => f32ops.floatingLit(-1)
+          case _ =>
+            val isLt = compareOps.lt(v1, v2)
+            branchOpsV.boolBranch(isLt) {
+              f32ops.floatingLit(-1)
+            } {
+              val isGt = compareOps.gt(v1, v2)
+              branchOpsV.boolBranch(isGt) {
+                f32ops.floatingLit(1)
+              } {
+                f32ops.floatingLit(0)
+              }
+            }
+
+
+      case FCMPG =>
         val isLt = compareOps.lt(v1, v2)
         branchOpsV.boolBranch(isLt) {
           f32ops.floatingLit(-1)
@@ -149,6 +175,42 @@ class GenericInterpreterNumerics[V]
             f32ops.floatingLit(1)
           } {
             f32ops.floatingLit(0)
+          }
+        }
+      case DCMPL =>
+        val isLt = compareOps.lt(v1, v2)
+        branchOpsV.boolBranch(isLt) {
+          f64ops.floatingLit(-1)
+        } {
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsV.boolBranch(isGt) {
+            f64ops.floatingLit(1)
+          } {
+            f64ops.floatingLit(0)
+          }
+        }
+      case DCMPG =>
+        val isLt = compareOps.lt(v1, v2)
+        branchOpsV.boolBranch(isLt) {
+          f64ops.floatingLit(-1)
+        } {
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsV.boolBranch(isGt) {
+            f64ops.floatingLit(1)
+          } {
+            f64ops.floatingLit(0)
+          }
+        }
+      case LCMP =>
+        val isLt = compareOps.lt(v1, v2)
+        branchOpsV.boolBranch(isLt) {
+          i64ops.integerLit(-1)
+        } {
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsV.boolBranch(isGt) {
+            i64ops.integerLit(1)
+          } {
+            i64ops.integerLit(0)
           }
         }
 
@@ -185,5 +247,11 @@ class GenericInterpreterNumerics[V]
     case I2S =>
       ???
 
-
+  def defaultValue(ty: ValType): V = ty match
+    case ValType.I32 => evalNumericOp(ICONST_0)
+    case ValType.I64 => evalNumericOp(LCONST_0)
+    case ValType.F32 => evalNumericOp(FCONST_0)
+    case ValType.F64 => evalNumericOp(DCONST_0)
+    
+  
 

@@ -97,6 +97,10 @@ trait Interpreter:
     , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
     , f32CompareOps: OrderingOps[F32, Bool]
     , f64CompareOps: OrderingOps[F64, Bool]
+    , i32EqOps: EqOps[I32, Bool]
+    , i64EqOps: EqOps[I64, Bool]
+    , f32EqOps: EqOps[F32, Bool]
+    , f64EqOps: EqOps[F64, Bool]
       ): BytecodeOps[Value] with
 
 
@@ -140,6 +144,21 @@ trait Interpreter:
       override def gt(v1: Value, v2: Value): Value = (v1, v2) match
         case (Float32(f1), Float32(f2)) => boolean(OrderingOps.gt(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
+    final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
+      import Value.*
+      override def equ(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(EqOps.equ(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(EqOps.equ(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(EqOps.equ(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(EqOps.equ(d1, d2))
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def neq(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(EqOps.neq(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(EqOps.neq(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(EqOps.neq(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(EqOps.neq(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)

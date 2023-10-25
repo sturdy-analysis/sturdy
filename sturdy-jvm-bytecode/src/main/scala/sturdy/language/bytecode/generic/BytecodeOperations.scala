@@ -14,6 +14,7 @@ trait BytecodeOps[V]:
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
   val compareOps: OrderingOps[V, V]
+  val eqOps: EqOps[V, V]
   
   val convert_i32_i64: ConvertIntLong[V, V]
   val convert_i32_f32: ConvertIntFloat[V, V]

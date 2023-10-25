@@ -1,9 +1,11 @@
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
 import sturdy.language.bytecode.ConcreteInterpreter
+import sturdy.language.bytecode.generic.ValType
 import sturdy.values.integer.IntegerOps
 
 import java.net.URL
+import scala.Float.NaN
 import scala.collection.mutable
 
 object test extends App{
@@ -46,11 +48,33 @@ object test extends App{
   println(result4)
 
   interp.eval(LoadFloat(12.0f))
-  interp.eval(LoadFloat(5.0f))
+  interp.eval(LoadFloat(NaN))
   interp.eval(FCMPL)
   val result5 = interp.stack.pop()
   println(result5)
 
+
+  val instList = List(
+    BIPUSH(5),
+    ISTORE_0,
+    BIPUSH(6),
+    ISTORE_1,
+    BIPUSH(29),
+    ILOAD_0,
+    ILOAD_1,
+    IADD
+  )
+  val localList = List(ValType.I32, ValType.I32, ValType.I32, ValType.I32)
+
+  interp.invokeStatic(localList, instList, List())
+
+  println(interp.stack.pop())
+  println(interp.stack.pop())
+
+
+/*
+
+*/
 
 }
 

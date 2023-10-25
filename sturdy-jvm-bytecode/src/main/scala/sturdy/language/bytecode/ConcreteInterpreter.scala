@@ -35,12 +35,13 @@ object ConcreteInterpreter extends Interpreter:
     else
       Value.Int32(0)
   class Instance extends GenericInstance:
-    val newFrameData = ()
+    val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
+
 
 
     private given Failure = failure
