@@ -194,6 +194,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
 
 
   def setLocal(ix: Int, name: Var, v: V): JOptionC[Unit] =
+    // apron => ApronStore on top of RecencyStore, 
     if (ix >= 0 && ix < vars.length) {
       val oldVal = vars(ix)
       getIntVal(v) match

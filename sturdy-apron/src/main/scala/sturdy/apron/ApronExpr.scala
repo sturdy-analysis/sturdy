@@ -5,9 +5,10 @@ import gmp.Mpz
 import sturdy.apron.ApronCons.False
 import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.{Join, MaybeChanged, Widen}
+import sturdy.effect.store.VirtualAddress
 
 enum ApronExpr[Context]:
-  case Var(v: ApronVar[Context])
+  case Var(v: VirtualAddress[Context])
   case Constant(coeff: Coeff)
   case Unary(op: UnOp, e: ApronExpr[Context], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr[Context], r: ApronExpr[Context], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
