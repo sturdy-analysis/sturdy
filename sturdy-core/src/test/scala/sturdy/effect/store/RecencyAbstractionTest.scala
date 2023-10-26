@@ -109,7 +109,7 @@ class RecencyAbstractionTest extends AnyFunSuite:
 
     val a2 = store.alloc(ctx1)
     val virt2 = PowVirtualAddress(a2)
-    val virt3 = PowVirtualAddress(a1, a2)
+    val virt3 = PowVirtualAddress(Iterable(a1, a2))
 
     virt2.isEmpty shouldBe false
     virt3.isEmpty shouldBe false

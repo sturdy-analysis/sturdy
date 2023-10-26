@@ -48,7 +48,7 @@ object IntervalRecencyAnalysis extends Interpreter,
     private val initPhysicalStore = initStore.map { (addr,v) => PhysicalAddress(addr, Recency.Recent) -> v }.toMap
     private val astore: AStoreThreaded[PhysicalAddress[AllocationSiteAddr], PowPhysicalAddress[AllocationSiteAddr], Value] = new AStoreThreaded(initPhysicalStore)
 
-    override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = new RecencyStore[AllocationSiteAddr, Addr, Value](astore)
+    override val store: RecencyStore[AllocationSiteAddr, Addr, Value] = ??? // new RecencyStore[AllocationSiteAddr, Addr, Value](astore)
     override val alloc: Allocator[Addr, AllocationSite] = new Allocator with Stateless:
       override def alloc(ctx: AllocationSite): PowVirtualAddress[AllocationSiteAddr] =
         PowVirtualAddress(store.alloc(References.allocationSiteAddr(ctx)))
