@@ -144,27 +144,17 @@ class GenericInterpreterNumerics[V]
       case LXOR =>
         i64ops.bitXor(v1, v2)
       case FCMPL =>
-        val nan = f32ops.NaN
-        println(s"V2: $v2")
-        println(s"nan: $nan")
-        println(eqOps.equ(v2, nan))
-        println(v2 == nan)
-        v2 match
-          case `nan` => f32ops.floatingLit(-1)
-          case _ =>
-            val isLt = compareOps.lt(v1, v2)
-            branchOpsV.boolBranch(isLt) {
-              f32ops.floatingLit(-1)
-            } {
-              val isGt = compareOps.gt(v1, v2)
-              branchOpsV.boolBranch(isGt) {
-                f32ops.floatingLit(1)
-              } {
-                f32ops.floatingLit(0)
-              }
-            }
-
-
+        val isLt = compareOps.lt(v1, v2)
+        branchOpsV.boolBranch(isLt) {
+          f32ops.floatingLit(-1)
+        } {
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsV.boolBranch(isGt) {
+            f32ops.floatingLit(1)
+          } {
+            f32ops.floatingLit(0)
+          }
+        }
       case FCMPG =>
         val isLt = compareOps.lt(v1, v2)
         branchOpsV.boolBranch(isLt) {

@@ -1,20 +1,35 @@
+import org.opalj.br.{ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType}
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
+import org.opalj.io.process
 import sturdy.language.bytecode.ConcreteInterpreter
 import sturdy.language.bytecode.generic.ValType
 import sturdy.values.integer.IntegerOps
 
+import java.io.{DataInputStream, FileInputStream}
 import java.net.URL
 import scala.Float.NaN
 import scala.collection.mutable
 
 object test extends App{
-  /*val projectJAR = "D:\\DesktopStuff\\Schule_Uni_Bewerbung_Stuff\\Studium\\Master\\Masterarbeit\\Seminar\\Example Java\\Password-Generator-master\\Password-Generator-master\\out\\production\\Password-Generator\\PasswordGenerator19.jar"
-  implicit val p: Project[URL] = Project(
-    new java.io.File(projectJAR) // path to the JAR files/directories containing the project
-  )
+  def convertTypes(opalTypes: FieldType): ValType = opalTypes match
+    case IntegerType => ValType.I32
+    case FloatType => ValType.F32
+    case LongType => ValType.I64
+    case DoubleType => ValType.F64
+    case _ => ValType.I32
 
-  println(p.allMethodsWithBody)*/
+  val classFileName = "D:\\DesktopStuff\\Schule_Uni_Bewerbung_Stuff\\Studium\\Master\\Masterarbeit\\Seminar\\Example Java\\Password-Generator-master\\Password-Generator-master\\out\\production\\Password-Generator\\SimpleMath.class"
+  val cfs: List[ClassFile] =
+    process(new DataInputStream(new FileInputStream(classFileName))) { in =>
+      org.opalj.br.reader.Java8Framework.ClassFile(in)
+    }
+  /*val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
+  println(locals.map(_.fieldType))
+  val localtypes = locals.map(_.fieldType)
+  val convertedTypes = localtypes.map(convertTypes(_))
+  println(convertedTypes)*/
+  val testMethod = cfs.head.findMethod("sub2").head
 
 
 
@@ -71,6 +86,11 @@ object test extends App{
   println(interp.stack.pop())
   println(interp.stack.pop())
 
+  interp.eval(BIPUSH(5))
+  interp.eval(BIPUSH(7))
+  interp.invokeStatic(testMethod)
+
+  println(interp.stack.pop())
 
 /*
 

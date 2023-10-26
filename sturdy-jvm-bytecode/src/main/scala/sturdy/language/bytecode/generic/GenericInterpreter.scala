@@ -10,8 +10,8 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.values.booleans.BooleanBranching
-
 import BytecodeFailure.*
+import org.opalj.br.{DoubleType, FieldType, FloatType, IntegerType, LongType, Method}
 
 /*
 
@@ -53,7 +53,7 @@ trait GenericInterpreter[V]:
   def eval(inst: Instruction): Unit = inst.opcode match
     // No Op
     case x if (x == 0) =>
-      ???
+      ()
 
     // push NULL on stack
     case x if (x == 1) =>
@@ -121,25 +121,38 @@ trait GenericInterpreter[V]:
     case x if (87 <= x && x <= 95) =>
       inst match
         case inst: POP.type =>
-          stack.pop()
+          stack.popOrAbort()
         case inst: POP2.type =>
-          stack.pop2()
+          stack.pop2OrAbort()
         case inst: DUP.type =>
-          ???
+          val dup = stack.popOrAbort()
+          stack.push(dup)
+          stack.push(dup)
         case inst: DUP_X1.type =>
-          ???
+          val dup = stack.popOrAbort()
+          val ins = stack.popOrAbort()
+          stack.push(dup)
+          stack.push(ins)
+          stack.push(dup)
         case inst: DUP_X2.type =>
           ???
         case inst: DUP2.type =>
-          ???
+          val dup1 = stack.popOrAbort()
+          val dup2 = stack.popOrAbort()
+          stack.push(dup2)
+          stack.push(dup1)
+          stack.push(dup2)
+          stack.push(dup1)
         case inst: DUP2_X1.type =>
           ???
         case inst: DUP2_X2.type =>
           ???
         case inst: SWAP.type =>
-          ???
-
-
+          val top = stack.popOrAbort()
+          val bot = stack.popOrAbort()
+          stack.push(top)
+          stack.push(bot)
+      
     // Arithmetic Ops
     case x if (96 <= x && x <= 115) =>
       val (v1, v2) = stack.pop2OrAbort()
@@ -179,7 +192,7 @@ trait GenericInterpreter[V]:
 
     // Return
     case x if (172 <= x && x <= 177) =>
-      ???
+      ()
 
     // Load and Store Statics
     case x if (178 <= x && x <= 179) =>
@@ -191,12 +204,18 @@ trait GenericInterpreter[V]:
 
     // Invoke Functions
     case x if (182 <= x && x <= 186) =>
-      val newFrameData = ()
-      val args: List[V] = ???
-      frame.withNew(newFrameData, args.zipWithIndex.map(_.swap)) {
+      inst match
+        case inst: INVOKESTATIC =>
+          ???
 
-      }
-      ???
+        case _ =>
+          val newFrameData = ()
+          val args: List[V] = ???
+          frame.withNew(newFrameData, args.zipWithIndex.map(_.swap)) {
+
+          }
+          ???
+
 
     // NEW
     case x if (x == 187) =>
@@ -281,3 +300,27 @@ trait GenericInterpreter[V]:
       }
     }
 
+  def invokeStatic(mth: Method) =
+    val newFrameData = ()
+    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+    val instructionList = mth.body.get
+    val args = mth.descriptor.parameterTypes.map(convertTypes(_))
+    val numArgs = mth.descriptor.parametersCount
+    val argsAndLocals = (args ++ locals).map(num.defaultValue(_))
+
+    stack.withNewFrame(numArgs){
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
+        for( i <- (numArgs-1) to 0 by -1){
+          frame.setLocalOrElse(i, stack.popOrAbort(), fail(UnboundLocal, s" ${i.toString}"))
+        }
+        instructionList.foreachInstruction(eval(_))
+      }
+    }
+
+
+  def convertTypes(opalTypes: FieldType): ValType = opalTypes match
+    case IntegerType => ValType.I32
+    case FloatType => ValType.F32
+    case LongType => ValType.I64
+    case DoubleType => ValType.F64
+    case _ => ValType.I32
