@@ -303,17 +303,27 @@ trait GenericInterpreter[V]:
   def invokeStatic(mth: Method) =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-    val instructionList = mth.body.get
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
     val args = mth.descriptor.parameterTypes.map(convertTypes(_))
     val numArgs = mth.descriptor.parametersCount
     val argsAndLocals = (args ++ locals).map(num.defaultValue(_))
+    val startingPC = mth.body.get.iterator.next().pc
+
+    var currPC = List(startingPC)
+    var currInst = instructionMap.get(currPC.head)
+
 
     stack.withNewFrame(numArgs){
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
         for( i <- (numArgs-1) to 0 by -1){
           frame.setLocalOrElse(i, stack.popOrAbort(), fail(UnboundLocal, s" ${i.toString}"))
         }
-        instructionList.foreachInstruction(eval(_))
+        eval(currInst.get)
+        while(currInst.get.nextInstructions(currPC.head)(mth.body.get).nonEmpty){
+          currPC = currInst.get.nextInstructions(currPC.head)(mth.body.get)
+          currInst = instructionMap.get(currPC.head)
+          eval(currInst.get)
+        }
       }
     }
 
