@@ -35,12 +35,13 @@ val jumpTargets: Map[String, InstructionIndex]
 
 trait GenericInterpreter[V]:
   val bytecodeOps: BytecodeOps[V]
+  import bytecodeOps.*
+
   val stack: DecidableOperandStack[V]
   val failure: Failure
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
-
 
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")

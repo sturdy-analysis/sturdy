@@ -95,6 +95,8 @@ trait Interpreter:
     , convertF64F32: ConvertDoubleFloat[F64, F32]
     , boolBranchOpsV: BooleanBranching[Bool, Value]
     , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+    , i32CompareOps: OrderingOps[I32, Bool]
+    , i64CompareOps: OrderingOps[I64, Bool]
     , f32CompareOps: OrderingOps[F32, Bool]
     , f64CompareOps: OrderingOps[F64, Bool]
     , i32EqOps: EqOps[I32, Bool]
@@ -130,18 +132,26 @@ trait Interpreter:
     final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
       import Value.*
       override def lt(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.lt(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.lt(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(OrderingOps.lt(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.lt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def le(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.le(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.le(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(OrderingOps.le(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.le(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def ge(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.ge(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.ge(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(OrderingOps.ge(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.ge(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def gt(v1: Value, v2: Value): Value = (v1, v2) match
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.gt(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.gt(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(OrderingOps.gt(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
