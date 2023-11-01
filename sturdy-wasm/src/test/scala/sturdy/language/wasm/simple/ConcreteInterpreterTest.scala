@@ -101,7 +101,10 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   //testFunction(st9, "test_e", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.ExternRef(0))))
   //testFunction(st9, "test_e", List.empty, List(Value.Ref(ConcreteInterpreter.RefValue.ExternNull)))
 
-  testFunction(st9, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
+ // testFunction(st9, "add_i32", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0)), Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
+  testFunction(st9, "return_const", List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))), List(Value.Num(ConcreteInterpreter.NumValue.Int32(0))))
+ // testFunction(st9, "test_call", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(7))))
+ // testFunction(st9, "test_call_indirect", List.empty, List(Value.Num(ConcreteInterpreter.NumValue.Int32(3))))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {

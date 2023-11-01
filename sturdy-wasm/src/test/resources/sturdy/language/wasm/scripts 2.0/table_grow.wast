@@ -41,7 +41,7 @@
 ;; Reject growing to size outside i32 value range
 (module
   (table $t 0x10 funcref)
-  ;;(elem declare func $f)
+  (elem declare func $f)
   (func $f (export "grow") (result i32)
     (table.grow $t (ref.func $f) (i32.const 0xffff_fff0))
   )
@@ -86,7 +86,7 @@
   (func (export "grow") (param i32) (result i32)
     (table.grow $t (ref.null func) (local.get 0))
   )
-  ;;(elem declare func 1)
+  (elem declare func 1)
   (func (export "check-table-null") (param i32 i32) (result funcref)
     (local funcref)
     (local.set 2 (ref.func 1))
@@ -106,6 +106,7 @@
 (assert_return (invoke "check-table-null" (i32.const 0) (i32.const 9)) (ref.null func))
 (assert_return (invoke "grow" (i32.const 10)) (i32.const 10))
 (assert_return (invoke "check-table-null" (i32.const 0) (i32.const 19)) (ref.null func))
+
 
 ;; Type errors
 

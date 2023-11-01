@@ -58,11 +58,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def funcRefToInt(r: Value): Int = ???
     override def makeRef(f: FunctionInstance): IntervalAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToV(f: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
+    override def makeRef(f: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def makeExternRef(f: Int): IntervalAnalysis.Value = ???
     override def instToVal(i: Inst): IntervalAnalysis.Value = ???
+    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -115,8 +116,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-    override var tabLimits: List[(Int, Option[Int])] = List()
-    override var tabTypes: List[ReferenceType] = List()
+    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tableTypes: List[ReferenceType] = List()
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =

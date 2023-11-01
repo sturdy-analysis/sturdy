@@ -21,6 +21,7 @@ import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.floating.FloatOps
 import swam.syntax.*
 import swam.{FuncType, ReferenceType}
+import swam.ReferenceType.{ExternRef, FuncRef}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -49,17 +50,67 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
-    override def valToInt(v: Value): Int = ???
+    override def valToInt(v: Value): Int = {
+      v match {
+        case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => i match {
+          case Topped.Actual(n) => n
+          case Topped.Top => 0
+        }
+        case _ => 0
+      }
+    }
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
-    override def numToRef(v: Value): Value = ???
-    override def funcRefToInt(r: Value): Int = ???
-    override def makeRef(f: FunctionInstance): ConstantAnalysis.Value = ???
-    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToV(f: Powerset[FunctionInstance]): ConstantAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = ???
-    override def isNull(r: Value): ConstantAnalysis.Value = ???
-    override def makeExternRef(f: Int): ConstantAnalysis.Value = ???
-    override def instToVal(i: Inst): ConstantAnalysis.Value = ???
+    override def numToRef(v: Value): Value = {
+      v match {
+        case Value.Num(NumValue.Int32(Topped.Actual(-1))) => makeNullRef(FuncRef)
+        case Value.Num(NumValue.Int32(r)) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(r))
+        case _ => makeNullRef(FuncRef)
+      }
+    }
+    override def funcRefToInt(r: Value): Int =
+      r match {
+        case Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(i))) => i
+        case _ => -1
+      }
+
+    override def makeRef(f: FunctionInstance): ConstantAnalysis.Value =
+      f match {
+        case FunctionInstance.Wasm(_, funcIx, _, _) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(funcIx)))
+        case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+      }
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
+    override def makeRef(f: Powerset[FunctionInstance]): ConstantAnalysis.Value = {
+      Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(0)))
+    }
+    override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = {
+      t match {
+        case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+        case ExternRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+      }
+    }
+
+    override def isNull(r: Value): ConstantAnalysis.Value = {
+      r match {
+        case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull) => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(1)))
+        case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull) => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(1)))
+        case _ => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(0)))
+      }
+    }
+    override def makeExternRef(f: Int): ConstantAnalysis.Value =
+      f match {
+        case -1 => makeNullRef(ExternRef)
+        case _ => Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Actual(f)))
+      }
+    override def instToVal(i: Inst): ConstantAnalysis.Value =
+      i match {
+        case RefFunc(x) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(x)))
+        case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+      }
+    override def validateTableElem(tabSz: Int, e: Int): Boolean = {
+      if (e < 0 | e >= tabSz) {
+        false
+      } else true
+    }
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -88,6 +139,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(Topped.Actual(l)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Value.Ref(RefValue.FuncNull)
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Ref(RefValue.ExternNull)
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) => Value.Ref(RefValue.FuncRef(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance
@@ -110,8 +165,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-    override var tabLimits: List[(Int, Option[Int])] = List()
-    override var tabTypes: List[ReferenceType] = List()
+    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tableTypes: List[ReferenceType] = List()
     private given Failure = failure
     
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly

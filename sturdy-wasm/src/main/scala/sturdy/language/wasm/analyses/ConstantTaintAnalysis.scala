@@ -57,11 +57,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def funcRefToInt(r: Value): Int = ???
     override def makeRef(f: FunctionInstance): ConstantTaintAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToV(f: Powerset[FunctionInstance]): ConstantTaintAnalysis.Value = ???
+    override def makeRef(f: Powerset[FunctionInstance]): ConstantTaintAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
     override def makeExternRef(f: Int): ConstantTaintAnalysis.Value = ???
     override def instToVal(i: Inst): ConstantTaintAnalysis.Value = ???
+    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>
@@ -114,8 +115,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-    override var tabLimits: List[(Int, Option[Int])] = List()
-    override var tabTypes: List[ReferenceType] = List()
+    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tableTypes: List[ReferenceType] = List()
     given Failure = failure
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 

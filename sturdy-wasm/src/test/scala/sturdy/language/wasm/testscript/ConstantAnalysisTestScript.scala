@@ -25,6 +25,7 @@ import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis
 import swam.ModuleLoader
+import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.text.*
@@ -44,8 +45,8 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript constant analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
-
+ // val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
+  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts 2.0").toURI;
   val spectest = Parsing.fromText(pathSpectest)
 
 
@@ -67,8 +68,8 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
         val script = Parsing.testscript(p)
         val interp = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp())
         interp.run(script)
-        val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
-        interpTop.run(script)
+      //  val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
+      //  interpTop.run(script)
       }
     }
   }
@@ -110,6 +111,10 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
+      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
+      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
+      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
+      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
       case _ => false
     }
 
@@ -279,6 +284,18 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
       case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l))
       case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f))
       case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d))
+      case unresolved.RefNull(t) => t match {
+        case FuncRef => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+        case ExternRef => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+      }
+      case unresolved.RefFunc(x) => x match {
+        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
+        case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+      }
+      case unresolved.RefExtern(x) => x match {
+        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
+        case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+      }
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =

@@ -76,10 +76,11 @@ object ConcreteInterpreter extends Interpreter:
       case Value.Num(NumValue.Int32(r)) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
       case _ => makeNullRef(FuncRef)
     }
-    override def funcRefToInt(r: ConcreteInterpreter.Value): Int = r match {
+    override def funcRefToInt(r: ConcreteInterpreter.Value): Int =
+      r match {
       case Value.Ref(ConcreteInterpreter.RefValue.FuncRef(i)) => i
       case _ => -1
-    }
+      }
 
     override def makeNullRef(t: ReferenceType): ConcreteInterpreter.Value =
       t match {
@@ -107,11 +108,6 @@ object ConcreteInterpreter extends Interpreter:
       }
 
     override def funcInstToFunV(f: FunctionInstance): FunctionInstance = f
-    override def funVToV(f: FunctionInstance): ConcreteInterpreter.Value =
-      f match {
-      case FunctionInstance.Wasm(_,funcIx,_,_) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(funcIx))
-      case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-    }
 
     override def instToVal(i: Inst): ConcreteInterpreter.Value =
       i match {
@@ -119,6 +115,11 @@ object ConcreteInterpreter extends Interpreter:
         case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
       }
 
+    override def validateTableElem(tabSz: Int, e: Int): Boolean =
+      if (e < 0 | e >= tabSz) {
+        false
+      } else true
+      
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
       if (i >= 0 && i < vec.size)
@@ -165,8 +166,8 @@ object ConcreteInterpreter extends Interpreter:
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
-    override var tabLimits: List[(Int, Option[Int])] = List()
-    override var tabTypes: List[ReferenceType] = List()
+    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tableTypes: List[ReferenceType] = List()
     private given Failure = failure
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, NoJoin] = implicitly
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]

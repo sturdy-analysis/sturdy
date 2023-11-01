@@ -17,9 +17,6 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   protected var tables: Map[Key, Either[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
-  var min = 0
-  var max = None
-
   override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
     tables(key) match
       case Right(entry) => JOptionA.NoneSome(entry)
@@ -46,7 +43,10 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           tables += key -> Left(tab.updated(sym, newEntry))
 
 
-  override def size(key: Key): Int = ???
+  override def size(key: Key): Int = tables(key) match {
+    case Left(table) => table.underlying.size
+    case _ => 0
+  }
 
   override def grow(key: Key, symbol: Topped[Symbol], initEntry: Entry): Int = ???
 
