@@ -93,8 +93,8 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
     )
   )
 
-val swamCommit = "580bdb83208e63cbdb2bcec86fc5432db288fd21"
-val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
+val swamCommit = "0cda3e76946b018797f3669cac61bc86959f85ff"
+val swam = uri(s"https://gitlab.rlp.net/npinkern/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
@@ -107,6 +107,7 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.json4s" %% "json4s-native" % "4.0.4" % "test",
+//      "com.typesafe" % "config" % "1.4.0" % "test",
       ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13) % "test",
       "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test"
     )
