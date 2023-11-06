@@ -1,7 +1,7 @@
 package sturdy.language.tip.analysis
 
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocatorIntIncrement}
-import sturdy.effect.store.{PowVirtualAddress, VirtualAddress, given}
+import sturdy.effect.store.{given}
 import sturdy.language.tip.abstractions.References
 import sturdy.language.tip.analysis.IntervalRecencyAnalysis.*
 import sturdy.language.tip.{AllocationSite, ConcreteInterpreter, Field, Function}

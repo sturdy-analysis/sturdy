@@ -7,7 +7,6 @@ import sturdy.data.given
 import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
-import sturdy.effect.store.PowVirtualAddress
 import sturdy.language.tip.ConcreteInterpreter
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*

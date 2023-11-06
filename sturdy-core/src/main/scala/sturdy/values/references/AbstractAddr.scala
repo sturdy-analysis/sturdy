@@ -3,10 +3,10 @@ package sturdy.values.references
 import sturdy.values.ordering.EqOps
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Powerset, Structural, Topped}
 
-trait AbstractAddr[+Addr]:
+trait AbstractAddr[+Addr] extends Iterable[Addr]:
   def isEmpty: Boolean
   def isStrong: Boolean
-  def reduce[A](f: Addr => A)(using Join[A]): A
+  def reduce[A](f: Addr => A)(using Join[A]): A = this.map(f).reduce((a1, a2) => Join(a1, a2).get)
 
 given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
   override def equ(v1: AA, v2: AA): Topped[Boolean] =
@@ -21,9 +21,8 @@ given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
 case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends AbstractAddr[AA]:
   override def isEmpty: Boolean = addrs.forall(_.isEmpty)
   override def isStrong: Boolean = addrs.size == 1 && addrs.head.isStrong
-  override def reduce[A](f: AA => A)(using Join[A]): A = addrs.map(f).reduce { case (a1, a2) =>
-    Join(a1, a2).get
-  }
+  override def iterator: Iterator[AA] = addrs.iterator
+
 object PowersetAddr:
   def apply[A, AA <: AbstractAddr[A]](addr: AA): PowersetAddr[A, AA] = PowersetAddr(Set(addr))
   def apply[A, AA <: AbstractAddr[A]](addr: AA, addrs: AA*): PowersetAddr[A, AA] = PowersetAddr(Set(addr) ++ addrs)

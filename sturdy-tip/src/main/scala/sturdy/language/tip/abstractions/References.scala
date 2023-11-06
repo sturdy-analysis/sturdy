@@ -38,7 +38,7 @@ object References:
       AbstractReference.NullAddr(aa, false)
 
   trait AllocationSitesRecency extends Interpreter:
-    final type Addr = PowersetAddr[VirtualAddress[AllocationSiteAddr], VirtualAddress[AllocationSiteAddr]]
+    final type Addr = PowVirtualAddress[AllocationSiteAddr]
     final type VRef = AbstractReference[Addr]
     final type Environment = Map[String, Value]
     final type InitStore = Map[AllocationSiteAddr, Value]
@@ -46,6 +46,6 @@ object References:
     given Widen[VRef] = combineAbstractReference
 
     final def topReference(using self: Instance): VRef =
-      val store = self.store.asInstanceOf[RecencyStore[AllocationSiteAddr, PowersetAddr[VirtualAddress[AllocationSiteAddr], VirtualAddress[AllocationSiteAddr]], Value]]
+      val store = self.store.asInstanceOf[RecencyStore[AllocationSiteAddr, PowVirtualAddress[AllocationSiteAddr], Value]]
       val knownVirtuals = store.virtualAddresses
       AbstractReference.NullAddr(knownVirtuals, false)
