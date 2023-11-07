@@ -24,8 +24,14 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
 
   def getAddressTranslation: AddressTranslation[Context] = this.addressTranslation
 
+  private def virtToPhys(v: VirtualAddress[Context]): PowPhysicalAddress[Context] =
+    addressTranslation(v)
+
   private def virtToPhys(vs: Virt): PowPhysicalAddress[Context] =
-    PowPhysicalAddress(vs)
+    if (vs.isEmpty)
+      PowersetAddr(Set())
+    else
+      vs.reduce(virtToPhys)
 
   override def read(vs: Virt): JOption[WithJoin, V] =
     val pa = virtToPhys(vs)
@@ -44,15 +50,15 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   def alloc(ctx: Context): VirtualAddress[Context] =
     val fresh = getNext()
     mostRecent.get(ctx) match
-      case Some(mostRecentIndices) =>
-        val mostRecentAddrs = PowPhysicalAddress(for (idx <- mostRecentIndices.set) yield (VirtualAddress[Context](ctx, idx, addressTranslation)))
-        for (mostRecentIdx <- mostRecentIndices)
-          addressTranslation += (ctx, mostRecentIdx) -> PowRecency.Old
-        val oldAddrs = addressTranslation.oldAddresses(ctx)
-        store.read(mostRecentAddrs).map { oldVal => store.write(oldAddrs, oldVal) }
+      case Some(mostRecentVirts) =>
         mostRecent += ctx -> Powerset(fresh)
         val virt = VirtualAddress(ctx, fresh, addressTranslation)
         addressTranslation += virt.identifier -> PowRecency.Recent
+        store.read(PowersetAddr(PhysicalAddress(ctx, Recency.Recent))).map { oldVal =>
+          store.write(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), oldVal)
+        }
+        for(mostRecentVirt <- mostRecentVirts)
+          addressTranslation += (ctx,mostRecentVirt) -> PowRecency.Old
         virt
       case None =>
         mostRecent += ctx -> Powerset(fresh)
@@ -112,7 +118,7 @@ class RecencyStore[Context, Virt <: AbstractAddr[VirtualAddress[Context]], V]
     val contextMap = physicalAddressesByContext
     c.entries.foreachEntry { case (a, v) =>
       val ctx = varAbstractly(a)
-      val ps = contextMap.getOrElse(ctx, PowPhysicalAddress.empty)
+      val ps = contextMap.getOrElse(ctx, PowersetAddr(Set()))
       store.read(ps) match
         case JOptionA.None() => return IsSound.NotSound(s"Concrete address $a abstracts to $ps, which is not bound in store")
         case JOptionA.Some(av) =>

@@ -38,7 +38,7 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
     if (xs.isStrong)
       xs.reduce(x => store -= x)
 
-  override final type State = Map[A, V]
+  override type State = Map[A, V]
   override def getState: Map[A, V] = store
   override def setState(s: Map[A, V]): Unit = this.store = s
   override def join: Join[Map[A, V]] = implicitly
