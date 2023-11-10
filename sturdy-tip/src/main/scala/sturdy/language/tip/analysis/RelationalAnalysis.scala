@@ -95,19 +95,9 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ApronCallFrame[String, String, Value, Exp.Call] = new ApronCallFrame(
-      apron,
-      "$root",
-      { 
-        case Value.IntValue(Topped.Top) => scala.Some(ApronExpr.topConstant)
-        case Value.IntValue(Topped.Actual(v)) => scala.Some(v)
-        case _ => None 
-      },
-      _ => None,
-      iv => Value.IntValue(Topped.Actual(iv)),
-      _ => Value.TopValue,
-      Iterable.empty
-    )
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+
+    private val relationalStore: Store[PowPhysicalAddress[AllocationSiteAddr], Value, J] = /* Some apron store here? */
 
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
