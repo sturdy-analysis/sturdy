@@ -21,7 +21,6 @@ enum AllocationSiteAddr extends AbstractAddr[AllocationSiteAddr]:
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = false
   override def reduce[A](f: AllocationSiteAddr => A)(using Join[A]): A = f(this)
-  override def iterator: Iterator[AllocationSiteAddr] = Iterator(this)
 
 given Finite[AllocationSiteAddr] with {}
 given Structural[AllocationSiteAddr] with {}
