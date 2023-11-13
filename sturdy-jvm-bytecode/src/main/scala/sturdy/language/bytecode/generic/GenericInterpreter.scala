@@ -12,7 +12,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
-import org.opalj.br.{DoubleType, FieldType, FloatType, IntegerType, LongType, Method}
+import org.opalj.br.{ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method}
 
 /*
 
@@ -35,7 +35,7 @@ val jumpTargets: Map[String, InstructionIndex]
  */
 
 enum JvmExcept:
-  case Foo
+  case Jump(pc: Int)
 
 trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   val bytecodeOps: BytecodeOps[V]
@@ -49,16 +49,14 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
+  val cfs: ClassFile
 
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[V](bytecodeOps)
 
-  def run(insts: Iterable[Instruction]): Unit =
-    insts.foreach(eval)
-
-  def eval(inst: Instruction): Unit = inst.opcode match
+  def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
     case x if (x == 0) =>
       ()
@@ -192,11 +190,22 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
     // Branching
     case x if (153 <= x && x <= 166) =>
-      ???
+      inst match
+        case inst: IFEQ =>
+          val v = stack.popOrAbort()
+          val isEq = eqOps.equ(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isEq) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+
 
     // JUMPS
     case x if (167 <= x && x <= 171) =>
-      ???
+      inst match
+        case inst: GOTO =>
+          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
 
     // Return
     case x if (172 <= x && x <= 177) =>
@@ -214,7 +223,9 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     case x if (182 <= x && x <= 186) =>
       inst match
         case inst: INVOKESTATIC =>
-          ???
+          // Overloaded Functions?
+          val mth = cfs.findMethod(inst.name).head
+          invokeStatic(mth)
 
         case _ =>
           val newFrameData = ()
@@ -312,33 +323,36 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-    val args = mth.descriptor.parameterTypes.map(convertTypes(_))
+
     val numArgs = mth.descriptor.parametersCount
-    val argsAndLocals = (args ++ locals).map(num.defaultValue(_))
+    val args = stack.popNOrAbort(numArgs)
+    val argsAndLocals = args.view ++ locals.map(num.defaultValue)
+
     val startingPC = mth.body.get.iterator.next().pc
 
     var currPC = List(startingPC)
     var currInst = instructionMap.get(currPC.head)
 
-    except.tryCatch {
-      if (util.Random.nextBoolean())
-        except.throws(JvmExcept.Foo)
-    } {
-      case JvmExcept.Foo => println(s"foo")
+    stack.withNewFrame(0){
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
+        runBlock(0, instructionMap, mth)
+      }
     }
 
-    stack.withNewFrame(numArgs){
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
-        for( i <- (numArgs-1) to 0 by -1){
-          frame.setLocalOrElse(i, stack.popOrAbort(), fail(UnboundLocal, s" ${i.toString}"))
-        }
-        eval(currInst.get)
-        while(currInst.get.nextInstructions(currPC.head)(mth.body.get).nonEmpty){
-          currPC = currInst.get.nextInstructions(currPC.head)(mth.body.get)
-          currInst = instructionMap.get(currPC.head)
-          eval(currInst.get)
-        }
+  def runBlock(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
+    except.tryCatch {
+      var currPC = pc
+      var currInst = instructionMap(currPC)
+      eval(currInst, currPC)
+      while(currInst.nextInstructions(pc)(mth.body.get).nonEmpty){
+        currPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
+        currInst = instructionMap(currPC)
+        eval(currInst, currPC)
       }
+
+    } {
+      case JvmExcept.Jump(targetPC) =>
+        runBlock(targetPC, instructionMap, mth)
     }
 
 

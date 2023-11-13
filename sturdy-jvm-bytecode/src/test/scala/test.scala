@@ -1,6 +1,6 @@
-import org.opalj.br.{ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType}
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
+import org.opalj.br.*
 import org.opalj.io.process
 import sturdy.language.bytecode.ConcreteInterpreter
 import sturdy.language.bytecode.generic.ValType
@@ -29,11 +29,11 @@ object test extends App{
   val localtypes = locals.map(_.fieldType)
   val convertedTypes = localtypes.map(convertTypes(_))
   println(convertedTypes)*/
-  val testMethod = cfs.head.findMethod("sub2").head
 
 
 
-  val interp = new ConcreteInterpreter.Instance
+
+  val interp = new ConcreteInterpreter.Instance(cfs.head)
 
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
@@ -86,15 +86,27 @@ object test extends App{
   println(interp.stack.pop())
   println(interp.stack.pop())
 
+
+  val testMethod = cfs.head.findMethod("sub2").head
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(7))
   interp.invokeStatic(testMethod)
-
   println(interp.stack.pop())
 
-/*
+  val testBranch = cfs.head.findMethod("branching").head
+  interp.eval(ICONST_0)
+  interp.invokeStatic(testBranch)
+  println(interp.stack.pop())
 
-*/
+  interp.eval(ICONST_1)
+  interp.invokeStatic(testBranch)
+  println(interp.stack.pop())
+
+
+
+  /*
+
+  */
 
 }
 

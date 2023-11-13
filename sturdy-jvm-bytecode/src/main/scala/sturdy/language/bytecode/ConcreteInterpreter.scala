@@ -1,5 +1,6 @@
 package sturdy.language.bytecode
 
+import org.opalj.br.ClassFile
 import sturdy.data.{*, given}
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
@@ -36,7 +37,7 @@ object ConcreteInterpreter extends Interpreter:
       Value.Int32(1)
     else
       Value.Int32(0)
-  class Instance extends GenericInstance:
+  class Instance(file: ClassFile) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
@@ -46,6 +47,8 @@ object ConcreteInterpreter extends Interpreter:
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
     val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
+
+    val cfs: ClassFile = file
 
 
     private given Failure = failure
