@@ -7,6 +7,7 @@ import sturdy.values.integer.*
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
+import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.values.booleans.BooleanBranching
@@ -33,12 +34,18 @@ val jumpTargets: Map[String, InstructionIndex]
 
  */
 
-trait GenericInterpreter[V]:
+enum JvmExcept:
+  case Foo
+
+trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   val bytecodeOps: BytecodeOps[V]
   import bytecodeOps.*
 
+  implicit val joinUnit: J[Unit]
+
   val stack: DecidableOperandStack[V]
   val failure: Failure
+  val except: Except[JvmExcept, JvmExcept, J]
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
@@ -313,6 +320,12 @@ trait GenericInterpreter[V]:
     var currPC = List(startingPC)
     var currInst = instructionMap.get(currPC.head)
 
+    except.tryCatch {
+      if (util.Random.nextBoolean())
+        except.throws(JvmExcept.Foo)
+    } {
+      case JvmExcept.Foo => println(s"foo")
+    }
 
     stack.withNewFrame(numArgs){
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){

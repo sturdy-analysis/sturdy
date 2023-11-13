@@ -2,11 +2,13 @@ package sturdy.language.bytecode
 
 import sturdy.data.{*, given}
 import sturdy.effect.callframe.ConcreteCallFrame
+import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.generic.*
 import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching}
+import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.floating.FloatOps
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
@@ -38,10 +40,12 @@ object ConcreteInterpreter extends Interpreter:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
+    val joinUnit: MayJoin.NoJoin[FrameData] = implicitly
+
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
-
+    val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
 
 
     private given Failure = failure

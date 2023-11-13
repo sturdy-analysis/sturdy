@@ -1,5 +1,6 @@
 package sturdy.language.bytecode
 
+import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
@@ -175,4 +176,4 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value]
+  abstract class GenericInstance extends GenericInterpreter[Value, NoJoin]
