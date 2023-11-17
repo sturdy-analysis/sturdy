@@ -19,7 +19,7 @@ object test extends App{
     case DoubleType => ValType.F64
     case _ => ValType.I32
 
-  val classFileName = "D:\\DesktopStuff\\Schule_Uni_Bewerbung_Stuff\\Studium\\Master\\Masterarbeit\\Seminar\\Example Java\\Password-Generator-master\\Password-Generator-master\\out\\production\\Password-Generator\\SimpleMath.class"
+  val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject\\SimpleMath.class"
   val cfs: List[ClassFile] =
     process(new DataInputStream(new FileInputStream(classFileName))) { in =>
       org.opalj.br.reader.Java8Framework.ClassFile(in)
@@ -101,6 +101,13 @@ object test extends App{
   interp.eval(ICONST_1)
   interp.invokeStatic(testBranch)
   println(interp.stack.pop())
+  println(interp.stack.size)
+
+  val testReturn = cfs.head.findMethod("returnTest").head
+  interp.eval(ICONST_0)
+  interp.invokeStatic(testReturn)
+  println(interp.stack.pop())
+  println(interp.stack.size)
 
 
 

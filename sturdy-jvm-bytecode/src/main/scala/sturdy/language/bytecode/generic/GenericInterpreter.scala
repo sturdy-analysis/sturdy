@@ -176,7 +176,10 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
     // iinc
     case x if (x == 132) =>
-      ???
+      inst match
+        case inst: IINC =>
+          val toInc = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+          frame.setLocalOrElse(inst.lvIndex, i32ops.add(toInc, i32ops.integerLit(1)), fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
     // Conversions
     case x if (133 <= x && x <= 147) =>
