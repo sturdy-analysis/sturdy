@@ -199,6 +199,98 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
           } {
 
           }
+        case inst: IFNE =>
+          val v = stack.popOrAbort()
+          val isNe = eqOps.neq(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isNe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          }{
+
+          }
+        case inst: IFLT =>
+          val v = stack.popOrAbort()
+          val isLt = compareOps.lt(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isLt) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IFGE =>
+          val v = stack.popOrAbort()
+          val isGe = compareOps.ge(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isGe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IFGT =>
+          val v = stack.popOrAbort()
+          val isGt = compareOps.gt(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isGt) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IFLE =>
+          val v = stack.popOrAbort()
+          val isLe = compareOps.le(v, i32ops.integerLit(0))
+          branchOpsUnit.boolBranch(isLe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPEQ =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isEq = eqOps.equ(v1, v2)
+          branchOpsUnit.boolBranch(isEq) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPNE =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isNe = eqOps.neq(v1, v2)
+          branchOpsUnit.boolBranch(isNe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPLT =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isLt = compareOps.lt(v1, v2)
+          branchOpsUnit.boolBranch(isLt) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPGE =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isGe = compareOps.ge(v1, v2)
+          branchOpsUnit.boolBranch(isGe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPGT =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isGt = compareOps.gt(v1, v2)
+          branchOpsUnit.boolBranch(isGt) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ICMPLE =>
+          val (v1, v2) = stack.pop2OrAbort()
+          val isLe = compareOps.le(v1, v2)
+          branchOpsUnit.boolBranch(isLe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
+        case inst: IF_ACMPEQ =>
+          ???
+        case inst: IF_ACMPNE =>
+          ???
 
 
     // JUMPS
@@ -223,8 +315,8 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
     case x if (182 <= x && x <= 186) =>
       inst match
         case inst: INVOKESTATIC =>
-          // Overloaded Functions?
-          val mth = cfs.findMethod(inst.name).head
+          // Overloaded Functions!
+          val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
           invokeStatic(mth)
 
         case _ =>
