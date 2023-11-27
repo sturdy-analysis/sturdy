@@ -110,7 +110,7 @@ class ApronStore[Context, V]
     getIntVal(v) match 
       case Some(exp) =>
         // TODO #2: can we fix scope or should we assume a function more specific than getIntval?
-        val aexp : apron.Texpr1Intern = exp.toIntern(null)
+        val aexp : apron.Texpr1Intern = exp.toIntern(apronState.getEnvironment())
         val newState = apronState.assignCopy(apronManager, x, aexp, null)
         if (x.isStrong || ! apronState.getEnvironment().hasVar(x))
           apronState = newState

@@ -6,13 +6,13 @@ import apron.Texpr1CstNode
 import apron.Texpr1UnNode
 import sturdy.apron.{Apron, ApronCons, ApronExpr, UnOp}
 
-given ApronBooleanOps: BooleanOps[ApronCons] with
+given ApronBooleanOps[Addr]: BooleanOps[Addr] with
 
-  override def boolLit(b: Boolean): ApronCons = ApronCons.fromBool(b)
+  override def boolLit(b: Boolean): ApronCons[Addr] = ApronCons[Addr].fromBool(b)
 
-  override def and(v1: ApronCons, v2: ApronCons): ApronCons = ???
+  override def and(v1: ApronCons[Addr], v2: ApronCons[Addr]): ApronCons[Addr] = ???
 
-  override def or(v1: ApronCons, v2: ApronCons): ApronCons = ???
+  override def or(v1: ApronCons[Addr], v2: ApronCons[Addr]): ApronCons[Addr] = ???
 
-  override def not(v: ApronCons): ApronCons = v.negated
+  override def not(v: ApronCons[Addr]): ApronCons[Addr] = v.negated
   

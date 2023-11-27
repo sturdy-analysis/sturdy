@@ -7,11 +7,11 @@ import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.{Join, MaybeChanged, Widen}
 import sturdy.effect.store.VirtualAddress
 
-enum ApronExpr[AbstractAddr[Addr]]:
-  case Var(v: AbstractAddr[Addr])
+enum ApronExpr[Addr]:
+  case Var(v: Addr)
   case Constant(coeff: Coeff)
-  case Unary(op: UnOp, e: ApronExpr[AbstractAddr[Addr]], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
-  case Binary(op: BinOp, l: ApronExpr[AbstractAddr[Addr]], r: ApronExpr[AbstractAddr[Addr]], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
+  case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
+  case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
 
   override def toString: String = this match
     case Var(v) => v.toString
@@ -25,49 +25,41 @@ enum ApronExpr[AbstractAddr[Addr]]:
 //    case Unary(op, e, rtyp, rdir) => e.vars
 //    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
-  def normalize(scope: ApronScope[AbstractAddr[Addr]]): ApronExpr[AbstractAddr[Addr]] = this match
-    case Var(v) => scope.getFreedReference(v) match
-      case Some(e) => e.normalize(scope) // TODO: cache e.normalize in scope
-      case None => this
-    case Constant(coeff) => this
-    case Unary(op, e, rtyp, rdir) => Unary(op, e.normalize(scope), rtyp, rdir)
-    case Binary(op, l, r, rtyp, rdir) => Binary(op, l.normalize(scope), r.normalize(scope), rtyp, rdir)
+  // def normalize(scope: ApronScope[Addr]): ApronExpr[Addr] = this match
+  //   case Var(v) => scope.getFreedReference(v) match
+  //     case Some(e) => e.normalize(scope) // TODO: cache e.normalize in scope
+  //     case None => this
+  //   case Constant(coeff) => this
+  //   case Unary(op, e, rtyp, rdir) => Unary(op, e.normalize(scope), rtyp, rdir)
+  //   case Binary(op, l, r, rtyp, rdir) => Binary(op, l.normalize(scope), r.normalize(scope), rtyp, rdir)
 
-  def isEqual(that: ApronExpr[AbstractAddr[Addr]], scope: ApronScope[AbstractAddr[Addr]]): Boolean =
-    this.normalize(scope) == that.normalize(scope)
+  // def isEqual(that: ApronExpr[Addr], scope: ApronScope[Addr]): Boolean =
+  //   this.normalize(scope) == that.normalize(scope)
 
-  def hashCode(scope: ApronScope[AbstractAddr[Addr]]): Int =
-    normalize(scope).hashCode
+  // def hashCode(scope: ApronScope[Addr]): Int =
+  //   normalize(scope).hashCode
 
-  def toApron(scope: ApronScope[AbstractAddr[Addr]], allowOpen: Boolean = true): Texpr1Node = this match
-    case Var(v) => scope.getFreedReference(v) match
-      case Some(e) => e.toApron(scope, allowOpen)
-      case None =>
-        if (allowOpen || scope.isBound(v))
-          v.node
-        else
-          new Texpr1CstNode(ApronExpr.topInterval)
+  def toApron(): Texpr1Node = this match
+    case Var(v) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
     case Constant(coeff) => new Texpr1CstNode(coeff)
-    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron(scope, allowOpen))
-    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(scope, allowOpen), r.toApron(scope, allowOpen))
+    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron())
+    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(), r.toApron())
 
-  def toIntern(scope: ApronScope[AbstractAddr[Addr]], allowOpen: Boolean = true): Texpr1Intern =
-    val expr = this.toApron(scope, allowOpen)
-    try new Texpr1Intern(scope.apronEnv, expr)
-    catch {
-      case ex: IllegalArgumentException => throw new IllegalArgumentException(s"Cannot close $this in $scope", ex)
-    }
+  def toIntern(env: apron.Environment): Texpr1Intern =
+    val expr = this.toApron()
+    new Texpr1Intern(env, expr)
+
 
 object ApronExpr:
-  def num(i: Int): Constant = 
+  def num(i: Int): Constant[_] = 
     Constant(new MpqScalar(new Mpz(i)))
-  def num(iv: Interval): Constant =
+  def num(iv: Interval): Constant[_] =
     Constant(iv)
   def topInterval: Interval =
     val topItv = new Interval()
     topItv.setTop()
     topItv
-  def topConstant: Constant =
+  def topConstant: Constant[_] =
     Constant(topInterval)
 
 enum UnOp:
@@ -109,16 +101,16 @@ enum BinOp:
     case Mod => Texpr1BinNode.OP_MOD
     case Pow => Texpr1BinNode.OP_POW
 
-enum ApronCons[AbstractAddr[Addr]]:
-  case True[AbstractAddr[Addr]]() extends ApronCons[AbstractAddr[Addr]]
-  case False[AbstractAddr[Addr]]() extends ApronCons[AbstractAddr[Addr]]
-  case Compare(op: CompareOp, e1: ApronExpr[AbstractAddr[Addr]], e2: ApronExpr[AbstractAddr[Addr]])
+enum ApronCons[Addr]:
+  case True[Addr]() extends ApronCons[Addr]
+  case False[Addr]() extends ApronCons[Addr]
+  case Compare(op: CompareOp, e1: ApronExpr[Addr], e2: ApronExpr[Addr])
 
   import CompareOp.*
 
   override def toString: String = this match
-    case True => "true"
-    case False => "false"
+    case True() => "true"
+    case False() => "false"
     case Compare(op, e1, e2) => s"($e1 $op $e2)"
 
 //  def vars: Set[ApronVar] = this match
@@ -126,9 +118,9 @@ enum ApronCons[AbstractAddr[Addr]]:
 //    case False => Set()
 //    case Compare(_, e1, e2) => e1.vars ++ e2.vars
 
-  def toApron(scope: ApronScope[AbstractAddr[Addr]]): Seq[Tcons1] = this match
-    case True => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(0).toApron(scope)))
-    case False => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(1).toApron(scope)))
+  def toApron(scope: ApronScope[Addr]): Seq[Tcons1] = this match
+    case True() => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(0).toApron(scope)))
+    case False() => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.num(1).toApron(scope)))
     case Compare(Eq, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(scope)))
     case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron(scope) ++ Compare(Lt, e1, e2).toApron(scope)
     case Compare(Lt, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron(scope)))
@@ -137,9 +129,9 @@ enum ApronCons[AbstractAddr[Addr]]:
     case Compare(Gt, e1, e2) => Seq(new Tcons1(scope.apronEnv, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron(scope)))
 
 
-  def negated: ApronCons[AbstractAddr[Addr]] = this match
-    case True => False
-    case False => True
+  def negated: ApronCons[Addr] = this match
+    case True() => False()
+    case False() => True()
     case Compare(Eq, e1, e2) => Compare(Neq, e1, e2)
     case Compare(Neq, e1, e2) => Compare(Eq, e1, e2)
     case Compare(Lt, e1, e2) => Compare(Ge, e1, e2)
@@ -150,13 +142,14 @@ enum ApronCons[AbstractAddr[Addr]]:
 object ApronCons:
   import CompareOp.*
 
-  def fromBool(b: Boolean): ApronCons = if (b) True else False
-  def eq(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Eq, e1, e2)
-  def neq(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Neq, e1, e2)
-  def lt(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Lt, e1, e2)
-  def le(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Le, e1, e2)
-  def ge(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Ge, e1, e2)
-  def gt(e1: ApronExpr, e2: ApronExpr): Compare = Compare(Gt, e1, e2)
+  // issue below, make CompareOp[Addr]?
+  def fromBool(b: Boolean): ApronCons[Addr] = if (b) True() else False()
+  def eq(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Eq, e1, e2)
+  def neq(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Neq, e1, e2)
+  def lt(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Lt, e1, e2)
+  def le(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Le, e1, e2)
+  def ge(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Ge, e1, e2)
+  def gt(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Gt, e1, e2)
 
 
 enum CompareOp:
@@ -175,10 +168,10 @@ enum CompareOp:
     case Ge => ">="
     case Gt => ">"
 
-given JoinApronExpr[AbstractAddr[Addr]](using state: ApronState): Join[ApronExpr[AbstractAddr[Addr]]] with
-  def apply(v1: ApronExpr[AbstractAddr[Addr]], v2: ApronExpr[AbstractAddr[Addr]]): MaybeChanged[ApronExpr[AbstractAddr[Addr]]] =
+given JoinApronExpr[Addr](using state: ApronState): Join[ApronExpr[Addr]] with
+  def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
     ApronJoins.combineExprs(v1, v2, state, widen = false)
 
-given WidenApronExpr[AbstractAddr[Addr]](using state: ApronState): Widen[ApronExpr[AbstractAddr[Addr]]] with
-  def apply(v1: ApronExpr[AbstractAddr[Addr]], v2: ApronExpr[AbstractAddr[Addr]]): MaybeChanged[ApronExpr[AbstractAddr[Addr]]] =
+given WidenApronExpr[Addr](using state: ApronState): Widen[ApronExpr[Addr]] with
+  def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
     ApronJoins.combineExprs(v1, v2, state, widen = true)
