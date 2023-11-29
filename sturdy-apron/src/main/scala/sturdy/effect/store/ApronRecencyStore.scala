@@ -109,6 +109,7 @@ class ApronStore[Context, V]
   def write(x: PhysicalAddress[Context], v : V): Unit =
     getIntVal(v) match 
       case Some(exp) =>
+        // TODO add variable if not in
         // TODO #2: can we fix scope or should we assume a function more specific than getIntval?
         val aexp : apron.Texpr1Intern = exp.toIntern(apronState.getEnvironment())
         val newState = apronState.assignCopy(apronManager, x, aexp, null)
