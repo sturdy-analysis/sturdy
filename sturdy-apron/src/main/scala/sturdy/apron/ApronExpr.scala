@@ -7,11 +7,12 @@ import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.{Join, MaybeChanged, Widen}
 import sturdy.effect.store.VirtualAddress
 
+
 enum ApronExpr[Addr <: apron.Var]:
   case Var(v: Addr)
   case Constant(coeff: Coeff)
   case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
-  case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, roundingDir: Int = Texpr1Node.RDIR_NEAREST)
+  case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int, roundingDir: Int)
 
   override def toString: String = this match
     case Var(v) => v.toString
@@ -61,6 +62,12 @@ object ApronExpr:
     topItv
   def topConstant: Constant[_] =
     Constant(topInterval)
+
+  def Unary[Addr <: apron.Var](op: UnOp, e: ApronExpr[Addr]): ApronExpr[Addr] =
+    Unary(op, e, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
+  def Binary[Addr <: apron.Var](op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr]): ApronExpr[Addr] =
+    Binary(op, l, r, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
+
 
 enum UnOp:
   case Negate
@@ -121,8 +128,10 @@ enum ApronCons[Addr <: apron.Var]:
   def toApron(env : apron.Environment): Seq[Tcons1] = this match
     case True() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron()))
     case False() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron()))
-    case Compare(Eq, e1, e2) => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron()))
-    case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron() ++ Compare(Lt, e1, e2).toApron()
+    case Compare(Eq, e1, e2) =>
+      val sub = ApronExpr.Binary(BinOp.Sub, e1, e2)
+      Seq(new Tcons1(env, Tcons1.EQ, sub.toApron()))
+    case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron(env) ++ Compare(Lt, e1, e2).toApron(env)
     case Compare(Lt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron()))
     case Compare(Le, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron()))
     case Compare(Ge, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron()))
@@ -144,13 +153,12 @@ object ApronCons:
 
   // issue below, make CompareOp[Addr]?
   def fromBool(b: Boolean): ApronCons[_] = if (b) True() else False()
-  def eq(e1: ApronExpr[_], e2: ApronExpr[_]) = Compare(Eq, e1, e2)
-  def neq(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Neq, e1, e2)
-  def lt(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Lt, e1, e2)
-  def le(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Le, e1, e2)
-  def ge(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Ge, e1, e2)
-  def gt(e1: ApronExpr[_], e2: ApronExpr[_]): Compare[_] = Compare(Gt, e1, e2)
-
+  def eq[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Eq, e1, e2)
+  def neq[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Neq, e1, e2)
+  def lt[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Lt, e1, e2)
+  def le[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Le, e1, e2)
+  def ge[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Ge, e1, e2)
+  def gt[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Gt, e1, e2)
 
 enum CompareOp:
   case Eq
