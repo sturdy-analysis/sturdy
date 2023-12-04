@@ -8,7 +8,7 @@ import sturdy.values.booleans.*
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.integer.AbstractBitVector.*
-import sturdy.values.relational.*
+// import sturdy.values.relational.*
 import sturdy.{AbstractlySound, IsSound, Soundness, given}
 
 import java.lang.Math
