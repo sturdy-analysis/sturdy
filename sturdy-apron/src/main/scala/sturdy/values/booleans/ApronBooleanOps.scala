@@ -4,7 +4,7 @@ import apron.MpqScalar
 import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Texpr1UnNode
-import sturdy.apron.{Apron, ApronCons, ApronExpr, UnOp}
+// import sturdy.apron.{Apron, ApronCons, ApronExpr, UnOp}
 
 // given ApronBooleanOps[Addr]: BooleanOps[Addr] with
 // 

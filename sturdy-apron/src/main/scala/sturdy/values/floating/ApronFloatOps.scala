@@ -8,13 +8,13 @@ import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
 
 import math.Numeric.Implicits.infixNumericOps
 import gmp.Mpfr
-import sturdy.apron.{Apron, ApronCons, ApronExpr, ApronState, BinOp, JoinApronExpr, UnOp}
+// import sturdy.apron.{Apron, ApronCons, ApronExpr, ApronState, BinOp, JoinApronExpr, UnOp}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Topped, config}
 import sturdy.values.config.{Bits, Overflow}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert, given}
-import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
+// import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
 import sturdy.values.utils.{ConvertCoeff, convertToScalarMpfr, given}
 
 import java.nio.ByteOrder

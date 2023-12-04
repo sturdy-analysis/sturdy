@@ -4,9 +4,9 @@ import apron.Interval
 import sturdy.data.CombineUnit
 import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 import gmp.{Mpq, Mpz}
-import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
+// import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
 import sturdy.data.MayJoin.NoJoin
-import sturdy.effect.callframe.ApronCallFrame
+// import sturdy.effect.callframe.ApronCallFrame
 
 import java.util
 import math.Numeric.Implicits.infixNumericOps
@@ -16,7 +16,7 @@ import sturdy.values.config.{Bits, UnsupportedConfiguration}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
 import sturdy.values.floating.FloatOps
 import sturdy.values.{Top, Topped, config}
-import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
+// import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
 import sturdy.values.utils.{ConvertCoeff, ConvertInterval, convertToScalarMpq, given}
 
 import java.nio.ByteOrder

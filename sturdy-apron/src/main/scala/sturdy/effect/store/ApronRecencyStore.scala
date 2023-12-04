@@ -76,7 +76,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
 import sturdy.values.references.{AbstractAddr, PowersetAddr, PhysicalAddress, joinPowersetAddr}
 import sturdy.values.{*, given}
-import sturdy.apron.{Apron, ApronAllocationSite, ApronExpr, ApronState, ApronVal, ApronVar}
+import sturdy.apron.{ApronExpr}// , Apron, ApronAllocationSite,  ApronState, ApronVal, ApronVar}
 import apron.Texpr1Intern
 import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1VarNode, Texpr1Intern, Var}
 
@@ -94,8 +94,15 @@ class ApronStore[Context, V]
   // TODO later: switch to AbstractAddress
   extends Store[PhysicalAddress[Context], V, WithJoin]:
 
+  override type State = Abstract1
   private var apronState : Abstract1 = new Abstract1(apronManager, new Environment())
  
+  def getState : State = apronState
+  def setState(s : Abstract1) = apronState = s 
+
+  def join : Join[State] = ???
+  def widen : Widen[State] = ???
+
   def read(x: PhysicalAddress[Context]): JOptionA[V] = 
     if (apronState.getEnvironment().hasVar(x)) {
       if (!x.isStrong) throw new NotImplementedError("FIXME: reading weak variable should be different")

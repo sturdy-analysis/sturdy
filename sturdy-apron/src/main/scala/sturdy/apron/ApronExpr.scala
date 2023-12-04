@@ -5,7 +5,6 @@ import gmp.Mpz
 import sturdy.apron.ApronCons.False
 import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.{Join, MaybeChanged, Widen}
-import sturdy.effect.store.VirtualAddress
 
 
 enum ApronExpr[Addr <: apron.Var]:
@@ -109,8 +108,8 @@ enum BinOp:
     case Pow => Texpr1BinNode.OP_POW
 
 enum ApronCons[Addr <: apron.Var]:
-  case True[Addr]() extends ApronCons[Addr]
-  case False[Addr]() extends ApronCons[Addr]
+  case True[Addr]() extends ApronCons[apron.Var]
+  case False[Addr]() extends ApronCons[apron.Var]
   case Compare(op: CompareOp, e1: ApronExpr[Addr], e2: ApronExpr[Addr])
 
   import CompareOp.*
