@@ -89,7 +89,7 @@ import scala.reflect.ClassTag
 class ApronStore[Context, V]
   (val apronManager: Manager,  
        getIntVal: V => Option[ApronExpr[PhysicalAddress[Context]]],
-       makeIntVal: ApronExpr[PhysicalAddress[Context]] => V,
+       makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => V,
        )
   // TODO later: switch to AbstractAddress
   extends Store[PhysicalAddress[Context], V, WithJoin]:
@@ -107,7 +107,7 @@ class ApronStore[Context, V]
     if (apronState.getEnvironment().hasVar(x)) {
       if (!x.isStrong) throw new NotImplementedError("FIXME: reading weak variable should be different")
       // TODO #3: Which JOption here?
-      JOptionA.Some(makeIntVal(ApronExpr.Var(x)))
+      JOptionA.Some(makeIntVal(ApronExpr.Var(x), apronState))
     } 
     else {
       JOptionA.None()
@@ -118,7 +118,12 @@ class ApronStore[Context, V]
       case Some(exp) =>
         // TODO add variable if not in
         // TODO #2: can we fix scope or should we assume a function more specific than getIntval?
-        val aexp : apron.Texpr1Intern = exp.toIntern(apronState.getEnvironment())
+        var env = apronState.getEnvironment()
+        if(!env.hasVar(x)) { 
+          env = env.add(Array[apron.Var](x), Array[apron.Var]())
+          apronState.changeEnvironment(apronManager, env, false)
+        }
+        val aexp : apron.Texpr1Intern = exp.toIntern(env)
         val newState = apronState.assignCopy(apronManager, x, aexp, null)
         if (x.isStrong || ! apronState.getEnvironment().hasVar(x))
           apronState = newState

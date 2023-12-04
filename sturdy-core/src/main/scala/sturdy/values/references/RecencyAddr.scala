@@ -84,9 +84,15 @@ case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends Abst
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
 
-  override def clone() : apron.Var = ???
-  override def compareTo(v : apron.Var) : Int = 
-    throw new NotImplementedError("ApronVar comparison")
+  override def clone() : apron.Var = new PhysicalAddress(this.ctx, this.recency)
+  override def compareTo(v : apron.Var) : Int =
+    if (!v.isInstanceOf[PhysicalAddress[Context]]) { -1 }
+    else { 
+      // FIXME
+      if (v == this) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
+      else 1
+
+    } 
 
 
 given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}
