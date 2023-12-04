@@ -89,8 +89,9 @@ case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends Abst
     if (!v.isInstanceOf[PhysicalAddress[Context]]) { -1 }
     else { 
       // FIXME
-      if (v == this) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
-      else 1
+      val vpa = v.asInstanceOf[PhysicalAddress[Context]]
+      if (vpa.ctx == this.ctx && vpa.recency == this.recency) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
+      else vpa.ctx.compareTo(this.ctx)
 
     } 
 
