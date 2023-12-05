@@ -5,7 +5,6 @@ import sturdy.effect.Effect
 import sturdy.effect.store.*
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
-import apron.*
 
 class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) extends Effect:
   var mapping: Map[(Context,Int), PowRecency] = init
@@ -79,21 +78,10 @@ class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslati
 
   final def identifier: (Context,Int) = (ctx,n)
 
-case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]], apron.Var:
+case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
-
-  override def clone() : apron.Var = new PhysicalAddress(this.ctx, this.recency)
-  override def compareTo(v : apron.Var) : Int =
-    if (!v.isInstanceOf[PhysicalAddress[Context]]) { -1 }
-    else { 
-      // FIXME
-      val vpa = v.asInstanceOf[PhysicalAddress[Context]]
-      if (vpa.ctx == this.ctx && vpa.recency == this.recency) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
-      else vpa.ctx.compareTo(this.ctx)
-
-    } 
 
 
 given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}

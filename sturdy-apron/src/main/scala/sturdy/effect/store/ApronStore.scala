@@ -89,25 +89,22 @@ class ApronPAWrap[Context: Ordering](_pa: PhysicalAddress[Context]) extends apro
   val pa : PhysicalAddress[Context] = _pa// def pa: PhysicalAddress[Context] = pa
   override def clone() : apron.Var = new ApronPAWrap(pa)
   override def compareTo(v : apron.Var) : Int =
-    if (!v.isInstanceOf[ApronPAWrap[Context]]) { -1 }
+    if (!v.isInstanceOf[ApronPAWrap[_]]) { -1 }
     else { 
-      // FIXME
       val vpa = v.asInstanceOf[ApronPAWrap[Context]]
-      // if (vpa.ctx == pa.ctx && vpa.recency == pa.recency) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
-      // else 
-      //summon[Ordered[Context]].compare(vpa.ctx, pa.ctx)
-      vpa.pa.ctx.compare(pa.ctx)
-
+      val ctxCmp = vpa.pa.ctx.compare(pa.ctx)
+      if(ctxCmp == 0) { vpa.pa.isStrong.compare(pa.isStrong) } else { ctxCmp }
     } 
+  override def toString: String = s"$pa"
 
 // Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
-class ApronStore[Context, V]
+class ApronStore[Context: Ordering, V]
   (val apronManager: Manager,  
-       getIntVal: V => Option[ApronExpr[PhysicalAddress[Context]]],
-       makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => V,
+       getIntVal: V => Option[ApronExpr[ApronPAWrap[Context]]],
+       makeIntVal: (ApronExpr[ApronPAWrap[Context]], Abstract1) => V,
        )
   // TODO later: switch to AbstractAddress
-  extends Store[PhysicalAddress[Context], V, WithJoin]:
+  extends Store[ApronPAWrap[Context], V, WithJoin]:
 
   override type State = Abstract1
   private var apronState : Abstract1 = new Abstract1(apronManager, new Environment())
@@ -118,9 +115,10 @@ class ApronStore[Context, V]
   def join : Join[State] = ???
   def widen : Widen[State] = ???
 
-  def read(x: PhysicalAddress[Context]): JOptionA[V] = 
+
+  def read(x: ApronPAWrap[Context]): JOptionA[V] = 
     if (apronState.getEnvironment().hasVar(x)) {
-      if (!x.isStrong) throw new NotImplementedError("FIXME: reading weak variable should be different")
+      if (!x.pa.isStrong) throw new NotImplementedError("FIXME: reading weak variable should be different")
       // TODO #3: Which JOption here?
       JOptionA.Some(makeIntVal(ApronExpr.Var(x), apronState))
     } 
@@ -128,7 +126,7 @@ class ApronStore[Context, V]
       JOptionA.None()
     }
 
-  def write(x: PhysicalAddress[Context], v : V): Unit =
+  def write(x: ApronPAWrap[Context], v : V): Unit =
     getIntVal(v) match 
       case Some(exp) =>
         // TODO add variable if not in
@@ -140,7 +138,7 @@ class ApronStore[Context, V]
         }
         val aexp : apron.Texpr1Intern = exp.toIntern(env)
         val newState = apronState.assignCopy(apronManager, x, aexp, null)
-        if (x.isStrong || ! apronState.getEnvironment().hasVar(x))
+        if (x.pa.isStrong || ! apronState.getEnvironment().hasVar(x))
           apronState = newState
         else 
           // weak update implemented as join
@@ -180,5 +178,5 @@ x = 2
 
 
 
-  def free(x: PhysicalAddress[Context]): Unit = 
+  def free(x: ApronPAWrap[Context]): Unit = 
     throw new NotImplementedError("free")

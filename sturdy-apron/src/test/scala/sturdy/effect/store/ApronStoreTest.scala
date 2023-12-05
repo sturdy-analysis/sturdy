@@ -15,20 +15,21 @@ import apron.{Polka, Abstract1, Interval, MpqScalar}
 class ApronRecencyStoreTest extends AnyFunSuite:
 
   type Context = String
-  type PAddr = PhysicalAddress[Context]
+  type PAddr = ApronPAWrap[Context]
 
   test("basic case") {
     val AS = new ApronStore[Context, ApronExpr[PAddr]](
         new apron.Polka(true),
         (v : ApronExpr[PAddr]) => Option(v), 
-        (e: ApronExpr[PhysicalAddress[Context]], s: Abstract1) => /* TODO: get itv overapproximation of e in s */ throw new NotImplementedError("getVal")
+        (e: ApronExpr[PAddr], s: Abstract1) => /* TODO: get itv overapproximation of e in s */ throw new NotImplementedError("getVal")
     )
-    val xR : PAddr = PhysicalAddress("x", Recency.Recent)
-    val yR : PAddr = PhysicalAddress("y", Recency.Recent)
+    val xR : PAddr = ApronPAWrap(PhysicalAddress("x", Recency.Recent))
+    val yR : PAddr = ApronPAWrap(PhysicalAddress("y", Recency.Recent))
 
     AS.write(xR, ApronExpr.Constant(Interval(0, 10)))
     println(xR.toString + " <- [0, 10] = " + AS.getState.toString)
 
+//
     AS.write(yR, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(xR), ApronExpr.Constant(MpqScalar(1))))
     println(yR.toString + " <- " + xR.toString + " + 1 = " + AS.getState.toString)
  
