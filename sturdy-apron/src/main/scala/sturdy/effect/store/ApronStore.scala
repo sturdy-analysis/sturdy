@@ -83,7 +83,22 @@ import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texp
 import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
+import math.Ordered.orderingToOrdered
 
+class ApronPAWrap[Context: Ordering](_pa: PhysicalAddress[Context]) extends apron.Var:
+  val pa : PhysicalAddress[Context] = _pa// def pa: PhysicalAddress[Context] = pa
+  override def clone() : apron.Var = new ApronPAWrap(pa)
+  override def compareTo(v : apron.Var) : Int =
+    if (!v.isInstanceOf[ApronPAWrap[Context]]) { -1 }
+    else { 
+      // FIXME
+      val vpa = v.asInstanceOf[ApronPAWrap[Context]]
+      // if (vpa.ctx == pa.ctx && vpa.recency == pa.recency) { 0 } // v.ctx == this.ctx && v.recency == this.recency) { 0 }
+      // else 
+      //summon[Ordered[Context]].compare(vpa.ctx, pa.ctx)
+      vpa.pa.ctx.compare(pa.ctx)
+
+    } 
 
 // Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
 class ApronStore[Context, V]
