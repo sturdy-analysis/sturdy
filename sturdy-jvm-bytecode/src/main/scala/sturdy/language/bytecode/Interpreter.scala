@@ -8,6 +8,8 @@ import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
+
+import generic.BytecodeFailure.*
 trait Interpreter:
   //type I8
   //type I16
@@ -16,6 +18,7 @@ trait Interpreter:
   type F32
   type F64
   type Bool
+  type Class
 
   enum Value:
     case TopValue
@@ -35,25 +38,25 @@ trait Interpreter:
       case Int16(s) => s
       case TopValue => topI16
       case _ => ??? //f.fail(TypeError, s"Expected i32 but got $this")*/
-    def asInt32: I32 = this match
+    def asInt32(using f: Failure): I32 = this match
       case Int32(i) => i
       case TopValue => topI32
-      case _ => ??? //f.fail(TypeError, s"Expected i32 but got $this")
+      case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
-    def asInt64: I64 = this match
+    def asInt64(using f: Failure): I64 = this match
       case Int64(l) => l
       case TopValue => topI64
-      case _ => ??? //f.fail(TypeError, s"Expected i64 but got $this")
+      case _ => f.fail(TypeError, s"Expected i64 but got $this")
 
-    def asFloat32: F32 = this match
+    def asFloat32(using f: Failure): F32 = this match
       case Float32(f) => f
       case TopValue => topF32
-      case _ => ??? //f.fail(TypeError, s"Expected f32 but got $this")
+      case _ => f.fail(TypeError, s"Expected f32 but got $this")
 
-    def asFloat64: F64 = this match
+    def asFloat64(using f: Failure): F64 = this match
       case Float64(d) => d
       case TopValue => topF64
-      case _ => ??? //f.fail(TypeError, s"Expected f64 but got $this")
+      case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
   //def topI8: I8
   //def topI16: I16

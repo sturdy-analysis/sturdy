@@ -12,7 +12,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
-import org.opalj.br.{ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method}
+import org.opalj.br.{ArrayType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
 
 /*
 
@@ -322,6 +322,11 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
           val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
           invokeStatic(mth)
 
+        case inst: INVOKEVIRTUAL =>
+          // this is super temp and just for testing
+          val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+          invokeStatic(mth)
+
         case _ =>
           val newFrameData = ()
           val args: List[V] = ???
@@ -333,7 +338,9 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
     // NEW
     case x if (x == 187) =>
-      ???
+      inst match
+        case inst: NEW =>
+          ???
 
     // Arrays
     case x if (188 <= x && x <= 190) =>
@@ -452,8 +459,10 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
 
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match
-    case IntegerType => ValType.I32
-    case FloatType => ValType.F32
-    case LongType => ValType.I64
-    case DoubleType => ValType.F64
+    case opalTypes: IntegerType => ValType.I32
+    case opalTypes: FloatType => ValType.F32
+    case opalTypes: LongType => ValType.I64
+    case opalTypes: DoubleType => ValType.F64
+    case opalTypes: ObjectType => ???
+    case opalTypes: ArrayType => ???
     case _ => ValType.I32

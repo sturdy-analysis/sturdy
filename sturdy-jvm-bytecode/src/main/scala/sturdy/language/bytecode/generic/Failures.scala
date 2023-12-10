@@ -6,5 +6,6 @@ import sturdy.values.Finite
 
 enum BytecodeFailure extends FailureKind:
   case UnboundLocal
+  case TypeError
   
 given Finite[BytecodeFailure] with {}

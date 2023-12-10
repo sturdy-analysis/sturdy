@@ -1,6 +1,7 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.ClassFile
+import org.opalj.br.ObjectType
 import sturdy.data.{*, given}
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
@@ -22,6 +23,7 @@ object ConcreteInterpreter extends Interpreter:
   override type F32 = Float
   override type F64 = Double
   override type Bool = Boolean
+  override type Class = ObjectType
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
