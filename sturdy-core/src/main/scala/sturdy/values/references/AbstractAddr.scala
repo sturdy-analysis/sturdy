@@ -2,16 +2,11 @@ package sturdy.values.references
 
 import sturdy.values.ordering.EqOps
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Powerset, Structural, Topped}
-import apron.*
 
 trait AbstractAddr[+Addr]:
   def isEmpty: Boolean
   def isStrong: Boolean
   def reduce[A](f: Addr => A)(using Join[A]): A
-
-  // override def clone() : apron.Var = ???
-  // override def compareTo(v : apron.Var) : Int = 
-  //   throw new NotImplementedError("ApronVar comparison")
 
 given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
   override def equ(v1: AA, v2: AA): Topped[Boolean] =
