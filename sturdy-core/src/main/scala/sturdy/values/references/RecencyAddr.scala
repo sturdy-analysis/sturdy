@@ -83,7 +83,6 @@ case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends Abst
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
 
-
 given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}
 
 given finiteVirtualAddr[Context](using Finite[PhysicalAddress[Context]]): Finite[VirtualAddress[Context]] with {}
@@ -92,6 +91,11 @@ given structuralVirtualAddr[Context]: Structural[VirtualAddress[Context]] with {
 enum Recency:
   case Recent
   case Old
+
+given RencencyOrdering: Ordering[Recency] = Ordering.by[Recency, Int] {
+  case Recency.Recent => 0
+  case Recency.Old => 1
+}
 
 enum PowRecency:
   case Recent

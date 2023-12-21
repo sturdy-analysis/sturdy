@@ -174,13 +174,3 @@ enum CompareOp:
     case Le => "<="
     case Ge => ">="
     case Gt => ">"
-
-// TODO write explicit, simple, join on ApronExpressions 
-// given JoinApronExpr[Addr](using state: ApronState): Join[ApronExpr[Addr]] with
-  // def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
-    // ApronJoins.combineExprs(v1, v2, state, widen = false)
-// 
-// given WidenApronExpr[Addr](using state: ApronState): Widen[ApronExpr[Addr]] with
-  // def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
-    // ApronJoins.combineExprs(v1, v2, state, widen = true)
-// 

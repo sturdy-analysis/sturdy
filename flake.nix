@@ -14,7 +14,7 @@
           pname = "sturdy";
           version = "0.1";
           src = ./.;
-          buildInputs = [ pkgs.sbt pkgs.jdk17_headless apron ];
+          buildInputs = [ pkgs.sbt pkgs.jdk19_headless apron ];
           buildPhase = "sbt assembly";
           installPhase = ''
             mkdir -p $out/bin

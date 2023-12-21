@@ -6,26 +6,29 @@ import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.ApronStore
-import sturdy.apron.{ApronExpr, BinOp}
+import sturdy.apron.{ApronExpr, BinOp, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.{*, given}
-import apron.{Polka, Abstract1, Interval, MpqScalar}
+import apron.{Abstract1, Environment, Interval, MpqScalar, Polka}
 
 class ApronRecencyStoreTest extends AnyFunSuite:
 
   type Context = String
-  type PAddr = ApronPAWrap[Context]
+  type PAddr = ApronPhysicalAddress[Context]
 
   test("basic case") {
     val man = new apron.Polka(true)
-    val AS = new ApronStore[Context, ApronExpr[PAddr]](
-          man,
-          (v : ApronExpr[PAddr]) => Option(v), 
-          (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant(s.getBound(man, e.toIntern(s.getEnvironment)))
-        )
-    val xR : PAddr = ApronPAWrap(PhysicalAddress("x", Recency.Recent))
-    val yR : PAddr = ApronPAWrap(PhysicalAddress("y", Recency.Recent))
+    given initialState: Abstract1 = new Abstract1(man, new Environment())
+    val AS = new ApronStore[Context, PAddr, PAddr, ApronExpr[PAddr]](
+      man,
+      initialState,
+      (v : ApronExpr[PAddr]) => Option(v),
+      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant(s.getBound(man, e.toIntern(s.getEnvironment)))
+    )
+
+    val xR : PAddr = PhysicalAddress("x", Recency.Recent)
+    val yR : PAddr = PhysicalAddress("y", Recency.Recent)
 
     AS.write(xR, ApronExpr.Constant(Interval(0, 10)))
     println(s"$xR <- [0, 10] = ${AS.getState}")
