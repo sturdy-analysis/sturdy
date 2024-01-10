@@ -33,6 +33,7 @@ trait NumericOps[V]:
   def mul(v1: V, v2: V): V
   def div(v1: V, v2: V): V
   def lt(v1: V, v2: V): V
+  def gt(v1:V, v2: V): V
 
 /*
  * We cannot in general decide the conditions of if and while statements in the generic interpreter. Therefore we need

@@ -8,8 +8,7 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import sturdy.language.tutorial.Stm.*
 import sturdy.language.tutorial.Exp.*
-import sturdy.language.tutorial.ReferenceInterpreter
-import sturdy.language.tutorial.Parser.parse
+import .parse
 
 import java.net.URI
 

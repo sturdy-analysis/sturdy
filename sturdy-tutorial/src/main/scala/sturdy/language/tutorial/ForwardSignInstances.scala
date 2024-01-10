@@ -5,6 +5,7 @@ import sturdy.effect.*
 import sturdy.data.{*, given}
 import sturdy.values.{*, given}
 import sturdy.effect.failure.{AFallible, FailureKind}
+import sturdy.effect.store.CStore
 
 import scala.collection.mutable.ListBuffer
 
@@ -16,6 +17,13 @@ enum Sign:
   case Neg
   case Zero
   case Pos
+
+  override def toString: String = this match
+    case TopSign => "⊤"
+    case Neg => "-"
+    case Zero => "0"
+    case Pos => "+"
+
 import Sign.*
 
 given finiteSign: Finite[Sign] with {}
@@ -90,6 +98,22 @@ class SignNumericOps(using f: Failure, j: EffectStack) extends NumericOps[Sign]:
     case (Zero, Neg) => Zero
     case _ => TopSign
 
+  override def gt(v1: Sign, v2: Sign): Sign = (v1, v2) match {
+    case (TopSign, _) | (_, TopSign) => TopSign
+    case (Zero, Neg) => Pos
+    case (Neg, Neg) => TopSign
+    case (Pos, Neg) => Pos
+    case (Zero, Pos) => Zero
+    case (Neg, Pos) => Zero
+    case (Pos, Pos) => TopSign
+    case (Pos, Zero) => Pos
+    case (Zero, Zero) => Zero
+    case (Neg, Zero) => Zero
+  }
+
+
+
+
 /*
  * Branching with a sign value as condition. In case we cannot decide the condition in the abstract domain we
  * need to join both computations of the thn and els continuations (so we need an EffectStack) and additionally
@@ -101,93 +125,6 @@ class SignBranching[R](using EffectStack, Join[R]) extends Branching[Sign, R]:
     else if (v == Pos || v == Neg) then thn
     else joinComputations(thn)(els)
 
-/*
- * An abstract store storing sign values. We treat strings a finite here, because in our toy language they encode
- * program variables, from which there may only be finitely many.
- */
-class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
-  import MayMust.*
-  protected var store: Map[String, MayMust[Sign]] = Map()
-  override def read(name: String): JOptionA[Sign] =
-    store.get(name) match
-      case None => JOptionA.none
-      case Some(Must(v)) => JOptionA.some(v)
-      case Some(May(v)) => JOptionA.noneSome(v)
-  override def write(name: String, v: Sign): Unit =
-    weekUpdate(name, Must(v))
-
-  private def weekUpdate(name: String, v: MayMust[Sign]): Unit =
-    store.get(name) match
-      case None => store += name -> v
-      case Some(old) => j(old,v).ifChanged(store += name -> _)
-
-  override type State = Map[String, MayMust[Sign]]
-  override def getState: State = store
-  override def setState(s: State): Unit = store = s
-  override def join: Join[Map[String, MayMust[Sign]]] = implicitly
-  override def widen: Widen[Map[String, MayMust[Sign]]] = {
-    given Finite[String] with {}
-    finitely(using join, implicitly)
-  }
-
-  private class SignStoreJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = store
-    private var fStore: Map[String, MayMust[Sign]] = _
-
-    override def inbetween(fFailed: Boolean): Unit =
-      fStore = store
-      store = snapshot
-
-    override def retainNone(): Unit =
-      store = snapshot
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      store = fStore
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit = ()
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      for ((name,v) <- fStore)
-        weekUpdate(name,v)
-
-  }
-
-  def storeIsSound(cs: CStore): IsSound =
-    val cMap = cs.entries
-    // all keys in concrete store must be present in abstract store
-    if (!cMap.keySet.subsetOf(store.keySet)) {
-      val missing = cMap.flatMap { (k,v) =>
-        if (store.contains(k))
-          None
-        else
-          Some(k)
-      }
-      IsSound.NotSound(s"${classOf[SignStore].getName}: Expected all concrete keys to be contained, but $missing are missing in $store.")
-    }
-    // all concrete entries must be approximated by the corresponding abstract entries
-    cMap.foreachEntry { (k,v) =>
-      val subSound = Soundness.isSound(v, store(k))
-      if (subSound.isNotSound)
-        return subSound
-    }
-    // all "must" entries in the abstract store must be present in the concrete store
-    val musts = store.filter {
-      case (_,Must(_)) => true
-      case _ => false
-    }
-    if (!musts.keySet.subsetOf(cMap.keySet)) {
-      val missing = musts.flatMap { (k,v) =>
-        if (cMap.contains(k))
-          None
-        else
-          Some(k)
-      }
-      IsSound.NotSound(s"${classOf[SignStore].getName}: Expected all must entries to be contained in concrete store, but $missing are missing.")
-    }
-    IsSound.Sound
-
-  given mustAbstractly[A,B](using a: Abstractly[A,B]): Abstractly[A, MayMust[B]] with
-    override def apply(c: A): MayMust[B] = Must(a.apply(c))
 
 /*
  * Abstract failures. We simply collect all possible failures in a list.

@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers
 
 import java.nio.file.{Path, Paths}
 import scala.io.Source
-import sturdy.language.tutorial.Parser
 
 class ReferenceInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "While reference interpreter"
