@@ -32,8 +32,7 @@ object test extends App{
 
 
 
-
-  val interp = new ConcreteInterpreter.Instance(cfs.head)
+  val interp = new ConcreteInterpreter.Instance(cfs.head, Map())
 
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
@@ -108,7 +107,6 @@ object test extends App{
   interp.invokeStatic(testReturn)
   println(interp.stack.pop())
   println(interp.stack.size)
-
 
 
   /*

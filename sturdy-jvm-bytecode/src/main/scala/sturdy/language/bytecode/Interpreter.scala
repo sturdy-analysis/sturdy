@@ -20,6 +20,8 @@ trait Interpreter:
   type Bool
   type Class
 
+  type Addr
+
   enum Value:
     case TopValue
     //case Int8(b: I8)
@@ -179,4 +181,4 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, NoJoin]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, NoJoin]

@@ -10,9 +10,11 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
+import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.{ArrayType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
+
 
 /*
 
@@ -37,7 +39,9 @@ val jumpTargets: Map[String, InstructionIndex]
 enum JvmExcept:
   case Jump(pc: Int)
 
-trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
+enum AllocationSite:
+  case classFile(obj: ObjectType, cfs: ClassFile)
+trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   val bytecodeOps: BytecodeOps[V]
   import bytecodeOps.*
 
@@ -46,6 +50,8 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]:
   val stack: DecidableOperandStack[V]
   val failure: Failure
   val except: Except[JvmExcept, JvmExcept, J]
+  val alloc: Allocation[Addr, AllocationSite]
+  val store: Store[Addr, V, J]
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]

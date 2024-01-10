@@ -3,10 +3,12 @@ package sturdy.language.bytecode
 import org.opalj.br.ClassFile
 import org.opalj.br.ObjectType
 import sturdy.data.{*, given}
+import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
+import sturdy.effect.store.CStore
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.generic.*
 import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching}
@@ -39,7 +41,10 @@ object ConcreteInterpreter extends Interpreter:
       Value.Int32(1)
     else
       Value.Int32(0)
-  class Instance(file: ClassFile) extends GenericInstance:
+
+  override type Addr = Int
+  type Store = Map[Int, Value]
+  class Instance(file: ClassFile, initStore: Store) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
@@ -49,6 +54,8 @@ object ConcreteInterpreter extends Interpreter:
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
     val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
+    val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    val store: CStore[Addr, Value] = new CStore(initStore)
 
     val cfs: ClassFile = file
 
