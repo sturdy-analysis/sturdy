@@ -5,8 +5,8 @@ import Stm.*
 import Sign.*
 import BackwardIntervalInstances.*
 import BackwardIntervalInstances.Interval.*
-import ConstantInstances.*
-import ConstantInstances.Const.*
+//import ConstantInstances.*
+//import ConstantInstances.Const.*
 
 
 class ProgramRunner[V](val st: Stm, val initialState: ST[V], val interpreter: BackGenericInterpreter[V]) {
@@ -137,18 +137,6 @@ object Examples {
     (st, initialState)
   }
 
-  def example11(): (Stm, Map[String, Const]) = {
-    val st = Block(Seq(
-      Assign("a", NumLit(3)),
-      Assign("b", NumLit(5)),
-      Assign("c", Add(Var("a"), Var("b"))), // c = 3 + 5
-      Assign("d", Sub(Var("c"), NumLit(3))) // d = 8 - 3
-    ))
-    val postState = Map(
-      "d" -> C // Known postcondition for d
-    )
-    (st, postState)
-  }
 
 
 
@@ -159,15 +147,9 @@ object MainApp {
   def main(args: Array[String]): Unit = {
     val signInterpreter = new BackwardSignInterpreter()
     val intervalInterpreter = new BackwardIntervalInterpreter()
-    val constantInterpreter = new BackwardConstantInterpreter()
-//
 
-    // To run example1
-//    val (st3, initialState3) = Examples.example3()
-//    runProgram(st3, initialState3, interpreter)
-
-    val (st, finalState) = Examples.example11()
-    runProgram(st, finalState, constantInterpreter)
+    val (st, finalState) = Examples.example5()
+    runProgram(st, finalState, intervalInterpreter)
 
   }
 

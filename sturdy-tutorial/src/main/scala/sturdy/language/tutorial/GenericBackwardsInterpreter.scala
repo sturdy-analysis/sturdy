@@ -50,8 +50,6 @@ trait BackJoin[V]:
 
 
 /*
- * With these interface at hand we can now implement the generic interpreter. This is only the first try without
- * using a fixpoint computation. We will later refine the generic interpreter.
  */
 trait BackGenericInterpreter[V]:
   var trace: List[(String, ST[V])] = List()
@@ -89,7 +87,7 @@ trait BackGenericInterpreter[V]:
   private def binOps( op:Exp, e1: Exp, e2: Exp, res: V, st: ST[V]): ST[V] =
     val f1: V = eval(e1,st) // obtain the forward evaluation of e1 and e2
     val f2: V = eval(e2,st)
-    println(s"Operation:${op} , e1 = ${e1}:${f1} and e2 = ${e2}:${f2}, res = ${res} \n st = ${st}")
+    //println(s"Operation:${op} , e1 = ${e1}:${f1} and e2 = ${e2}:${f2}, res = ${res} \n st = ${st}")
 
     val (r1, r2,_) = op match
       case Add(_,_) => invertOps.invAdd(f1, f2, res)
