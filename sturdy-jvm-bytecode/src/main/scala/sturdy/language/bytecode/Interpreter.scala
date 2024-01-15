@@ -8,8 +8,8 @@ import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
-
 import generic.BytecodeFailure.*
+import sturdy.values.objects.*
 trait Interpreter:
   //type I8
   //type I16
@@ -18,10 +18,11 @@ trait Interpreter:
   type F32
   type F64
   type Bool
-  type Class
+  type ObjType
 
   type Addr
-
+  type Idx
+  type ObjRep
   enum Value:
     case TopValue
     //case Int8(b: I8)
@@ -30,6 +31,7 @@ trait Interpreter:
     case Int64(l: I64)
     case Float32(f: F32)
     case Float64(d: F64)
+    case Obj(o: ObjType)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
@@ -109,11 +111,13 @@ trait Interpreter:
     , i64EqOps: EqOps[I64, Bool]
     , f32EqOps: EqOps[F32, Bool]
     , f64EqOps: EqOps[F64, Bool]
-      ): BytecodeOps[Value] with
+    , objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
+      ): BytecodeOps[Addr, Idx, ObjType, ObjRep, Value] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
+    final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep] = objOps
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
@@ -181,4 +185,4 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, NoJoin]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, ObjType, ObjRep, NoJoin]

@@ -25,7 +25,7 @@ object ConcreteInterpreter extends Interpreter:
   override type F32 = Float
   override type F64 = Double
   override type Bool = Boolean
-  override type Class = ObjectType
+  override type ObjType = ClassFile
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -43,6 +43,8 @@ object ConcreteInterpreter extends Interpreter:
       Value.Int32(0)
 
   override type Addr = Int
+  override type Idx = Int
+  override type ObjRep = (Addr, ObjType, Map[Int, Value])
   type Store = Map[Int, Value]
   class Instance(file: ClassFile, initStore: Store) extends GenericInstance:
     val newFrameData: FrameData = ()
@@ -62,6 +64,6 @@ object ConcreteInterpreter extends Interpreter:
 
     private given Failure = failure
 
-    val bytecodeOps: BytecodeOps[Value] = implicitly
+    val bytecodeOps: BytecodeOps[Addr, Idx, ObjType, ObjRep, Value] = implicitly
 
 

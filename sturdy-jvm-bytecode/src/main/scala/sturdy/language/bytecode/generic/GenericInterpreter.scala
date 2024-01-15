@@ -41,8 +41,8 @@ enum JvmExcept:
 
 enum AllocationSite:
   case classFile(obj: ObjectType, cfs: ClassFile)
-trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
-  val bytecodeOps: BytecodeOps[V]
+trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
+  val bytecodeOps: BytecodeOps[Addr, Idx, ObjType, ObjRep, V]
   import bytecodeOps.*
 
   implicit val joinUnit: J[Unit]
@@ -57,10 +57,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]:
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
   val cfs: ClassFile
 
+
+
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
-  lazy val num = new GenericInterpreterNumerics[V](bytecodeOps)
+  lazy val num = new GenericInterpreterNumerics[Addr, Idx, ObjType, ObjRep, V](bytecodeOps)
 
   def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
