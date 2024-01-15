@@ -109,40 +109,15 @@ given PhysicalAddressToApronVar[Context: Ordering]: Conversion[PhysicalAddress[C
 
 /**
 
-x = rand(0, 10);
-// ApronExpr(Itv[0, 10])
-// apronState: 0 <= xR <= 10
-// recencyStore:
-//   addrsTranslation: #1 ~> xR
-y = x + 1;
-  // how to read x?
-  // Lookup x in environment: #1 (maybe in the CallFrame?)
-  // Recencystore: read #1:
-     // #1 ~> xR
-     // ApronStore: read xR:
-        // why go back to virtual addresses and do the inverse translation once you write?
-
-// apronState: 0 <= xR <= 10, yR = xR+1
-// addrsT: #1 ~> xR, #2 ~> yR
-print(y - x)
-// addrsTranslation: #1 ~> xR, #2 ~> yR, #3 ~> tmpR
-// apronState: 0 <= xR <= 10, yR = xR + 1, tmpR = 1
-
-
-print(x) // print: xR
-x = 2
-// ApronState: xR = 2
-...
-
-
+Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
+ 
  **/
-
 
 // Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
 class ApronStore[
   Context: Ordering,
-  PowAddr <: AbstractAddr[Addr],
   Addr <: apron.Var,
+  PowAddr <: AbstractAddr[Addr],
   V]
   (val apronManager: Manager,
        initialState: Abstract1,
@@ -150,15 +125,15 @@ class ApronStore[
        makeIntVal: (ApronExpr[Addr], Abstract1) => V,
        )
   (using Join[V])
-  // TODO later: switch to AbstractAddress
   extends Store[PowAddr, V, WithJoin]:
+
 
   override type State = Abstract1
   private var apronState : Abstract1 = initialState
  
   def getState : State = apronState
   def setState(s : Abstract1) = apronState = s 
-
+ 
   def join : Join[State] = ???
   def widen : Widen[State] = ???
 

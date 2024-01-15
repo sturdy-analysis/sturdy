@@ -9,7 +9,7 @@ import sturdy.values.{Join, MaybeChanged, Widen}
 
 enum ApronExpr[Addr <: apron.Var]:
   case Var(v: Addr)
-  case Constant(coeff: Coeff)
+  case Constant[Addr](coeff: Coeff) extends ApronExpr[apron.Var]
   case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int, roundingDir: Int)
 

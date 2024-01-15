@@ -15,16 +15,20 @@ import apron.{Abstract1, Environment, Interval, MpqScalar, Polka}
 class ApronRecencyStoreTest extends AnyFunSuite:
 
   type Context = String
-  type PAddr = ApronPhysicalAddress[Context]
+  given Finite[Context] with {}
+
+  type PAddr = PhysicalAddress[Context]
+  type PowAddr[Context] = PowersetAddr[PAddr, PAddr]
+  
+  val man = new apron.Polka(true)
+  given initialState: Abstract1 = new Abstract1(man, new Environment())
 
   test("basic case") {
-    val man = new apron.Polka(true)
-    given initialState: Abstract1 = new Abstract1(man, new Environment())
     val AS = new ApronStore[Context, PAddr, PAddr, ApronExpr[PAddr]](
       man,
       initialState,
       (v : ApronExpr[PAddr]) => Option(v),
-      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant(s.getBound(man, e.toIntern(s.getEnvironment)))
+      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant[PAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
 
     val xR : PAddr = PhysicalAddress("x", Recency.Recent)
@@ -44,15 +48,19 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   // I think we need more than the ApronStore to do that?
 
   // TODO RecencyStore+ApronStore
-  /*
   test("with recencystore") {
-    val man = new apron.Polka(true)
-    val AS = new ApronStore[Context, ApronExpr[PAddr]](
-          man,
-          (v : ApronExpr[PAddr]) => Option(v), 
-          (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant(s.getBound(man, e.toIntern(s.getEnvironment)))
-        )
-    
+    val AS = new ApronStore[
+      Context, 
+      PAddr, 
+      PowersetAddr[PAddr, PAddr], 
+      ApronExpr[PAddr]
+      ](
+      man,
+      initialState,
+      (v : ApronExpr[PAddr]) => Option(v),
+      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant[PAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
+    )
+    val RS = new RecencyStore[Context, PAddr, ApronExpr[PAddr]](AS)
   
   }
-  */
+  
