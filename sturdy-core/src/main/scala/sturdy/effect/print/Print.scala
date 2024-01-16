@@ -5,3 +5,4 @@ import sturdy.effect.Effect
 /** [[Print]] describes the effect of printing to a console. */
 trait Print[A] extends Effect:
   def apply(a: A): Unit
+  def print(a: A): Unit = apply(a)
