@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.ApronStore
-import sturdy.apron.{ApronExpr, BinOp, given}
+import sturdy.apron.{ApronExpr, BinOp, JoinApronExpr, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.{*, given}
@@ -17,9 +17,16 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   type Context = String
   given Finite[Context] with {}
 
-  type PAddr = PhysicalAddress[Context]
+  type PAddr = ApronPhysicalAddress[Context]
   type PowAddr[Context] = PowersetAddr[PAddr, PAddr]
-  
+
+  // The one from ApronStore seems to restrictive, as PAddr here isn't a subtype of apron.Var
+  given JoinApronExpr[PAddr](using abstract1: Abstract1): Join[ApronExpr[PAddr]] with
+    def apply(v1: ApronExpr[PAddr], v2: ApronExpr[PAddr]): MaybeChanged[ApronExpr[PAddr]] =
+      throw NotImplementedError()
+
+
+
   val man = new apron.Polka(true)
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
