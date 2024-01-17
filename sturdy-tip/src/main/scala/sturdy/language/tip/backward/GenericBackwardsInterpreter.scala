@@ -26,6 +26,13 @@ import sturdy.values.relational.{EqOps, OrderingOps}
 
 import scala.collection.mutable.ListBuffer
 
+trait Meet[V]:
+  def meet(v1: V, v2: V): Option[V]
+  inline def apply(v1: V, v2: V): Option[V] = meet(v1, v2)
+object Meet:
+  def apply[V](v1: V, v2: V)(using meet: Meet[V]): Option[V] = meet(v1, v2)
+
+
 enum TipBackFailure extends FailureKind:
   case BackwardsUnreachable
   case BackwardsUnboundVariable
@@ -82,6 +89,8 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   implicit def jv: WithJoin[V]
   implicit def junit: WithJoin[Unit] = WithJoin(implicitly, jv.eff)
 
+  val meet: Meet[V]
+
   // value components
   val intOps: BackIntegerOps[Int, V]; import intOps.*
   val compareOps: BackOrderingOps[V, V]; import compareOps.*
@@ -119,8 +128,8 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     } {
       failure(BackwardsUnreachable, s"not the asserted post value")
     }
-    // TODO use a meet on v and expected
-    v
+    val m = meet(v, expected)
+    m.getOrElse(failure(BackwardsUnreachable, s"empty meet"))
 
   def evalBack_open(e: Exp, expected: V)(using BackFixed): V = e match {
     case Exp.NumLit(n) => assert(integerLit(n), expected)
@@ -256,15 +265,17 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   }
   inline def external[A](f: BackFixed ?=> A): A = f(using fixedBack)
 
-  def executeBack(p: Program): Unit = external {
+  def executeBack(p: Program): Seq[V] = external {
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
 
     val postVars = (main.params ++ main.locals).map(p => p -> topValue)
-    callFrame.withNew((), postVars) {
+    val preVars = callFrame.withNew((), postVars) {
       evalBack(main.ret, topValue)
       runBack(main.body)
+      (main.params ++ main.locals).map(p => callFrame.getLocalByName(p).getOrElse(failure(BackwardsUnboundVariable, p)))
     }
+    preVars
 //    val args = main.params.map(_ => Exp.Input())
 //    eval(Exp.Call(Exp.Var("main"), args))
   }

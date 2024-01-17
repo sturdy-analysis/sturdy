@@ -37,7 +37,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith("a7.tip")
+    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -68,7 +68,6 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
 
       println(s"Backward run of ${p.getFileName} is $aresult")
-      println("Call frame: " + analysis.callFrame.getState)
       (aresult, analysis)
     } else {
       null

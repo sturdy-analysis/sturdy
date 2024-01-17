@@ -2,6 +2,7 @@ package sturdy.language.tip.backward.values
 
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.language.tip.backward.Meet
 import sturdy.values.integer.IntSign
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.SignIntegerOps
@@ -99,3 +100,15 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
   override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = ???
 
   override def div(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = ???
+
+
+given Meet[IntSign] with
+  override def meet(v1: IntSign, v2: IntSign): Option[IntSign] = (v1, v2) match
+    case (TopSign, _) => Some(v2)
+    case (_, TopSign) => Some(v1)
+    case (NegOrZero, Neg | Zero) => Some(v2)
+    case (Neg | Zero, NegOrZero) => Some(v1)
+    case (ZeroOrPos, Zero | Pos) => Some(v2)
+    case (Zero | Pos, ZeroOrPos) => Some(v1)
+    case _ if v1 == v2 => Some(v1)
+    case _ => None

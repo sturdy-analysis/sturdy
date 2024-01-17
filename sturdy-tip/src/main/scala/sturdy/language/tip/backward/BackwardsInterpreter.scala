@@ -71,6 +71,14 @@ trait BackwardsInterpreter:
       case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
       case _ => MaybeChanged(TopValue, v1)
 
+  given MeetValue(using Meet[VInt]): Meet[Value] with
+    import Value.*
+    override def meet(v1: Value, v2: Value): Option[Value] = (v1, v2) match
+      case (TopValue, _) => Some(v2)
+      case (_, TopValue) => Some(v1)
+      case (IntValue(i1), IntValue(i2)) => Meet(i1, i2).map(Value.IntValue.apply)
+      case _ => None
+
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*

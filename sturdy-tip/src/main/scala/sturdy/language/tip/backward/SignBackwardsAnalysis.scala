@@ -29,6 +29,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
 
   class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericBackwardsInstance:
     override def jv: WithJoin[Value] = implicitly
+    override val meet: Meet[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
