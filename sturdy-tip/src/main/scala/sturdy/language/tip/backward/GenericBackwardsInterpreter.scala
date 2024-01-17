@@ -14,6 +14,7 @@ import sturdy.fix
 import sturdy.language.tip.TipFailure.UnboundVariable
 import sturdy.language.tip.backward.TipBackFailure.*
 import sturdy.language.tip.*
+import sturdy.language.tip.backward.values.*
 import sturdy.util.Label
 import sturdy.values.*
 import sturdy.values.booleans.{BooleanBranching, BooleanOps}
@@ -53,28 +54,6 @@ given CombineBackFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[BackF
     case (BackFixOut.Run(), BackFixOut.Run()) => Unchanged(BackFixOut.Run())
     case (BackFixOut.ExitFunction(v1), BackFixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(BackFixOut.ExitFunction.apply)
     case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
-
-
-trait BackIntegerOps[B, V]:
-  def integerLit(i: B): V
-  def randomInteger(): V
-
-  def add(v1: V => V, v2: V => V, r: V): V
-  def sub(v1: V => V, v2: V => V, r: V): V
-  def mul(v1: V => V, v2: V => V, r: V): V
-  def div(v1: V => V, v2: V => V, r: V): V
-
-trait BackOrderingOps[V, B]:
-  def lt(v1: V => V, v2: V => V, r: B): B
-  def le(v1: V => V, v2: V => V, r: B): B
-
-  def ge(v1: V => V, v2: V => V, r: B): B = le(v2, v1, r)
-  def gt(v1: V => V, v2: V => V, r: B): B = lt(v2, v1, r)
-
-trait BackEqOps[V, B]:
-  def equ(v1: V => V, v2: V => V, r: B): B
-  def neq(v1: V => V, v2: V => V, r: B): B
-
 
 /**
  * The generic interpreter for the Tip language (https://github.com/cs-au-dk/TIP).
