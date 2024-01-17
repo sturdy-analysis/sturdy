@@ -148,11 +148,11 @@ trait BackGenericInterpreter[V]:
 
     case If(cond, thn, els) =>
       val stThen = backeval(cond,invertOps.trueVal,backrun(thn,state))
-      els match
-        case None => stThen
-        case Some(someElse) =>
-          val stElse = backeval(cond,invertOps.falseVal,backrun(someElse,state))
-          backJoin.joinMaps(stThen,stElse)
+      val stElseBeforecond = els match
+        case None => state
+        case Some(someElse) => backrun(someElse,state)
+      val stElse = backeval(cond,invertOps.falseVal, stElseBeforecond)
+      backJoin.joinMaps(stThen,stElse)
 
     case While(cond, body) =>
       var currentState = backeval(cond, invertOps.falseVal, state)

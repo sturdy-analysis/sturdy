@@ -7,6 +7,15 @@ import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.SignIntegerOps
 
 
+/** 
+ * 
+ * e1 + e2
+ * 
+ * Necessary properties
+ * - e1 and e2 must be evaluated exactly once
+ * - e2 must be evaluated before e1
+ * 
+ */
 trait BackIntegerOps[B, V]:
   def integerLit(i: B): V
   def randomInteger(): V
@@ -38,6 +47,29 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
 
   override def randomInteger(): IntSign = TopSign
 
+  //  { x = Pos, y = Pos } 
+  // x * y = Pos 
+  //  { x = Pos, y = Top }
+  
+  // evalBack(x * y, Pos)
+  //   evalBack(y, Top) = Top
+  //   evalBack(x, Top) = Pos
+  // = Pos
+  // missed: y needs to be Pos
+
+  // evalBack(x * (y - 56), Pos)
+  //   evalBack(y - 56, Top) = Top
+  //     evalBack(y, Top) = Top
+  //   evalBack(x, Top) = Pos
+  // = Pos
+  // missed: y needs to be Pos
+
+  // evalBack(y * x, Pos)
+  //   evalBack(x, Top) = Pos
+  //   evalBack(y, Pos) = Pos
+  // = Pos
+  // found: y is Pos
+
   override def add(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
     case TopSign =>
       val a2 = v2(TopSign)
@@ -61,7 +93,7 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
     case Pos => v2(TopSign) match
       case Zero | NegOrZero | Neg => v1(Pos); Pos
       case Pos | ZeroOrPos | TopSign => v1(TopSign); Pos
-
+  
   override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = ???
 
   override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = ???

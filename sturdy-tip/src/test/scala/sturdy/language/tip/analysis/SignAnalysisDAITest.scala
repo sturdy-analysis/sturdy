@@ -30,7 +30,6 @@ import sturdy.values.relational.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
 import sturdy.language.tip.analysis.SignAnalysis.{*, given}
-import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source

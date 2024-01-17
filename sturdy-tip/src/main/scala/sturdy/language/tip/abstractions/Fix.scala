@@ -19,12 +19,11 @@ import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
 import sturdy.values.{Widen, Finite, Join}
 
-def isFunOrWhile(dom: FixIn): Int = dom match
-  case FixIn.EnterFunction(_) => 0
-  case FixIn.Run(Stm.While(_, _)) => 1
-  case _ => -1
-
 trait Fix extends Interpreter:
+  def isFunOrWhile(dom: FixIn): Int = dom match
+    case FixIn.EnterFunction(_) => 0
+    case FixIn.Run(Stm.While(_, _)) => 1
+    case _ => -1
 
   final def callSitesLogger(): CallSiteLogger[FixIn, Exp.Call] = context.callSites[FixIn, Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)

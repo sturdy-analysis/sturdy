@@ -1,5 +1,6 @@
 package sturdy.language.tip.backward.abstractions
 
+import sturdy.data.MayJoin.WithJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.{EffectStack, ObservableJoin}
 import sturdy.effect.callframe.DecidableCallFrame
@@ -8,50 +9,50 @@ import sturdy.effect.store.Store
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.fix.context.{CallSiteLogger, FiniteCallString, Parameters}
 import sturdy.fix.{*, given}
-import sturdy.language.tip.{Exp, FixIn, FixOut, Function, Interpreter, Program, Stm}
+import sturdy.language.tip.backward.{BackFixIn, BackFixOut, BackwardsInterpreter}
+import sturdy.language.tip.{Exp, Function, Interpreter, Program, Stm}
 import sturdy.values.{Finite, Join, Widen}
 
-def isFunOrWhile(dom: FixIn): Int = dom match
-  case FixIn.EnterFunction(_) => 0
-  case FixIn.Run(Stm.While(_, _)) => 1
-  case _ => -1
+trait Fix extends BackwardsInterpreter:
+  def isFunOrWhile(dom: BackFixIn[Value]): Int = dom match
+    case BackFixIn.EnterFunction(_) => 0
+    case BackFixIn.Iterate(_) => 1
+    case _ => -1
 
-trait Fix extends Interpreter:
-
-  final def callSitesLogger(): CallSiteLogger[FixIn, Exp.Call] = context.callSites[FixIn, Exp.Call] {
-    case FixIn.Eval(c: Exp.Call) => Some(c)
+  final def callSitesLogger(): CallSiteLogger[BackFixIn[Value], Exp.Call] = context.callSites[BackFixIn[Value], Exp.Call] {
+    case BackFixIn.Eval(c: Exp.Call, v) => Some(c)
     case _ => None
   }
   type CallString = context.CallString[Exp.Call]
   given Finite[CallString] = context.FiniteCallString
 
-  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[FixIn, Parameters[String, Value]] =
-    context.parameters[FixIn, String, Value] {
-      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
+  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[BackFixIn[Value], Parameters[String, Value]] =
+    context.parameters[BackFixIn[Value], String, Value] {
+      case BackFixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
       case _ => None
     }
 
 
 
-  def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]])
+  def loopUnwinding[Ctx, In, Out, All](loopUnwindingSteps: Int, phi: Contextual[Ctx, BackFixIn[Value], BackFixOut[Value]] ?=> Combinator[BackFixIn[Value], BackFixOut[Value]])
                                       (using Widen[Value], Widen[In], Widen[Out], Finite[Ctx], EffectStack)
-    : Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]]
+    : Contextual[Ctx, BackFixIn[Value], BackFixOut[Value]] ?=> Combinator[BackFixIn[Value], BackFixOut[Value]]
     = conditional({
-        case FixIn.Run(Stm.While(_, _)) => true
+        case BackFixIn.Run(Stm.While(_, _)) => true
         case _ => false
       }, sturdy.fix.unwind(loopUnwindingSteps, phi), phi)
 
-  def contextInsensitive(phi: (Contextual[Unit, FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
+  def contextInsensitive(phi: (Contextual[Unit, BackFixIn[Value], BackFixOut[Value]]) ?=> Combinator[BackFixIn[Value], BackFixOut[Value]])(using WithJoin[Value]): Combinator[BackFixIn[Value], BackFixOut[Value]] =
     notContextSensitive(phi)
 
-  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
+  def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], BackFixIn[Value], BackFixOut[Value]]) ?=> Combinator[BackFixIn[Value], BackFixOut[Value]])(using WithJoin[Value]): Combinator[BackFixIn[Value], BackFixOut[Value]] =
     contextSensitive(parameters(analysis.callFrame), phi)
 
-  def callSiteSensitive(k: Int, phi: (Contextual[CallString, FixIn, FixOut[Value]], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
+  def callSiteSensitive(k: Int, phi: (Contextual[CallString, BackFixIn[Value], BackFixOut[Value]], Finite[CallString]) ?=> Combinator[BackFixIn[Value], BackFixOut[Value]]): Combinator[BackFixIn[Value], BackFixOut[Value]] =
     val callSites = callSitesLogger()
     log(callSites, contextSensitive(callSites.callString(k), phi))
 
-//  def callSiteSensitiveFixpoint[In, Out, All](loopUnwindingSteps: Int): AnalysisState[FixIn, In, Out, All] ?=> ContextualFixpoint[FixIn, FixOut[Value]] = new ContextualFixpoint {
+//  def callSiteSensitiveFixpoint[In, Out, All](loopUnwindingSteps: Int): AnalysisState[BackFixIn, In, Out, All] ?=> ContextualFixpoint[BackFixIn, BackFixOut[Value]] = new ContextualFixpoint {
 //    override type Ctx = CallString
 //    val callSites = callSitesLogger()
 //    protected override def context = callSites.callString(2)
@@ -84,15 +85,15 @@ trait Fix extends Interpreter:
       case _ => None
 
 //  def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
-//    val cfg = control[analysis.fixpoint.Ctx, FixIn, FixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {
-//      case FixIn.Run(Stm.Block(_)) => None
-//      case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
-//      case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
-//      case FixIn.Eval(c: Exp.Call) => Some(CfgNode.Call(c))
+//    val cfg = control[analysis.fixpoint.Ctx, BackFixIn, BackFixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {
+//      case BackFixIn.Run(Stm.Block(_)) => None
+//      case BackFixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
+//      case BackFixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
+//      case BackFixIn.Eval(c: Exp.Call) => Some(CfgNode.Call(c))
 //      case _ => None
 //    } {
-//      case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
-//      case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
+//      case (BackFixIn.EnterFunction(f), BackFixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
+//      case (BackFixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
 //      case _ => None
 //    } (using analysis.effectStack, ObservableExcept.None)
 //    analysis.fixpoint.addContextSensitiveLogger(cfg.logger)

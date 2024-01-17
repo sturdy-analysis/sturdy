@@ -28,7 +28,6 @@ import sturdy.values.relational.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
-import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source

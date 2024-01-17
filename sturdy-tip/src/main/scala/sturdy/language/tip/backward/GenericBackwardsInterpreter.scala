@@ -33,16 +33,19 @@ enum TipBackFailure extends FailureKind:
 enum BackFixIn[V]:
   case Eval(e: Exp, v: V)
   case Run(s: Stm)
+  case Iterate(w: Stm.While)
   case EnterFunction(f: Function)
 
   override def toString: String = this match
     case Eval(e, v) => s"evalBack $e = $v"
     case Run(s) => s"runBack $s"
+    case Iterate(w) => s"iterateBack $w"
     case EnterFunction(fun) => s"enterBack ${fun.name}"
 
 enum BackFixOut[V]:
   case Eval(v: V)
   case Run()
+  case Iterate()
   case ExitFunction(ret: V)
 
 given finiteBackFixIn[V]: Finite[BackFixIn[V]] with {}
@@ -52,6 +55,7 @@ given CombineBackFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[BackF
   override def apply(out1: BackFixOut[V], out2: BackFixOut[V]): MaybeChanged[BackFixOut[V]] = (out1, out2) match
     case (BackFixOut.Eval(v1), BackFixOut.Eval(v2)) => Combine[V, W](v1, v2).map(BackFixOut.Eval.apply)
     case (BackFixOut.Run(), BackFixOut.Run()) => Unchanged(BackFixOut.Run())
+    case (BackFixOut.Iterate(), BackFixOut.Iterate()) => Unchanged(BackFixOut.Iterate())
     case (BackFixOut.ExitFunction(v1), BackFixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(BackFixOut.ExitFunction.apply)
     case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
@@ -107,12 +111,15 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
+  // assert(TopSign, Zero) should yield Zero
+  // assert(Pos, Zero) should always fail
   def assert(v: V, expected: V): V =
     branchOps.boolBranch(eqOps.equ(v, expected)) {
       // fine
     } {
       failure(BackwardsUnreachable, s"not the asserted post value")
     }
+    // TODO use a meet on v and expected
     v
 
   def evalBack_open(e: Exp, expected: V)(using BackFixed): V = e match {
@@ -121,8 +128,10 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => assert(funValue(fun), expected)
       case None =>
-        val xVal = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-        assert(xVal, expected)
+        val xVal = callFrame.getLocalByName(x).getOrElse(failure(BackwardsUnboundVariable, x))
+        val refined = assert(xVal, expected)
+        callFrame.setLocalByName(x, refined)
+        refined
     case Exp.Add(e1, e2) => add(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
@@ -165,41 +174,41 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       failure(BackwardsUnreachable, s"pre-condition $v == 0")
     } {
     }
+    // TODO refinement?
     v
 
   def runBack_open(s: Stm)(using BackFixed): Unit = s match
     case s@Stm.Assign(lhs: Assignable, e: Exp) =>
       val v = assignBack(lhs, s)
       evalBack(e, v)
-    case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) => els match
-      case None =>
+    case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) =>
+      junit.eff.joinComputations {
         runBack(thn)
         evalBackNonzero(cond, topInt)
-      case Some(elsStm) =>
-        junit.eff.joinComputations {
-          runBack(thn)
-          evalBackNonzero(cond, topInt)
-          ()
-        } {
-          runBack(elsStm)
-          evalBack(cond, integerLit(0))
-          ()
-        }
-    case Stm.While(cond, body) =>
-      evalBack(cond, integerLit(0))
-      junit.eff.joinComputations {
-        // skip to predecessor
+        ()
       } {
-        runBack(body)
-        evalBackNonzero(cond, topInt)
-        runBack(s)
+        els.foreach(runBack(_))
+        evalBack(cond, integerLit(0))
+        ()
       }
+    case w@Stm.While(cond, body) =>
+      evalBack(cond, integerLit(0))
+      iterateBack(w)
     case Stm.Block(body) =>
       body.reverse.foreach(runBack(_))
     case Stm.Output(e) =>
       evalBack(e, print.read())
     case Stm.Error(e) =>
       failure(BackwardsUnreachable, s"Error $e")
+
+  def iterateBack_open(w: Stm.While)(using BackFixed): Unit =
+    junit.eff.joinComputations {
+      // skip to predecessor
+    } {
+      runBack(w.body)
+      evalBackNonzero(w.cond, topInt)
+      iterateBack(w)
+    }
 
   def assignBack(lhs: Assignable, s: Stm.Assign)(using BackFixed): V = lhs match
     case Assignable.AVar(x) =>
@@ -233,6 +242,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
   inline def evalBack(e: Exp, v: V)(using rec: BackFixed): V = rec(BackFixIn.Eval(e, v)) match {case BackFixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
   inline def runBack(s: Stm)(using rec:  BackFixed): Unit = rec(BackFixIn.Run(s)) match {case BackFixOut.Run() => (); case _ => throw new IllegalStateException()}
+  inline def iterateBack(w: Stm.While)(using rec: BackFixed): Unit = rec(BackFixIn.Iterate(w)) match {case BackFixOut.Iterate() => (); case _ => throw new IllegalStateException()}
 
 //  private inline def enterFunction(fun: Function)(using rec: BackFixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
@@ -240,6 +250,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     fixpoint {
       case BackFixIn.Eval(e, v) => BackFixOut.Eval(evalBack_open(e, v))
       case BackFixIn.Run(s) => runBack_open(s); BackFixOut.Run()
+      case BackFixIn.Iterate(w) => iterateBack_open(w); BackFixOut.Iterate()
 //      case BackFixIn.EnterFunction(f) => BackFixOut.ExitFunction({run(f.body); eval(f.ret)})
     }
   }
@@ -248,7 +259,12 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   def executeBack(p: Program): Unit = external {
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
-    runBack(main.body)
+
+    val postVars = (main.params ++ main.locals).map(p => p -> topValue)
+    callFrame.withNew((), postVars) {
+      evalBack(main.ret, topValue)
+      runBack(main.body)
+    }
 //    val args = main.params.map(_ => Exp.Input())
 //    eval(Exp.Call(Exp.Var("main"), args))
   }

@@ -4,13 +4,13 @@ import sturdy.data.{WithJoin, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
-import sturdy.effect.given
+import sturdy.effect.{EffectStack, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
 import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
-import sturdy.fix.{StackConfig, given}
+import sturdy.fix.{CombinatorFixpoint, StackConfig, given}
 import sturdy.language.tip.{AllocationSite, Field, *, given}
 import sturdy.language.tip.backward.abstractions.*
 import sturdy.language.tip.backward.values.{*, given}
@@ -23,7 +23,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 
-object SignBackwardsAnalysis extends BackwardsInterpreter, References.AllocationSites, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop:
+object SignBackwardsAnalysis extends BackwardsInterpreter, References.AllocationSites, Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, Fix:
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
@@ -70,7 +70,8 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
-    override val fixpoint = ???
-//      fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
-//        parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
+    override val fixpoint: EffectStack ?=> fix.Fixpoint[BackFixIn[Value], BackFixOut[Value]] =
+      fix.filter((dom: BackFixIn[Value]) => isFunOrWhile(dom) >= 0,
+        fix.notContextSensitive(
+          fix.iter.innermost[BackFixIn[Value], BackFixOut[Value], Unit](stackConfig))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
