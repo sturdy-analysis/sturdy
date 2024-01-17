@@ -8,9 +8,8 @@ import sturdy.values.integer.SignOrderingOps
 trait BackOrderingOps[V, B]:
   def lt(v1: V => V, v2: V => V, r: B): B
   def le(v1: V => V, v2: V => V, r: B): B
-
-  def ge(v1: V => V, v2: V => V, r: B): B = le(v2, v1, r)
-  def gt(v1: V => V, v2: V => V, r: B): B = lt(v2, v1, r)
+  def ge(v1: V => V, v2: V => V, r: B): B
+  def gt(v1: V => V, v2: V => V, r: B): B
 
 class LiftedBackOrderingOps[V,B,UV,UB](extract: V => UV, inject: UV => V, extractB: B => UB, injectB: UB => B)(using ops: BackOrderingOps[UV,UB]) extends BackOrderingOps[V,B]:
   import scala.language.implicitConversions
@@ -20,6 +19,8 @@ class LiftedBackOrderingOps[V,B,UV,UB](extract: V => UV, inject: UV => V, extrac
 
   override def lt(v1: V => V, v2: V => V, r: B): B = ops.lt(v1, v2, r)
   override def le(v1: V => V, v2: V => V, r: B): B = ops.le(v1, v2, r)
+  override def ge(v1: V => V, v2: V => V, r: B): B = ops.ge(v1, v2, r)
+  override def gt(v1: V => V, v2: V => V, r: B): B = ops.gt(v1, v2, r)
 
 given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
   override def lt(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
@@ -31,8 +32,8 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
       case Neg | NegOrZero | Zero => v1(Neg); r
       case ZeroOrPos | Pos | TopSign => v1(TopSign); r
     case Topped.Actual(false) => v2(TopSign) match
-      case Zero | ZeroOrPos => v2(ZeroOrPos); r
-      case Pos => v2(Pos); r
+      case Zero | ZeroOrPos => v1(ZeroOrPos); r
+      case Pos => v1(Pos); r
       case Neg | NegOrZero | TopSign => v1(TopSign); r
 
     override def le(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
@@ -45,8 +46,33 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
         case Neg => v1(Neg); r
         case ZeroOrPos | Pos | TopSign => v1(TopSign); r
       case Topped.Actual(false) => v2(TopSign) match
-        case Zero | ZeroOrPos | Pos => v2(Pos); r
+        case Zero | ZeroOrPos | Pos => v1(Pos); r
         case Neg | NegOrZero | TopSign => v1(TopSign); r
 
+  override def ge(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
+    case Topped.Top =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignOrderingOps.lt(a1, a2)
+    case Topped.Actual(true) => v2(TopSign) match
+      case Pos => v1(Pos); r
+      case ZeroOrPos | Zero => v1(ZeroOrPos); r
+      case Neg | NegOrZero | TopSign => v1(TopSign); r
+    case Topped.Actual(false) => v2(TopSign) match
+      case Zero | NegOrZero | Neg => v1(Neg); r
+      case Pos | ZeroOrPos | TopSign => v1(TopSign); r
+
+    override def gt(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
+      case Topped.Top =>
+        val a2 = v2(TopSign)
+        val a1 = v1(TopSign)
+        SignOrderingOps.lt(a1, a2)
+      case Topped.Actual(true) => v2(TopSign) match
+        case Pos | ZeroOrPos | Zero => v1(Pos); r
+        case Neg | NegOrZero | TopSign => v1(TopSign); r
+      case Topped.Actual(false) => v2(TopSign) match
+        case Zero | NegOrZero => v1(NegOrZero); r
+        case Neg => v1(Neg); r
+        case Pos | ZeroOrPos | TopSign => v1(TopSign); r
 
 

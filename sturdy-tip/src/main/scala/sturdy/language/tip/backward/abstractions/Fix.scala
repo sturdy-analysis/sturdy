@@ -15,7 +15,7 @@ import sturdy.values.{Finite, Join, Widen}
 
 trait Fix extends BackwardsInterpreter:
   def isFunOrWhile(dom: BackFixIn[Value]): Int = dom match
-    case BackFixIn.EnterFunction(_) => 0
+    case BackFixIn.EnterFunction(_, _) => 0
     case BackFixIn.Iterate(_) => 1
     case _ => -1
 
@@ -28,7 +28,7 @@ trait Fix extends BackwardsInterpreter:
 
   final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[BackFixIn[Value], Parameters[String, Value]] =
     context.parameters[BackFixIn[Value], String, Value] {
-      case BackFixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
+      case BackFixIn.EnterFunction(f, _) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
       case _ => None
     }
 

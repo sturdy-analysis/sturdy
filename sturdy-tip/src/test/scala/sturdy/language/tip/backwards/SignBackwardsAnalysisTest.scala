@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.given
+import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
 import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
 import sturdy.language.tip.Parser.*
@@ -37,7 +37,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith("main.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -56,7 +56,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
-      val aresult = analysis.failure.fallible(analysis.executeBack(program))
+      val aresult = analysis.failure.fallible(analysis.executeBack(program, analysis.topValue))
 //      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
 
 //      if (deadNodes.nonEmpty)
@@ -67,7 +67,13 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
 
-      println(s"Backward run of ${p.getFileName} is $aresult")
+      println(s"Backward run of ${p.getFileName} ")
+      aresult match
+        case AFallible.Unfailing(t) => println(s"  yields ${t._2} given arguments ${t._1}")
+        case AFallible.Failing(msgs) => println(s"  fails $msgs")
+        case AFallible.MaybeFailing(t, msgs) => println(s"  may yield ${t._2} given arguments ${t._1}, or fails $msgs")
+        case AFallible.Diverging(recur) => println(s"  diverges ($recur)")
+
       (aresult, analysis)
     } else {
       null

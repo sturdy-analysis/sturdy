@@ -41,19 +41,19 @@ enum BackFixIn[V]:
   case Eval(e: Exp, v: V)
   case Run(s: Stm)
   case Iterate(w: Stm.While)
-  case EnterFunction(f: Function)
+  case EnterFunction(f: Function, ret: V)
 
   override def toString: String = this match
     case Eval(e, v) => s"evalBack $e = $v"
     case Run(s) => s"runBack $s"
     case Iterate(w) => s"iterateBack $w"
-    case EnterFunction(fun) => s"enterBack ${fun.name}"
+    case EnterFunction(fun, v) => s"enterBack ${fun.name} = $v"
 
 enum BackFixOut[V]:
   case Eval(v: V)
   case Run()
   case Iterate()
-  case ExitFunction(ret: V)
+  case ExitFunction(v: V)
 
 given finiteBackFixIn[V]: Finite[BackFixIn[V]] with {}
 //given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
@@ -96,7 +96,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   val compareOps: BackOrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val backEqOps: BackEqOps[V, V]
-  val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
+  val functionOps: BackFunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
@@ -111,6 +111,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
   val topValue: V
   val topInt: V
+  def topFunction: V
 
   // effect stack
   final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure))
@@ -145,10 +146,21 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_), expected)
-    case Exp.Gt(e1, e2) => gt(evalBack(e1, _), evalBack(e2, _), expected)
+    case Exp.Gt(e1, e2) =>
+      println(s"$e1 > $e2 ??")
+      def trace(e: Exp)(f: V => V): V => V = v =>
+        val a = f(v)
+        println(s"$e =? $v  <--  $a")
+        a
+      gt(trace(e1)(evalBack(e1,_)), trace(e2)(evalBack(e2, _)), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
-//    case Exp.Call(fun, args) =>
-//      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case Exp.Call(Exp.Var(f), args) =>
+      val fun = functions.getOrElse(f, failure(UnboundVariable, s"Function $f"))
+      val (argVals,v) = invokeFunBack(funValue(fun), expected)(callBack)
+      args.zip(argVals).reverse.map(evalBack(_,_))
+      v
+    case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
+
 //    case a@Exp.Alloc(e) =>
 //      val addr = alloc(AllocationSite.Alloc(a))
 //      store.write(addr, eval(e))
@@ -224,6 +236,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       val v = callFrame.getLocalByName(x).getOrElse(failure(BackwardsUnboundVariable, s.toString))
       callFrame.setLocalByName(x, topValue)
       v
+    case _ => failure(BackwardsUnreachable, s"not implemented yet: assignable $lhs")
 //    case Assignable.ADeref(e) =>
 //      val addr = refAddr(eval(e))
 //      store.write(addr, v)
@@ -240,42 +253,37 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 //      val updated = updateRecordField(recVal, Field(field), v)
 //      store.write(recAddr, updated)
 
-//  def call(fun: Function, args: Seq[V])(using Fixed): V =
-//    val locals: Map[String, V] =
-//      Map() ++
-//        fun.params.zip(args) ++
-//        fun.locals.map(x => (x, integerLit(-1)))
-//    callFrame.withNew((), locals) {
-//      enterFunction(fun)
-//    }
+  def callBack(fun: Function, ret: V)(using BackFixed): (Seq[V], V) =
+    val locals = fun.params ++ fun.locals
+    val localsInit = locals.map(x => x -> topValue).toMap
+    callFrame.withNew((), localsInit) {
+      val v = enterFunction(fun, ret)
+      val args = fun.params.map(callFrame.getLocalByName.andThen(_.get))
+      (args, v)
+    }
 
   inline def evalBack(e: Exp, v: V)(using rec: BackFixed): V = rec(BackFixIn.Eval(e, v)) match {case BackFixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
   inline def runBack(s: Stm)(using rec:  BackFixed): Unit = rec(BackFixIn.Run(s)) match {case BackFixOut.Run() => (); case _ => throw new IllegalStateException()}
   inline def iterateBack(w: Stm.While)(using rec: BackFixed): Unit = rec(BackFixIn.Iterate(w)) match {case BackFixOut.Iterate() => (); case _ => throw new IllegalStateException()}
 
-//  private inline def enterFunction(fun: Function)(using rec: BackFixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
+  private inline def enterFunction(fun: Function, ret: V)(using rec: BackFixed) = rec(BackFixIn.EnterFunction(fun, ret)) match {case BackFixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
   private lazy val fixedBack = {
     fixpoint {
       case BackFixIn.Eval(e, v) => BackFixOut.Eval(evalBack_open(e, v))
       case BackFixIn.Run(s) => runBack_open(s); BackFixOut.Run()
       case BackFixIn.Iterate(w) => iterateBack_open(w); BackFixOut.Iterate()
-//      case BackFixIn.EnterFunction(f) => BackFixOut.ExitFunction({run(f.body); eval(f.ret)})
+      case BackFixIn.EnterFunction(f, ret) => BackFixOut.ExitFunction({
+        val v = evalBack(f.ret, ret)
+        runBack(f.body)
+        v
+      })
     }
   }
   inline def external[A](f: BackFixed ?=> A): A = f(using fixedBack)
 
-  def executeBack(p: Program): Seq[V] = external {
+  def executeBack(p: Program, expected: V): (Seq[V], V) = external {
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
-
-    val postVars = (main.params ++ main.locals).map(p => p -> topValue)
-    val preVars = callFrame.withNew((), postVars) {
-      evalBack(main.ret, topValue)
-      runBack(main.body)
-      (main.params ++ main.locals).map(p => callFrame.getLocalByName(p).getOrElse(failure(BackwardsUnboundVariable, p)))
-    }
-    preVars
-//    val args = main.params.map(_ => Exp.Input())
-//    eval(Exp.Call(Exp.Var("main"), args))
+    callBack(main, expected)
   }

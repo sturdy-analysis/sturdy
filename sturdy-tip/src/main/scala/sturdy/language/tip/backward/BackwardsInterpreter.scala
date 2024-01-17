@@ -101,8 +101,8 @@ trait BackwardsInterpreter:
       case (RecValue(r1), RecValue(r2)) => boolean(EqOps.neq(r1, r2))
       case (TopValue, _) | (_, TopValue) => boolean(topBool)
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-  given ValueFunctionOps(using Instance, FunctionOps[Function, Seq[Value], Value, VFun]): FunctionOps[Function, Seq[Value], Value, Value] =
-    new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
+  given ValueFunctionOps(using Instance, BackFunctionOps[Function, Seq[Value], Value, VFun]): BackFunctionOps[Function, Seq[Value], Value, Value] =
+    new LiftedBackFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
   given ValueReferenceOps(using Instance, ReferenceOps[Addr, VRef]): ReferenceOps[Addr, Value] =
     new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)
   given ValueRecordOps(using Failure, RecordOps[Field, Value, VRecord]): RecordOps[Field, Value, Value] =

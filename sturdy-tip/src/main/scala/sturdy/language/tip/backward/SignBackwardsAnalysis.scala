@@ -35,6 +35,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
     private given Failure = failure
 
     override val topInt: Value = Value.IntValue(IntSign.TopSign)
+    override def topFunction: Value = Value.FunValue(Powerset.apply(functions.values.toSet))
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
@@ -58,7 +59,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
         case Topped.Actual(b) => equ(v1, v2, boolean(Topped.Actual(!b))); r
 
     override val eqOps: EqOps[Value, Value] = implicitly
-    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val functionOps: BackFunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
