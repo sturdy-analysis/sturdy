@@ -9,7 +9,7 @@ import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 import generic.BytecodeFailure.*
-import sturdy.values.objects.*
+import sturdy.values.objects.{LiftedObjectOps, ObjectOps}
 trait Interpreter:
   //type I8
   //type I16
@@ -18,10 +18,10 @@ trait Interpreter:
   type F32
   type F64
   type Bool
-  type ObjType
 
   type Addr
   type Idx
+  type ObjType
   type ObjRep
   enum Value:
     case TopValue
@@ -31,7 +31,7 @@ trait Interpreter:
     case Int64(l: I64)
     case Float32(f: F32)
     case Float64(d: F64)
-    case Obj(o: ObjType)
+    case Obj(o: ObjRep)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
@@ -62,12 +62,18 @@ trait Interpreter:
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
+    def asObj(using f: Failure): ObjRep = this match
+      case Obj(o) => o
+      case TopValue => topObj
+      case _ => f.fail(TypeError, s"Expected obj but got $this")
+
   //def topI8: I8
   //def topI16: I16
   def topI32: I32
   def topI64: I64
   def topF32: F32
   def topF64: F64
+  def topObj: ObjRep
 
   /*
   def typedTop(ty: ValType): Value = ty match
@@ -117,7 +123,8 @@ trait Interpreter:
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
-    final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep] = objOps
+    //final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep] = objOps
+    final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value] = new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, Value, ObjRep](identity, _.asObj, identity, Value.Obj.apply)
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
