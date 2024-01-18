@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.{Executor, fix, data}
+import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
@@ -13,7 +13,7 @@ import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
 import sturdy.effect.store
 import sturdy.effect.store
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.may.PowersetAddrMayStore
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
@@ -28,7 +28,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
@@ -54,7 +54,7 @@ object IntervalAnalysis extends Interpreter,
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val store: PowersetAddrMayStore[AllocationSiteAddr, Value] = new PowersetAddrMayStore(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))

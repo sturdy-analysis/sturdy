@@ -1,7 +1,6 @@
 package sturdy.language.tip.backward.abstractions
 
 import sturdy.data.WithJoin
-import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.language.tip.backward.BackwardsInterpreter
 import sturdy.language.tip.{AllocationSite, Interpreter}
 import sturdy.values.Powerset

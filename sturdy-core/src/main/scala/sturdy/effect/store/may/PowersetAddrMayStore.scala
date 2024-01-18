@@ -1,24 +1,19 @@
-package sturdy.effect.store
+package sturdy.effect.store.may
 
-import sturdy.IsSound
-import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
+import sturdy.effect.store.*
 import sturdy.values.{*, given}
+import sturdy.{IsSound, Soundness}
 
 import scala.collection.mutable.ListBuffer
-import reflect.Selectable.reflectiveSelectable
+import scala.reflect.Selectable.reflectiveSelectable
 
-/*
- * An abstract threadded store. The store tracks if an address is definitely bound,
- * maybe bound, or unbound and calls the corresponding continuations upon read.
- * Internally, the store tracks dirty addresses that have been (re)writteb to
- * optimize the join computation, since only values of dirty addresses need joining.
- */
-class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
-  extends Store[Powerset[Addr], V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
-  this.store = _init
+class PowersetAddrMayStore[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V], Widen[V], Finite[Addr])
+  extends MayStore[Powerset[Addr], V, WithJoin], AbstractMayStore[Addr, V]:
+
+  this.store = MayMap(_init)
 
   override def read(xs: Powerset[Addr]): JOptionA[V] = {
     var needsNotFound = false
@@ -53,16 +48,16 @@ class AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
     import sturdy.values
 
     val abstractedKeys = c.entries.keySet.flatMap(k => varAbstractly.apply(k).set)
-    if (!abstractedKeys.subsetOf(store.keySet)) {
+    if (!abstractedKeys.subsetOf(store.m.keySet)) {
       val missing = c.entries.flatMap{ kv =>
         val k = kv._1
         val ak = varAbstractly.apply(k)
-        if (ak.set.subsetOf(store.keySet))
+        if (ak.set.subsetOf(store.m.keySet))
           None
         else
           Some(s"abs($k->${kv._2})=$ak")
       }
-      IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
+      IsSound.NotSound(s"${classOf[PowersetAddrMayStore[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
       c.entries.foreachEntry { case (x, v) =>
         val avs = this.read(varAbstractly.apply(x)) match

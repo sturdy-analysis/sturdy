@@ -6,7 +6,7 @@ import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
-import sturdy.effect.store.Store
+import sturdy.effect.store.{MayStore, Store}
 import sturdy.effect.userinput.UserInput
 import sturdy.util.Label
 import sturdy.values.*
@@ -98,7 +98,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // effect components
   val callFrame: DecidableMutableCallFrame[Unit, String, V]
-  val store: Store[Addr, V, J]
+  val store: MayStore[Addr, V, J]
   val alloc: Allocation[Addr, AllocationSite]
   val print: Print[V]
   val input: UserInput[V]

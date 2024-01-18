@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Failure
 import scala.util.Success
 import ControlFlowGraph.*
-import sturdy.data.combineMaps
+import sturdy.data.{MayMap, combineMayMaps}
 import sturdy.effect.TrySturdy
 import sturdy.effect.except.ExceptObserver
 import sturdy.effect.except.ObservableExcept
@@ -35,19 +35,19 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
 
   private case class PredNode(cnode: CNode[N, Ctx], exceptional: Boolean)
 
-  type Predecessors = Map[CNode[N, Ctx], EdgeAttrib]
-  type Exceptions = Map[Any, Predecessors]
+  type Predecessors = MayMap[CNode[N, Ctx], EdgeAttrib]
+  type Exceptions = MayMap[Any, Predecessors]
 
   private val startCNode: CNode[N, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
 
-  private var predecessors: Predecessors = Map(startCNode -> EdgeAttrib.default)
+  private var predecessors: Predecessors = MayMap(Map(startCNode -> EdgeAttrib.default))
   private var joinStack: List[Predecessors] = List()
 
   /** Currently active exceptions and the CFG nodes that triggered them. */
-  private var exceptions: Exceptions = Map()
+  private var exceptions: Exceptions = MayMap()
   private var exceptStack: List[Exceptions] = List()
   /** Exceptions currently handled in a catch block. Uncaught exceptions are propagated outwards. */
-  private var catchExceptions: Exceptions = Map()
+  private var catchExceptions: Exceptions = MayMap()
 
   private val nodes: mutable.Set[CNode[N, Ctx]] = mutable.Set(startCNode)
   private val edges: mutable.Map[CNode[N, Ctx], Map[CNode[N, Ctx], EdgeAttrib]] = mutable.Map()
@@ -60,18 +60,18 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
       case Some(preds) =>
         val combinedPreds = combinePredecessors(preds, exceptionalPredecessors)
         exceptions += exc -> combinedPreds
-    predecessors = Map()
+    predecessors = MayMap()
 
   override def handling(exc: Exc): Unit =
     catchExceptions.get(exc) match
-      case None => predecessors = Map()
+      case None => predecessors = MayMap()
       case Some(preds) =>
         predecessors = preds
         catchExceptions -= exc
 
   override def tryStart(): Unit =
     exceptStack = exceptions :: exceptStack
-    exceptions = Map()
+    exceptions = MayMap()
 
   override def tryEnd(): Unit =
     val fallthrough = exceptStack.head
@@ -80,7 +80,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
 
   override def catchStart(): Unit =
     catchExceptions = exceptions
-    exceptions = Map()
+    exceptions = MayMap()
 
   override def catchEnd(): Unit =
     exceptions = combineExceptions(exceptions, catchExceptions)
@@ -92,7 +92,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
   override def joinSwitch(leftFailed: Boolean): Unit =
     val otherPredecessors = joinStack.head
     if (leftFailed)
-      joinStack = Map() :: joinStack.tail
+      joinStack = MayMap() :: joinStack.tail
     else
       joinStack = predecessors :: joinStack.tail
     predecessors = otherPredecessors
@@ -109,10 +109,10 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
     }
 
   private inline def combinePredecessors(preds1: Predecessors, preds2: Predecessors): Predecessors =
-    combineMaps(preds1, preds2, _.combine(_))
+    combineMayMaps(preds1, preds2, _.combine(_))
 
   private inline def combineExceptions(excs1: Exceptions, excs2: Exceptions): Exceptions =
-    combineMaps(excs1, excs2, combinePredecessors(_, _))
+    combineMayMaps(excs1, excs2, combinePredecessors(_, _))
 
   // TODO
 //  override def recurrent(in: In, result: Option[TrySturdy[Out]]): Unit = result match
@@ -125,10 +125,10 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
 
   override def repeating(): Unit =
     // We have already logged the edges to `in` from its original predecessor.
-    predecessors = Map()
+    predecessors = MayMap()
 
   def clear(): Unit =
-    predecessors = Map(startCNode -> EdgeAttrib.default)
+    predecessors = MayMap(Map(startCNode -> EdgeAttrib.default))
     joinStack = List()
     nodes.clear()
     nodes += startCNode
@@ -157,7 +157,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
         val cnode = CNode(node, getContext)
         nodes += cnode
         addEdgeFromPredecessors(cnode)
-        predecessors = Map(cnode -> EdgeAttrib.default)
+        predecessors = MayMap(Map(cnode -> EdgeAttrib.default))
       case None => // nothing
 
     override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit = codom.get match
@@ -166,10 +166,10 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
           val cnode = CNode(node, getContext)
           nodes += cnode
           addEdgeFromPredecessors(cnode)
-          predecessors = Map(cnode -> EdgeAttrib.default)
+          predecessors = MayMap(Map(cnode -> EdgeAttrib.default))
         case None => // nothing
       case None =>
-        predecessors = Map()
+        predecessors = MayMap()
   }
 
 

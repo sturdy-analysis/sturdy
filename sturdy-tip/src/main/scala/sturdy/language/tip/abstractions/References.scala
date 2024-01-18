@@ -2,7 +2,6 @@ package sturdy.language.tip.abstractions
 
 import sturdy.data.WithJoin
 import sturdy.language.tip.Interpreter
-import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.values.Powerset
 import sturdy.values.references.AllocationSiteRef
 import sturdy.values.references.AllocationSiteAddr

@@ -2,7 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, State}
+import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Join, Widen}

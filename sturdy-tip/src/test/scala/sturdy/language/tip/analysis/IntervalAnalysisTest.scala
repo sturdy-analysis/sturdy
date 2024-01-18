@@ -46,9 +46,6 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
     }
-    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runIntervalAnalysis(p, StackConfig.StackedCfgNodes())
-    }
   }
 
   def runIntervalAnalysis(p: Path, stackConfig: StackConfig) =

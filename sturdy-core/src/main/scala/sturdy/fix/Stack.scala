@@ -14,8 +14,8 @@ object Stack:
                             : Stack[Dom, Codom, state.In, state.Out] = config match
     case StackConfig.StackedStates(readPriorOutput) =>
       StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput)
-    case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
-      StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
+//    case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
+//      StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
 
 trait Stack[Dom, Codom, In, Out]:
   enum PushResult:
@@ -34,4 +34,20 @@ trait Stack[Dom, Codom, In, Out]:
 
 enum StackConfig:
   case StackedStates(readPriorOutput: Boolean = true)
-  case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true)
+//  case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true)
+
+class FrameInstanceInfo(var frameIdWithInStateOfCache: Option[Int]):
+  private var frameCounter: Int = 1
+
+  def this(id: Int) =
+    this(Some(id))
+
+  def push(newID: Int): Unit =
+    frameIdWithInStateOfCache = Some(newID)
+    frameCounter += 1
+
+  def popAndGetIsEmpty(id: Int): Boolean =
+    frameIdWithInStateOfCache = None
+    frameCounter -= 1
+//    assert(frameCounter >= 0)
+    frameCounter == 0

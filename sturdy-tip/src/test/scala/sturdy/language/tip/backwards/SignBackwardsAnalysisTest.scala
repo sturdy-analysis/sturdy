@@ -8,7 +8,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
-import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.analysis.SignAnalysis.{*, given}

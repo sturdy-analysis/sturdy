@@ -19,7 +19,7 @@ import sturdy.language.tip.GenericInterpreter
 import sturdy.util.{Labeled, Profiler}
 import sturdy.{*, given}
 import sturdy.data.given
-import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}
+import sturdy.effect.store.Store
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}

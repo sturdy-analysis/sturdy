@@ -1,6 +1,5 @@
 package sturdy.effect
 
-import sturdy.fix.Frame
 import sturdy.values.Combine
 import sturdy.values.MaybeChanged
 import sturdy.values.Widening

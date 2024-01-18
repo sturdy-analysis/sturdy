@@ -9,9 +9,9 @@ import sturdy.effect.TrySturdy
 import sturdy.values.*
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
-  protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
+  protected var tables: MustMap[Key, MustMap[Symbol, Entry]] = MustMap()
 
-  def entries: Map[Key, Map[Symbol, Entry]] = tables
+  def entries: MustMap[Key, MustMap[Symbol, Entry]] = tables
   
   override def get(key: Key, symbol: Symbol): JOptionC[Entry] =
     JOptionC(tables(key).get(symbol))
@@ -20,7 +20,7 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
     tables += key -> (tables(key) + (symbol -> newEntry))
 
   override def putNew(key: Key): Unit =
-    tables += key -> Map()
+    tables += key -> MustMap()
 
   def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     c.tables.foreachEntry { (key, cTab) =>
@@ -38,15 +38,15 @@ class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
 
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
-  override type State =  Map[Key, Map[Symbol, Entry]]
-  override def getState: Map[Key, Map[Symbol, Entry]] = tables
-  override def setState(st: Map[Key, Map[Symbol, Entry]]): Unit = tables = st
-  override def join: Join[Map[Key, Map[Symbol, Entry]]] = implicitly
-  override def widen: Widen[Map[Key, Map[Symbol, Entry]]] = implicitly
+  override type State =  MustMap[Key, MustMap[Symbol, Entry]]
+  override def getState: MustMap[Key, MustMap[Symbol, Entry]] = tables
+  override def setState(st: MustMap[Key, MustMap[Symbol, Entry]]): Unit = tables = st
+  override def join: Join[MustMap[Key, MustMap[Symbol, Entry]]] = implicitly
+  override def widen: Widen[MustMap[Key, MustMap[Symbol, Entry]]] = implicitly
 
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
-    private var fTables: Map[Key, Map[Symbol, Entry]] = null
+    private var fTables: MustMap[Key, MustMap[Symbol, Entry]] = MustMap(null)
 
     override def inbetween(fFailed: Boolean): Unit =
       fTables = tables
@@ -64,9 +64,9 @@ class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       if (fTables.size != tables.size)
         throw new IllegalStateException()
-      var joined = Map[Key, Map[Symbol, Entry]]()
+      var joined = MustMap[Key, MustMap[Symbol, Entry]]()
       for ((key,fmap) <- fTables) {
-        var joinedMap = Map[Symbol, Entry]()
+        var joinedMap = MustMap[Symbol, Entry]()
         val gmap = tables(key)
         if (fmap.size != gmap.size)
           throw new IllegalStateException()

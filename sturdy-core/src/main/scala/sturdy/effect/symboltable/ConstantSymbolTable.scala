@@ -46,16 +46,16 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     tables += key -> Left(Table(Map(), Set()))
     dirtyTables += key
 
-  override type State = Tables[Key, Symbol, Entry]
-  def getState: Tables[Key, Symbol, Entry] = tables
-  def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
-  override def join: Join[Tables[Key, Symbol, Entry]] = JoinMap(using {
+  override type State = MayTables[Key, Symbol, Entry]
+  def getState: MayTables[Key, Symbol, Entry] = MayMap(tables)
+  def setState(s: MayTables[Key, Symbol, Entry]): Unit = tables = s.m
+  override def join: Join[MayTables[Key, Symbol, Entry]] = JoinMayMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
     case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
   })
-  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
+  override def widen: Widen[MayTables[Key, Symbol, Entry]] = WidenFiniteKeyMayMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
@@ -119,7 +119,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     }
     cTables.foreachEntry { (key, cTab) =>
       val aTab = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
-      val tabSound = tabInstanceIsSound(cTab, aTab)
+      val tabSound = tabInstanceIsSound(cTab.m, aTab)
       if (tabSound.isNotSound)
         return tabSound
     }
@@ -152,6 +152,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
 
 object ConstantSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Eith[Table[Symbol, Entry], Entry]]
+  type MayTables[Key, Symbol, Entry] = MayMap[Key, Eith[Table[Symbol, Entry], Entry]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with
     override def apply(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): MaybeChanged[Table[Symbol, Entry]] =

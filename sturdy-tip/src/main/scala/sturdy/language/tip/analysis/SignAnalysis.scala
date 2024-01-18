@@ -7,7 +7,7 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.PrintFiniteAlphabet
 import sturdy.effect.print.given
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.may.PowersetAddrMayStore
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
@@ -23,7 +23,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
@@ -49,7 +49,7 @@ object SignAnalysis extends Interpreter,
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val store: PowersetAddrMayStore[AllocationSiteAddr, Value] = new PowersetAddrMayStore(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))

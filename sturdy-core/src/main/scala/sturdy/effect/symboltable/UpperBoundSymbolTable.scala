@@ -10,7 +10,7 @@ import sturdy.effect.TrySturdy
 
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:
 
-  protected var tables: Map[Key, Entry] = Map()
+  protected var tables: MayMap[Key, Entry] = MayMap()
 
   override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
     JOptionA.noneSome(tables(key))
@@ -23,7 +23,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
 
   private class UpperBoundSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
-    private var fTables: Map[Key, Entry] = _
+    private var fTables: MayMap[Key, Entry] = _
     private var fDirty: Set[Key] = _
 
     override def inbetween(fFailed: Boolean): Unit =
@@ -55,8 +55,8 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
     }
     IsSound.Sound
 
-  type State = Map[Key, Entry]
-  override def getState: Map[Key, Entry] = tables
-  override def setState(s: Map[Key, Entry]): Unit = tables = s
-  override def join: Join[Map[Key, Entry]] = implicitly
-  override def widen: Widen[Map[Key, Entry]] = implicitly
+  type State = MayMap[Key, Entry]
+  override def getState: MayMap[Key, Entry] = tables
+  override def setState(s: MayMap[Key, Entry]): Unit = tables = s
+  override def join: Join[MayMap[Key, Entry]] = implicitly
+  override def widen: Widen[MayMap[Key, Entry]] = implicitly

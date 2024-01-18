@@ -5,7 +5,7 @@ import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Effect
-import sturdy.effect.symboltable.ConstantSymbolTable.Tables
+import sturdy.effect.symboltable.ConstantSymbolTable.{MayTables, Tables}
 import sturdy.values.*
 import sturdy.values.integer.NumericInterval
 
@@ -43,12 +43,12 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     constantSymbolTable.putNew(key)
 
   override type State = constantSymbolTable.State
-  override def getState: Tables[Key, I, Entry] =
+  override def getState: MayTables[Key, I, Entry] =
     constantSymbolTable.getState
-  def setState(state: Tables[Key, I, Entry]): Unit =
+  def setState(state: MayTables[Key, I, Entry]): Unit =
     constantSymbolTable.setState(state)
-  override def join: Join[Tables[Key, I, Entry]] = constantSymbolTable.join
-  override def widen: Widen[Tables[Key, I, Entry]] = constantSymbolTable.widen
+  override def join: Join[MayTables[Key, I, Entry]] = constantSymbolTable.join
+  override def widen: Widen[MayTables[Key, I, Entry]] = constantSymbolTable.widen
 
   def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, I, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     constantSymbolTable.tableIsSound(c)

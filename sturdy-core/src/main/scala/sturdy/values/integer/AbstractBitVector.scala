@@ -350,8 +350,8 @@ class AbstractBitVectorIntegerOps[I]
     rem.getOrElse(throw new IllegalStateException( s"unable to compute meet between $rem1 % $rem2"))
 
   def gcd(v1: AbstractBitVector[I], v2: AbstractBitVector[I]): AbstractBitVector[I] = {
-    if v1 == constant(zero) then v2
-    if v2 == constant(zero) then v1
+    if v1 == constant(zero) then return v2
+    if v2 == constant(zero) then return v1
     val n = v1.bits.length-1
     var gcdOptions = ArrayBuffer[AbstractBitVector[I]]() //all possible gcd
     var u = absolute(v1) //work only with absolute values

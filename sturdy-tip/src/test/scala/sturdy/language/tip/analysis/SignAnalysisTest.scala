@@ -14,7 +14,7 @@ import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.{Parser, Program}
 import sturdy.effect.failure.given
-import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labeled
 import sturdy.{*, given}
@@ -46,9 +46,6 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
-    }
-    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runSignAnalysis(p, StackConfig.StackedCfgNodes())
     }
   }
 

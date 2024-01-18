@@ -15,3 +15,8 @@ trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
 
   final def readOrElse(x: Addr, default: => V)(using J[V]): V =
     read(x).getOrElse(default)
+
+/** Tracks possible values for an address. When a read succeeds, the address may have that value or be unbound. */
+trait MayStore[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]
+/** Tracks definite values for an address. When a read succeeds, the address must have that value and is definitely bound. */
+trait MustStore[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]

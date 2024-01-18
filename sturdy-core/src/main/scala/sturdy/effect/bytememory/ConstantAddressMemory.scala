@@ -76,11 +76,11 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
           memories += key -> gmemOpt.asIndefinite
   }
 
-  override type State = Map[Key, Mem[B]]
-  override def getState: Map[Key, Mem[B]] = memories
-  override def setState(s: Map[Key, Mem[B]]): Unit = memories = s
-  override def join: Join[Map[Key, Mem[B]]] = implicitly
-  override def widen: Widen[Map[Key, Mem[B]]] = implicitly
+  override type State = MayMap[Key, Mem[B]]
+  override def getState: MayMap[Key, Mem[B]] = MayMap(memories)
+  override def setState(s: MayMap[Key, Mem[B]]): Unit = memories = s.m
+  override def join: Join[MayMap[Key, Mem[B]]] = implicitly
+  override def widen: Widen[MayMap[Key, Mem[B]]] = implicitly
 
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:
@@ -162,7 +162,7 @@ object ConstantAddressMemory:
             Changed(TopMem(newDefinite, newUpperBound))
         case (oldMem: ImmutableByteMem[B], nowMem: ImmutableByteMem[B]) =>
           if (oldMem.size == nowMem.size) {
-            val words = JoinIntMap[Word[B], W](using ConstantAddressMemory.CombineWord)(oldMem.words, nowMem.words)
+            val words = JoinMayIntMap[Word[B], W](using ConstantAddressMemory.CombineWord)(oldMem.words, nowMem.words)
             MaybeChanged(ImmutableByteMem(oldMem.size, oldMem.emptyB, words.get, oldMem.sizeLimit, newDefinite, newUpperBound), words.hasChanged || boundDefChanged)
           } else {
             Changed(TopMem(newDefinite, newUpperBound))
