@@ -5,7 +5,7 @@ import sturdy.values.references.Recency.*
 import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.store.ApronStore
+import sturdy.effect.store.{ApronStore, given}
 import sturdy.apron.{ApronExpr, BinOp, JoinApronExpr, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
@@ -17,6 +17,7 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   type Context = String
   given Finite[Context] with {}
 
+  type Addr = PhysicalAddress[Context]
   type PAddr = ApronPhysicalAddress[Context]
   type PowAddr[Context] = PowersetAddr[PAddr, PAddr]
 
@@ -58,8 +59,8 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   test("with recencystore") {
     val AS = new ApronStore[
       Context, 
-      PAddr, 
-      PowersetAddr[PAddr, PAddr], 
+      Addr, 
+      PowersetAddr[Addr, Addr], 
       ApronExpr[PAddr]
       ](
       man,
@@ -67,7 +68,9 @@ class ApronRecencyStoreTest extends AnyFunSuite:
       (v : ApronExpr[PAddr]) => Option(v),
       (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant[PAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
-    val RS = new RecencyStore[Context, PAddr, ApronExpr[PAddr]](AS)
+    val AT = AddressTranslation.empty[Context]
+    summon[ClosedEquality[AT.State, AS.State]]
+    val RS = new RecencyStore[Context, Addr, ApronExpr[PAddr]](AS, AT)
   
   }
   

@@ -85,6 +85,14 @@ import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
 import math.Ordered.orderingToOrdered
 
+implicit def convertToApron[Context : Ordering](x: PhysicalAddress[Context]) : ApronPhysicalAddress[Context] =
+  ApronPhysicalAddress(x.ctx, x.recency)
+
+implicit def convertFromApron[Context : Ordering](x: ApronPhysicalAddress[Context]) : PhysicalAddress[Context] =
+  PhysicalAddress(x.ctx, x.recency)
+
+
+
 case class ApronPhysicalAddress[Context: Ordering](ctx: Context, recency: Recency)
   extends apron.Var
   with AbstractAddr[ApronPhysicalAddress[Context]]:
@@ -114,15 +122,17 @@ Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu
  **/
 
 // Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
+// Restrict type to PowPhysicalAddress and enable automatic conversion?
 class ApronStore[
   Context: Ordering,
-  Addr <: apron.Var,
+  //Addr <: apron.Var,
+  Addr <: PhysicalAddress[Context], 
   PowAddr <: AbstractAddr[Addr],
   V]
   (val apronManager: Manager,
        initialState: Abstract1,
-       getIntVal: V => Option[ApronExpr[Addr]],
-       makeIntVal: (ApronExpr[Addr], Abstract1) => V,
+       getIntVal: V => Option[ApronExpr[ApronPhysicalAddress[Context]]],
+       makeIntVal: (ApronExpr[ApronPhysicalAddress[Context]], Abstract1) => V,
        )
   (using Join[V])
   extends Store[PowAddr, V, WithJoin]:
@@ -144,7 +154,9 @@ class ApronStore[
     else
       powAddr.reduce(addr =>
         if (apronState.getEnvironment().hasVar(addr)) {
-          JOptionA.NoneSome(makeIntVal(ApronExpr.Var(addr), apronState))
+          JOptionA.NoneSome(makeIntVal(
+            ApronExpr.Var(
+            (ApronPhysicalAddress(addr.ctx, addr.recency))), apronState))
         }
         else {
           JOptionA.None()
@@ -192,4 +204,10 @@ given JoinApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Join[ApronEx
 
 given WidenApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Widen[ApronExpr[Addr]] with
   def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
+    throw NotImplementedError()
+
+given ClosedEquality[Any, apron.Abstract1] with  
+  def closedEquals(closure1: Any, a1: apron.Abstract1, closure2: Any, a2: apron.Abstract1): Boolean =
+    a1.isEqual(a1.getCreationManager(), a2)
+  def closedHashCode(closure: Any, a: apron.Abstract1): Int = 
     throw NotImplementedError()
