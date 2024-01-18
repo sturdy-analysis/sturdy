@@ -21,7 +21,7 @@ given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
 case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends AbstractAddr[AA]:
   override def isEmpty: Boolean = addrs.forall(_.isEmpty)
   override def isStrong: Boolean = addrs.size == 1 && addrs.head.isStrong
-  override def reduce[A](f: AA => A)(using Join[A]): A = addrs.map(f).reduce { case (a1, a2) =>
+  override def reduce[B](f: AA => B)(using Join[B]): B = addrs.map(f).reduce { case (a1, a2) =>
     Join(a1, a2).get
   }
 object PowersetAddr:

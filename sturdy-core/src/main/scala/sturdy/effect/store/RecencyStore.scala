@@ -13,7 +13,7 @@ import scala.reflect.ClassTag
 
 class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin],
-   val addressTranslation: AddressTranslation[Context])
+   val addressTranslation: AddressTranslation[Context] = AddressTranslation.empty[Context])
   (using Join[V], Widen[V], Finite[Context], ClosedEquality[Map[(Context,Int), PowRecency], initStore.State])
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 

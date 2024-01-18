@@ -206,8 +206,8 @@ given WidenApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Widen[Apron
   def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
     throw NotImplementedError()
 
-given ClosedEquality[Any, apron.Abstract1] with  
-  def closedEquals(closure1: Any, a1: apron.Abstract1, closure2: Any, a2: apron.Abstract1): Boolean =
+given ApronClosedEquality[Cls]:  ClosedEquality[Cls, apron.Abstract1] with
+  def closedEquals(closure1: Cls, a1: apron.Abstract1, closure2: Cls, a2: apron.Abstract1): Boolean =
     a1.isEqual(a1.getCreationManager(), a2)
-  def closedHashCode(closure: Any, a: apron.Abstract1): Int = 
+  def closedHashCode(closure: Cls, a: apron.Abstract1): Int =
     throw NotImplementedError()

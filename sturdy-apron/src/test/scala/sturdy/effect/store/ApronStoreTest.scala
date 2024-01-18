@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.{ApronStore, given}
-import sturdy.apron.{ApronExpr, BinOp, JoinApronExpr, given}
+import sturdy.apron.{ApronExpr, BinOp, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.{*, given}
@@ -18,12 +18,15 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   given Finite[Context] with {}
 
   type Addr = PhysicalAddress[Context]
-  type PAddr = ApronPhysicalAddress[Context]
-  type PowAddr[Context] = PowersetAddr[PAddr, PAddr]
+  type PowAddr = PowersetAddr[Addr, Addr]
+  type VAddr = VirtualAddress[Context]
+  type PowVAddr = PowersetAddr[VAddr, VAddr]
+
+  type ApAddr = ApronPhysicalAddress[Context]
 
   // The one from ApronStore seems to restrictive, as PAddr here isn't a subtype of apron.Var
-  given JoinApronExpr[PAddr](using abstract1: Abstract1): Join[ApronExpr[PAddr]] with
-    def apply(v1: ApronExpr[PAddr], v2: ApronExpr[PAddr]): MaybeChanged[ApronExpr[PAddr]] =
+  given JoinApronExpr(using abstract1: Abstract1): Join[ApronExpr[ApAddr]] with
+    def apply(v1: ApronExpr[ApAddr], v2: ApronExpr[ApAddr]): MaybeChanged[ApronExpr[ApAddr]] =
       throw NotImplementedError()
 
 
@@ -32,20 +35,21 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
   test("basic case") {
-    val AS = new ApronStore[Context, PAddr, PAddr, ApronExpr[PAddr]](
+    val AS = new ApronStore[Context, Addr, PowAddr, ApronExpr[ApAddr]](
       man,
       initialState,
-      (v : ApronExpr[PAddr]) => Option(v),
-      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant[PAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
+      (v : ApronExpr[ApAddr]) => Option(v),
+      (e: ApronExpr[ApAddr], s: Abstract1) => ApronExpr.Constant[ApAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
 
-    val xR : PAddr = PhysicalAddress("x", Recency.Recent)
-    val yR : PAddr = PhysicalAddress("y", Recency.Recent)
+    val x = PhysicalAddress("x", Recency.Recent)
+    val xR = PowersetAddr(Set(x))
+    val yR = PowersetAddr(Set(PhysicalAddress("y", Recency.Recent)))
 
     AS.write(xR, ApronExpr.Constant(Interval(0, 10)))
     println(s"$xR <- [0, 10] = ${AS.getState}")
 
-    AS.write(yR, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(xR), ApronExpr.Constant(MpqScalar(1))))
+    AS.write(yR, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
     println(s"$yR <- $xR + 1 = ${AS.getState}")
 
     val ry = AS.read(yR)
@@ -58,19 +62,18 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   // TODO RecencyStore+ApronStore
   test("with recencystore") {
     val AS = new ApronStore[
-      Context, 
-      Addr, 
-      PowersetAddr[Addr, Addr], 
-      ApronExpr[PAddr]
+      Context,
+      Addr,
+      PowersetAddr[Addr, Addr],
+      ApronExpr[ApAddr]
       ](
       man,
       initialState,
-      (v : ApronExpr[PAddr]) => Option(v),
-      (e: ApronExpr[PAddr], s: Abstract1) => ApronExpr.Constant[PAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
+      (v : ApronExpr[ApAddr]) => Option(v),
+      (e: ApronExpr[ApAddr], s: Abstract1) => ApronExpr.Constant[ApAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
     val AT = AddressTranslation.empty[Context]
-    summon[ClosedEquality[AT.State, AS.State]]
-    val RS = new RecencyStore[Context, Addr, ApronExpr[PAddr]](AS, AT)
+    val RS = new RecencyStore[Context, PowVAddr, ApronExpr[ApAddr]](AS, AT)
   
   }
   
