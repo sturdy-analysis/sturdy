@@ -147,12 +147,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Gt(e1, e2) =>
-      println(s"$e1 > $e2 ??")
-      def trace(e: Exp)(f: V => V): V => V = v =>
-        val a = f(v)
-        println(s"$e =? $v  <--  $a")
-        a
-      gt(trace(e1)(evalBack(e1,_)), trace(e2)(evalBack(e2, _)), expected)
+      gt(evalBack(e1,_), evalBack(e2, _), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Call(Exp.Var(f), args) =>
       val fun = functions.getOrElse(f, failure(UnboundVariable, s"Function $f"))
