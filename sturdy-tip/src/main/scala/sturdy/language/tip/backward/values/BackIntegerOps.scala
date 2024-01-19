@@ -3,10 +3,12 @@ package sturdy.language.tip.backward.values
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
+import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
 import sturdy.values.integer.IntSign
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.Interval
 import sturdy.values.integer.Interval.*
+import sturdy.values.integer.CombineIntSign
 import sturdy.values.integer.SignIntegerOps
 import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
 import sturdy.values.integer.CombineIntSign
@@ -189,6 +191,8 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
         case Neg => v1(Neg)
         case Pos => v1(Pos)
       }; Pos
+
+
 
 given Meet[IntSign] with
   override def meet(v1: IntSign, v2: IntSign): Option[IntSign] = (v1, v2) match
