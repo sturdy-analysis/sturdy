@@ -1,12 +1,13 @@
 package sturdy.language.tip.analysis
 
-import sturdy.{Executor, fix, data}
+import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.JoinableDecidableCallFrame
+import sturdy.effect.except.ObservableExcept
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
@@ -28,11 +29,11 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
-  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix, Control:
 
   override type J[A] = WithJoin[A]
 
@@ -72,10 +73,16 @@ object IntervalAnalysis extends Interpreter,
       bounds = from.asInstanceOf[Instance].bounds
     }
 
-    final override val fixpoint =
-      callSiteSensitive(callSites, fix.dispatch(isFunOrWhile, Seq(
-        fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)))
-      ).fixpoint
+    val cfgLogger = controlLogger[CallString](callSites > 0)
 
+    final override val fixpoint =
+      callSiteSensitive(callSites,
+        fix.log(cfgLogger.logger,
+          fix.dispatch(isFunOrWhile, Seq(
+            fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
+          ))
+        )
+      ).fixpoint
+      
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 

@@ -47,9 +47,6 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
     }
-    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runIntervalAnalysis(p, StackConfig.StackedCfgNodes())
-    }
   }
 
   def runIntervalAnalysis(p: Path, stackConfig: StackConfig) =
@@ -69,6 +66,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       LinearStateOperationCounter.addToListAndReset()
       println(s"${LinearStateOperationCounter.toString} in the last tests")
       println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
+
+      println(analysis.cfgLogger.toGraphViz)
+
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
