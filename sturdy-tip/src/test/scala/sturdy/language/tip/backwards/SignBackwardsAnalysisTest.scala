@@ -34,7 +34,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign backward analysis"
 
-  val uri = classOf[SignBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[SignBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.getFileName.toString == "simple1.tip"
@@ -60,11 +60,11 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
+      //println(s"Program is ${program}")
       val analysis = new SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
-      val expectedVal = analysis.intOps.toValue(List(5))
+      val expectedVal = analysis.intOps.toValue(List(-5))
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
-
 
       println(s"Backward run of ${p.getFileName} ")
       aresult match
