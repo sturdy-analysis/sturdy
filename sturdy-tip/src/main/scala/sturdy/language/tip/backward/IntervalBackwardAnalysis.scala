@@ -4,7 +4,7 @@ import sturdy.data.{WithJoin, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
-import sturdy.effect.{EffectStack, given}
+import sturdy.effect.{EffectStack, TrySturdy, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
 import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}
 import sturdy.effect.userinput.AUserInput
@@ -47,7 +47,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
         case Topped.Actual(false) => v2(Value.TopValue) match
           case Value.IntValue(Interval.I(0,0)) =>
             effectStack.joinComputations {
-              v1(Value.IntValue(???)) //IntSign.Neg
+              v1(Value.IntValue(???)) //IntSign.Neg? what is going on here???
             } {
               v1(Value.IntValue(???)) //IntSign.Pos
             }
@@ -72,8 +72,23 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
+    def getState = this.effectStack.getAllState
+
+    val logger = new fix.Logger[BackFixIn[Value], BackFixOut[Value]]:
+      override def enter(dom: BackFixIn[IntervalBackwardAnalysis.Value]): Unit = dom match
+        case BackFixIn.EnterFunction(f, v) => println(s"Postcondition of $f = $v\n\t$getState")
+        case _ => //nothing
+
+      override def exit(dom: BackFixIn[IntervalBackwardAnalysis.Value], codom: TrySturdy[BackFixOut[IntervalBackwardAnalysis.Value]]): Unit = (dom, codom.get) match
+        case (BackFixIn.Run(s), Some(BackFixOut.Run())) if !s.isInstanceOf[Stm.Block] =>
+          println(s"Precondition of $s\n\t${getState}")
+        case (BackFixIn.Run(s), None) => println(s"Precondition of $s = bottom")
+        case (BackFixIn.EnterFunction(f, v), _) => println(s"Precondition of $f = $v\n\t${getState}")
+        case _ => // nothing
+
     override val fixpoint: EffectStack ?=> fix.Fixpoint[BackFixIn[Value], BackFixOut[Value]] =
-      fix.filter((dom: BackFixIn[Value]) => isFunOrWhile(dom) >= 0,
-        fix.notContextSensitive(
-          fix.iter.innermost[BackFixIn[Value], BackFixOut[Value], Unit](stackConfig))).fixpoint
+      fix.log(logger,
+        fix.filter((dom: BackFixIn[Value]) => isFunOrWhile(dom) >= 0,
+          fix.notContextSensitive(
+            fix.iter.innermost[BackFixIn[Value], BackFixOut[Value], Unit](stackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)

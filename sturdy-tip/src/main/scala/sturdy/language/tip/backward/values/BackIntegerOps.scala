@@ -28,6 +28,9 @@ import sturdy.values.integer.CombineIntSign
  */
 trait BackIntegerOps[B, V]:
   def integerLit(i: B): V
+
+  def toValue(is: List[B]): V
+
   def randomInteger(): V
 
   def add(v1: V => V, v2: V => V, r: V): V
@@ -42,6 +45,7 @@ class LiftedBackIntegerOps[B,V,I](extract: V => I, inject: I => V)(using ops: Ba
   private implicit def wrap(f: V => V): I => I = i => extract(f(inject(i)))
 
   override def integerLit(i: B): V = ops.integerLit(i)
+  override def toValue(is: List[B]): V = ops.toValue(is)
   override def randomInteger(): V = ops.randomInteger()
   override def add(v1: V => V, v2: V => V, r: V): V = ops.add(v1, v2, r)
   override def sub(v1: V => V, v2: V => V, r: V): V = ops.sub(v1, v2, r)
@@ -55,6 +59,9 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
     else if base.gt(i, base.zero) then Pos
     else Zero
 
+  override def toValue(is: List[B]): IntSign = is match
+    case Nil => throw new IllegalArgumentException("List is empty, cannot extract head element.")
+    case (i :: _) => integerLit(i)
   override def randomInteger(): IntSign = TopSign
 
   //  { x = Pos, y = Pos } 
@@ -210,6 +217,15 @@ given Meet[IntSign] with
 given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integral[B]): BackIntegerOps[B, Interval] with
 
   override def integerLit(i: B): Interval = I(base.toInt(i), base.toInt(i))
+
+  override def toValue(is: List[B]): Interval = is match
+    case i1 :: i2 :: Nil =>
+      val l = base.toInt(i1)
+      val h = base.toInt(i2)
+      I(l,h)
+    case _ =>
+      throw new IllegalArgumentException("List must contain exactly two elements.")
+
 
   override def randomInteger(): Interval = ITop
 

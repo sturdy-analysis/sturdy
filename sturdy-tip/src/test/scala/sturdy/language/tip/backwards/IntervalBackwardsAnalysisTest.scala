@@ -11,8 +11,8 @@ import sturdy.effect.print.given
 import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.analysis.SignAnalysis.{*, given}
-import sturdy.language.tip.analysis.SignAnalysisSoundness.given
+//import sturdy.language.tip.analysis.SignAnalysis.{*, given}
+//import sturdy.language.tip.analysis.SignAnalysisSoundness.given
 import sturdy.language.tip.*
 import sturdy.util.Labeled
 import sturdy.values.booleans.{*, given}
@@ -25,6 +25,10 @@ import sturdy.values.{*, given}
 import sturdy.*
 import sturdy.language.tip.backward.{IntervalBackwardAnalysis}
 
+
+import sturdy.language.tip.backward.BackwardsInterpreter
+
+
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
@@ -34,7 +38,7 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign backward analysis"
 
-  val uri = classOf[IntervalBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[IntervalBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.getFileName.toString == "myfile.tip"
@@ -61,19 +65,12 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalBackwardAnalysis.Instance(Map(), Map(), stackConfig)
 
-      //      val onlyCalls = false
-      //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
+      //val intervalValue = Interval.I(2, 10)
 
-      val aresult = analysis.failure.fallible(analysis.executeBack(program, analysis.topValue))
-      //      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
+      //val resultVal = analysis.topValue
+      val resultVal = analysis.intOps.toValue(List(20,100))
 
-      //      if (deadNodes.nonEmpty)
-      //        println(s"Found dead code: $deadNodes")
-      //      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      //      val cresult = interp.failure.fallible(interp.execute(program))
-      //      given CAllocationIntIncrement[AllocationSite] = interp.alloc
-      //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
-      //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+      val aresult = analysis.failure.fallible(analysis.executeBack(program, resultVal))
 
       println(s"Backward run of ${p.getFileName} ")
       aresult match

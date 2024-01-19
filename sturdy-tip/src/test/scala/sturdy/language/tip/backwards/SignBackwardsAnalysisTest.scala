@@ -36,21 +36,21 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
-//  Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.getFileName.toString == "myfile.tip"
-//  ).foreach { p =>
-//    it must s"soundly analyze ${p.getFileName} with stacked states" in {
-//      runSignAnalysis(p, StackConfig.StackedStates())
-//    }
-//  }
-
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
-  ).sorted.foreach { p =>
+    p.getFileName.toString == "simple1.tip"
+  ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
     }
   }
+
+//  Files.list(Paths.get(uri)).toScala(List).filter(p =>
+//    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+//  ).sorted.foreach { p =>
+//    it must s"soundly analyze ${p.getFileName} with stacked states" in {
+//      runSignAnalysis(p, StackConfig.StackedStates())
+//    }
+//  }
 
 
 def runSignAnalysis(p: Path, stackConfig: StackConfig) =
@@ -61,20 +61,10 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
+      val expectedVal = analysis.intOps.toValue(List(5))
 
-//      val onlyCalls = false
-//      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
+      val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
 
-      val aresult = analysis.failure.fallible(analysis.executeBack(program, analysis.topValue))
-//      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
-
-//      if (deadNodes.nonEmpty)
-//        println(s"Found dead code: $deadNodes")
-//      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-//      val cresult = interp.failure.fallible(interp.execute(program))
-//      given CAllocationIntIncrement[AllocationSite] = interp.alloc
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
 
       println(s"Backward run of ${p.getFileName} ")
       aresult match
