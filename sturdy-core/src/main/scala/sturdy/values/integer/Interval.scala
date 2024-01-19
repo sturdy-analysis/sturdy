@@ -1,0 +1,112 @@
+package sturdy.values.integer
+
+import sturdy.effect.EffectStack
+import sturdy.effect.failure.Failure
+import sturdy.values.*
+import sturdy.values.relational.*
+
+enum Interval:
+  case ITop
+  case I (low: Int, high: Int)
+
+  def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
+    case (I(l1,h1),I(l2,h2)) => h1 < l2
+    case (_,_) => false)
+
+
+  def negated: Interval = this match
+    case ITop => ITop
+    case I(low, high) => I(-high, -low)
+
+
+
+import sturdy.values.integer.Interval.*
+
+given Abstractly[Int, Interval] with
+  override def apply(i: Int): Interval = I(i,i)
+
+given PartialOrder[Interval] with
+  override def lteq(x: Interval, y: Interval): Boolean = (x, y) match
+    case (Interval.I(low1, high1), Interval.I(low2, high2)) => x == y || x < y
+
+
+given CombineInterval[W <: Widening]: Combine[Interval, W] with
+  override def apply(v1: Interval, v2: Interval): MaybeChanged[Interval] =
+    if v1 == v2 then Unchanged(v1)
+    else if v1 < v2 then Changed(v2)
+    else if v2 < v1 then Unchanged(v1)
+    else (v1, v2) match
+      case (I(l1, h1), I(l2, h2)) => Changed(I(math.min(l1, l2), math.max(h1, h2)))
+      case _ => Changed(ITop)
+
+
+
+given IntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
+  def integerLit(i: B): Interval =
+    val iInt = base.toInt(i)
+    I(iInt,iInt)
+
+  def randomInteger(): Interval = I(0, 0) // ZeroOrPos
+
+  def add(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (I(l1, h1), I(l2, h2)) => I(l1 + l2, h1 + h2)
+    case (_,_) => ITop
+
+  def sub(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (I(l1, h1), I(l2, h2)) => I(l1 - h2, h1 - l2)
+    case (_,_) => ITop
+
+
+  def mul(v1: Interval, v2: Interval): Interval = ???
+
+  def max(v1: Interval, v2: Interval): Interval = ???
+  def min(v1: Interval, v2: Interval): Interval = ???
+
+  def div(v1: Interval, v2: Interval): Interval = ???
+
+  def divUnsigned(v1: Interval, v2: Interval): Interval = ???
+  def remainder(v1: Interval, v2: Interval): Interval = ???
+  def remainderUnsigned(v1: Interval, v2: Interval): Interval = ???
+  def modulo(v1: Interval, v2: Interval): Interval = ???
+  def gcd(v1: Interval, v2: Interval): Interval = ???
+
+  def absolute(v: Interval): Interval = ???
+  def bitAnd(v1: Interval, v2: Interval): Interval = ???
+  def bitOr(v1: Interval, v2: Interval): Interval = ???
+  def bitXor(v1: Interval, v2: Interval): Interval = ???
+  def shiftLeft(v: Interval, shift: Interval): Interval = ???
+  def shiftRight(v: Interval, shift: Interval): Interval = ???
+  def shiftRightUnsigned(v: Interval, shift: Interval): Interval = ???
+  def rotateLeft(v: Interval, shift: Interval): Interval = ???
+  def rotateRight(v: Interval, shift: Interval): Interval = ???
+  def countLeadingZeros(v: Interval): Interval = ???
+  def countTrailingZeros(v: Interval): Interval = ???
+  def nonzeroBitCount(v: Interval): Interval = ???
+  def invertBits(v: Interval): Interval = ???
+
+given IntervalOrderingOps: OrderingOps[Interval, Topped[Boolean]] with
+  def lt(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
+    case (I(l1, h1), I(l2, h2)) =>
+      if (h1 < l2) then Topped.Actual(true)
+      else if (h2 < l1) then Topped.Actual(false)
+      else Topped.Top
+    case _ => Topped.Top
+
+  def le(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
+    case (I(l1, h1), I(l2, h2)) =>
+      if (h1 <= l2) then Topped.Actual(true)
+      else if (h2 <= l1) then Topped.Actual(false)
+      else Topped.Top
+    case _ => Topped.Top
+
+
+given IntervalEqOps: EqOps[Interval, Topped[Boolean]] with
+  def equ(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
+    case (I(l1, h1), I(l2, h2)) =>
+      val b = l1 == l2 && h1 == h2
+      Topped.Actual(b)
+    case _ => Topped.Top
+
+  def neq(v1: Interval, v2: Interval): Topped[Boolean] = equ(v1, v2).map(!_)
+
+given FiniteInterval: Finite[Interval] with {}

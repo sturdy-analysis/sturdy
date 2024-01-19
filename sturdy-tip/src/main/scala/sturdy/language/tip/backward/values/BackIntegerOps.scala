@@ -5,6 +5,8 @@ import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
 import sturdy.values.integer.IntSign
 import sturdy.values.integer.IntSign.*
+import sturdy.values.integer.Interval
+import sturdy.values.integer.Interval.*
 import sturdy.values.integer.SignIntegerOps
 
 
@@ -139,3 +141,38 @@ given Meet[IntSign] with
     case (Zero | Pos, ZeroOrPos) => Some(v1)
     case _ if v1 == v2 => Some(v1)
     case _ => None
+
+
+
+given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integral[B]): BackIntegerOps[B, Interval] with
+
+  override def integerLit(i: B): Interval = I(base.toInt(i), base.toInt(i))
+
+  override def randomInteger(): Interval = ITop
+
+  override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
+    case ITop => Interval.ITop
+    case I(l, h) =>
+      val I(l2, h2) = v2(ITop)
+      val I(l1, h1) = v1(ITop)
+      I(l1 + l2, h1 + h2)
+
+  override def sub(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
+    case ITop => ITop
+    case I(l, h) =>
+      val I(l2, h2) = v2(ITop)
+      val I(l1, h1) = v1(ITop)
+      I(l1 - h2, h1 - l2)
+
+  override def mul(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = ???
+  override def div(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = ???
+
+
+given Meet[Interval] with
+  override def meet(v1: Interval, v2: Interval): Option[Interval] = (v1, v2) match
+    case (ITop, _) => Some(v2)
+    case (_, ITop) => Some(v1)
+    case (I(low1, high1), I(low2, high2)) =>
+      val newLow = Math.max(low1, low2)
+      val newHigh = Math.min(high1, high2)
+      if newLow <= newHigh then Some(I(newLow, newHigh)) else None

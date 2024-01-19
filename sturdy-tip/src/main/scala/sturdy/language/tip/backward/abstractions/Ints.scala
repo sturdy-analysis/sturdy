@@ -3,27 +3,29 @@ package sturdy.language.tip.backward.abstractions
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.BackwardsInterpreter
 import sturdy.language.tip.{Interpreter, TipFailure}
-import sturdy.values.integer.{AbstractBitVector, IntSign, NumericInterval, given}
+import sturdy.values.integer.{AbstractBitVector, IntSign, Interval, given}
 import sturdy.values.relational.EqOps
 import sturdy.values.{Join, Topped}
 
 object Ints:
-  trait Interval extends BackwardsInterpreter :
+  trait MInterval extends BackwardsInterpreter :
     final type VBool = Topped[Boolean]
-    final type VInt = NumericInterval[Int]
+    final type VInt = Interval
 
-    final def topInt: NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
+    final def topInt: Interval = Interval.I(Int.MinValue, Int.MaxValue)
     final def topBool: Topped[Boolean] = Topped.Top
 
     final def asBoolean(v: Value)(using failure: Failure): VBool = v match
-      case Value.IntValue(i) => i.toBoolean
+      case Value.IntValue(i) => i match
+        case Interval.I(l,h) => if l == 0 && h == 0 then Topped.Actual(false) else Topped.Actual(true)
+        case Interval.ITop   => Topped.Top
       case Value.TopValue => Topped.Top
       case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => NumericInterval(0, 1)
-      case Topped.Actual(true) => NumericInterval(1, 1)
-      case Topped.Actual(false) => NumericInterval(0, 0)
+      case Topped.Top => Interval.I(0, 1)
+      case Topped.Actual(true) => Interval.I(1, 1)
+      case Topped.Actual(false) => Interval.I(0, 0)
     )
 
   trait Sign extends BackwardsInterpreter :
