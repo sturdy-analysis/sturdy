@@ -86,21 +86,21 @@ trait BackwardsInterpreter:
     new LiftedBackIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueBackOrderingOps(using Failure, BackOrderingOps[VInt, VBool]): BackOrderingOps[Value, Value] =
     new LiftedBackOrderingOps[Value, Value, VInt, VBool](_.asInt, IntValue.apply, asBoolean, boolean)
-  given ValueEqOps(using EqOps[VInt, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
+  given ValueEqOps(using EqOps[VInt, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Failure): EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => boolean(EqOps.equ(i1, i2))
       case (RefValue(a1), RefValue(a2)) => boolean(EqOps.equ(a1, a2))
       case (FunValue(f1), FunValue(f2)) => boolean(EqOps.equ(f1, f2))
       case (RecValue(r1), RecValue(r2)) => boolean(EqOps.equ(r1, r2))
       case (TopValue, _) | (_, TopValue) => boolean(topBool)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      case _ => Failure(TipFailure.TypeError, s"Expected values of equal type but got $v1 and $v2")
     def neq(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => boolean(EqOps.neq(i1, i2))
       case (RefValue(a1), RefValue(a2)) => boolean(EqOps.neq(a1, a2))
       case (FunValue(f1), FunValue(f2)) => boolean(EqOps.neq(f1, f2))
       case (RecValue(r1), RecValue(r2)) => boolean(EqOps.neq(r1, r2))
       case (TopValue, _) | (_, TopValue) => boolean(topBool)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      case _ => Failure(TipFailure.TypeError, s"Expected values of equal type but got $v1 and $v2")
   given ValueFunctionOps(using Instance, BackFunctionOps[Function, Seq[Value], Value, VFun]): BackFunctionOps[Function, Seq[Value], Value, Value] =
     new LiftedBackFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
   given ValueReferenceOps(using Instance, ReferenceOps[Addr, VRef]): ReferenceOps[Addr, Value] =
