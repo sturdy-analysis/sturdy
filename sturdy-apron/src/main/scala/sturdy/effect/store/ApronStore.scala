@@ -210,4 +210,4 @@ given ApronClosedEquality[Cls]:  ClosedEquality[Cls, apron.Abstract1] with
   def closedEquals(closure1: Cls, a1: apron.Abstract1, closure2: Cls, a2: apron.Abstract1): Boolean =
     a1.isEqual(a1.getCreationManager(), a2)
   def closedHashCode(closure: Cls, a: apron.Abstract1): Int =
-    throw NotImplementedError()
+    a.hashCode()

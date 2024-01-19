@@ -75,5 +75,21 @@ class ApronRecencyStoreTest extends AnyFunSuite:
     val AT = AddressTranslation.empty[Context]
     val RS = new RecencyStore[Context, PowVAddr, ApronExpr[ApAddr]](AS, AT)
   
+    val x = RS.alloc("x")
+    val x0 = PowersetAddr(Set(x))
+    val y0 = PowersetAddr(Set(RS.alloc("y")))
+
+    RS.write(x0, ApronExpr.Constant(Interval(0, 10)))
+    println(s"$x0 <- [0, 10] = ${RS.getState}")
+
+    val xVs = RS.getAddressTranslation.apply(x)
+    xVs.reduce(x =>
+                   // ApronExpr already works on virtual addresses here...
+      RS.write(y0, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
+      println(s"$y0 <- $x0 + 1 = ${RS.getState}")
+
+      val ry = RS.read(y0)
+      println(s"Read $y0: $ry") // non-relational read is expected here, it shouldn't happen much.
+    )
   }
   

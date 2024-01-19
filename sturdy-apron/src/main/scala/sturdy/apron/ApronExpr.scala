@@ -13,6 +13,7 @@ enum ApronExpr[Addr <: apron.Var]:
   case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int, roundingDir: Int)
 
+
   override def toString: String = this match
     case Var(v) => v.toString
     case Constant(coeff) => coeff.toString
