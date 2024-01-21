@@ -23,6 +23,7 @@ trait IntegerOps[B, V]:
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
   def mul(v1: V, v2: V): V
+  def neg(v: V): V
 
   def max(v1: V, v2: V): V
   def min(v1: V, v2: V): V

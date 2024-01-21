@@ -34,10 +34,10 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign backward analysis"
 
-  val uri = classOf[SignBackwardsAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[SignBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString == "simple1.tip"
+    p.getFileName.toString == "simple4.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())

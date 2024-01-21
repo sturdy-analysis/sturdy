@@ -21,6 +21,8 @@ given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effe
   def sub(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.sub, v2)
   def mul(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.mul, v2)
 
+  def neg(v: Topped[T]): Topped[T] = ???
+
   def max(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.max, v2)
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
   def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)

@@ -82,22 +82,26 @@ final class StackedStates[Dom, Codom](val state: State)
         val info = new FrameInstanceInfo(stackHeight)
         stack.put(stateFrame, info)
         if (Fixpoint.DEBUG)
-          println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
+          println()
+          //println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
         PushResult.Continue(Some(widenedIn))
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
         if (Fixpoint.DEBUG)
-          println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
+          // println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
+          println()
         Option(outCache.get(stateFrame)) match
           case None =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+              // println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+              println()
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+              // println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+              println()
             PushResult.Recurrent(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -112,7 +116,8 @@ final class StackedStates[Dom, Codom](val state: State)
       storeCorecurrentOutput(stateFrame, result, out)
     } else {
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
+        //println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
+        println()
       PopResult.Stable
     }
     val previousInfo = stack.remove(stateFrame)

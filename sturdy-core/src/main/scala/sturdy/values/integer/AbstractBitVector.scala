@@ -223,6 +223,7 @@ class AbstractBitVectorIntegerOps[I]
 
   def sub(v1: AbstractBitVector[I], v2: AbstractBitVector[I]): AbstractBitVector[I] = addWithCarry(v1,invertBits(v2),One) //more accurate than complement
 
+  def neg(v: AbstractBitVector[I]): AbstractBitVector[I] = ???
   def mul(v1: AbstractBitVector[I], v2: AbstractBitVector[I]): AbstractBitVector[I] = //accurate but slow/large
     val subResults = Array(constant(zero)) //start with zero; all possible results
     for(i <- v2.bits.indices) { //add bitwise mult result to possible results

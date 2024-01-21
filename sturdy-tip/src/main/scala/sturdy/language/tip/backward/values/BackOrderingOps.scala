@@ -133,6 +133,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
       val a1 = v1(ITop)
       val a2 = v2(ITop)
       IntervalOrderingOps.gt(a1, a2)
+
     case Topped.Actual(true) => v2(ITop) match
       case I(l, h) =>
         v1(I(h + 1, Int.MaxValue)); r  // Exclude 'h' for strict inequality
@@ -140,6 +141,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
         v1(ITop); r
     case Topped.Actual(false) => v2(ITop) match
       case I(l, h) =>
-        v1(I(Int.MinValue, h)); r  // Include 'h' as it's not strictly greater
+        //println(s"???Inside GT???${I(l,h)} ==? ${v1.toString()}")
+        v1(I(Int.MinValue, h-1)); r  // Include 'h' as it's not strictly greater
       case ITop =>
         v1(ITop); r

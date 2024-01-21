@@ -30,6 +30,13 @@ trait BackwardsInterpreter:
     case FunValue(fun: VFun)
     case RecValue(rec: VRecord)
 
+    override def toString: String = this match
+      case TopValue => "TopValue"
+      case IntValue(i) => s"$i"
+      case RefValue(addr) => s"RefValue($addr)"
+      case FunValue(fun) => s"FunValue(${fun.toString})"
+      case RecValue(rec) => s"RecValue(${rec.toString})"
+
     def asBoolean(using Failure): VBool = BackwardsInterpreter.this.asBoolean(this)
     def asInt(using failure: Failure): VInt = this match
       case IntValue(i) => i

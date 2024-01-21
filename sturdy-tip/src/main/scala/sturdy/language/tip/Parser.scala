@@ -106,6 +106,9 @@ object Parser:
   val deref: P[Exp] =
     (op('*') *> P.defer(atom)).map(Exp.Deref.apply)
 
+  lazy val negatableExpr: P[Exp] =
+    (op('-') *> atom).map(Exp.Neg(_))
+
   lazy val atom: P[Exp] =
     ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) |
     (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) |
@@ -137,6 +140,7 @@ object Parser:
     ).?).map(maybeBinOp)
 
   lazy val expression: P[Exp] =
+    negatableExpr |
     (operation ~ (
       (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
       (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))

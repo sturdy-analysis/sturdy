@@ -47,8 +47,10 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
         case Topped.Actual(false) => v2(Value.TopValue) match
           case Value.IntValue(Interval.I(0,0)) =>
             effectStack.joinComputations {
+              println("I am here in intvalue")
               v1(Value.IntValue(???)) //IntSign.Neg? what is going on here???
             } {
+              println("I am here in intvalue")
               v1(Value.IntValue(???)) //IntSign.Pos
             }
             r
@@ -72,7 +74,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
-    def getState = this.effectStack.getAllState
+    def getState = this.effectStack.getAllState.head
 
     val logger = new fix.Logger[BackFixIn[Value], BackFixOut[Value]]:
       override def enter(dom: BackFixIn[IntervalBackwardAnalysis.Value]): Unit = dom match

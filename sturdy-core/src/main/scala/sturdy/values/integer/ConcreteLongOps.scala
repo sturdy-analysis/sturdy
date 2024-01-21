@@ -28,6 +28,8 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def sub(v1: Long, v2: Long): Long = v1 - v2
   def mul(v1: Long, v2: Long): Long = v1 * v2
 
+  def neg(v: Long): Long = -1 * v
+
   def max(v1: Long, v2: Long): Long = v1.max(v2)
   def min(v1: Long, v2: Long): Long = v1.min(v2)
 

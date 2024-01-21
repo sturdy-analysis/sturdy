@@ -23,9 +23,9 @@ object Ints:
       case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => Interval.I(0, 1)
-      case Topped.Actual(true) => Interval.I(1, 1)
-      case Topped.Actual(false) => Interval.I(0, 0)
+      case Topped.Top => Interval.ITop
+      case Topped.Actual(true) => Interval.I(1.0, 2.0)
+      case Topped.Actual(false) => Interval.I(0.0, 0.0)
     )
 
   trait Sign extends BackwardsInterpreter :

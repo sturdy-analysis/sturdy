@@ -7,7 +7,7 @@ import sturdy.values.relational.*
 
 enum Interval:
   case ITop
-  case I (low: Int, high: Int)
+  case I (low: Double, high: Double)
 
   def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
     case (I(l1,h1),I(l2,h2)) => h1 < l2
@@ -56,13 +56,33 @@ given IntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B])
     case (I(l1, h1), I(l2, h2)) => I(l1 - h2, h1 - l2)
     case (_,_) => ITop
 
+  def neg(v: Interval): Interval = v.negated
 
-  def mul(v1: Interval, v2: Interval): Interval = ???
 
-  def max(v1: Interval, v2: Interval): Interval = ???
-  def min(v1: Interval, v2: Interval): Interval = ???
+  def mul(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, _) | (_, ITop) => ITop
+    case (I(l1, h1), I(l2, h2)) =>
+      val products = List(l1 * l2, l1 * h2, h1 * l2, h1 * h2)
+      I(products.min, products.max)
 
-  def div(v1: Interval, v2: Interval): Interval = ???
+  def div(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (_, ITop) | (ITop, _) => ITop
+    case (_, I(l2, h2)) if l2 <= 0 && h2 >= 0 => ITop
+    case (I(l1, h1), I(l2, h2)) =>
+      val divs = List(l1 / l2, l1 / h2, h1 / l2, h1 / h2)
+      I(divs.min, divs.max)
+
+
+  def max(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, _) | (_, ITop) => ITop
+    case (I(l1, h1), I(l2, h2)) => I(math.max(l1, l2), math.max(h1, h2))
+
+
+  def min(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, i) => i
+    case (i, ITop) => i
+    case (I(l1, h1), I(l2, h2)) => I(math.min(l1, l2), math.min(h1, h2))
+
 
   def divUnsigned(v1: Interval, v2: Interval): Interval = ???
   def remainder(v1: Interval, v2: Interval): Interval = ???

@@ -369,6 +369,8 @@ class IntervalIntegerOps[I]
       resultImpreciseWhenOverflowing
   }
 
+  def neg(v: NumericInterval[I]): NumericInterval[I] = ???
+
   def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
     NumericInterval.safe(ops.max(v1.low, v2.low), ops.max(v1.high, v2.high))
 

@@ -36,6 +36,7 @@ object Meet:
 enum TipBackFailure extends FailureKind:
   case BackwardsUnreachable
   case BackwardsUnboundVariable
+  case DivisonByZero
 
 enum BackFixIn[V]:
   case Eval(e: Exp, v: V)
@@ -91,6 +92,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
   val meet: Meet[V]
 
+
   // value components
   val intOps: BackIntegerOps[Int, V]; import intOps.*
   val compareOps: BackOrderingOps[V, V]; import compareOps.*
@@ -124,6 +126,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   // assert(TopSign, Zero) should yield Zero
   // assert(Pos, Zero) should always fail
   def assert(v: V, expected: V): V =
+    // println(s"I am here:${v} and expected ${expected}")
     branchOps.boolBranch(eqOps.equ(v, expected)) {
       // fine
     } {
@@ -133,7 +136,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     m.getOrElse(failure(BackwardsUnreachable, s"empty meet"))
 
   def evalBack_open(e: Exp, expected: V)(using BackFixed): V = e match {
-    case Exp.NumLit(n) => assert(integerLit(n), expected)
+    case Exp.NumLit(n) =>  assert(integerLit(n), expected)
     case Exp.Input() => input.print(expected); expected
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => assert(funValue(fun), expected)
@@ -149,6 +152,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.Gt(e1, e2) =>
       gt(evalBack(e1,_), evalBack(e2, _), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Neg(e) => neg(evalBack(e,_), expected)
     case Exp.Call(Exp.Var(f), args) =>
       val fun = functions.getOrElse(f, failure(UnboundVariable, s"Function $f"))
       val (argVals,v) = invokeFunBack(funValue(fun), expected)(callBack)
@@ -187,7 +191,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     val v = evalBack(e, expected)
     // then block can only run backwards if condition was != 0
     branchOps.boolBranch(eqOps.equ(v, integerLit(0))) {
-      failure(BackwardsUnreachable, s"pre-condition $v == 0")
+      failure(BackwardsUnreachable, s"pre-condition $v == 0: \nOrignExpr = ${e} \n expected: ${expected}")
     } {
     }
     // TODO refinement?
@@ -196,6 +200,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   def runBack_open(s: Stm)(using BackFixed): Unit = s match
     case s@Stm.Assign(lhs: Assignable, e: Exp) =>
       val v = assignBack(lhs, s)
+      //println(s"For ${e}: we have ${v}")
       evalBack(e, v)
     case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) =>
       junit.eff.joinComputations {
@@ -256,6 +261,9 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       val args = fun.params.map(callFrame.getLocalByName.andThen(_.get))
       (args, v)
     }
+
+  //def getVariables():List[V] =
+
 
   inline def evalBack(e: Exp, v: V)(using rec: BackFixed): V = rec(BackFixIn.Eval(e, v)) match {case BackFixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
   inline def runBack(s: Stm)(using rec:  BackFixed): Unit = rec(BackFixIn.Run(s)) match {case BackFixOut.Run() => (); case _ => throw new IllegalStateException()}

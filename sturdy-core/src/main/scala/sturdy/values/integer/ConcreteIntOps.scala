@@ -24,6 +24,7 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def add(v1: Int, v2: Int): Int = v1 + v2
   def sub(v1: Int, v2: Int): Int = v1 - v2
   def mul(v1: Int, v2: Int): Int = v1 * v2
+  def neg(v: Int): Int = -1 * v
 
   def max(v1: Int, v2: Int): Int = v1.max(v2)
   def min(v1: Int, v2: Int): Int = v1.min(v2)
