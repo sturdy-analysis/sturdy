@@ -191,7 +191,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     val v = evalBack(e, expected)
     // then block can only run backwards if condition was != 0
     branchOps.boolBranch(eqOps.equ(v, integerLit(0))) {
-      //failure(BackwardsUnreachable, s"pre-condition $v == 0: \nOrignExpr = ${e} \n expected: ${expected}")
+      failure(BackwardsUnreachable, s"pre-condition $v == 0: \nOrignExpr = ${e} \n expected: ${expected}")
     } {
     }
     // TODO refinement?
