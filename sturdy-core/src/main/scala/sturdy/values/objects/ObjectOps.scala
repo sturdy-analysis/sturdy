@@ -1,32 +1,31 @@
 package sturdy.values.objects
 
+import sturdy.data.{MayJoin, NoJoin}
 import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.store.Store
+import sturdy.effect.allocation.Allocation
 
 import scala.collection.mutable
 
-case class UnboundField[F](field: F) extends FailureKind:
-  def failedLookup[R](rec: R)(using f: Failure) = f.fail(this, s"while reading $rec")
-  def failedUpdate[R](rec: R)(using f: Failure) = f.fail(this, s"while updating $rec")
+enum ObjectFailure extends FailureKind:
+  case UnboundField
 
-trait ObjectOps[Addr, Idx, V, CF, O]:
-  def makeObject(addr: Addr, cfs: CF, fields: Seq[(Idx, V)]): O
+enum AllocationSite:
+  case Object
+
+import ObjectFailure.*
+
+trait ObjectOps[Addr, Idx, V, CF, J[_] <: MayJoin[_], O]:
+  def makeObject(cfs: CF, store: Store[Idx, V, J]): O
   def getField(obj: O, idx: Idx): V
   def setField(obj: O, idx: Idx, v: V): Unit
 
-given ConcreteObjectOps[Addr, Idx, V, CF](using Failure): ObjectOps[Addr, Idx, V, CF, (Addr, CF, scala.collection.mutable.Map[Idx, V])] with
+given ConcreteObjectOps[Addr, Idx, V, CF, J[_] <: MayJoin[_]](using f: Failure, alloc: Allocation[Addr, AllocationSite]): ObjectOps[Addr, Idx, V, CF, J, (Addr, CF, Store[Idx, V, J])] with
+  override def makeObject(cfs: CF, store: Store[Idx, V, J]): (Addr, CF, Store[Idx, V, J]) =
+    val addr = alloc(AllocationSite.Object)
+    (addr, cfs, store)
+  override def getField(obj: (Addr, CF, Store[Idx, V, J]), idx: Idx): V =
+    obj._3.read(idx).getOrElse(f(UnboundField, idx.toString))
 
-  override def makeObject(addr: Addr, cfs: CF, fields: Seq[(Idx, V)]): (Addr, CF, scala.collection.mutable.Map[Idx, V]) =
-    (addr, cfs, scala.collection.mutable.Map() ++ fields.toMap)
-
-  override def getField(obj: (Addr, CF, mutable.Map[Idx, V]), idx: Idx): V =
-    obj._3.getOrElse(idx, UnboundField(idx).failedLookup(obj._3))
-
-  override def setField(obj: (Addr, CF, mutable.Map[Idx, V]), idx: Idx, v: V): Unit =
-    obj._3.map(idx => v)
-
-
-
-
-
-
-
+  override def setField(obj: (Addr, CF, Store[Idx, V, J]), idx: Idx, v: V): Unit =
+    obj._3.write(idx, v)

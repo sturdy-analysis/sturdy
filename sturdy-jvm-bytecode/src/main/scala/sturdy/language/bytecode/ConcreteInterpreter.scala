@@ -48,7 +48,7 @@ object ConcreteInterpreter extends Interpreter:
       Value.Int32(0)
 
 
-  type Store = Map[Int, Value]
+  type Store = Map[Idx, Value]
   class Instance(file: ClassFile, initStore: Store) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()

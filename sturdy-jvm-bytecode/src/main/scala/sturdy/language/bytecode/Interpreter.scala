@@ -117,14 +117,14 @@ trait Interpreter:
     , i64EqOps: EqOps[I64, Bool]
     , f32EqOps: EqOps[F32, Bool]
     , f64EqOps: EqOps[F64, Bool]
-    , objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
+    //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
       ): BytecodeOps[Addr, Idx, ObjType, ObjRep, Value] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
     //final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep] = objOps
-    final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value] = new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, Value, ObjRep](identity, _.asObj, identity, Value.Obj.apply)
+    //final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value] = new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, Value, ObjRep](identity, _.asObj, identity, Value.Obj.apply)
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
