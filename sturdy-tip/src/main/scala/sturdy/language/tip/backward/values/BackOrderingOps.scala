@@ -141,6 +141,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
         v1(ITop); r
     case Topped.Actual(false) => v2(ITop) match
       case I(l, h) =>
-        v1(I(Int.MinValue, h)); r  // Include 'h' as it's not strictly greater
+        //println(s"Topped false${I(l,h)} and   ${r}")
+        v1(I(Int.MinValue, h)); r // Include 'h' as it's not strictly greater
       case ITop =>
         v1(ITop); r
