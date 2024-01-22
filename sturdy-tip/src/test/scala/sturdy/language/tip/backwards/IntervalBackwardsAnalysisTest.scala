@@ -41,7 +41,7 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IntervalBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString == "fact.tip"
+    p.getFileName.toString == "simple1.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
@@ -69,7 +69,7 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
       //val intervalValue = Interval.I(2, 10)
 
       //val resultVal = analysis.topValue
-      val resultVal = analysis.intOps.toValue(List(24,24))
+      val resultVal = analysis.intOps.toValue(List(2,5))
       val aresult = analysis.failure.fallible(analysis.executeBack(program, resultVal))
 
       println(s"Backward run of ${p.getFileName} ")

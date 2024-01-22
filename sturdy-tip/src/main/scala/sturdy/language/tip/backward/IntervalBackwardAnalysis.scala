@@ -40,6 +40,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
     override val compareOps: BackOrderingOps[Value, Value] = implicitly
+
     override val backEqOps: BackEqOps[Value, Value] = new BackEqOps[Value, Value]:
       override def equ(v1: Value => Value, v2: Value => Value, r: Value): Value = asBoolean(r) match
         case Topped.Top => v2(Value.TopValue); v1(Value.TopValue); r
@@ -47,11 +48,9 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
         case Topped.Actual(false) => v2(Value.TopValue) match
           case Value.IntValue(Interval.I(0,0)) =>
             effectStack.joinComputations {
-              println("I am here in intvalue")
-              v1(Value.IntValue(???)) //IntSign.Neg? what is going on here???
+              v1(Value.IntValue(Interval.I(Int.MinValue,-1)))//IntSign.Neg? what is going on here???
             } {
-              println("I am here in intvalue")
-              v1(Value.IntValue(???)) //IntSign.Pos
+              v1(Value.IntValue(Interval.I(1,Int.MaxValue))) //IntSign.Pos
             }
             r
           case _ => v1(Value.TopValue); r

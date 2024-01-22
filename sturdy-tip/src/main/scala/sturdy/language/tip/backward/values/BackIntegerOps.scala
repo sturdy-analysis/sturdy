@@ -265,7 +265,7 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
     case ITop =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
-      ITop
+      IntervalIntegerOps.sub(a1,a2)
 
     case I(l, h) => v2(ITop) match
       case I(l2, h2) =>
@@ -279,16 +279,21 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
 
   override def neg(v: Interval => Interval, r: Interval): Interval = r match
     case ITop =>
-      v(ITop); ITop
+      val n = v(ITop);
+      IntervalIntegerOps.neg(n)
     case I(l, h) =>
       v(I(-h,-l)); I(l,h)
 
   override def mul(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval =
     r match
-      case ITop => ITop
+      case ITop =>
+        val a1 = v1(ITop)
+        val a2 = v2(ITop)
+        IntervalIntegerOps.mul(a1, a2)
+
       case I(l, h) => v2(ITop) match
         case I(l2, h2) =>
-          val prods = List(l * l2, l * h2, h * l2, h * h2)
+          val prods = List(l / l2, l / h2, h / l2, h / h2)
           val v1Int = I(prods.min, prods.max)
           val I(l1, h1) = v1(v1Int)
           val finProds = List(l1 * l2, l1 * h2, h1 * l2, h1 * h2)
@@ -298,10 +303,13 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
           I(l, h)
 
   override def div(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
-    case ITop => ITop
+    case ITop =>
+      val a1 = v1(ITop)
+      val a2 = v2(ITop)
+      IntervalIntegerOps.div(a1, a2)
     case I(l, h) => v2(ITop) match
       case I(l2, h2) if l2 != 0 && h2 != 0 =>
-        val prods = List(l / l2, l / h2, h / l2, h / h2)
+        val prods = List(l * l2, l * h2, h * l2, h * h2)
         val v1Int = I(prods.min, prods.max)
         val I(l1, h1) = v1(v1Int)
         val finalProds = List(l1 / l2, l1 / h2, h1 / l2, h1 / h2)
