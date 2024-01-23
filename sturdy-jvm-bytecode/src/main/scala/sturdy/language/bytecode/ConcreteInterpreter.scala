@@ -2,7 +2,7 @@ package sturdy.language.bytecode
 
 import org.opalj.br.ClassFile
 import org.opalj.br.ObjectType
-import sturdy.data.{*, given}
+import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
@@ -30,7 +30,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
-  override type ObjRep = (Addr, ObjType, Map[Int, Value])
+  override type ObjRep = Object[ClassFile, Value]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -38,6 +38,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
+  override def topObj: Object[ClassFile, ConcreteInterpreter.Value] = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
 
@@ -67,6 +68,7 @@ object ConcreteInterpreter extends Interpreter:
 
     private given Failure = failure
 
-    val bytecodeOps: BytecodeOps[Addr, Idx, ObjType, ObjRep, Value] = implicitly
+    val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
+    val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep, AllocationSite, MayJoin.NoJoin] = ???
 
 

@@ -1,31 +1,41 @@
 package sturdy.values.objects
 
-import sturdy.data.{MayJoin, NoJoin}
+import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin}
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
 
 import scala.collection.mutable
 
-enum ObjectFailure extends FailureKind:
-  case UnboundField
 
-enum AllocationSite:
-  case Object
+trait ObjectOps[Addr, Idx, V, CF, O, Site, J[_] <: MayJoin[_]]:
+  def makeObject(cfs: CF, vals: Seq[(V,Site)]): O
+  def getField(obj: O, idx: Idx): JOption[J, V]
+  def setField(obj: O, idx: Idx, v: V): JOption[J, Unit]
 
-import ObjectFailure.*
+case class Object[CF, Addr](cls: CF, fields: Vector[Addr])
 
-trait ObjectOps[Addr, Idx, V, CF, J[_] <: MayJoin[_], O]:
-  def makeObject(cfs: CF, store: Store[Idx, V, J]): O
-  def getField(obj: O, idx: Idx): V
-  def setField(obj: O, idx: Idx, v: V): Unit
+given ConcreteObjectOps[Addr, V, Site, CF]
+    (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, Int, V, CF, Object[CF,Addr], Site, NoJoin] with
+  override def makeObject(cfs: CF, vals: Seq[(V,Site)]): Object[CF, Addr] =
+    val fieldAddrs = vals.map { (v, site) =>
+      val addr = alloc(site)
+      store.write(addr, v)
+      addr
+    }.toVector
+    Object(cfs, fieldAddrs)
 
-given ConcreteObjectOps[Addr, Idx, V, CF, J[_] <: MayJoin[_]](using f: Failure, alloc: Allocation[Addr, AllocationSite]): ObjectOps[Addr, Idx, V, CF, J, (Addr, CF, Store[Idx, V, J])] with
-  override def makeObject(cfs: CF, store: Store[Idx, V, J]): (Addr, CF, Store[Idx, V, J]) =
-    val addr = alloc(AllocationSite.Object)
-    (addr, cfs, store)
-  override def getField(obj: (Addr, CF, Store[Idx, V, J]), idx: Idx): V =
-    obj._3.read(idx).getOrElse(f(UnboundField, idx.toString))
+  override def getField(obj: Object[CF, Addr], idx: Int): JOption[NoJoin, V] =
+    if (idx >= obj.fields.size)
+      JOptionC.none
+    else
+      store.read(obj.fields(idx))
 
-  override def setField(obj: (Addr, CF, Store[Idx, V, J]), idx: Idx, v: V): Unit =
-    obj._3.write(idx, v)
+  override def setField(obj: Object[CF, Addr], idx: Int, v: V): JOptionC[Unit] =
+    if (idx >= obj.fields.size)
+      JOptionC.none
+    else {
+      store.write(obj.fields(idx), v)
+      JOptionC.some(())
+    }
+

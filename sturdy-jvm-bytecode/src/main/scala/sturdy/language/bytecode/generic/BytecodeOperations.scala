@@ -7,7 +7,7 @@ import sturdy.values.integer.*
 import sturdy.values.relational.*
 import sturdy.values.objects.*
  
-trait BytecodeOps[Addr, Idx, ObjType, ObjRep, V]:
+trait BytecodeOps[Addr, Idx, V]:
   //val i8ops:  IntegerOps[Byte, V]
   //val i16ops: IntegerOps[Short, V]
   val i32ops: IntegerOps[Int, V]
@@ -31,5 +31,4 @@ trait BytecodeOps[Addr, Idx, ObjType, ObjRep, V]:
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
-  val objectOps: ObjectOps[Addr, Idx, V, ObjType, ObjRep]
   

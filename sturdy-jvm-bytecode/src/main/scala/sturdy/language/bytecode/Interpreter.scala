@@ -118,7 +118,7 @@ trait Interpreter:
     , f32EqOps: EqOps[F32, Bool]
     , f64EqOps: EqOps[F64, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
-      ): BytecodeOps[Addr, Idx, ObjType, ObjRep, Value] with
+      ): BytecodeOps[Addr, Idx, Value] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)

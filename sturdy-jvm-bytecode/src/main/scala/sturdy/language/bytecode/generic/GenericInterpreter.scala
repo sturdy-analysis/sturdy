@@ -14,6 +14,7 @@ import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.{ArrayType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
+import sturdy.values.objects.ObjectOps
 
 
 /*
@@ -41,9 +42,12 @@ enum JvmExcept:
 
 enum AllocationSite:
   case classFile(obj: ObjectType, cfs: ClassFile)
+
 trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
-  val bytecodeOps: BytecodeOps[Addr, Idx, ObjType, ObjRep, V]
+
+  val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
+  val objectOps: ObjectOps[Addr, Idx, V, ObjType, ObjRep, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
 
@@ -62,7 +66,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
-  lazy val num = new GenericInterpreterNumerics[Addr, Idx, ObjType, ObjRep, V](bytecodeOps)
+  lazy val num = new GenericInterpreterNumerics[Addr, Idx, V](bytecodeOps)
 
   def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
