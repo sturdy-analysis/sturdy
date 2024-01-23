@@ -53,7 +53,7 @@ object IntervalAnalysis extends Interpreter,
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
-    override val branchOps: BooleanBranching[Value, Unit] = implicitly
+    override val branchOps: ObservedBooleanBranching[Value, Unit] = new ObservedBooleanBranching
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
@@ -80,7 +80,7 @@ object IntervalAnalysis extends Interpreter,
     this.addControlObserver(controlObserver)
 
     final override val fixpoint =
-      fix.log(controlEventLogger(this),
+      fix.log(controlEventLogger(this, branchOps),
         callSiteSensitive(callSites,
           fix.log(cfgLogger.logger,
             fix.dispatch(isFunOrWhile, Seq(

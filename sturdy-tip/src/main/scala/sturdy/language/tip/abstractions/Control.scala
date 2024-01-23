@@ -8,6 +8,7 @@ import sturdy.fix.Logger
 import sturdy.fix.cfg.{ControlFlowGraph, ControlLogger}
 import sturdy.language.tip.*
 import sturdy.util.Labeled
+import sturdy.values.booleans.ObservedBooleanBranching
 
 object TipControl:
   type Atom = Stm
@@ -32,19 +33,20 @@ object TipControl:
 trait Control extends Interpreter:
   import TipControl.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc], br: ObservedBooleanBranching[_,_])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     observable.triggerControlEvent(ControlEvent.Start())
     effects.addJoinObserver(observable)
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
         case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
         case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
-        case FixIn.Run(s: (Stm.If | Stm.While)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
+        case FixIn.Run(s: (Stm.If | Stm.While)) =>
+          br.observer = _ => observable.triggerControlEvent(ControlEvent.Atomic(s))
         case _ => // nothing
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
         case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
         case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
-        case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
+        case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
         case _ => // nothing
 
   def controlLogger[Ctx](ctxSensitive: Boolean)(using effects: EffectStack)

@@ -14,6 +14,7 @@ package sturdy.control
   *     | Begin(s:Section) E* End(s)
   *     | BeginTry E* Throws(exc:Exc)? E* Catches(exc)? E* EndTry
   *     | Fork E* Switch E* Join
+  *     
   */
 enum ControlEvent[Atom, Section, Exc]:
   case Start()
@@ -31,5 +32,15 @@ enum ControlEvent[Atom, Section, Exc]:
   case Fork()
   case Switch()
   case Join()
+
+
+/*
+
+  0. BeginTry, Atomic, EndTry
+  1. BeginTry, Throw, Catch, EndTry
+  2. BeginTry, Fork, Atomic, Throw, Switch, Atomic, Join, Catch, EndTry
+  3. BeginTry, Fork, Atomic, Throw e1, Switch, Atomic, Throw e2, Join, Catch, EndTry
+
+ */
 
 

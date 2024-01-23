@@ -7,12 +7,13 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
   private var started = false
   private var failing = false
   private var sections: List[Section] = List()
-  private var forks: List[ForkState] = List() // switched == true
+  private var forks: List[ForkState] = List()
 
   override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit =
     if (!started) ev match
       case Start() => started = true
       case _ => error(s"Sequence must begin with ControlEvent.Start(): $ev")
+      
     else if (failing) ev match
       case ControlEvent.End(sec) => sections match
         case Nil => error(s"No section to close: $ev")
@@ -28,9 +29,10 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         case Nil => error(s"No fork to join: $ev")
         case ForkState.Second(firstFailing) :: restForks =>
           forks = restForks
-          failing = firstFailing
+          failing = firstFailing // && failing
         case _ => error(s"Fork mismatch, expected Switch: $ev")
       case _ => error(s"Invalid event after failure: $ev")
+      
     else ev match
       case ControlEvent.Start() => error(s"Repeated Start() event: $ev")
       case ControlEvent.Atomic(a) => // fine
