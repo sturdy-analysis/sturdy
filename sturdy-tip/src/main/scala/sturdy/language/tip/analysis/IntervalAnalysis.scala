@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import sturdy.control.{ControlEvent, ControlObservable, ControlObserver}
 import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
@@ -39,7 +40,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -65,6 +66,7 @@ object IntervalAnalysis extends Interpreter,
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
+      this.triggerControlEvent(ControlEvent.Start())
       bounds = p.intLiterals
       super.execute(p)
 
@@ -74,13 +76,18 @@ object IntervalAnalysis extends Interpreter,
     }
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
+    this.addControlObserver(new ControlObserver:
+      override def handle(ev: ControlEvent[TipControl.Atom, TipControl.Section]): Unit = println(ev)
+    )
 
     final override val fixpoint =
-      callSiteSensitive(callSites,
-        fix.log(cfgLogger.logger,
-          fix.dispatch(isFunOrWhile, Seq(
-            fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
-          ))
+      fix.log(controlEventLogger(this),
+        callSiteSensitive(callSites,
+          fix.log(cfgLogger.logger,
+            fix.dispatch(isFunOrWhile, Seq(
+              fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
+            ))
+          )
         )
       ).fixpoint
       

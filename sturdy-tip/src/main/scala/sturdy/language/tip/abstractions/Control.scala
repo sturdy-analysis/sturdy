@@ -1,14 +1,49 @@
 package sturdy.language.tip.abstractions
 
-import sturdy.effect.EffectStack
+import sturdy.control.{ControlEvent, ControlObservable}
+import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.except.ObservableExcept
 import sturdy.fix
+import sturdy.fix.Logger
 import sturdy.fix.cfg.{ControlFlowGraph, ControlLogger}
 import sturdy.language.tip.*
 import sturdy.util.Labeled
 
+object TipControl:
+  type Atom = Stm
+  type Section = Function | Exp.Call
+
+  def getInNode(l: Labeled | Function): Option[TipControlNode] = l match
+    case f: Function => Some(TipControlNode.Enter(f.name))
+    case c: Exp.Call => Some(TipControlNode.Call(c))
+    case _: (Stm.Block | Stm.Assign) => None
+    case s: Stm => Some(TipControlNode.Stm(s))
+    //      case e: (Exp.Alloc | Exp.Deref) => Some(TipControlNode.MemExp(e))
+    case _ => None
+
+  def getOutNode(l: Labeled | Function): Option[TipControlNode] = l match
+    case f: Function => Some(TipControlNode.Exit(f.name))
+    case c: Exp.Call => Some(TipControlNode.CallReturn(TipControlNode.Call(c)))
+    case a: Stm.Assign => Some(TipControlNode.Stm(a))
+    case _ => None
+
+
 trait Control extends Interpreter:
   import TipControl.*
+
+  def controlEventLogger(observable: ControlObservable[Atom, Section])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+    effects.addJoinObserver(observable)
+    new Logger:
+      override def enter(dom: FixIn): Unit = dom match
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
+        case FixIn.Run(s: (Stm.If | Stm.While)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
+        case _ => // nothing
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
+        case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
+        case _ => // nothing
 
   def controlLogger[Ctx](ctxSensitive: Boolean)(using effects: EffectStack)
              : ControlLogger[Ctx, FixIn, FixOut[Value], Nothing, TipControlNode] =
@@ -24,8 +59,6 @@ trait Control extends Interpreter:
         case (FixIn.EnterFunction(f),_) => getOutNode(f)
       }
       (using effects, ObservableExcept.None)
-
-
 
 enum TipControlNode extends ControlFlowGraph.Node:
   case Start
@@ -52,18 +85,3 @@ enum TipControlNode extends ControlFlowGraph.Node:
     case CallReturn(c) => "return " + c.toString
     case MemExp(e) => e.toString
     case Stm(s) => s.toString
-
-object TipControl:
-  def getInNode(l: Labeled | Function): Option[TipControlNode] = l match
-    case f: Function => Some(TipControlNode.Enter(f.name))
-    case c: Exp.Call => Some(TipControlNode.Call(c))
-    case _: (Stm.Block | Stm.Assign) => None
-    case s: Stm => Some(TipControlNode.Stm(s))
-//      case e: (Exp.Alloc | Exp.Deref) => Some(TipControlNode.MemExp(e))
-    case _ => None
-
-  def getOutNode(l: Labeled | Function): Option[TipControlNode] = l match
-    case f: Function => Some(TipControlNode.Exit(f.name))
-    case c: Exp.Call => Some(TipControlNode.CallReturn(TipControlNode.Call(c)))
-    case a: Stm.Assign => Some(TipControlNode.Stm(a))
-    case _ => None
