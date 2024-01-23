@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.control.{ControlEvent, ControlObservable, ControlObserver}
+import sturdy.control.{ControlEvent, ControlObservable, ControlObserver, RecordingControlObserver}
 import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
@@ -40,7 +40,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section]:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -66,7 +66,6 @@ object IntervalAnalysis extends Interpreter,
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
-      this.triggerControlEvent(ControlEvent.Start())
       bounds = p.intLiterals
       super.execute(p)
 
@@ -76,9 +75,9 @@ object IntervalAnalysis extends Interpreter,
     }
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
-    this.addControlObserver(new ControlObserver:
-      override def handle(ev: ControlEvent[TipControl.Atom, TipControl.Section]): Unit = println(ev)
-    )
+
+    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](true)
+    this.addControlObserver(controlObserver)
 
     final override val fixpoint =
       fix.log(controlEventLogger(this),

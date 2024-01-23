@@ -22,7 +22,7 @@ trait ControlObservable[Atom, Section, Exc] extends JoinObserver:
   override def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit =
     if (leftFailed || rightFailed)
       println(s"#### Join leftFailed=$leftFailed, rightfailed=$rightFailed")
-  triggerControlEvent(ControlEvent.Join())
+    triggerControlEvent(ControlEvent.Join())
 
   override def repeating(): Unit = () // TODO
 

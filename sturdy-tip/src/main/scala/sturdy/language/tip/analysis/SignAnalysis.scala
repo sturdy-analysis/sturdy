@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
 import sturdy.effect.allocation.AAllocationFromContext
@@ -23,17 +24,18 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.{Field, FixIn, AllocationSite, FixOut}
+import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
+import sturdy.language.tip.analysis.IntervalAnalysis.controlEventLogger
 
 object SignAnalysis extends Interpreter,
-  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix, Control:
 
   override type J[A] = WithJoin[A]
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
@@ -56,9 +58,13 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
+    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](true)
+    this.addControlObserver(controlObserver)
+
     override val fixpoint =
-      fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
-        parameterSensitive(this, fix.iter.innermost(stackConfig))).fixpoint
+      fix.log(controlEventLogger(this),
+        fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
+          parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
   class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):

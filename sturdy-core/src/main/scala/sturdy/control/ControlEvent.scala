@@ -9,12 +9,11 @@ package sturdy.control
   * Invariants: A valid sequence of control events must adhere to the
   * following data-dependent grammar.
   * 
-  * ES ::= E*                                // event sequence
-  * E ::= Start | Atomic(a:Atom) | Failed    // event
-  *     | Begin(s:Section) ES End(s)
-  *     | BeginTry ES Throws(exc:Exc) ES Catches(exc)? ES EndTry
-  *     | Fork ES Switch ES Join
-  * 
+  * ES ::= Start E*                  // complete event sequence
+  * E ::= Atomic(a:Atom) | Failed    // event
+  *     | Begin(s:Section) E* End(s)
+  *     | BeginTry E* Throws(exc:Exc)? E* Catches(exc)? E* EndTry
+  *     | Fork E* Switch E* Join
   */
 enum ControlEvent[Atom, Section, Exc]:
   case Start()
@@ -25,16 +24,12 @@ enum ControlEvent[Atom, Section, Exc]:
   case End(sec: Section)
 
   case BeginTry()
-  case Throws(exc: Exc)
-  case Catches(exc: Exc)
+  case Throw()
+  case Catch()
   case EndTry()
 
   case Fork()
   case Switch()
   case Join()
-
-
-  
-
 
 

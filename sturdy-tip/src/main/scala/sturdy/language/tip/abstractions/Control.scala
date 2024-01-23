@@ -12,6 +12,7 @@ import sturdy.util.Labeled
 object TipControl:
   type Atom = Stm
   type Section = Function | Exp.Call
+  type Exc = Unit
 
   def getInNode(l: Labeled | Function): Option[TipControlNode] = l match
     case f: Function => Some(TipControlNode.Enter(f.name))
@@ -31,7 +32,8 @@ object TipControl:
 trait Control extends Interpreter:
   import TipControl.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+    observable.triggerControlEvent(ControlEvent.Start())
     effects.addJoinObserver(observable)
     new Logger:
       override def enter(dom: FixIn): Unit = dom match

@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
+import sturdy.control.ControlEvent
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
@@ -42,7 +43,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.contains("") && p.toString.endsWith("_recursive.tip")
+    p.toString.contains("") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
@@ -67,7 +68,8 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"${LinearStateOperationCounter.toString} in the last tests")
       println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
 
-      println(analysis.cfgLogger.toGraphViz)
+//      println(analysis.cfgLogger.toGraphViz)
+      println(analysis.controlObserver)
 
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
 //      if (deadNodes.nonEmpty)
