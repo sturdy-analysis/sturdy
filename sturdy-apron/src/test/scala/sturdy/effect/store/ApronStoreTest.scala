@@ -12,7 +12,7 @@ import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericInter
 import sturdy.values.references.{*, given}
 import apron.{Abstract1, Environment, Interval, MpqScalar, Polka}
 
-class ApronRecencyStoreTest extends AnyFunSuite:
+class ApronStoreTest extends AnyFunSuite:
 
   type Context = String
   given Finite[Context] with {}
@@ -20,8 +20,7 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   type Addr = PhysicalAddress[Context]
   type PowAddr = PowersetAddr[Addr, Addr]
   type VAddr = VirtualAddress[Context]
-  type PowVAddr = PowersetAddr[VAddr, VAddr]
-
+  type PowVAddr = PowVirtualAddress[Context]
   type ApAddr = ApronPhysicalAddress[Context]
 
   // The one from ApronStore seems to restrictive, as PAddr here isn't a subtype of apron.Var
@@ -35,7 +34,7 @@ class ApronRecencyStoreTest extends AnyFunSuite:
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
   test("basic case") {
-    val AS = new ApronStore[Context, Addr, PowAddr, ApronExpr[ApAddr]](
+    val apronStore = new ApronStore[Context, Addr, PowAddr, ApronExpr[ApAddr]](
       man,
       initialState,
       (v : ApronExpr[ApAddr]) => Option(v),
@@ -43,17 +42,17 @@ class ApronRecencyStoreTest extends AnyFunSuite:
     )
 
     val x = PhysicalAddress("x", Recency.Recent)
-    val xR = PowersetAddr(Set(x))
-    val yR = PowersetAddr(Set(PhysicalAddress("y", Recency.Recent)))
+    val xPow = PowersetAddr(Set(x))
+    val y = PhysicalAddress("y", Recency.Recent)
+    val yPow = PowersetAddr(Set(y))
 
-    AS.write(xR, ApronExpr.Constant(Interval(0, 10)))
-    println(s"$xR <- [0, 10] = ${AS.getState}")
+    apronStore.write(xPow, ApronExpr.Constant(Interval(0, 10)))
+    apronStore.read(xPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0,10)))
 
-    AS.write(yR, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
-    println(s"$yR <- $xR + 1 = ${AS.getState}")
+    apronStore.write(yPow, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
+    apronStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(1, 11)))
 
-    val ry = AS.read(yR)
-    println(s"Read $yR: $ry") // non-relational read is expected here, it shouldn't happen much.
+//    apronStore.read(PowersetAddr(Set(x,y))) shouldBe JOptionA.NoneSome(ApronExpr.Constant(Interval(0,11)))
   }
 
   // TODO: x = [0, 10], if (x >= 15)
@@ -61,7 +60,7 @@ class ApronRecencyStoreTest extends AnyFunSuite:
 
   // TODO RecencyStore+ApronStore
   test("with recencystore") {
-    val AS = new ApronStore[
+    val apronStore = new ApronStore[
       Context,
       Addr,
       PowersetAddr[Addr, Addr],
@@ -72,24 +71,22 @@ class ApronRecencyStoreTest extends AnyFunSuite:
       (v : ApronExpr[ApAddr]) => Option(v),
       (e: ApronExpr[ApAddr], s: Abstract1) => ApronExpr.Constant[ApAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
-    val AT = AddressTranslation.empty[Context]
-    val RS = new RecencyStore[Context, PowVAddr, ApronExpr[ApAddr]](AS, AT)
+    val addressTranslation = AddressTranslation.empty[Context]
+    val recencyStore = new RecencyStore[Context, PowVAddr, ApronExpr[ApAddr]](apronStore, addressTranslation)
   
-    val x = RS.alloc("x")
-    val x0 = PowersetAddr(Set(x))
-    val y0 = PowersetAddr(Set(RS.alloc("y")))
+    val x = recencyStore.alloc("x")
+    val xPow = PowVirtualAddress(x)
+    val yPow = PowVirtualAddress(recencyStore.alloc("y"))
 
-    RS.write(x0, ApronExpr.Constant(Interval(0, 10)))
-    println(s"$x0 <- [0, 10] = ${RS.getState}")
+    recencyStore.write(xPow, ApronExpr.Constant(Interval(0, 10)))
+    recencyStore.read(xPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0,10)))
 
-    val xVs = RS.getAddressTranslation.apply(x)
+    val xVs = addressTranslation(x)
     xVs.reduce(x =>
-                   // ApronExpr already works on virtual addresses here...
-      RS.write(y0, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
-      println(s"$y0 <- $x0 + 1 = ${RS.getState}")
-
-      val ry = RS.read(y0)
-      println(s"Read $y0: $ry") // non-relational read is expected here, it shouldn't happen much.
+      // ApronExpr already works on virtual addresses here...
+      recencyStore.write(yPow, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
+      recencyStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(1,11)))
+      ()
     )
   }
   

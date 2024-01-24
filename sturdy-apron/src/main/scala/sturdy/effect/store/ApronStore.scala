@@ -107,6 +107,8 @@ case class ApronPhysicalAddress[Context: Ordering](ctx: Context, recency: Recenc
       case other: ApronPhysicalAddress[Context] => physicalAddressOrdering[Context].compare(this, other)
       case _ => -1
 
+  override def toString: String = s"${ctx}_${recency}"
+
 given physicalAddressOrdering[Context: Ordering]: Ordering[ApronPhysicalAddress[Context]] =
   Ordering.by[ApronPhysicalAddress[Context], (Context, Recency)](addr => (addr.ctx, addr.recency))
 
@@ -140,7 +142,7 @@ class ApronStore[
 
   override type State = Abstract1
   private var apronState : Abstract1 = initialState
- 
+
   def getState : State = apronState
   def setState(s : Abstract1) = apronState = s 
  
@@ -154,7 +156,7 @@ class ApronStore[
     else
       powAddr.reduce(addr =>
         if (apronState.getEnvironment().hasVar(addr)) {
-          JOptionA.NoneSome(makeIntVal(
+          JOptionA.Some(makeIntVal(
             ApronExpr.Var(
             (ApronPhysicalAddress(addr.ctx, addr.recency))), apronState))
         }
