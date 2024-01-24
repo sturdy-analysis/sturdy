@@ -75,6 +75,8 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
 
     override def hashCode(): Int = throw new UnsupportedOperationException("Use RecencyStore.closedEquality")
 
+    override def toString: String = s"RecencyStoreState(${store}, ${addrTrans}, ${mostRecent})"
+
   def closedEquality: ClosedEquality[addressTranslation.State, RecencyStoreState] =
     new ClosedEquality[addressTranslation.State, RecencyStoreState]:
       override def closedEquals(closure1: addressTranslation.State, state1: RecencyStoreState, closure2: addressTranslation.State, state2: RecencyStoreState): Boolean =
