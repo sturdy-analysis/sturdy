@@ -10,16 +10,18 @@ class ApronJoinTest extends AnyFunSuite:
 
   val x = StringVar("x")
   val y = StringVar("y")
-  val z = StringVar("z")
-  val inames = Array[Var](x,y,z)
-  val fnames: Array[Var] = Array()
-  val env = new Environment(inames, fnames)
+  val env = new Environment(Array[Var](), Array[Var]())
+  val env_x = env.add(Array[Var](x), Array[Var]())
+  val env_y = env.add(Array[Var](y), Array[Var]())
+  val env_xy = env.add(Array[Var](x,y), Array[Var]())
   val manager: Manager = new Polka(false)
   val state1 = new Abstract1(manager, env)
 
   test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {
-    val state2 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 10)).toIntern(env), null)
-    val state3 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env), null)
+    val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 10)).toIntern(env_x), null)
+    val state3 = state1.changeEnvironmentCopy(manager, env_x, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
@@ -27,8 +29,10 @@ class ApronJoinTest extends AnyFunSuite:
   }
 
   test("{x ∈ [0,20]} ⊔ {x ∈ [10,10]} = {x ∈ [0,20]}") {
-    val state2 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
-    val state3 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env), null)
+    val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_x), null)
+    val state3 = state1.changeEnvironmentCopy(manager, env_x, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe false
@@ -36,10 +40,12 @@ class ApronJoinTest extends AnyFunSuite:
   }
 
   test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
-    val state2 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
-                       .assignCopy(manager, y, ApronExpr.Binary[StringVar](BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(Interval(1,1))).toIntern(env), null)
-    val state3 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
-                       .assignCopy(manager, y, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x),  ApronExpr.Constant(Interval(2,2))).toIntern(env), null)
+    val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.Binary[StringVar](BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(Interval(1,1))).toIntern(env_xy), null)
+    val state3 = state1.changeEnvironmentCopy(manager, env_xy, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x),  ApronExpr.Constant(Interval(2,2))).toIntern(env_xy), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
@@ -49,14 +55,16 @@ class ApronJoinTest extends AnyFunSuite:
   }
 
 
-  test("{x ∈ [0,20]} ⊔ {y ∈ [0,20]} = {x ∈ [0,20], y ∈ [0,20]}") {
-    val state2 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
-    val state3 = state1.assignCopy(manager, y, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
+  test("{x ∈ [10,20]} ⊔ {y ∈ [10,20]} = {x ∈ [10,20], y ∈ [10,20]}") {
+    val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
+    val state3 = state1.changeEnvironmentCopy(manager, env_y, false)
+                       .assignCopy(manager, y, ApronExpr.Constant(Interval(10, 20)).toIntern(env_y), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
-    joined.get.getBound(manager, x) shouldBe Interval(0, 20)
-    joined.get.getBound(manager, y) shouldBe Interval(0, 20)
+    joined.get.getBound(manager, x) shouldBe Interval(10, 20)
+    joined.get.getBound(manager, y) shouldBe Interval(10, 20)
   }
 
 

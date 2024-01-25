@@ -143,7 +143,7 @@ class ApronStore[
   override type State = Abstract1
   private var apronState : Abstract1 = initialState
 
-  def getState : State = apronState
+  def getState : State = apronState // Sven: We probably need to copy apron state here, since we mutate it in `ApronStore.write`.
   def setState(s : Abstract1) = apronState = s 
  
   def join : Join[State] = implicitly
@@ -180,15 +180,16 @@ class ApronStore[
             apronState = apronState.assignCopy(apronManager, addr, aexp, null)
           )
         } else /* if(powAddr.isWeak) */ {
+          // weak update implemented as join
           powAddr.reduce(addr =>
             var env = apronState.getEnvironment()
             if (!env.hasVar(addr)) {
               env = env.add(Array[apron.Var](addr), Array[apron.Var]())
               apronState.changeEnvironment(apronManager, env, false)
+              apronState.assign(apronManager, addr, exp.toIntern(env), null)
+            } else {
+              apronState.join(apronManager, apronState.assignCopy(apronManager, addr, exp.toIntern(env), null))
             }
-            val aexp: apron.Texpr1Intern = exp.toIntern(env)
-            // weak update implemented as join
-            apronState.join(apronManager, apronState.assignCopy(apronManager, addr, aexp, null))
           )
         }
       case None =>

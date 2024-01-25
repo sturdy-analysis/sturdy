@@ -33,7 +33,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
 
     store.write(a1, NumericInterval(1, 2))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
 
 
     val a2 = store.alloc(ctx1)
@@ -49,11 +49,11 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     a2.hashCode() should equal(a2.hashCode())
     a1.hashCode() should not equal (a2.hashCode())
 
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
 
     store.write(a2, NumericInterval(5, 6))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(5, 6)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(5, 6)))
 
 
     val a3 = store.alloc(ctx1)
@@ -75,13 +75,13 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     a1.hashCode() should not equal (a3.hashCode())
     a2.hashCode() should not equal (a3.hashCode())
 
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 6)))
 
     store.write(a3, NumericInterval(8, 9))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
-    store.read(a3) should beGreaterThan(JOptionA.Some(NumericInterval(8, 9)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 6)))
+    store.read(a3) should be(JOptionA.Some(NumericInterval(8, 9)))
   }
 
   test("Join of powersets of virtual addresses") {
@@ -151,14 +151,14 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     } {
       // a1 should be old, since a3 is a more recent allocation of ctx1
       a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-      store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(3,4)))
+      store.read(a1) should be(JOptionA.Some(NumericInterval(3,4)))
 
       a3 = store.alloc(ctx1)
       store.write(a3, NumericInterval(5, 6))
 
       // a1 should be old, since a3 is a more recent allocation of ctx1
       a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
-      store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(3,4)))
+      store.read(a1) should be(JOptionA.Some(NumericInterval(3,4)))
 
       // a2 should not be bound to a physical address, since it was allocated in the other branch.
       an [Exception] should be thrownBy a2.physical
@@ -169,10 +169,10 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     }
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(3, 4)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(3, 4)))
 
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 2)))
 
     an [Exception] should be thrownBy a3.physical
 //    a3.physical shouldBe PhysicalAddress(ctx1, Recent)
@@ -199,9 +199,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
     a3.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(3, 6)))
-    store.read(a3) should beGreaterThan(JOptionA.Some(NumericInterval(3, 6)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(3, 6)))
+    store.read(a3) should be(JOptionA.Some(NumericInterval(3, 6)))
   }
 
   test("Strong updates on the same address in separate branches") {
@@ -216,7 +216,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     )(
       store.write(a1, NumericInterval(5, 6))
     )
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
   }
 
   test("Recency store should handle reallocation that happens in while loops") {
@@ -235,22 +235,22 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
       // First iteration of while body
       val a1 = store.alloc(ctx)
       store.write(a1, NumericInterval(1, 2))
-      store.read(a1) should beGreaterThan (JOptionA.Some(NumericInterval(1, 2)))
+      store.read(a1) should be (JOptionA.Some(NumericInterval(1, 2)))
 
       // Second iteration of while body
       effectStack.joinComputations {
         val a2 = store.alloc(ctx)
         store.write(a2, NumericInterval(5, 6))
-        store.read(a1) should beGreaterThan (JOptionA.Some(NumericInterval(1, 2)))
-        store.read(a2) should beGreaterThan (JOptionA.Some(NumericInterval(5, 6)))
+        store.read(a1) should be (JOptionA.Some(NumericInterval(1, 2)))
+        store.read(a2) should be (JOptionA.Some(NumericInterval(5, 6)))
 
         // Third iteration of while body
         effectStack.joinComputations {
           val a3 = store.alloc(ctx)
           store.write(a3, NumericInterval(8, 9))
-          store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
-          store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 6)))
-          store.read(a3) should beGreaterThan(JOptionA.Some(NumericInterval(8, 9)))
+          store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
+          store.read(a2) should be(JOptionA.Some(NumericInterval(1, 6)))
+          store.read(a3) should be(JOptionA.Some(NumericInterval(8, 9)))
           unit
         } {
           // When condition is false, exit loop
@@ -275,7 +275,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.setState(join.get.asInstanceOf[store.State])
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1,2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1,2)))
     join.hasChanged should be(true)
   }
 
@@ -308,7 +308,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.setState(join.get.asInstanceOf[store.State])
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 4)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 4)))
     join.hasChanged should be(true)
   }
 
@@ -325,7 +325,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.setState(join.get.asInstanceOf[store.State])
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1,2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1,2)))
     join.hasChanged should be(false)
   }
 
@@ -370,8 +370,8 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(l0, Recent))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(l3, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 1)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
   }
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = Unit x Recency") {
@@ -391,8 +391,8 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx, Recent), PhysicalAddress(ctx, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx, Recent))
-    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
-    store.read(a2) should beGreaterThan(JOptionA.Some(NumericInterval(1, 1)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
   }
 
   def beGreaterThan[A: Join](right: JOptionA[A]) = new Matcher[JOption[WithJoin,A]] {

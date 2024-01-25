@@ -63,6 +63,13 @@ object ApronExpr:
   def topConstant: Constant[_] =
     Constant(topInterval)
 
+  def bottomInterval: Interval =
+    val itv = new Interval()
+    itv.setBottom()
+    itv
+  def bottomConstant: Constant[_] =
+    Constant(bottomInterval)
+
   def Unary[Addr <: apron.Var](op: UnOp, e: ApronExpr[Addr]): ApronExpr[Addr] =
     Unary(op, e, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
   def Binary[Addr <: apron.Var](op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr]): ApronExpr[Addr] =

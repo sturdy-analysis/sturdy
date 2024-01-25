@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Abstract1, Manager, StringVar}
+import apron.{Abstract1, Environment, Manager, StringVar}
 import sturdy.values.Widen
 // import sturdy.apron.Apron.debugJoinWiden
 import sturdy.data.combineMaps
@@ -17,17 +17,56 @@ given Abstract1Widen: Widen[Abstract1] with
 
 object ApronJoins:
   def combineAbstract1(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] =
-    val apronManager = s1.getCreationManager
-    val lce = s1.getEnvironment.lce(s2.getEnvironment)
-    val combinable1 = s1.changeEnvironmentCopy(apronManager, lce, false)
-    val combinable2 = s2.changeEnvironmentCopy(apronManager, lce, false)
+    val manager = s1.getCreationManager
+
+    val env1 = s1.getEnvironment
+    val env2 = s2.getEnvironment
+    val lce = env1.lce(env2)
+
+    val s1ExtEnv = s1.changeEnvironmentCopy(manager, lce, false)
+    val s2ExtEnv = s2.changeEnvironmentCopy(manager, lce, false)
+
+    val top = ApronExpr.topConstant.toIntern(lce)
+
+    val env2_minus_env1 = minus(env2,env1).getVars
+    val combinable1 =
+      if(env2_minus_env1.nonEmpty)
+        s1ExtEnv.assignCopy(
+          manager,
+          env2_minus_env1,
+          Array.fill(env2_minus_env1.length)(top),
+          s2ExtEnv
+        )
+      else
+        s1ExtEnv
+
+    val env1_minus_env2 = minus(env1,env2).getVars
+    val combinable2 =
+      if(env1_minus_env2.nonEmpty)
+        s2ExtEnv.assignCopy(
+          manager,
+          env1_minus_env2,
+          Array.fill(env1_minus_env2.length)(top),
+          s1ExtEnv
+        )
+      else
+        s2ExtEnv
+
     val combined =
       if (widen)
-        combinable1.widening(apronManager, combinable2)
+        combinable1.widening(manager, combinable2)
       else
-        combinable1.joinCopy(apronManager, combinable2)
+        combinable1.joinCopy(manager, combinable2)
 
-    MaybeChanged(combined, ! combined.isIncluded(apronManager, combinable1))
+    MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+
+  def minus[A](env1: Environment, env2: Environment): Environment =
+    var env = env1
+    for (x <- env1.getVars)
+      if (env2.hasVar(x))
+        env = env.remove(Array(x))
+    env
+
 
 //  def combineExprs[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr], state: Abstract1, widen: Boolean): MaybeChanged[ApronExpr[Addr]] =
 //    val apronManager = state.getCreationManager
@@ -55,6 +94,7 @@ object ApronJoins:
 //      else {
 //        a1.join(apronManager, cs)
 //        a1
+
 //      }
 
 //    val bound = aJoined.getBound(apronManager, av)
