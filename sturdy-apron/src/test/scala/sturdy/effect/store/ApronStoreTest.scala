@@ -1,8 +1,9 @@
 package sturdy.effect.store
 
 import org.scalatest.funsuite.AnyFunSuite
-import sturdy.values.references.Recency.*
 import org.scalatest.matchers.should.Matchers.*
+
+import sturdy.values.references.Recency.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.{ApronStore, given}

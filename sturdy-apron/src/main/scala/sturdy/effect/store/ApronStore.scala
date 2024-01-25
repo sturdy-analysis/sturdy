@@ -76,7 +76,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
 import sturdy.values.references.{AbstractAddr, PhysicalAddress, PowersetAddr, Recency, joinPowersetAddr, given}
 import sturdy.values.{*, given}
-import sturdy.apron.ApronExpr
+import sturdy.apron.{ApronExpr, Abstract1Join, Abstract1Widen}
 import apron.Texpr1Intern
 import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1Intern, Texpr1VarNode, Var}
 
@@ -146,9 +146,8 @@ class ApronStore[
   def getState : State = apronState
   def setState(s : Abstract1) = apronState = s 
  
-  def join : Join[State] = ???
-  def widen : Widen[State] = ???
-
+  def join : Join[State] = implicitly
+  def widen : Widen[State] = implicitly
 
   def read(powAddr: PowAddr): JOptionA[V] =
     if(powAddr.isEmpty)

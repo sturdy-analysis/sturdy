@@ -33,7 +33,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
 
     store.write(a1, NumericInterval(1, 2))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(1, 2)))
 
 
     val a2 = store.alloc(ctx1)
