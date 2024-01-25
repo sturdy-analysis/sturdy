@@ -49,6 +49,17 @@ class ApronJoinTest extends AnyFunSuite:
   }
 
 
+  test("{x ∈ [0,20]} ⊔ {y ∈ [0,20]} = {x ∈ [0,20], y ∈ [0,20]}") {
+    val state2 = state1.assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
+    val state3 = state1.assignCopy(manager, y, ApronExpr.Constant(Interval(0, 20)).toIntern(env), null)
+    val joined = Join(state2, state3)
+
+    joined.hasChanged shouldBe true
+    joined.get.getBound(manager, x) shouldBe Interval(0, 20)
+    joined.get.getBound(manager, y) shouldBe Interval(0, 20)
+  }
+
+
   case class StringVar(name: String) extends Var:
     override def compareTo(other: Var): Int =
       other match
