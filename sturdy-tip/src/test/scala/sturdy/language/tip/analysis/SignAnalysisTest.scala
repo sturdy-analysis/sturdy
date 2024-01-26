@@ -64,6 +64,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
+      println(analysis.controlObserver)
       val aresult = analysis.failure.fallible(analysis.execute(program))
 //      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
 
