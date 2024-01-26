@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.control.{ControlEvent, ControlObservable, ControlObserver, RecordingControlObserver}
+import sturdy.control.{ControlEvent, ControlEventGraphBuilder, ControlObservable, ControlObserver, RecordingControlObserver}
 import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
@@ -78,6 +78,9 @@ object IntervalAnalysis extends Interpreter,
 
     val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](true)
     this.addControlObserver(controlObserver)
+    
+    val controlEventGraphBuilder = new ControlEventGraphBuilder[TipControl.Atom, TipControl.Section, TipControl.Exc]
+    this.addControlObserver(controlEventGraphBuilder)
 
     final override val fixpoint =
       fix.log(controlEventLogger(this),

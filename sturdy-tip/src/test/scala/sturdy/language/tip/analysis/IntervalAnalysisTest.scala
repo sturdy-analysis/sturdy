@@ -71,6 +71,8 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      println(analysis.cfgLogger.toGraphViz)
       println(analysis.controlObserver)
 
+      println(analysis.controlEventGraphBuilder.toGraphViz)
+
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
