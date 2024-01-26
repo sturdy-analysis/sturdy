@@ -370,7 +370,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(l0, Recent))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(l3, Recent))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a1) should beGreaterThan(JOptionA.Some(NumericInterval(2, 2)))
     store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
   }
 

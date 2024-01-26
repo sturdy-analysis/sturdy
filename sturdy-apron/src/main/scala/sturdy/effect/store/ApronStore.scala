@@ -143,7 +143,8 @@ class ApronStore[
   override type State = Abstract1
   private var apronState : Abstract1 = initialState
 
-  def getState : State = apronState // Sven: We probably need to copy apron state here, since we mutate it in `ApronStore.write`.
+  // TODO: find a better way to copy apronState without changing anything
+  def getState : State = apronState.changeEnvironmentCopy(apronManager, apronState.getEnvironment, false)
   def setState(s : Abstract1) = apronState = s 
  
   def join : Join[State] = implicitly
@@ -177,7 +178,7 @@ class ApronStore[
               apronState.changeEnvironment(apronManager, env, false)
             }
             val aexp : apron.Texpr1Intern = exp.toIntern(env)
-            apronState = apronState.assignCopy(apronManager, addr, aexp, null)
+            apronState.assign(apronManager, addr, aexp, null)
           )
         } else /* if(powAddr.isWeak) */ {
           // weak update implemented as join
@@ -195,9 +196,16 @@ class ApronStore[
       case None =>
         throw new NotImplementedError("")
 
-  def free(x: PowAddr): Unit =
-    throw new NotImplementedError("free")
-
+  def free(powAddr: PowAddr): Unit =
+    if (powAddr.isStrong) {
+      powAddr.reduce(addr =>
+        var env = apronState.getEnvironment()
+        if(env.hasVar(addr)) {
+          apronState.forget(apronManager, addr, false)
+          apronState.changeEnvironment(apronManager, env.remove(Array[Var](addr)), false)
+        }
+      )
+    }
 
 // TODO write explicit, simple, join on ApronExpressions
 given JoinApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Join[ApronExpr[Addr]] with
