@@ -2,14 +2,15 @@ package sturdy.language.bytecode
 
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter}
+import sturdy.language.bytecode.generic.{AllocationSite, BytecodeOps, GenericInterpreter}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 import generic.BytecodeFailure.*
-import sturdy.values.objects.{LiftedObjectOps, ObjectOps}
+import sturdy.data.MayJoin
+import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps}
 trait Interpreter:
   //type I8
   //type I16
@@ -61,11 +62,11 @@ trait Interpreter:
       case Float64(d) => d
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
-
     def asObj(using f: Failure): ObjRep = this match
       case Obj(o) => o
       case TopValue => topObj
       case _ => f.fail(TypeError, s"Expected obj but got $this")
+
 
   //def topI8: I8
   //def topI16: I16
@@ -83,7 +84,7 @@ trait Interpreter:
     case ValType.F64 => Value.Float64(topF64)
 
   */
-
+  //def asObj(v: Value)(using Failure): ObjRep
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
 
@@ -123,15 +124,13 @@ trait Interpreter:
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
-    //final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep] = objOps
-    //final val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value] = new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, Value, ObjRep](identity, _.asObj, identity, Value.Obj.apply)
+    
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
     final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
-
 
     final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
     final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, Value.Float32.apply)

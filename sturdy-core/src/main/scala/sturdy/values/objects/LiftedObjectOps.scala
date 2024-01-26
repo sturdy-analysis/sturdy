@@ -3,7 +3,7 @@ package sturdy.values.objects
 import sturdy.data.{JOption, MayJoin}
 import sturdy.effect.store.Store
 
-class LiftedObjectOps[Addr, Idx, V, CF, Site, J[_] <: MayJoin[_], O, UV, UO]
+class LiftedObjectOps[Addr, Idx, V, CF, O, Site, J[_] <: MayJoin[_], UV, UO]
   (extractV: V => UV, extractO: O => UO, injectV: UV => V, injectO: UO => O)
   (using ops: ObjectOps[Addr, Idx, UV, CF, UO, Site, J]) extends ObjectOps[Addr, Idx, V, CF, O, Site, J]:
 

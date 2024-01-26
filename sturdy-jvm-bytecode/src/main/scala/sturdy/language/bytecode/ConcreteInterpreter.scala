@@ -30,7 +30,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
-  override type ObjRep = Object[ClassFile, Value]
+  override type ObjRep = Object[ObjType, Addr]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -38,10 +38,9 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
-  override def topObj: Object[ClassFile, ConcreteInterpreter.Value] = throw new UnsupportedOperationException
-
+  override def topObj: Object[ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
-
+  def asObj(v: Value)(using Failure): ObjRep = v.asObj
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
@@ -49,7 +48,7 @@ object ConcreteInterpreter extends Interpreter:
       Value.Int32(0)
 
 
-  type Store = Map[Idx, Value]
+  type Store = Map[Addr, Value]
   class Instance(file: ClassFile, initStore: Store) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
@@ -65,10 +64,12 @@ object ConcreteInterpreter extends Interpreter:
 
     val cfs: ClassFile = file
 
-
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep, AllocationSite, MayJoin.NoJoin] = ???
+    val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value, AllocationSite, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, AllocationSite, MayJoin.NoJoin, Value, ObjRep](identity, asObj, identity, Value.Obj.apply)(
+        using new ConcreteObjectOps(using alloc, store)
+      )
 
 
