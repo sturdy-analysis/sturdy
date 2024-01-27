@@ -84,19 +84,23 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
 
 
 given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
-  override def lt(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] = r match
-    case Topped.Top =>
-      val a1 = v2(ITop)
-      val a2 = v1(ITop)
-      IntervalOrderingOps.lt(a1, a2)
-    case Topped.Actual(true) => v2(ITop) match
-      case I(l,h) => v1(I(Int.MinValue,l-1)); r
-      case ITop   => v1(ITop); r
-    case Topped.Actual(false) => v2(ITop) match
-      case I(l, h) => v1(I(h,Int.MaxValue)); r
-      case ITop => v1(ITop); r
+  override def lt(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
+    println(s"I got ${v1} and ${v2}")
+    r match
+      case Topped.Top =>
+        val a1 = v2(ITop)
+        val a2 = v1(ITop)
+        IntervalOrderingOps.lt(a1, a2)
+      case Topped.Actual(true) => v2(ITop) match
+        case I(l,h) => v1(I(Int.MinValue,l-1)); r
+        case ITop   => v1(ITop); r
+      case Topped.Actual(false) => v2(ITop) match
+        case I(l, h) => v1(I(h,Int.MaxValue)); r
+        case ITop => v1(ITop); r
 
-  override def le(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] = r match
+  override def le(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
+    println(s"I got ${v1} and ${v2}")
+    r match
     case Topped.Top =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
@@ -112,36 +116,43 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
       case ITop =>
         v1(ITop); r
 
-  override def ge(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] = r match
-    case Topped.Top =>
-      val a1 = v1(ITop)
-      val a2 = v2(ITop)
-      IntervalOrderingOps.ge(a1, a2)
-    case Topped.Actual(true) => v2(ITop) match
-      case I(l, h) =>
-        v1(I(h, Int.MaxValue)); r  // Inclusive comparison, include 'h'
-      case ITop =>
-        v1(ITop); r
-    case Topped.Actual(false) => v2(ITop) match
-      case I(l, h) =>
-        v1(I(Int.MinValue, l - 1)); r // Exclude 'l' as it's not greater than or equal
-      case ITop =>
-        v1(ITop); r
+  override def ge(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
+    println(s"I got ${v1} and ${v2}")
+    r match
+      case Topped.Top =>
+        val a1 = v1(ITop)
+        val a2 = v2(ITop)
+        IntervalOrderingOps.ge(a1, a2)
+      case Topped.Actual(true) => v2(ITop) match
+        case I(l, h) =>
+          v1(I(h, Int.MaxValue)); r  // Inclusive comparison, include 'h'
+        case ITop =>
+          v1(ITop); r
+      case Topped.Actual(false) => v2(ITop) match
+        case I(l, h) =>
+          v1(I(Int.MinValue, l - 1)); r // Exclude 'l' as it's not greater than or equal
+        case ITop =>
+          v1(ITop); r
 
-  override def gt(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] = r match
-    case Topped.Top =>
-      val a1 = v1(ITop)
-      val a2 = v2(ITop)
-      IntervalOrderingOps.gt(a1, a2)
+  override def gt(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
+    r match
+      case Topped.Top =>
+        val a1 = v1(ITop)
+        val a2 = v2(ITop)
+        println(s"I got ${a1} and ${a2} = ${ IntervalOrderingOps.gt(a1, a2)}")
+        IntervalOrderingOps.gt(a1, a2)
 
-    case Topped.Actual(true) => v2(ITop) match
-      case I(l, h) =>
-        v1(I(h + 1, Int.MaxValue)); r  // Exclude 'h' for strict inequality
-      case ITop =>
-        v1(ITop); r
-    case Topped.Actual(false) => v2(ITop) match
-      case I(l, h) =>
-        //println(s"Topped false${I(l,h)} and   ${r}")
-        v1(I(Int.MinValue, h)); r // Include 'h' as it's not strictly greater
-      case ITop =>
-        v1(ITop); r
+      case Topped.Actual(true) => v2(ITop) match
+        case I(l, h) =>
+          v1(I(h + 1, Int.MaxValue)); r  // Exclude 'h' for strict inequality
+        case ITop =>
+          v1(ITop); r
+      case Topped.Actual(false) =>
+        v2(ITop) match
+          case I(l, h) =>
+            println(s"HOI $l - $h")
+            //println(s"Topped false${I(l,h)} and   ${r}")
+            println(v1(ITop))
+            v1(I(Int.MinValue, h)); r // Include 'h' as it's not strictly greater
+          case ITop =>
+            v1(ITop); r

@@ -160,6 +160,27 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       v
     case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
 
+    case a@Exp.Alloc(e) =>
+      val addr = alloc(AllocationSite.Alloc(a))
+      val refined = assert(refValue(addr), expected)
+      val v = store.read(addr).getOrElse(topValue)
+      store.write(addr, topValue)
+      evalBack(e, v)
+      refined
+    case Exp.VarRef(x) =>
+      failure(TipFailure.VariableReferencesNotSupported, s"&$x")
+    //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+    //      unmanagedRefValue(addr)
+    case Exp.Deref(e) =>
+      val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
+      val refined = assert(v, expected)
+      val addr = evalBack(e, refValue(topAddr))
+      store.write(refAddr(addr), refined)
+      refined
+    case Exp.NullRef() =>
+      assert(nullValue, expected)
+
+
     //    case a@Exp.Alloc(e) =>
     //      val addr = alloc(AllocationSite.Alloc(a))
     //      store.write(addr, eval(e))
@@ -207,11 +228,14 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         println("Executing non Zero")
         runBack(thn)
         evalBackNonzero(cond, topInt)
+        println(s"thn: ${callFrame.getState}")
         ()
       } {
         println("Executing Zero")
         els.foreach(runBack(_))
+        println(s"els: ${callFrame.getState}")
         evalBack(cond, integerLit(0))
+        println(s"els: ${callFrame.getState}")
         ()
       }
     case w@Stm.While(cond, body) =>
@@ -292,3 +316,4 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     val main = functions("main")
     callBack(main, expected)
   }
+

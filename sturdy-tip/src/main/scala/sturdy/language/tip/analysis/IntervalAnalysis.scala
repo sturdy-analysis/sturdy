@@ -45,7 +45,7 @@ object IntervalAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    override val intOps: IntegerOps[Int, Value] = implicitly
+    override val intOps: IntegerOps[Int, Value] = ???
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly

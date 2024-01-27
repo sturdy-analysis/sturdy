@@ -254,8 +254,8 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
       IntervalIntegerOps.add(a1,a2)
     case I(l, h) => v2(ITop) match
       case I(l2, h2) =>
-        val I(l1, h1) = v1(I(l - l2, h - h2))
-        I(l1+l2,h1+h2)
+        v1(I(l - l2, h - h2))
+        I(l, h)
       case ITop =>
         val v1Refine = v1(ITop)
         I(l,h)
