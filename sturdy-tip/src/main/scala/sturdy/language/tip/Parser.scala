@@ -142,15 +142,21 @@ object Parser:
   lazy val expression: P[Exp] =
     negatableExpr |
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     (operation ~ (
       (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
       (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
     ).?).map(maybeBinOp)
 =======
+=======
+>>>>>>> Stashed changes
       (operation ~ (
         (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
           (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
         ).?).map(maybeBinOp)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   val assignable: P[Assignable] =

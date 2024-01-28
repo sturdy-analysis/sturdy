@@ -102,6 +102,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
     println(s"I got ${v1} and ${v2}")
     r match
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     case Topped.Top =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
@@ -117,6 +118,8 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
       case ITop =>
         v1(ITop); r
 =======
+=======
+>>>>>>> Stashed changes
       case Topped.Top =>
         val a1 = v1(ITop)
         val a2 = v2(ITop)
@@ -131,6 +134,9 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
           v1(I(h + 1, Int.MaxValue)); r // Exclude 'h' since it's not less than or equal
         case ITop =>
           v1(ITop); r
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   override def ge(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =

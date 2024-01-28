@@ -5,10 +5,16 @@ import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
 import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import sturdy.values.integer.{CombineIntSign, IntSign, Interval, IntervalIntegerOps, SignIntegerOps}
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.Interval.{I, *}
 import sturdy.values.integer.CombineIntSign
+=======
+import sturdy.values.integer.{CombineIntSign, IntSign, Interval, SignIntegerOps,IntervalIntegerOps}
+import sturdy.values.integer.IntSign.*
+import sturdy.values.integer.Interval.{I, *}
+>>>>>>> Stashed changes
 =======
 import sturdy.values.integer.{CombineIntSign, IntSign, Interval, SignIntegerOps,IntervalIntegerOps}
 import sturdy.values.integer.IntSign.*
@@ -146,7 +152,12 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
   override def neg(v: IntSign => IntSign, r: IntSign): IntSign = r match
     case TopSign =>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       SignIntegerOps.neg(v(TopSign))
+=======
+      println("Neg not implemented for sign domain")
+      ??? ///SignIntegerOps.neg(v(TopSign))
+>>>>>>> Stashed changes
 =======
       println("Neg not implemented for sign domain")
       ??? ///SignIntegerOps.neg(v(TopSign))
@@ -251,6 +262,7 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
   override def randomInteger(): Interval = ITop
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //  override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
 //    case ITop => Interval.ITop
 //    case I(l, h) =>
@@ -258,12 +270,17 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
 //      val I(l1, h1) = v1(ITop)
 //      I(l1 + l2, h1 + h2)
 =======
+=======
+>>>>>>> Stashed changes
   //  override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
   //    case ITop => Interval.ITop
   //    case I(l, h) =>
   //      val I(l2, h2) = v2(ITop)
   //      val I(l1, h1) = v1(ITop)
   //      I(l1 + l2, h1 + h2)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match

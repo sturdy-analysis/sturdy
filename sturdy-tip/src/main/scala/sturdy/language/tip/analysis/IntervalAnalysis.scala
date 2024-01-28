@@ -13,9 +13,12 @@ import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
 import sturdy.effect.store
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
 =======
+=======
+>>>>>>> Stashed changes
 import sturdy.effect.store.may.PowersetAddrMayStore
 >>>>>>> Stashed changes
 import sturdy.effect.store.Store

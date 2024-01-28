@@ -42,7 +42,11 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     p.getFileName.toString == "simple6.tip"
+=======
+    p.getFileName.toString == "simple8.tip"
+>>>>>>> Stashed changes
 =======
     p.getFileName.toString == "simple8.tip"
 >>>>>>> Stashed changes
@@ -75,7 +79,10 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
       //val resultVal = analysis.topValue
       val resultVal = analysis.intOps.toValue(List(2,5))
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
       val aresult = analysis.failure.fallible(analysis.executeBack(program, resultVal))

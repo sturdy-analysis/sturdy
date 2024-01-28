@@ -85,7 +85,11 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println()
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           //println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
+=======
+          // println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
+>>>>>>> Stashed changes
 =======
           // println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
 >>>>>>> Stashed changes
@@ -95,6 +99,7 @@ final class StackedStates[Dom, Codom](val state: State)
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
         if (Fixpoint.DEBUG)
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
           // println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
           println()
@@ -108,6 +113,20 @@ final class StackedStates[Dom, Codom](val state: State)
             if (Fixpoint.DEBUG)
               // println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
               println()
+=======
+          println()
+          //println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
+        Option(outCache.get(stateFrame)) match
+          case None =>
+            if (Fixpoint.DEBUG)
+              println()
+              //println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+            PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
+          case Some(OutCacheEntry(res, previousOut, _)) =>
+            if (Fixpoint.DEBUG)
+              println()
+              //println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+>>>>>>> Stashed changes
 =======
           println()
           //println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
@@ -137,8 +156,13 @@ final class StackedStates[Dom, Codom](val state: State)
     } else {
       if (Fixpoint.DEBUG)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         //println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
         println()
+=======
+        println()
+        //println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
+>>>>>>> Stashed changes
 =======
         println()
         //println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")

@@ -38,7 +38,11 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     p.getFileName.toString == "simple6.tip"
+=======
+    p.getFileName.toString == "simple9.tip"
+>>>>>>> Stashed changes
 =======
     p.getFileName.toString == "simple9.tip"
 >>>>>>> Stashed changes

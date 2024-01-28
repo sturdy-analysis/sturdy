@@ -14,9 +14,15 @@ enum Interval:
   case I (low: Double, high: Double)
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //  def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
 //    case (I(l1,h1),I(l2,h2)) => h1 < l2
 //    case (_,_) => false)
+=======
+  //  def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
+  //    case (I(l1,h1),I(l2,h2)) => h1 < l2
+  //    case (_,_) => false)
+>>>>>>> Stashed changes
 =======
   //  def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
   //    case (I(l1,h1),I(l2,h2)) => h1 < l2
@@ -44,8 +50,11 @@ given CombineInterval[W <: Widening]: Combine[Interval, W] with
   override def apply(v1: Interval, v2: Interval): MaybeChanged[Interval] =
     if v1 == v2 then Unchanged(v1)
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //    else if v1 < v2 then Changed(v2)
 //    else if v2 < v1 then Unchanged(v1)
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     else (v1, v2) match
@@ -166,8 +175,11 @@ given IntervalEqOps: EqOps[Interval, Topped[Boolean]] with
       else if (h1 < l2 || h2 < l1) Topped.Actual(false)
       else Topped.Top
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 //      val b = l1 == l2 && h1 == h2
 //      Topped.Actual(b)
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     case _ => Topped.Top
