@@ -41,7 +41,7 @@ given CombineInterval[W <: Widening]: Combine[Interval, W] with
 
 
 
-given IntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
+given MIntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
   def integerLit(i: B): Interval =
     val iInt = base.toInt(i)
     I(iInt,iInt)

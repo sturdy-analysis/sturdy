@@ -8,7 +8,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
-import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 //import sturdy.language.tip.analysis.SignAnalysis.{*, given}
@@ -41,7 +41,7 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IntervalBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString == "myfile.tip"
+    p.getFileName.toString == "simple2.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())

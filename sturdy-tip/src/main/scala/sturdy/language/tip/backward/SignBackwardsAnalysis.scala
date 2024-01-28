@@ -80,7 +80,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
-    def getState = this.effectStack.getAllState
+    def getState = this.effectStack.getAllState.head
 
     val logger = new fix.Logger[BackFixIn[Value], BackFixOut[Value]]:
       override def enter(dom: BackFixIn[SignBackwardsAnalysis.Value]): Unit = dom match
