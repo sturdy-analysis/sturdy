@@ -149,6 +149,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Neg(e) => neg(evalBack(e,_), expected)
     case Exp.Gt(e1, e2) =>
       gt(evalBack(e1,_), evalBack(e2, _), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
@@ -176,6 +177,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       val refined = assert(v, expected)
       val addr = evalBack(e, refValue(topAddr))
       store.write(refAddr(addr), refined)
+      //println(s"Deref expression: The v val is ${v} ??")
       refined
     case Exp.NullRef() =>
       assert(nullValue, expected)
@@ -262,6 +264,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       val v = callFrame.getLocalByName(x).getOrElse(failure(BackwardsUnboundVariable, s.toString))
       callFrame.setLocalByName(x, topValue)
       v
+<<<<<<< Updated upstream
     case _ => failure(BackwardsUnreachable, s"not implemented yet: assignable $lhs")
   //    case Assignable.ADeref(e) =>
   //      val addr = refAddr(eval(e))
@@ -278,6 +281,28 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   //      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
   //      val updated = updateRecordField(recVal, Field(field), v)
   //      store.write(recAddr, updated)
+=======
+    case Assignable.ADeref(e) =>
+      val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
+      println(s"Got this in dereference:expression: ${e} and value v =  ${refValue(topAddr)}")
+      val addr = evalBack(e, refValue(topAddr))
+      store.write(refAddr(addr), topValue)
+      v
+
+//    case _ => failure(BackwardsUnreachable, s"not implemented yet: assignable $lhs")
+//    case Assignable.AField(recVar, field) =>
+//      val recRef = eval(Exp.Var(recVar))
+//      val recAddr = refAddr(recRef)
+//      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
+//      val updated = updateRecordField(recVal, Field(field), v)
+//      store.write(recAddr, updated)
+//    case Assignable.ADerefField(rec, field) =>
+//      val recRef = eval(rec)
+//      val recAddr = refAddr(recRef)
+//      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
+//      val updated = updateRecordField(recVal, Field(field), v)
+//      store.write(recAddr, updated)
+>>>>>>> Stashed changes
 
   def callBack(fun: Function, ret: V)(using BackFixed): (Seq[V], V) =
     val locals = fun.params ++ fun.locals

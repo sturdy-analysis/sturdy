@@ -12,9 +12,14 @@ import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
 import sturdy.effect.store
+<<<<<<< Updated upstream
 import sturdy.effect.store
 import sturdy.effect.store.AStoreMultiAddrThreadded
+=======
+import sturdy.effect.store.may.PowersetAddrMayStore
+>>>>>>> Stashed changes
 import sturdy.effect.store.Store
+import sturdy.effect.store.may.PowersetAddrMayStore
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.StackConfig

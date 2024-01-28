@@ -43,18 +43,18 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
       case Pos => v1(Pos); r
       case Neg | NegOrZero | TopSign => v1(TopSign); r
 
-    override def le(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
-      case Topped.Top =>
-        val a2 = v2(TopSign)
-        val a1 = v1(TopSign)
-        SignOrderingOps.le(a1, a2)
-      case Topped.Actual(true) => v2(TopSign) match
-        case NegOrZero | Zero => v1(NegOrZero); r
-        case Neg => v1(Neg); r
-        case ZeroOrPos | Pos | TopSign => v1(TopSign); r
-      case Topped.Actual(false) => v2(TopSign) match
-        case Zero | ZeroOrPos | Pos => v1(Pos); r
-        case Neg | NegOrZero | TopSign => v1(TopSign); r
+  override def le(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
+    case Topped.Top =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignOrderingOps.le(a1, a2)
+    case Topped.Actual(true) => v2(TopSign) match
+      case NegOrZero | Zero => v1(NegOrZero); r
+      case Neg => v1(Neg); r
+      case ZeroOrPos | Pos | TopSign => v1(TopSign); r
+    case Topped.Actual(false) => v2(TopSign) match
+      case Zero | ZeroOrPos | Pos => v1(Pos); r
+      case Neg | NegOrZero | TopSign => v1(TopSign); r
 
   override def ge(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
     case Topped.Top =>
@@ -69,18 +69,18 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
       case Zero | NegOrZero | Neg => v1(Neg); r
       case Pos | ZeroOrPos | TopSign => v1(TopSign); r
 
-    override def gt(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
-      case Topped.Top =>
-        val a2 = v2(TopSign)
-        val a1 = v1(TopSign)
-        SignOrderingOps.lt(a1, a2)
-      case Topped.Actual(true) => v2(TopSign) match
-        case Pos | ZeroOrPos | Zero => v1(Pos); r
-        case Neg | NegOrZero | TopSign => v1(TopSign); r
-      case Topped.Actual(false) => v2(TopSign) match
-        case Zero | NegOrZero => v1(NegOrZero); r
-        case Neg => v1(Neg); r
-        case Pos | ZeroOrPos | TopSign => v1(TopSign); r
+  override def gt(v1: IntSign => IntSign, v2: IntSign => IntSign, r: Topped[Boolean]): Topped[Boolean] = r match
+    case Topped.Top =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignOrderingOps.lt(a1, a2)
+    case Topped.Actual(true) => v2(TopSign) match
+      case Pos | ZeroOrPos | Zero => v1(Pos); r
+      case Neg | NegOrZero | TopSign => v1(TopSign); r
+    case Topped.Actual(false) => v2(TopSign) match
+      case Zero | NegOrZero => v1(NegOrZero); r
+      case Neg => v1(Neg); r
+      case Pos | ZeroOrPos | TopSign => v1(TopSign); r
 
 
 given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
@@ -101,6 +101,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
   override def le(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
     println(s"I got ${v1} and ${v2}")
     r match
+<<<<<<< Updated upstream
     case Topped.Top =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
@@ -115,6 +116,22 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
         v1(I(h + 1, Int.MaxValue)); r // Exclude 'h' since it's not less than or equal
       case ITop =>
         v1(ITop); r
+=======
+      case Topped.Top =>
+        val a1 = v1(ITop)
+        val a2 = v2(ITop)
+        IntervalOrderingOps.le(a1, a2)
+      case Topped.Actual(true) => v2(ITop) match
+        case I(l, h) =>
+          v1(I(Int.MinValue, l)); r  // Inclusive comparison, so we include 'l'
+        case ITop =>
+          v1(ITop); r
+      case Topped.Actual(false) => v2(ITop) match
+        case I(l, h) =>
+          v1(I(h + 1, Int.MaxValue)); r // Exclude 'h' since it's not less than or equal
+        case ITop =>
+          v1(ITop); r
+>>>>>>> Stashed changes
 
   override def ge(v1: Interval => Interval, v2: Interval => Interval, r: Topped[Boolean]): Topped[Boolean] =
     println(s"I got ${v1} and ${v2}")

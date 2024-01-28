@@ -6,7 +6,10 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.{EffectStack, TrySturdy, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
-import sturdy.effect.store.{AStoreMultiAddrThreadded, Store}
+
+import sturdy.effect.store.must.PowersetAddrMustStore
+import sturdy.effect.store.Store
+
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
@@ -27,6 +30,10 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
+//  var bounds: Set[Double] = Set()
+//  given Widen[Interval] = new IntervalWiden(bounds, Double.MinValue, Double.MaxValue)
+//  given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
+
   class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericBackwardsInstance:
     override def jv: WithJoin[Value] = implicitly
     override val meet: Meet[Value] = implicitly
@@ -36,6 +43,13 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
 
     override val topInt: Value = Value.IntValue(Interval.ITop)
     override def topFunction: Value = Value.FunValue(Powerset.apply(functions.values.toSet))
+
+    override def topAddr: Powerset[AllocationSiteAddr] =
+      Powerset(functions.values.toSet.flatMap(_.fold(using
+        fun => (fun.params ++ fun.locals).map(p => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)).toSet,
+        _ => Set[AllocationSiteAddr](),
+        { case Exp.Alloc(e) => Set(AllocationSiteAddr.Alloc(e.label)(true)); case _ => Set() }
+      )))
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
@@ -66,10 +80,12 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val store: PowersetAddrMustStore[AllocationSiteAddr, Value] = new PowersetAddrMustStore(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: AUserInput[Value] = new AUserInput(Value.IntValue(Interval.ITop))
     override val input: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
+
+
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 

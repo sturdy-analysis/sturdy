@@ -24,6 +24,8 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def integerLit(l: Long): Long = l
   def randomInteger(): Long = Random.nextLong()
 
+  override def neg(v: Long): Long = ???
+
   def add(v1: Long, v2: Long): Long = v1 + v2
   def sub(v1: Long, v2: Long): Long = v1 - v2
   def mul(v1: Long, v2: Long): Long = v1 * v2

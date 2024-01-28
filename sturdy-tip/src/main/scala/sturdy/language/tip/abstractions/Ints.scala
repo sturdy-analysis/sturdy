@@ -11,6 +11,7 @@ object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
     final type VInt = NumericInterval[Int]
+  
 
     final def topInt: NumericInterval[Int] = NumericInterval(Int.MinValue, Int.MaxValue)
     final def topBool: Topped[Boolean] = Topped.Top

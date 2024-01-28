@@ -19,7 +19,7 @@ case object IntegerOverflow extends FailureKind
 trait IntegerOps[B, V]:
   def integerLit(i: B): V
   def randomInteger(): V
-  
+
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
   def mul(v1: V, v2: V): V
@@ -52,7 +52,7 @@ trait IntegerOps[B, V]:
   def countTrailingZeros(v: V): V
   def nonzeroBitCount(v: V): V
   def invertBits(v: V): V
-  
+
 
 trait OverflowIntegers[V]:
   def wasOverflown(v: V): Topped[Boolean]

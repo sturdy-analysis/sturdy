@@ -71,7 +71,7 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
     )
 
   def map[J](f: I => J): NumericInterval[J] =
-      NumericInterval(f(low), f(high))
+    NumericInterval(f(low), f(high))
 
   def isConstant: Boolean = low == high
 
@@ -92,13 +92,13 @@ case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Optio
 
 
 given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictIntegerOps[I, I, NoJoin], Numeric[I], Top[NumericInterval[I]])
-  (using Failure, EffectStack): IntervalIntegerOps[I] =
+                                   (using Failure, EffectStack): IntervalIntegerOps[I] =
   new IntervalIntegerOps(20)
 
 
 class IntervalIntegerOps[I]
-  (val feasibleNumberOfOps: Int)
-  (using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
+(val feasibleNumberOfOps: Int)
+(using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
 
   import NumericInterval.constant
 
@@ -717,7 +717,7 @@ class IntervalIntegerOps[I]
 
   // see Hacker's delight by Henry S. Warren, Jr., Chapter 4.3 (https://doc.lagout.org/security/Hackers%20Delight.pdf)
   def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
-    // use of DeMorgan-Rules as explained in Hacker's Delight
+  // use of DeMorgan-Rules as explained in Hacker's Delight
     invertBits(bitOr(NumericInterval.safe(
       ops.invertBits(v1.high),
       ops.invertBits(v1.low)), NumericInterval.safe(
@@ -1127,15 +1127,15 @@ class IntervalIntegerOps[I]
   }
 
   def invertBits(v: NumericInterval[I]): NumericInterval[I] =
-    /*
-    Let l <= x <= h.
-    Then ~h <= ~x <= ~l, because:
+  /*
+  Let l <= x <= h.
+  Then ~h <= ~x <= ~l, because:
 
-    -x = twosCompl(x) = ~x + 1
-    => ~x = -x - 1
-    => ~h = -h - 1 <= -x - 1 = ~x = -x - 1 <= -l - 1 = ~l
-       and of course these bounds are tight for x=l and x=h
-    */
+  -x = twosCompl(x) = ~x + 1
+  => ~x = -x - 1
+  => ~h = -h - 1 <= -x - 1 = ~x = -x - 1 <= -l - 1 = ~l
+     and of course these bounds are tight for x=l and x=h
+  */
     NumericInterval.safe(ops.invertBits(v.high), ops.invertBits(v.low))
 
 given TopNumericIntervalInt: Top[NumericInterval[Int]] with
@@ -1205,7 +1205,7 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
 
 
 given ConvertNumericIntervalsIntLong[I, L](using convert: ConvertIntLong[I, L])(using Numeric[I], Ordering[I], Numeric[L], Ordering[L])
-  : ConvertIntLong[NumericInterval[I], NumericInterval[L]] with
+: ConvertIntLong[NumericInterval[I], NumericInterval[L]] with
 
   def apply(from: NumericInterval[I], conf: Bits): NumericInterval[L] =
     conf match
@@ -1240,9 +1240,9 @@ given ConvertConstantToNumericInterval[From, To, I](using Top[NumericInterval[I]
     case Topped.Actual(l) => NumericInterval(l, l)
 
 given ConvertNumericIntervalToBytes[From, To, I, B]
-  (using convert: Convert[From, To, I, Seq[B], config.BytesSize && SomeCC[ByteOrder]], topB: Top[NumericInterval[B]], num: Numeric[I])
-  (using Failure, EffectStack, Ordering[B])
-  : Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && SomeCC[ByteOrder]] with
+(using convert: Convert[From, To, I, Seq[B], config.BytesSize && SomeCC[ByteOrder]], topB: Top[NumericInterval[B]], num: Numeric[I])
+(using Failure, EffectStack, Ordering[B])
+: Convert[From, To, NumericInterval[I], Seq[NumericInterval[B]], config.BytesSize && SomeCC[ByteOrder]] with
 
   def apply(i: NumericInterval[I], conf: config.BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[B]] =
     val bigEndianConf = conf.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false)
@@ -1278,9 +1278,9 @@ given ConvertNumericIntervalToBytes[From, To, I, B]
 
 
 given ConvertBytesToNumericInterval[From, To, I]
-  (using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits], top: Top[NumericInterval[I]])
-  (using Failure, EffectStack, Ordering[I])
-  : Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+(using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits], top: Top[NumericInterval[I]])
+(using Failure, EffectStack, Ordering[I])
+: Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
 
   def apply(bytes: Seq[NumericInterval[Byte]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
     val lowBytes = new ListBuffer[Byte]

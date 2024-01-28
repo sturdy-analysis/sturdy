@@ -158,6 +158,8 @@ class AbstractBitVectorIntegerOps[I]
   private val one = num.fromInt(1)
   private val zero = num.fromInt(0)
 
+  override def neg(v: AbstractBitVector[I]): AbstractBitVector[I] = ???
+
   def integerLit(i: I): AbstractBitVector[I] = AbstractBitVector.constant(i)
   def randomInteger(): AbstractBitVector[I] = top
 

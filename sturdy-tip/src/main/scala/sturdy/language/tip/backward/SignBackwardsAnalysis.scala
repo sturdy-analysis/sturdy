@@ -72,6 +72,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
+<<<<<<< Updated upstream
 //    def getState = this.effectStack.getAllState.head
     def getState = this.effectStack.getAllState.head
 
@@ -93,6 +94,20 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
         case (BackFixIn.Run(s), None) => println(s"Precondition of $s = bottom" )
         case (BackFixIn.EnterFunction(f, v), _) =>
           println(s"Precondition of $f = $v\n\t${getState}${params}")
+=======
+    def getState = this.effectStack.getAllState.head
+
+    val logger = new fix.Logger[BackFixIn[Value], BackFixOut[Value]]:
+      override def enter(dom: BackFixIn[SignBackwardsAnalysis.Value]): Unit = dom match
+        case BackFixIn.EnterFunction(f, v) => println(s"Postcondition of $f = $v\n\t${getState}")
+        //case BackFixIn.Run(s) => println(s"Postcondition of statement $s: \t${getState}")
+        case _ => //nothing
+      override def exit(dom: BackFixIn[SignBackwardsAnalysis.Value], codom: TrySturdy[BackFixOut[SignBackwardsAnalysis.Value]]): Unit = (dom, codom.get) match
+        case (BackFixIn.Run(s), Some(BackFixOut.Run())) if !s.isInstanceOf[Stm.Block] =>
+          println(s"Precondition of statement $s\n\t${getState}")
+        case (BackFixIn.Run(s), None) => println(s"Precondition of $s = bottom: ${codom}")
+        case (BackFixIn.EnterFunction(f, v), _) => println(s"Precondition of $f = $v\n\t${getState}")
+>>>>>>> Stashed changes
         case _ => // nothing
 
     override val fixpoint: EffectStack ?=> fix.Fixpoint[BackFixIn[Value], BackFixOut[Value]] =

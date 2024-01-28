@@ -59,6 +59,8 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
   def integerLit(i: B): TaintProduct[V] = untainted(ops.integerLit(i))
   def randomInteger(): TaintProduct[V] = untainted(ops.randomInteger())
 
+  override def neg(v: TaintProduct[V]): TaintProduct[V] = ???
+
   def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)
   def sub(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.sub, v2)
   def mul(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.mul, v2)

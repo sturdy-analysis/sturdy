@@ -18,7 +18,7 @@ enum IntSign:
     case Zero => s2 == NegOrZero || s2 == ZeroOrPos
     case Pos => s2 == ZeroOrPos
     case _ => false
-  )
+    )
   def negated: IntSign = this match
     case TopSign => TopSign
     case Neg => Pos

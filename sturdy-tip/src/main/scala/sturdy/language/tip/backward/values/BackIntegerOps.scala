@@ -4,23 +4,28 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
 import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
+<<<<<<< Updated upstream
 import sturdy.values.integer.{CombineIntSign, IntSign, Interval, IntervalIntegerOps, SignIntegerOps}
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.Interval.{I, *}
 import sturdy.values.integer.CombineIntSign
+=======
+import sturdy.values.integer.{CombineIntSign, IntSign, Interval, SignIntegerOps,IntervalIntegerOps}
+import sturdy.values.integer.IntSign.*
+import sturdy.values.integer.Interval.{I, *}
+>>>>>>> Stashed changes
 
 
 
 
-
-/** 
- * 
+/**
+ *
  * e1 + e2
- * 
+ *
  * Necessary properties
  * - e1 and e2 must be evaluated exactly once
  * - e2 must be evaluated before e1
- * 
+ *
  */
 trait BackIntegerOps[B, V]:
   def integerLit(i: B): V
@@ -62,10 +67,10 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
     case (i :: _) => integerLit(i)
   override def randomInteger(): IntSign = TopSign
 
-  //  { x = Pos, y = Pos } 
-  // x * y = Pos 
+  //  { x = Pos, y = Pos }
+  // x * y = Pos
   //  { x = Pos, y = Top }
-  
+
   // evalBack(x * y, Pos)
   //   evalBack(y, Top) = Top
   //   evalBack(x, Top) = Pos
@@ -112,7 +117,7 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
       case Zero | NegOrZero | Neg => v1(Pos)
       case Pos | ZeroOrPos | TopSign => v1(TopSign)
       Pos
-  
+
   override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
     case TopSign =>
       val a2 = v2(TopSign)
@@ -140,7 +145,12 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
 
   override def neg(v: IntSign => IntSign, r: IntSign): IntSign = r match
     case TopSign =>
+<<<<<<< Updated upstream
       SignIntegerOps.neg(v(TopSign))
+=======
+      println("Neg not implemented for sign domain")
+      ??? ///SignIntegerOps.neg(v(TopSign))
+>>>>>>> Stashed changes
     case Neg =>
       v(Pos);Neg
     case NegOrZero =>
@@ -240,12 +250,21 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
 
   override def randomInteger(): Interval = ITop
 
+<<<<<<< Updated upstream
 //  override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
 //    case ITop => Interval.ITop
 //    case I(l, h) =>
 //      val I(l2, h2) = v2(ITop)
 //      val I(l1, h1) = v1(ITop)
 //      I(l1 + l2, h1 + h2)
+=======
+  //  override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
+  //    case ITop => Interval.ITop
+  //    case I(l, h) =>
+  //      val I(l2, h2) = v2(ITop)
+  //      val I(l1, h1) = v1(ITop)
+  //      I(l1 + l2, h1 + h2)
+>>>>>>> Stashed changes
 
   override def add(v1: Interval => Interval, v2: Interval => Interval, r: Interval): Interval = r match
     case ITop =>

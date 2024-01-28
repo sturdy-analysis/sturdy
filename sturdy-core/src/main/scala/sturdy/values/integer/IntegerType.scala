@@ -11,6 +11,8 @@ given TypeIntegerOps[B: ClassTag](using f: Failure, j: EffectStack, base: Integr
   def integerLit(i: B): BaseType[B] = BaseType[B]
   def randomInteger(): BaseType[B] = BaseType[B]
 
+  override def neg(v: BaseType[B]): BaseType[B] = ???
+
   def add(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
   def sub(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]
   def mul(v1: BaseType[B], v2: BaseType[B]): BaseType[B] = BaseType[B]

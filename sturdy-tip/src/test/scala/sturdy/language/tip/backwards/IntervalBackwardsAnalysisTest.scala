@@ -8,7 +8,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
-import sturdy.fix.{Fixpoint, StackConfig, StackedFrames}
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 //import sturdy.language.tip.analysis.SignAnalysis.{*, given}
@@ -41,7 +41,11 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IntervalBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
+<<<<<<< Updated upstream
     p.getFileName.toString == "simple6.tip"
+=======
+    p.getFileName.toString == "simple8.tip"
+>>>>>>> Stashed changes
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runIntervalAnalysis(p, StackConfig.StackedStates())
@@ -70,6 +74,10 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
 
       //val resultVal = analysis.topValue
       val resultVal = analysis.intOps.toValue(List(2,5))
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
       val aresult = analysis.failure.fallible(analysis.executeBack(program, resultVal))
 
       println(s"Backward run of ${p.getFileName} ")
