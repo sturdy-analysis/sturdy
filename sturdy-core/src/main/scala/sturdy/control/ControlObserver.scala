@@ -15,4 +15,6 @@ class RecordingControlObserver[Atom, Section, Exc](check: Boolean = false) exten
   
   def events: List[ControlEvent[Atom, Section, Exc]] = buf.toList
 
-  override def toString: String = s"ControlEvents(${events.mkString("\n  ", "\n  ", "\n")})"
+  override def toString: String =
+    val esStr = ControlEvent.toString(events, "  ", "\n")
+    s"ControlEvents($esStr)"
