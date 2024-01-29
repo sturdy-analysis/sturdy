@@ -25,8 +25,8 @@ enum ControlEvent[Atom, Section, Exc]:
   case End(sec: Section)
 
   case BeginTry()
-  case Throw()
-  case Catch()
+  case Throw(exc: Exc)
+  case Catch(exc: Exc)
   case EndTry()
 
   case Fork()
@@ -35,60 +35,6 @@ enum ControlEvent[Atom, Section, Exc]:
 
   case FixpointAbort()
   case FixpointRepeat()
-
-/**
-  * x = a
-  * while (x)
-  *   x = x - 1
-  * y = x
-  */
-import ControlEvent.*
-val es = List(
-  Start(),
-  Atomic("x = a"),
-  Atomic("while (x)"),
-  Atomic("x = x - 1"),
-  Atomic("while (x)"),
-  FixpointAbort(),
-  FixpointRepeat(),
-  Atomic("while (x)"),
-  Atomic("x = x - 1"),
-  Atomic("while (x)"),
-  Atomic("y = x")
-)
-
-/**
-  * def f(n)=
-  *   var x;
-  *   if (n <= 0)
-  *     x = 1
-  *   else
-  *     x = n * f(n - 1)
-  *   ret x
-  */
-val es2 = List(
-  Begin("f"),
-  Atomic("if"),
-  Fork(),
-    Atomic("x = 1"),
-  Switch(),
-    FixpointAbort(),
-  Join(),
-  Atomic("ret x"),
-  End("f"),
-
-  FixpointRepeat(),
-  Begin("f"),
-  Atomic("if"),
-  Fork(),
-    Atomic("x = 1"),
-  Switch(),
-    Atomic("x = n * f(n-1)"),
-  Join(),
-  Atomic("ret x"),
-  End("f"),
-)
-
 
 object ControlEvent:
   def toString(es: List[ControlEvent[_,_,_]], _indent: String, sep: String): String =

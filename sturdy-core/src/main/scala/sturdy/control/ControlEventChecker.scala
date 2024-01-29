@@ -43,8 +43,8 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         case `sec` :: restSections => sections = restSections
         case s :: _ => error(s"Section mismatch, expected End($s): $ev")
       case ControlEvent.BeginTry() => ???
-      case ControlEvent.Throw() => ???
-      case ControlEvent.Catch() => ???
+      case ControlEvent.Throw(_) => ???
+      case ControlEvent.Catch(_) => ???
       case ControlEvent.EndTry() => ???
       case ControlEvent.Fork() => forks = ForkState.First +: forks
       case ControlEvent.Switch() => forks match
