@@ -19,7 +19,7 @@ object test extends App{
     case DoubleType => ValType.F64
     case _ => ValType.I32
 
-  val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject\\SimpleMath.class"
+  val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject"
 
   val pWithNatives = Project(
     new java.io.File(classFileName), // path to the JAR files/directories containing the project
@@ -37,6 +37,7 @@ object test extends App{
   println(convertedTypes)*/
 
   val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
+  val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
 
 
   val interp = new ConcreteInterpreter.Instance(pWithNatives, Map())
@@ -121,6 +122,11 @@ object test extends App{
   println("--- ObjectTest ---")
   val testObj = cfs.findMethod("objectTest").head
   interp.invokeStatic(testObj)
+  println(interp.stack.pop())
+
+  println("--- InheritanceTest ---")
+  val testInherit = cfs.findMethod("inheritanceTest").head
+  interp.invokeStatic(testInherit)
   println(interp.stack.pop())
 
 

@@ -364,11 +364,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
             val source = nativeClassFileWrapper(objectType)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethod(mth)
+            invokeMethodOnObject(mth)
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethod(mth)
+            invokeMethodOnObject(mth)
 
         case inst: INVOKESPECIAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
@@ -376,11 +376,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
             val source = nativeClassFileWrapper(objectType)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethod(mth)
+            invokeMethodOnObject(mth)
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethod(mth)
+            invokeMethodOnObject(mth)
 
         case _ =>
           val newFrameData = ()
@@ -466,7 +466,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
       ???
 
 
-  def invokeMethod(mth: Method) =
+  def invokeMethodOnObject(mth: Method) =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
