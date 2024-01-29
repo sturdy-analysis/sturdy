@@ -1,6 +1,7 @@
 package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers.*
 
 import apron.*
 import gmp.*
@@ -43,4 +44,25 @@ class ApronLibraryTest extends AnyFunSuite:
 
     val asItvs = aState.toBox(polyManager)
     asItvs.foreach(println)
+  }
+
+  test("{x ∈ [1,2], y ∈ [3,4], z ∈ [6,7]}.fold([x,y,z]) = { x ∈ [1,7] }") {
+
+    val x = "x"
+    val y = "y"
+    val z = "z"
+    val inames = Array(x, y, z)
+    val fnames: Array[String] = Array()
+    val env = new Environment(inames, fnames)
+    val manager: Manager = new Polka(false)
+    val aState = new Abstract1(manager, env)
+
+    aState.assign(manager, x, ApronExpr.Constant(Interval(1, 2)).toIntern(env), null)
+    aState.assign(manager, y, ApronExpr.Constant(Interval(3, 4)).toIntern(env), null)
+    aState.assign(manager, z, ApronExpr.Constant(Interval(6, 7)).toIntern(env), null)
+    aState.fold(manager, Array(x,y,z))
+
+    aState.getBound(manager, x) shouldBe Interval(1,7)
+    aState.getEnvironment.hasVar(y) shouldBe false
+    aState.getEnvironment.hasVar(z) shouldBe false
   }

@@ -34,7 +34,7 @@ class ApronStoreTest extends AnyFunSuite:
   val man = new apron.Polka(true)
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
-  test("basic case") {
+  test("Retire a recent address") {
     val apronStore = new ApronStore[Context, Addr, PowAddr, ApronExpr[ApAddr]](
       man,
       initialState,
@@ -42,18 +42,22 @@ class ApronStoreTest extends AnyFunSuite:
       (e: ApronExpr[ApAddr], s: Abstract1) => ApronExpr.Constant[ApAddr](s.getBound(man, e.toIntern(s.getEnvironment)))
     )
 
-    val x = PhysicalAddress("x", Recency.Recent)
-    val xPow = PowersetAddr(Set(x))
-    val y = PhysicalAddress("y", Recency.Recent)
-    val yPow = PowersetAddr(Set(y))
+    val xRecent = PhysicalAddress("x", Recency.Recent)
+    val xOld = PhysicalAddress("x", Recency.Old)
 
-    apronStore.write(xPow, ApronExpr.Constant(Interval(0, 10)))
-    apronStore.read(xPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0,10)))
+    apronStore.write(PowersetAddr(xRecent), ApronExpr.Constant(Interval(0, 10)))
+    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0,10)))
 
-    apronStore.write(yPow, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
-    apronStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(1, 11)))
+    apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
+    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
+    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0,10)))
 
-//    apronStore.read(PowersetAddr(Set(x,y))) shouldBe JOptionA.NoneSome(ApronExpr.Constant(Interval(0,11)))
+    apronStore.write(PowersetAddr(xRecent), ApronExpr.Constant(Interval(15, 20)))
+    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(15,20)))
+
+    apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
+    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
+    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(0, 20)))
   }
 
   // TODO: x = [0, 10], if (x >= 15)

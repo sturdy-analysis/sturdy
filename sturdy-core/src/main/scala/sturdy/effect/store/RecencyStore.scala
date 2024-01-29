@@ -54,9 +54,9 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
         mostRecent += ctx -> Powerset(fresh)
         val virt = VirtualAddress(ctx, fresh, addressTranslation)
         addressTranslation += virt.identifier -> PowRecency.Recent
-        store.read(PowersetAddr(PhysicalAddress(ctx, Recency.Recent))).map { oldVal =>
-          store.write(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), oldVal)
-        }
+        store.move(
+          PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
+          PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
         for(mostRecentVirt <- mostRecentVirts)
           addressTranslation += (ctx,mostRecentVirt) -> PowRecency.Old
         virt

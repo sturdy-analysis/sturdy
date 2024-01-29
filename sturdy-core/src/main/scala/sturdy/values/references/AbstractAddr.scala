@@ -7,6 +7,7 @@ trait AbstractAddr[+Addr]:
   def isEmpty: Boolean
   def isStrong: Boolean
   def reduce[A](f: Addr => A)(using Join[A]): A
+  def iterator: Iterator[Addr]
 
 given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
   override def equ(v1: AA, v2: AA): Topped[Boolean] =
@@ -24,6 +25,8 @@ case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends Abstra
   override def reduce[B](f: AA => B)(using Join[B]): B = addrs.map(f).reduce { case (a1, a2) =>
     Join(a1, a2).get
   }
+  override def iterator: Iterator[AA] = addrs.iterator
+
 object PowersetAddr:
   def apply[A, AA <: AbstractAddr[A]](addr: AA): PowersetAddr[A, AA] = PowersetAddr(Set(addr))
   def apply[A, AA <: AbstractAddr[A]](addr: AA, addrs: AA*): PowersetAddr[A, AA] = PowersetAddr(Set(addr) ++ addrs)

@@ -65,7 +65,7 @@ class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslati
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = physical.isStrong
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)
-
+  override def iterator: Iterator[VirtualAddress[Context]] = Iterator(this)
   override def toString: String = s"VirtualAddress($ctx, $n)"
 
   final override def equals(obj: Any): Boolean =
@@ -82,6 +82,7 @@ case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends Abst
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
+  override def iterator: Iterator[PhysicalAddress[Context]] = Iterator(this)
   override def toString() = s"${ctx}_${recency}"
 
 given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}
@@ -134,6 +135,9 @@ class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressM
 
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A =
     virtualAddresses.map(f).reduce((a,b) => Join(a,b).get)
+
+  override def iterator: Iterator[VirtualAddress[Context]] =
+    virtualAddresses.iterator
 
   override def toString: String =
     virtualAddresses.toString

@@ -100,6 +100,7 @@ case class ApronPhysicalAddress[Context: Ordering](ctx: Context, recency: Recenc
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: ApronPhysicalAddress[Context] => A)(using Join[A]): A = f(this)
+  override def iterator: Iterator[ApronPhysicalAddress[Context]] = Iterator(this)
   override def clone(): ApronPhysicalAddress[Context] = this // We don't need to clone since PhysicalAddress is immutable
 
   override def compareTo(v: apron.Var): Int =
@@ -125,7 +126,7 @@ Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu
 
 // Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
 // Restrict type to PowPhysicalAddress and enable automatic conversion?
-class ApronStore[
+final class ApronStore[
   Context: Ordering,
   //Addr <: apron.Var,
   Addr <: PhysicalAddress[Context], 
@@ -150,7 +151,7 @@ class ApronStore[
   def join : Join[State] = implicitly
   def widen : Widen[State] = implicitly
 
-  def read(powAddr: PowAddr): JOptionA[V] =
+  override def read(powAddr: PowAddr): JOptionA[V] =
     if(powAddr.isEmpty)
       JOptionA.None()
     else
@@ -165,7 +166,7 @@ class ApronStore[
         }
       )
 
-  def write(powAddr: PowAddr, v : V): Unit =
+  override def write(powAddr: PowAddr, v : V): Unit =
     getIntVal(v) match 
       case Some(exp) =>
         if(powAddr.isEmpty) {
@@ -196,7 +197,28 @@ class ApronStore[
       case None =>
         throw new NotImplementedError("")
 
-  def free(powAddr: PowAddr): Unit =
+  override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
+    // Check for the special case if `fromPow` and `toPow` are singletons to avoid a join on the abstract domain
+    if(fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
+      val from: Var = convertToApron(fromPow.iterator.next())
+      val to: Var = convertToApron(toPow.iterator.next())
+      if(apronState.getEnvironment.hasVar(to)) {
+        apronState.fold(apronManager, Array(to, from))
+      } else {
+        val newEnv = apronState.getEnvironment.add(Array(to), Array[Var]())
+        apronState.expand(apronManager, from, Array(to))
+        apronState.changeEnvironment(apronManager, newEnv.remove(Array(from)), false)
+      }
+    } else {
+      throw new NotImplementedError("Handle the case where multiple variables are moved")
+//      toPow.iterator.foreach {
+//        to =>
+//          val foldVars = (Iterator(to) ++ fromPow.iterator).map(addr => convertToApron(addr): Var).toArray
+//          apronState.join(apronManager, apronState.foldCopy(apronManager, foldVars))
+//      }
+    }
+
+  override def free(powAddr: PowAddr): Unit =
     if (powAddr.isStrong) {
       powAddr.reduce(addr =>
         var env = apronState.getEnvironment()
