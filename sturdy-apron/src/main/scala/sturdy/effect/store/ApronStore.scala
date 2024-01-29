@@ -200,8 +200,8 @@ final class ApronStore[
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
     // Check for the special case if `fromPow` and `toPow` are singletons to avoid a join on the abstract domain
     if(fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      val from: Var = convertToApron(fromPow.iterator.next())
-      val to: Var = convertToApron(toPow.iterator.next())
+      val from: Var = fromPow.iterator.next()
+      val to: Var = toPow.iterator.next()
       if(apronState.getEnvironment.hasVar(to)) {
         apronState.fold(apronManager, Array(to, from))
       } else {
