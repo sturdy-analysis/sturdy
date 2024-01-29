@@ -132,6 +132,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
     case Topped.Top =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
+      println(s"Got here: ${a1} and ${a2} with result ${IntervalOrderingOps.gt(a1, a2)}")
       IntervalOrderingOps.gt(a1, a2)
     case Topped.Actual(true) => v2(ITop) match
       case I(l, h) =>

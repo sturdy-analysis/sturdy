@@ -135,7 +135,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: State)
       val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut.asInstanceOf[state.Out], out.asInstanceOf[state.Out]).map(_.asInstanceOf[Out])}
 
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
+        () // println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
       val changed = newResult.hasChanged || newOut.hasChanged
       if (changed) {
         outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))
