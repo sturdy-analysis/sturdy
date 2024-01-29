@@ -97,7 +97,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
           completeEdge(current)
           stack.push(List.empty)
 
-        case _ => ??? // TODO
+        case _ => () // TODO
 
   private def completeEdge(current : Node) : Unit = completeEdge(current, None)
 

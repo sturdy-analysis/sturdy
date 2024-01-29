@@ -76,7 +76,7 @@ object IntervalAnalysis extends Interpreter,
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
 
-    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](true)
+    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](false)
     this.addControlObserver(controlObserver)
     
     val controlEventGraphBuilder = new ControlEventGraphBuilder[TipControl.Atom, TipControl.Section, TipControl.Exc]

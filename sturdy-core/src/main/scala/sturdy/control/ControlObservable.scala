@@ -24,7 +24,8 @@ trait ControlObservable[Atom, Section, Exc] extends JoinObserver:
       println(s"#### Join leftFailed=$leftFailed, rightfailed=$rightFailed")
     triggerControlEvent(ControlEvent.Join())
 
-  override def repeating(): Unit = () // TODO
+  override def repeating(): Unit =
+    triggerControlEvent(ControlEvent.FixpointRepeat())
 
 
 

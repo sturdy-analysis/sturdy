@@ -43,11 +43,15 @@ trait Control extends Interpreter:
         case FixIn.Run(s: (Stm.If | Stm.While)) =>
           br.observer = _ => observable.triggerControlEvent(ControlEvent.Atomic(s))
         case _ => // nothing
-      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
-        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
-        case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
-        case _ => // nothing
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
+        if (codom.isRecurrent)
+          observable.triggerControlEvent(ControlEvent.FixpointAbort())
+        else
+          dom match
+            case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
+            case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
+            case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
+            case _ => // nothing
 
   def controlLogger[Ctx](ctxSensitive: Boolean)(using effects: EffectStack)
              : ControlLogger[Ctx, FixIn, FixOut[Value], Nothing, TipControlNode] =
