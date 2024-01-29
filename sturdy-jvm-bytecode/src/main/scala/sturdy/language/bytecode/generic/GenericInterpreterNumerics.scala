@@ -236,11 +236,7 @@ class GenericInterpreterNumerics[Addr, Idx, V](bytecodeOps: BytecodeOps[Addr, Id
     case I2S =>
       ???
 
-  def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => evalNumericOp(ICONST_0)
-    case ValType.I64 => evalNumericOp(LCONST_0)
-    case ValType.F32 => evalNumericOp(FCONST_0)
-    case ValType.F64 => evalNumericOp(DCONST_0)
+
     
   
 

@@ -26,4 +26,9 @@ object ValType {
     def <:<(that: Type): Boolean =
       that == F64
   }
+ 
+  case object Obj extends ValType(32){
+    def <:<(that: Type): Boolean =
+      that == Obj
+  }
 }

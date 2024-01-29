@@ -20,19 +20,26 @@ object test extends App{
     case _ => ValType.I32
 
   val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject\\SimpleMath.class"
-  val cfs: List[ClassFile] =
+
+  val pWithNatives = Project(
+    new java.io.File(classFileName), // path to the JAR files/directories containing the project
+    org.opalj.bytecode.RTJar
+  )
+
+  /*val cfs: List[ClassFile] =
     process(new DataInputStream(new FileInputStream(classFileName))) { in =>
       org.opalj.br.reader.Java8Framework.ClassFile(in)
     }
-  /*val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
+  val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
   println(locals.map(_.fieldType))
   val localtypes = locals.map(_.fieldType)
   val convertedTypes = localtypes.map(convertTypes(_))
   println(convertedTypes)*/
 
+  val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
 
 
-  val interp = new ConcreteInterpreter.Instance(cfs.head, Map())
+  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map())
 
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
@@ -85,14 +92,16 @@ object test extends App{
   println(interp.stack.pop())
   println(interp.stack.pop())
 
-
-  val testMethod = cfs.head.findMethod("sub2").head
+  println("--- SubTest ---")
+  val testMethod = cfs.findMethod("sub2").head
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(7))
   interp.invokeStatic(testMethod)
   println(interp.stack.pop())
 
-  val testBranch = cfs.head.findMethod("branching").head
+
+  println("--- BranchTest ---")
+  val testBranch = cfs.findMethod("branching").head
   interp.eval(ICONST_0)
   interp.invokeStatic(testBranch)
   println(interp.stack.pop())
@@ -102,11 +111,17 @@ object test extends App{
   println(interp.stack.pop())
   println(interp.stack.size)
 
-  val testReturn = cfs.head.findMethod("returnTest").head
+  println("--- ReturnTest ---")
+  val testReturn = cfs.findMethod("returnTest").head
   interp.eval(ICONST_0)
   interp.invokeStatic(testReturn)
   println(interp.stack.pop())
   println(interp.stack.size)
+
+  println("--- ObjectTest ---")
+  val testObj = cfs.findMethod("objectTest").head
+  interp.invokeStatic(testObj)
+  println(interp.stack.pop())
 
 
   /*

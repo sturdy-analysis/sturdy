@@ -13,8 +13,11 @@ import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
-import org.opalj.br.{ArrayType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
+import org.opalj.br.analyses.Project
+import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
 import sturdy.values.objects.ObjectOps
+
+import java.net.URL
 
 
 /*
@@ -42,14 +45,16 @@ enum JvmExcept:
 
 enum AllocationSite:
   case classFile(obj: ObjectType, cfs: ClassFile)
+  case objField(cfs: ClassFile)
 
 trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Idx, V, ObjType, V, AllocationSite, J]
+  val objectOps: ObjectOps[Addr, Int, V, ClassFile, V, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
+  implicit val jvV: J[V]
 
   val stack: DecidableOperandStack[V]
   val failure: Failure
@@ -59,9 +64,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
-  val cfs: ClassFile
+  val project: Project[URL]
 
+  val nativeSource = org.opalj.bytecode.RTJar
+  val objectCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
 
+  def nativeClassFileWrapper(obj: ObjectType): String =
+    val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
+    source
 
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
@@ -324,20 +334,53 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
     // Load and Store Fields
     case x if (180 <= x && x <= 181) =>
-      ???
+      inst match
+        case inst: GETFIELD =>
+          val obj = stack.popOrAbort()
+          val objCF = project.classFile(inst.declaringClass).get
+          val fieldIndex = objCF.fields.map(_.name).indexOf(inst.name)
+          val field = objectOps.getField(obj, fieldIndex).getOrElse(fail(UnboundField, inst.name))
+          stack.push(field)
+        case inst: PUTFIELD =>
+          val value = stack.popOrAbort()
+          val obj = stack.popOrAbort()
+          val objCF = project.classFile(inst.declaringClass).get
+          val fieldIndex = objCF.fields.map(_.name).indexOf(inst.name)
+          objectOps.setField(obj, fieldIndex, value)
+
 
     // Invoke Functions
     case x if (182 <= x && x <= 186) =>
       inst match
         case inst: INVOKESTATIC =>
           // Overloaded Functions!
-          val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+          //val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+          val mth = project.classFile(inst.declaringClass).get.findMethod(inst.name, inst.methodDescriptor).get
           invokeStatic(mth)
 
         case inst: INVOKEVIRTUAL =>
-          // this is super temp and just for testing
-          val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-          invokeStatic(mth)
+          val objectType = inst.declaringClass.mostPreciseObjectType
+          if (project.isLibraryType(objectType))
+            val source = nativeClassFileWrapper(objectType)
+            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+            invokeMethod(mth)
+          else
+            val cfs = project.classFile(objectType).get
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+            invokeMethod(mth)
+
+        case inst: INVOKESPECIAL =>
+          val objectType = inst.declaringClass.mostPreciseObjectType
+          if (project.isLibraryType(objectType))
+            val source = nativeClassFileWrapper(objectType)
+            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+            invokeMethod(mth)
+          else
+            val cfs = project.classFile(objectType).get
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+            invokeMethod(mth)
 
         case _ =>
           val newFrameData = ()
@@ -352,7 +395,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
     case x if (x == 187) =>
       inst match
         case inst: NEW =>
-          ???
+          val cfs = project.classFile(inst.objectType).get
+          val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs)))
+          val obj = objectOps.makeObject(cfs, fields)
+          stack.push(obj)
+
 
     // Arrays
     case x if (188 <= x && x <= 190) =>
@@ -418,34 +465,56 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
     case inst: IASTORE.type =>
       ???
 
-  def invokeStatic(locals: List[ValType], instructionList: List[Instruction], args: List[V]) =
-    //val cls = ???
-    //val mth = ???
-    //val params = ???
-    val newFrameData = ()
-    val localVars = locals.map(num.defaultValue)
 
-    stack.withNewFrame(0) {
-      frame.withNew(newFrameData, localVars.view.zipWithIndex.map(_.swap)) {
-        for (inst <- instructionList) {
-          eval(inst)
-        }
-      }
-    }
-
-  def invokeStatic(mth: Method) =
+  def invokeMethod(mth: Method) =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
     val numArgs = mth.descriptor.parametersCount
     val args = stack.popNOrAbort(numArgs)
-    val argsAndLocals = args.view ++ locals.map(num.defaultValue)
+    val obj = stack.popOrAbort()
+    val thisAndArgs = List(obj) ++ args
+    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
 
     val startingPC = mth.body.get.iterator.next().pc
 
-    var currPC = List(startingPC)
-    var currInst = instructionMap.get(currPC.head)
+    var currInst = instructionMap.get(startingPC)
+
+    stack.withNewFrame(0) {
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+        runBlock(0, instructionMap, mth)
+      }
+    }
+
+  def invokeStatic(locals: List[ValType], instructionList: List[Instruction], args: List[V]) =
+      //val cls = ???
+      //val mth = ???
+      //val params = ???
+      val newFrameData = ()
+      val localVars = locals.map(defaultValue)
+
+      stack.withNewFrame(0) {
+        frame.withNew(newFrameData, localVars.view.zipWithIndex.map(_.swap)) {
+          for (inst <- instructionList) {
+            eval(inst)
+          }
+        }
+      }
+  def invokeStatic(mth: Method) =
+    val newFrameData = ()
+    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+    //println(mth.name)
+    //println(locals)
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+    val numArgs = mth.descriptor.parametersCount
+    val args = stack.popNOrAbort(numArgs)
+    val argsAndLocals = args.view ++ locals.map(defaultValue)
+
+    val startingPC = mth.body.get.iterator.next().pc
+
+    var currInst = instructionMap.get(startingPC)
 
     stack.withNewFrame(0){
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
@@ -457,10 +526,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
     except.tryCatch {
       var currPC = pc
       var currInst = instructionMap(currPC)
+      //println(currInst.toString ++ " " ++ currPC.toString)
       eval(currInst, currPC)
       while(currInst.nextInstructions(pc)(mth.body.get).nonEmpty){
         currPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
         currInst = instructionMap(currPC)
+        //println(currInst.toString ++ " " ++ currPC.toString)
         eval(currInst, currPC)
       }
 
@@ -475,6 +546,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
     case opalTypes: FloatType => ValType.F32
     case opalTypes: LongType => ValType.I64
     case opalTypes: DoubleType => ValType.F64
-    case opalTypes: ObjectType => ???
+    case opalTypes: BooleanType => ValType.I32
+    case opalTypes: ObjectType => ValType.Obj
     case opalTypes: ArrayType => ???
-    case _ => ValType.I32
+    case _ => ???
+
+  def defaultValue(ty: ValType): V = ty match
+    case ValType.I32 => num.evalNumericOp(ICONST_0)
+    case ValType.I64 => num.evalNumericOp(LCONST_0)
+    case ValType.F32 => num.evalNumericOp(FCONST_0)
+    case ValType.F64 => num.evalNumericOp(DCONST_0)
+    case ValType.Obj => objectOps.makeObject(objectCF, Seq())

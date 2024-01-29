@@ -2,6 +2,7 @@ package sturdy.language.bytecode
 
 import org.opalj.br.ClassFile
 import org.opalj.br.ObjectType
+import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
@@ -17,6 +18,8 @@ import sturdy.values.floating.FloatOps
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
+
+import java.net.URL
 
 object ConcreteInterpreter extends Interpreter:
   //override type I8  = Byte
@@ -49,11 +52,12 @@ object ConcreteInterpreter extends Interpreter:
 
 
   type Store = Map[Addr, Value]
-  class Instance(file: ClassFile, initStore: Store) extends GenericInstance:
+  class Instance(files: Project[URL], initStore: Store) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
     val joinUnit: MayJoin.NoJoin[FrameData] = implicitly
+    val jvV: MayJoin.NoJoin[Value] = implicitly
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
@@ -62,7 +66,7 @@ object ConcreteInterpreter extends Interpreter:
     val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val store: CStore[Addr, Value] = new CStore(initStore)
 
-    val cfs: ClassFile = file
+    val project: Project[URL] = files
 
     private given Failure = failure
 
