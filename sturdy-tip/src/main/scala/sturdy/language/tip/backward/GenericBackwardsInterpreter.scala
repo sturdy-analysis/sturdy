@@ -175,6 +175,10 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.NullRef() =>
       assert(nullValue, expected)
 
+    case Exp.Neg(e) => neg(evalBack(e, _), expected)
+
+
+
     //    case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
 
 

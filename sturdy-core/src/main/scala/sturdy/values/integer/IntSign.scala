@@ -18,7 +18,7 @@ enum IntSign:
     case Zero => s2 == NegOrZero || s2 == ZeroOrPos
     case Pos => s2 == ZeroOrPos
     case _ => false
-  )
+    )
   def negated: IntSign = this match
     case TopSign => TopSign
     case Neg => Pos
@@ -121,8 +121,24 @@ given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): In
     case (Pos, ZeroOrPos) => ZeroOrPos
     case (Pos, Pos) => Pos
 
-  def max(v1: IntSign, v2: IntSign): IntSign = ???
-  def min(v1: IntSign, v2: IntSign): IntSign = ???
+  def neg(v: IntSign): IntSign = v.negated
+
+  def max(v1: IntSign, v2: IntSign): IntSign = (v1, v2) match
+    case (TopSign, _) | (_, TopSign) => TopSign
+    case (Pos, _) | (_, Pos) => Pos
+    case (ZeroOrPos, _) | (_, ZeroOrPos) => ZeroOrPos
+    case (Zero, _) | (_, Zero) => Zero
+    case (NegOrZero, Neg) | (Neg, NegOrZero) => NegOrZero
+    case _ => Neg
+
+  def min(v1: IntSign, v2: IntSign): IntSign = (v1, v2) match
+    case (TopSign, _) | (_, TopSign) => TopSign
+    case (Neg, _) | (_, Neg) => Neg
+    case (NegOrZero, _) | (_, NegOrZero) => NegOrZero
+    case (Zero, _) | (_, Zero) => Zero
+    case (ZeroOrPos, Pos) | (Pos, ZeroOrPos) => ZeroOrPos
+    case _ => Pos
+
 
   def div(v1: IntSign, v2: IntSign): IntSign = v2 match
     case Zero => f.fail(IntegerDivisionByZero, s"$v1 / $v2")

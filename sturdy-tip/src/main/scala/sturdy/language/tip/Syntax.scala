@@ -15,6 +15,7 @@ enum Exp extends Labeled:
   case Div(e1: Exp, e2: Exp)
   case Gt(e1: Exp, e2: Exp)
   case Eq(e1: Exp, e2: Exp)
+  case Neg(e: Exp)
   case Call(fun: Exp, args: Seq[Exp])
   case Alloc(e: Exp)
   case VarRef(name: String)
@@ -34,6 +35,7 @@ enum Exp extends Labeled:
     case Div(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Gt(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Eq(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Neg(e) => m.combine(f(this),e.fold)
     case Call(fun, args) => m.combine(f(this), m.combine(fun.fold, m.combineAll(args.view.map(f))))
     case Alloc(e) => m.combine(f(this), e.fold)
     case VarRef(_) => f(this)
@@ -41,25 +43,6 @@ enum Exp extends Labeled:
     case NullRef() => f(this)
     case Record(fields) => m.combine(f(this), m.combineAll(fields.view.map(kv => f(kv._2))))
     case FieldAccess(rec, field) => m.combine(f(this), rec.fold)
-
-//  override def toString: String = this match
-//    case NumLit(n) => s"$n@${this.label}"
-//    case Input() => s"Input@${this.label}"
-//    case Var(name) => s"$name@${this.label}"
-//    case Add(e1, e2) => s"Add@${this.label}"
-//    case Sub(e1, e2) => s"Sub@${this.label}"
-//    case Mul(e1, e2) => s"Mul@${this.label}"
-//    case Div(e1, e2) => s"Div@${this.label}"
-//    case Gt(e1, e2) => s"Gt@${this.label}"
-//    case Eq(e1, e2) => s"Eq@${this.label}"
-//    case Call(Var(fun), args) => s"Call($fun)@${this.label}"
-//    case Call(fun, args) => s"Call@${this.label}"
-//    case Alloc(e) => s"Alloc@${this.label}"
-//    case VarRef(name: String) => s"&$name@${this.label}"
-//    case Deref(e) => s"Deref@${this.label}"
-//    case NullRef() => s"Null@${this.label}"
-//    case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
-//    case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
   override def toString: String = this match
     case NumLit(n) => s"$n"
@@ -71,6 +54,7 @@ enum Exp extends Labeled:
     case Div(e1, e2) => s"(${e1.toString} / ${e2.toString})"
     case Gt(e1, e2) => s"(${e1.toString} > ${e2.toString})"
     case Eq(e1, e2) => s"(${e1.toString} == ${e2.toString})"
+    case Neg(e)     => s"-(${e.toString})"
     case Call(Var(fun), args) =>
       val argsStr = args.map(_.toString).mkString(", ")
       s"$fun($argsStr)"
@@ -112,19 +96,11 @@ enum Stm extends Labeled:
     case Output(e) => m.combine(f(this), e.fold)
     case Error(e) => m.combine(f(this), e.fold)
 
-//  override def toString: String = this match
-//    case Assign(x, e) => s"Assign($x)@${this.label}"
-//    case If(c, t, e) => s"If($c)@${this.label}"
-//    case While(c, b) => s"While($c)@${this.label}"
-//    case Block(body) => s"Block@${this.label}"
-//    case Output(e) => s"Output@${this.label}"
-//    case Error(e) => s"Error@${this.label}"
-
   override def toString: String = this match
     case Assign(x, e) => s"$x := $e"
-    case If(c, t, None) => s"if ($c) {\n  $t\n}"
-    case If(c, t, Some(e)) => s"if ($c) {\n  $t\n} else {\n  $e\n}"
-    case While(c, b) => s"while ($c) { ... }"
+    case If(c, t, None) => s"if ($c) {...}"
+    case If(c, t, Some(e)) => s"if ($c) {...}"
+    case While(c, b) => s"while ($c) {...}"
     case Block(body) =>
       val bodyStr = body.map(stm => s"  ${stm.toString}").mkString("\n")
       s"{\n$bodyStr\n}"
@@ -147,6 +123,7 @@ enum Assignable:
     case AField(rec, field) => s"$rec.$field"
     case ADerefField(rec, field) => s"(*$rec).$field"
 
+
   def fold[A](using g: Exp => A)(using m: Monoid[A]): A = this match
     case ADeref(e) => g(e)
     case ADerefField(rec, _) => g(rec)
@@ -159,11 +136,7 @@ enum Assignable:
     case ADerefField(rec, _) => rec.intLiterals
 
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
-  override def toString: String =
-    val bodyStr = body.toString
-    val retStr = ret.toString
-    // s"function $name = body: $bodyStr\n  return $retStr\n}"
-    s"function $name"
+  override def toString: String = s"function $name"
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))
 

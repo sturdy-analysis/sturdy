@@ -68,7 +68,7 @@ class IntervalBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
       //val intervalValue = Interval.I(2, 10)
 
       //val resultVal = analysis.topValue
-      val resultVal = analysis.intOps.toValue(List(20,100))
+      val resultVal = analysis.intOps.toValue(List(2,5))
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, resultVal))
 

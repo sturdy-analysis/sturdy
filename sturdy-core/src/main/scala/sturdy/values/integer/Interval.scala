@@ -25,44 +25,64 @@ import sturdy.values.integer.Interval.*
 given Abstractly[Int, Interval] with
   override def apply(i: Int): Interval = I(i,i)
 
+
 given PartialOrder[Interval] with
   override def lteq(x: Interval, y: Interval): Boolean = (x, y) match
-    case (Interval.I(low1, high1), Interval.I(low2, high2)) => x == y || x < y
+    case (Interval.I(low1, high1), Interval.I(low2, high2)) => low2 <= low1 && high1 <= high2
+
 
 
 given CombineInterval[W <: Widening]: Combine[Interval, W] with
   override def apply(v1: Interval, v2: Interval): MaybeChanged[Interval] =
     if v1 == v2 then Unchanged(v1)
-    else if v1 < v2 then Changed(v2)
-    else if v2 < v1 then Unchanged(v1)
     else (v1, v2) match
       case (I(l1, h1), I(l2, h2)) => Changed(I(math.min(l1, l2), math.max(h1, h2)))
       case _ => Changed(ITop)
 
 
 
-given MIntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
+given IntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
   def integerLit(i: B): Interval =
     val iInt = base.toInt(i)
-    I(iInt,iInt)
+    I(iInt, iInt)
 
-  def randomInteger(): Interval = I(0, 0) // ZeroOrPos
+  def randomInteger(): Interval = ITop
 
   def add(v1: Interval, v2: Interval): Interval = (v1, v2) match
     case (I(l1, h1), I(l2, h2)) => I(l1 + l2, h1 + h2)
-    case (_,_) => ITop
+    case (_, _) => ITop
+
 
   def sub(v1: Interval, v2: Interval): Interval = (v1, v2) match
     case (I(l1, h1), I(l2, h2)) => I(l1 - h2, h1 - l2)
-    case (_,_) => ITop
+    case (_, _) => ITop
+
+  def neg(v: Interval): Interval = v.negated
 
 
-  def mul(v1: Interval, v2: Interval): Interval = ???
+  def mul(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, _) | (_, ITop) => ITop
+    case (I(l1, h1), I(l2, h2)) =>
+      val products = List(l1 * l2, l1 * h2, h1 * l2, h1 * h2)
+      I(products.min, products.max)
 
-  def max(v1: Interval, v2: Interval): Interval = ???
-  def min(v1: Interval, v2: Interval): Interval = ???
+  def div(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (_, ITop) | (ITop, _) => ITop
+    case (_, I(l2, h2)) if l2 <= 0 && h2 >= 0 => ITop
+    case (I(l1, h1), I(l2, h2)) =>
+      val divs = List(l1 / l2, l1 / h2, h1 / l2, h1 / h2)
+      I(divs.min, divs.max)
 
-  def div(v1: Interval, v2: Interval): Interval = ???
+
+  def max(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, _) | (_, ITop) => ITop
+    case (I(l1, h1), I(l2, h2)) => I(math.max(l1, l2), math.max(h1, h2))
+
+
+  def min(v1: Interval, v2: Interval): Interval = (v1, v2) match
+    case (ITop, i) => i
+    case (i, ITop) => i
+    case (I(l1, h1), I(l2, h2)) => I(math.min(l1, l2), math.min(h1, h2))
 
   def divUnsigned(v1: Interval, v2: Interval): Interval = ???
   def remainder(v1: Interval, v2: Interval): Interval = ???
@@ -88,23 +108,25 @@ given IntervalOrderingOps: OrderingOps[Interval, Topped[Boolean]] with
   def lt(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
     case (I(l1, h1), I(l2, h2)) =>
       if (h1 < l2) then Topped.Actual(true)
-      else if (h2 < l1) then Topped.Actual(false)
+      else if (h2 <= l1) then Topped.Actual(false)
       else Topped.Top
     case _ => Topped.Top
 
   def le(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
     case (I(l1, h1), I(l2, h2)) =>
       if (h1 <= l2) then Topped.Actual(true)
-      else if (h2 <= l1) then Topped.Actual(false)
+      else if (h2 < l1) then Topped.Actual(false)
       else Topped.Top
     case _ => Topped.Top
+
 
 
 given IntervalEqOps: EqOps[Interval, Topped[Boolean]] with
   def equ(v1: Interval, v2: Interval): Topped[Boolean] = (v1, v2) match
     case (I(l1, h1), I(l2, h2)) =>
-      val b = l1 == l2 && h1 == h2
-      Topped.Actual(b)
+      if (l1 == h1 && h1 == l2 && l2 == h2) Topped.Actual(true)
+      else if (h1 < l2 || h2 < l1) Topped.Actual(false)
+      else Topped.Top
     case _ => Topped.Top
 
   def neq(v1: Interval, v2: Interval): Topped[Boolean] = equ(v1, v2).map(!_)

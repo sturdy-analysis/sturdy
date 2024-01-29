@@ -6,8 +6,10 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.{EffectStack, TrySturdy, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
+
 import sturdy.effect.store.must.PowersetAddrMustStore
-import sturdy.effect.store.{MustStore, Store}
+import sturdy.effect.store.Store
+
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
@@ -27,6 +29,10 @@ import sturdy.values.{*, given}
 object IntervalBackwardAnalysis extends BackwardsInterpreter, References.AllocationSites, Ints.MInterval, Functions.Powerset, Records.PreciseFieldsOrTop, Fix:
 
   given Lazy[Join[Value]] = lazily(CombineValue)
+
+  //  var bounds: Set[Double] = Set()
+  //  given Widen[Interval] = new IntervalWiden(bounds, Double.MinValue, Double.MaxValue)
+  //  given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
   class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericBackwardsInstance:
     override def jv: WithJoin[Value] = implicitly
@@ -48,6 +54,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
     override val compareOps: BackOrderingOps[Value, Value] = implicitly
+
     override val backEqOps: BackEqOps[Value, Value] = new BackEqOps[Value, Value]:
       override def equ(v1: Value => Value, v2: Value => Value, r: Value): Value = asBoolean(r) match
         case Topped.Top => v2(Value.TopValue); v1(Value.TopValue); r
@@ -55,9 +62,9 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
         case Topped.Actual(false) => v2(Value.TopValue) match
           case Value.IntValue(Interval.I(0,0)) =>
             effectStack.joinComputations {
-              v1(Value.IntValue(???)) //IntSign.Neg? what is going on here???
+              v1(Value.IntValue(Interval.I(Int.MinValue,-1)))//IntSign.Neg? what is going on here???
             } {
-              v1(Value.IntValue(???)) //IntSign.Pos
+              v1(Value.IntValue(Interval.I(1,Int.MaxValue))) //IntSign.Pos
             }
             r
           case _ => v1(Value.TopValue); r
@@ -77,6 +84,8 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: AUserInput[Value] = new AUserInput(Value.IntValue(Interval.ITop))
     override val input: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
+
+
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 

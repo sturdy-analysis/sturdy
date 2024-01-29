@@ -106,17 +106,20 @@ object Parser:
   val deref: P[Exp] =
     (op('*') *> P.defer(atom)).map(Exp.Deref.apply)
 
+  lazy val negatableExpr: P[Exp] =
+    (op('-') *> atom).map(Exp.Neg(_))
+
   lazy val atom: P[Exp] =
     ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) |
-    (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) |
-    keyword(KINPUT).map(_ => Exp.Input()) |
-    keyword(KNULL).map(_ => Exp.NullRef()) |
-    (op('&') *> identifier).map(Exp.VarRef.apply) |
-    deref |
-    spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
-    inParens(recExpression) |
-    inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
-    variable
+      (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) |
+      keyword(KINPUT).map(_ => Exp.Input()) |
+      keyword(KNULL).map(_ => Exp.NullRef()) |
+      (op('&') *> identifier).map(Exp.VarRef.apply) |
+      deref |
+      spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
+      inParens(recExpression) |
+      inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
+      variable
 
   val access: P[Exp] =
     ((variable | deref | inParens(recExpression)) ~ (op('.') *> identifier).rep)
@@ -125,40 +128,41 @@ object Parser:
 
   lazy val term: P[Exp] =
     access |
-    (atom ~ (
-      (op('*') *> P.defer(term)).map(e2 => Exp.Mul(_, e2)) |
-      (op('/') *> P.defer(term)).map(e2 => Exp.Div(_, e2))
-    ).?).map(maybeBinOp)
+      (atom ~ (
+        (op('*') *> P.defer(term)).map(e2 => Exp.Mul(_, e2)) |
+          (op('/') *> P.defer(term)).map(e2 => Exp.Div(_, e2))
+        ).?).map(maybeBinOp)
 
   lazy val operation: P[Exp] =
     (term ~ (
       (op('+') *> P.defer(operation)).map(e2 => Exp.Add(_, e2)) |
-      (op('-') *> P.defer(operation)).map(e2 => Exp.Sub(_, e2))
-    ).?).map(maybeBinOp)
+        (op('-') *> P.defer(operation)).map(e2 => Exp.Sub(_, e2))
+      ).?).map(maybeBinOp)
 
   lazy val expression: P[Exp] =
-    (operation ~ (
-      (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
-      (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
-    ).?).map(maybeBinOp)
+    negatableExpr |
+      (operation ~ (
+        (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
+          (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
+        ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =
     (op('*') *> atom).map(Assignable.ADeref.apply) |
-    (inParens(op('*') *> atom) ~ (op('.') *> identifier)).map(Assignable.ADerefField.apply) |
-    (identifier ~ (op('.') *> identifier).?)
-      .map {
-        case (x, None) => Assignable.AVar(x)
-        case (x, Some(y)) => Assignable.AField(x, y)
-      }
+      (inParens(op('*') *> atom) ~ (op('.') *> identifier)).map(Assignable.ADerefField.apply) |
+      (identifier ~ (op('.') *> identifier).?)
+        .map {
+          case (x, None) => Assignable.AVar(x)
+          case (x, Some(y)) => Assignable.AField(x, y)
+        }
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
       .map { case ((c, t), e) => Stm.If(c, t, e) } |
-    (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) |
-    inBraces(recStatement.rep0).map(Stm.Block.apply) |
-    (keyword(KOUTPUT) *> recExpression <* semi).map(Stm.Output.apply) |
-    (keyword(KERROR) *> recExpression <* semi).map(Stm.Error.apply) |
-    ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply)
+      (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) |
+      inBraces(recStatement.rep0).map(Stm.Block.apply) |
+      (keyword(KOUTPUT) *> recExpression <* semi).map(Stm.Output.apply) |
+      (keyword(KERROR) *> recExpression <* semi).map(Stm.Error.apply) |
+      ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply)
 
   val varDecl: P[List[String]] =
     keyword(KVAR) *> list(identifier) <* semi
@@ -167,10 +171,10 @@ object Parser:
     (identifier ~ inParens(list0(identifier)) ~
       inBraces(
         varDecl.rep0 ~
-        statement.rep0 ~
-        (keyword(KRETURN) *> expression <* semi)
+          statement.rep0 ~
+          (keyword(KRETURN) *> expression <* semi)
       )
-    ).map { case ((name, params), ((locals, body), ret)) =>
+      ).map { case ((name, params), ((locals, body), ret)) =>
       Function(name, params, locals.flatten, Stm.Block(body), ret)
     }
 
