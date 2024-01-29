@@ -1,11 +1,11 @@
 package sturdy.language.tip.analysis
 
-import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.control.{ControlEvent, ControlObservable, RecordingControlObserver}
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.failure.{CollectedFailures, Failure}
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind, ObservableFailure}
 import sturdy.effect.print.PrintFiniteAlphabet
 import sturdy.effect.print.given
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -38,7 +38,8 @@ object SignAnalysis extends Interpreter,
   class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
-    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
+
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)

@@ -9,7 +9,7 @@ import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.ObservableExcept
-import sturdy.effect.failure.{CollectedFailures, Failure}
+import sturdy.effect.failure.{CollectedFailures, Failure, ObservableFailure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
@@ -43,7 +43,7 @@ object IntervalAnalysis extends Interpreter,
   class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
-    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
