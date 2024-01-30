@@ -8,7 +8,6 @@ class TestControlEvents extends AnyFunSuite {
     test(name) {
       val rec = new RecordingControlObserver[A, S, E](true)
       es.foreach(rec.handle)
-      rec.ch
     }
 
   testEvents("Test 1",

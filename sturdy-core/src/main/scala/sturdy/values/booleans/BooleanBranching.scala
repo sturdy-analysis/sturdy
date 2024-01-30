@@ -29,7 +29,11 @@ given ConcreteBooleanBranching[R]: BooleanBranching[Boolean, R] with
     if (v) thn else els
 
 class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends BooleanBranching[B, R]:
-  var observer: B => Unit = _ => ()
+  private var observer: List[B => Unit] = List()
+  def addObserver(f: B => Unit): Unit = observer +:= f
+
   override def boolBranch(v: B, thn: => R, els: => R): R =
-    observer(v)
+    val f = observer.head
+    f(v)
+    observer = observer.tail
     ops.boolBranch(v, thn, els)

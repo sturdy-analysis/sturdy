@@ -41,7 +41,7 @@ trait Control extends Interpreter:
         case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
         case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
         case FixIn.Run(s: (Stm.If | Stm.While)) =>
-          br.observer = _ => observable.triggerControlEvent(ControlEvent.Atomic(s))
+          br.addObserver(_ => observable.triggerControlEvent(ControlEvent.Atomic(s)))
         case _ => // nothing
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
         if (codom.isRecurrent)
