@@ -1,10 +1,11 @@
 package sturdy.control
 
 import sturdy.effect.JoinObserver
+import sturdy.effect.except.ExceptObserver
 
 import scala.collection.mutable.ListBuffer
 
-trait ControlObservable[Atom, Section, Exc] extends JoinObserver:
+trait ControlObservable[Atom, Section, Exc] extends JoinObserver, ExceptObserver[Exc]:
   private val observers: ListBuffer[ControlObserver[Atom, Section, Exc]] = ListBuffer.empty
   def addControlObserver(obs: ControlObserver[Atom, Section, Exc]): Unit =
     observers += obs
@@ -16,16 +17,20 @@ trait ControlObservable[Atom, Section, Exc] extends JoinObserver:
 
   override def joinStart(): Unit = triggerControlEvent(ControlEvent.Fork())
   override def joinSwitch(leftFailed: Boolean): Unit =
-    if (leftFailed)
-      println("#### Switch leftFailed")
     triggerControlEvent(ControlEvent.Switch())
   override def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit =
-    if (leftFailed || rightFailed)
-      println(s"#### Join leftFailed=$leftFailed, rightfailed=$rightFailed")
     triggerControlEvent(ControlEvent.Join())
 
   override def repeating(): Unit =
     triggerControlEvent(ControlEvent.FixpointRepeat())
+  
+  override def throwing(exc: Exc): Unit = triggerControlEvent(ControlEvent.Throw(exc))
+  override def handling(exc: Exc): Unit = triggerControlEvent(ControlEvent.Catch(exc))
+  override def tryStart(): Unit = triggerControlEvent(ControlEvent.BeginTry())
+  override def tryEnd(): Unit = triggerControlEvent(ControlEvent.EndTry())
+  override def catchStart(): Unit = ()
+  override def catchEnd(): Unit = ()
 
+  
 
 

@@ -35,7 +35,7 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
@@ -59,7 +59,7 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
-    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](true)
+    val controlObserver = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
     this.addControlObserver(controlObserver)
 
     override val fixpoint =

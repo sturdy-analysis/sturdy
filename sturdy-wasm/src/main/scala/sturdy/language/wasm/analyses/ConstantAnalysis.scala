@@ -10,11 +10,11 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -34,8 +34,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow:
+object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[Topped[Byte]]
@@ -79,7 +80,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-      GenericInstance
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, WasmException[Value]]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
@@ -103,11 +104,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
+    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, WasmException[Value]](true)
+    this.addControlObserver(controlRecorder)
+
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = config.ctx.Ctx
       val (contextPreparation, sensitivity) = config.ctx.make[ConstantAnalysis.Value]
       import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger[WasmException[Value]](Instance.this, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = config.fix.get
     }

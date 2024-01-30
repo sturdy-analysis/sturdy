@@ -40,7 +40,7 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[TipControl.Atom, TipControl.Section, TipControl.Exc]:
+  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
@@ -76,10 +76,10 @@ object IntervalAnalysis extends Interpreter,
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
 
-    val controlObserver = new RecordingControlObserver[TipControl.Atom, TipControl.Section, TipControl.Exc](false)
+    val controlObserver = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
     this.addControlObserver(controlObserver)
     
-    val controlEventGraphBuilder = new ControlEventGraphBuilder[TipControl.Atom, TipControl.Section, TipControl.Exc]
+    val controlEventGraphBuilder = new ControlEventGraphBuilder[Control.Atom, Control.Section, Control.Exc]
     this.addControlObserver(controlEventGraphBuilder)
 
     final override val fixpoint =

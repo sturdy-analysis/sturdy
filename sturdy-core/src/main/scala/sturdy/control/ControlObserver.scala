@@ -11,6 +11,7 @@ class RecordingControlObserver[Atom, Section, Exc](check: Boolean = false) exten
   
   override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit = 
     buf += ev
+    println(ev)
     checker.foreach(_.handle(ev))
   
   def events: List[ControlEvent[Atom, Section, Exc]] = buf.toList

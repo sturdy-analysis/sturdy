@@ -10,7 +10,7 @@ import sturdy.language.tip.*
 import sturdy.util.Labeled
 import sturdy.values.booleans.ObservedBooleanBranching
 
-object TipControl:
+object Control:
   type Atom = Stm
   type Section = Function | Exp.Call
   type Exc = Unit
@@ -31,7 +31,7 @@ object TipControl:
 
 
 trait Control extends Interpreter:
-  import TipControl.*
+  import Control.*
 
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc], br: ObservedBooleanBranching[_,_])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     observable.triggerControlEvent(ControlEvent.Start())
