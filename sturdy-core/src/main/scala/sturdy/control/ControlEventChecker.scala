@@ -8,8 +8,8 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
     case Sec(s: Section)
     case Try()
     case Catching(failed: Boolean)
-    case ForkFirst()
-    case ForkSecond(firstFailing: Boolean)
+    case ForkFirst(excBeforeFork: Set[Exc])
+    case ForkSecond(firstFailing: Boolean, excAfterFirst: Set[Exc])
     case Fixpoint(failing: Boolean, stack: List[Entry], tries: List[Set[Exc]])
 
   private var started = false
@@ -31,7 +31,7 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
     case Nil => error(s"No try entry to catch, stack is empty: $ev")
     case e :: rest => f.lift(e) match
       case None => e match
-        case Entry.ForkFirst() | Entry.ForkSecond(_) => e :: updateThroughForks(rest)(f)
+        case Entry.ForkFirst(_) | Entry.ForkSecond(_,_) => e :: updateThroughForks(rest)(f)
         case _ => error(s"Section mismatch, expected end of $e: $ev")
       case Some(None) => rest
       case Some(Some(replace)) => replace :: rest
@@ -47,11 +47,16 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
       case ControlEvent.End(sec) =>
         updateEntry { case Entry.Sec(sec) => None}
       case ControlEvent.Switch() =>
-        updateEntry { case Entry.ForkFirst() => Some(Entry.ForkSecond(failing)) }
+        updateEntry { case Entry.ForkFirst(excBeforeFork) =>
+          val excAfterFirst = tries.head
+          tries = excBeforeFork :: tries.tail
+          Some(Entry.ForkSecond(failing, excAfterFirst))
+        }
         failing = false
       case ControlEvent.Join() =>
-        updateEntry { case Entry.ForkSecond(firstFailing) =>
+        updateEntry { case Entry.ForkSecond(firstFailing, excAfterFirst) =>
           failing = firstFailing
+          tries = (tries.head ++ excAfterFirst) :: tries.tail
           None
         }
       case ControlEvent.Catching() =>
@@ -74,7 +79,6 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
       case ControlEvent.FixpointRepeat() =>
-        println("repeat")
         updateEntry { case e: Entry.Fixpoint =>
           failing = e.failing
           stack = e.stack
@@ -115,16 +119,22 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
       case ControlEvent.Fork() =>
-        pushEntry(Entry.ForkFirst())
+        pushEntry(Entry.ForkFirst(tries.head))
       case ControlEvent.Switch() =>
-        updateEntry { case Entry.ForkFirst() => Some(Entry.ForkSecond(failing)) }
+        updateEntry { case Entry.ForkFirst(excBeforeFork) =>
+          val excAfterFirst = tries.head
+          tries = excBeforeFork :: tries.tail
+          Some(Entry.ForkSecond(failing, excAfterFirst))
+        }
       case ControlEvent.Join() =>
-        updateEntry { case Entry.ForkSecond(firstFailing) => None }
+        updateEntry { case Entry.ForkSecond(firstFailing, excAfterFirst) =>
+          tries = (tries.head ++ excAfterFirst) :: tries.tail
+          None
+        }
       case ControlEvent.FixpointPrepare() =>
         pushEntry(Entry.Fixpoint(failing, stack, tries))
       case ControlEvent.FixpointRecurrent() => failing = true
       case ControlEvent.FixpointRepeat() =>
-        println("repeat")
         updateEntry { case e: Entry.Fixpoint =>
           failing = e.failing
           stack = e.stack
