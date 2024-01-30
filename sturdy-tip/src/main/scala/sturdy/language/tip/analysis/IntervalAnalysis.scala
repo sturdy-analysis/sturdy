@@ -83,7 +83,7 @@ object IntervalAnalysis extends Interpreter,
     this.addControlObserver(controlEventGraphBuilder)
 
     final override val fixpoint =
-      fix.log(controlEventLogger(this, branchOps),
+      fix.log(controlEventLogger(this, branchOps, isFunOrWhile(_) >= 0),
         callSiteSensitive(callSites,
           fix.log(cfgLogger.logger,
             fix.dispatch(isFunOrWhile, Seq(

@@ -33,25 +33,37 @@ object Control:
 trait Control extends Interpreter:
   import Control.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc], br: ObservedBooleanBranching[_,_])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
+                         br: ObservedBooleanBranching[_,_],
+                         needsFixing: FixIn => Boolean
+                        )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     observable.triggerControlEvent(ControlEvent.Start())
     effects.addJoinObserver(observable)
     new Logger:
-      override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
-        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
-        case FixIn.Run(s: (Stm.If | Stm.While)) =>
-          br.addObserver(_ => observable.triggerControlEvent(ControlEvent.Atomic(s)))
-        case _ => // nothing
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
+          case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
+          case FixIn.Run(s: (Stm.If | Stm.While)) =>
+            br.addObserver(_ => observable.triggerControlEvent(ControlEvent.Atomic(s)))
+          case _ => // nothing
+
+        if (needsFixing(dom))
+          observable.triggerControlEvent(ControlEvent.FixpointPrepare())
+
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
         if (codom.isRecurrent)
-          observable.triggerControlEvent(ControlEvent.FixpointAbort())
-        else
-          dom match
-            case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
-            case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
-            case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
-            case _ => // nothing
+          observable.triggerControlEvent(ControlEvent.FixpointRecurrent())
+        if (needsFixing(dom))
+          observable.triggerControlEvent(ControlEvent.FixpointRelease())
+
+        dom match
+          case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
+          case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
+          case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
+          case _ => // nothing
+
+
 
   def controlLogger[Ctx](ctxSensitive: Boolean)(using effects: EffectStack)
              : ControlLogger[Ctx, FixIn, FixOut[Value], Nothing, TipControlNode] =

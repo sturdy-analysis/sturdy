@@ -54,6 +54,9 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
       this.exception = originalException
     }
 
+  /** This is necessary since a failing execution still produces relevant except state. */
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ExceptJoiner)
+
   private class ExceptJoiner[A] extends ComputationJoiner[A] {
     val snapshot = exception
     var fExcept: JOptionA[E] = null
@@ -63,12 +66,13 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
       exception = snapshot
 
     override def retainNone(): Unit =
-      exception = snapshot
+      exception = fExcept.joinDeep(exception)
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      exception = fExcept
+      exception = fExcept.joinDeep(exception)
 
-    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      exception = fExcept.joinDeep(exception)
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       exception = fExcept.joinDeep(exception)

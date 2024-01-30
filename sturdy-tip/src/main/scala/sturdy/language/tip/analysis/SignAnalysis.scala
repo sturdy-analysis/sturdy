@@ -63,7 +63,7 @@ object SignAnalysis extends Interpreter,
     this.addControlObserver(controlObserver)
 
     override val fixpoint =
-      fix.log(controlEventLogger(this, branchOps),
+      fix.log(controlEventLogger(this, branchOps, isFunOrWhile(_) >= 0),
         fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
           parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)

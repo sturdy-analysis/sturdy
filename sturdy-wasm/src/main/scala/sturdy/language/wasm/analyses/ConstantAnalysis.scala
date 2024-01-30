@@ -80,7 +80,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-      GenericInstance, ControlObservable[Control.Atom, Control.Section, WasmException[Value]]
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
@@ -104,7 +104,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, WasmException[Value]](true)
+    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
     this.addControlObserver(controlRecorder)
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
@@ -112,7 +112,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       val (contextPreparation, sensitivity) = config.ctx.make[ConstantAnalysis.Value]
       import config.ctx.finiteCtx
       override protected def contextFree = phi =>
-        fix.log(controlEventLogger[WasmException[Value]](Instance.this, except), contextPreparation(phi))
+        fix.log(controlEventLogger(Instance.this, except, isFunOrLoop), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = config.fix.get
     }

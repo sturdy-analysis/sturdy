@@ -7,8 +7,10 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
   enum Entry:
     case Sec(s: Section)
     case Try()
+    case Catching(failed: Boolean)
     case ForkFirst()
     case ForkSecond(firstFailing: Boolean)
+    case Fixpoint(failing: Boolean, stack: List[Entry], tries: List[Set[Exc]])
 
   private var started = false
   private var failing = false
@@ -24,6 +26,12 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
       case None => error(s"Section mismatch, expected end of $e: $ev")
       case Some(None) => stack = rest
       case Some(Some(replace)) => stack = replace :: rest
+
+  private def updateCatching(entries: List[Entry])(using ev: ControlEvent[Atom, Section, Exc]): List[Entry] = entries match
+    case Nil => error(s"No try entry to catch, stack is empty: $ev")
+    case Entry.Try() :: rest => Entry.Catching(failing) :: rest
+    case (e@(Entry.ForkFirst() | Entry.ForkSecond(_))) :: rest => e :: updateCatching(rest)
+    case e :: rest => error(s"Section mismatch, expected end of $e: $ev")
 
   override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit =
     given ControlEvent[Atom, Section, Exc] = ev
@@ -43,20 +51,36 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
           failing = firstFailing
           None
         }
-      case ControlEvent.Catch(exc) =>
+      case ControlEvent.Catching() =>
+        stack = updateCatching(stack)
+        failing = false
+      case ControlEvent.Handle(exc) =>
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
         tries = remaining :: tries.tail
-        failing = false
       case ControlEvent.EndTry() =>
-        updateEntry { case Entry.Try() => None }
+        updateEntry {
+          case Entry.Try() => None
+          case Entry.Catching(failed) =>
+            failing = failed
+            None
+        }
         val stillActive = tries.head
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
       case ControlEvent.FixpointRepeat() =>
+        println("repeat")
+        updateEntry { case e: Entry.Fixpoint =>
+          failing = e.failing
+          stack = e.stack
+          tries = e.tries
+          Some(e)
+        }
         failing = false
-      case ControlEvent.FixpointAbort() => // still failing
+      case ControlEvent.FixpointRecurrent() => // still failing
+      case ControlEvent.FixpointRelease() =>
+        updateEntry { case _: Entry.Fixpoint => None}
       case _ => error(s"Invalid event after failure: $ev")
       
     else ev match
@@ -73,13 +97,15 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
       case ControlEvent.Throw(exc) =>
         tries = (tries.head + exc) :: tries.tail
         failing = true
-      case ControlEvent.Catch(exc) =>
+      case ControlEvent.Catching() =>
+        stack = updateCatching(stack)
+      case ControlEvent.Handle(exc) =>
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
         tries = remaining :: tries.tail
       case ControlEvent.EndTry() =>
-        updateEntry { case Entry.Try() => None }
+        updateEntry { case Entry.Try() | Entry.Catching(_) => None }
         val stillActive = tries.head
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
@@ -89,8 +115,19 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         updateEntry { case Entry.ForkFirst() => Some(Entry.ForkSecond(failing)) }
       case ControlEvent.Join() =>
         updateEntry { case Entry.ForkSecond(firstFailing) => None }
-      case ControlEvent.FixpointAbort() => failing = true
-      case ControlEvent.FixpointRepeat() => // nothing
+      case ControlEvent.FixpointPrepare() =>
+        pushEntry(Entry.Fixpoint(failing, stack, tries))
+      case ControlEvent.FixpointRecurrent() => failing = true
+      case ControlEvent.FixpointRepeat() =>
+        println("repeat")
+        updateEntry { case e: Entry.Fixpoint =>
+          failing = e.failing
+          stack = e.stack
+          tries = e.tries
+          Some(e)
+        }
+      case ControlEvent.FixpointRelease() =>
+        updateEntry { case _: Entry.Fixpoint => None}
 
 
 object ControlEventChecker:

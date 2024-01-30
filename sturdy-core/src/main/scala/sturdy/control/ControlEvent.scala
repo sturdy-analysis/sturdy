@@ -26,45 +26,18 @@ enum ControlEvent[Atom, Section, Exc]:
 
   case BeginTry()
   case Throw(exc: Exc)
-  case Catch(exc: Exc)
+  case Catching()
+  case Handle(exc: Exc)
   case EndTry()
 
   case Fork()
   case Switch()
   case Join()
 
-  case FixpointAbort()
+  case FixpointPrepare()
+  case FixpointRecurrent()
   case FixpointRepeat()
-
-object ControlEvent:
-  def toString(es: List[ControlEvent[_,_,_]], _indent: String, sep: String): String =
-    val buf = new StringBuffer()
-    var indent = _indent
-    var rest = es
-    while (rest.nonEmpty) {
-      val e = rest.head
-      e match
-        case Begin(_) =>
-          buf.append(indent).append(e).append(sep)
-          indent += "  "
-        case End(_) =>
-          indent = indent.drop(2)
-          buf.append(indent).append(e).append(sep)
-        case Fork() =>
-          buf.append(indent).append(e).append(sep)
-          indent += "  "
-        case Switch() =>
-          buf.append(indent.drop(2)).append(e).append(sep)
-        case Join() =>
-          indent = indent.drop(2)
-          buf.append(indent).append(e).append(sep)
-        case _ =>
-          buf.append(indent).append(e).append(sep)
-
-      rest = rest.tail
-    }
-    buf.toString
-
+  case FixpointRelease()
 
 /*
 

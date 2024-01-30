@@ -30,7 +30,7 @@ trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effect, ObservableExcept[Exc]:
     try tries(f).either(a => {g; a}){ e =>
       catchStart()
       try exceptional.handle(e) { exc =>
-//        handling(exc)
+        handling(exc)
         g
         throws(exc)
       } finally {

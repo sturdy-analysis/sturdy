@@ -2,7 +2,7 @@ package sturdy.language.wasm.abstractions
 
 import sturdy.control.{ControlEvent, ControlObservable}
 import sturdy.effect.{EffectStack, ObservableJoin, TrySturdy}
-import sturdy.effect.except.ObservableExcept
+import sturdy.effect.except.{LiftedExceptObserver, ObservableExcept}
 import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
 import sturdy.language.wasm.generic.InstLoc
 import sturdy.language.wasm.generic.FuncId
@@ -21,28 +21,39 @@ import collection.mutable
 object Control:
   type Atom = (Inst, InstLoc)
   type Section = FuncId | (Block | Loop | If | Call | CallIndirect, InstLoc)
+  type Exc = JumpTarget
 
 trait Control extends Interpreter:
   import Control.*
 
-  def controlEventLogger[Exc](observable: ControlObservable[Atom, Section, Exc], obsExc: ObservableExcept[Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
+                         obsExc: ObservableExcept[WasmException[Value]],
+                         needsFixing: FixIn => Boolean
+                        )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     observable.triggerControlEvent(ControlEvent.Start())
     effects.addJoinObserver(observable)
-    obsExc.addExceptObserver(observable)
+    obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:
-      override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(ControlEvent.Begin(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(ControlEvent.Begin((c,loc)))
-        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(ControlEvent.Atomic((inst, loc)))
-        case _ => // nothing
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(ControlEvent.Begin(id))
+          case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(ControlEvent.Begin((c,loc)))
+          case FixIn.Eval(inst, loc) => observable.triggerControlEvent(ControlEvent.Atomic((inst, loc)))
+          case _ => // nothing
+
+        if (needsFixing(dom))
+          observable.triggerControlEvent(ControlEvent.FixpointPrepare())
+
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
         if (codom.isRecurrent)
-          observable.triggerControlEvent(ControlEvent.FixpointAbort())
-        else
-          dom match
-            case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(ControlEvent.End(id))
-            case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(ControlEvent.End((c, loc)))
-            case _ => // nothing
+          observable.triggerControlEvent(ControlEvent.FixpointRecurrent())
+        if (needsFixing(dom))
+          observable.triggerControlEvent(ControlEvent.FixpointRelease())
+
+        dom match
+          case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(ControlEvent.End(id))
+          case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(ControlEvent.End((c, loc)))
+          case _ => // nothing
 
 
 enum CfgNode extends ControlFlowGraph.Node:

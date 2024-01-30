@@ -29,7 +29,7 @@ trait Effect:
 
   /** [[ComputationJoiner]] joins two effectful computations, including this effect.
    */
-  final def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
+  def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
     private val original = getState
     private var afterFirst: State = _
 

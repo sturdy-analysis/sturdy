@@ -10,6 +10,14 @@ trait ExceptObserver[Exc]:
   def catchStart(): Unit
   def catchEnd(): Unit
 
+class LiftedExceptObserver[Exc, UExc](lift: Exc => UExc, obs: ExceptObserver[UExc]) extends ExceptObserver[Exc]:
+  override def throwing(exc: Exc): Unit = obs.throwing(lift(exc))
+  override def handling(exc: Exc): Unit = obs.handling(lift(exc))
+  override def tryStart(): Unit = obs.tryStart()
+  override def tryEnd(): Unit = obs.tryEnd()
+  override def catchStart(): Unit = obs.catchStart()
+  override def catchEnd(): Unit = obs.catchEnd()
+
 trait ObservableExcept[Exc]:
   private var observers: List[ExceptObserver[Exc]] = Nil
   def addExceptObserver(obs: ExceptObserver[Exc]): Unit =

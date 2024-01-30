@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
-import sturdy.control.ControlEvent
+import sturdy.control.{ControlEvent, PrintingControlObserver}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
@@ -58,6 +58,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      analysis.addControlObserver(new PrintingControlObserver()(println))
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
