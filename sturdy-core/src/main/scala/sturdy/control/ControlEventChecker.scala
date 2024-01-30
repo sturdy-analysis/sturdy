@@ -27,11 +27,14 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
       case Some(None) => stack = rest
       case Some(Some(replace)) => stack = replace :: rest
 
-  private def updateCatching(entries: List[Entry])(using ev: ControlEvent[Atom, Section, Exc]): List[Entry] = entries match
+  private def updateThroughForks(entries: List[Entry])(f: PartialFunction[Entry, Option[Entry]])(using ev: ControlEvent[Atom, Section, Exc]): List[Entry] = entries match
     case Nil => error(s"No try entry to catch, stack is empty: $ev")
-    case Entry.Try() :: rest => Entry.Catching(failing) :: rest
-    case (e@(Entry.ForkFirst() | Entry.ForkSecond(_))) :: rest => e :: updateCatching(rest)
-    case e :: rest => error(s"Section mismatch, expected end of $e: $ev")
+    case e :: rest => f.lift(e) match
+      case None => e match
+        case Entry.ForkFirst() | Entry.ForkSecond(_) => e :: updateThroughForks(rest)(f)
+        case _ => error(s"Section mismatch, expected end of $e: $ev")
+      case Some(None) => rest
+      case Some(Some(replace)) => replace :: rest
 
   override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit =
     given ControlEvent[Atom, Section, Exc] = ev
@@ -52,9 +55,10 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
           None
         }
       case ControlEvent.Catching() =>
-        stack = updateCatching(stack)
+        stack = updateThroughForks(stack) { case Entry.Try() => Some(Entry.Catching(failing)) }
         failing = false
       case ControlEvent.Handle(exc) =>
+        stack = updateThroughForks(stack) { case e@Entry.Catching(_) => Some(e) }
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
@@ -98,8 +102,9 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         tries = (tries.head + exc) :: tries.tail
         failing = true
       case ControlEvent.Catching() =>
-        stack = updateCatching(stack)
+        stack = updateThroughForks(stack) { case Entry.Try() => Some(Entry.Catching(failing)) }
       case ControlEvent.Handle(exc) =>
+        stack = updateThroughForks(stack) { case e@Entry.Catching(_) => Some(e) }
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
