@@ -2,7 +2,6 @@ package sturdy.values.references
 
 import sturdy.data.given
 import sturdy.effect.Effect
-import sturdy.effect.store.*
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
@@ -12,11 +11,15 @@ class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) extends 
   given finitePowRecency: Finite[PowRecency] with {}
 
   def apply(virt: VirtualAddress[Context]): PowPhysicalAddress[Context] =
-    mapping.get((virt.ctx, virt.n)) match
-      case Some(PowRecency.Recent) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Recent))
-      case Some(PowRecency.Old) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Old))
-      case Some(PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(virt.ctx, Recency.Recent), PhysicalAddress(virt.ctx, Recency.Old))
-      case None => throw IllegalStateException(s"Virtual address $virt is not bound to a physical address")
+    apply(virt.ctx, virt.n)
+
+  def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] =
+    mapping.get((ctx, n)) match
+      case Some(PowRecency.Recent) => PowersetAddr(PhysicalAddress(ctx, Recency.Recent))
+      case Some(PowRecency.Old) => PowersetAddr(PhysicalAddress(ctx, Recency.Old))
+      case Some(PowRecency.RecentOld) => PowersetAddr(PhysicalAddress(ctx, Recency.Recent), PhysicalAddress(ctx, Recency.Old))
+      case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
+
 
   def += (kv: ((Context,Int), PowRecency)): Unit =
     mapping += kv
@@ -78,12 +81,18 @@ class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslati
 
   final def identifier: (Context,Int) = (ctx,n)
 
+given VirtualAddressOrdering[Context : Ordering]: Ordering[VirtualAddress[Context]] =
+  Ordering.by(virt => (virt.ctx, virt.addressTranslation.getState(virt.identifier)))
+
 case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = recency == Recency.Recent
   override def reduce[A](f: PhysicalAddress[Context] => A)(using Join[A]): A = f(this)
   override def iterator: Iterator[PhysicalAddress[Context]] = Iterator(this)
   override def toString() = s"${ctx}_${recency}"
+
+given PhysicalAddressOrdering[Context: Ordering]: Ordering[PhysicalAddress[Context]] =
+  Ordering.by(addr => (addr.ctx, addr.recency))
 
 given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress[Context]] with {}
 
@@ -103,6 +112,13 @@ enum PowRecency:
   case Recent
   case Old
   case RecentOld
+
+
+given PowRencencyOrdering: Ordering[PowRecency] = Ordering.by[PowRecency, Int] {
+  case PowRecency.Recent => 0
+  case PowRecency.Old => 1
+  case PowRecency.RecentOld => 2
+}
 
 given CombinePowRencency[W <: Widening]: Combine[PowRecency, W] with
   override def apply(v1: PowRecency, v2: PowRecency): MaybeChanged[PowRecency] =
@@ -186,6 +202,6 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
               joined += ctx2 -> indices1.union(indices2)
         MaybeChanged(new PowVirtualAddress(joined, v1.addressMap), changed)
 
-given orderingPowersetVirtAddr[Context]: PartialOrder[PowVirtualAddress[Context]] with
+given PowVirtAddrOrdering[Context]: PartialOrder[PowVirtualAddress[Context]] with
   override def lteq(x: PowVirtualAddress[Context], y: PowVirtualAddress[Context]): Boolean =
     x.physicalAddresses.subsetOf(y.physicalAddresses)

@@ -2,12 +2,11 @@ package sturdy.effect.store
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
-
 import sturdy.values.references.Recency.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.{ApronStore, given}
-import sturdy.apron.{ApronExpr, BinOp, given}
+import sturdy.apron.{ApronExpr, ApronVar, BinOp, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.{*, given}
@@ -22,7 +21,7 @@ class ApronStoreTest extends AnyFunSuite:
   type PowAddr = PowersetAddr[Addr, Addr]
   type VAddr = VirtualAddress[Context]
   type PowVAddr = PowVirtualAddress[Context]
-  type ApAddr = ApronPhysicalAddress[Context]
+  type ApAddr = PhysicalAddress[Context]
 
   // The one from ApronStore seems to restrictive, as PAddr here isn't a subtype of apron.Var
   given JoinApronExpr(using abstract1: Abstract1): Join[ApronExpr[ApAddr]] with
@@ -89,7 +88,7 @@ class ApronStoreTest extends AnyFunSuite:
     val xVs = addressTranslation(x)
     xVs.reduce(x =>
       // ApronExpr already works on virtual addresses here...
-      recencyStore.write(yPow, ApronExpr.Binary(BinOp.Add, ApronExpr.Var(x), ApronExpr.Constant(MpqScalar(1))))
+      recencyStore.write(yPow, ApronExpr.Binary(BinOp.Add, ApronExpr._var(x) : ApronExpr[ApAddr], ApronExpr.Constant(MpqScalar(1))))
       recencyStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.Constant(Interval(1,11)))
       ()
     )

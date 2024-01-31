@@ -2,43 +2,39 @@ package sturdy.apron
 
 import apron.*
 import gmp.Mpz
+
 import sturdy.apron.ApronCons.False
 import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.{Join, MaybeChanged, Widen}
 
+import scala.reflect.ClassTag
 
-enum ApronExpr[Addr <: apron.Var]:
-  case Var(v: Addr)
+enum ApronExpr[Addr]:
+  case Var(v: ApronVar[Addr])
   case Constant(coeff: Coeff)
-  case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, ronudingDir: Int = Texpr1Node.RDIR_NEAREST)
+  case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, roundingDir: Int = Texpr1Node.RDIR_NEAREST)
   case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int, roundingDir: Int)
 
+  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr] =
+    this match
+      case Var(ApronVar(addr)) => Var(ApronVar(f(addr)))
+      case Constant(coeff) => Constant(coeff)
+      case Unary(op, expr, roundingType, roundingDir) =>
+        Unary(op, expr.mapAddr(f), roundingType, roundingDir)
+      case Binary(op, expr1, expr2, roundingType, roundingDir) =>
+        Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir)
+
+  def vars: Set[Addr] = this match
+    case Var(v) => Set(v.addr)
+    case Constant(coeff) => Set()
+    case Unary(op, e, rtyp, rdir) => e.vars
+    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
 
   override def toString: String = this match
     case Var(v) => v.toString
     case Constant(coeff) => coeff.toString
     case Unary(op, e, _, _) => s"$op $e"
     case Binary(op, l, r, _, _) => s"($l $op $r)"
-
-//  def vars: Set[ApronVar] = this match
-//    case Var(v) => Set(v)
-//    case Constant(coeff) => Set()
-//    case Unary(op, e, rtyp, rdir) => e.vars
-//    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
-
-  // def normalize(scope: ApronScope[Addr]): ApronExpr[Addr] = this match
-  //   case Var(v) => scope.getFreedReference(v) match
-  //     case Some(e) => e.normalize(scope) // TODO: cache e.normalize in scope
-  //     case None => this
-  //   case Constant(coeff) => this
-  //   case Unary(op, e, rtyp, rdir) => Unary(op, e.normalize(scope), rtyp, rdir)
-  //   case Binary(op, l, r, rtyp, rdir) => Binary(op, l.normalize(scope), r.normalize(scope), rtyp, rdir)
-
-  // def isEqual(that: ApronExpr[Addr], scope: ApronScope[Addr]): Boolean =
-  //   this.normalize(scope) == that.normalize(scope)
-
-  // def hashCode(scope: ApronScope[Addr]): Int =
-  //   normalize(scope).hashCode
 
   def toApron(): Texpr1Node = this match
     case Var(v) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
@@ -50,9 +46,9 @@ enum ApronExpr[Addr <: apron.Var]:
     val expr = this.toApron()
     new Texpr1Intern(env, expr)
 
-
 object ApronExpr:
-  def num(i: Int): Constant[_] = 
+  def _var[Addr : Ordering : ClassTag](addr: Addr): ApronExpr[Addr] = ApronExpr.Var(ApronVar(addr))
+  def num(i: Int): Constant[_] =
     Constant(new MpqScalar(new Mpz(i)))
   def num(iv: Interval): Constant[_] =
     Constant(iv)
@@ -70,9 +66,9 @@ object ApronExpr:
   def bottomConstant: Constant[_] =
     Constant(bottomInterval)
 
-  def Unary[Addr <: apron.Var](op: UnOp, e: ApronExpr[Addr]): ApronExpr[Addr] =
+  def Unary[Addr](op: UnOp, e: ApronExpr[Addr]): ApronExpr[Addr] =
     Unary(op, e, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
-  def Binary[Addr <: apron.Var](op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr]): ApronExpr[Addr] =
+  def Binary[Addr](op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr]): ApronExpr[Addr] =
     Binary(op, l, r, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
 
 
@@ -182,3 +178,11 @@ enum CompareOp:
     case Le => "<="
     case Ge => ">="
     case Gt => ">"
+
+given JoinApronExpr[Var]: Join[ApronExpr[Var]] with
+  def apply(v1: ApronExpr[Var], v2: ApronExpr[Var]): MaybeChanged[ApronExpr[Var]] =
+    throw NotImplementedError()
+
+given WidenApronExpr[Var <: apron.Var]: Widen[ApronExpr[Var]] with
+  def apply(v1: ApronExpr[Var], v2: ApronExpr[Var]): MaybeChanged[ApronExpr[Var]] =
+    throw NotImplementedError()

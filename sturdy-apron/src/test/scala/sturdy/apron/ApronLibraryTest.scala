@@ -6,6 +6,8 @@ import org.scalatest.matchers.should.Matchers.*
 import apron.*
 import gmp.*
 
+import sturdy.values.references.{*, given}
+
 class ApronLibraryTest extends AnyFunSuite:
 
   test("ApronLibrary can be loaded") {

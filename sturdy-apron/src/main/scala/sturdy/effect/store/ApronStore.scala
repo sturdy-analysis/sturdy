@@ -1,196 +1,86 @@
-/*
-
-// CallFrame : names -> VirtualAddress
-// RecencyStore : VirtAddr -> PhysAddr
-// ApronState : constraints over PhysAddr
-
-
-// new CallFrame(x, y): 
-// CF: x ~> x0; y ~> y0
-// RS: x0 ~> xR; y0 ~> yR
-// AS: xR = -1, yR = -1
-x = rand(0, 10)
-// CF.setLocal(x, [0, 10])
-//   RS.write(x1, [0, 10])
-//     AS.write(xR, [0, 10])
-//     RS: x0 ~> xO, x1 ~> xR, y0 ~> yR
-//     AS: xO = -1, 0 <= xR <= 10, yR = -1
-y = x + 1
-// CF.getLocal(x) = ApronExpr.Var(x1)
-// CF.setLocal(y, ApronExpr(x1 + 1))
-//   RS.write(y1, ApronExpr(x1+1))
-// map from ApronExpr[A] to ApronExpr[B] with addressTranslation : A => B? (in ApronStore) 
-// just _.physical 
-
-//     AS.write(yR, ApronExpr(x1 + 1)) // xR+1 
-// AS:xO =  -1, yO = -1, 0 <= xR <= 10, yR = xR + 1
-// RS: x0 ~> xO, x1 ~> xR, y1 ~> yR, y0 ~> yO
-print(x) 
-// print: x1 <- TODO: precision improvement?
-// RS: x1 ~> xR
-x = 3
-// RS: x0 ~> xO, x1 ~> xO, x2 ~> xR 
-// AS: -1 <= xO <= 10, xR = 3, yR <= xO + 1?
-if(x == 5) 
-  // SpecialBranchingOps 
-  // assert(ApronCons(x2 == 5))
-  // ApronState: bot, which raises an exception and prunes the branch
-if(x >= y)
-  // introduce new constraint in ApronState
-
-z = sin(y)
-// RS.read(y1)
-//   AS.read(yR) = ApronExpr.Constant([...]) <- NOT A VirtAddr, ApronExpr[PhysAddr]. This is a non-relational read, but shouldn't happen much
-
-// ApronExpr.Constant([-1., 1.]) // fetch y as interval, then call sin(y_itv)
-
-
-// Non-representable operations?
-// 1. Convert to intervals (but you need to read)
-// 2. 
-
-
-// TODO: ApronExpr parametric in Virt/Phys Addr
-
-
-n0 = 0
-n1 = inc(n0)  // x = virt#1, xR
-n2 = inc(n1)  // x = virt#2, xR
-n3 = inc(n2)  // x = virt#3, xR
-def inc(x) = {
-  global += x
-  return x + 1
-}
-
-
-
-
-
-*/
-
 package sturdy.effect.store
 
-import sturdy.{IsSound, Soundness}
+import apron.*
+import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronExpr, ApronVar}
 import sturdy.data.{JOption, JOptionA, WithJoin, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
-import sturdy.values.references.{AbstractAddr, PhysicalAddress, PowersetAddr, Recency, joinPowersetAddr, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
-import sturdy.apron.{ApronExpr, Abstract1Join, Abstract1Widen}
-import apron.Texpr1Intern
-import apron.{Abstract1, Environment, Interval, Manager, StringVar, Tcons1, Texpr1Intern, Texpr1VarNode, Var}
+import sturdy.{IsSound, Soundness}
 
 import scala.collection.immutable.{HashMap, IntMap}
-import scala.collection.{MapView, mutable}
-import scala.reflect.ClassTag
+import scala.collection.mutable
 import math.Ordered.orderingToOrdered
-
-implicit def convertToApron[Context : Ordering](x: PhysicalAddress[Context]) : ApronPhysicalAddress[Context] =
-  ApronPhysicalAddress(x.ctx, x.recency)
-
-implicit def convertFromApron[Context : Ordering](x: ApronPhysicalAddress[Context]) : PhysicalAddress[Context] =
-  PhysicalAddress(x.ctx, x.recency)
-
-
-
-case class ApronPhysicalAddress[Context: Ordering](ctx: Context, recency: Recency)
-  extends apron.Var
-  with AbstractAddr[ApronPhysicalAddress[Context]]:
-
-  override def isEmpty: Boolean = false
-  override def isStrong: Boolean = recency == Recency.Recent
-  override def reduce[A](f: ApronPhysicalAddress[Context] => A)(using Join[A]): A = f(this)
-  override def iterator: Iterator[ApronPhysicalAddress[Context]] = Iterator(this)
-  override def clone(): ApronPhysicalAddress[Context] = this // We don't need to clone since PhysicalAddress is immutable
-
-  override def compareTo(v: apron.Var): Int =
-    v match
-      case other: ApronPhysicalAddress[Context] => physicalAddressOrdering[Context].compare(this, other)
-      case _ => -1
-
-  override def toString: String = s"${ctx}_${recency}"
-
-given physicalAddressOrdering[Context: Ordering]: Ordering[ApronPhysicalAddress[Context]] =
-  Ordering.by[ApronPhysicalAddress[Context], (Context, Recency)](addr => (addr.ctx, addr.recency))
-
-given PhysicalAddressToApronVar[Context: Ordering]: Conversion[PhysicalAddress[Context], ApronPhysicalAddress[Context]] with
-  override def apply(addr: PhysicalAddress[Context]): ApronPhysicalAddress[Context] = ApronPhysicalAddress[Context](addr.ctx, addr.recency)
-
-
+import scala.reflect.ClassTag
 
 /**
-
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
- 
  **/
-
-// Plan: 1) ApronStore, 2) tests, 3) ApronCallFrame stuff
-// Restrict type to PowPhysicalAddress and enable automatic conversion?
 final class ApronStore[
   Context: Ordering,
-  //Addr <: apron.Var,
-  Addr <: PhysicalAddress[Context], 
+  Addr <: PhysicalAddress[Context] : Ordering : ClassTag,
   PowAddr <: AbstractAddr[Addr],
-  V]
-  (val apronManager: Manager,
-       initialState: Abstract1,
-       getIntVal: V => Option[ApronExpr[ApronPhysicalAddress[Context]]],
-       makeIntVal: (ApronExpr[ApronPhysicalAddress[Context]], Abstract1) => V,
-       )
-  (using Join[V])
-  extends Store[PowAddr, V, WithJoin]:
-
+  Val : Join]
+  (val manager: Manager,
+   initialState: Abstract1,
+   getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context]]],
+   makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => Val)
+  extends Store[PowAddr, Val, WithJoin]:
 
   override type State = Abstract1
   private var apronState : Abstract1 = initialState
 
   // TODO: find a better way to copy apronState without changing anything
-  def getState : State = apronState.changeEnvironmentCopy(apronManager, apronState.getEnvironment, false)
-  def setState(s : Abstract1) = apronState = s 
- 
+  def getState : State = apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false)
+  def setState(s : Abstract1) = apronState = s
+
   def join : Join[State] = implicitly
   def widen : Widen[State] = implicitly
 
-  override def read(powAddr: PowAddr): JOptionA[V] =
+  override def read(powAddr: PowAddr): JOptionA[Val] =
     if(powAddr.isEmpty)
       JOptionA.None()
     else
       powAddr.reduce(addr =>
-        if (apronState.getEnvironment().hasVar(addr)) {
-          JOptionA.Some(makeIntVal(
-            ApronExpr.Var(
-            (ApronPhysicalAddress(addr.ctx, addr.recency))), apronState))
+        if (apronState.getEnvironment().hasVar(ApronVar(addr))) {
+          JOptionA.Some(
+            makeIntVal(
+              ApronExpr._var(PhysicalAddress(addr.ctx, addr.recency)),
+              apronState))
         }
         else {
           JOptionA.None()
         }
       )
 
-  override def write(powAddr: PowAddr, v : V): Unit =
-    getIntVal(v) match 
+  override def write(powAddr: PowAddr, v : Val): Unit =
+    getIntVal(v) match
       case Some(exp) =>
         if(powAddr.isEmpty) {
           // nothing
         } else if (powAddr.isStrong) {
           powAddr.reduce(addr =>
+            val to = ApronVar(addr)
             var env = apronState.getEnvironment()
-            if (!env.hasVar(addr)) {
-              env = env.add(Array[apron.Var](addr), Array[apron.Var]())
-              apronState.changeEnvironment(apronManager, env, false)
+            if (!env.hasVar(to)) {
+              env = env.add(Array[apron.Var](to), Array[apron.Var]())
+              apronState.changeEnvironment(manager, env, false)
             }
             val aexp : apron.Texpr1Intern = exp.toIntern(env)
-            apronState.assign(apronManager, addr, aexp, null)
+            apronState.assign(manager, to, aexp, null)
           )
         } else /* if(powAddr.isWeak) */ {
           // weak update implemented as join
           powAddr.reduce(addr =>
+            val to = ApronVar(addr)
             var env = apronState.getEnvironment()
-            if (!env.hasVar(addr)) {
-              env = env.add(Array[apron.Var](addr), Array[apron.Var]())
-              apronState.changeEnvironment(apronManager, env, false)
-              apronState.assign(apronManager, addr, exp.toIntern(env), null)
+            if (!env.hasVar(to)) {
+              env = env.add(Array[apron.Var](to), Array[apron.Var]())
+              apronState.changeEnvironment(manager, env, false)
+              apronState.assign(manager, to, exp.toIntern(env), null)
             } else {
-              apronState.join(apronManager, apronState.assignCopy(apronManager, addr, exp.toIntern(env), null))
+              apronState.join(manager, apronState.assignCopy(manager, to, exp.toIntern(env), null))
             }
           )
         }
@@ -200,14 +90,16 @@ final class ApronStore[
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
     // Check for the special case if `fromPow` and `toPow` are singletons to avoid a join on the abstract domain
     if(fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      val from: Var = fromPow.iterator.next()
-      val to: Var = toPow.iterator.next()
-      if(apronState.getEnvironment.hasVar(to)) {
-        apronState.fold(apronManager, Array(to, from))
+      val from: Var = ApronVar(fromPow.iterator.next())
+      val to: Var = ApronVar(toPow.iterator.next())
+      if(apronState.getEnvironment.hasVar(from)){
+        if(apronState.getEnvironment.hasVar(to)) {
+          apronState.fold(manager, Array(to, from))
+        } else {
+          apronState.rename(manager, Array(from), Array(to))
+        }
       } else {
-        val newEnv = apronState.getEnvironment.add(Array(to), Array[Var]())
-        apronState.expand(apronManager, from, Array(to))
-        apronState.changeEnvironment(apronManager, newEnv.remove(Array(from)), false)
+        // Address `from` is not bound in `apronState`. In this case `apronState` is not changed.
       }
     } else {
       throw new NotImplementedError("Handle the case where multiple variables are moved")
@@ -218,25 +110,36 @@ final class ApronStore[
 //      }
     }
 
+  override def copy(fromPow: PowAddr, toPow: PowAddr): Unit =
+    if (fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
+      val from: ApronVar[Addr] = ApronVar(fromPow.iterator.next())
+      val to: ApronVar[Addr] = ApronVar(toPow.iterator.next())
+      val env = apronState.getEnvironment
+      if (env.hasVar(from)) {
+        if (env.hasVar(to)) {
+          apronState.join(manager,
+            apronState.assignCopy(manager, to, ApronExpr.Var(from).toIntern(env), null))
+        } else {
+          apronState.expand(manager, from, Array[Var](to))
+        }
+      } else {
+        // Address `from` is not bound in `apronState`. In this case `apronState` is not changed.
+      }
+    } else {
+      throw new NotImplementedError("Handle the case where multiple addresses are copied")
+    }
+
   override def free(powAddr: PowAddr): Unit =
     if (powAddr.isStrong) {
       powAddr.reduce(addr =>
-        var env = apronState.getEnvironment()
-        if(env.hasVar(addr)) {
-          apronState.forget(apronManager, addr, false)
-          apronState.changeEnvironment(apronManager, env.remove(Array[Var](addr)), false)
+        val dest = ApronVar(addr)
+        val env = apronState.getEnvironment()
+        if(env.hasVar(dest)) {
+          apronState.forget(manager, dest, false)
+          apronState.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
         }
       )
     }
-
-// TODO write explicit, simple, join on ApronExpressions
-given JoinApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Join[ApronExpr[Addr]] with
-  def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
-    throw NotImplementedError()
-
-given WidenApronExpr[Addr <: apron.Var](using abstract1: Abstract1): Widen[ApronExpr[Addr]] with
-  def apply(v1: ApronExpr[Addr], v2: ApronExpr[Addr]): MaybeChanged[ApronExpr[Addr]] =
-    throw NotImplementedError()
 
 given ApronClosedEquality[Cls]:  ClosedEquality[Cls, apron.Abstract1] with
   def closedEquals(closure1: Cls, a1: apron.Abstract1, closure2: Cls, a2: apron.Abstract1): Boolean =

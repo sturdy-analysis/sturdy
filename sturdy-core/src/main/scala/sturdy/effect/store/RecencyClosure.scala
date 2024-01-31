@@ -40,12 +40,21 @@ given addressClosureCombine[Cls, A, W <: Widening](using Combine[Cls, W], Combin
   override def apply(v1: AddressClosure[Cls, A], v2: AddressClosure[Cls, A]): MaybeChanged[AddressClosure[Cls, A]] =
     Combine((v1.closure, v1.a), (v2.closure, v2.a)).map(AddressClosure(_, _))
 
+given listClosedEquality[Cls, V](using ClosedEquality[Cls, V]): ClosedEquality[Cls, List[V]] with
+  override def closedEquals(cls1: Cls, m1: List[V], cls2: Cls, m2: List[V]): Boolean = (m1,m2) match
+    case (first1 :: rest1, first2 :: rest2) => ClosedEquality(cls1, first1, cls2, first2) && closedEquals(cls1, rest1, cls2, rest2)
+    case (Nil, Nil) => true
+    case (_,_) => false
+  override def closedHashCode(cls: Cls, list: List[V]): Int =
+    list.view.map(AddressClosure(cls,_)).hashCode()
+
+
 /**
  * Closed equality for hashmaps. Closes equality on values, not on keys.
  */
 given mapClosedEquality[Cls, K, V] (using ClosedEquality[Cls, V]): ClosedEquality[Cls, Map[K,V]] with
-  override def closedEquals(cls1: Cls, m1: Map[K, V], closure2: Cls, m2: Map[K, V]): Boolean =
-    m1.view.mapValues(AddressClosure(cls1, _)) == m2.view.mapValues((AddressClosure(closure2, _)))
+  override def closedEquals(cls1: Cls, m1: Map[K, V], cls2: Cls, m2: Map[K, V]): Boolean =
+    m1.view.mapValues(AddressClosure(cls1, _)) == m2.view.mapValues((AddressClosure(cls2, _)))
   override def closedHashCode(cls: Cls, m: Map[K, V]): Int =
     m.view.mapValues(AddressClosure(cls, _)).hashCode()
 

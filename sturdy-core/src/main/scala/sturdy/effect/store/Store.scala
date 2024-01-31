@@ -12,9 +12,14 @@ trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
   def write(x: Addr, v: V): Unit
   def move(from: Addr, to: Addr): Unit =
     read(from).map(
-      v =>
-        write(to, v)
+      value =>
+        write(to, value)
         free(from)
+    )
+  def copy(from: Addr, to: Addr): Unit =
+    read(from).map(
+      value =>
+        write(to, value)
     )
 
   def free(x: Addr): Unit

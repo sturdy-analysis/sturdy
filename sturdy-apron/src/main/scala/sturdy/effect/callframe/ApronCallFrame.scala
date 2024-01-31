@@ -1,3 +1,181 @@
+package sturdy.effect.callframe
+
+import apron.*
+import sturdy.apron.{ApronExpr, given}
+import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin}
+import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
+import sturdy.effect.store.{ApronStore, ClosedEquality, ClosedHashCode, RecencyStore, given}
+import sturdy.values.{*, given}
+import sturdy.values.references.{*, given}
+
+trait HasContext[Context]:
+  def currentContext: Context
+
+object HasContext:
+  def currentContext[Context](using getContext: HasContext[Context]): Context = getContext.currentContext
+
+case class LocalVariableContext[Var,Ctx](variable: Var, ctx: Ctx)
+
+given LocalVariableContextOrdering[Var: Ordering, Ctx: Ordering]: Ordering[LocalVariableContext[Var,Ctx]] =
+  Ordering.by[LocalVariableContext[Var, Ctx], (Var,Ctx)](localVarCtx => (localVarCtx.variable, localVarCtx.ctx))
+
+final class ApronCallFrame
+  [Data,
+   Var: Ordering,
+   CallSite,
+   Ctx: Ordering]
+  (initData: Data,
+   initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]]]])],
+   apronManager: Manager)
+  (using
+   Finite[LocalVariableContext[Var,Ctx]],
+   HasContext[Ctx]
+  )
+  extends MutableCallFrame[Data, Var, ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]]], CallSite, NoJoin]:
+
+  final type Context = LocalVariableContext[Var,Ctx]
+  final type VirtAddr = VirtualAddress[Context]
+  final type PhysAddr = PhysicalAddress[Context]
+  final type PowPhysAddr = PowersetAddr[PhysicalAddress[Context], PhysicalAddress[Context]]
+  final type PowVirtAddr = PowVirtualAddress[Context]
+  final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Context]]
+  final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Context]]
+
+  val apronStore: ApronStore[Context, PhysAddr, PowPhysAddr, ApronExprPhysAddr] = ApronStore(
+    apronManager,
+    Abstract1(apronManager, new Environment()),
+    getIntVal = Some[ApronExprPhysAddr](_),
+    makeIntVal = (expr: ApronExprPhysAddr, state: Abstract1) =>
+      ApronExpr.Constant(state.getBound(apronManager, expr.toIntern(state.getEnvironment)))
+  )
+
+  val addressTranslation: AddressTranslation[LocalVariableContext[Var, Ctx]] = AddressTranslation.empty
+
+  val recencyStore: RecencyStore[Context, PowVirtAddr, ApronExprPhysAddr] =
+    RecencyStore(
+      apronStore,
+      addressTranslation)
+
+  val addressCallFrame: JoinableDecidableCallFrame[Data, Var, VirtAddr, CallSite] =
+    JoinableDecidableCallFrame(
+      initData,
+      Iterable.empty
+    )
+
+  override def data: Data = addressCallFrame.data
+
+  def getAddressTranslation: AddressTranslation[Context] = recencyStore.getAddressTranslation
+
+  def setVars(newVars: Iterable[(Var, Option[ApronExprVirtAddr])]) =
+    addressCallFrame.setVars(
+      newVars.map((variable, _) =>
+        val ctx = LocalVariableContext(variable, HasContext.currentContext)
+        (variable, Some(recencyStore.alloc(ctx)))
+      )
+    )
+
+    for((variable, exprOption) <- newVars;
+        expr <- exprOption)
+      setLocalByName(variable, expr)
+
+  setVars(initVars)
+
+  override def setLocal(idx: Int, exprVirtAddr: ApronExprVirtAddr): JOptionC[Unit] =
+    addressCallFrame.getLocal(idx).map(virt =>
+      recencyStore.write(PowVirtualAddress(virt), virtToPhys(exprVirtAddr))
+    )
+
+  override def setLocalByName(x: Var, expr: ApronExprVirtAddr): JOptionC[Unit] =
+    addressCallFrame.getFrameNames.get(x) match
+      case None => JOptionC.none
+      case Some(idx) => setLocal(idx, expr)
+
+  override def getLocal(x: Int): JOptionC[ApronExprVirtAddr] =
+    addressCallFrame.getLocal(x).map(ApronExpr._var(_))
+
+  override def getLocalByName(x: Var): JOptionC[ApronExprVirtAddr] =
+    addressCallFrame.getLocalByName(x).map(ApronExpr._var(_))
+
+  def getBound(x: ApronExprVirtAddr): apron.Interval =
+    val apronState: Abstract1 = apronStore.getState
+    val env = apronState.getEnvironment
+    apronState.getBound(apronManager, virtToPhys(x).toIntern(env))
+
+  override def withNew[A](d: Data, vars: Iterable[(Var, Option[ApronExprVirtAddr])], site: CallSite)(f: => A): A =
+    val virtAddrs = vars.map((variable, _) =>
+      val ctx = LocalVariableContext(variable, HasContext.currentContext)
+      (variable, Some(recencyStore.alloc(ctx)))
+    )
+    addressCallFrame.withNew(d, virtAddrs, site) {
+      for ((variable, exprOption) <- vars; expr <- exprOption)
+        setLocalByName(variable, expr)
+      f
+    }
+
+  private def virtToPhys(exprVirtAddr: ApronExprVirtAddr): ApronExprPhysAddr =
+    // To convert ApronExprVirtAddr to ApronExprPhysAddr, we need to combine virtual addresses
+    // that map to two physical addresses {(ctx,recent),(ctx,old)}.
+    // Specifically, we join (ctx,recent) into (ctx,old), such that the virtual address
+    // can be mapped to {(ctx,old)}.
+    val virtRecentOlds = PowVirtualAddress(exprVirtAddr.vars.filter(virt => virt.physical.addrs.size == 2))
+    recencyStore.joinRecentIntoOld(virtRecentOlds)
+    exprVirtAddr.mapAddr(
+      virt =>
+        val physicals = virt.physical
+        if (physicals.addrs.size == 1)
+          physicals.iterator.next()
+        else
+          throw IllegalStateException(s"${virt} did not map to a single physical address, but to ${physicals}")
+    )
+
+  case class ApronCallFrameState(recencyStoreState: recencyStore.State, addressCallFrameState: addressCallFrame.State):
+    override def equals(obj: Any): Boolean = throw new UnsupportedOperationException("Use ApronCallFrame.closedEquality")
+    override def hashCode(): Int = throw new UnsupportedOperationException("Use ApronCallFrame.closedEquality")
+
+
+  override type State = ApronCallFrameState
+
+  override def getState: ApronCallFrameState =
+    ApronCallFrameState(recencyStore.getState, addressCallFrame.getState)
+
+  override def setState(state: ApronCallFrameState): Unit =
+    recencyStore.setState(state.recencyStoreState)
+    addressCallFrame.setState(state.addressCallFrameState)
+
+  override def join: Join[ApronCallFrameState] =
+    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
+      val joinedRecencyStoreState = recencyStore.join(v1.recencyStoreState, v2.recencyStoreState)
+      val joinedAddressCallFrameState = addressCallFrame.join(v1.addressCallFrameState, v2.addressCallFrameState)
+      val joinedApronCallFrameState = ApronCallFrameState(joinedRecencyStoreState.get, joinedAddressCallFrameState.get)
+      MaybeChanged(joinedApronCallFrameState,  joinedRecencyStoreState.hasChanged || joinedAddressCallFrameState.hasChanged)
+
+  override def widen: Widen[ApronCallFrameState] =
+    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
+      val widenedRecencyStoreState = recencyStore.widen(v1.recencyStoreState, v2.recencyStoreState)
+      val widenedAddressCallFrameState = addressCallFrame.widen(v1.addressCallFrameState, v2.addressCallFrameState)
+      val widenedApronCallFrameState = ApronCallFrameState(widenedRecencyStoreState.get, widenedAddressCallFrameState.get)
+      MaybeChanged(widenedApronCallFrameState, widenedRecencyStoreState.hasChanged || widenedAddressCallFrameState.hasChanged)
+
+  given VirtAddrJoin: Join[VirtAddr] with
+    override def apply(v1: VirtAddr, v2: VirtAddr): MaybeChanged[VirtAddr] =
+      if(v1.physical == v2.physical)
+        MaybeChanged(v1, false)
+      else
+        throw new IllegalStateException(s"Cannot join ${v1} and ${v2}")
+
+//  def closedEquality: ClosedEquality[addressTranslation.State, ApronCallFrameState] =
+//    new ClosedEquality[addressTranslation.State, ApronCallFrameState]:
+//      val recencyStoreEquals = recencyStore.closedEquality
+//
+//      override def closedEquals(closure1: addressTranslation.State, state1: ApronCallFrameState, closure2: addressTranslation.State, state2: ApronCallFrameState): Boolean =
+//        recencyStoreEquals.closedEquals(closure1, state1.recencyStoreState, closure2, state2.recencyStoreState) &&
+//          listClosedEquality[addressTranslation.State, VirtAddr](using VirtAddrClosedEquality[Context]).closedEquals(closure1, state1.addressCallFrameState, closure2, state2.addressCallFrameState)
+//
+//      override def closedHashCode(closure: addressTranslation.State, state: ApronCallFrameState): Int =
+//        (recencyStoreEquals.closedHashCode(closure, state.recencyStoreState),
+//          listClosedEquality[addressTranslation.State, VirtAddr].closedHashCode(closure, state.addressCallFrameState)).hashCode()
+
+
 /* package sturdy.effect.callframe
 
 import apron.Texpr1Intern
@@ -194,7 +372,7 @@ class ApronCallFrame[Data, Var, V, Site](val apron: Apron,
 
 
   def setLocal(ix: Int, name: Var, v: V): JOptionC[Unit] =
-    // apron => ApronStore on top of RecencyStore, 
+    // apron => ApronStore on top of RecencyStore,
     if (ix >= 0 && ix < vars.length) {
       val oldVal = vars(ix)
       getIntVal(v) match

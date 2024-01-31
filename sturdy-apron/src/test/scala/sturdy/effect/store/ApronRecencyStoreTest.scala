@@ -4,7 +4,7 @@ import apron.{Abstract1, Environment, Interval}
 import sturdy.apron.ApronExpr
 import sturdy.values.{Finite, Widen}
 import sturdy.values.integer.{NumericInterval, NumericIntervalWiden, given}
-import sturdy.values.references.{AddressTranslation, PhysicalAddress, PowVirtualAddress, PowersetAddr, VirtualAddress}
+import sturdy.values.references.{*,given}
 
 
 type Ctx = String
@@ -14,7 +14,7 @@ type VAddr = VirtualAddress[Ctx]
 type PowVAddr = PowVirtualAddress[Ctx]
 type PAddr = PhysicalAddress[Ctx]
 type PowPAddr = PowersetAddr[PAddr, PAddr]
-type ApAddr = ApronPhysicalAddress[Ctx]
+type ApAddr = PhysicalAddress[Ctx]
 given Widen[NumericInterval[Int]] = NumericIntervalWiden[Int](Set(10, 20, 30, 40, 50, 60, 70, 80, 90), 0, 100)
 class ApronRecencyStoreTest extends RecencyAbstractionTest({
   val man = new apron.Polka(true)
