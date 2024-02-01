@@ -26,6 +26,7 @@ case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends Abstra
     Join(a1, a2).get
   }
   override def iterator: Iterator[AA] = addrs.iterator
+  def +(other: PowersetAddr[A, AA]): PowersetAddr[A, AA] = PowersetAddr(addrs.union(other.addrs))
 
 object PowersetAddr:
   def apply[A, AA <: AbstractAddr[A]](addr: AA): PowersetAddr[A, AA] = PowersetAddr(Set(addr))

@@ -38,8 +38,6 @@ class ApronCallFrameTest extends AnyFunSuite:
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     callFrame.getBound(xExpr) shouldBe Interval(0,10)
-
-    println(callFrame.getState)
   }
 
   test("setLocal") {
@@ -105,26 +103,52 @@ class ApronCallFrameTest extends AnyFunSuite:
     callFrame.getLocalByName("y") shouldBe JOptionC.None()
   }
 
-//  test("EffectStack.join") {
-//    val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx](
-//      initData = (),
-//      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 10)))),
-//      manager
-//    )
-//    val closure = new RecencyClosure[Ctx](callFrame.getAddressTranslation, callFrame)(using callFrame.closedEquality)
-//    val effectStack: EffectStack = new EffectStack(List(closure))
-//
-//
-//    val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-//    val xIv = callFrame.getBound(xExpr)
-//
-//    callFrame.withNew((), List("y" -> Some(xExpr)), "f") {
-//      val yExpr = callFrame.getLocalByName("y").getOrElse(fail(s"Variable y not bound in ${callFrame}"))
-//      callFrame.getBound(yExpr) shouldBe xIv
-//
-//      callFrame.getLocalByName("x") shouldBe JOptionC.None()
-//    }
-//
-//    callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-//    callFrame.getLocalByName("y") shouldBe JOptionC.None()
-//  }
+  test("join") {
+    val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx](
+      initData = (),
+      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 10)))),
+      manager
+    )
+
+    val state1 = callFrame.getState
+
+    callFrame.setLocalByName("x", ApronExpr.Constant(Interval(5, 15)))
+
+    val state2 = callFrame.getState
+
+    val joinedStates = callFrame.join(state1, state2)
+
+    joinedStates.hasChanged shouldBe true
+
+    callFrame.setState(joinedStates.get)
+
+    val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
+    callFrame.getBound(xExpr) shouldBe Interval(0, 15)
+  }
+
+  test("join recent against old") {
+    val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx](
+      initData = (),
+      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 2)))),
+      manager
+    )
+
+    val state1 = callFrame.getState
+
+    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.Constant(Interval(4, 5)))), "f") {
+      callFrame.getState
+    }
+
+    val joinedStates = callFrame.join(state1, state2)
+    joinedStates.hasChanged shouldBe true
+    callFrame.setState(joinedStates.get)
+
+    var xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
+    callFrame.getBound(xExpr) shouldBe Interval(0, 5)
+
+    // Test that x is old
+    callFrame.setLocalByName("x", ApronExpr.Constant(Interval(7, 8)))
+    xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
+    callFrame.getBound(xExpr) shouldBe Interval(0, 8)
+
+  }

@@ -5,7 +5,7 @@ import sturdy.effect.Effect
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
-class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) extends Effect:
+final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) extends Effect:
   var mapping: Map[(Context,Int), PowRecency] = init
   given finiteVirt: Finite[(Context,Int)] with {}
   given finitePowRecency: Finite[PowRecency] with {}

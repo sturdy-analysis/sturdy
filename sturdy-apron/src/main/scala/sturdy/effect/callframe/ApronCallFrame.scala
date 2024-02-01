@@ -8,13 +8,16 @@ import sturdy.effect.store.{ApronStore, ClosedEquality, ClosedHashCode, RecencyS
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
+import scala.collection.immutable.HashMap
+
 trait HasContext[Context]:
   def currentContext: Context
 
 object HasContext:
   def currentContext[Context](using getContext: HasContext[Context]): Context = getContext.currentContext
 
-case class LocalVariableContext[Var,Ctx](variable: Var, ctx: Ctx)
+case class LocalVariableContext[Var,Ctx](variable: Var, ctx: Ctx):
+  override def toString: String = s"${variable}@${ctx}"
 
 given LocalVariableContextOrdering[Var: Ordering, Ctx: Ordering]: Ordering[LocalVariableContext[Var,Ctx]] =
   Ordering.by[LocalVariableContext[Var, Ctx], (Var,Ctx)](localVarCtx => (localVarCtx.variable, localVarCtx.ctx))
@@ -145,35 +148,54 @@ final class ApronCallFrame
   override def join: Join[ApronCallFrameState] =
     (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
       val joinedRecencyStoreState = recencyStore.join(v1.recencyStoreState, v2.recencyStoreState)
-      val joinedAddressCallFrameState = addressCallFrame.join(v1.addressCallFrameState, v2.addressCallFrameState)
-      val joinedApronCallFrameState = ApronCallFrameState(joinedRecencyStoreState.get, joinedAddressCallFrameState.get)
-      MaybeChanged(joinedApronCallFrameState,  joinedRecencyStoreState.hasChanged || joinedAddressCallFrameState.hasChanged)
+
+      val backupState = recencyStore.getState
+
+      try {
+        recencyStore.setState(joinedRecencyStoreState.get)
+
+        if (v1.addressCallFrameState.length != v2.addressCallFrameState.length) {
+          throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
+        } else {
+          val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
+            recencyStore.write(PowVirtualAddress(virt1), virtToPhys(ApronExpr._var(virt2)))
+            virt1
+          )
+
+          val updatedRecencyStoreState =
+            recencyStore.join(joinedRecencyStoreState.get, recencyStore.getState)
+
+          MaybeChanged(
+            ApronCallFrameState(
+              updatedRecencyStoreState.get,
+              joinedAddressCallFrameState
+            ),
+            joinedRecencyStoreState.hasChanged || updatedRecencyStoreState.hasChanged
+          )
+        }
+      } finally {
+        recencyStore.setState(backupState)
+      }
 
   override def widen: Widen[ApronCallFrameState] =
     (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
-      val widenedRecencyStoreState = recencyStore.widen(v1.recencyStoreState, v2.recencyStoreState)
-      val widenedAddressCallFrameState = addressCallFrame.widen(v1.addressCallFrameState, v2.addressCallFrameState)
-      val widenedApronCallFrameState = ApronCallFrameState(widenedRecencyStoreState.get, widenedAddressCallFrameState.get)
-      MaybeChanged(widenedApronCallFrameState, widenedRecencyStoreState.hasChanged || widenedAddressCallFrameState.hasChanged)
+      throw new NotImplementedError()
+
+  def closedEquality: ClosedEquality[addressTranslation.State, ApronCallFrameState] =
+    new ClosedEquality[addressTranslation.State, ApronCallFrameState]:
+      val recencyStoreEquals = recencyStore.closedEquality
+
+      override def closedEquals(closure1: addressTranslation.State, state1: ApronCallFrameState, closure2: addressTranslation.State, state2: ApronCallFrameState): Boolean =
+        recencyStoreEquals.closedEquals(closure1, state1.recencyStoreState, closure2, state2.recencyStoreState) &&
+          ClosedEquality(closure1, state1.addressCallFrameState, closure2, state2.addressCallFrameState)
+
+      override def closedHashCode(closure: addressTranslation.State, state: ApronCallFrameState): Int =
+        (recencyStoreEquals.closedHashCode(closure, state.recencyStoreState),
+          ClosedHashCode(closure, state.addressCallFrameState)).hashCode()
 
   given VirtAddrJoin: Join[VirtAddr] with
     override def apply(v1: VirtAddr, v2: VirtAddr): MaybeChanged[VirtAddr] =
-      if(v1.physical == v2.physical)
-        MaybeChanged(v1, false)
-      else
-        throw new IllegalStateException(s"Cannot join ${v1} and ${v2}")
-
-//  def closedEquality: ClosedEquality[addressTranslation.State, ApronCallFrameState] =
-//    new ClosedEquality[addressTranslation.State, ApronCallFrameState]:
-//      val recencyStoreEquals = recencyStore.closedEquality
-//
-//      override def closedEquals(closure1: addressTranslation.State, state1: ApronCallFrameState, closure2: addressTranslation.State, state2: ApronCallFrameState): Boolean =
-//        recencyStoreEquals.closedEquals(closure1, state1.recencyStoreState, closure2, state2.recencyStoreState) &&
-//          listClosedEquality[addressTranslation.State, VirtAddr](using VirtAddrClosedEquality[Context]).closedEquals(closure1, state1.addressCallFrameState, closure2, state2.addressCallFrameState)
-//
-//      override def closedHashCode(closure: addressTranslation.State, state: ApronCallFrameState): Int =
-//        (recencyStoreEquals.closedHashCode(closure, state.recencyStoreState),
-//          listClosedEquality[addressTranslation.State, VirtAddr].closedHashCode(closure, state.addressCallFrameState)).hashCode()
+      throw UnsupportedOperationException("Virtual Addresses cannot be joined directly. Instead, they are joined inside of the apronStore.")
 
 
 /* package sturdy.effect.callframe

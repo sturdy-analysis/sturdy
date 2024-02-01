@@ -78,9 +78,9 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
 
   override type State = RecencyStoreState
 
-  class RecencyStoreState(val store: initStore.State,
-                          val addrTrans: addressTranslation.State,
-                          val mostRecent: Map[Context, Powerset[Int]]):
+  case class RecencyStoreState(store: initStore.State,
+                               addrTrans: addressTranslation.State,
+                               mostRecent: Map[Context, Powerset[Int]]):
     override def equals(obj: Any): Boolean = throw new UnsupportedOperationException("Use RecencyStore.closedEquality")
 
     override def hashCode(): Int = throw new UnsupportedOperationException("Use RecencyStore.closedEquality")
@@ -99,7 +99,6 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
   override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(initStore.widen)
   private class CombineRecencyStoreState[W <: Widening](combineStore: Combine[initStore.State, W]) extends Combine[RecencyStoreState, W]:
     override def apply(state1: RecencyStoreState, state2: RecencyStoreState): MaybeChanged[RecencyStoreState] =
-      // TODO: I would like to use `initStore.combine`, but it does not exist.
       val combinedStores = combineStore(state1.store, state2.store)
       val combinedAddrTrans = Combine(state1.addrTrans, state2.addrTrans)
       val combinedMostRecent = Combine(state1.mostRecent, state2.mostRecent)

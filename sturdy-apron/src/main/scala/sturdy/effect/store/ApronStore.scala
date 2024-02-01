@@ -24,8 +24,8 @@ final class ApronStore[
   Val : Join]
   (val manager: Manager,
    initialState: Abstract1,
-   getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context]]],
-   makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => Val)
+   val getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context]]],
+   val makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => Val)
   extends Store[PowAddr, Val, WithJoin]:
 
   override type State = Abstract1
@@ -110,23 +110,30 @@ final class ApronStore[
 //      }
     }
 
+  /**
+   * Computes an over-approximation of copying addresses from a source to a target.
+   * `copy` has a worst-case complexity O(n * m) joins,
+   * where n is the number of source addresses
+   * and m is the number of target addresses.
+   */
   override def copy(fromPow: PowAddr, toPow: PowAddr): Unit =
-    if (fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      val from: ApronVar[Addr] = ApronVar(fromPow.iterator.next())
-      val to: ApronVar[Addr] = ApronVar(toPow.iterator.next())
-      val env = apronState.getEnvironment
-      if (env.hasVar(from)) {
-        if (env.hasVar(to)) {
-          apronState.join(manager,
-            apronState.assignCopy(manager, to, ApronExpr.Var(from).toIntern(env), null))
-        } else {
-          apronState.expand(manager, from, Array[Var](to))
-        }
+    val env = apronState.getEnvironment
+
+    val toSet: Set[ApronVar[Addr]] =
+      toPow.iterator.map(ApronVar(_)).toSet
+
+    val fromSet: Set[ApronVar[Addr]] =
+      fromPow.iterator.map(ApronVar(_)).toSet
+        .diff(toSet) // remove `to` addresses, because they don't need to be copied
+        .filter(from => env.hasVar(from)) // filter out unbound `from` addresses, because they dont' need to be copied
+
+    for (from <- fromSet; to <- toSet) {
+      if (env.hasVar(to)) {
+        apronState.join(manager,
+          apronState.assignCopy(manager, to, ApronExpr.Var(from).toIntern(env), null))
       } else {
-        // Address `from` is not bound in `apronState`. In this case `apronState` is not changed.
+        apronState.expand(manager, from, Array[Var](to))
       }
-    } else {
-      throw new NotImplementedError("Handle the case where multiple addresses are copied")
     }
 
   override def free(powAddr: PowAddr): Unit =
