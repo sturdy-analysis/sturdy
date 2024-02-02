@@ -49,7 +49,7 @@ object SignAnalysis extends Interpreter,
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
-    override val branchOps: ObservedBooleanBranching[Value, Unit] = new ObservedBooleanBranching
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
@@ -63,7 +63,7 @@ object SignAnalysis extends Interpreter,
     this.addControlObserver(controlObserver)
 
     override val fixpoint =
-      fix.log(controlEventLogger(this, branchOps, isFunOrWhile(_) >= 0),
+      fix.log(controlEventLogger(this),
         fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
           parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)

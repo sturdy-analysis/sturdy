@@ -12,23 +12,23 @@ trait ControlObservable[Atom, Section, Exc] extends JoinObserver, ExceptObserver
   def removeControlObserver(obs: ControlObserver[Atom, Section, Exc]): Unit =
     observers -= obs
 
-  def triggerControlEvent(ev: ControlEvent[Atom, Section, Exc]): Unit =
+  def triggerControlEvent(ev: ControlEvent): Unit =
     observers.foreach(_.handle(ev))
 
-  override def joinStart(): Unit = triggerControlEvent(ControlEvent.Fork())
+  override def joinStart(): Unit = triggerControlEvent(BranchingControlEvent.Fork())
   override def joinSwitch(leftFailed: Boolean): Unit =
-    triggerControlEvent(ControlEvent.Switch())
+    triggerControlEvent(BranchingControlEvent.Switch())
   override def joinEnd(leftFailed: Boolean, rightFailed: Boolean): Unit =
-    triggerControlEvent(ControlEvent.Join())
+    triggerControlEvent(BranchingControlEvent.Join())
 
   override def repeating(): Unit =
-    triggerControlEvent(ControlEvent.FixpointRepeat())
+    triggerControlEvent(FixpointControlEvent.RepeatFixpoint())
   
-  override def throwing(exc: Exc): Unit = triggerControlEvent(ControlEvent.Throw(exc))
-  override def handling(exc: Exc): Unit = triggerControlEvent(ControlEvent.Handle(exc))
-  override def tryStart(): Unit = triggerControlEvent(ControlEvent.BeginTry())
-  override def tryEnd(): Unit = triggerControlEvent(ControlEvent.EndTry())
-  override def catchStart(): Unit = triggerControlEvent(ControlEvent.Catching())
+  override def throwing(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.Throw(exc))
+  override def handling(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.Handle(exc))
+  override def tryStart(): Unit = triggerControlEvent(ExceptionControlEvent.BeginTry())
+  override def tryEnd(): Unit = triggerControlEvent(ExceptionControlEvent.EndTry())
+  override def catchStart(): Unit = triggerControlEvent(ExceptionControlEvent.Catching())
   override def catchEnd(): Unit = ()
 
   

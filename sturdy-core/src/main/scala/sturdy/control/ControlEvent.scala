@@ -16,7 +16,11 @@ package sturdy.control
   *     | Fork E* Switch E* Join
   *     
   */
-enum ControlEvent[Atom, Section, Exc]:
+
+
+trait ControlEvent
+
+enum BasicControlEvent[Atom, Section] extends ControlEvent:
   case Start()
   case Atomic(a: Atom)
   case Failed()
@@ -24,20 +28,23 @@ enum ControlEvent[Atom, Section, Exc]:
   case Begin(sec: Section)
   case End(sec: Section)
 
+enum ExceptionControlEvent[Exc] extends ControlEvent:
   case BeginTry()
   case Throw(exc: Exc)
   case Catching()
   case Handle(exc: Exc)
   case EndTry()
 
+enum BranchingControlEvent extends ControlEvent:
   case Fork()
   case Switch()
   case Join()
 
-  case FixpointPrepare()
-  case FixpointRecurrent(failing: Boolean)
-  case FixpointRepeat()
-  case FixpointRelease()
+enum FixpointControlEvent extends ControlEvent:
+  case BeginFixpoint()
+  case RecurrentCall(failing: Boolean)
+  case EndFixpoint()
+  case RepeatFixpoint()
 
 /*
 

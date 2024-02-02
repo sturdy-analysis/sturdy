@@ -107,14 +107,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
     this.addControlObserver(controlRecorder)
 
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[ConstantAnalysis.Value]
-      import config.ctx.finiteCtx
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[ConstantAnalysis.Value]
+      import observedConfig.ctx.finiteCtx
       override protected def contextFree = phi =>
-        fix.log(controlEventLogger(Instance.this, except, isFunOrLoop), contextPreparation(phi))
+        fix.log(controlEventLogger(Instance.this, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
+      override protected def contextSensitive = observedConfig.fix.get
     }
 
     override val fixpointSuper = fixpoint

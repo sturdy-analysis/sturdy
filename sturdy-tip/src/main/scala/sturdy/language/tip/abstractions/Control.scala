@@ -1,6 +1,6 @@
 package sturdy.language.tip.abstractions
 
-import sturdy.control.{ControlEvent, ControlObservable}
+import sturdy.control.{BasicControlEvent, ControlEvent, ControlObservable}
 import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.except.ObservableExcept
 import sturdy.fix
@@ -33,36 +33,23 @@ object Control:
 trait Control extends Interpreter:
   import Control.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
-                         br: ObservedBooleanBranching[_,_],
-                         needsFixing: FixIn => Boolean
-                        )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
-    observable.triggerControlEvent(ControlEvent.Start())
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+    observable.triggerControlEvent(BasicControlEvent.Start())
     effects.addJoinObserver(observable)
     new Logger:
-      override def enter(dom: FixIn): Unit =
-        dom match
-          case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
-          case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
-          case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(ControlEvent.Begin(s))
-          case FixIn.Run(s: Stm.While) => observable.triggerControlEvent(ControlEvent.Atomic(s))
-          case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
-          case _ => // nothing
+      override def enter(dom: FixIn): Unit = dom match
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.Begin(f))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.Begin(c))
+        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.Begin(s))
+        case FixIn.Run(s: Stm.While) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
+        case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
+        case _ => // nothing
 
-        if (needsFixing(dom))
-          observable.triggerControlEvent(ControlEvent.FixpointPrepare())
-
-      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
-        if (codom.isRecurrent)
-          observable.triggerControlEvent(ControlEvent.FixpointRecurrent())
-        if (needsFixing(dom))
-          observable.triggerControlEvent(ControlEvent.FixpointRelease())
-
-        dom match
-          case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
-          case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
-          case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(ControlEvent.End(s))
-          case _ => // nothing
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.End(f))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.End(c))
+        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.End(s))
+        case _ => // nothing
 
 
 

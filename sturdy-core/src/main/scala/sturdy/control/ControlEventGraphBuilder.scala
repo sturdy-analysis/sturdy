@@ -41,6 +41,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
 
   private type BuilderState = (List[ProgramStructure], List[Node], Boolean)
   private val stateStack: mutable.Stack[BuilderState] = mutable.Stack.empty
+  private var fixpoint: Option[BuilderState] = None
 
   var checker: ControlEventChecker[Atom, Section, Exc] = new ControlEventChecker
 
@@ -60,7 +61,12 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     previous
 
 
-  override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit =
+  override def handle(ev: BasicControlEvent[Atom, Section]): Unit = ???
+  override def handle(ev: ExceptionControlEvent[Exc]): Unit = ???
+  override def handle(ev: BranchingControlEvent): Unit = ???
+  override def handle(ev: FixpointControlEvent): Unit = ???
+
+  override def handle(ev: ControlEvent): Unit =
     val failing = checker.failing
     checker.handle(ev)
 
@@ -69,7 +75,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
 
     if !started then
       ev match
-        case ControlEvent.Start() => // PUSH 1
+        case BasicControlEvent.Start() => // PUSH 1
           started = true
           val current = Node.Start()
           ancestors = List(current)
@@ -78,18 +84,18 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
         case _ => throw new Exception("Not started !")
     else
       ev match
-        case ControlEvent.Start() => throw new Exception("Duplicate start")
+        case BasicControlEvent.Start() => throw new Exception("Duplicate start")
 
-        case ControlEvent.Atomic(a: Atom) =>
+        case BasicControlEvent.Atomic(a: Atom) =>
           val current = Node.Atomic(a)
           update(current)
 
-        case ControlEvent.Begin(sec: Section) =>
+        case BasicControlEvent.Begin(sec: Section) =>
           val current = Node.BlockStart(sec)
           update(current)
           structureStack = structureStack ++ List(ProgramStructure.Block(sec.toString, current, Node.BlockEnd(sec)))
 
-        case ControlEvent.End(sec: Section) =>
+        case BasicControlEvent.End(sec: Section) =>
           structureStack.last match
             case ProgramStructure.Block(label, start, end) => // add check match block
               val ancest = update(end)
@@ -98,37 +104,37 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
                 edges += ((start, end, EdgeType.BlockPair))
             case _ => throw new Exception("Illegal control event sequence")
 
-        case ControlEvent.Fork() =>
+        case BranchingControlEvent.Fork() =>
           structureStack = structureStack ++ List(ProgramStructure.Fork("", ancestors, List.empty))
 
-        case ControlEvent.Switch() =>
+        case BranchingControlEvent.Switch() =>
           structureStack.last match
             case ProgramStructure.Fork(label, origin, _) =>
               structureStack = structureStack.dropRight(1) ++ List(ProgramStructure.Fork(label, origin, ancestors))
               ancestors = origin
             case _ => throw new Exception("Illegal control event sequence")
 
-        case ControlEvent.Join() =>
+        case BranchingControlEvent.Join() =>
           structureStack.last match
             case ProgramStructure.Fork(_, _, lastFirstBranch) =>
               ancestors = ancestors ++ lastFirstBranch
               structureStack = structureStack.dropRight(1)
             case _ => throw new Exception("Illegal control event sequence")
 
-        case ControlEvent.Failed() =>
+        case BasicControlEvent.Failed() =>
           ancestors.foreach(n => nodesProperties += n -> NodeProperties(mayFail = true))
 
-        case ControlEvent.FixpointPrepare() =>
+        case FixpointControlEvent.BeginFixpoint() =>
           stateStack.push(getCurrentState)
 
-        case ControlEvent.FixpointRecurrent() =>
+        case FixpointControlEvent.RecurrentCall(_) =>
           ancestors = List.empty
 
-        case ControlEvent.FixpointRepeat() =>
-          setToState(stateStack.head)
+        case FixpointControlEvent.RepeatFixpoint() =>
+          setToState(fixpoint.get)
 
-        case ControlEvent.FixpointRelease() =>
-          stateStack.pop()
+        case FixpointControlEvent.EndFixpoint() =>
+          fixpoint = Some(stateStack.pop())
 
         case _ => () // TODO
 

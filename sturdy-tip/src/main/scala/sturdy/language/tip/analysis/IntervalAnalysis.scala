@@ -53,7 +53,7 @@ object IntervalAnalysis extends Interpreter,
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
-    override val branchOps: ObservedBooleanBranching[Value, Unit] = new ObservedBooleanBranching
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
     override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
@@ -82,16 +82,18 @@ object IntervalAnalysis extends Interpreter,
     val controlEventGraphBuilder = new ControlEventGraphBuilder[Control.Atom, Control.Section, Control.Exc]
     this.addControlObserver(controlEventGraphBuilder)
 
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
+
     final override val fixpoint =
-      fix.log(controlEventLogger(this, branchOps, isFunOrWhile(_) >= 0),
+      fix.log(controlEventLogger(this),
         callSiteSensitive(callSites,
           fix.log(cfgLogger.logger,
             fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
+              fix.iter.innermost(observedStackConfig), fix.iter.innermost(observedStackConfig)
             ))
           )
         )
       ).fixpoint
-      
+    
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
 

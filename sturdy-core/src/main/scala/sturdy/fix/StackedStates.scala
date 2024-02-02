@@ -2,13 +2,14 @@ package sturdy.fix
 
 import org.eclipse.collections.api.factory.Maps
 import org.eclipse.collections.api.map.MutableMap
+import sturdy.control.{ControlObservable, FixpointControlEvent}
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Finite
-import sturdy.values.{MaybeChanged, Unchanged, Join, Changed, Widen}
+import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -16,7 +17,7 @@ import scala.util.Success
 import scala.util.Try
 
 final class StackedStates[Dom, Codom](val state: State)
-                                     (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean)
+                                     (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[FixpointControlEvent => Unit])
                                      (using Finite[Dom], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
@@ -46,6 +47,8 @@ final class StackedStates[Dom, Codom](val state: State)
 
   override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
 
+  private def fire(ev: FixpointControlEvent): Unit = observers.foreach(_.apply(ev))
+  
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
 
@@ -74,6 +77,7 @@ final class StackedStates[Dom, Codom](val state: State)
             val OutCacheEntry(result, out, _) = outEntry.get
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
+            fire(FixpointControlEvent.RecurrentCall(false))
             return PushResult.Recurrent(result, Some(out))
           }
         }
@@ -84,6 +88,7 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
+        fire(FixpointControlEvent.BeginFixpoint())
         PushResult.Continue(Some(widenedIn))
       case Some(info) =>
         // call is recurrent
@@ -94,10 +99,12 @@ final class StackedStates[Dom, Codom](val state: State)
           case None =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+            fire(FixpointControlEvent.RecurrentCall(true))
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+            fire(FixpointControlEvent.RecurrentCall(false))
             PushResult.Recurrent(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -119,6 +126,7 @@ final class StackedStates[Dom, Codom](val state: State)
     if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
       throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
     stackHeight = newStackHeight
+    fire(FixpointControlEvent.EndFixpoint())
     updatedResult
 
 
@@ -149,9 +157,9 @@ final class StackedStates[Dom, Codom](val state: State)
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
-                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean)
+                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[FixpointControlEvent => Unit])
                        (using Finite[Dom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
-    new StackedStates(state)(inStateWidening, readPriorOutput).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
+    new StackedStates(state)(inStateWidening, readPriorOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 trait InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In]

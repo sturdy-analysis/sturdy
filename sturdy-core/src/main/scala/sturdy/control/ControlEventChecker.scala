@@ -1,7 +1,6 @@
 package sturdy.control
 
 class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section,Exc]:
-  import ControlEvent.*
   import ControlEventChecker.*
 
   enum Entry:
@@ -16,18 +15,19 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
   var failing = false
   private var stack: List[Entry] = List()
   private var tries: List[Set[Exc]] = List(Set())
+  private var fixpoint: Option[Entry.Fixpoint] = None
 
   private def pushEntry(e: Entry): Unit =
     stack = e :: stack
 
-  private def updateEntry(f: PartialFunction[Entry, Option[Entry]])(using ev: ControlEvent[Atom, Section, Exc]): Unit = stack match
+  private def updateEntry(f: PartialFunction[Entry, Option[Entry]])(using ev: ControlEvent): Unit = stack match
     case Nil => error(s"No entry to close, stack is empty: $ev")
     case e :: rest => f.lift(e) match
       case None => error(s"Section mismatch, expected end of $e: $ev")
       case Some(None) => stack = rest
       case Some(Some(replace)) => stack = replace :: rest
 
-  private def updateThroughForks(entries: List[Entry])(f: PartialFunction[Entry, Option[Entry]])(using ev: ControlEvent[Atom, Section, Exc]): List[Entry] = entries match
+  private def updateThroughForks(entries: List[Entry])(f: PartialFunction[Entry, Option[Entry]])(using ev: ControlEvent): List[Entry] = entries match
     case Nil => error(s"No try entry to catch, stack is empty: $ev")
     case e :: rest => f.lift(e) match
       case None => e match
@@ -36,39 +36,44 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
       case Some(None) => rest
       case Some(Some(replace)) => replace :: rest
 
-  override def handle(ev: ControlEvent[Atom, Section, Exc]): Unit =
-    given ControlEvent[Atom, Section, Exc] = ev
+  override def handle(ev: BasicControlEvent[Atom, Section]): Unit = ???
+  override def handle(ev: ExceptionControlEvent[Exc]): Unit = ???
+  override def handle(ev: BranchingControlEvent): Unit = ???
+  override def handle(ev: FixpointControlEvent): Unit = ???
+
+  override def handle(ev: ControlEvent): Unit =
+    given ControlEvent = ev
 
     if (!started) ev match
-      case Start() => started = true
+      case BasicControlEvent.Start() => started = true
       case _ => error(s"Sequence must begin with ControlEvent.Start(): $ev")
       
     else if (failing) ev match
-      case ControlEvent.End(sec) =>
+      case BasicControlEvent.End(sec) =>
         updateEntry { case Entry.Sec(sec) => None}
-      case ControlEvent.Switch() =>
+      case BranchingControlEvent.Switch() =>
         updateEntry { case Entry.ForkFirst(excBeforeFork) =>
           val excAfterFirst = tries.head
           tries = excBeforeFork :: tries.tail
           Some(Entry.ForkSecond(failing, excAfterFirst))
         }
         failing = false
-      case ControlEvent.Join() =>
+      case BranchingControlEvent.Join() =>
         updateEntry { case Entry.ForkSecond(firstFailing, excAfterFirst) =>
           failing = firstFailing
           tries = (tries.head ++ excAfterFirst) :: tries.tail
           None
         }
-      case ControlEvent.Catching() =>
+      case ExceptionControlEvent.Catching() =>
         stack = updateThroughForks(stack) { case Entry.Try() => Some(Entry.Catching(failing)) }
         failing = false
-      case ControlEvent.Handle(exc) =>
+      case ExceptionControlEvent.Handle(exc: Exc) =>
         stack = updateThroughForks(stack) { case e@Entry.Catching(_) => Some(e) }
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
         tries = remaining :: tries.tail
-      case ControlEvent.EndTry() =>
+      case ExceptionControlEvent.EndTry() =>
         updateEntry {
           case Entry.Try() => None
           case Entry.Catching(failed) =>
@@ -78,71 +83,84 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
         val stillActive = tries.head
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
-      case ControlEvent.FixpointRepeat() =>
-        updateEntry { case e: Entry.Fixpoint =>
-          failing = e.failing
-          stack = e.stack
-          tries = e.tries
-          Some(e)
-        }
+      case FixpointControlEvent.RepeatFixpoint() =>
+        fixpoint match
+          case Some(e) =>
+            failing = e.failing
+            stack = e.stack
+            tries = e.tries
+          case None =>
+            error(s"Cannot repeat here, expected end of fixpoint before")
         failing = false
-      case ControlEvent.FixpointRecurrent() => // still failing
-      case ControlEvent.FixpointRelease() =>
-        updateEntry { case _: Entry.Fixpoint => None}
+      case FixpointControlEvent.RecurrentCall(recFailing) =>
+        failing = recFailing
+      case FixpointControlEvent.EndFixpoint() =>
+        updateEntry { case e: Entry.Fixpoint =>
+          fixpoint = Some(e)
+          None
+        }
       case _ => error(s"Invalid event after failure: $ev")
       
     else ev match
-      case ControlEvent.Start() => error(s"Repeated Start() event: $ev")
-      case ControlEvent.Atomic(a) => // fine
-      case ControlEvent.Failed() => failing = true
-      case ControlEvent.Begin(sec) =>
+      case BasicControlEvent.Start() => error(s"Repeated Start() event: $ev")
+      case BasicControlEvent.Atomic(a) => // fine
+      case BasicControlEvent.Failed() => failing = true
+      case BasicControlEvent.Begin(sec: Section) =>
         pushEntry(Entry.Sec(sec))
-      case ControlEvent.End(sec) =>
+      case BasicControlEvent.End(sec) =>
         updateEntry { case Entry.Sec(sec) => None}
-      case ControlEvent.BeginTry() =>
+      case ExceptionControlEvent.BeginTry() =>
         pushEntry(Entry.Try())
         tries = Set() +: tries
-      case ControlEvent.Throw(exc) =>
+      case ExceptionControlEvent.Throw(exc: Exc) =>
         tries = (tries.head + exc) :: tries.tail
         failing = true
-      case ControlEvent.Catching() =>
+      case ExceptionControlEvent.Catching() =>
         stack = updateThroughForks(stack) { case Entry.Try() => Some(Entry.Catching(failing)) }
-      case ControlEvent.Handle(exc) =>
+      case ExceptionControlEvent.Handle(exc: Exc) =>
         stack = updateThroughForks(stack) { case e@Entry.Catching(_) => Some(e) }
         if (!tries.head.contains(exc))
           error(s"Exception $exc not currently active")
         val remaining = tries.head - exc
         tries = remaining :: tries.tail
-      case ControlEvent.EndTry() =>
+      case ExceptionControlEvent.EndTry() =>
         updateEntry { case Entry.Try() | Entry.Catching(_) => None }
         val stillActive = tries.head
         val rest = tries.tail
         tries = (rest.head ++ stillActive) :: rest.tail
-      case ControlEvent.Fork() =>
+      case BranchingControlEvent.Fork() =>
         pushEntry(Entry.ForkFirst(tries.head))
-      case ControlEvent.Switch() =>
+      case BranchingControlEvent.Switch() =>
         updateEntry { case Entry.ForkFirst(excBeforeFork) =>
           val excAfterFirst = tries.head
           tries = excBeforeFork :: tries.tail
           Some(Entry.ForkSecond(failing, excAfterFirst))
         }
-      case ControlEvent.Join() =>
+      case BranchingControlEvent.Join() =>
         updateEntry { case Entry.ForkSecond(firstFailing, excAfterFirst) =>
           tries = (tries.head ++ excAfterFirst) :: tries.tail
           None
         }
-      case ControlEvent.FixpointPrepare() =>
+      case FixpointControlEvent.BeginFixpoint() =>
         pushEntry(Entry.Fixpoint(failing, stack, tries))
-      case ControlEvent.FixpointRecurrent() => failing = true
-      case ControlEvent.FixpointRepeat() =>
+      case FixpointControlEvent.RecurrentCall(recFailing) => failing = recFailing
+      case FixpointControlEvent.RepeatFixpoint() =>
+        fixpoint match
+          case Some(e) =>
+            failing = e.failing
+            stack = e.stack
+            tries = e.tries
+          case None =>
+            error(s"Cannot repeat here, expected end of fixpoint before")
+      case FixpointControlEvent.EndFixpoint() =>
         updateEntry { case e: Entry.Fixpoint =>
-          failing = e.failing
-          stack = e.stack
-          tries = e.tries
-          Some(e)
+          fixpoint = Some(e)
+          None
         }
-      case ControlEvent.FixpointRelease() =>
-        updateEntry { case _: Entry.Fixpoint => None}
+
+    ev match
+      case FixpointControlEvent.EndFixpoint() => // nothing
+      case _ => fixpoint = None
 
 
 object ControlEventChecker:

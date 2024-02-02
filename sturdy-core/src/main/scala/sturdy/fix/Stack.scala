@@ -1,6 +1,7 @@
 package sturdy.fix
 
-import sturdy.values.{Widen, Join}
+import sturdy.control.FixpointControlEvent
+import sturdy.values.{Join, Widen}
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.TrySturdy
@@ -12,10 +13,10 @@ object Stack:
                             (config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
                             (using Finite[Dom], Finite[Ctx], Widen[Codom])
                             : Stack[Dom, Codom, state.In, state.Out] = config match
-    case StackConfig.StackedStates(readPriorOutput) =>
-      StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput)
-    case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
-      StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
+    case StackConfig.StackedStates(readPriorOutput, observers) =>
+      StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput, observers)
+    case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent, observers) =>
+      StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent) // TODO pass observers
 
 trait Stack[Dom, Codom, In, Out]:
   enum PushResult:
@@ -33,5 +34,10 @@ trait Stack[Dom, Codom, In, Out]:
   def hasRecurrentCalls: Boolean
 
 enum StackConfig:
-  case StackedStates(readPriorOutput: Boolean = true)
-  case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true)
+  case StackedStates(readPriorOutput: Boolean = true, observers: Iterable[FixpointControlEvent => Unit] = Seq())
+  case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true, observers: Iterable[FixpointControlEvent => Unit] = Seq())
+
+  def withObservers(newObservers: Iterable[FixpointControlEvent => Unit]): StackConfig = this match
+    case ss: StackedStates => ss.copy(observers = ss.observers ++ newObservers)
+    case ss: StackedCfgNodes => ss.copy(observers = ss.observers ++ newObservers)
+

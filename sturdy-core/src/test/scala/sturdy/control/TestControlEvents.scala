@@ -1,10 +1,10 @@
 package sturdy.control
 
 import org.scalatest.funsuite.AnyFunSuite
-import ControlEvent.*
+import BasicControlEvent.*, ExceptionControlEvent.*, BranchingControlEvent.*, FixpointControlEvent.*
 
 class TestControlEvents extends AnyFunSuite {
-  inline def testEvents[A,S,E](name: String, code: String, es: List[ControlEvent[A,S,E]]): Unit =
+  inline def testEvents[A,S,E](name: String, code: String, es: List[ControlEvent]): Unit =
     test(name) {
       val rec = new RecordingControlObserver[A, S, E](true)
       es.foreach(rec.handle)
@@ -21,14 +21,14 @@ class TestControlEvents extends AnyFunSuite {
       Start(),
       Atomic("x = a"),
       Atomic("while (x)"),
-      FixpointPrepare(),
+      BeginFixpoint(),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
-      FixpointRecurrent(),
-      FixpointRepeat(),
+      RecurrentCall(true),
+      RepeatFixpoint(),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
-      FixpointRelease(),
+      EndFixpoint(),
       Atomic("y = x")
     )
   )
@@ -43,18 +43,18 @@ class TestControlEvents extends AnyFunSuite {
     List(
       Start(),
       Begin("f"),
-      FixpointPrepare(),
+      BeginFixpoint(),
       Atomic("if"),
       Fork(),
       Atomic("x = 1"),
       Switch(),
       Begin("f"),
-      FixpointRecurrent(),
+      RecurrentCall(true),
       End("f"),
       Join(),
       Atomic("ret x"),
 
-      FixpointRepeat(),
+      RepeatFixpoint(),
       Atomic("if"),
       Fork(),
       Atomic("x = 1"),
@@ -62,7 +62,7 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("x = n * f(n-1)"),
       Join(),
       Atomic("ret x"),
-      FixpointRelease(),
+      EndFixpoint(),
       End("f"),
     )
   )
