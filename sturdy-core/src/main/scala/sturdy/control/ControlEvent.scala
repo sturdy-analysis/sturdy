@@ -35,7 +35,7 @@ enum ControlEvent[Atom, Section, Exc]:
   case Join()
 
   case FixpointPrepare()
-  case FixpointRecurrent()
+  case FixpointRecurrent(failing: Boolean)
   case FixpointRepeat()
   case FixpointRelease()
 

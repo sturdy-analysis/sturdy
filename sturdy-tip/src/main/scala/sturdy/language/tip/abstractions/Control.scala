@@ -12,7 +12,7 @@ import sturdy.values.booleans.ObservedBooleanBranching
 
 object Control:
   type Atom = Stm
-  type Section = Function | Exp.Call
+  type Section = Function | Exp.Call | Stm.If
   type Exc = Unit
 
   def getInNode(l: Labeled | Function): Option[TipControlNode] = l match
@@ -44,8 +44,9 @@ trait Control extends Interpreter:
         dom match
           case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.Begin(f))
           case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.Begin(c))
-          case FixIn.Run(s: (Stm.If | Stm.While)) =>
-            br.addObserver(_ => observable.triggerControlEvent(ControlEvent.Atomic(s)))
+          case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(ControlEvent.Begin(s))
+          case FixIn.Run(s: Stm.While) => observable.triggerControlEvent(ControlEvent.Atomic(s))
+          case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(ControlEvent.Atomic(s))
           case _ => // nothing
 
         if (needsFixing(dom))
@@ -60,7 +61,7 @@ trait Control extends Interpreter:
         dom match
           case FixIn.EnterFunction(f) => observable.triggerControlEvent(ControlEvent.End(f))
           case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(ControlEvent.End(c))
-          case FixIn.Run(s: (Stm.Assign | Stm.Output)) if !codom.isBottom => observable.triggerControlEvent(ControlEvent.Atomic(s))
+          case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(ControlEvent.End(s))
           case _ => // nothing
 
 

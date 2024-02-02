@@ -33,7 +33,7 @@ class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends 
   def addObserver(f: B => Unit): Unit = observer +:= f
 
   override def boolBranch(v: B, thn: => R, els: => R): R =
-    val f = observer.head
-    f(v)
-    observer = observer.tail
+//    val f = observer.head
+//    f(v)
+//    observer = observer.tail
     ops.boolBranch(v, thn, els)

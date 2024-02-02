@@ -13,7 +13,7 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
     case Fixpoint(failing: Boolean, stack: List[Entry], tries: List[Set[Exc]])
 
   private var started = false
-  private var failing = false
+  var failing = false
   private var stack: List[Entry] = List()
   private var tries: List[Set[Exc]] = List(Set())
 

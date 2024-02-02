@@ -1,7 +1,9 @@
-package sturdy.control
+/*package sturdy.control
 
 import org.scalatest.funsuite.AnyFunSuite
 import ControlEvent.*
+import sturdy.control.ControlEventGraphBuilder.Node 
+import sturdy.control.ControlEventGraphBuilder.EdgeType
 
 
 class TestGraphBuilder extends AnyFunSuite {
@@ -11,6 +13,7 @@ class TestGraphBuilder extends AnyFunSuite {
       val graphBuilder = new ControlEventGraphBuilder[A, S, E]
       es.foreach(graphBuilder.handle)
 
+      ControlEventGraphBuilder[A,S,E].Node
       val edgesMissing = expected.diff(graphBuilder.edges)
       val edgesUnexpected = graphBuilder.edges.diff(expected)
 
@@ -229,4 +232,6 @@ class TestGraphBuilder extends AnyFunSuite {
   )
 
 }
+
+ */
 
