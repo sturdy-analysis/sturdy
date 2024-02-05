@@ -34,7 +34,6 @@ trait Control extends Interpreter:
   import Control.*
 
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
-    observable.triggerControlEvent(BasicControlEvent.Start())
     effects.addJoinObserver(observable)
     new Logger:
       override def enter(dom: FixIn): Unit = dom match

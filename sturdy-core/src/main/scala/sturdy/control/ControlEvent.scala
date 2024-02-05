@@ -21,7 +21,6 @@ package sturdy.control
 trait ControlEvent
 
 enum BasicControlEvent[Atom, Section] extends ControlEvent:
-  case Start()
   case Atomic(a: Atom)
   case Failed()
 

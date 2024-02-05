@@ -29,7 +29,6 @@ trait Control extends Interpreter:
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
                          obsExc: ObservableExcept[WasmException[Value]]
                         )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
-    observable.triggerControlEvent(BasicControlEvent.Start())
     effects.addJoinObserver(observable)
     obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:

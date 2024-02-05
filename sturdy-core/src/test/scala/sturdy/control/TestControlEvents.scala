@@ -18,17 +18,16 @@ class TestControlEvents extends AnyFunSuite {
      |y = x
      |""".stripMargin,
     List(
-      Start(),
       Atomic("x = a"),
       Atomic("while (x)"),
       BeginFixpoint(),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
       RecurrentCall(true),
+      EndFixpoint(),
       RepeatFixpoint(),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
-      EndFixpoint(),
       Atomic("y = x")
     )
   )
@@ -41,7 +40,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = n * f(n - 1)
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginFixpoint(),
       Atomic("if"),
@@ -53,6 +51,7 @@ class TestControlEvents extends AnyFunSuite {
       End("f"),
       Join(),
       Atomic("ret x"),
+      EndFixpoint(),
 
       RepeatFixpoint(),
       Atomic("if"),
@@ -62,7 +61,6 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("x = n * f(n-1)"),
       Join(),
       Atomic("ret x"),
-      EndFixpoint(),
       End("f"),
     )
   )
@@ -79,7 +77,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginTry(),
         Atomic("x = 1"),
@@ -103,7 +100,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginTry(),
         Atomic("x = 1"),
@@ -128,7 +124,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginTry(),
         Atomic("If(???)"),
@@ -163,7 +158,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginTry(),
         Atomic("If(???)"),
@@ -202,7 +196,6 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Start(),
       Begin("f"),
       BeginTry(),
         Atomic("If(???)"),
