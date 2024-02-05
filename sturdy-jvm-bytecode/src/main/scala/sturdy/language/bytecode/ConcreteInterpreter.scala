@@ -1,7 +1,6 @@
 package sturdy.language.bytecode
 
-import org.opalj.br.ClassFile
-import org.opalj.br.ObjectType
+import org.opalj.br.{ClassFile, Method, ObjectType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
@@ -30,10 +29,12 @@ object ConcreteInterpreter extends Interpreter:
   override type F64 = Double
   override type Bool = Boolean
 
+  override type Mth = Method
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
-  override type ObjRep = Object[ObjType, Addr]
+  override type OID = Int
+  override type ObjRep = Object[OID, ObjType, Addr]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -41,7 +42,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
-  override def topObj: Object[ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
+  override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   def asObj(v: Value)(using Failure): ObjRep = v.asObj
   override def boolean(b: Boolean): Value =
@@ -64,6 +65,7 @@ object ConcreteInterpreter extends Interpreter:
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
     val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
     val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val store: CStore[Addr, Value] = new CStore(initStore)
 
     val project: Project[URL] = files
@@ -71,8 +73,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, Value, ObjType, Value, AllocationSite, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, Value, ObjType, Value, AllocationSite, MayJoin.NoJoin, Value, ObjRep](identity, asObj, identity, Value.Obj.apply)(
+    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, Value, AllocationSite, Mth, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, Value, AllocationSite, Mth, MayJoin.NoJoin, Value, ObjRep](identity, asObj, identity, Value.Obj.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
 

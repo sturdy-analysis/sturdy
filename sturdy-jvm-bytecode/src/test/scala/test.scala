@@ -129,6 +129,14 @@ object test extends App{
   interp.invokeStatic(testInherit)
   println(interp.stack.pop())
 
+  println("--- objectCompTest ---")
+  val testObjCompTrue = cfs.findMethod("objectCompTestTrue").head
+  interp.invokeStatic(testObjCompTrue)
+  println(interp.stack.pop())
+
+  val testObjCompFalse = cfs.findMethod("objectCompTestFalse").head
+  interp.invokeStatic(testObjCompFalse)
+  println(interp.stack.pop())
 
   /*
 

@@ -44,14 +44,14 @@ enum JvmExcept:
   case Jump(pc: Int)
 
 enum AllocationSite:
-  case classFile(obj: ObjectType, cfs: ClassFile)
+  case classFile(cfs: ClassFile)
   case objField(cfs: ClassFile)
 
-trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, V, ClassFile, V, AllocationSite, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, V, AllocationSite, Method, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -60,6 +60,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
   val failure: Failure
   val except: Except[JvmExcept, JvmExcept, J]
   val alloc: Allocation[Addr, AllocationSite]
+  val objAlloc: Allocation[OID, AllocationSite]
   val store: Store[Addr, V, J]
 
   type FrameData = Unit
@@ -313,9 +314,21 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
           }
         case inst: IF_ACMPEQ =>
-          ???
+          val(v1, v2) = stack.pop2OrAbort()
+          val isEq = eqOps.equ(v1, v2)
+          branchOpsUnit.boolBranch(isEq){
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          }{
+
+          }
         case inst: IF_ACMPNE =>
-          ???
+          val (v1, v2) = stack.pop2OrAbort()
+          val isNe = eqOps.neq(v1, v2)
+          branchOpsUnit.boolBranch(isNe) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          } {
+
+          }
 
 
     // JUMPS
@@ -397,7 +410,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
         case inst: NEW =>
           val cfs = project.classFile(inst.objectType).get
           val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs)))
-          val obj = objectOps.makeObject(cfs, fields)
+          val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
           stack.push(obj)
 
 
@@ -556,4 +569,4 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, J[_] <: MayJoin[_]]:
     case ValType.I64 => num.evalNumericOp(LCONST_0)
     case ValType.F32 => num.evalNumericOp(FCONST_0)
     case ValType.F64 => num.evalNumericOp(DCONST_0)
-    case ValType.Obj => objectOps.makeObject(objectCF, Seq())
+    case ValType.Obj => objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
