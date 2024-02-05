@@ -6,18 +6,18 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
+enum Node:
+  case Atomic[Atom](atom: Atom)
+  case BlockStart[Section](sec: Section)
+  case BlockEnd[Section](label: Section)
+
+enum EdgeType:
+  case CF
+  case BlockPair
+
+type Edge = (Node, Node, EdgeType)
+
 class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Section,Exc]:
-
-  enum Node:
-    case Atomic(atom: Atom)
-    case BlockStart(sec: Section)
-    case BlockEnd(label: Section)
-
-  enum EdgeType:
-    case CF
-    case BlockPair
-
-  private type Edge = (Node, Node, EdgeType)
 
   private case class NodeProperties(mayFail: Boolean)
 
@@ -71,7 +71,16 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
       case BasicControlEvent.Failed() => ancestors.foreach(n => nodesProperties += n -> NodeProperties(mayFail = true)) // Change to creating a Failure node, deleting the properties and coloring the node via post processing
 
 
-  override def handle(ev: ExceptionControlEvent[Exc]): Unit = ()
+  override def handle(ev: ExceptionControlEvent[Exc]): Unit =
+    import ExceptionControlEvent.*
+    checkFail(ev)
+    ev match
+      case BeginTry() => ()
+      case Throw(exc) => ()
+      case Catching() => ()
+      case Handle(exc) => ()
+      case EndTry() => ()
+
 
   override def handle(ev: BranchingControlEvent): Unit =
     import BranchingControlEvent.*
@@ -112,9 +121,10 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     }.reduce((s1, s2) => s1 + "\n" + s2)
     + "\n\n\n\n" +
     nodes.filter(node => edges.exists(e => e._1 == node || e._2 == node)).map { node => (node, nodesProperties.get(node)) match
-      case (n : Node.Atomic, Some(NodeProperties(true))) => s"\"$n\" [style=filled, fillcolor=\"#FFBBBB\"]"
-      case (n : Node.Atomic, Some(NodeProperties(false))) => s"\"$n\" [style=filled, fillcolor=\"#BBFFBB\"]"
-      case (n : Node.BlockStart, _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
-      case (n : Node.BlockEnd, _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
+      case (n : Node.Atomic[Atom], Some(NodeProperties(true))) => nodesProperties(n) match
+        case NodeProperties(true) => s"\"$n\" [style=filled, fillcolor=\"#FFBBBB\"]"
+        case NodeProperties(false) => s"\"$n\" [style=filled, fillcolor=\"#BBFFBB\"]"
+      case (n : Node.BlockStart[Section], _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
+      case (n : Node.BlockEnd[Section], _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
       case _ => ""
     }.reduce((s1, s2) => s1 + "\n" + s2)

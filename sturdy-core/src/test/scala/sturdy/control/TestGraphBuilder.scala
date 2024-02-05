@@ -1,19 +1,18 @@
-/*package sturdy.control
+package sturdy.control
 
 import org.scalatest.funsuite.AnyFunSuite
-import ControlEvent.*
-import sturdy.control.ControlEventGraphBuilder.Node 
-import sturdy.control.ControlEventGraphBuilder.EdgeType
-
+import BasicControlEvent.*
+import ExceptionControlEvent.*
+import BranchingControlEvent.*
+import FixpointControlEvent.*
 
 class TestGraphBuilder extends AnyFunSuite {
 
-  inline def testGraph[A, S, E](name: String, code: String, es: List[ControlEvent[A, S, E]], expected: Set[(Node, Node, EdgeType)]): Unit =
+  inline def testGraph[A, S, E](name: String, code: String, es: List[ControlEvent], expected: Set[(Node, Node, EdgeType)]): Unit =
     test(name) {
       val graphBuilder = new ControlEventGraphBuilder[A, S, E]
       es.foreach(graphBuilder.handle)
 
-      ControlEventGraphBuilder[A,S,E].Node
       val edgesMissing = expected.diff(graphBuilder.edges)
       val edgesUnexpected = graphBuilder.edges.diff(expected)
 
@@ -40,13 +39,12 @@ class TestGraphBuilder extends AnyFunSuite {
        |output z;
        |""".stripMargin,
     List(
-      Start(),
       Atomic("x = input"),
       Atomic("y = x + 1"),
       Atomic("z = input"),
       Atomic("output z"),
     ),
-    linearPath(List(Node.Start(),
+    linearPath(List(
       Node.Atomic("x = input"),
       Node.Atomic("y = x + 1"),
       Node.Atomic("z = input"),
@@ -61,14 +59,13 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Start(),
       Begin("Call(main)"),
       Begin("main"),
       Atomic("output 3"),
       End("main"),
       End("Call(main)"),
     ),
-    linearPath(List(Node.Start(),
+    linearPath(List(
       Node.BlockStart("Call(main)"),
       Node.BlockStart("main"),
       Node.Atomic("output 3"),
@@ -95,7 +92,6 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Start(),
       Begin("Call(main)"),
       Begin("main"),
       Atomic("output 3"),
@@ -108,7 +104,7 @@ class TestGraphBuilder extends AnyFunSuite {
       End("main"),
       End("Call(main)"),
     ),
-    linearPath(List(Node.Start(),
+    linearPath(List(
       Node.BlockStart("Call(main)"),
       Node.BlockStart("main"),
       Node.Atomic("output 3"),
@@ -123,7 +119,7 @@ class TestGraphBuilder extends AnyFunSuite {
       ++ Set(
       (Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
       (Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
-      (Node.BlockStart("foo"), Node.BlockEnd("foo"), EdgeType.BlockPair),
+      // (Node.BlockStart("foo"), Node.BlockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
       (Node.BlockStart("Call(foo)"), Node.BlockEnd("Call(foo)"), EdgeType.BlockPair),
     )
   )
@@ -143,7 +139,6 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Start(),
       Begin("Call(main)"),
       Begin("main"),
       Atomic("x = input"),
@@ -157,7 +152,6 @@ class TestGraphBuilder extends AnyFunSuite {
       End("Call(main)"),
     ),
     linearPath(List(
-      Node.Start(),
       Node.BlockStart("Call(main)"),
       Node.BlockStart("main"),
       Node.Atomic("x = input"),
@@ -192,7 +186,6 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Start(),
       Begin("Call(main)"),
       Begin("main"),
       Atomic("x = input"),
@@ -211,7 +204,6 @@ class TestGraphBuilder extends AnyFunSuite {
       End("Call(main)"),
     ),
     linearPath(List(
-      Node.Start(),
       Node.BlockStart("Call(main)"),
       Node.BlockStart("main"),
       Node.Atomic("x = input"),
@@ -232,6 +224,4 @@ class TestGraphBuilder extends AnyFunSuite {
   )
 
 }
-
- */
 
