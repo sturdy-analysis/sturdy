@@ -13,13 +13,13 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     case BlockStart(sec: Section)
     case BlockEnd(label: Section)
 
-  private case class NodeProperties(mayFail: Boolean)
-
   enum EdgeType:
     case CF
     case BlockPair
 
   private type Edge = (Node, Node, EdgeType)
+
+  private case class NodeProperties(mayFail: Boolean)
 
   private enum ProgramStructure:
     case Block(start: Node)
@@ -33,12 +33,11 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
   private var structureStack: List[ProgramStructure] = List.empty
   private var ancestors: List[Node] = List.empty
 
-  private type BuilderState = (List[ProgramStructure], List[Node])
-  private var fixpoint: List[Node] = List.empty
+  private var fixpointAncestors: List[Node] = List.empty
 
   var checker: ControlEventChecker[Atom, Section, Exc] = new ControlEventChecker
 
-  private def update(node : Node) : List[Node] =
+  private def addNode(node : Node) : List[Node] =
     val previous = ancestors
     ancestors.foreach(n => edges += ((n, node, EdgeType.CF)))
     ancestors = List(node)
@@ -46,22 +45,25 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     nodesProperties.getOrElseUpdate(node, NodeProperties(mayFail = false))
     previous
 
-  override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
-    import BasicControlEvent.*
+  private def checkFail(ev : ControlEvent) : Unit =
     if (checker.failing)
       ancestors = List.empty
     checker.handle(ev)
+
+  override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
+    import BasicControlEvent.*
+    checkFail(ev)
     ev match
-      case Atomic(a: Atom) => update(Node.Atomic(a))
+      case Atomic(a: Atom) => addNode(Node.Atomic(a))
       case Begin(sec: Section) =>
         val current = Node.BlockStart(sec)
-        update(current)
+        addNode(current)
         structureStack = ProgramStructure.Block(current) :: structureStack
       case End(sec: Section) =>
         structureStack.head match
           case ProgramStructure.Block(start) =>
             val end = Node.BlockEnd(sec)
-            val prev = update(end) // check to print helper BlockPair edge only if there is no direct CF edge between the two Block nodes
+            val prev = addNode(end) // check to print helper BlockPair edge only if there is no direct CF edge between the two Block nodes
             structureStack = structureStack.tail
             if (prev.nonEmpty && !prev.contains(Node.BlockStart(sec)))
               edges += ((start, end, EdgeType.BlockPair))
@@ -72,18 +74,17 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
   override def handle(ev: ExceptionControlEvent[Exc]): Unit = ()
 
   override def handle(ev: BranchingControlEvent): Unit =
-    if (checker.failing)
-      ancestors = List.empty
-    checker.handle(ev)
+    import BranchingControlEvent.*
+    checkFail(ev)
     ev match
-      case BranchingControlEvent.Fork() => structureStack = ProgramStructure.Fork(ancestors, List.empty) :: structureStack
-      case BranchingControlEvent.Switch() =>
+      case Fork() => structureStack = ProgramStructure.Fork(ancestors, List.empty) :: structureStack
+      case Switch() =>
         structureStack.head match
           case ProgramStructure.Fork(origin, _) =>
             structureStack = ProgramStructure.Fork(origin, ancestors) :: structureStack.tail
             ancestors = origin
           case _ => throw new Exception("Illegal control event sequence")
-      case BranchingControlEvent.Join() =>
+      case Join() =>
         structureStack.head match
           case ProgramStructure.Fork(_, lastFirstBranch) =>
             ancestors = ancestors ++ lastFirstBranch
@@ -91,17 +92,16 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
           case _ => throw new Exception("Illegal control event sequence")
 
   override def handle(ev: FixpointControlEvent): Unit =
-    if (checker.failing)
-      ancestors = List.empty
-    checker.handle(ev)
+    import FixpointControlEvent.*
+    checkFail(ev)
     ev match
-      case FixpointControlEvent.BeginFixpoint() =>
-        fixpoint = ancestors
-      case FixpointControlEvent.RecurrentCall(_) =>
+      case BeginFixpoint() =>
+        fixpointAncestors = ancestors
+      case RecurrentCall(_) =>
         ancestors = List.empty
-      case FixpointControlEvent.RepeatFixpoint() =>
-        ancestors = fixpoint
-      case FixpointControlEvent.EndFixpoint() => ()
+      case RepeatFixpoint() =>
+        ancestors = fixpointAncestors
+      case EndFixpoint() => ()
 
 
   def toGraphViz : String =
