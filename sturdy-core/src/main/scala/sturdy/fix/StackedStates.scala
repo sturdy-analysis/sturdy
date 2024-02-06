@@ -68,8 +68,8 @@ final class StackedStates[Dom, Codom](val state: State)
     val widenedIn = inStateWidening.push(dom, in).get
     val stateFrame = (dom, widenedIn)
     Option(stack.get(stateFrame)) match
+      // call is not recurrent
       case None =>
-        // call is not recurrent
         if (readPriorOutput) {
           val outEntry = Option(outCache.get(stateFrame))
           if (outEntry.exists(_.isStable)) {
@@ -90,8 +90,9 @@ final class StackedStates[Dom, Codom](val state: State)
         stackHeight += 1
         fire(FixpointControlEvent.BeginFixpoint())
         PushResult.Continue(Some(widenedIn))
+
+      // call is recurrent
       case Some(info) =>
-        // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")

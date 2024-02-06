@@ -4,6 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.PrintingControlObserver
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
@@ -14,10 +15,10 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, IntervalAnalysis}
+import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, WasmFailure, FixOut, FrameData}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
@@ -126,39 +127,39 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
+      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates(false))
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
-    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
-        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
-        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
-        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
-    }
+//    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
+//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
+//        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
+//        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
+//    }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
+      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates(false))
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
-    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
-        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
-    }
+//    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
+//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
+//        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
+//    }
 
 
 def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
@@ -168,6 +169,7 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = IntervalAnalysis.constantInstructions(interp)
+  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(

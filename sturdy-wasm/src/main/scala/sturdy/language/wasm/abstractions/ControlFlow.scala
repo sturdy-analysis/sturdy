@@ -27,9 +27,10 @@ trait Control extends Interpreter:
   import Control.*
 
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
+                         obsJoin: ObservableJoin,
                          obsExc: ObservableExcept[WasmException[Value]]
                         )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
-    effects.addJoinObserver(observable)
+    obsJoin.addJoinObserver(observable)
     obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:
       override def enter(dom: FixIn): Unit = dom match

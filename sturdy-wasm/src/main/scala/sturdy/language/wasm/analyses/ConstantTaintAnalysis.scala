@@ -7,11 +7,11 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable, given}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -32,10 +32,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
 
-object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ExceptionByTarget, ControlFlow:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
@@ -73,21 +74,24 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
-    GenericInstance
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
 
-    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
-      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
-    }
+    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
+    this.addControlObserver(controlRecorder)
 
-    override val fixpointSuper = fixpoint
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
+    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
+      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+      override protected def contextSensitive = observedConfig.fix.get
+    }
 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
