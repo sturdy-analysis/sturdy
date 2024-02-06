@@ -2,74 +2,166 @@ package sturdy.apron
 
 import apron.*
 import gmp.Mpz
-
-import sturdy.apron.ApronCons.False
 import sturdy.apron.ApronExpr.{Binary, Unary}
+import sturdy.values.booleans.BooleanOps
+import sturdy.values.integer.IntegerOps
+import sturdy.values.ordering.EqOps
+import sturdy.values.types.BaseType
 import sturdy.values.{Join, MaybeChanged, Widen}
 
 import scala.reflect.ClassTag
 
-enum ApronExpr[Addr]:
-  case Var(v: ApronVar[Addr])
-  case Constant(coeff: Coeff)
-  case Unary(op: UnOp, e: ApronExpr[Addr], roundingType: Int = Texpr1Node.RTYPE_REAL, roundingDir: Int = Texpr1Node.RDIR_NEAREST)
-  case Binary(op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr], roundingType: Int, roundingDir: Int)
+enum ApronExpr[Addr, Type]:
+  case Var(v: ApronVar[Addr], tpe: Type)
+  case Constant(coeff: Coeff, tpe: Type)
+  case Unary(op: UnOp,
+             e: ApronExpr[Addr, Type],
+             tpe: Type,
+             roundingType: RoundingType,
+             roundingDir: RoundingDir)
+  case Binary(op: BinOp,
+              l: ApronExpr[Addr, Type],
+              r: ApronExpr[Addr, Type],
+              tpe: Type,
+              roundingType: RoundingType,
+              roundingDir: RoundingDir)
 
-  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr] =
+  def _type: Type =
     this match
-      case Var(ApronVar(addr)) => Var(ApronVar(f(addr)))
-      case Constant(coeff) => Constant(coeff)
-      case Unary(op, expr, roundingType, roundingDir) =>
-        Unary(op, expr.mapAddr(f), roundingType, roundingDir)
-      case Binary(op, expr1, expr2, roundingType, roundingDir) =>
-        Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir)
+      case Var(_, t) => t
+      case Constant(_, t) => t
+      case Unary(_, _, t, _, _) => t
+      case Binary(_, _, _, t, _, _) => t
+
+  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
+    this match
+      case Var(ApronVar(addr), _type) => Var(ApronVar(f(addr)), _type)
+      case Constant(coeff, _type) => Constant(coeff, _type)
+      case Unary(op, expr, roundingType, roundingDir, _type) =>
+        Unary(op, expr.mapAddr(f), roundingType, roundingDir, _type)
+      case Binary(op, expr1, expr2, roundingType, roundingDir, _type) =>
+        Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir, _type)
 
   def vars: Set[Addr] = this match
-    case Var(v) => Set(v.addr)
-    case Constant(coeff) => Set()
-    case Unary(op, e, rtyp, rdir) => e.vars
-    case Binary(op, l, r, rtyp, rdir) => l.vars ++ r.vars
+    case Var(v, _) => Set(v.addr)
+    case Constant(coeff, _) => Set()
+    case Unary(op, e, rtyp, rdir, _) => e.vars
+    case Binary(op, l, r, rtyp, rdir, _) => l.vars ++ r.vars
 
   override def toString: String = this match
-    case Var(v) => v.toString
-    case Constant(coeff) => coeff.toString
-    case Unary(op, e, _, _) => s"$op $e"
-    case Binary(op, l, r, _, _) => s"($l $op $r)"
+    case Var(v, _) => v.toString
+    case Constant(coeff, _) => coeff.toString
+    case Unary(op, e, _, _, _) => s"$op $e"
+    case Binary(op, l, r, _, _, _) => s"($l $op $r)"
 
-  def toApron(): Texpr1Node = this match
-    case Var(v) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
-    case Constant(coeff) => new Texpr1CstNode(coeff)
-    case Unary(op, e, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp, rdir, e.toApron())
-    case Binary(op, l, r, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp, rdir, l.toApron(), r.toApron())
+  def toApron: Texpr1Node = this match
+    case Var(v, _) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
+    case Constant(coeff, _) => new Texpr1CstNode(coeff)
+    case Unary(op, e, _, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron)
+    case Binary(op, l, r, _, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron, r.toApron)
 
   def toIntern(env: apron.Environment): Texpr1Intern =
-    val expr = this.toApron()
+    val expr = this.toApron
     new Texpr1Intern(env, expr)
 
+enum RoundingType:
+  case Real
+  case Int
+  case Single
+  case Double
+  case Extended
+  case Quad
+
+  def toApron: Int =
+    this match
+      case Real => Texpr1Node.RTYPE_REAL
+      case Int => Texpr1Node.RTYPE_INT
+      case Single => Texpr1Node.RTYPE_SINGLE
+      case Double => Texpr1Node.RTYPE_DOUBLE
+      case Extended => Texpr1Node.RTYPE_EXTENDED
+      case Quad => Texpr1Node.RTYPE_QUAD
+
+trait ApronType[Type]:
+  extension(t: Type)
+    def representation: Representation
+    def roundingDir: RoundingDir
+    def roundingType: RoundingType
+
+given IntApronType: ApronType[BaseType[Int]] with
+  extension(t: BaseType[Int])
+    override def representation: Representation = Representation.Int
+    override def roundingDir: RoundingDir = RoundingDir.Zero
+    override def roundingType: RoundingType = RoundingType.Int
+
+enum Representation:
+  case Int
+  case Real
+
+enum RoundingDir:
+  case Down
+  case Nearest
+  case Rnd
+  case Up
+  case Zero
+
+  def toApron: Int =
+    this match
+      case Down => Texpr1Node.RDIR_DOWN
+      case Nearest => Texpr1Node.RDIR_NEAREST
+      case Rnd => Texpr1Node.RDIR_NEAREST
+      case Up => Texpr1Node.RDIR_UP
+      case Zero => Texpr1Node.RDIR_ZERO
+
 object ApronExpr:
-  def _var[Addr : Ordering : ClassTag](addr: Addr): ApronExpr[Addr] = ApronExpr.Var(ApronVar(addr))
-  def num(i: Int): Constant[_] =
-    Constant(new MpqScalar(new Mpz(i)))
-  def num(iv: Interval): Constant[_] =
-    Constant(iv)
+  def _var[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Var(ApronVar(addr), _type)
+  def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(i))
+  def intInterval[Addr, Type](using intOps: IntegerOps[Int,Type])(lower: Int, upper: Int): Constant[Addr, Type] =
+    Constant(Interval(lower, upper), intOps.integerLit(lower))
+
+  def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
+    Constant(iv, _type)
+
+  def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
+    ApronExpr.Unary(op, e1, resultType, resultType.roundingType, resultType.roundingDir)
+
+  def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
+    ApronExpr.Binary(op, e1, e2, resultType, resultType.roundingType, resultType.roundingDir)
+
+  def intNegate[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, intOps.sub(intOps.integerLit(0), e1._type))
+
+  def intAdd[Addr,Type: ApronType](using intOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    binary(BinOp.Add, e1, e2, intOps.add(e1._type, e2._type))
+
+  def intSub[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Sub, e1, e2, intOps.sub(e1._type, e2._type))
+
+  def intMul[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Mul, e1, e2, intOps.mul(e1._type, e2._type))
+
+  def intDiv[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
+
+  def intMod[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Mod, e1, e2, intOps.div(e1._type, e2._type))
+
+  def intPow[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
+
   def topInterval: Interval =
     val topItv = new Interval()
     topItv.setTop()
     topItv
-  def topConstant: Constant[_] =
-    Constant(topInterval)
+  def topConstant[Type](_type: Type): Constant[_, Type] =
+    Constant(topInterval, _type)
 
   def bottomInterval: Interval =
     val itv = new Interval()
     itv.setBottom()
     itv
-  def bottomConstant: Constant[_] =
-    Constant(bottomInterval)
-
-  def Unary[Addr](op: UnOp, e: ApronExpr[Addr]): ApronExpr[Addr] =
-    Unary(op, e, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
-  def Binary[Addr](op: BinOp, l: ApronExpr[Addr], r: ApronExpr[Addr]): ApronExpr[Addr] =
-    Binary(op, l, r, Texpr1Node.RTYPE_REAL, Texpr1Node.RDIR_NEAREST)
+  def bottomConstant[Type](_type: Type): Constant[_, Type] =
+    Constant(bottomInterval, _type)
 
 
 enum UnOp:
@@ -111,57 +203,55 @@ enum BinOp:
     case Mod => Texpr1BinNode.OP_MOD
     case Pow => Texpr1BinNode.OP_POW
 
-enum ApronCons[Addr <: apron.Var]:
-  case True[Addr]() extends ApronCons[apron.Var]
-  case False[Addr]() extends ApronCons[apron.Var]
-  case Compare(op: CompareOp, e1: ApronExpr[Addr], e2: ApronExpr[Addr])
+enum ApronCons[Addr, Type]:
+  case Compare(op: CompareOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type)
 
   import CompareOp.*
 
   override def toString: String = this match
-    case True() => "true"
-    case False() => "false"
-    case Compare(op, e1, e2) => s"($e1 $op $e2)"
+    case Compare(op, e1, e2, _) => s"($e1 $op $e2)"
 
 //  def vars: Set[ApronVar] = this match
 //    case True => Set()
 //    case False => Set()
 //    case Compare(_, e1, e2) => e1.vars ++ e2.vars
 
-  def toApron(env : apron.Environment): Seq[Tcons1] = this match
-    case True() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(0).toApron()))
-    case False() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.num(1).toApron()))
-    case Compare(Eq, e1, e2) =>
-      val sub = ApronExpr.Binary(BinOp.Sub, e1, e2)
-      Seq(new Tcons1(env, Tcons1.EQ, sub.toApron()))
-    case Compare(Neq, e1, e2) => Compare(Gt, e1, e2).toApron(env) ++ Compare(Lt, e1, e2).toApron(env)
-    case Compare(Lt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron()))
-    case Compare(Le, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e2, e1).toApron()))
-    case Compare(Ge, e1, e2) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron()))
-    case Compare(Gt, e1, e2) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.Binary(BinOp.Sub, e1, e2).toApron()))
+  def toApron(env : apron.Environment)(using ApronType[Type]): Seq[Tcons1] = this match
+//    case True() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.constant(0, boolOpts.boolLit(true)).toApron))
+//    case False() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.constant(1, boolOpts.boolLit(false)).toApron))
+    case Compare(Eq, e1, e2, tpe) =>
+      Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
+    case Compare(Neq, e1, e2, tpe) => Compare(Gt, e1, e2, tpe).toApron(env) ++ Compare(Lt, e1, e2, tpe).toApron(env)
+    case Compare(Lt, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
+    case Compare(Le, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
+    case Compare(Ge, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
+    case Compare(Gt, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
 
 
-  def negated: ApronCons[Addr] = this match
-    case True() => False()
-    case False() => True()
-    case Compare(Eq, e1, e2) => Compare(Neq, e1, e2)
-    case Compare(Neq, e1, e2) => Compare(Eq, e1, e2)
-    case Compare(Lt, e1, e2) => Compare(Ge, e1, e2)
-    case Compare(Le, e1, e2) => Compare(Gt, e1, e2)
-    case Compare(Ge, e1, e2) => Compare(Lt, e1, e2)
-    case Compare(Gt, e1, e2) => Compare(Le, e1, e2)
+  def negated: ApronCons[Addr, Type] = this match
+    case Compare(Eq, e1, e2, tpe) => Compare(Neq, e1, e2, tpe)
+    case Compare(Neq, e1, e2, tpe) => Compare(Eq, e1, e2, tpe)
+    case Compare(Lt, e1, e2, tpe) => Compare(Ge, e1, e2, tpe)
+    case Compare(Le, e1, e2, tpe) => Compare(Gt, e1, e2, tpe)
+    case Compare(Ge, e1, e2, tpe) => Compare(Lt, e1, e2, tpe)
+    case Compare(Gt, e1, e2, tpe) => Compare(Le, e1, e2, tpe)
 
 object ApronCons:
   import CompareOp.*
 
   // issue below, make CompareOp[Addr]?
-  def fromBool(b: Boolean): ApronCons[_] = if (b) True() else False()
-  def eq[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Eq, e1, e2)
-  def neq[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Neq, e1, e2)
-  def lt[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Lt, e1, e2)
-  def le[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Le, e1, e2)
-  def ge[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Ge, e1, e2)
-  def gt[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr]): Compare[Addr] = Compare(Gt, e1, e2)
+  def intEq[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Eq, e1, e2, intOps.sub(e1._type, e2._type))
+  def neq[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Neq, e1, e2, intOps.sub(e1._type, e2._type))
+  def lt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Lt, e1, e2, intOps.sub(e2._type, e1._type))
+  def le[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Le, e1, e2, intOps.sub(e2._type, e1._type))
+  def ge[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Ge, e1, e2, intOps.sub(e1._type, e2._type))
+  def gt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Gt, e1, e2, intOps.sub(e1._type, e2._type))
 
 enum CompareOp:
   case Eq
@@ -179,10 +269,10 @@ enum CompareOp:
     case Ge => ">="
     case Gt => ">"
 
-given JoinApronExpr[Var]: Join[ApronExpr[Var]] with
-  def apply(v1: ApronExpr[Var], v2: ApronExpr[Var]): MaybeChanged[ApronExpr[Var]] =
+given JoinApronExpr[Var, Type]: Join[ApronExpr[Var, Type]] with
+  def apply(v1: ApronExpr[Var, Type], v2: ApronExpr[Var, Type]): MaybeChanged[ApronExpr[Var, Type]] =
     throw NotImplementedError()
 
-given WidenApronExpr[Var <: apron.Var]: Widen[ApronExpr[Var]] with
-  def apply(v1: ApronExpr[Var], v2: ApronExpr[Var]): MaybeChanged[ApronExpr[Var]] =
+given WidenApronExpr[Var, Type]: Widen[ApronExpr[Var, Type]] with
+  def apply(v1: ApronExpr[Var, Type], v2: ApronExpr[Var, Type]): MaybeChanged[ApronExpr[Var, Type]] =
     throw NotImplementedError()

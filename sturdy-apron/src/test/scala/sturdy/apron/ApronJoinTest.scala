@@ -4,7 +4,11 @@ import org.scalatest.funsuite.AnyFunSuite
 import apron.*
 import gmp.*
 import org.scalatest.matchers.should.Matchers.*
-import sturdy.values.Join
+import sturdy.effect.EffectStack
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
+import sturdy.values.{Finite, Join}
+import sturdy.values.types.BaseType
+import sturdy.values.integer.TypeIntegerOps
 
 class ApronJoinTest extends AnyFunSuite:
 
@@ -16,12 +20,15 @@ class ApronJoinTest extends AnyFunSuite:
   val env_xy = env.add(Array[Var](x,y), Array[Var]())
   val manager: Manager = new Polka(false)
   val state1 = new Abstract1(manager, env)
+  given failure: Failure = new CollectedFailures[FailureKind]
+  given effectState: EffectStack = EffectStack(List(failure))
+  given Finite[FailureKind] with {}
 
   test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 10)).toIntern(env_x), null)
+                       .assignCopy(manager, x, ApronExpr.intInterval(0, 10).toIntern(env_x), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_x, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
+                       .assignCopy(manager, x, ApronExpr.intInterval(10, 20).toIntern(env_x), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
@@ -30,9 +37,9 @@ class ApronJoinTest extends AnyFunSuite:
 
   test("{x ∈ [0,20]} ⊔ {x ∈ [10,10]} = {x ∈ [0,20]}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_x), null)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_x), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_x, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20), BaseType[Int]).toIntern(env_x), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe false
@@ -41,11 +48,11 @@ class ApronJoinTest extends AnyFunSuite:
 
   test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.Binary[StringVar](BinOp.Add, ApronExpr._var(x), ApronExpr.Constant(Interval(1,1))).toIntern(env_xy), null)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(ApronVar(x), BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_xy, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20)).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.Binary(BinOp.Add, ApronExpr._var(x),  ApronExpr.Constant(Interval(2,2))).toIntern(env_xy), null)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(ApronVar(x), BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
@@ -57,16 +64,15 @@ class ApronJoinTest extends AnyFunSuite:
 
   test("{x ∈ [10,20]} ⊔ {y ∈ [10,20]} = {x ∈ [10,20], y ∈ [10,20]}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
-                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20)).toIntern(env_x), null)
+                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20), BaseType[Int]).toIntern(env_x), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_y, false)
-                       .assignCopy(manager, y, ApronExpr.Constant(Interval(10, 20)).toIntern(env_y), null)
+                       .assignCopy(manager, y, ApronExpr.Constant(Interval(10, 20), BaseType[Int]).toIntern(env_y), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
     joined.get.getBound(manager, x) shouldBe Interval(10, 20)
     joined.get.getBound(manager, y) shouldBe Interval(10, 20)
   }
-
 
   case class StringVar(name: String) extends Var:
     override def compareTo(other: Var): Int =

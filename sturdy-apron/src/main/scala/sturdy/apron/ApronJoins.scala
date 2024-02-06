@@ -26,7 +26,7 @@ object ApronJoins:
     val s1ExtEnv = s1.changeEnvironmentCopy(manager, lce, false)
     val s2ExtEnv = s2.changeEnvironmentCopy(manager, lce, false)
 
-    val top = ApronExpr.topConstant.toIntern(lce)
+    val top = ApronExpr.topConstant(null).toIntern(lce)
 
     val env2_minus_env1 = minus(env2,env1).getVars
     val combinable1 =

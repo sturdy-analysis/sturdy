@@ -2,11 +2,10 @@ package sturdy.apron
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
-
 import apron.*
 import gmp.*
-
 import sturdy.values.references.{*, given}
+import sturdy.values.types.BaseType
 
 class ApronLibraryTest extends AnyFunSuite:
 
@@ -59,9 +58,9 @@ class ApronLibraryTest extends AnyFunSuite:
     val manager: Manager = new Polka(false)
     val aState = new Abstract1(manager, env)
 
-    aState.assign(manager, x, ApronExpr.Constant(Interval(1, 2)).toIntern(env), null)
-    aState.assign(manager, y, ApronExpr.Constant(Interval(3, 4)).toIntern(env), null)
-    aState.assign(manager, z, ApronExpr.Constant(Interval(6, 7)).toIntern(env), null)
+    aState.assign(manager, x, ApronExpr.Constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, y, ApronExpr.Constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, z, ApronExpr.Constant(Interval(6, 7), BaseType[Int]).toIntern(env), null)
     aState.fold(manager, Array(x,y,z))
 
     aState.getBound(manager, x) shouldBe Interval(1,7)

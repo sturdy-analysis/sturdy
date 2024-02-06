@@ -2,9 +2,12 @@ package sturdy.effect.store
 
 import apron.{Abstract1, Environment, Interval}
 import sturdy.apron.ApronExpr
+import sturdy.effect.EffectStack
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.{Finite, Widen}
-import sturdy.values.integer.{NumericInterval, NumericIntervalWiden, given}
-import sturdy.values.references.{*,given}
+import sturdy.values.integer.{NumericInterval, NumericIntervalWiden, NumericIntervalJoin, TypeIntegerOps}
+import sturdy.values.references.{*, given}
+import sturdy.values.types.{BaseType, given}
 
 
 type Ctx = String
@@ -20,11 +23,16 @@ class ApronRecencyStoreTest extends RecencyAbstractionTest({
   val man = new apron.Polka(true)
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
-  val apronStore = new ApronStore[Ctx, PAddr, PowPAddr, NumericInterval[Int]](
+  given failure: Failure = new CollectedFailures[FailureKind]
+  given effectState: EffectStack = EffectStack(List(failure))
+  given Finite[FailureKind] with {}
+
+  val apronStore = new ApronStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]](
     man,
     initialState,
-    (v: NumericInterval[Int]) => Option(ApronExpr.Constant(Interval(v.low, v.high))),
-    (e: ApronExpr[ApAddr], s: Abstract1) =>
+    Map(),
+    (v: NumericInterval[Int]) => Option(ApronExpr.intInterval(v.low, v.high)),
+    (e: ApronExpr[ApAddr, BaseType[Int]], s: Abstract1) =>
       val iv = s.getBound(man, e.toIntern(s.getEnvironment))
       val d = Array[Double](0)
       iv.inf().toDouble(d, 0)

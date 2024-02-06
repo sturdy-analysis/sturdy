@@ -2,7 +2,7 @@ package sturdy.effect.store
 
 import apron.*
 import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronExpr, ApronVar}
-import sturdy.data.{JOption, JOptionA, WithJoin, given}
+import sturdy.data.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
 import sturdy.values.references.{*, given}
@@ -18,35 +18,35 @@ import scala.reflect.ClassTag
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
  **/
 final class ApronStore[
-  Context: Ordering,
-  Addr <: PhysicalAddress[Context] : Ordering : ClassTag,
-  PowAddr <: AbstractAddr[Addr],
+  Context: Ordering: Finite,
+  Type : Join: Widen,
+  PowAddr <: AbstractAddr[PhysicalAddress[Context]],
   Val : Join]
   (val manager: Manager,
    initialState: Abstract1,
-   val getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context]]],
-   val makeIntVal: (ApronExpr[PhysicalAddress[Context]], Abstract1) => Val)
+   initialTypeEnv: Map[PhysicalAddress[Context], Type],
+   val getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context], Type]],
+   val makeIntVal: (ApronExpr[PhysicalAddress[Context], Type], Abstract1) => Val)
   extends Store[PowAddr, Val, WithJoin]:
 
-  override type State = Abstract1
+  type TypeEnv = Map[PhysicalAddress[Context], Type]
+
   private var apronState : Abstract1 = initialState
+  private var typeEnv: TypeEnv = initialTypeEnv
 
-  // TODO: find a better way to copy apronState without changing anything
-  def getState : State = apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false)
-  def setState(s : Abstract1) = apronState = s
-
-  def join : Join[State] = implicitly
-  def widen : Widen[State] = implicitly
+  def getType(powAddr: PowAddr): Type =
+    powAddr.reduce(typeEnv(_))
 
   override def read(powAddr: PowAddr): JOptionA[Val] =
     if(powAddr.isEmpty)
       JOptionA.None()
     else
       powAddr.reduce(addr =>
-        if (apronState.getEnvironment().hasVar(ApronVar(addr))) {
+        val vAddr = ApronVar(addr)
+        if (apronState.getEnvironment().hasVar(vAddr)) {
           JOptionA.Some(
             makeIntVal(
-              ApronExpr._var(PhysicalAddress(addr.ctx, addr.recency)),
+              ApronExpr.Var(vAddr, typeEnv(addr)),
               apronState))
         }
         else {
@@ -66,6 +66,7 @@ final class ApronStore[
             if (!env.hasVar(to)) {
               env = env.add(Array[apron.Var](to), Array[apron.Var]())
               apronState.changeEnvironment(manager, env, false)
+              typeEnv += to.addr -> exp._type
             }
             val aexp : apron.Texpr1Intern = exp.toIntern(env)
             apronState.assign(manager, to, aexp, null)
@@ -78,8 +79,10 @@ final class ApronStore[
             if (!env.hasVar(to)) {
               env = env.add(Array[apron.Var](to), Array[apron.Var]())
               apronState.changeEnvironment(manager, env, false)
+              typeEnv += to.addr -> exp._type
               apronState.assign(manager, to, exp.toIntern(env), null)
             } else {
+              typeEnv += to.addr -> Join(typeEnv(to.addr), exp._type).get
               apronState.join(manager, apronState.assignCopy(manager, to, exp.toIntern(env), null))
             }
           )
@@ -90,14 +93,17 @@ final class ApronStore[
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
     // Check for the special case if `fromPow` and `toPow` are singletons to avoid a join on the abstract domain
     if(fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      val from: Var = ApronVar(fromPow.iterator.next())
-      val to: Var = ApronVar(toPow.iterator.next())
+      val from = ApronVar(fromPow.iterator.next())
+      val to = ApronVar(toPow.iterator.next())
       if(apronState.getEnvironment.hasVar(from)){
         if(apronState.getEnvironment.hasVar(to)) {
-          apronState.fold(manager, Array(to, from))
+          typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
+          apronState.fold(manager, Array[Var](to, from))
         } else {
-          apronState.rename(manager, Array(from), Array(to))
+          typeEnv += to.addr -> typeEnv(from.addr)
+          apronState.rename(manager, Array[Var](from), Array[Var](to))
         }
+        typeEnv -= from.addr
       } else {
         // Address `from` is not bound in `apronState`. In this case `apronState` is not changed.
       }
@@ -119,19 +125,23 @@ final class ApronStore[
   override def copy(fromPow: PowAddr, toPow: PowAddr): Unit =
     val env = apronState.getEnvironment
 
-    val toSet: Set[ApronVar[Addr]] =
+    val toSet =
       toPow.iterator.map(ApronVar(_)).toSet
 
-    val fromSet: Set[ApronVar[Addr]] =
-      fromPow.iterator.map(ApronVar(_)).toSet
-        .diff(toSet) // remove `to` addresses, because they don't need to be copied
+    val fromSet =
+      fromPow.iterator
+        .map(ApronVar(_))
         .filter(from => env.hasVar(from)) // filter out unbound `from` addresses, because they dont' need to be copied
+        .toSet
+        .diff(toSet) // remove `to` addresses, because they don't need to be copied
 
     for (from <- fromSet; to <- toSet) {
       if (env.hasVar(to)) {
+        typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
         apronState.join(manager,
-          apronState.assignCopy(manager, to, ApronExpr.Var(from).toIntern(env), null))
+          apronState.assignCopy(manager, to, ApronExpr.Var(from, typeEnv(from.addr)).toIntern(env), null))
       } else {
+        typeEnv += to.addr -> typeEnv(from.addr)
         apronState.expand(manager, from, Array[Var](to))
       }
     }
@@ -142,14 +152,31 @@ final class ApronStore[
         val dest = ApronVar(addr)
         val env = apronState.getEnvironment()
         if(env.hasVar(dest)) {
+          typeEnv -= dest.addr
           apronState.forget(manager, dest, false)
           apronState.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
         }
       )
     }
 
-given ApronClosedEquality[Cls]:  ClosedEquality[Cls, apron.Abstract1] with
-  def closedEquals(closure1: Cls, a1: apron.Abstract1, closure2: Cls, a2: apron.Abstract1): Boolean =
-    a1.isEqual(a1.getCreationManager(), a2)
-  def closedHashCode(closure: Cls, a: apron.Abstract1): Int =
+  override type State = (TypeEnv, Abstract1)
+
+  // TODO: find a better way to copy apronState without changing anything
+  def getState: State = (typeEnv, apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false))
+
+  def setState(s: State) =
+    typeEnv = s._1
+    apronState = s._2
+
+  def join: Join[State] = implicitly
+
+  def widen: Widen[State] = implicitly
+
+given ApronClosedEquality[Cls, Context, Type]:  ClosedEquality[Cls, (Map[PhysicalAddress[Context],Type], apron.Abstract1)] with
+  def closedEquals(closure1: Cls, a1: (Map[PhysicalAddress[Context], Type], apron.Abstract1), closure2: Cls, a2: (Map[PhysicalAddress[Context], Type], apron.Abstract1)): Boolean =
+    val (typeEnv1, abstract1) = a1
+    val (typeEnv2, abstract2) = a2
+    typeEnv1 == typeEnv2 && abstract1.isEqual(abstract1.getCreationManager(), abstract2)
+
+  def closedHashCode(closure: Cls, a: (Map[PhysicalAddress[Context], Type], apron.Abstract1)): Int =
     a.hashCode()

@@ -1,7 +1,7 @@
 package sturdy.effect.callframe
 
 import apron.*
-import sturdy.apron.{ApronExpr, given}
+import sturdy.apron.{ApronExpr, ApronVar, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin}
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
 import sturdy.effect.store.{ApronStore, ClosedEquality, ClosedHashCode, RecencyStore, given}
@@ -26,30 +26,32 @@ final class ApronCallFrame
   [Data,
    Var: Ordering,
    CallSite,
-   Ctx: Ordering]
+   Ctx: Ordering,
+   Type: Join: Widen]
   (initData: Data,
-   initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]]]])],
+   initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]],Type]])],
    apronManager: Manager)
   (using
    Finite[LocalVariableContext[Var,Ctx]],
    HasContext[Ctx]
   )
-  extends MutableCallFrame[Data, Var, ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]]], CallSite, NoJoin]:
+  extends MutableCallFrame[Data, Var, ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]],Type], CallSite, NoJoin]:
 
   final type Context = LocalVariableContext[Var,Ctx]
   final type VirtAddr = VirtualAddress[Context]
   final type PhysAddr = PhysicalAddress[Context]
   final type PowPhysAddr = PowersetAddr[PhysicalAddress[Context], PhysicalAddress[Context]]
   final type PowVirtAddr = PowVirtualAddress[Context]
-  final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Context]]
-  final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Context]]
+  final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Context],Type]
+  final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Context],Type]
 
-  val apronStore: ApronStore[Context, PhysAddr, PowPhysAddr, ApronExprPhysAddr] = ApronStore(
+  val apronStore: ApronStore[Context, Type, PowPhysAddr, ApronExprPhysAddr] = ApronStore(
     apronManager,
     Abstract1(apronManager, new Environment()),
+    Map(),
     getIntVal = Some[ApronExprPhysAddr](_),
     makeIntVal = (expr: ApronExprPhysAddr, state: Abstract1) =>
-      ApronExpr.Constant(state.getBound(apronManager, expr.toIntern(state.getEnvironment)))
+      ApronExpr.Constant(state.getBound(apronManager, expr.toIntern(state.getEnvironment)), expr._type)
   )
 
   val addressTranslation: AddressTranslation[LocalVariableContext[Var, Ctx]] = AddressTranslation.empty
@@ -94,13 +96,15 @@ final class ApronCallFrame
       case Some(idx) => setLocal(idx, expr)
 
   override def getLocal(x: Int): JOptionC[ApronExprVirtAddr] =
-    addressCallFrame.getLocal(x).map(ApronExpr._var(_))
+    addressCallFrame.getLocal(x).map(virt =>
+      ApronExpr.Var(ApronVar(virt), apronStore.getType(virt.physical)))
 
   override def getLocalByName(x: Var): JOptionC[ApronExprVirtAddr] =
-    addressCallFrame.getLocalByName(x).map(ApronExpr._var(_))
+    addressCallFrame.getLocalByName(x).map(virt =>
+      ApronExpr.Var(ApronVar(virt), apronStore.getType(virt.physical)))
 
   def getBound(x: ApronExprVirtAddr): apron.Interval =
-    val apronState: Abstract1 = apronStore.getState
+    val apronState: Abstract1 = apronStore.getState._2
     val env = apronState.getEnvironment
     apronState.getBound(apronManager, virtToPhys(x).toIntern(env))
 
@@ -158,7 +162,8 @@ final class ApronCallFrame
           throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
         } else {
           val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            recencyStore.write(PowVirtualAddress(virt1), virtToPhys(ApronExpr._var(virt2)))
+            val sourceExpr = ApronExpr.Var(virt2, apronStore.getType(virt2.physical))
+            recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
             virt1
           )
 

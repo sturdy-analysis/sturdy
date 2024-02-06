@@ -5,7 +5,7 @@ import apron.*
 import java.util.Objects
 import scala.reflect.ClassTag
 
-case class ApronVar[Addr](addr: Addr)(using Ordering[Addr], ClassTag[Addr]) extends apron.Var:
+case class ApronVar[+Addr](addr: Addr)(using Ordering[Addr], ClassTag[Addr]) extends apron.Var:
   override def clone(): Var = this
   override def compareTo(other: Var): Int = other match
     case otherApronVar: ApronVar[Addr] =>
