@@ -32,7 +32,7 @@ class ControlTreeGraphBuilder[Atom, Sec] {
       val (lastBlock2, edgesBlock2) = rec(b2, prev)
       (lastBlock1 ++ lastBlock2, edgesBlock1 ++ edgesBlock2)
     case ControlTree.Failed() =>
-      val current : CNode = Node.Failure(prev.hashCode().toString)
+      val current : CNode = Node.Failure()
       (List.empty, addEdges(prev, current))
 
   private inline def addEdges(prev: List[CNode], current: CNode) : List[CEdge] =
