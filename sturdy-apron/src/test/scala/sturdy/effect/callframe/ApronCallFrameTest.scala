@@ -5,7 +5,7 @@ import gmp.*
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
-import sturdy.apron.ApronExpr
+import sturdy.apron.{ApronExpr, given}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.callframe.{HasContext, LocalVariableContext}

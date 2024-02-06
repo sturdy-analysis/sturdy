@@ -1,7 +1,7 @@
 package sturdy.effect.callframe
 
 import apron.*
-import sturdy.apron.{ApronExpr, ApronVar, given}
+import sturdy.apron.{ApronExpr, ApronType, ApronVar, IntApronType, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin}
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
 import sturdy.effect.store.{ApronStore, ClosedEquality, ClosedHashCode, RecencyStore, given}
@@ -27,7 +27,7 @@ final class ApronCallFrame
    Var: Ordering,
    CallSite,
    Ctx: Ordering,
-   Type: Join: Widen]
+   Type: ApronType: Join: Widen]
   (initData: Data,
    initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[LocalVariableContext[Var,Ctx]],Type]])],
    apronManager: Manager)

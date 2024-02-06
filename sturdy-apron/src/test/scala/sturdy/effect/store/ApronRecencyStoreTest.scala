@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.{Abstract1, Environment, Interval}
-import sturdy.apron.ApronExpr
+import sturdy.apron.{ApronExpr, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.{Finite, Widen}
