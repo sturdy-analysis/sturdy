@@ -10,7 +10,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
 
   private var edges : Set[CEdge] = Set.empty
 
-  def rec(ct: CT) : Set[CEdge] =
+  def build(ct: CT) : Set[CEdge] =
     rec(ct, Set.empty)
     edges
 
@@ -20,7 +20,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
 
     case ControlTree.Atomic(a) =>
       val node : CNode = Node.Atomic(a)
-      edges = edges ++ addEdges(prev, node)
+      edges ++= addEdges(prev, node)
       (Set(node), Map.empty)
 
     case ControlTree.Seq(x, xs) =>
@@ -32,8 +32,10 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       val nodeStart : CNode = Node.BlockStart(section)
       val nodeEnd : CNode = Node.BlockEnd(section)
       val (prevEndBlock, excBlock) = rec(body, Set(nodeStart))
-      edges = edges ++ addEdges(prev, nodeStart)
-      edges = edges ++ addEdges(prevEndBlock, nodeEnd)
+      edges ++= addEdges(prev, nodeStart) ++ addEdges(prevEndBlock, nodeEnd)
+      if(!edges.exists(e => e.from == nodeStart && e.to == nodeEnd))
+        edges += Edge(nodeStart, nodeEnd, EdgeType.BlockPair)
+
       (Set(nodeEnd), excBlock)
 
     case ControlTree.Fork(b1, b2) =>
@@ -43,7 +45,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
 
     case ControlTree.Failed() =>
       val current : CNode = Node.Failure()
-      edges = edges ++ addEdges(prev, current)
+      edges ++= addEdges(prev, current)
       (Set.empty, Map.empty)
 
     case ControlTree.Throw(exc) =>

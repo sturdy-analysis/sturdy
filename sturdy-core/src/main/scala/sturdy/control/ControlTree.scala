@@ -5,7 +5,7 @@ import scala.annotation.targetName
 enum ControlTree[Atom, Sec, Exc]:
   case Empty()
   case Atomic(a: Atom)
-  case Seq(x: ControlTree[Atom, Sec, Exc], xs: ControlTree[Atom, Sec, Exc])
+  case Seq(a: ControlTree[Atom, Sec, Exc], b: ControlTree[Atom, Sec, Exc])
   case Section(section: Sec, body: ControlTree[Atom, Sec, Exc])
   case Fork(b1: ControlTree[Atom, Sec, Exc], b2: ControlTree[Atom, Sec, Exc])
   case Failed()
