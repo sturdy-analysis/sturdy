@@ -17,19 +17,16 @@ trait ControlObserver[Atom, Section, Exc]:
   def handle(ev: BranchingControlEvent): Unit
   def handle(ev: FixpointControlEvent): Unit
 
-class RecordingControlObserver[Atom, Section, Exc](check: Boolean = false) extends ControlObserver[Atom, Section, Exc]:
+class RecordingControlObserver[Atom, Section, Exc] extends ControlObserver[Atom, Section, Exc]:
   private val buf: ListBuffer[ControlEvent] = ListBuffer.empty
-  private val checker: Option[ControlEventChecker[Atom, Section, Exc]] = Option.when(check)(new ControlEventChecker)
 
   override def handle(ev: BasicControlEvent[Atom, Section]): Unit = _handle(ev)
   override def handle(ev: ExceptionControlEvent[Exc]): Unit = _handle(ev)
   override def handle(ev: BranchingControlEvent): Unit = _handle(ev)
   override def handle(ev: FixpointControlEvent): Unit = _handle(ev)
 
-  private def _handle(ev: ControlEvent): Unit =
-    buf += ev
-    checker.foreach(_.handle(ev))
-  
+  private def _handle(ev: ControlEvent): Unit = buf += ev
+
   def events: List[ControlEvent] = buf.toList
 
   override def toString: String =

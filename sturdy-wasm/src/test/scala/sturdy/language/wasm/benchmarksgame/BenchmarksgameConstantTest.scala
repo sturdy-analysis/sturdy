@@ -3,6 +3,7 @@ package sturdy.language.wasm.benchmarksgame
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.RecordingControlObserver
 import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
@@ -52,6 +53,7 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
+    val controlRecorder = interp.addControlObserver(new RecordingControlObserver)
 
     val modInst = interp.initializeModule(module)
 
@@ -65,5 +67,5 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     println(s"${LinearStateOperationCounter.toString} in the last tests")
     println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
     Profiler.printLastMeasured()
-    println(s"Recorded ${interp.controlRecorder.events.size} control events")
+    println(s"Recorded ${controlRecorder.events.size} control events")
 

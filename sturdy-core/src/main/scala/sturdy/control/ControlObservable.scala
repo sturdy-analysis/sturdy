@@ -7,8 +7,9 @@ import scala.collection.mutable.ListBuffer
 
 trait ControlObservable[Atom, Section, Exc] extends JoinObserver, ExceptObserver[Exc]:
   private val observers: ListBuffer[ControlObserver[Atom, Section, Exc]] = ListBuffer.empty
-  def addControlObserver(obs: ControlObserver[Atom, Section, Exc]): Unit =
+  def addControlObserver(obs: ControlObserver[Atom, Section, Exc]): obs.type =
     observers += obs
+    obs
   def removeControlObserver(obs: ControlObserver[Atom, Section, Exc]): Unit =
     observers -= obs
 

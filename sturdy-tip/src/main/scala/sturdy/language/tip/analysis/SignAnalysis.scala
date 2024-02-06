@@ -59,9 +59,6 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
-    val controlObserver = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
-    this.addControlObserver(controlObserver)
-
     override val fixpoint =
       fix.log(controlEventLogger(this),
         fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,

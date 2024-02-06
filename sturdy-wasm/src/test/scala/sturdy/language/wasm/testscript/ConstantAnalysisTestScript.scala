@@ -4,6 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
@@ -79,6 +80,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
   type AValue = ConstantAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  aInterp.addControlObserver(new ControlEventChecker)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

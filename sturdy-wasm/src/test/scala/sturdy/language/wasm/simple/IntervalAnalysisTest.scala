@@ -127,7 +127,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates(false))
+      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
@@ -145,7 +145,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates(false))
+      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))

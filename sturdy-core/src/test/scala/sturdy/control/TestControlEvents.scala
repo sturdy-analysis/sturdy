@@ -6,7 +6,7 @@ import BasicControlEvent.*, ExceptionControlEvent.*, BranchingControlEvent.*, Fi
 class TestControlEvents extends AnyFunSuite {
   inline def testEvents[A,S,E](name: String, code: String, es: List[ControlEvent]): Unit =
     test(name) {
-      val rec = new RecordingControlObserver[A, S, E](true)
+      val rec = new ControlEventChecker[A, S, E]()
       es.foreach(rec.handle)
     }
 

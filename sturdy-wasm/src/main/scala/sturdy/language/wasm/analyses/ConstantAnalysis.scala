@@ -104,9 +104,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
-    this.addControlObserver(controlRecorder)
-
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
       override type Ctx = observedConfig.ctx.Ctx

@@ -40,15 +40,17 @@ class ControlEventChecker[Atom,Section,Exc] extends ControlObserver[Atom,Section
   
   override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
     import BasicControlEvent.*
-    if (failing_) ev match
-      case End(sec) =>
-        updateEntry(ev) { case Entry.Sec(sec) => None}
-      case _ => error(s"Invalid event after failure: $ev")
-    else ev match
-      case BasicControlEvent.Atomic(a) => // fine
-      case BasicControlEvent.Failed() => failing_ = true
-      case BasicControlEvent.Begin(sec: Section) => pushEntry(Entry.Sec(sec))
-      case BasicControlEvent.End(sec) => updateEntry(ev){ case Entry.Sec(sec) => None }
+    if (failing_) {
+      ev match
+        case BasicControlEvent.End(sec) => updateEntry(ev) { case Entry.Sec(sec) => None }
+        case _ => error(s"Invalid event after failure: $ev")
+    } else {
+      ev match
+        case BasicControlEvent.Atomic(a) => // fine
+        case BasicControlEvent.Failed() => failing_ = true
+        case BasicControlEvent.Begin(sec: Section) => pushEntry(Entry.Sec(sec))
+        case BasicControlEvent.End(sec) => updateEntry(ev) { case Entry.Sec(sec) => None }
+    }
     fixpoint = None
 
   override def handle(ev: ExceptionControlEvent[Exc]): Unit =
@@ -167,7 +169,8 @@ object ControlEventChecker:
   private def error(msg: String): Nothing =
     println(s"############ Control Event Error: $msg")
     throw InvalidControlEventSequence(msg)
-  private case class InvalidControlEventSequence(msg: String) extends Exception(msg)
+
+  case class InvalidControlEventSequence(msg: String) extends Exception(msg)
   
   private enum ForkState:
     case First

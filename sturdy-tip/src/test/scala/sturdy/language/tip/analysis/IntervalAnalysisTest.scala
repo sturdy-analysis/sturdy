@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
-import sturdy.control.{ControlEvent, PrintingControlObserver}
+import sturdy.control.{ControlEvent, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
@@ -59,6 +59,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
       analysis.addControlObserver(new PrintingControlObserver()(println))
+      val graphBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -70,9 +71,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
 
 //      println(analysis.cfgLogger.toGraphViz)
-      println(analysis.controlObserver)
-
-      println(analysis.controlEventGraphBuilder.toGraphViz)
+      println(graphBuilder.toGraphViz)
 
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
 //      if (deadNodes.nonEmpty)
