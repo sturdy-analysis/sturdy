@@ -12,8 +12,8 @@ import sturdy.values.integer.TypeIntegerOps
 
 class ApronJoinTest extends AnyFunSuite:
 
-  val x = StringVar("x")
-  val y = StringVar("y")
+  val x = ApronVar("x")
+  val y = ApronVar("y")
   val env = new Environment(Array[Var](), Array[Var]())
   val env_x = env.add(Array[Var](x), Array[Var]())
   val env_y = env.add(Array[Var](y), Array[Var]())
@@ -49,10 +49,10 @@ class ApronJoinTest extends AnyFunSuite:
   test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
                        .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(ApronVar(x), BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(x, BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_xy, false)
                        .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(ApronVar(x), BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(x, BaseType[Int]), ApronExpr.intLit(2)).toIntern(env_xy), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
@@ -73,13 +73,3 @@ class ApronJoinTest extends AnyFunSuite:
     joined.get.getBound(manager, x) shouldBe Interval(10, 20)
     joined.get.getBound(manager, y) shouldBe Interval(10, 20)
   }
-
-  case class StringVar(name: String) extends Var:
-    override def compareTo(other: Var): Int =
-      other match
-        case otherStringVar: StringVar => name.compareTo(otherStringVar.name)
-        case _ => -1
-
-    override def clone(): Var = this
-
-    override def toString: String = name
