@@ -1,5 +1,7 @@
 package sturdy.control
 
+import scala.annotation.targetName
+
 enum ControlTree[Atom, Sec]:
   case Empty()
   case Atomic(a: Atom)
@@ -7,3 +9,7 @@ enum ControlTree[Atom, Sec]:
   case Section(section: Sec, body: ControlTree[Atom, Sec])
   case Fork(b1: ControlTree[Atom, Sec], b2: ControlTree[Atom, Sec])
   case Failed()
+  
+  @targetName("plusToSeq")
+  infix def +(that: ControlTree[Atom, Sec]) : ControlTree[Atom, Sec] =
+    Seq(this, that)
