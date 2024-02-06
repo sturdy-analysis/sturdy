@@ -7,11 +7,12 @@ import scala.annotation.targetName
 
 class TestControlTree extends AnyFunSuite {
 
-  val controlTreeGraphBuilder: ControlTreeGraphBuilder[String, String] = ControlTreeGraphBuilder()
+  val controlTreeGraphBuilder: ControlTreeGraphBuilder[String, String, String] = ControlTreeGraphBuilder()
 
+  type CT = ControlTree[String, String, String]
 
   test("Fork") {
-    val tree =
+    val tree : CT =
       Atomic("a1") +
       Section("main",
           Atomic("a2") + Atomic("a3") + Fork(
@@ -24,7 +25,7 @@ class TestControlTree extends AnyFunSuite {
   }
 
   test("Failure") {
-    val tree = Section("main",
+    val tree : CT = Section("main",
           Atomic("a2") + Atomic("a3") + Fork(
                 Atomic("a4"),
                 Atomic("a5") + Atomic("a6") + Failed())
@@ -34,7 +35,7 @@ class TestControlTree extends AnyFunSuite {
   }
 
   test("Multiple failures") {
-    val tree = Section("main",
+    val tree : CT = Section("main",
       Atomic("a2") + Atomic("a3") + Fork(
         Atomic("a4") + Fork(
           Atomic("a8"),
@@ -42,6 +43,30 @@ class TestControlTree extends AnyFunSuite {
         ),
         Atomic("a5") + Atomic("a6") + Failed())
     ) + Atomic("3")
+    val graph = controlTreeGraphBuilder.rec(tree)
+    println(ControlGraph.toGraphViz(graph))
+  }
+
+  test("Exception") {
+    val tree : CT = Section("main",
+      Atomic("1") + Try(
+        Atomic("2") + Throw("Exc1"),
+        Map[String, CT]("Exc1" -> Atomic("Handle Exc1"), "Exc2" -> Atomic("Handle Exc2"))
+      )
+      + Atomic("5")
+    )
+    val graph = controlTreeGraphBuilder.rec(tree)
+    println(ControlGraph.toGraphViz(graph))
+  }
+  
+  test("Exception") {
+    val tree : CT = Section("main",
+      Atomic("1") + Try(
+        Atomic("2") + Throw("Exc1"),
+        Map[String, CT]("Exc1" -> Atomic("Handle Exc1"), "Exc2" -> Atomic("Handle Exc2"))
+      )
+      + Atomic("5")
+    )
     val graph = controlTreeGraphBuilder.rec(tree)
     println(ControlGraph.toGraphViz(graph))
   }
