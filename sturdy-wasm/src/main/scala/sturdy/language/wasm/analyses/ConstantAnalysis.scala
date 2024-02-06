@@ -113,10 +113,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       val (contextPreparation, sensitivity) = observedConfig.ctx.make[ConstantAnalysis.Value]
       import observedConfig.ctx.finiteCtx
       override protected def contextFree = phi =>
-        fix.log(controlEventLogger(Instance.this, except), contextPreparation(phi))
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = observedConfig.fix.get
     }
 
-    override val fixpointSuper = fixpoint
     override def toString: String = s"constant $config"

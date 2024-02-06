@@ -1,7 +1,7 @@
 package sturdy.language.wasm
 
 import sturdy.data.{*, given}
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectStack, NoJoinsToObserve}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
@@ -26,9 +26,12 @@ import sturdy.values.relational.{*, given}
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.effect.symboltable.ConcreteSymbolTable
+import sturdy.fix.{Combinator, Contextual}
+import sturdy.language.wasm.abstractions.Control
 
-object ConcreteInterpreter extends Interpreter:
+object ConcreteInterpreter extends Interpreter with Control:
   override type J[A] = NoJoin[A]
   override type I32 = Int
   override type I64 = Long
@@ -94,7 +97,8 @@ object ConcreteInterpreter extends Interpreter:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc)(args)
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends GenericInstance:
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]:
 
     override def jvUnit: NoJoin[Unit] = implicitly
     override def jvV: NoJoin[Value] = implicitly
@@ -111,6 +115,10 @@ object ConcreteInterpreter extends Interpreter:
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 
-    val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
-    override val fixpointSuper = fixpoint
+    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
+    this.addControlObserver(controlRecorder)
+
+    val fixpoint = new fix.ContextInsensitiveFixpoint {
+      override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)
+    }
 

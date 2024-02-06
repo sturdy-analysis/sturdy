@@ -30,7 +30,7 @@ class RecordingControlObserver[Atom, Section, Exc](check: Boolean = false) exten
     buf += ev
     checker.foreach(_.handle(ev))
   
-  private def events: List[ControlEvent] = buf.toList
+  def events: List[ControlEvent] = buf.toList
 
   override def toString: String =
     val esStr = PrintingControlObserver.toString(events, "  ", "\n")

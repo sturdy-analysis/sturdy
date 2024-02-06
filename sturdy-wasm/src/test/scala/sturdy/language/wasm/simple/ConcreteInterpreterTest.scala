@@ -4,6 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.PrintingControlObserver
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm.generic.FrameData
@@ -88,6 +89,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = Parsing.fromText(path)
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)

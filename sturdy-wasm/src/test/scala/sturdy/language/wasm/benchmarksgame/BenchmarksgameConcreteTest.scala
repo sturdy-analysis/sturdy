@@ -59,4 +59,5 @@ class BenchmarksgameConcreteTest extends AnyFlatSpec, Matchers:
       interp.invokeExported(modInst, funcName, List.empty)
     )
     println(res)
+    println(s"Recorded ${interp.controlRecorder.events.size} control events")
 

@@ -65,3 +65,5 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     println(s"${LinearStateOperationCounter.toString} in the last tests")
     println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
     Profiler.printLastMeasured()
+    println(s"Recorded ${interp.controlRecorder.events.size} control events")
+
