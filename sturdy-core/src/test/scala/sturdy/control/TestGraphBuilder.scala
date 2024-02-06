@@ -8,7 +8,7 @@ import FixpointControlEvent.*
 
 class TestGraphBuilder extends AnyFunSuite {
 
-  inline def testGraph[A, S, E](name: String, code: String, es: List[ControlEvent], expected: Set[(Node, Node, EdgeType)]): Unit =
+  inline def testGraph[A, S, E](name: String, code: String, es: List[ControlEvent], expected: Set[Edge[A, S]]): Unit =
     test(name) {
       val graphBuilder = new ControlEventGraphBuilder[A, S, E]
       es.foreach(graphBuilder.handle)
@@ -24,9 +24,9 @@ class TestGraphBuilder extends AnyFunSuite {
     }
     ()
 
-  private def linearPath(nodes: Seq[Node]): Set[(Node, Node, EdgeType)] =
+  private def linearPath[A, S](nodes: List[Node[A, S]]): Set[Edge[A, S]] =
     nodes.sliding(2).map {
-      case Seq(a, b) => ((a, b, EdgeType.CF))
+      case Seq(a, b) => Edge(a, b, EdgeType.CF)
     }.toSet
 
 
@@ -72,8 +72,8 @@ class TestGraphBuilder extends AnyFunSuite {
       Node.BlockEnd("main"),
       Node.BlockEnd("Call(main)")))
       ++ Set(
-      (Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      (Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 
@@ -117,10 +117,10 @@ class TestGraphBuilder extends AnyFunSuite {
       Node.BlockEnd("main"),
       Node.BlockEnd("Call(main)")))
       ++ Set(
-      (Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      (Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
-      // (Node.BlockStart("foo"), Node.BlockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
-      (Node.BlockStart("Call(foo)"), Node.BlockEnd("Call(foo)"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      // Edge(Node.BlockStart("foo"), Node.BlockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
+      Edge(Node.BlockStart("Call(foo)"), Node.BlockEnd("Call(foo)"), EdgeType.BlockPair),
     )
   )
 
@@ -161,10 +161,10 @@ class TestGraphBuilder extends AnyFunSuite {
       Node.BlockEnd("Call(main)")
     ))
       ++ Set(
-      (Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
-      (Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
-      (Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      (Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 
@@ -215,11 +215,11 @@ class TestGraphBuilder extends AnyFunSuite {
       Node.BlockEnd("Call(main)")
     ))
       ++ Set(
-      (Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
-      (Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
-      (Node.Atomic("if(x>10)"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the nested Fork
-      (Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      (Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.Atomic("if(x>10)"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the nested Fork
+      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 

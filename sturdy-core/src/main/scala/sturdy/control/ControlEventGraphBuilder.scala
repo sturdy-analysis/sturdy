@@ -6,40 +6,32 @@ import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
-enum Node:
-  case Atomic[Atom](atom: Atom)
-  case BlockStart[Section](sec: Section)
-  case BlockEnd[Section](label: Section)
-
-enum EdgeType:
-  case CF
-  case BlockPair
-
-type Edge = (Node, Node, EdgeType)
-
 class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Section,Exc]:
+
+  type CNode = Node[Atom, Section]
+  type CEdge = Edge[Atom, Section]
 
   private case class NodeProperties(mayFail: Boolean)
 
   private enum ProgramStructure:
-    case Block(start: Node)
-    case Fork(origin: List[Node], lastFirstBranch: List[Node])
+    case Block(start: CNode)
+    case Fork(origin: List[CNode], lastFirstBranch: List[CNode])
 
-  val edges: mutable.Set[Edge] = mutable.Set.empty
-  val nodes: mutable.Set[Node] = mutable.Set.empty
+  val edges: mutable.Set[CEdge] = mutable.Set.empty
+  val nodes: mutable.Set[CNode] = mutable.Set.empty
 
-  private val nodesProperties: mutable.Map[Node, NodeProperties] = mutable.Map.empty
+  private val nodesProperties: mutable.Map[CNode, NodeProperties] = mutable.Map.empty
 
   private var structureStack: List[ProgramStructure] = List.empty
-  private var ancestors: List[Node] = List.empty
+  private var ancestors: List[CNode] = List.empty
 
-  private var fixpointAncestors: List[Node] = List.empty
+  private var fixpointAncestors: List[CNode] = List.empty
 
   var checker: ControlEventChecker[Atom, Section, Exc] = new ControlEventChecker
 
-  private def addNode(node : Node) : List[Node] =
+  private def addNode(node : CNode) : List[CNode] =
     val previous = ancestors
-    ancestors.foreach(n => edges += ((n, node, EdgeType.CF)))
+    ancestors.foreach(n => edges += (Edge(n, node, EdgeType.CF)))
     ancestors = List(node)
     nodes += node
     nodesProperties.getOrElseUpdate(node, NodeProperties(mayFail = false))
@@ -56,17 +48,17 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     ev match
       case Atomic(a: Atom) => addNode(Node.Atomic(a))
       case Begin(sec: Section) =>
-        val current = Node.BlockStart(sec)
+        val current : CNode = Node.BlockStart(sec)
         addNode(current)
         structureStack = ProgramStructure.Block(current) :: structureStack
       case End(sec: Section) =>
         structureStack.head match
           case ProgramStructure.Block(start) =>
-            val end = Node.BlockEnd(sec)
+            val end : CNode = Node.BlockEnd(sec)
             val prev = addNode(end) // check to print helper BlockPair edge only if there is no direct CF edge between the two Block nodes
             structureStack = structureStack.tail
             if (prev.nonEmpty && !prev.contains(Node.BlockStart(sec)))
-              edges += ((start, end, EdgeType.BlockPair))
+              edges += (Edge(start, end, EdgeType.BlockPair))
           case _ => throw new Exception("Illegal control event sequence")
       case BasicControlEvent.Failed() => ancestors.foreach(n => nodesProperties += n -> NodeProperties(mayFail = true)) // Change to creating a Failure node, deleting the properties and coloring the node via post processing
 
@@ -115,16 +107,4 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
 
   def toGraphViz : String =
     if(structureStack.nonEmpty) throw new Exception(s"Stack non empty $structureStack")
-    edges.map {
-      case (n1, n2, EdgeType.CF) => s"\"$n1\" -> \"$n2\""
-      case (n1, n2, EdgeType.BlockPair) => s"\"$n1\" -> \"$n2\"  [style=dashed]"
-    }.reduce((s1, s2) => s1 + "\n" + s2)
-    + "\n\n\n\n" +
-    nodes.filter(node => edges.exists(e => e._1 == node || e._2 == node)).map { node => (node, nodesProperties.get(node)) match
-      case (n : Node.Atomic[Atom], Some(NodeProperties(true))) => nodesProperties(n) match
-        case NodeProperties(true) => s"\"$n\" [style=filled, fillcolor=\"#FFBBBB\"]"
-        case NodeProperties(false) => s"\"$n\" [style=filled, fillcolor=\"#BBFFBB\"]"
-      case (n : Node.BlockStart[Section], _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
-      case (n : Node.BlockEnd[Section], _) => s"\"$n\" [shape=rect, style=filled, fillcolor=\"#BBBBFF\"]"
-      case _ => ""
-    }.reduce((s1, s2) => s1 + "\n" + s2)
+    ControlGraph.toGraphViz(edges.toList)
