@@ -14,7 +14,7 @@ case class Edge[Atom, Section](from: Node[Atom, Section], to: Node[Atom, Section
 
 
 object ControlGraph :
-  def toGraphViz[Atom, Sec](edges: List[Edge[Atom, Sec]]): String =
+  def toGraphViz[Atom, Sec](edges: Set[Edge[Atom, Sec]]): String =
     import Node.*
     edges.map {
       case Edge(_, Failure(), _) => ""
@@ -22,7 +22,7 @@ object ControlGraph :
       case Edge(n1, n2, EdgeType.BlockPair) => s"\"$n1\" -> \"$n2\"  [style=dashed]"
     }.reduce((s1, s2) => s1 + (if s2 != "" then "\n" else "") + s2)
       + "\n\n" +
-      edges.flatMap(e => List(e.from, e.to)).toSet.map {
+      edges.flatMap(e => List(e.from, e.to)).map {
         case n: Atomic[Atom, Sec] => if(edges.exists { e => e.from == n && e.to == Failure() })
           s"\"$n\" [style=filled, fillcolor=\"#FFBBBB\"]"
         else

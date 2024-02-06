@@ -31,7 +31,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
 
   private def addNode(node : CNode) : List[CNode] =
     val previous = ancestors
-    ancestors.foreach(n => edges += (Edge(n, node, EdgeType.CF)))
+    ancestors.foreach(n => edges += Edge(n, node, EdgeType.CF))
     ancestors = List(node)
     nodes += node
     nodesProperties.getOrElseUpdate(node, NodeProperties(mayFail = false))
@@ -58,7 +58,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
             val prev = addNode(end) // check to print helper BlockPair edge only if there is no direct CF edge between the two Block nodes
             structureStack = structureStack.tail
             if (prev.nonEmpty && !prev.contains(Node.BlockStart(sec)))
-              edges += (Edge(start, end, EdgeType.BlockPair))
+              edges += Edge(start, end, EdgeType.BlockPair)
           case _ => throw new Exception("Illegal control event sequence")
       case BasicControlEvent.Failed() => ancestors.foreach(n => nodesProperties += n -> NodeProperties(mayFail = true)) // Change to creating a Failure node, deleting the properties and coloring the node via post processing
 
@@ -107,4 +107,4 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
 
   def toGraphViz : String =
     if(structureStack.nonEmpty) throw new Exception(s"Stack non empty $structureStack")
-    ControlGraph.toGraphViz(edges.toList)
+    ControlGraph.toGraphViz(edges.toSet)

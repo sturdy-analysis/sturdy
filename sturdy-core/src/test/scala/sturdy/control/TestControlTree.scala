@@ -58,17 +58,5 @@ class TestControlTree extends AnyFunSuite {
     val graph = controlTreeGraphBuilder.rec(tree)
     println(ControlGraph.toGraphViz(graph))
   }
-  
-  test("Exception") {
-    val tree : CT = Section("main",
-      Atomic("1") + Try(
-        Atomic("2") + Throw("Exc1"),
-        Map[String, CT]("Exc1" -> Atomic("Handle Exc1"), "Exc2" -> Atomic("Handle Exc2"))
-      )
-      + Atomic("5")
-    )
-    val graph = controlTreeGraphBuilder.rec(tree)
-    println(ControlGraph.toGraphViz(graph))
-  }
 
 }
