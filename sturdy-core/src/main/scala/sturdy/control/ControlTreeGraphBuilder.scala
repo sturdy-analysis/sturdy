@@ -20,7 +20,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
 
     case ControlTree.Atomic(a) =>
       val node : CNode = Node.Atomic(a)
-      edges ++= addEdges(prev, node)
+      addEdges(prev, node)
       (Set(node), Map.empty)
 
     case ControlTree.Seq(x, xs) =>
@@ -32,10 +32,10 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       val nodeStart : CNode = Node.BlockStart(section)
       val nodeEnd : CNode = Node.BlockEnd(section)
       val (prevEndBlock, excBlock) = rec(body, Set(nodeStart))
-      edges ++= addEdges(prev, nodeStart) ++ addEdges(prevEndBlock, nodeEnd)
-      if(!edges.exists(e => e.from == nodeStart && e.to == nodeEnd))
+      addEdges(prev, nodeStart)
+      addEdges(prevEndBlock, nodeEnd)
+      if (!edges.contains(Edge(nodeStart, nodeEnd, EdgeType.CF)))
         edges += Edge(nodeStart, nodeEnd, EdgeType.BlockPair)
-
       (Set(nodeEnd), excBlock)
 
     case ControlTree.Fork(b1, b2) =>
@@ -45,7 +45,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
 
     case ControlTree.Failed() =>
       val current : CNode = Node.Failure()
-      edges ++= addEdges(prev, current)
+      addEdges(prev, current)
       (Set.empty, Map.empty)
 
     case ControlTree.Throw(exc) =>
@@ -60,9 +60,14 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       ).unzip
       (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _++_)))
 
+    case ControlTree.Fixpoint(b, rep) =>
+      val (endBody, excBody) = rec(b, prev)
+      rep match
+        case None => (endBody, excBody)
+        case Some(next) => rec(next, prev)
 
-  private inline def addEdges(prev: Set[CNode], current: CNode) : Set[CEdge] =
-    prev.map(p => Edge(p, current, EdgeType.CF))
+  private def addEdges(prev: Set[CNode], current: CNode): Unit =
+    edges ++= prev.map(p => Edge(p, current, EdgeType.CF))
 
 }
 

@@ -12,8 +12,10 @@ enum ControlTree[Atom, Sec, Exc]:
   
   case Try(body: ControlTree[Atom, Sec, Exc], handle: Map[Exc, ControlTree[Atom, Sec, Exc]])
   case Throw(exc: Exc)
-  case Handle(exc: Exc)
-  
+
+  case Fixpoint(b: ControlTree[Atom, Sec, Exc], repeat: Option[ControlTree[Atom, Sec, Exc]])
+  case Recurrent(failing: Boolean)
+
   @targetName("plusToSeq")
   infix def +(that: ControlTree[Atom, Sec, Exc]) : ControlTree[Atom, Sec, Exc] =
     Seq(this, that)
