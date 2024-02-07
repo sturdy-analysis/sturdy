@@ -8,7 +8,8 @@ import org.scalatest.matchers.should.Matchers.*
 import sturdy.apron.{ApronExpr, given}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.callframe.{HasContext, LocalVariableContext}
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
+import sturdy.effect.callframe
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.RecencyClosure
 import sturdy.values.Finite
@@ -21,27 +22,22 @@ class ApronCallFrameTest extends AnyFunSuite:
   type Data = Unit
   type Var = String
   type CallSite = String
-  type Ctx = Unit
-  type Context = LocalVariableContext[Var, Ctx]
+  type Ctx = Var
   type Type = BaseType[Int]
   val intType: Type = BaseType[Int]
 
-  given Finite[Context] with {}
+  given Finite[Ctx] with {}
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(List(failure))
   given Finite[FailureKind] with {}
+  given allocator: Allocator[Ctx,Var] = AAllocatorFromContext(ctx => ctx)
 
-  val manager = new apron.Polka(true)
-
-  given contextInsensitive: HasContext[Ctx] with
-    override def currentContext: Ctx = ()
-
+  given Manager = new apron.Polka(true)
 
   test("getLocal") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 10), intType))),
-      manager
+      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 10), intType)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
@@ -51,8 +47,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("setLocal") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> None),
-      manager
+      initVars = List("x" -> None)
     )
 
     callFrame.setLocalByName("x", ApronExpr.intInterval(0, 10))
@@ -64,8 +59,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("strong update") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> None),
-      manager
+      initVars = List("x" -> None)
     )
 
     callFrame.setLocalByName("x", ApronExpr.intInterval(0, 10))
@@ -78,8 +72,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("weak update") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2))),
-      manager
+      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2)))
     )
 
     callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval(4, 5))), "f") {}
@@ -93,8 +86,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("withNew") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10))),
-      manager
+      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
@@ -114,8 +106,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("join") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10))),
-      manager
+      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10)))
     )
 
     val state1 = callFrame.getState
@@ -137,8 +128,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("join recent against old") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2))),
-      manager
+      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2)))
     )
 
     val state1 = callFrame.getState

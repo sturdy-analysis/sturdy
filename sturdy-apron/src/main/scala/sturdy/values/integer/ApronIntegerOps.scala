@@ -1,26 +1,140 @@
 package sturdy.values.integer
 
 import apron.Interval
-import sturdy.data.CombineUnit
-import apron.{DoubleScalar, Environment, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
-import gmp.{Mpq, Mpz}
-// import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
-import sturdy.data.MayJoin.NoJoin
-// import sturdy.effect.callframe.ApronCallFrame
-
-import java.util
-import math.Numeric.Implicits.infixNumericOps
-import sturdy.effect.EffectStack
+import sturdy.data.{given}
+import sturdy.apron.{*, given}
 import sturdy.effect.failure.Failure
-import sturdy.values.config.{Bits, UnsupportedConfiguration}
-import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
-import sturdy.values.floating.FloatOps
-import sturdy.values.{Top, Topped, config}
-// import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
-import sturdy.values.utils.{ConvertCoeff, ConvertInterval, convertToScalarMpq, given}
+import sturdy.values.{*, given}
+import sturdy.values.references.{*, given}
 
-import java.nio.ByteOrder
-import scala.language.reflectiveCalls
+import scala.reflect.ClassTag
+
+given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
+    (using apronState: ApronState[Addr,Type], f: Failure, typeIntOps: IntegerOps[Int,Type]):
+      IntegerOps[Int, ApronExpr[Addr,Type]] with
+
+  override def integerLit(i: Int): ApronExpr[Addr, Type] =
+    ApronExpr.intLit(i)
+
+  override def randomInteger(): ApronExpr[Addr, Type] =
+    ApronExpr.intTop
+
+  override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.intAdd(v1,v2)
+
+  override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.intSub(v1,v2)
+
+  override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.intMul(v1,v2)
+
+  override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.max(v1._type, v2._type)
+    apronState.withTempVars(resultType) { case List(result) =>
+      apronState.ifThenElse(ApronCons.intLt(v2,v1)) {
+        apronState.assign(result, v1)
+      } {
+        apronState.assign(result, v2)
+      }
+      ApronExpr.addr(result, resultType)
+    }
+
+  override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.min(v1._type, v2._type)
+    apronState.withTempVars(resultType) { case List(result) =>
+      apronState.ifThenElse(ApronCons.intLt(v2, v1)) {
+        apronState.assign(result, v2)
+      } {
+        apronState.assign(result, v1)
+      }
+      ApronExpr.addr(result, resultType)
+    }
+
+  override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    apronState.withTempVars(v._type) { case List(result) =>
+      apronState.ifThenElse(ApronCons.intLe(ApronExpr.intLit(0), v)) {
+        apronState.assign(result, v)
+      } {
+        apronState.assign(result, ApronExpr.intNegate(v))
+      }
+      ApronExpr.addr(result, typeIntOps.absolute(v._type))
+    }
+
+  override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.div(v1._type, v2._type)
+    apronState.withTempVars(resultType) { case List(result) =>
+      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), v2)) {
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      } {
+        apronState.assign(result, ApronExpr.intDiv(v1, v2))
+      }
+      ApronExpr.addr(result, resultType)
+    }
+
+  override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def gcd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def bitAnd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def bitOr(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def bitXor(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.intMul(v, ApronExpr.intPow(ApronExpr.intLit(2), shift))
+
+  override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.intDiv(v, ApronExpr.intPow(ApronExpr.intLit(2), shift))
+
+  override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def rotateRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def nonzeroBitCount(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+
+
+//import apron.{Abstract1, DoubleScalar, Environment, Interval, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
+//import sturdy.data.CombineUnit
+//import gmp.{Mpq, Mpz}
+//import sturdy.apron.{ApronExpr, BinOp}
+//import sturdy.effect.store.ApronStore
+//import sturdy.values.Join
+//import sturdy.values.references.{AbstractAddr, PhysicalAddress}
+//
+//import scala.reflect.ClassTag
+//// import sturdy.apron.{Apron, ApronCons, ApronExpr, BinOp, JoinApronExpr, UnOp}
+//import sturdy.data.MayJoin.NoJoin
+//// import sturdy.effect.callframe.ApronCallFrame
+//
+//import java.util
+//import math.Numeric.Implicits.infixNumericOps
+//import sturdy.effect.EffectStack
+//import sturdy.effect.failure.Failure
+//import sturdy.values.config.{Bits, UnsupportedConfiguration}
+//import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert}
+//import sturdy.values.floating.FloatOps
+//import sturdy.values.{Top, Topped, config}
+// import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps, OrderingOps}
+//import sturdy.values.utils.{ConvertCoeff, ConvertInterval, convertToScalarMpq, given}
+//
+//import java.nio.ByteOrder
+//import scala.language.reflectiveCalls
 
 
 // given ApronIntegerOps[B](using Numeric[B])

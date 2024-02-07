@@ -94,7 +94,7 @@ class ApronStoreTest extends AnyFunSuite:
     val xVs = addressTranslation(x)
     xVs.reduce(x =>
       // ApronExpr already works on virtual addresses here...
-      recencyStore.write(yPow, ApronExpr.intAdd(ApronExpr.Var(ApronVar(x), BaseType[Int]), ApronExpr.intLit(1)))
+      recencyStore.write(yPow, ApronExpr.intAdd(ApronExpr.addr(x, BaseType[Int]), ApronExpr.intLit(1)))
       recencyStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.intInterval(1,11))
       ()
     )

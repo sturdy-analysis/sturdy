@@ -12,7 +12,7 @@ import sturdy.values.{Join, MaybeChanged, Widen}
 import scala.reflect.ClassTag
 
 enum ApronExpr[Addr, Type]:
-  case Var(v: ApronVar[Addr], tpe: Type)
+  case Addr(v: ApronVar[Addr], tpe: Type)
   case Constant(coeff: Coeff, tpe: Type)
   case Unary(op: UnOp,
              e: ApronExpr[Addr, Type],
@@ -28,34 +28,34 @@ enum ApronExpr[Addr, Type]:
 
   def _type: Type =
     this match
-      case Var(_, t) => t
+      case Addr(_, t) => t
       case Constant(_, t) => t
       case Unary(_, _, t, _, _) => t
       case Binary(_, _, _, t, _, _) => t
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
-      case Var(ApronVar(addr), _type) => Var(ApronVar(f(addr)), _type)
+      case Addr(ApronVar(addr), _type) => Addr(ApronVar(f(addr)), _type)
       case Constant(coeff, _type) => Constant(coeff, _type)
       case Unary(op, expr, roundingType, roundingDir, _type) =>
         Unary(op, expr.mapAddr(f), roundingType, roundingDir, _type)
       case Binary(op, expr1, expr2, roundingType, roundingDir, _type) =>
         Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir, _type)
 
-  def vars: Set[Addr] = this match
-    case Var(v, _) => Set(v.addr)
+  def addrs: Set[Addr] = this match
+    case Addr(v, _) => Set(v.addr)
     case Constant(coeff, _) => Set()
-    case Unary(op, e, rtyp, rdir, _) => e.vars
-    case Binary(op, l, r, rtyp, rdir, _) => l.vars ++ r.vars
+    case Unary(op, e, rtyp, rdir, _) => e.addrs
+    case Binary(op, l, r, rtyp, rdir, _) => l.addrs ++ r.addrs
 
   override def toString: String = this match
-    case Var(v, _) => v.toString
+    case Addr(v, _) => v.toString
     case Constant(coeff, _) => coeff.toString
     case Unary(op, e, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _) => s"($l $op $r)"
 
   def toApron: Texpr1Node = this match
-    case Var(v, _) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
+    case Addr(v, _) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
     case Constant(coeff, _) => new Texpr1CstNode(coeff)
     case Unary(op, e, _, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron)
     case Binary(op, l, r, _, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron, r.toApron)
@@ -113,11 +113,13 @@ enum RoundingDir:
       case Zero => Texpr1Node.RDIR_ZERO
 
 object ApronExpr:
-  def _var[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Var(ApronVar(addr), _type)
+  def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
   def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(i))
+    Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(0))
   def intInterval[Addr, Type](using intOps: IntegerOps[Int,Type])(lower: Int, upper: Int): Constant[Addr, Type] =
-    Constant(Interval(lower, upper), intOps.integerLit(lower))
+    Constant(Interval(lower, upper), intOps.integerLit(0))
+  def intTop[Addr, Type](using intOps: IntegerOps[Int, Type]): Constant[Addr, Type] =
+    Constant(topInterval, intOps.integerLit(0))
 
   def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
     Constant(iv, _type)
@@ -242,15 +244,15 @@ object ApronCons:
   // issue below, make CompareOp[Addr]?
   def intEq[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Eq, e1, e2, intOps.sub(e1._type, e2._type))
-  def neq[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+  def intNeq[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Neq, e1, e2, intOps.sub(e1._type, e2._type))
-  def lt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+  def intLt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Lt, e1, e2, intOps.sub(e2._type, e1._type))
-  def le[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+  def intLe[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Le, e1, e2, intOps.sub(e2._type, e1._type))
-  def ge[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+  def intGe[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Ge, e1, e2, intOps.sub(e1._type, e2._type))
-  def gt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+  def intGt[Addr, Type](using intOps: IntegerOps[_, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Gt, e1, e2, intOps.sub(e1._type, e2._type))
 
 enum CompareOp:

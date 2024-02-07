@@ -46,7 +46,7 @@ final class ApronStore[
         if (apronState.getEnvironment().hasVar(vAddr)) {
           JOptionA.Some(
             makeIntVal(
-              ApronExpr.Var(vAddr, typeEnv(addr)),
+              ApronExpr.Addr(vAddr, typeEnv(addr)),
               apronState))
         }
         else {
@@ -121,7 +121,7 @@ final class ApronStore[
           if(fromType.representation == toType.representation) {
             typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
             apronState.join(manager,
-              apronState.assignCopy(manager, to, ApronExpr.Var(from, typeEnv(from.addr)).toIntern(env), null))
+              apronState.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
           } else {
             throw new IllegalStateException(
               s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.representation}" +

@@ -49,10 +49,10 @@ class ApronJoinTest extends AnyFunSuite:
   test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
     val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
                        .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(x, BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Addr(x, BaseType[Int]), ApronExpr.intLit(1)).toIntern(env_xy), null)
     val state3 = state1.changeEnvironmentCopy(manager, env_xy, false)
                        .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Var(x, BaseType[Int]), ApronExpr.intLit(2)).toIntern(env_xy), null)
+                       .assignCopy(manager, y, ApronExpr.intAdd(ApronExpr.Addr(x, BaseType[Int]), ApronExpr.intLit(2)).toIntern(env_xy), null)
     val joined = Join(state2, state3)
 
     joined.hasChanged shouldBe true
