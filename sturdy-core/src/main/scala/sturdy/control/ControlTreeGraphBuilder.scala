@@ -14,51 +14,51 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
     rec(ct, Set.empty)
     edges
 
-  private def rec(ct: CT, prev: Set[CNode]) : (Set[CNode], Map[Exc, Set[CNode]]) = ct match
+  private def rec(ct: CT, prev: Set[CNode]) : (Set[CNode], Map[Exc, Set[CNode]], Boolean) = ct match
     case ControlTree.Empty() =>
-      (prev, Map.empty)
+      (prev, Map.empty, false)
 
     case ControlTree.Atomic(a) =>
       val node : CNode = Node.Atomic(a)
       edges ++= addEdges(prev, node)
-      (Set(node), Map.empty)
+      (Set(node), Map.empty, false)
 
     case ControlTree.Seq(x, xs) =>
-      val (prevAfter1, exc1) = rec(x, prev)
-      val (prevAfter2, exc2) = rec(xs, prevAfter1)
-      (prevAfter2, combineMaps(exc1, exc2, _++_))
+      val (prevAfter1, exc1, failing1) = rec(x, prev)
+      val (prevAfter2, exc2, failing2) = rec(xs, prevAfter1)
+      (prevAfter2, combineMaps(exc1, exc2, _++_), failing1 || failing2)
 
     case ControlTree.Section(section, body) =>
       val nodeStart : CNode = Node.BlockStart(section)
       val nodeEnd : CNode = Node.BlockEnd(section)
-      val (prevEndBlock, excBlock) = rec(body, Set(nodeStart))
-      edges ++= addEdges(prev, nodeStart) ++ addEdges(prevEndBlock, nodeEnd)
-      if(!edges.exists(e => e.from == nodeStart && e.to == nodeEnd))
+      val (prevEndBlock, excBlock, failing) = rec(body, Set(nodeStart))
+      edges ++= addEdges(prev, nodeStart) ++ (if(!failing) addEdges(prevEndBlock, nodeEnd) else Set.empty)
+      if(!edges.exists(e => e.from == nodeStart && e.to == nodeEnd) && edges.exists(e => e.to == nodeEnd))
         edges += Edge(nodeStart, nodeEnd, EdgeType.BlockPair)
 
-      (Set(nodeEnd), excBlock)
+      (Set(nodeEnd), excBlock, failing)
 
     case ControlTree.Fork(b1, b2) =>
-      val (lastBlock1, exc1) = rec(b1, prev)
-      val (lastBlock2, exc2) = rec(b2, prev)
-      (lastBlock1 ++ lastBlock2, combineMaps(exc1, exc2, _++_))
+      val (lastBlock1, exc1, failing1) = rec(b1, prev)
+      val (lastBlock2, exc2, failing2) = rec(b2, prev)
+      (lastBlock1 ++ lastBlock2, combineMaps(exc1, exc2, _++_), failing1 && failing2)
 
     case ControlTree.Failed() =>
       val current : CNode = Node.Failure()
       edges ++= addEdges(prev, current)
-      (Set.empty, Map.empty)
+      (Set.empty, Map.empty, true)
 
     case ControlTree.Throw(exc) =>
-      (Set.empty, Map(exc -> prev))
+      (Set.empty, Map(exc -> prev), false)
 
     case ControlTree.Try(body, handlers) =>
-      val (endTry, excMap) = rec(body, prev)
+      val (endTry, excMap, failingBody) = rec(body, prev)
 
-      val (lastHandlers, excHandlers) = excMap.map((exc, throws) => handlers.get(exc) match
+      val (lastHandlers, excHandlers, failing) = excMap.map((exc, throws) => handlers.get(exc) match
         case Some(handle) => rec(handle, throws)
-        case None => (List.empty, Map(exc -> throws))
-      ).unzip
-      (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _++_)))
+        case None => (List.empty, Map(exc -> throws), true)
+      ).unzip3
+      (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _++_)), failing.reduce(_||_))
 
 
   private inline def addEdges(prev: Set[CNode], current: CNode) : Set[CEdge] =

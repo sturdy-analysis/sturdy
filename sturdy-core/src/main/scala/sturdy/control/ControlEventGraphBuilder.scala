@@ -11,16 +11,12 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
   type CNode = Node[Atom, Section]
   type CEdge = Edge[Atom, Section]
 
-  private case class NodeProperties(mayFail: Boolean)
-
   private enum ProgramStructure:
     case Block(start: CNode)
     case Fork(origin: List[CNode], lastFirstBranch: List[CNode])
 
   val edges: mutable.Set[CEdge] = mutable.Set.empty
   val nodes: mutable.Set[CNode] = mutable.Set.empty
-
-  private val nodesProperties: mutable.Map[CNode, NodeProperties] = mutable.Map.empty
 
   private var structureStack: List[ProgramStructure] = List.empty
   private var ancestors: List[CNode] = List.empty
@@ -34,7 +30,6 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
     ancestors.foreach(n => edges += Edge(n, node, EdgeType.CF))
     ancestors = List(node)
     nodes += node
-    nodesProperties.getOrElseUpdate(node, NodeProperties(mayFail = false))
     previous
 
   private def checkFail(ev : ControlEvent) : Unit =
@@ -60,7 +55,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc] extends ControlObserver[Atom,Se
             if (prev.nonEmpty && !prev.contains(Node.BlockStart(sec)))
               edges += Edge(start, end, EdgeType.BlockPair)
           case _ => throw new Exception("Illegal control event sequence")
-      case BasicControlEvent.Failed() => ancestors.foreach(n => nodesProperties += n -> NodeProperties(mayFail = true)) // Change to creating a Failure node, deleting the properties and coloring the node via post processing
+      case BasicControlEvent.Failed() => addNode(Node.Failure())
 
 
   override def handle(ev: ExceptionControlEvent[Exc]): Unit =

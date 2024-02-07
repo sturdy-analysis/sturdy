@@ -22,25 +22,29 @@ class TestControlTree extends AnyFunSuite {
       val edgesMissing = expected.diff(actual)
       val edgesUnexpected = actual.diff(expected)
 
+      println(ControlGraph.toGraphViz(actual))
+
       (edgesMissing.isEmpty, edgesUnexpected.isEmpty) match
-        case (true, true) => println(ControlGraph.toGraphViz(actual))
+        case (true, true) => ()
         case (false, true) => throw new Exception(s"Missing expected edges : $edgesMissing")
         case (true, false) => throw new Exception(s"Unexpected edges : $edgesUnexpected")
         case (false, false) => throw new Exception(s"Missing and unexpected edges\n\tMissing edges : $edgesMissing\n\tUnexpected edges : $edgesUnexpected")
-
     }
 
-  private def pairsToEdges[A, S](edgeType: EdgeType, pairs : Set[(Node[A, S], Node[A, S])]) : Set[Edge[A, S]] =
+  private def pairsToEdges(edgeType: EdgeType, pairs : Set[(Node[String, String], Node[String, String])]) : Set[Edge[String, String]] =
     pairs.map((a, b) => Edge(a, b, edgeType))
 
-  private case class AtomicPair(t: Atomic[String, String, String], g: Node.Atomic[String, String])
-  private case class SectionPair(t: Section[String, String, String], gIn: Node.BlockStart[String, String], gOut: Node.BlockEnd[String, String])
+  type AtomPair = (ControlTree[String, String, String], Node[String, String])
+  case class SectionPair(n: Section[String, String, String], start: AtomPair, end: AtomPair)
+
+  private given scala.Conversion[AtomPair, ControlTree[String, String, String]] = _._1
+  private given scala.Conversion[(AtomPair, AtomPair), (Node[String, String], Node[String, String])] = (a,b) => (a._2, b._2)
+  private given scala.Conversion[SectionPair, Section[String, String, String]] = _.n
 
   // Creates a ControlTree node and a GraphNode
-  private def createAtomic(atom : String) : AtomicPair = AtomicPair(Atomic(atom), Node.Atomic(atom))
-
-  private def createSection(section : String, body: CT) : SectionPair =
-    SectionPair(Section(section, body), Node.BlockStart(section), Node.BlockEnd(section))
+  private def createAtomic(atom : String) : AtomPair = (Atomic(atom), Node.Atomic(atom))
+  private def createSection(section : String, body: CT) : SectionPair = SectionPair(Section(section, body),(null, Node.BlockStart(section)), (null, Node.BlockEnd(section)))
+  private val nFailure : AtomPair = (Failed(), Node.Failure[String, String]())
 
   testGraph("Atoms") {
     val a1 = createAtomic("A1")
@@ -48,38 +52,56 @@ class TestControlTree extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val ct = a1.t + a2.t + a3.t + a4.t
+    val ct = a1 + a2 + a3 + a4
 
-    (ct, pairsToEdges(CF, Set(
-      a1.g -> a2.g,
-      a2.g -> a3.g,
-      a3.g -> a4.g)))
+    (ct,
+      pairsToEdges(CF, Set(
+      a1 -> a2,
+      a2 -> a3,
+      a3 -> a4))
+    )
   }
 
   testGraph("Empty in a sequence") {
     val a1 = createAtomic("A1")
     val a2 = createAtomic("A2")
 
-    val ct = a1.t + Empty() + Empty() + a2.t
+    val ct = a1 + Empty() + Empty() + a2
 
-    (ct, pairsToEdges(CF, Set(
-      a1.g -> a2.g)))
+    (ct,
+      pairsToEdges(CF, Set(
+      a1 -> a2))
+    )
   }
 
   testGraph("Section") {
 
     val a1 = createAtomic("A1")
     val a2 = createAtomic("A2")
-    val sec1 = createSection("sec1", a1.t + a2.t)
 
-    (sec1.t,
+    val sec1 = createSection("sec1", a1 + a2)
+
+    (sec1,
       pairsToEdges(CF, Set(
-        sec1.gIn -> a1.g,
-        a1.g -> a2.g,
-        a2.g -> sec1.gOut)) ++
+        sec1.start -> a1,
+        a1 -> a2,
+        a2 -> sec1.end)) ++
         pairsToEdges(BlockPair, Set(
-          sec1.gIn -> sec1.gOut
-        ))
+          sec1.start -> sec1.end))
+    )
+  }
+
+  testGraph("Failure") {
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+
+    val sec1 = createSection("sec1", a1 + a2 + Failed())
+
+    (sec1,
+      pairsToEdges(CF, Set(
+        sec1.start -> a1,
+        a1 -> a2,
+        a2 -> nFailure))
     )
   }
 
@@ -90,22 +112,21 @@ class TestControlTree extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
+    val sec1 = createSection("sec1", a2 + a3)
+    val sec2 = createSection("sec2", a1 + sec1 + a4)
 
-    val sec1 = createSection("sec1", a2.t + a3.t)
-    val sec2 = createSection("sec2", a1.t + sec1.t + a4.t)
-
-    (sec2.t,
+    (sec2,
       pairsToEdges(CF, Set(
-        sec2.gIn -> a1.g,
-        a1.g -> sec1.gIn,
-        sec1.gIn -> a2.g,
-        a2.g -> a3.g,
-        a3.g -> sec1.gOut,
-        sec1.gOut -> a4.g,
-        a4.g -> sec2.gOut)) ++
+        sec2.start -> a1,
+        a1 -> sec1.start,
+        sec1.start -> a2,
+        a2 -> a3,
+        a3 -> sec1.end,
+        sec1.end -> a4,
+        a4 -> sec2.end)) ++
       pairsToEdges(BlockPair, Set(
-        sec1.gIn -> sec1.gOut,
-        sec2.gIn -> sec2.gOut))
+        sec1.start -> sec1.end,
+        sec2.start -> sec2.end))
     )
   }
 
@@ -114,18 +135,17 @@ class TestControlTree extends AnyFunSuite {
     val a2 = createAtomic("A2")
 
     val sec1 = createSection("sec1", Empty())
-    val sec2 = createSection("sec2", a1.t + sec1.t + a2.t)
+    val sec2 = createSection("sec2", a1 + sec1 + a2)
 
-
-    (sec2.t,
+    (sec2,
       pairsToEdges(CF, Set(
-        sec2.gIn -> a1.g,
-        a1.g -> sec1.gIn,
-        sec1.gIn -> sec1.gOut,
-        sec1.gOut -> a2.g,
-        a2.g -> sec2.gOut)) ++
+        sec2.start -> a1,
+        a1 -> sec1.start,
+        sec1.start -> sec1.end,
+        sec1.end -> a2,
+        a2 -> sec2.end)) ++
         pairsToEdges(BlockPair, Set(
-          sec2.gIn -> sec2.gOut))
+          sec2.start -> sec2.end))
     )
   }
 
@@ -136,20 +156,21 @@ class TestControlTree extends AnyFunSuite {
     val a4 = createAtomic("A4")
     val a5 = createAtomic("A5")
 
-    val secMain = createSection("if", a1.t + Fork(a2.t + a3.t, a4.t) + a5.t)
+    val secMain = createSection("if", a1 + Fork(a2 + a3, a4) + a5)
 
-    (secMain.t,
+    (secMain,
       pairsToEdges(CF, Set(
-       secMain.gIn -> a1.g,
-        a1.g -> a2.g,
-        a1.g -> a4.g,
-        a2.g -> a3.g,
-        a4.g -> a5.g,
-        a3.g -> a5.g,
-        a5.g -> secMain.gOut
+       secMain.start -> a1,
+        a1 -> a2,
+        a1 -> a4,
+        a2 -> a3,
+        a4 -> a5,
+        a3 -> a5,
+        a5 -> secMain.end
       )) ++ pairsToEdges(BlockPair, Set(
-        secMain.gIn -> secMain.gOut,
-      )))
+        secMain.start -> secMain.end,
+      ))
+    )
   }
 
   testGraph("Fork with empty branch") {
@@ -157,18 +178,19 @@ class TestControlTree extends AnyFunSuite {
     val a2 = createAtomic("A2")
     val a3 = createAtomic("A3")
 
-    val secMain = createSection("if", a1.t + Fork(a2.t, Empty()) + a3.t)
+    val secMain = createSection("if", a1 + Fork(a2, Empty()) + a3)
 
-    (secMain.t,
+    (secMain,
       pairsToEdges(CF, Set(
-       secMain.gIn -> a1.g,
-        a1.g -> a2.g,
-        a2.g -> a3.g,
-        a1.g -> a3.g,
-        a3.g -> secMain.gOut
+       secMain.start -> a1,
+        a1 -> a2,
+        a2 -> a3,
+        a1 -> a3,
+        a3 -> secMain.end
       )) ++ pairsToEdges(BlockPair, Set(
-        secMain.gIn -> secMain.gOut,
-      )))
+        secMain.start -> secMain.end,
+      ))
+    )
   }
 
   testGraph("Nested Fork") {
@@ -180,29 +202,96 @@ class TestControlTree extends AnyFunSuite {
     val a6 = createAtomic("A6")
 
 
-    val if2 = createSection("If(...) 2", Fork(a4.t, a5.t))
-    val if1 = createSection("If(...) 1", Fork(a2.t + a3.t, if2.t))
-    val secMain = createSection("secMain", a1.t + if1.t + a6.t)
+    val if2 = createSection("If(...) 2", Fork(a4, a5))
+    val if1 = createSection("If(...) 1", Fork(a2 + a3, if2))
+    val secMain = createSection("secMain", a1 + if1 + a6)
 
-    (secMain.t,
+    (secMain,
       pairsToEdges(CF, Set(
-        secMain.gIn -> a1.g,
-        a1.g -> if1.gIn,
-        if1.gIn -> a2.g,
-        if1.gIn -> if2.gIn,
-        if2.gIn -> a4.g,
-        if2.gIn -> a5.g,
-        a4.g -> if2.gOut,
-        a5.g -> if2.gOut,
-        if2.gOut -> if1.gOut,
-        a2.g -> a3.g,
-        a3.g -> if1.gOut,
-        if1.gOut -> a6.g,
-        a6.g -> secMain.gOut
+        secMain.start -> a1,
+        a1 -> if1.start,
+        if1.start -> a2,
+        if1.start -> if2.start,
+        if2.start -> a4,
+        if2.start -> a5,
+        a4 -> if2.end,
+        a5 -> if2.end,
+        if2.end -> if1.end,
+        a2 -> a3,
+        a3 -> if1.end,
+        if1.end -> a6,
+        a6 -> secMain.end
       )) ++ pairsToEdges(BlockPair, Set(
-        if2.gIn -> if2.gOut,
-        if1.gIn -> if1.gOut,
-        secMain.gIn -> secMain.gOut
-      )))
+        if2.start -> if2.end,
+        if1.start -> if1.end,
+        secMain.start -> secMain.end
+      ))
+    )
   }
+
+  testGraph("Failure in one branch") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val secMain = createSection("secMain", a1 + Fork(a2, a3 + nFailure) + a4)
+
+    (secMain,
+      pairsToEdges(CF, Set(
+        secMain.start -> a1,
+        a1 -> a2,
+        a1 -> a3,
+        a3 -> nFailure,
+        a2 -> a4,
+        a4 -> secMain.end
+      )) ++ pairsToEdges(BlockPair, Set(
+        secMain.start -> secMain.end
+      ))
+    )
+  }
+
+  testGraph("Failure in both branches") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val secMain = createSection("secMain", a1 + Fork(a2 + nFailure, a3 + nFailure))
+
+    (secMain,
+      pairsToEdges(CF, Set(
+        secMain.start -> a1,
+        a1 -> a2,
+        a1 -> a3,
+        a3 -> nFailure,
+        a2 -> nFailure
+      ))
+    )
+  }
+
+  testGraph("Failure in nested section") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val secNotClosed = createSection("secInner", a3 + nFailure)
+    val secMain = createSection("secMain", a1 + Fork(a2 + nFailure, secNotClosed))
+
+    (secMain,
+      pairsToEdges(CF, Set(
+        secMain.start -> a1,
+        a1 -> a2,
+        a1 -> secNotClosed.start,
+        secNotClosed.start -> a3,
+        a3 -> nFailure,
+        a2 -> nFailure
+      ))
+    )
+  }
+
 }
