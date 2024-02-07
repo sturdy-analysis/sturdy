@@ -4,6 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.RecordingControlObserver
 import sturdy.effect.failure.AFallible
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
@@ -52,6 +53,7 @@ class BenchmarksgameConcreteTest extends AnyFlatSpec, Matchers:
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+    val controlRecorder = interp.addControlObserver(new RecordingControlObserver)
 
     println(s"Running $p")
     val modInst = interp.initializeModule(module)
@@ -59,5 +61,5 @@ class BenchmarksgameConcreteTest extends AnyFlatSpec, Matchers:
       interp.invokeExported(modInst, funcName, List.empty)
     )
     println(res)
-    println(s"Recorded ${interp.controlRecorder.events.size} control events")
+    println(s"Recorded ${controlRecorder.events.size} control events")
 

@@ -38,6 +38,6 @@ enum StackConfig:
   case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true, observers: Iterable[FixpointControlEvent => Unit] = Seq())
 
   def withObservers(newObservers: Iterable[FixpointControlEvent => Unit]): StackConfig = this match
-    case ss: StackedStates => ss.copy(observers = ss.observers ++ newObservers)
-    case ss: StackedCfgNodes => ss.copy(observers = ss.observers ++ newObservers)
+    case ss: StackedStates => StackedStates(false, observers = ss.observers ++ newObservers)
+    case ss: StackedCfgNodes => StackedCfgNodes(false, observers = ss.observers ++ newObservers)
 

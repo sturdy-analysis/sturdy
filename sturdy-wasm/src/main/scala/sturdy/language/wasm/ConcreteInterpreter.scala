@@ -115,9 +115,6 @@ object ConcreteInterpreter extends Interpreter with Control:
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 
-    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
-    this.addControlObserver(controlRecorder)
-
     val fixpoint = new fix.ContextInsensitiveFixpoint {
       override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)
     }

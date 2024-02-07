@@ -76,12 +76,6 @@ object IntervalAnalysis extends Interpreter,
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
 
-    val controlObserver = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
-    this.addControlObserver(controlObserver)
-    
-    val controlEventGraphBuilder = new ControlEventGraphBuilder[Control.Atom, Control.Section, Control.Exc]
-    this.addControlObserver(controlEventGraphBuilder)
-
     val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
 
     final override val fixpoint =

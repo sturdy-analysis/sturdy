@@ -5,12 +5,13 @@ import cats.effect.IO
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.{ConstantTaintAnalysis, ConstantAnalysis, ConstantTaintAnalysisSoundness}
+import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, ConstantTaintAnalysisSoundness}
 import sturdy.language.wasm.analyses.ConstantTaintAnalysisSoundness.given
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
@@ -22,7 +23,7 @@ import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
-import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
+import sturdy.values.taint.Taint.{Tainted, TopTaint, Untainted}
 import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader
@@ -66,6 +67,7 @@ class ConstantTaintAnalysisTestScriptInterpreter(spectest: Option[Module] = None
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val aInterp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  aInterp.addControlObserver(new ControlEventChecker)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

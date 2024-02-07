@@ -39,7 +39,7 @@ case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig
 object WasmConfig:
   def default = WasmConfig()
 
-case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedStates(false)), loopUnwinding: Int = 0):
+case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedStates()), loopUnwinding: Int = 0):
   def withObservers(newObservers: Iterable[FixpointControlEvent => Unit]): FixpointConfig =
     FixpointConfig(iter.withObservers(newObservers))
   

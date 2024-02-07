@@ -4,6 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.RecordingControlObserver
 import sturdy.effect.failure.AFallible
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
@@ -56,6 +57,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
 
     val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val controlRecorder = interp.addControlObserver(new RecordingControlObserver)
 
     val modInst = interp.initializeModule(module)
     interp.failure.fallible(
@@ -85,4 +87,5 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
     Files.writeString(dotPath, cfg.toGraphViz)
+    println(s"Recorded ${controlRecorder.events.size} control events")
 

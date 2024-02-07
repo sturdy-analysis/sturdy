@@ -79,9 +79,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
       :
     private given Instance = this
 
-    val controlRecorder = new RecordingControlObserver[Control.Atom, Control.Section, Control.Exc](true)
-    this.addControlObserver(controlRecorder)
-
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
       override type Ctx = observedConfig.ctx.Ctx
