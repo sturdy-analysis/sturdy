@@ -62,13 +62,13 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _++_)), failing.reduce(_||_))
 
     case ControlTree.Fixpoint(b, rep) =>
-      val (endBody, excBody) = rec(b, prev)
+      val (endBody, excBody, failing) = rec(b, prev)
       rep match
-        case None => (endBody, excBody)
+        case None => (endBody, excBody, failing)
         case Some(next) => rec(next, prev)
 
-  private inline def addEdges(prev: Set[CNode], current: CNode) : Set[CEdge] =
-    prev.map(p => Edge(p, current, EdgeType.CF))
+  private inline def addEdges(prev: Set[CNode], current: CNode) : Unit =
+    edges ++= prev.map(p => Edge(p, current, EdgeType.CF))
 
 }
 
