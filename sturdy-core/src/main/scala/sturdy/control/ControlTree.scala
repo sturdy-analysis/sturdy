@@ -17,5 +17,5 @@ enum ControlTree[Atom, Sec, Exc]:
   case Recurrent(failing: Boolean)
 
   @targetName("plusToSeq")
-  infix def +(that: ControlTree[Atom, Sec, Exc]) : ControlTree[Atom, Sec, Exc] =
+  infix def +(that: ControlTree[Atom, Sec, Exc]): ControlTree[Atom, Sec, Exc] =
     Seq(this, that)
