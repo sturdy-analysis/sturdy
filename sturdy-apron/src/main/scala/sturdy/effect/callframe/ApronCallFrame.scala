@@ -31,6 +31,7 @@ final class ApronCallFrame
     apronManager: Manager
   )
   extends MutableCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx],Type], CallSite, NoJoin]
+     with DecidableCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx],Type], CallSite]
      with ApronRecencyState[Ctx, Type](temporaryVariableAllocator, recencyStore, apronStore):
 
   final type VirtAddr = VirtualAddress[Ctx]
