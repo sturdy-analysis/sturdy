@@ -26,11 +26,12 @@ final class ApronCallFrame
     val apronStore: ApronStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
   )
   (using
-    localVariableAllocator: Allocator[Ctx, Var],
+   temporaryVariableAllocator: Allocator[Ctx, Type],
+   localVariableAllocator: Allocator[Ctx, Var],
     apronManager: Manager
   )
   extends MutableCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx],Type], CallSite, NoJoin]
-     with ApronRecencyState[Ctx, Type](recencyStore, apronStore):
+     with ApronRecencyState[Ctx, Type](temporaryVariableAllocator, recencyStore, apronStore):
 
   final type VirtAddr = VirtualAddress[Ctx]
   final type PhysAddr = PhysicalAddress[Ctx]
@@ -163,6 +164,47 @@ final class ApronCallFrame
   given VirtAddrJoin: Join[VirtAddr] with
     override def apply(v1: VirtAddr, v2: VirtAddr): MaybeChanged[VirtAddr] =
       throw UnsupportedOperationException("Virtual Addresses cannot be joined directly. Instead, they are joined inside of the apronStore.")
+
+object ApronCallFrame:
+  def apply[
+    Data,
+    Var: Ordering,
+    CallSite,
+    Ctx: Ordering : Finite,
+    Type: ApronType : Join : Widen
+  ](
+      initData: Data,
+      initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx], Type]])],
+  )(using
+    temporaryVariableAllocator: Allocator[Ctx, Type],
+    localVariableAllocator: Allocator[Ctx, Var],
+    apronManager: Manager
+  ): ApronCallFrame[Data, Var, CallSite, Ctx, Type] =
+
+    type VirtAddr = VirtualAddress[Ctx]
+    type PhysAddr = PhysicalAddress[Ctx]
+    type PowPhysAddr = PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]]
+    type PowVirtAddr = PowVirtualAddress[Ctx]
+    type ApronExprVirtAddr = ApronExpr[VirtualAddress[Ctx], Type]
+    type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx], Type]
+
+    val apronStore: ApronStore[Ctx, Type, PowPhysAddr, ApronExprPhysAddr] = ApronStore(
+      apronManager,
+      Abstract1(apronManager, new Environment()),
+      Map(),
+      getIntVal = Some[ApronExprPhysAddr](_),
+      makeIntVal = (expr: ApronExprPhysAddr, state: Abstract1) =>
+        ApronExpr.Constant(state.getBound(apronManager, expr.toIntern(state.getEnvironment)), expr._type)
+    )
+
+    val addressTranslation: AddressTranslation[Ctx] = AddressTranslation.empty
+
+    val recencyStore: RecencyStore[Ctx, PowVirtAddr, ApronExprPhysAddr] =
+      RecencyStore(
+        apronStore,
+        addressTranslation)
+
+    new ApronCallFrame(initData, initVars, recencyStore, apronStore)
 
 
 /* package sturdy.effect.callframe

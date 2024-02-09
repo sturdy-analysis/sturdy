@@ -49,3 +49,10 @@ given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](us
 given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)
+
+given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
+  (t1: BaseType[B], t2: BaseType[B]) =>
+    if(t1 == t2)
+      0
+    else
+      -1

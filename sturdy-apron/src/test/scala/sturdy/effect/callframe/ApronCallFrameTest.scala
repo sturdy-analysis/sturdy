@@ -1,15 +1,17 @@
 package sturdy.effect.callframe
 
-import apron.*
-import gmp.*
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
+
+import scala.math.Ordering.*
+import math.Ordered.orderingToOrdered
+import apron.*
+import gmp.*
 import sturdy.apron.{ApronExpr, given}
 import sturdy.data.{*, given}
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
-import sturdy.effect.callframe
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.RecencyClosure
 import sturdy.values.Finite
@@ -22,15 +24,31 @@ class ApronCallFrameTest extends AnyFunSuite:
   type Data = Unit
   type Var = String
   type CallSite = String
-  type Ctx = Var
   type Type = BaseType[Int]
   val intType: Type = BaseType[Int]
 
+  enum Ctx:
+    case Var(name: String)
+    case TempVar(tpe: Type, n: Int)
+
   given Finite[Ctx] with {}
+  given Ordering[Ctx] = {
+    case (Ctx.Var(n1), Ctx.Var(n2)) => n1.compare(n2)
+    case (Ctx.TempVar(t1, n1), Ctx.TempVar(t2,n2)) => (t1,n1).compare((t2,n2))
+    case _ => -1
+  }
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(List(failure))
   given Finite[FailureKind] with {}
-  given allocator: Allocator[Ctx,Var] = AAllocatorFromContext(ctx => ctx)
+  given variableAllocator: Allocator[Ctx,Var] =
+    AAllocatorFromContext(ctx => Ctx.Var(ctx))
+
+  // Unused
+  given tempVariableAllocator: Allocator[Ctx,Type] = new Allocator[Ctx,Type] with Stateless:
+    var n = 0
+    override def alloc(ctx: Type): Ctx =
+      n += 1
+      Ctx.TempVar(ctx, n)
 
   given Manager = new apron.Polka(true)
 

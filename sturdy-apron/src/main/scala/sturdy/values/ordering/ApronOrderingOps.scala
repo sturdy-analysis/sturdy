@@ -8,12 +8,11 @@ package sturdy.values.ordering
 //      ap.ifThenElse {
 //        ap.insertConstraint(ApronCons.lt(v1, v2))
 //        ap.assign(temp, ApronExpr.Constant(1))
-//        ApronExpr._var(temp)
 //      } {
 //        ap.insertConstraint(ApronCons.ge(v1, v2))
 //        ap.assign(temp, ApronExpr.Constant(0))
-//        ApronExpr._var(temp)
 //      }
+//      ApronExpr._var(temp)
 //    }
 //
 //
