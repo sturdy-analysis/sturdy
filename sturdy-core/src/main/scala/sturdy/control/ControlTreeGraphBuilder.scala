@@ -34,13 +34,14 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       val nodeEnd: CNode = Node.BlockEnd(section)
       val (prevEndBlock, excBlock) = rec(body, Set(nodeStart))
       addEdges(prev, nodeStart)
-      if (prevEndBlock.nonEmpty)
+      if (prevEndBlock.nonEmpty) {
         addEdges(prevEndBlock, nodeEnd)
         if (!edges.contains(Edge(nodeStart, nodeEnd, EdgeType.CF)) && edges.exists(e => e.to == nodeEnd))
           edges += Edge(nodeStart, nodeEnd, EdgeType.BlockPair)
         (Set(nodeEnd), excBlock)
-      else
+      } else {
         (Set.empty, excBlock)
+      }
 
     case ControlTree.Fork(b1, b2) =>
       val (lastBlock1, exc1) = rec(b1, prev)
@@ -69,6 +70,9 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       rep match
         case None => (endBody, excBody)
         case Some(next) => rec(next, prev)
+
+    case ControlTree.Recurrent(_) =>
+      (Set.empty, Map.empty)
 
   private inline def addEdges(prev: Set[CNode], current: CNode): Unit =
     edges ++= prev.map(p => Edge(p, current, EdgeType.CF))
