@@ -53,13 +53,13 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       (Set.empty, Map(exc -> prev), false)
 
     case ControlTree.Try(body, handlers) =>
-      val (endTry, excMap, failingBody) = rec(body, prev)
+      val (endTry, throwers, bodyFailing) = rec(body, prev)
 
-      val (lastHandlers, excHandlers, failing) = excMap.map((exc, throws) => handlers.get(exc) match
-        case Some(handle) => rec(handle, throws)
-        case None => (List.empty, Map(exc -> throws), true)
+      val (lastHandlers, excHandlers, failing) = throwers.map((exc, thrower) => handlers.get(exc) match
+        case Some(handle) => rec(handle, thrower)
+        case None => (Set.empty, Map(exc -> thrower), false)
       ).unzip3
-      (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _ ++ _)), failing.fold(failingBody)(_ || _))
+      (lastHandlers.flatten.toSet ++ endTry, excHandlers.fold(Map.empty)(combineMaps(_, _, _ ++ _)), failing.fold(bodyFailing)(_ || _))
 
     case ControlTree.Fixpoint(b, rep) =>
       val (endBody, excBody, failing) = rec(b, prev)

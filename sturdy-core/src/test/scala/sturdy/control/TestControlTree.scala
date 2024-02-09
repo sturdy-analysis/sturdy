@@ -249,7 +249,7 @@ class TestControlTree extends AnyFunSuite {
         secMain.start -> secMain.end)))
   }
 
-  testGraph("Failure in one branch") {
+  testGraph("Failure in one branch, not preserved after the fork") {
 
     val a1 = createAtomic("A1")
     val a2 = createAtomic("A2")
@@ -269,7 +269,7 @@ class TestControlTree extends AnyFunSuite {
         secMain.start -> secMain.end)))
   }
 
-  testGraph("Failure in both branches") {
+  testGraph("Failure in both branches, preserved after fork") {
 
     val a1 = createAtomic("A1")
     val a2 = createAtomic("A2")
@@ -369,6 +369,57 @@ class TestControlTree extends AnyFunSuite {
       secMain.start -> secMain.end)))
   }
 
+  testGraph("Try with nested rethrow, correct dispatch") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val handle = createAtomic("Handle Exc1 Throw Exc2 in inner Try")
+    val handleIn = createAtomic("Handle Exc2 Inner")
+    val handleOut = createAtomic("Handle Exc2 Outer")
+
+    val tryInner = Try(Fork(a1 + Throw("Exc1"), a2 + Throw("Exc2")), Map("Exc1" -> (handle + Throw("Exc2")), "Exc2" -> handleIn))
+    val tryOuter = Try(tryInner + a3, Map("Exc2" -> handleOut))
+
+    val secMain = createSection("secMain", tryOuter + a4)
+
+    (secMain, pairsToEdges(CF, Set(
+      secMain.start -> a1,
+      secMain.start -> a2,
+      a1 -> handle,
+      handle -> handleOut,
+      a2 -> handleIn,
+      handleIn -> a3,
+      a3 -> a4,
+      handleOut -> a4,
+      a4 -> secMain.end)) ++ pairsToEdges(BlockPair, Set(
+      secMain.start -> secMain.end)))
+  }
+
+  testGraph("Try nested, handle outer") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+
+    val handle = createAtomic("Handle Exc1")
+
+    val tryInner = Try(a3 + Throw("Exc1"), Map.empty)
+    val tryOuter = Try(a2 + tryInner, Map("Exc1" -> handle))
+
+    val secMain = createSection("secMain", a1 + tryOuter)
+
+    (secMain, pairsToEdges(CF, Set(
+      secMain.start -> a1,
+      a1 -> a2,
+      a2 -> a3,
+      a3 -> handle,
+      handle -> secMain.end)) ++ pairsToEdges(BlockPair, Set(
+      secMain.start -> secMain.end)))
+  }
+
   testGraph("Try with nested block, rethrow") {
 
     val a1 = createAtomic("A1")
@@ -397,8 +448,29 @@ class TestControlTree extends AnyFunSuite {
       secMain.start -> secMain.end)))
   }
 
-  test("") {
-    println(combineMaps(Map(1 -> 2, 2 -> 3, 3 -> 4), Map(1 -> 2), _ + _))
+  testGraph("Try with multiple throw") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val handle1 = createAtomic("Handle Exc1")
+    val handle2 = createAtomic("Handle Exc2")
+
+    val secMain = createSection("secMain", Try(a1 + Fork(a2, Fork(Throw("Exc1"), a3 + Throw("Exc2"))), Map("Exc1" -> handle1, "Exc2" -> handle2)) + a4)
+
+    (secMain, pairsToEdges(CF, Set(
+      secMain.start -> a1,
+      a1 -> a2,
+      a1 -> handle1,
+      a1 -> a3,
+      a3 -> handle2,
+      a2 -> a4,
+      handle1 -> a4,
+      handle2 -> a4,
+      a4 -> secMain.end)) ++ pairsToEdges(BlockPair, Set(
+      secMain.start -> secMain.end)))
   }
 
 }
