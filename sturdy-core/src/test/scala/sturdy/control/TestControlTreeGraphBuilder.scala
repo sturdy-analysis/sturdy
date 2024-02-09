@@ -8,7 +8,7 @@ import sturdy.data.combineMaps
 
 import scala.annotation.targetName
 
-class TestControlTree extends AnyFunSuite {
+class TestControlTreeGraphBuilder extends AnyFunSuite {
 
   type CT = ControlTree[String, String, String]
   type AtomPair = (ControlTree[String, String, String], Node[String, String])
@@ -472,5 +472,37 @@ class TestControlTree extends AnyFunSuite {
       a4 -> secMain.end)) ++ pairsToEdges(BlockPair, Set(
       secMain.start -> secMain.end)))
   }
+
+  testGraph("Try with failure") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a3 = createAtomic("A3")
+    val a4 = createAtomic("A4")
+
+    val secMain = createSection("secMain", a1 + Try(Failed(), Map("Exc1" -> a3)))
+
+    (secMain, pairsToEdges(CF, Set(
+      secMain.start -> a1,
+      a1 -> nFailure)))
+  }
+
+  testGraph("Try with failure in handler") {
+
+    val a1 = createAtomic("A1")
+    val a2 = createAtomic("A2")
+    val a4 = createAtomic("A4")
+
+    val secMain = createSection("secMain", a1 + Try(a2 + Fork(Empty(), Throw("Exc1")), Map("Exc1" -> Failed())) + a4)
+
+    (secMain, pairsToEdges(CF, Set(
+      secMain.start -> a1,
+      a1 -> a2,
+      a2 -> a4,
+      a2 -> nFailure,
+      a4 -> secMain.end)) ++ pairsToEdges(BlockPair, Set(
+      secMain.start -> secMain.end)))
+  }
+
 
 }
