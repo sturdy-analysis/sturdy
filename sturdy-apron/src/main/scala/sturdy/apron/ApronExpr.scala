@@ -213,14 +213,13 @@ enum ApronCons[Addr, Type]:
   override def toString: String = this match
     case Compare(op, e1, e2, _) => s"($e1 $op $e2)"
 
-//  def vars: Set[ApronVar] = this match
-//    case True => Set()
-//    case False => Set()
-//    case Compare(_, e1, e2) => e1.vars ++ e2.vars
+  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] = this match
+    case Compare(op, e1, e2, tpe) => Compare(op, e1.mapAddr(f), e2.mapAddr(f), tpe)
+
+  def addrs: Set[Addr] = this match
+    case Compare(_, e1, e2, _) => e1.addrs ++ e2.addrs
 
   def toApron(env : apron.Environment)(using ApronType[Type]): Seq[Tcons1] = this match
-//    case True() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.constant(0, boolOpts.boolLit(true)).toApron))
-//    case False() => Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.constant(1, boolOpts.boolLit(false)).toApron))
     case Compare(Eq, e1, e2, tpe) =>
       Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
     case Compare(Neq, e1, e2, tpe) => Compare(Gt, e1, e2, tpe).toApron(env) ++ Compare(Lt, e1, e2, tpe).toApron(env)

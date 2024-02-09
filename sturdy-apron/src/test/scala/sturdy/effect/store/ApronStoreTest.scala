@@ -6,7 +6,7 @@ import sturdy.values.references.Recency.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.store.{ApronStore, given}
-import sturdy.apron.{ApronExpr, ApronVar, BinOp, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronVar, BinOp, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden, TypeIntegerOps}
 import sturdy.values.references.{*, given}
@@ -65,6 +65,9 @@ class ApronStoreTest extends AnyFunSuite:
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
     apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(0, 20))
+
+    apronStore.addConstraint(ApronCons.intLt[PhysicalAddress[Context],BaseType[Int]](ApronExpr.intLit(10), ApronExpr.addr(xOld, BaseType[Int])))
+    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(11, 20))
   }
 
   type AExpr = ApronExpr[ApAddr, BaseType[Int]]

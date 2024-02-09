@@ -28,36 +28,35 @@ given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronExpr.intMul(v1,v2)
 
+
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.max(v1._type, v2._type)
-    apronState.withTempVars(resultType) { case List(result) =>
-      apronState.ifThenElse(ApronCons.intLt(v2,v1)) {
-        apronState.assign(result, v1)
+    withTwo(v1, v2, resultType) { (x, y, result) =>
+      apronState.ifThenElse(ApronCons.intLt(x, y)) {
+        apronState.assign(result, y)
       } {
-        apronState.assign(result, v2)
+        apronState.assign(result, x)
       }
-      ApronExpr.addr(result, resultType)
     }
 
   override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.min(v1._type, v2._type)
-    apronState.withTempVars(resultType) { case List(result) =>
-      apronState.ifThenElse(ApronCons.intLt(v2, v1)) {
-        apronState.assign(result, v2)
+    withTwo(v1, v2, resultType) { (x, y, result) =>
+      apronState.ifThenElse(ApronCons.intLt(x, y)) {
+        apronState.assign(result, x)
       } {
-        apronState.assign(result, v1)
+        apronState.assign(result, y)
       }
-      ApronExpr.addr(result, resultType)
     }
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    apronState.withTempVars(v._type) { case List(result) =>
-      apronState.ifThenElse(ApronCons.intLe(ApronExpr.intLit(0), v)) {
-        apronState.assign(result, v)
+    val resultType = typeIntOps.absolute(v._type)
+    withOne(v, resultType) { (x, result) =>
+      apronState.ifThenElse(ApronCons.intLe(ApronExpr.intLit(0), x)) {
+        apronState.assign(result, x)
       } {
-        apronState.assign(result, ApronExpr.intNegate(v))
+        apronState.assign(result, ApronExpr.intNegate(x))
       }
-      ApronExpr.addr(result, typeIntOps.absolute(v._type))
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -107,7 +106,20 @@ given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
 
   override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
+  def withOne(v1: ApronExpr[Addr, Type], resultType: Type)(f: (ApronExpr[Addr, Type], Addr) => Unit) =
+    apronState.withTempVars(v1._type, resultType) { case List(x, result) =>
+      apronState.assign(x, v1); val ex = ApronExpr.addr(x, v1._type)
+      f(ex, result)
+      ApronExpr.addr(result, resultType)
+    }
 
+  def withTwo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type], resultType: Type)(f: (ApronExpr[Addr, Type], ApronExpr[Addr, Type], Addr) => Unit) =
+    apronState.withTempVars(v1._type, v2._type, resultType) { case List(x, y, result) =>
+      apronState.assign(x, v1); val ex = ApronExpr.addr(x, v1._type)
+      apronState.assign(y, v2); val ey = ApronExpr.addr(y, v2._type)
+      f(ex, ey, result)
+      ApronExpr.addr(result, resultType)
+    }
 
 //import apron.{Abstract1, DoubleScalar, Environment, Interval, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 //import sturdy.data.CombineUnit

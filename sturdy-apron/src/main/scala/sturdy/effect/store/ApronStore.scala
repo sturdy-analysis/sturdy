@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronExpr, ApronType, ApronVar, Representation}
+import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronType, ApronVar, Representation}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
@@ -149,6 +149,13 @@ final class ApronStore[
       )
     }
 
+  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
+    val constraints: Array[Tcons1] = constraint.toApron(apronState.getEnvironment).toArray
+    apronState.meet(manager, constraints)
+
+  def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
+    apronState.getBound(apronState.getCreationManager, expr.toIntern(apronState.getEnvironment))
+
   private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]) =
     var env = apronState.getEnvironment()
     val variable = ApronVar(addr)
@@ -170,6 +177,9 @@ final class ApronStore[
             s"to address ${addr} of type ${typeEnv(addr)} represented by ${typeEnv(addr).representation}")
       }
     }
+
+  def isBottom: Boolean =
+    apronState.isBottom(manager)
 
   override type State = (TypeEnv, Abstract1)
 
