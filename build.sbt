@@ -3,7 +3,7 @@ ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 ThisBuild / version := "0.1"
 
-ThisBuild / scalaVersion := "3.1.2"
+ThisBuild / scalaVersion := "3.2.1"
 
 ThisBuild / Test / fork := false
 ThisBuild / Test / parallelExecution := false
@@ -14,6 +14,7 @@ lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
     sturdy_core,
+    sturdy_apron,
     sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial
@@ -27,14 +28,15 @@ lazy val sturdy_core = (project in file("sturdy-core"))
       "org.apache.commons" % "commons-math3" % "3.6.1",
       "org.eclipse.collections" % "eclipse-collections" % "11.0.0",
       // test
-      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+      "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0" % "test"
     )
   )
 
 val copyApronBinaries = taskKey[Unit]("Copies the platform-dependent Apron binaries to the project root, so that sbt loads them automatically")
 
 lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
-  .dependsOn(sturdy_core % "compile->compile")
+  .dependsOn(sturdy_core % "compile->compile; test->test")
   .settings(
     name := "sturdy_apron",
     libraryDependencies ++= Seq(

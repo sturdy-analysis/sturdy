@@ -31,38 +31,41 @@ given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.max(v1._type, v2._type)
-    withTwo(v1, v2, resultType) { (x, y, result) =>
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
       apronState.ifThenElse(ApronCons.intLt(x, y)) {
         apronState.assign(result, y)
       } {
         apronState.assign(result, x)
       }
+      ApronExpr.addr(result, resultType)
     }
 
   override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.min(v1._type, v2._type)
-    withTwo(v1, v2, resultType) { (x, y, result) =>
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
       apronState.ifThenElse(ApronCons.intLt(x, y)) {
         apronState.assign(result, x)
       } {
         apronState.assign(result, y)
       }
+      ApronExpr.addr(result, resultType)
     }
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.absolute(v._type)
-    withOne(v, resultType) { (x, result) =>
+    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
       apronState.ifThenElse(ApronCons.intLe(ApronExpr.intLit(0), x)) {
         apronState.assign(result, x)
       } {
         apronState.assign(result, ApronExpr.intNegate(x))
       }
+      ApronExpr.addr(result, resultType)
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.div(v1._type, v2._type)
-    apronState.withTempVars(resultType) { case List(result) =>
-      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), v2)) {
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), y)) {
         f.fail(IntegerDivisionByZero, s"$v1 / $v2")
       } {
         apronState.assign(result, ApronExpr.intDiv(v1, v2))
@@ -72,7 +75,16 @@ given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
-  override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.remainder(v1._type, v2._type)
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), y)) {
+        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
+      } {
+        apronState.assign(result, ApronExpr.intMod(v1, v2))
+      }
+      ApronExpr.addr(result, resultType)
+    }
 
   override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
@@ -106,20 +118,6 @@ given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
 
   override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
-  def withOne(v1: ApronExpr[Addr, Type], resultType: Type)(f: (ApronExpr[Addr, Type], Addr) => Unit) =
-    apronState.withTempVars(v1._type, resultType) { case List(x, result) =>
-      apronState.assign(x, v1); val ex = ApronExpr.addr(x, v1._type)
-      f(ex, result)
-      ApronExpr.addr(result, resultType)
-    }
-
-  def withTwo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type], resultType: Type)(f: (ApronExpr[Addr, Type], ApronExpr[Addr, Type], Addr) => Unit) =
-    apronState.withTempVars(v1._type, v2._type, resultType) { case List(x, y, result) =>
-      apronState.assign(x, v1); val ex = ApronExpr.addr(x, v1._type)
-      apronState.assign(y, v2); val ey = ApronExpr.addr(y, v2._type)
-      f(ex, ey, result)
-      ApronExpr.addr(result, resultType)
-    }
 
 //import apron.{Abstract1, DoubleScalar, Environment, Interval, MpqScalar, Tcons1, Texpr0Node, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode, Var}
 //import sturdy.data.CombineUnit

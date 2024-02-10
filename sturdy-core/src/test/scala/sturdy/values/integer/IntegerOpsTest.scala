@@ -12,7 +12,7 @@ trait IntervalIntegerOps[L,N] extends IntegerOps[L,N]:
 
 class IntegerOpsTest[L,N](size: Int,
                           makeIntegerOps: => IntervalIntegerOps[L, N])
-  extends AnyFunSuite with ScalaCheckPropertyChecks:
+    extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   def genInterval =
     for(x <- Gen.choose(-size, size);

@@ -8,7 +8,8 @@ import sturdy.values.Join
 import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, PowersetAddr, VirtualAddress, given}
 
 trait ApronState[Addr,Type]:
-  def withTempVars[A](types: Type*)(f: PartialFunction[List[Addr],A]): A
+  def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
+                     (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraint(constraint: ApronCons[Addr,Type]): Unit
   def getBound(expr: ApronExpr[Addr,Type]): Interval
@@ -28,12 +29,34 @@ trait ApronRecencyState
 
   val effectStack = EffectStack(List(recencyStore))
 
-  override def withTempVars[A](types: Type*)(f: PartialFunction[List[VirtualAddress[Ctx]], A]): A =
-    val tempVars = types.map { tpe =>
-      val ctx = temporaryVariableAllocator(tpe)
-      recencyStore.alloc(ctx)
-    }.toList
-    f(tempVars)
+  override def withTempVars[A](resultType: Type, exprs: ApronExpr[VirtualAddress[Ctx], Type]*)(f: PartialFunction[(VirtualAddress[Ctx],List[ApronExpr[VirtualAddress[Ctx], Type]]), A]): A =
+    val tempVars = exprs.map ( expr =>
+      if(expr.addrs.isEmpty) {
+        val tpe = expr._type
+        val ctx = temporaryVariableAllocator(tpe)
+        val addr = recencyStore.alloc(ctx)
+        assign(addr, expr)
+        ApronExpr.addr(addr, tpe)
+      } else {
+        expr
+      }
+    ).toList
+
+    val resultCtx = temporaryVariableAllocator(resultType)
+    val resultAddr = recencyStore.alloc(resultCtx)
+
+    f(resultAddr, tempVars)
+
+
+
+
+
+  //  override def withTempVars[A](types: Type*)(f: PartialFunction[List[VirtualAddress[Ctx]], A]): A =
+//    val tempVars = types.map { tpe =>
+//      val ctx = temporaryVariableAllocator(tpe)
+//      recencyStore.alloc(ctx)
+//    }.toList
+//    f(tempVars)
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     apronStore.write(v.physical, virtToPhys(expr))
