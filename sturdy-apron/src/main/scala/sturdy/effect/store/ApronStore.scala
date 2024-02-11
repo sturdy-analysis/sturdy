@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronType, ApronVar, Representation}
+import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronType, ApronVar, ApronRepresentation}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
@@ -118,14 +118,14 @@ final class ApronStore[
     for (from <- fromSet; to <- toSet) {
       (typeEnv.get(from.addr), typeEnv.get(to.addr)) match
         case (Some(fromType), Some(toType)) =>
-          if(fromType.representation == toType.representation) {
+          if(fromType.apronRepresentation == toType.apronRepresentation) {
             typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
             apronState.join(manager,
               apronState.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
           } else {
             throw new IllegalStateException(
-              s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.representation}" +
-                s"to address ${to.addr} of type ${toType} represented by ${toType.representation}")
+              s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.apronRepresentation}" +
+                s"to address ${to.addr} of type ${toType} represented by ${toType.apronRepresentation}")
           }
 
         case (Some(fromType), None) =>
@@ -161,20 +161,20 @@ final class ApronStore[
     val variable = ApronVar(addr)
     val tpe = expr._type
     if (!env.hasVar(variable)) {
-      tpe.representation match
-        case Representation.Int =>
+      tpe.apronRepresentation match
+        case ApronRepresentation.Int =>
           env = env.add(Array[apron.Var](variable), Array[apron.Var]())
-        case Representation.Real =>
+        case ApronRepresentation.Real =>
           env = env.add(Array[apron.Var](), Array[apron.Var](variable))
       apronState.changeEnvironment(manager, env, false)
       typeEnv += addr -> tpe
     } else {
-      if (typeEnv(addr).representation == tpe.representation) {
+      if (typeEnv(addr).apronRepresentation == tpe.apronRepresentation) {
         typeEnv += addr -> Join(typeEnv(addr), tpe).get
       } else {
         throw new IllegalStateException(
-          s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.representation}" +
-            s"to address ${addr} of type ${typeEnv(addr)} represented by ${typeEnv(addr).representation}")
+          s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.apronRepresentation}" +
+            s"to address ${addr} of type ${typeEnv(addr)} represented by ${typeEnv(addr).apronRepresentation}")
       }
     }
 

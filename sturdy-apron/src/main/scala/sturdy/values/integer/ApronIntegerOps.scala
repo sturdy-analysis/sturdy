@@ -1,92 +1,117 @@
 package sturdy.values.integer
 
 import apron.Interval
-import sturdy.data.{given}
+import sturdy.data.given
 import sturdy.apron.{*, given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
 import scala.reflect.ClassTag
+import ApronExpr.*
+import ApronCons.*
+import sturdy.values.ordering.{EqOps, OrderingOps}
 
-given ApronIntegerOps[Addr: Ordering: ClassTag, Type : ApronType : Join]
-    (using apronState: ApronState[Addr,Type], f: Failure, typeIntOps: IntegerOps[Int,Type]):
-      IntegerOps[Int, ApronExpr[Addr,Type]] with
+given ApronIntegerOps
+  [
+    Addr: Ordering: ClassTag,
+    Type : ApronType : Join
+  ]
+  (using
+    apronState: ApronState[Addr,Type],
+    f: Failure,
+    typeIntOps: IntegerOps[Int,Type],
+    typeOrderingOps: OrderingOps[Type,Type],
+    typeEqOps: EqOps[Type,Type]
+  ): IntegerOps[Int, ApronExpr[Addr,Type]] with
 
   override def integerLit(i: Int): ApronExpr[Addr, Type] =
-    ApronExpr.intLit(i)
+    intLit(i)
 
   override def randomInteger(): ApronExpr[Addr, Type] =
-    ApronExpr.intTop
+    intTop
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.intAdd(v1,v2)
+    intAdd(v1,v2)
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.intSub(v1,v2)
+    intSub(v1,v2)
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.intMul(v1,v2)
+    intMul(v1,v2)
 
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.max(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(ApronCons.intLt(x, y)) {
+      apronState.ifThenElse(intLt(x, y)) {
         apronState.assign(result, y)
       } {
         apronState.assign(result, x)
       }
-      ApronExpr.addr(result, resultType)
+      addr(result, resultType)
     }
 
   override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.min(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(ApronCons.intLt(x, y)) {
+      apronState.ifThenElse(intLt(x, y)) {
         apronState.assign(result, x)
       } {
         apronState.assign(result, y)
       }
-      ApronExpr.addr(result, resultType)
+      addr(result, resultType)
     }
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.absolute(v._type)
     apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-      apronState.ifThenElse(ApronCons.intLe(ApronExpr.intLit(0), x)) {
+      apronState.ifThenElse(intLe(intLit(0), x)) {
         apronState.assign(result, x)
       } {
-        apronState.assign(result, ApronExpr.intNegate(x))
+        apronState.assign(result, intNegate(x))
       }
-      ApronExpr.addr(result, resultType)
+      addr(result, resultType)
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.div(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), y)) {
+      apronState.ifThenElse(intEq(intLit(0), y)) {
         f.fail(IntegerDivisionByZero, s"$v1 / $v2")
       } {
-        apronState.assign(result, ApronExpr.intDiv(v1, v2))
+        apronState.assign(result, intDiv(v1, v2))
       }
-      ApronExpr.addr(result, resultType)
+      addr(result, resultType)
     }
 
-  override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    div(toUnsigned(v1), toUnsigned(v2))
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.remainder(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(ApronCons.intEq(ApronExpr.intLit(0), y)) {
+      apronState.ifThenElse(intEq(intLit(0), y)) {
         f.fail(IntegerDivisionByZero, s"$v1 % $v2")
       } {
-        apronState.assign(result, ApronExpr.intMod(v1, v2))
+        apronState.assign(result, intMod(v1, v2))
       }
-      ApronExpr.addr(result, resultType)
+      addr(result, resultType)
     }
 
-  override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    remainder(toUnsigned(v1), toUnsigned(v2))
+
+  def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.divUnsigned(v._type, v._type)
+    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
+      apronState.ifThenElse(intLt(x, intLit(0))) {
+        apronState.assign(result, intAdd(x, intLit(???)))
+      } {
+        apronState.assign(result, x)
+      }
+      addr(result, resultType)
+    }
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 

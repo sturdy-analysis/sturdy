@@ -47,17 +47,6 @@ trait ApronRecencyState
 
     f(resultAddr, tempVars)
 
-
-
-
-
-  //  override def withTempVars[A](types: Type*)(f: PartialFunction[List[VirtualAddress[Ctx]], A]): A =
-//    val tempVars = types.map { tpe =>
-//      val ctx = temporaryVariableAllocator(tpe)
-//      recencyStore.alloc(ctx)
-//    }.toList
-//    f(tempVars)
-
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     apronStore.write(v.physical, virtToPhys(expr))
 

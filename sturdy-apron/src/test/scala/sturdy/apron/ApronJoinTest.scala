@@ -58,7 +58,6 @@ class ApronJoinTest extends AnyFunSuite:
     joined.hasChanged shouldBe true
     joined.get.getBound(manager, x) shouldBe Interval(0, 20)
     joined.get.getBound(manager, y) shouldBe Interval(1, 22)
-    println(joined.get)
   }
 
 

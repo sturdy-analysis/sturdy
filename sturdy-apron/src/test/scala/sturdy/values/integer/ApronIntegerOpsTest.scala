@@ -1,29 +1,78 @@
 package sturdy.values.integer
 
 import org.scalatest.matchers.should.Matchers.*
-
 import apron.*
-
-import sturdy.apron.{ApronExpr, ApronRecencyState, ApronState, given}
+import sturdy.apron.{ApronExpr, ApronRecencyState, ApronRepresentation, ApronState, ApronType, RoundingDir, RoundingType, given}
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.{ApronRecencyStore, ApronStore, RecencyStore, given}
-import sturdy.values.Finite
+import sturdy.values.{Combine, Finite, Join, MaybeChanged, Widening}
+import sturdy.values.ordering.{EqOps, LiftedEqOps, LiftedOrderingOps, OrderingOps}
 import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
 
+enum Error extends FailureKind:
+  case TypeError
+
+import Error.*
+
+enum Type:
+  case IntType(baseType: BaseType[Int])
+  case BoolType(baseType: BaseType[Boolean])
+
+  def asInt(using f: Failure): BaseType[Int] =
+    this match
+      case IntType(tpe) => tpe
+      case _ => f.fail(TypeError, s"Expected int, but got $this")
+
+  def asBool(using f: Failure): BaseType[Boolean] =
+    this match
+      case BoolType(tpe) => tpe
+      case _ => f.fail(TypeError, s"Expected bool, but got $this")
+
+given Ordering[Type] = {
+  case (Type.IntType(_), Type.IntType(_)) | (Type.BoolType(_), Type.BoolType(_)) => 0
+  case (_, _) => -1
+}
+given IntegerOps[Int,Type] = LiftedIntegerOps[Int,Type,BaseType[Int]](extract = _.asInt, inject = Type.IntType(_))
+given OrderingOps[Type,Type] = LiftedOrderingOps[Type,Type,BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
+given EqOps[Type,Type] = LiftedEqOps[Type,Type,BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
+given ApronType[Type] with
+  extension(tpe: Type)
+    override def apronRepresentation: ApronRepresentation =
+      tpe match
+        case Type.IntType(baseType) => baseType.apronRepresentation
+        case Type.BoolType(baseType) => baseType.apronRepresentation
+
+    override def roundingDir: RoundingDir =
+      tpe match
+        case Type.IntType(baseType) => baseType.roundingDir
+        case Type.BoolType(baseType) => baseType.roundingDir
+
+    override def roundingType: RoundingType =
+      tpe match
+        case Type.IntType(baseType) => baseType.roundingType
+        case Type.BoolType(baseType) => baseType.roundingType
+
+given [W <: Widening]: Combine[Type, W] = {
+  case (t@Type.IntType(_), Type.IntType(_)) => MaybeChanged.Unchanged(t)
+  case (t@Type.BoolType(_), Type.BoolType(_)) => MaybeChanged.Unchanged(t)
+  case (t1,t2) => throw new IllegalStateException(s"Cannot join type $t1 with type $t2")
+}
+
 enum Ctx:
   case TempVar(tpe: Type, n: Int)
-type Type = BaseType[Int]
 
 given Ordering[Ctx] = Ordering.by { case Ctx.TempVar(tpe,n) => (tpe, n) }
 given Finite[Ctx] with {}
+
 given tempVariableAllocator: Allocator[Ctx, Type] = new Allocator[Ctx, Type] with Stateless:
   var n = 0
 
-  override def alloc(ctx: Type): Ctx =
+  override def alloc(tpe: Type): Ctx =
     n += 1
-    Ctx.TempVar(ctx, n)
+    Ctx.TempVar(tpe, n)
 
 
 type VirtAddr = VirtualAddress[Ctx]
