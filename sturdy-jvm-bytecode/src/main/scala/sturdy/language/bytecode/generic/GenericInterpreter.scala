@@ -16,8 +16,10 @@ import BytecodeFailure.*
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
 import sturdy.values.objects.ObjectOps
+import sturdy.values.relational.EqOps
 
 import java.net.URL
+import scala.util.control.Breaks.{break, breakable}
 
 
 /*
@@ -342,20 +344,32 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
           ???
         case inst: TABLESWITCH =>
           val index = stack.popOrAbort()
+          val transformedOffsets = Iterator.from(0).zip(inst.jumpOffsets).toSeq.map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
           val lowAsV = i32ops.integerLit(inst.low)
           val highAsV = i32ops.integerLit(inst.high)
           val ge = compareOps.ge(index, lowAsV)
           val le = compareOps.le(index, highAsV)
           branchOpsUnit.boolBranch(eqOps.equ(ge, le)){
-            //except.throws(JvmExcept.Jump(pc + inst.jumpOffsets(index)))
+            except.throws(JvmExcept.Jump(pc + transformedOffsets(index)))
           }{
-            //except.throws(JvmExcept.Jump(pc + inst.defaultOffset))
+            except.throws(JvmExcept.Jump(pc + inst.defaultOffset))
           }
         case inst: LOOKUPSWITCH =>
           val key = stack.popOrAbort()
-          val find = inst.npairs.find(pair => pair.key == key)
-          val jump = find.map(pair => pair.value).getOrElse(inst.defaultOffset)
-          except.throws(JvmExcept.Jump(pc + jump))
+          val transformedMap = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value))
+          var offset = 0
+          breakable {
+            for (pair <- transformedMap) {
+              branchOpsUnit.boolBranch(eqOps.equ(key, pair._1)) {
+                offset = pair._2
+                break
+              } {
+                offset = inst.defaultOffset
+              }
+            }
+          }
+          except.throws(JvmExcept.Jump(pc + offset))
+
 
     // Return
     case x if (172 <= x && x <= 177) =>

@@ -138,9 +138,23 @@ object test extends App{
   interp.invokeStatic(testObjCompFalse)
   println(interp.stack.pop())
 
+  println("--- switchTest ---")
+  val switchTest = cfs.findMethod("switchTest").head
+  interp.eval(BIPUSH(2))
+  interp.invokeStatic(switchTest)
+  println(interp.stack.pop())
+
+  interp.eval(SIPUSH(200))
+  interp.invokeStatic(switchTest)
+  println(interp.stack.pop())
+
   println("--- nonCompactSwitchTest ---")
   val nonCompactSwitchTest = cfs.findMethod("nonCompactSwitchTest").head
   interp.eval(SIPUSH(200))
+  interp.invokeStatic(nonCompactSwitchTest)
+  println(interp.stack.pop())
+
+  interp.eval(SIPUSH(201))
   interp.invokeStatic(nonCompactSwitchTest)
   println(interp.stack.pop())
 
