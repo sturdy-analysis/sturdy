@@ -138,6 +138,12 @@ object test extends App{
   interp.invokeStatic(testObjCompFalse)
   println(interp.stack.pop())
 
+  println("--- nonCompactSwitchTest ---")
+  val nonCompactSwitchTest = cfs.findMethod("nonCompactSwitchTest").head
+  interp.eval(SIPUSH(200))
+  interp.invokeStatic(nonCompactSwitchTest)
+  println(interp.stack.pop())
+
   /*
 
   */

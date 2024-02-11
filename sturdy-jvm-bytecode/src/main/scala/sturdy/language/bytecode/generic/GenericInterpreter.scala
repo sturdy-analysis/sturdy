@@ -336,6 +336,26 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
       inst match
         case inst: GOTO =>
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+        case inst: JSR =>
+          ???
+        case inst: RET =>
+          ???
+        case inst: TABLESWITCH =>
+          val index = stack.popOrAbort()
+          val lowAsV = i32ops.integerLit(inst.low)
+          val highAsV = i32ops.integerLit(inst.high)
+          val ge = compareOps.ge(index, lowAsV)
+          val le = compareOps.le(index, highAsV)
+          branchOpsUnit.boolBranch(eqOps.equ(ge, le)){
+            //except.throws(JvmExcept.Jump(pc + inst.jumpOffsets(index)))
+          }{
+            //except.throws(JvmExcept.Jump(pc + inst.defaultOffset))
+          }
+        case inst: LOOKUPSWITCH =>
+          val key = stack.popOrAbort()
+          val find = inst.npairs.find(pair => pair.key == key)
+          val jump = find.map(pair => pair.value).getOrElse(inst.defaultOffset)
+          except.throws(JvmExcept.Jump(pc + jump))
 
     // Return
     case x if (172 <= x && x <= 177) =>
