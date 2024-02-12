@@ -5,6 +5,7 @@ import sturdy.control.FixpointControlEvent.RepeatFixpoint
 import java.util.Optional
 import scala.annotation.targetName
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 enum ControlTree[Atom, Sec, Exc]:
   case Empty()
@@ -28,6 +29,45 @@ enum ControlTree[Atom, Sec, Exc]:
     val buf: ListBuffer[ControlEvent] = ListBuffer.empty
     _toEvents(buf)
     buf.toList
+
+  def toGraphViz: String = this._toGraphViz("Start").fold(s"")(_ + "\n" + _)
+
+  private def _toGraphViz(p: String): Set[String] = this match
+    case ControlTree.Empty() =>
+      val name = s"Empty(${randomString})"
+      Set(toGraphVizEdge(p, name))
+    case ControlTree.Atomic(a) =>
+      val name = s"$a (${randomString})"
+      Set(toGraphVizEdge(p, name))
+    case ControlTree.Seq(a, b) =>
+      val name = s"Seq (${randomString})"
+      a._toGraphViz(name) ++ b._toGraphViz(name) + toGraphVizEdge(p, name)
+    case ControlTree.Section(section, body) =>
+      val name = s"Section $section (${randomString})"
+      body._toGraphViz(name) + toGraphVizEdge(p, name)
+    case ControlTree.Fork(b1, b2) =>
+      val name = s"Fork (${randomString})"
+      b1._toGraphViz(name) ++ b2._toGraphViz(name) + toGraphVizEdge(p, name)
+    case ControlTree.Failed() =>
+      val name = s"Failed(${randomString})"
+      Set(toGraphVizEdge(p, name))
+    case ControlTree.Try(body, handle) =>
+      val name = s"Try (${randomString})"
+      body._toGraphViz(name) ++ handle.flatMap((exc, ct) => {
+        val nameExc = s"Handle $exc (${randomString})"
+        Set(toGraphVizEdge(name, nameExc)) ++ ct._toGraphViz(nameExc)
+      }) + toGraphVizEdge(p, name)
+    case ControlTree.Throw(exc) =>
+      val name = s"Throw $exc (${randomString})"
+      Set(toGraphVizEdge(p, name))
+    case ControlTree.Fixpoint(b, repeat) => ???
+    case ControlTree.Recurrent(failing) =>
+      val name = s"Recurrent (${randomString})"
+      Set(toGraphVizEdge(p, name))
+
+  private def randomString: String = Random.alphanumeric.take(10).mkString
+
+  private def toGraphVizEdge(n1: String, n2: String): String = s"\"$n1\" -> \"$n2\""
 
   private def _toEvents(buf: ListBuffer[ControlEvent]): Unit = this match
     case ControlTree.Empty() => ()
@@ -58,10 +98,27 @@ enum ControlTree[Atom, Sec, Exc]:
       body._toEvents(buf)
       if (handle.nonEmpty)
         buf += ExceptionControlEvent.Catching()
+
+      if (handle.size == 1) {
         handle.foreach { (exc, handler) =>
           buf += ExceptionControlEvent.Handle(exc)
           handler._toEvents(buf)
         }
+      }
+      else {
+        var first = true
+        for (_ <- 0 until handle.size - 1)
+          buf += BranchingControlEvent.Fork()
+        handle.foreach { (exc, handler) =>
+          if (!first) buf += BranchingControlEvent.Switch()
+          buf += ExceptionControlEvent.Handle(exc)
+          handler._toEvents(buf)
+          if (!first) buf += BranchingControlEvent.Join()
+          first = false
+        }
+      }
+
+
       buf += ExceptionControlEvent.EndTry()
 
     case ControlTree.Throw(exc) =>
@@ -91,7 +148,9 @@ object ControlTree:
       case VirtualBlock(program: Option[CT])
       case Block(section: Sec, body: Option[CT])
       case Fork(branch1: Option[CT], branch2: Option[CT], afterSwitch: Boolean)
-      case Try(body: Option[CT], handlers: Map[Exc, Option[CT]], currentHandling: Option[Exc])
+      case Try(body: Option[CT])
+      case Catching(handlers: Map[Exc, Option[CT]], currentHandling: Option[Exc])
+      case Handling(body: Option[CT])
       case Fixpoint(body: Option[CT], repeat: Option[CT], afterRepeat: Boolean, ended: Boolean)
 
     var stack: List[Structure] = List(Structure.VirtualBlock(None))
@@ -100,24 +159,23 @@ object ControlTree:
       case (None, _) => Some(b)
       case (Some(aa), _) => Some(aa + b)
 
-    def addToStack(ct: CT): Unit =
-      stack = (stack.head match
-        case Structure.VirtualBlock(program) => Structure.VirtualBlock(concatenate(program, ct))
-        case Structure.Block(section, body) => Structure.Block(section, concatenate(body, ct))
-        case Structure.Fork(branch1, branch2, afterSwitch) =>
-          if (afterSwitch)
-            Structure.Fork(concatenate(branch1, ct), branch2, afterSwitch)
-          else
-            Structure.Fork(branch1, concatenate(branch2, ct), afterSwitch)
-        case Structure.Try(body, handlers, currentHandling) => currentHandling match
-          case None => Structure.Try(concatenate(body, ct), handlers, currentHandling)
-          case Some(exc) =>
-            Structure.Try(body, handlers + (exc -> concatenate(handlers(exc), ct)), currentHandling)
-        case Structure.Fixpoint(body, repeat, afterRepeat, ended) =>
-          if (afterRepeat)
-            Structure.Fixpoint(body, concatenate(repeat, ct), afterRepeat, ended)
-          else
-            Structure.Fixpoint(concatenate(body, ct), repeat, afterRepeat, ended)) :: stack.tail
+    def addToStack(ct: CT): Unit = stack.head match
+      case Structure.VirtualBlock(program) => stack = Structure.VirtualBlock(concatenate(program, ct)) :: stack.tail
+      case Structure.Block(section, body) => stack = Structure.Block(section, concatenate(body, ct)) :: stack.tail
+      case Structure.Fork(branch1, branch2, afterSwitch) =>
+        if (!afterSwitch)
+          stack = Structure.Fork(concatenate(branch1, ct), branch2, afterSwitch) :: stack.tail
+        else
+          stack = Structure.Fork(branch1, concatenate(branch2, ct), afterSwitch) :: stack.tail
+      case Structure.Try(body) =>
+        stack = Structure.Try(concatenate(body, ct)) :: stack.tail
+      case Structure.Catching(_, _) => throw new Exception("...")
+      case Structure.Handling(body) => stack = Structure.Handling(concatenate(body, ct)) :: stack.tail
+      case Structure.Fixpoint(body, repeat, afterRepeat, ended) =>
+        if (afterRepeat)
+          stack = Structure.Fixpoint(body, concatenate(repeat, ct), afterRepeat, ended) :: stack.tail
+        else
+          stack = Structure.Fixpoint(concatenate(body, ct), repeat, afterRepeat, ended) :: stack.tail
 
     for (ev <- events) {
 
@@ -132,10 +190,13 @@ object ControlTree:
       ev match
         case BasicControlEvent.Atomic(a: Atom) =>
           addToStack(ControlTree.Atomic(a))
+
         case BasicControlEvent.Failed() =>
           addToStack(ControlTree.Failed())
+
         case BasicControlEvent.Begin(sec: Sec) =>
           stack = Structure.Block(sec, None) :: stack
+
         case BasicControlEvent.End(_: Sec) =>
           stack.head match
             case Structure.Block(sec, body) =>
@@ -143,17 +204,24 @@ object ControlTree:
               addToStack(Section(sec, body.getOrElse(Empty())))
             case _ => throw new Exception("...")
 
-        case BranchingControlEvent.Fork() =>
-          stack = Structure.Fork(None, None, false) :: stack
+        case BranchingControlEvent.Fork() => stack.head match
+          case Structure.Catching(_, _) => ()
+          case _ => stack = Structure.Fork(None, None, false) :: stack
+
         case BranchingControlEvent.Switch() =>
           stack.head match
             case Structure.Fork(branch1, branch2, false) => stack = Structure.Fork(branch1, branch2, true) :: stack.tail
+            case Structure.Catching(_, _) => ()
+            case Structure.Handling(_) => ()
             case _ => throw new Exception("...")
+
         case BranchingControlEvent.Join() =>
           stack.head match
             case Structure.Fork(branch1, branch2, true) =>
               stack = stack.tail
               addToStack(Fork(branch1.getOrElse(Empty()), branch2.getOrElse(Empty())))
+            case Structure.Catching(_, _) => ()
+            case Structure.Handling(_) => ()
             case _ => throw new Exception("...")
 
         case FixpointControlEvent.BeginFixpoint() =>
@@ -172,18 +240,36 @@ object ControlTree:
           case _ => throw new Exception("...")
 
         case ExceptionControlEvent.BeginTry() =>
-          stack = Structure.Try(None, Map.empty, None) :: stack
+          stack = Structure.Try(None) :: stack
+
         case ExceptionControlEvent.Throw(exc: Exc) =>
           addToStack(ControlTree.Throw(exc))
-        case ExceptionControlEvent.Catching() => ()
-        case ExceptionControlEvent.Handle(exc: Exc) => stack.head match
-          case Structure.Try(body, handlers, _) =>
-            stack = Structure.Try(body, handlers, Some(exc)) :: stack.tail
+
+        case ExceptionControlEvent.Catching() => stack.head match
+          case Structure.Try(_) => stack = Structure.Catching(Map.empty, None) :: stack
+
           case _ => throw new Exception("...")
-        case ExceptionControlEvent.EndTry() => stack.head match
-          case Structure.Try(body, handlers, _) =>
+
+        case ExceptionControlEvent.Handle(exc: Exc) => stack.head match
+          case Structure.Handling(body) =>
             stack = stack.tail
-            addToStack(Try(body.getOrElse(Empty()), handlers.map((k, v) => (k, v.getOrElse(Empty())))))
+            stack.head match
+              case Structure.Catching(handlers, Some(currentHandling)) =>
+                stack = Structure.Catching(handlers + (currentHandling -> body), Some(exc)) :: stack.tail
+                stack = Structure.Handling(None) :: stack
+              case _ => throw new Exception("...")
+          case Structure.Catching(handlers, _) =>
+            stack = Structure.Catching(handlers, Some(exc)) :: stack.tail
+            stack = Structure.Handling(None) :: stack
+          case _ => throw new Exception("...")
+
+        case ExceptionControlEvent.EndTry() => stack.take(3) match
+          case List(Structure.Handling(body), Structure.Catching(handlers, Some(currentHandling)), Structure.Try(mainBody)) =>
+            stack = stack.drop(3)
+            addToStack(Try(mainBody.getOrElse(Empty()), handlers.map((k, v) => (k, v.getOrElse(Empty()))) + (currentHandling -> body.getOrElse(Empty()))))
+          case List(Structure.Try(mainBody), _, _) =>
+            stack = stack.drop(1)
+            addToStack(Try(mainBody.getOrElse(Empty()), Map.empty))
           case _ => throw new Exception("...")
     }
 
