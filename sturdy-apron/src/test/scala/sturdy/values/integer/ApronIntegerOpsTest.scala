@@ -31,6 +31,11 @@ enum Type:
       case BoolType(tpe) => tpe
       case _ => f.fail(TypeError, s"Expected bool, but got $this")
 
+  override def toString: String =
+    this match
+      case IntType(_) => "int"
+      case BoolType(_) => "boolean"
+
 given Ordering[Type] = {
   case (Type.IntType(_), Type.IntType(_)) | (Type.BoolType(_), Type.BoolType(_)) => 0
   case (_, _) => -1
@@ -55,6 +60,11 @@ given ApronType[Type] with
         case Type.IntType(baseType) => baseType.roundingType
         case Type.BoolType(baseType) => baseType.roundingType
 
+    override def byteSize: Int =
+      tpe match
+        case Type.IntType(baseType) => baseType.byteSize
+        case Type.BoolType(baseType) => baseType.byteSize
+
 given [W <: Widening]: Combine[Type, W] = {
   case (t@Type.IntType(_), Type.IntType(_)) => MaybeChanged.Unchanged(t)
   case (t@Type.BoolType(_), Type.BoolType(_)) => MaybeChanged.Unchanged(t)
@@ -63,6 +73,10 @@ given [W <: Widening]: Combine[Type, W] = {
 
 enum Ctx:
   case TempVar(tpe: Type, n: Int)
+
+  override def toString: String =
+    this match
+      case TempVar(tpe,n) => s"x${n}:$tpe"
 
 given Ordering[Ctx] = Ordering.by { case Ctx.TempVar(tpe,n) => (tpe, n) }
 given Finite[Ctx] with {}
@@ -95,10 +109,20 @@ def makeIntegerOps: IntervalIntegerOps[Int, ApronExpr[VirtAddr, Type]] = {
     override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) =
       val iv = apronState.getBound(n)
       val d = Array[Double](0)
-      iv.inf().toDouble(d, 0)
-      val lower = d(0).intValue()
-      iv.sup().toDouble(d, 0)
-      val upper = d(0).intValue()
+      val lower =
+        if(iv.inf().isInfty() != 0)
+          Integer.MIN_VALUE
+        else
+          iv.inf().toDouble(d, 0)
+          d(0).intValue()
+
+      val upper =
+        if(iv.sup().isInfty() != 0)
+          Integer.MAX_VALUE
+        else
+          iv.sup().toDouble(d, 0)
+          d(0).intValue()
+
       (lower,upper)
   }
 }

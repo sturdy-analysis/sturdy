@@ -75,45 +75,127 @@ given ApronIntegerOps
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.div(v1._type, v2._type)
-    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(intEq(intLit(0), y)) {
-        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-      } {
-        apronState.assign(result, intDiv(v1, v2))
-      }
-      addr(result, resultType)
-    }
+//    println(s"x = ${apronState.getBound(v1)}, y = ${apronState.getBound(v2)}, x / y = ${apronState.getBound(intDiv(v1, v2))}\n")
+    intDiv(v1,v2)
+
+//    val resultType = typeIntOps.div(v1._type, v2._type)
+//    apronState.withTempVars(resultType) { case (result, List()) =>
+//      apronState.assign(result, intDiv(v1,v2))
+//      addr(result, resultType)
+//    }
+
+
+//    val resultType = typeIntOps.div(v1._type, v2._type)
+//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+//      apronState.join{
+//        apronState.withConstraint(intLt(intLit(0), y)) {
+//          apronState.assign(result, intDiv(v1,v2))
+//          println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
+//        }
+//      } {
+//        apronState.withConstraint(intLt(y, intLit(0))) {
+//          apronState.assign(result, intDiv(v1, v2))
+//          println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
+//        }
+//      }
+//      println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}\n")
+//      addr(result, resultType)
+//    }
+
+//    val resultType = typeIntOps.div(v1._type, v2._type)
+//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+//      apronState.ifThenElse(intEq(intLit(0), y)) {
+//        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+//      } {
+//        apronState.assign(result, intDiv(v1, v2))
+//        println(s"x = ${x} = ${apronState.getBound(x)}, y = ${y} = ${apronState.getBound(y)}, result = ${result} = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
+//      }
+//      addr(result, resultType)
+//    }
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    div(toUnsigned(v1), toUnsigned(v2))
+    fromUnsigned(div(toUnsigned(v1), toUnsigned(v2)))
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.remainder(v1._type, v2._type)
-    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(intEq(intLit(0), y)) {
-        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
-      } {
-        apronState.assign(result, intMod(v1, v2))
-      }
-      addr(result, resultType)
-    }
+    intMod(v1,v2)
+//    val resultType = typeIntOps.remainder(v1._type, v2._type)
+//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+//      apronState.ifThenElse(intEq(intLit(0), y)) {
+//        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
+//      } {
+//        apronState.assign(result, intMod(v1, v2))
+//      }
+//      addr(result, resultType)
+//    }
 
   override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    remainder(toUnsigned(v1), toUnsigned(v2))
+    fromUnsigned(remainder(toUnsigned(v1), toUnsigned(v2)))
 
   def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.divUnsigned(v._type, v._type)
+    val unsignedMaxValue = math.pow(2, v._type.byteSize*8).longValue()
     apronState.withTempVars(resultType, v) { case (result, List(x)) =>
       apronState.ifThenElse(intLt(x, intLit(0))) {
-        apronState.assign(result, intAdd(x, intLit(???)))
+        apronState.assign(result, intAdd(x, longLit(unsignedMaxValue)))
       } {
         apronState.assign(result, x)
       }
       addr(result, resultType)
     }
 
-  override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  def fromUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.divUnsigned(v._type, v._type)
+    val unsignedMaxValue = math.pow(2, v._type.byteSize * 8).longValue()
+    val signedMaxValue = math.pow(2, v._type.byteSize * 8 - 1).longValue()
+    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
+      apronState.ifThenElse(intLt(longLit(signedMaxValue), x)) {
+        apronState.assign(result, intSub(x, longLit(unsignedMaxValue)))
+      } {
+        apronState.assign(result, x)
+      }
+      addr(result, resultType)
+    }
+
+  override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.modulo(v1._type, v2._type)
+    apronState.withTempVars(resultType, intMod(v1,v2)) { case (result, List(x)) =>
+      apronState.ifThenElse(intLt(x, intLit(0))) {
+        apronState.assign(result, intAdd(x, v2))
+      } {
+        apronState.assign(result, x)
+      }
+      addr(result, resultType)
+    }
+
+  override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.shiftLeft(v._type, shift._type)
+    apronState.withTempVars(resultType, shift) { case (result, List(s)) =>
+      apronState.ifThenElse(intLe(intLit(0), s)) {
+        apronState.assign(result, intMul(v, intPow(intLit(2), s)))
+      } {
+        apronState.assign(result, intDiv(v, intPow(intLit(2), intNegate(s))))
+      }
+      addr(result, resultType)
+    }
+
+
+  override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.shiftRight(v._type, shift._type)
+    apronState.withTempVars(resultType, shift) { case (result, List(s)) =>
+      apronState.ifThenElse(intLe(intLit(0), s)) {
+        apronState.assign(result, intDiv(v, intPow(intLit(2), s)))
+      } {
+        apronState.assign(result, intMul(v, intPow(intLit(2), intNegate(s))))
+      }
+      addr(result, resultType)
+    }
+
+  override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    fromUnsigned(shiftRight(toUnsigned(v), shift))
+
+  override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def rotateRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
   override def gcd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
@@ -123,19 +205,28 @@ given ApronIntegerOps
 
   override def bitXor(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
-  override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.intMul(v, ApronExpr.intPow(ApronExpr.intLit(2), shift))
+  override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.countLeadingZeros(v._type)
+    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
+      apronState.ifThenElse(intLt(intLit(0), x)) {
+        apronState.assign(result, intSub(intLit(v._type.byteSize * 8), mostSignificantBit(x)))
+      } {
+        apronState.assign(result, intLit(0))
+      }
+      addr(result, resultType)
+    }
 
-  override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.intDiv(v, ApronExpr.intPow(ApronExpr.intLit(2), shift))
+  def mostSignificantBit(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
+    intAdd(log(2, v), intLit(1))
 
-  override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
-
-  override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
-
-  override def rotateRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
-
-  override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  def log(n: Int, v: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    val resultType = typeIntOps.countLeadingZeros(v._type)
+    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
+      val resultExpr = addr(result, resultType)
+      apronState.assign(result, ApronExpr.intTop)
+      apronState.withConstraint(intEq(intPow(intLit(n), resultExpr), x)) {}
+      resultExpr
+    }
 
   override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 

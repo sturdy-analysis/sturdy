@@ -9,6 +9,7 @@ import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.values.types.BaseType
 import sturdy.values.{Join, MaybeChanged, Widen}
 
+import java.math.BigInteger
 import scala.reflect.ClassTag
 
 enum ApronExpr[Addr, Type]:
@@ -69,6 +70,8 @@ object ApronExpr:
   def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
   def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(0))
+  def longLit[Addr, Type](using intOps: IntegerOps[Int, Type])(i: Long): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(BigInteger.valueOf(i))), intOps.integerLit(0))
   def intInterval[Addr, Type](using intOps: IntegerOps[Int,Type])(lower: Int, upper: Int): Constant[Addr, Type] =
     Constant(Interval(lower, upper), intOps.integerLit(0))
   def intTop[Addr, Type](using intOps: IntegerOps[Int, Type]): Constant[Addr, Type] =
@@ -99,7 +102,7 @@ object ApronExpr:
     binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
 
   def intMod[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Mod, e1, e2, intOps.div(e1._type, e2._type))
+    binary(BinOp.Mod, e1, e2, intOps.remainder(e1._type, e2._type))
 
   def intPow[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
@@ -175,8 +178,7 @@ enum ApronCons[Addr, Type]:
   def toApron(env : apron.Environment)(using ApronType[Type]): Seq[Tcons1] = this match
     case Compare(Eq, e1, e2, tpe) =>
       Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
-    case Compare(Neq, e1, e2, tpe) => Seq()
-      // Compare(Gt, e1, e2, tpe).toApron(env) ++ Compare(Lt, e1, e2, tpe).toApron(env)
+    case Compare(Neq, e1, e2, tpe) => Compare(Gt, e1, e2, tpe).toApron(env) ++ Compare(Lt, e1, e2, tpe).toApron(env)
     case Compare(Lt, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
     case Compare(Le, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
     case Compare(Ge, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))

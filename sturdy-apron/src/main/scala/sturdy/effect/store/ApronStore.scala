@@ -1,10 +1,10 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronType, ApronVar, ApronRepresentation}
+import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronRepresentation, ApronType, ApronVar, CompareOp}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.{ComputationJoiner, Stateless, TrySturdy}
+import sturdy.effect.{ComputationJoiner, EffectStack, Stateless, SturdyFailure, TrySturdy}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.{IsSound, Soundness}
@@ -33,6 +33,8 @@ final class ApronStore[
 
   private var apronState : Abstract1 = initialState
   private var typeEnv: TypeEnv = initialTypeEnv
+
+  def abstract1: Abstract1 = apronState
 
   def getType(powAddr: PowAddr): Type =
     powAddr.reduce(typeEnv(_))
@@ -149,9 +151,29 @@ final class ApronStore[
       )
     }
 
-  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
-    val constraints: Array[Tcons1] = constraint.toApron(apronState.getEnvironment).toArray
-    apronState.meet(manager, constraints)
+  class BottomFailure extends SturdyFailure
+
+  def withConstraint[A: Join](constraint: ApronCons[PhysicalAddress[Context], Type])(f: => A)(using effectStack: EffectStack): A =
+    constraint match
+      case ApronCons.Compare(CompareOp.Neq, _, _, _) =>
+        val Seq(c1, c2) = constraint.toApron(apronState.getEnvironment)
+        effectStack.joinComputations {
+          this.apronState.meet(manager, c1)
+          if (this.apronState.isBottom(manager))
+            throw new BottomFailure
+          f
+        } {
+          this.apronState.meet(manager, c2)
+          if (this.apronState.isBottom(manager))
+            throw new BottomFailure
+          f
+        }
+      case _ =>
+        val constraints: Array[Tcons1] = constraint.toApron(apronState.getEnvironment).toArray
+        this.apronState.meet(manager, constraints)
+        if (this.apronState.isBottom(manager))
+          throw new BottomFailure
+        f
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
     apronState.getBound(apronState.getCreationManager, expr.toIntern(apronState.getEnvironment))

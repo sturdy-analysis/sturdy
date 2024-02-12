@@ -9,6 +9,7 @@ trait ApronType[Type]:
     def apronRepresentation: ApronRepresentation
     def roundingDir: RoundingDir
     def roundingType: RoundingType
+    def byteSize: Int
 
 enum ApronRepresentation:
   case Int
@@ -51,18 +52,21 @@ given ByteApronType: ApronType[BaseType[Byte]] with
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
     override def roundingDir: RoundingDir = RoundingDir.Zero
     override def roundingType: RoundingType = RoundingType.Int
+    override def byteSize: Int = java.lang.Byte.BYTES
 
 given ShortApronType: ApronType[BaseType[Short]] with
   extension(t: BaseType[Short])
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
     override def roundingDir: RoundingDir = RoundingDir.Zero
     override def roundingType: RoundingType = RoundingType.Int
+    override def byteSize: Int = java.lang.Short.BYTES
 
 given IntApronType: ApronType[BaseType[Int]] with
   extension(t: BaseType[Int])
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
     override def roundingDir: RoundingDir = RoundingDir.Zero
     override def roundingType: RoundingType = RoundingType.Int
+    override def byteSize: Int = java.lang.Integer.BYTES
 
 
 given LongApronType: ApronType[BaseType[Long]] with
@@ -70,9 +74,11 @@ given LongApronType: ApronType[BaseType[Long]] with
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
     override def roundingDir: RoundingDir = RoundingDir.Zero
     override def roundingType: RoundingType = RoundingType.Int
+    override def byteSize: Int = java.lang.Long.BYTES
 
 given BooleanApronType: ApronType[BaseType[Boolean]] with
   extension (t: BaseType[Boolean])
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
     override def roundingDir: RoundingDir = RoundingDir.Zero
     override def roundingType: RoundingType = RoundingType.Int
+    override def byteSize: Int = java.lang.Byte.BYTES
