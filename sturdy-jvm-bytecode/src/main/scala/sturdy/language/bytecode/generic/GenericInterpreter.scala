@@ -19,7 +19,6 @@ import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
 
 import java.net.URL
-import scala.util.control.Breaks.{break, breakable}
 
 
 /*
@@ -345,6 +344,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
         case inst: TABLESWITCH =>
           val index = stack.popOrAbort()
           val transformedOffsets = Iterator.from(0).zip(inst.jumpOffsets).toSeq.map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
+          val offset = transformedOffsets.get(index).getOrElse(inst.defaultOffset)
+          except.throws(JvmExcept.Jump(pc + offset))
+          /*
           val lowAsV = i32ops.integerLit(inst.low)
           val highAsV = i32ops.integerLit(inst.high)
           val ge = compareOps.ge(index, lowAsV)
@@ -353,21 +355,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
             except.throws(JvmExcept.Jump(pc + transformedOffsets(index)))
           }{
             except.throws(JvmExcept.Jump(pc + inst.defaultOffset))
-          }
+          }*/
         case inst: LOOKUPSWITCH =>
           val key = stack.popOrAbort()
-          val transformedMap = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value))
-          var offset = 0
-          breakable {
-            for (pair <- transformedMap) {
-              branchOpsUnit.boolBranch(eqOps.equ(key, pair._1)) {
-                offset = pair._2
-                break
-              } {
-                offset = inst.defaultOffset
-              }
-            }
-          }
+          val transformedOffsets = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
+          val offset = transformedOffsets.get(key).getOrElse(inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
 
 
