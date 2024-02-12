@@ -10,7 +10,6 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
-import sturdy.values.ordering.{EqOps, OrderingOps}
 
 given ApronIntegerOps
   [
@@ -20,9 +19,7 @@ given ApronIntegerOps
   (using
     apronState: ApronState[Addr,Type],
     f: Failure,
-    typeIntOps: IntegerOps[Int,Type],
-    typeOrderingOps: OrderingOps[Type,Type],
-    typeEqOps: EqOps[Type,Type]
+    typeIntOps: IntegerOps[Int,Type]
   ): IntegerOps[Int, ApronExpr[Addr,Type]] with
 
   override def integerLit(i: Int): ApronExpr[Addr, Type] =
@@ -75,8 +72,19 @@ given ApronIntegerOps
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeIntOps.div(v1._type, v2._type)
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+      apronState.ifThenElse(intEq(intLit(0), y)) {
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      } {
+        apronState.assign(result, intDiv(v1, v2))
+      }
+      addr(result, resultType)
+    }
+
+
 //    println(s"x = ${apronState.getBound(v1)}, y = ${apronState.getBound(v2)}, x / y = ${apronState.getBound(intDiv(v1, v2))}\n")
-    intDiv(v1,v2)
+//    intDiv(v1,v2)
 
 //    val resultType = typeIntOps.div(v1._type, v2._type)
 //    apronState.withTempVars(resultType) { case (result, List()) =>
@@ -102,31 +110,20 @@ given ApronIntegerOps
 //      addr(result, resultType)
 //    }
 
-//    val resultType = typeIntOps.div(v1._type, v2._type)
-//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-//      apronState.ifThenElse(intEq(intLit(0), y)) {
-//        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
-//      } {
-//        apronState.assign(result, intDiv(v1, v2))
-//        println(s"x = ${x} = ${apronState.getBound(x)}, y = ${y} = ${apronState.getBound(y)}, result = ${result} = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
-//      }
-//      addr(result, resultType)
-//    }
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     fromUnsigned(div(toUnsigned(v1), toUnsigned(v2)))
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intMod(v1,v2)
-//    val resultType = typeIntOps.remainder(v1._type, v2._type)
-//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-//      apronState.ifThenElse(intEq(intLit(0), y)) {
-//        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
-//      } {
-//        apronState.assign(result, intMod(v1, v2))
-//      }
-//      addr(result, resultType)
-//    }
+    val resultType = typeIntOps.remainder(v1._type, v2._type)
+    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+      apronState.ifThenElse(intEq(intLit(0), y)) {
+        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
+      } {
+        apronState.assign(result, intMod(v1, v2))
+      }
+      addr(result, resultType)
+    }
 
   override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     fromUnsigned(remainder(toUnsigned(v1), toUnsigned(v2)))
@@ -158,7 +155,7 @@ given ApronIntegerOps
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.modulo(v1._type, v2._type)
-    apronState.withTempVars(resultType, intMod(v1,v2)) { case (result, List(x)) =>
+    apronState.withTempVars(resultType, remainder(v1,v2)) { case (result, List(x)) =>
       apronState.ifThenElse(intLt(x, intLit(0))) {
         apronState.assign(result, intAdd(x, v2))
       } {
@@ -224,7 +221,7 @@ given ApronIntegerOps
     apronState.withTempVars(resultType, v) { case (result, List(x)) =>
       val resultExpr = addr(result, resultType)
       apronState.assign(result, ApronExpr.intTop)
-      apronState.withConstraint(intEq(intPow(intLit(n), resultExpr), x)) {}
+      apronState.addConstraint(intEq(intPow(intLit(n), resultExpr), x))
       resultExpr
     }
 

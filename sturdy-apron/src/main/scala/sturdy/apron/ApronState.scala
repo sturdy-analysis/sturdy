@@ -11,7 +11,7 @@ trait ApronState[Addr,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
-  def withConstraint[A: Join](constraint: ApronCons[Addr,Type])(f: => A): A
+  def addConstraint(constraint: ApronCons[Addr,Type]): Unit
   def getBound(expr: ApronExpr[Addr,Type]): Interval
   def join[A: Join](f: => A)(g: => A): A
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
@@ -50,8 +50,8 @@ trait ApronRecencyState
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     apronStore.write(v.physical, virtToPhys(expr))
 
-  override def withConstraint[A: Join](constraint: ApronCons[VirtualAddress[Ctx], Type])(f: => A): A =
-    apronStore.withConstraint(virtToPhys(constraint))(f)(using implicitly[Join[A]], effectStack)
+  override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]) =
+    apronStore.addConstraint(virtToPhys(constraint))
 
   override def getBound(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     apronStore.getBound(virtToPhys(expr))
@@ -65,9 +65,11 @@ trait ApronRecencyState
 
   override def ifThenElse[A: Join](condition: ApronCons[VirtualAddress[Ctx], Type])(f: => A)(g: => A): A =
     join {
-      withConstraint(condition)(f)
+      addConstraint(condition)
+      f
     } {
-      withConstraint(condition.negated)(g)
+      addConstraint(condition.negated)
+      g
     }
 
   protected def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx],Type]): ApronExpr[PhysicalAddress[Ctx],Type] =

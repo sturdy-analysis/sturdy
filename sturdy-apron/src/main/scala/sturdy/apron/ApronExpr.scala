@@ -5,7 +5,6 @@ import gmp.Mpz
 import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.values.types.BaseType
 import sturdy.values.{Join, MaybeChanged, Widen}
 
@@ -68,6 +67,10 @@ enum ApronExpr[Addr, Type]:
 
 object ApronExpr:
   def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
+
+  def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
+    Constant(iv, _type)
+
   def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(0))
   def longLit[Addr, Type](using intOps: IntegerOps[Int, Type])(i: Long): Constant[Addr, Type] =
@@ -77,8 +80,6 @@ object ApronExpr:
   def intTop[Addr, Type](using intOps: IntegerOps[Int, Type]): Constant[Addr, Type] =
     Constant(topInterval, intOps.integerLit(0))
 
-  def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
-    Constant(iv, _type)
 
   def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Unary(op, e1, resultType, resultType.roundingType, resultType.roundingDir)
@@ -175,14 +176,13 @@ enum ApronCons[Addr, Type]:
   def addrs: Set[Addr] = this match
     case Compare(_, e1, e2, _) => e1.addrs ++ e2.addrs
 
-  def toApron(env : apron.Environment)(using ApronType[Type]): Seq[Tcons1] = this match
-    case Compare(Eq, e1, e2, tpe) =>
-      Seq(new Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
-    case Compare(Neq, e1, e2, tpe) => Compare(Gt, e1, e2, tpe).toApron(env) ++ Compare(Lt, e1, e2, tpe).toApron(env)
-    case Compare(Lt, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
-    case Compare(Le, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron))
-    case Compare(Ge, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
-    case Compare(Gt, e1, e2, tpe) => Seq(new Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron))
+  def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = this match
+    case Compare(Eq, e1, e2, tpe)  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
+    case Compare(Neq, e1, e2, tpe) => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
+    case Compare(Lt, e1, e2, tpe)  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
+    case Compare(Le, e1, e2, tpe)  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
+    case Compare(Ge, e1, e2, tpe)  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
+    case Compare(Gt, e1, e2, tpe)  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
 
 
   def negated: ApronCons[Addr, Type] = this match
@@ -197,18 +197,18 @@ object ApronCons:
   import CompareOp.*
 
   // issue below, make CompareOp[Addr]?
-  def intEq[Addr, Type](using eqOps: EqOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Eq, e1, e2, eqOps.equ(e1._type, e2._type))
-  def intNeq[Addr, Type](using eqOps: EqOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Neq, e1, e2, eqOps.neq(e1._type, e2._type))
-  def intLt[Addr, Type](using orderingOps: OrderingOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Lt, e1, e2, orderingOps.lt(e1._type, e2._type))
-  def intLe[Addr, Type](using orderingOps: OrderingOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Le, e1, e2, orderingOps.le(e2._type, e1._type))
-  def intGe[Addr, Type](using orderingOps: OrderingOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Ge, e1, e2, orderingOps.ge(e1._type, e2._type))
-  def intGt[Addr, Type](using orderingOps: OrderingOps[Type, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Gt, e1, e2, orderingOps.gt(e1._type, e2._type))
+  def intEq[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Eq, e1, e2, integerOps.sub(e1._type, e2._type))
+  def intNeq[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Neq, e1, e2, integerOps.sub(e1._type, e2._type))
+  def intLt[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Lt, e1, e2, integerOps.sub(e1._type, e2._type))
+  def intLe[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Le, e1, e2, integerOps.sub(e1._type, e2._type))
+  def intGe[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Ge, e1, e2, integerOps.sub(e1._type, e2._type))
+  def intGt[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    Compare(Gt, e1, e2, integerOps.sub(e1._type, e2._type))
 
 enum CompareOp:
   case Eq

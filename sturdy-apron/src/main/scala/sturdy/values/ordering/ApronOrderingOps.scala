@@ -1,5 +1,39 @@
 package sturdy.values.ordering
 
+import apron.Interval
+import sturdy.data.given
+import sturdy.apron.{*, given}
+import sturdy.effect.failure.Failure
+import sturdy.values.{*, given}
+import sturdy.values.references.{*, given}
+
+import scala.reflect.ClassTag
+import ApronExpr.*
+import ApronCons.*
+
+given ApronOrderingOps
+  [
+    Addr: Ordering: ClassTag,
+    Type : ApronType : Join
+  ]
+  (using
+   apronState: ApronState[Addr,Type],
+   f: Failure,
+   typeOrderingOps: OrderingOps[Type,Type]
+  ): OrderingOps[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] with {
+  override def lt(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    val resultType = typeOrderingOps.lt(v1._type, v2._type)
+    apronState.withTempVars(resultType, v1, v2) {
+      case (result, List(x,y)) =>
+        apronState.ifThenElse(intLt(x,y)) {
+          apronState.assign(result, ???)
+        } {
+          apronState.assign(result, ???)
+        }
+    }
+  override def le(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+}
+
 //import sturdy.apron.{*,given}
 //
 //given ApronOrderingOps[Addr]: OrderingOps[ApronExpr[Addr], ApronExpr[Addr]] with

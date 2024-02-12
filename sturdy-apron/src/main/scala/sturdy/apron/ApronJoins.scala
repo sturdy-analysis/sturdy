@@ -1,9 +1,11 @@
 package sturdy.apron
 
 import apron.{Abstract1, Environment, Manager, StringVar}
-import sturdy.values.Widen
+import sturdy.values.{Combine, Widen, Widening}
+
+import scala.reflect.ClassTag
 // import sturdy.apron.Apron.debugJoinWiden
-import sturdy.data.combineMaps
+import sturdy.data.{given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
 
@@ -66,6 +68,23 @@ object ApronJoins:
       if (env2.hasVar(x))
         env = env.remove(Array(x))
     env
+
+given CombineApronExpr[Addr: Ordering: ClassTag, Type : Join, W <: Widening](using apronState: ApronState[Addr,Type]): Combine[ApronExpr[Addr,Type], W] =
+  (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
+    val resultType = Join(e1._type, e2._type).get
+    val iv1 = apronState.getBound(e1)
+    val iv2 = apronState.getBound(e2)
+    apronState.withTempVars(resultType) {
+      case (result, List()) =>
+        apronState.join {
+          apronState.assign(result, e1)
+        } {
+          apronState.assign(result, e2)
+        }
+        val iv3 = apronState.getBound(e2)
+        MaybeChanged(ApronExpr.addr(result, resultType), iv3.isLeq(iv1))
+    }
+
 
 
 //  def combineExprs[Addr <: apron.Var](e1: ApronExpr[Addr], e2: ApronExpr[Addr], state: Abstract1, widen: Boolean): MaybeChanged[ApronExpr[Addr]] =
