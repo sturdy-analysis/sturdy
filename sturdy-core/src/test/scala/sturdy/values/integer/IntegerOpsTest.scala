@@ -12,7 +12,7 @@ import sturdy.utils.GenInterval.{*, given}
 import math.Ordering.Implicits.infixOrderingOps
 
 
-trait IntervalIntegerOps[L,N] extends IntegerOps[L,N]:
+trait TestingIntegerOps[L,N] extends IntegerOps[L,N]:
   def integerLit(i: L): N
   def interval(low: L, high: L): N
   def getBounds(n:N): (L,L)
@@ -25,7 +25,7 @@ class IntegerOpsTest
   (
     minValue: L,
     maxValue: L,
-    makeIntegerOps: => IntervalIntegerOps[L, N]
+    makeIntegerOps: => TestingIntegerOps[L, N]
   )
   (using
    integral: Integral[L],
@@ -99,7 +99,7 @@ class IntegerOpsTest
     expectedFun = concreteIntegerOps.div(_, _)
   )
 
-  test("divide by zero") {
+  test("div([1,1],[-1,1])") {
     val integerOps = makeIntegerOps
     integerOps.getBounds(
       integerOps.div(
@@ -110,7 +110,7 @@ class IntegerOpsTest
         concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1)))
   }
 
-  test("divide [-1,1] / [-1,-1]") {
+  test("div([-1,1],[-1,-1])") {
     val integerOps = makeIntegerOps
     integerOps.getBounds(
       integerOps.div(
@@ -153,6 +153,17 @@ class IntegerOpsTest
     testFun = _.shiftLeft(_, _),
     expectedFun = concreteIntegerOps.shiftLeft(_, _)
   )
+
+  test("shiftLeft([1,1], [-1,-1])") {
+    val integerOps = makeIntegerOps
+    val result = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
+    integerOps.getBounds(
+      integerOps.shiftLeft(
+        integerOps.integerLit(integral.fromInt(1)),
+        integerOps.integerLit(integral.fromInt(-1)))) shouldBe
+      (result, result)
+  }
+
 
   binOpTest(
     testName = "shiftRight",

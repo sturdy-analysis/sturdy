@@ -11,7 +11,7 @@ import sturdy.values.{Structural, Topped}
 import sturdy.utils.GenInterval.{*, given}
 import sturdy.values.integer.IntegerOps
 
-trait IntervalOrderingOps[L,V,B] extends OrderingOps[V,B]:
+trait TestingOrderingOps[L,V,B] extends OrderingOps[V,B]:
   def integerLit(i: L): V
   def interval(low: L, high: L): V
   def getBool(b: B): Topped[Boolean]
@@ -25,7 +25,7 @@ class OrderingOpsTest
   (
     minValue: L,
     maxValue: L,
-    makeOrderingOps: => IntervalOrderingOps[L,V, B]
+    makeOrderingOps: => TestingOrderingOps[L,V, B]
   )
   (using
     concreteOrderingOps: OrderingOps[L,Boolean]
@@ -60,7 +60,7 @@ class OrderingOpsTest
     expectedFun = concreteOrderingOps.ge(_, _)
   )
 
-  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntervalOrderingOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
+  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (TestingOrderingOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
     test(testName) {
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>

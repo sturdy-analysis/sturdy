@@ -143,7 +143,7 @@ given ApronIntegerOps
   def fromUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.divUnsigned(v._type, v._type)
     val unsignedMaxValue = math.pow(2, v._type.byteSize * 8).longValue()
-    val signedMaxValue = math.pow(2, v._type.byteSize * 8 - 1).longValue()
+    val signedMaxValue = math.pow(2, v._type.byteSize * 8 - 1).longValue() - 1
     apronState.withTempVars(resultType, v) { case (result, List(x)) =>
       apronState.ifThenElse(intLt(longLit(signedMaxValue), x)) {
         apronState.assign(result, intSub(x, longLit(unsignedMaxValue)))
@@ -165,27 +165,10 @@ given ApronIntegerOps
     }
 
   override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.shiftLeft(v._type, shift._type)
-    apronState.withTempVars(resultType, shift) { case (result, List(s)) =>
-      apronState.ifThenElse(intLe(intLit(0), s)) {
-        apronState.assign(result, intMul(v, intPow(intLit(2), s)))
-      } {
-        apronState.assign(result, intDiv(v, intPow(intLit(2), intNegate(s))))
-      }
-      addr(result, resultType)
-    }
-
+    fromUnsigned(intMul(v, intPow(intLit(2), modulo(shift, intLit(32)))))
 
   override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.shiftRight(v._type, shift._type)
-    apronState.withTempVars(resultType, shift) { case (result, List(s)) =>
-      apronState.ifThenElse(intLe(intLit(0), s)) {
-        apronState.assign(result, intDiv(v, intPow(intLit(2), s)))
-      } {
-        apronState.assign(result, intMul(v, intPow(intLit(2), intNegate(s))))
-      }
-      addr(result, resultType)
-    }
+    intDiv(v, intPow(intLit(2), modulo(shift, intLit(32))))
 
   override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     fromUnsigned(shiftRight(toUnsigned(v), shift))

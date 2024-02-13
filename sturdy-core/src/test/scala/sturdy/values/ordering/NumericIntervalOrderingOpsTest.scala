@@ -7,9 +7,9 @@ import sturdy.values.{Finite, Structural, Top, Topped}
 import sturdy.values.integer.{IntegerOps, NumericInterval, NumericIntervalOrderingOps, StrictIntegerOps, given}
 import sturdy.values.ordering.{*, given}
 
-class NumericIntervalIntervalOrderingOps[I](using ordering: Ordering[I])
+class NumericIntervalTestingOrderingOps[I](using ordering: Ordering[I])
   extends NumericIntervalOrderingOps[I]
-    with IntervalOrderingOps[I, NumericInterval[I], Topped[Boolean]]:
+    with TestingOrderingOps[I, NumericInterval[I], Topped[Boolean]]:
   override def integerLit(i: I): NumericInterval[I] = NumericInterval(i,i)
   override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low,high)
   override def getBool(b: Topped[Boolean]): Topped[Boolean] = b
@@ -17,11 +17,11 @@ class NumericIntervalIntervalOrderingOps[I](using ordering: Ordering[I])
 class NumericIntervalIntOrderingOpsTest extends OrderingOpsTest[Int, NumericInterval[Int], Topped[Boolean]](
   minValue = Integer.MIN_VALUE,
   maxValue = Integer.MAX_VALUE,
-  makeOrderingOps = new NumericIntervalIntervalOrderingOps
+  makeOrderingOps = new NumericIntervalTestingOrderingOps
 )
 
 class NumericIntervalLongOrderingOpsTest extends OrderingOpsTest[Long, NumericInterval[Long], Topped[Boolean]](
   minValue = Long.MinValue,
   maxValue = Long.MaxValue,
-  makeOrderingOps = new NumericIntervalIntervalOrderingOps
+  makeOrderingOps = new NumericIntervalTestingOrderingOps
 )

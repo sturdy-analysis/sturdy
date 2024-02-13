@@ -20,7 +20,7 @@ class ApronOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type
     val apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = ApronRecencyStore[Ctx, Type](apronManager)
     given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
-    new ApronOrderingOps[VirtAddr, Type] with IntervalOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
+    new ApronOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
       override def getBool(b: ApronExpr[VirtAddr, Type]): Topped[Boolean] =
