@@ -24,8 +24,12 @@ class BaseType[B](using val tag: ClassTag[B]):
 object BaseType:
   def apply[B: ClassTag] = new BaseType[B]
 
-given CombineBaseType[B: ClassTag, W <: Widening]: Combine[BaseType[B], W] with
+given FiniteBaseType[B]: Finite[BaseType[B]] with {}
+
+given JoinBaseType[B: ClassTag]: Join[BaseType[B]] with
   override def apply(v1: BaseType[B], v2: BaseType[B]): MaybeChanged[BaseType[B]] = MaybeChanged.Unchanged(v1)
+
+export sturdy.values.finiteWidening
 
 given TopBaseType[B: ClassTag]: Top[BaseType[B]] with
   def top: BaseType[B] = BaseType[B]

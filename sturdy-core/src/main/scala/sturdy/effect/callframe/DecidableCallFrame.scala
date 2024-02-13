@@ -89,30 +89,6 @@ class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
   override type State = List[V]
   override def getState: List[V] = vars.toList
-  override def setState(s: List[V]): Unit =
-    vars = s.toArray
+  override def setState(s: List[V]): Unit = vars = s.toArray
   override def join: Join[List[V]] = implicitly
   override def widen: Widen[List[V]] = implicitly
-
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
-  protected class CallFrameJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = vars.toList
-    private var fVars: Array[V] = _
-
-    override def inbetween(): Unit =
-      fVars = vars
-      vars = snapshot.toArray
-
-    override def retainNone(): Unit =
-      vars = snapshot.toArray
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      vars = fVars
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (vars.length != fVars.length)
-        throw IllegalStateException()
-      vars = vars.zip(fVars).map(Join[V](_,_).get)
-  }

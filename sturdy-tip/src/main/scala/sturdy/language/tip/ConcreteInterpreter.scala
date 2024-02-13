@@ -32,7 +32,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord: VRecord = throw new UnsupportedOperationException
-  override def topBool: Boolean = throw new UnsupportedOperationException
+  override def topBool(using Instance): Boolean = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using inst: Instance): Boolean = v match
     case Value.BoolValue(b) => b

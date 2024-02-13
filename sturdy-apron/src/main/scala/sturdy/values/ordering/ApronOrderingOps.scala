@@ -16,6 +16,14 @@ import ApronExpr.*
 import ApronCons.*
 
 
+given ApronConsOrderingOps[Addr, Type](using IntegerOps[Int,Type]): OrderingOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
+  override def lt(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intLt(v1, v2)
+  override def le(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intLe(v1, v2)
+
+given ApronConsEqOps[Addr, Type](using IntegerOps[Int,Type]): EqOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
+  override def equ(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intEq(v1, v2)
+  override def neq(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intNeq(v1, v2)
+
 given ApronOrderingOps
   [
     Addr: Ordering: ClassTag,

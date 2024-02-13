@@ -98,7 +98,7 @@ trait ApronRecencyState
         e.printStackTrace()
     }
 
-  override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]) =
+  override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]): Unit =
     apronStore.addConstraint(virtToPhys(constraint))
 
   override def getBound(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =

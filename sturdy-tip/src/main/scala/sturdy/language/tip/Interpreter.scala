@@ -47,7 +47,7 @@ trait Interpreter:
   def topFun(using Instance): VFun
   def topReference(using Instance): VRef
   def topRecord: VRecord
-  def topBool: VBool
+  def topBool(using Instance): VBool
 
   def asBoolean(v: Value)(using Instance): VBool
   def asInt(v: Value)(using Instance): VInt
@@ -73,7 +73,7 @@ trait Interpreter:
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
     new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
-  given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool]): EqOps[Value, Value] with
+  given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Instance): EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => Value.BoolValue(EqOps.equ(i1, i2))
       //case (BoolValue(i1), BoolValue(i2)) => Value.TopValue
@@ -103,4 +103,4 @@ trait Interpreter:
 
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
-    given Instance = this.asInstanceOf[Instance]
+    protected given Instance = this.asInstanceOf[Instance]

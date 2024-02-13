@@ -6,7 +6,7 @@ import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.types.BaseType
-import sturdy.values.{Join, MaybeChanged, Widen}
+import sturdy.values.{Join, MaybeChanged, Topped, Widen}
 
 import java.math.BigInteger
 import scala.reflect.ClassTag
@@ -81,7 +81,7 @@ object ApronExpr:
     Constant(topInterval, intOps.integerLit(0))
 
   def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
-    val n = if(b) 1 else 0
+    val n = if (b) 1 else 0
     Constant(new MpqScalar(new Mpz(n)), booleanOps.boolLit(b))
 
   def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
@@ -166,20 +166,25 @@ enum BinOp:
     case Pow => Texpr1BinNode.OP_POW
 
 enum ApronCons[Addr, Type]:
+  case Constant(b: Boolean, tpe: Type)
   case Compare(op: CompareOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type)
 
   import CompareOp.*
 
   override def toString: String = this match
+    case Constant(b, _) => b.toString
     case Compare(op, e1, e2, _) => s"($e1 $op $e2)"
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] = this match
+    case Constant(b, tpe) => Constant(b, tpe)
     case Compare(op, e1, e2, tpe) => Compare(op, e1.mapAddr(f), e2.mapAddr(f), tpe)
 
   def addrs: Set[Addr] = this match
+    case Constant(_, _) => Set()
     case Compare(_, e1, e2, _) => e1.addrs ++ e2.addrs
 
   def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = this match
+    case Constant(b, tpe) => Tcons1(env, Tcons1.EQ, ApronExpr.Constant(new MpqScalar(new Mpz(if (b) 0 else 1)), tpe).toApron)
     case Compare(Eq, e1, e2, tpe)  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
     case Compare(Neq, e1, e2, tpe) => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
     case Compare(Lt, e1, e2, tpe)  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
@@ -189,6 +194,7 @@ enum ApronCons[Addr, Type]:
 
 
   def negated: ApronCons[Addr, Type] = this match
+    case Constant(b, tpe) => Constant(!b, tpe)
     case Compare(Eq, e1, e2, tpe) => Compare(Neq, e1, e2, tpe)
     case Compare(Neq, e1, e2, tpe) => Compare(Eq, e1, e2, tpe)
     case Compare(Lt, e1, e2, tpe) => Compare(Ge, e1, e2, tpe)
@@ -212,6 +218,14 @@ object ApronCons:
     Compare(Ge, e1, e2, integerOps.sub(e1._type, e2._type))
   def intGt[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
     Compare(Gt, e1, e2, integerOps.sub(e1._type, e2._type))
+  def top[Addr, Type](using integerOps: IntegerOps[Int, Type]): Compare[Addr, Type] = {
+    val itop = ApronExpr.intTop[Addr, Type]
+    Compare(Eq, itop, itop, integerOps.sub(itop._type, itop._type))
+  }
+  def from[Addr, Type](tb: Topped[Boolean])(using integerOps: IntegerOps[Int, Type]): ApronCons[Addr, Type] = tb match
+    case Topped.Top => top
+    case Topped.Actual(b) => Constant(b, integerOps.integerLit(if (b) 0 else 1))
+
 
 enum CompareOp:
   case Eq

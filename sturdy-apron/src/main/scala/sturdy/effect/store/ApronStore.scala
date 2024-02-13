@@ -156,7 +156,7 @@ final class ApronStore[
 
   class BottomFailure extends SturdyFailure
 
-  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]) =
+  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
     val constraints: Array[Tcons1] = Array(constraint.toApron(apronState.getEnvironment))
     this.apronState.meet(manager, constraints)
     if (this.apronState.isBottom(manager))

@@ -15,6 +15,12 @@ import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
 
+given ApronConsBooleanBranching[Addr, Type, A: Join]
+  (using apronState: ApronState[Addr, Type])
+  : BooleanBranching[ApronCons[Addr, Type], A] with
+  override def boolBranch(v: ApronCons[Addr, Type], thn: => A, els: => A): A =
+    apronState.ifThenElse(v)(thn)(els)
+
 given ApronBooleanBranching
   [
     Addr: Ordering: ClassTag,

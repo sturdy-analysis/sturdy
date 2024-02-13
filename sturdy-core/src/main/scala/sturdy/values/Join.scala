@@ -21,6 +21,10 @@ enum MaybeChanged[+A]:
     case Changed(a) => MaybeChanged.Changed(f(a))
     case Unchanged(a) => MaybeChanged.Unchanged(f(a))
 
+  inline def flatmap[B](f: A => MaybeChanged[B]): MaybeChanged[B] = this match
+    case Changed(a) => MaybeChanged.Changed(f(a).get)
+    case Unchanged(a) => f(a)
+  
   inline def ifChanged(f: A => Unit): Unit = this match
     case Changed(a) => f(a)
     case Unchanged(_) => // nothing
