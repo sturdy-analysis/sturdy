@@ -1,0 +1,35 @@
+package sturdy.values.ordering
+
+import apron.*
+import sturdy.apron.*
+import sturdy.effect.Stateless
+import sturdy.effect.allocation.Allocator
+import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.store.{ApronRecencyStore, ApronStore, RecencyStore, given}
+import sturdy.utils.TestContexts.{*, given}
+import sturdy.utils.TestTypes.{*, given}
+import sturdy.values.*
+import sturdy.values.ordering.*
+import sturdy.values.references.{*, given}
+import sturdy.values.types.{BaseType, given}
+
+type VirtAddr = VirtualAddress[Ctx]
+
+class ApronOrderingOpsTest extends OrderingOpsTest[ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]](
+  size = 100,
+  makeOrderingOps = {
+    val apronManager: Manager = new apron.Polka(true)
+    val (recencyStore, apronStore) = ApronRecencyStore[Ctx, Type](apronManager)
+    given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
+    new ApronOrderingOps[VirtAddr, Type] with IntervalOrderingOps[ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
+      override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
+      override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
+      override def getBool(b: ApronExpr[VirtAddr, Type]): Topped[Boolean] =
+        apronSt.getIntBound(b) match
+          case (0,0) => Topped.Actual(false)
+          case (1,1) => Topped.Actual(true)
+          case (0,1) => Topped.Top
+          case iv => throw new IllegalStateException(s"Not a valid boolean interval ${iv}")
+    }
+  }
+)

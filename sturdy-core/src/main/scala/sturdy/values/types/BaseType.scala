@@ -1,12 +1,12 @@
 package sturdy.values.types
 
-import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
+import sturdy.data.{MakeJoined, WithJoin, joinComputations, joinWithFailure}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
-import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
-import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
@@ -41,6 +41,12 @@ given BaseTypeOrderingOps[B: ClassTag]: OrderingOps[BaseType[B], BaseType[Boolea
 given BaseTypeUnsignedOrderingOps[B: ClassTag]: UnsignedOrderingOps[BaseType[B], BaseType[Boolean]] with
   def ltUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def leUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
+
+given BaseTypeBooleanOps: BooleanOps[BaseType[Boolean]] with
+  override def boolLit(b: Boolean): BaseType[Boolean] = BaseType[Boolean]
+  override def and(v1: BaseType[Boolean], v2: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
+  override def not(v: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
+  override def or(v1: BaseType[Boolean], v2: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
 
 given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, EffectStack): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =

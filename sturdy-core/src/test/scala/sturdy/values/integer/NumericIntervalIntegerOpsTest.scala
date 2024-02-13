@@ -8,7 +8,7 @@ given failure: Failure = new CollectedFailures[FailureKind]
 given Finite[FailureKind] with {}
 given effectState: EffectStack = EffectStack(List(failure))
 
-class NumericIntervalTest extends IntegerOpsTest[Int,NumericInterval[Int]](
+class NumericIntervalIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
   100,
   makeIntegerOps = new NumericIntervalIntegerOps[Int](20) with IntervalIntegerOps[Int, NumericInterval[Int]] {
     override def integerLit(i: Int): NumericInterval[Int] = NumericInterval(i, i)

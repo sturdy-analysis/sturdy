@@ -6,6 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import sturdy.utils.GenInterval.{*,given}
 
 trait IntervalIntegerOps[L,N] extends IntegerOps[L,N]:
   def integerLit(i: Int): N
@@ -15,23 +16,6 @@ trait IntervalIntegerOps[L,N] extends IntegerOps[L,N]:
 class IntegerOpsTest[L,N](size: Int,
                           makeIntegerOps: => IntervalIntegerOps[L, N])
     extends AnyFunSuite with ScalaCheckPropertyChecks:
-
-  case class Interval(low: Int, included: Int, high: Int)
-
-  given genInterval: Gen[Interval] =
-    for {
-      low <- Gen.choose(-size, size)
-      high <- Gen.choose(low, low+size)
-      included <- Gen.choose(low,high)
-    }
-      yield Interval(low,included,high)
-
-  given shrinkInterval: Shrink[Interval] = Shrink.xmap[(Int,Int,Int),Interval](
-    from = (low,included,high) => Interval(low,included,high),
-    to = iv => (iv.low, iv.included, iv.high)
-  ).suchThat { case Interval(low, included, high) =>
-    low <= included && included <= high
-  }
 
 
   test("integer literal") {
@@ -169,7 +153,7 @@ class IntegerOpsTest[L,N](size: Int,
 
   def binOpTest(testName: String, precondition: (Int,Int) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (Int,Int) => Int) =
     test(testName) {
-      forAll((genInterval, "x ∈ [x1,x2]"), (genInterval, "y ∈ [y1,y2]")) {
+      forAll((genInterval(size), "x ∈ [x1,x2]"), (genInterval(size), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
             val integerOps: IntervalIntegerOps[L,N] = makeIntegerOps
@@ -180,7 +164,7 @@ class IntegerOpsTest[L,N](size: Int,
 
   def unOpTest(testName: String, precondition: Int => Boolean, testFun: (IntegerOps[L,N],N) => N, expectedFun: Int => Int) =
     test(testName) {
-      forAll((genInterval, "x ∈ [x1,x2]")) {
+      forAll((genInterval(size), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
             val integerOps: IntervalIntegerOps[L, N] = makeIntegerOps

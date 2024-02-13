@@ -4,8 +4,6 @@ import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 
-import scala.math.Ordering.*
-import math.Ordered.orderingToOrdered
 import apron.*
 import gmp.*
 import sturdy.apron.{ApronExpr, given}
@@ -21,41 +19,24 @@ import sturdy.values.types.{BaseType, given}
 
 class ApronCallFrameTest extends AnyFunSuite:
 
+  import sturdy.utils.TestTypes.*
+  import sturdy.utils.TestContexts.*
+
   type Data = Unit
   type Var = String
   type CallSite = String
-  type Type = BaseType[Int]
-  val intType: Type = BaseType[Int]
+  val intType: Type = Type.IntType(BaseType[Int])
 
-  enum Ctx:
-    case Var(name: String)
-    case TempVar(tpe: Type, n: Int)
-
-  given Finite[Ctx] with {}
-  given Ordering[Ctx] = {
-    case (Ctx.Var(n1), Ctx.Var(n2)) => n1.compare(n2)
-    case (Ctx.TempVar(t1, n1), Ctx.TempVar(t2,n2)) => (t1,n1).compare((t2,n2))
-    case _ => -1
-  }
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(List(failure))
   given Finite[FailureKind] with {}
-  given variableAllocator: Allocator[Ctx,Var] =
-    AAllocatorFromContext(ctx => Ctx.Var(ctx))
-
-  // Unused
-  given tempVariableAllocator: Allocator[Ctx,Type] = new Allocator[Ctx,Type] with Stateless:
-    var n = 0
-    override def alloc(ctx: Type): Ctx =
-      n += 1
-      Ctx.TempVar(ctx, n)
 
   given Manager = new apron.Polka(true)
 
   test("getLocal") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.Constant(Interval(0, 10), intType)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
@@ -68,7 +49,7 @@ class ApronCallFrameTest extends AnyFunSuite:
       initVars = List("x" -> None)
     )
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval(0, 10))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10))
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     callFrame.getBound(xExpr) shouldBe Interval(0, 10)
@@ -80,8 +61,8 @@ class ApronCallFrameTest extends AnyFunSuite:
       initVars = List("x" -> None)
     )
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval(0, 10))
-    callFrame.setLocalByName("x", ApronExpr.intInterval(15, 20))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](15, 20))
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     callFrame.getBound(xExpr) shouldBe Interval(15, 20)
@@ -90,11 +71,11 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("weak update") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2)))
     )
 
-    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval(4, 5))), "f") {}
-    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval(7, 8))), "f") {}
+    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5))), "f") {}
+    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8))), "f") {}
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     callFrame.getBound(xExpr) shouldBe Interval(0, 5)
@@ -104,7 +85,7 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("withNew") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
@@ -124,12 +105,12 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("join") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 10)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
     )
 
     val state1 = callFrame.getState
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval(5, 15))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](5, 15))
 
     val state2 = callFrame.getState
 
@@ -146,12 +127,12 @@ class ApronCallFrameTest extends AnyFunSuite:
   test("join recent against old") {
     val callFrame = ApronCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval(0, 2)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2)))
     )
 
     val state1 = callFrame.getState
 
-    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval(4, 5))), "f") {
+    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5))), "f") {
       callFrame.getState
     }
 
@@ -163,7 +144,7 @@ class ApronCallFrameTest extends AnyFunSuite:
     callFrame.getBound(xExpr) shouldBe Interval(0, 5)
 
     // Test that x is old
-    callFrame.setLocalByName("x", ApronExpr.intInterval(7, 8))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8))
     xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     callFrame.getBound(xExpr) shouldBe Interval(0, 8)
 

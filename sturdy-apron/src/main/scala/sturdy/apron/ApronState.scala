@@ -17,9 +17,27 @@ trait ApronState[Addr,Type]:
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraint(constraint: ApronCons[Addr,Type]): Unit
-  def getBound(expr: ApronExpr[Addr,Type]): Interval
   def join[A: Join](f: => A)(g: => A): A
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
+  def getBound(expr: ApronExpr[Addr, Type]): Interval
+  def getIntBound(expr: ApronExpr[Addr, Type]): (Int,Int) =
+    val iv = getBound(expr)
+    val d = Array[Double](0)
+    val lower =
+      if (iv.inf().isInfty() != 0)
+        Integer.MIN_VALUE
+      else
+        iv.inf().toDouble(d, 0)
+        d(0).intValue()
+
+    val upper =
+      if (iv.sup().isInfty() != 0)
+        Integer.MAX_VALUE
+      else
+        iv.sup().toDouble(d, 0)
+        d(0).intValue()
+
+    (lower, upper)
 
 object ApronState:
   def comparison[Addr: Ordering : ClassTag, Type]
@@ -73,7 +91,12 @@ trait ApronRecencyState
     f(resultAddr, tempVars)
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
-    apronStore.write(v.physical, virtToPhys(expr))
+    try {
+      apronStore.write(v.physical, virtToPhys(expr))
+    } catch {
+      case e: IllegalArgumentException =>
+        e.printStackTrace()
+    }
 
   override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]) =
     apronStore.addConstraint(virtToPhys(constraint))
