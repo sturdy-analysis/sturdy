@@ -1,11 +1,16 @@
 package sturdy.apron
 
 import apron.{Interval, Var}
+import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{ApronStore, RecencyStore}
 import sturdy.values.Join
+import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, PowersetAddr, VirtualAddress, given}
+import sturdy.data.{*,given}
+
+import scala.reflect.ClassTag
 
 trait ApronState[Addr,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
@@ -15,6 +20,26 @@ trait ApronState[Addr,Type]:
   def getBound(expr: ApronExpr[Addr,Type]): Interval
   def join[A: Join](f: => A)(g: => A): A
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
+
+object ApronState:
+  def comparison[Addr: Ordering : ClassTag, Type]
+    (op: (ApronExpr[Addr, Type], ApronExpr[Addr, Type]) => ApronCons[Addr, Type],
+     v1: ApronExpr[Addr, Type],
+     v2: ApronExpr[Addr, Type],
+     resultType: Type)
+    (using
+     apronState: ApronState[Addr, Type],
+     typeBooleanOps: BooleanOps[Type]
+    ): ApronExpr[Addr, Type] =
+      apronState.withTempVars(resultType, v1, v2) {
+        case (result, List(x, y)) =>
+          apronState.ifThenElse(op(x, y)) {
+            apronState.assign(result, booleanLit(true))
+          } {
+            apronState.assign(result, booleanLit(false))
+          }
+          addr(result, resultType)
+      }
 
 trait ApronRecencyState
   [

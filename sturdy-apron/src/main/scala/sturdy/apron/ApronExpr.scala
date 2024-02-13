@@ -80,6 +80,9 @@ object ApronExpr:
   def intTop[Addr, Type](using intOps: IntegerOps[Int, Type]): Constant[Addr, Type] =
     Constant(topInterval, intOps.integerLit(0))
 
+  def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
+    val n = if(b) 1 else 0
+    Constant(new MpqScalar(new Mpz(n)), booleanOps.boolLit(b))
 
   def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Unary(op, e1, resultType, resultType.roundingType, resultType.roundingDir)
