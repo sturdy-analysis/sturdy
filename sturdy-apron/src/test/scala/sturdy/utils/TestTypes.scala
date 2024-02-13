@@ -36,6 +36,8 @@ object TestTypes:
 
   given Ordering[Type] = {
     case (Type.IntType(_), Type.IntType(_)) | (Type.BoolType(_), Type.BoolType(_)) => 0
+    case (Type.IntType(_), Type.BoolType(_)) => 1
+    case (Type.BoolType(_), Type.IntType(_)) => -1
     case (_, _) => -1
   }
 

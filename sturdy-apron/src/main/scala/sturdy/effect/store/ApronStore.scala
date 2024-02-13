@@ -66,6 +66,8 @@ final class ApronStore[
           powAddr.reduce(toAddr =>
             addAddrToEnvs(toAddr, exp)
             val to = ApronVar(toAddr)
+            val env = apronState.getEnvironment
+            assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
             val aexp : apron.Texpr1Intern = exp.toIntern(apronState.getEnvironment)
             apronState.assign(manager, to, aexp, null)
           )

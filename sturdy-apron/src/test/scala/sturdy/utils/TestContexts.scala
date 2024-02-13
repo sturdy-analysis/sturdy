@@ -19,6 +19,8 @@ object TestContexts:
   given Ordering[Ctx] = {
     case (Ctx.Var(n1), Ctx.Var(n2)) => n1.compare(n2)
     case (Ctx.TempVar(t1, n1), Ctx.TempVar(t2, n2)) => (t1, n1).compare((t2, n2))
+    case (Ctx.Var(_), Ctx.TempVar(_, _)) => 1
+    case (Ctx.TempVar(_, _), Ctx.Var(_)) => -1
     case _ => -1
   }
 
