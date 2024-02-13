@@ -11,12 +11,12 @@ import sturdy.values.{Structural, Topped}
 import sturdy.utils.GenInterval.{*, given}
 import sturdy.values.integer.IntegerOps
 
-trait IntervalOrderingOps[L,V,B] extends OrderingOps[V,B]:
+trait IntervalEqOps[L,V,B] extends EqOps[V,B]:
   def integerLit(i: L): V
   def interval(low: L, high: L): V
   def getBool(b: B): Topped[Boolean]
 
-class OrderingOpsTest
+class EqOpsTest
   [
     L: Integral: Choose: Arbitrary: Ordering: Structural,
     V,
@@ -25,42 +25,28 @@ class OrderingOpsTest
   (
     minValue: L,
     maxValue: L,
-    makeOrderingOps: => IntervalOrderingOps[L,V, B]
+    makeOrderingOps: => IntervalEqOps[L,V, B]
   )
   (using
-    concreteOrderingOps: OrderingOps[L,Boolean]
+   concreteEqOps: EqOps[L,Boolean]
   )
     extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   binOpTest(
-    testName = "lt",
+    testName = "equ",
     precondition = (_,_) => true,
-    testFun = _.lt(_,_),
-    expectedFun = concreteOrderingOps.lt(_,_)
+    testFun = _.equ(_,_),
+    expectedFun = concreteEqOps.equ(_,_)
   )
 
   binOpTest(
-    testName = "le",
+    testName = "neq",
     precondition = (_, _) => true,
-    testFun = _.le(_, _),
-    expectedFun = concreteOrderingOps.le(_, _)
+    testFun = _.neq(_, _),
+    expectedFun = concreteEqOps.neq(_, _)
   )
 
-  binOpTest(
-    testName = "gt",
-    precondition = (_, _) => true,
-    testFun = _.gt(_, _),
-    expectedFun = concreteOrderingOps.gt(_, _)
-  )
-
-  binOpTest(
-    testName = "ge",
-    precondition = (_, _) => true,
-    testFun = _.ge(_, _),
-    expectedFun = concreteOrderingOps.ge(_, _)
-  )
-
-  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntervalOrderingOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
+  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntervalEqOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
     test(testName) {
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>

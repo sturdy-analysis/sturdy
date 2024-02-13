@@ -38,7 +38,6 @@ object TestTypes:
     case (Type.IntType(_), Type.IntType(_)) | (Type.BoolType(_), Type.BoolType(_)) => 0
     case (Type.IntType(_), Type.BoolType(_)) => 1
     case (Type.BoolType(_), Type.IntType(_)) => -1
-    case (_, _) => -1
   }
 
   given IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = Type.IntType(_))

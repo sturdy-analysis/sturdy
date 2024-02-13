@@ -18,7 +18,8 @@ import sturdy.utils.TestContexts.{*, given}
 type VirtAddr = VirtualAddress[Ctx]
 
 class ApronIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
-  size = 100,
+  minValue = -100,
+  maxValue = 100,
   makeIntegerOps = {
     val apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = ApronRecencyStore[Ctx, Type](apronManager)

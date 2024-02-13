@@ -1,19 +1,23 @@
 package sturdy.utils
 
+import org.scalacheck.Gen.Choose
 import org.scalacheck.{Gen, Shrink}
 
-object GenInterval:
-  case class Interval(low: Int, included: Int, high: Int)
+import math.Integral.Implicits.infixIntegralOps
+import math.Ordering.Implicits.infixOrderingOps
 
-  def genInterval(size: Int): Gen[Interval] =
+object GenInterval:
+  case class Interval[N](low: N, included: N, high: N)
+
+  def genInterval[N: Integral: Choose](minValue: N, maxValue: N): Gen[Interval[N]] =
     for {
-      low <- Gen.choose(-size, size)
-      high <- Gen.choose(low, low + size)
-      included <- Gen.choose(low, high)
+      low <- Gen.chooseNum(minValue, maxValue)
+      high <- Gen.chooseNum(low, maxValue)
+      included <- Gen.chooseNum(low, high)
     }
     yield Interval(low, included, high)
 
-  given shrinkInterval: Shrink[Interval] = Shrink.xmap[(Int, Int, Int), Interval](
+  given shrinkInterval[N: Integral: Ordering]: Shrink[Interval[N]] = Shrink.xmap[(N, N, N), Interval[N]](
     from = (low, included, high) => Interval(low, included, high),
     to = iv => (iv.low, iv.included, iv.high)
   ).suchThat { case Interval(low, included, high) =>
