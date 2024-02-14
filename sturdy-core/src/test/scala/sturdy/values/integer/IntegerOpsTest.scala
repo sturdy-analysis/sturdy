@@ -104,10 +104,10 @@ class IntegerOpsTest
     integerOps.getBounds(
       integerOps.div(
         integerOps.interval(integral.fromInt(1), integral.fromInt(1)),
-        integerOps.interval(integral.fromInt(-1), integral.fromInt(1)))) should
-      contain(
+        integerOps.interval(integral.fromInt(-1), integral.fromInt(1)))) shouldBe(
         concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(-1)),
-        concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1)))
+        concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1))
+    )
   }
 
   test("div([-1,1],[-1,-1])") {

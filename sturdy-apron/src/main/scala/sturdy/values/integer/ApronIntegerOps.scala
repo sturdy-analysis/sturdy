@@ -74,41 +74,15 @@ given ApronIntegerOps
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.div(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(intEq(intLit(0), y)) {
-        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      apronState.join{
+        apronState.addConstraint(intLt(intLit(0), y))
+        apronState.assign(result, intDiv(x, y))
       } {
-        apronState.assign(result, intDiv(v1, v2))
+        apronState.addConstraint(intLt(y, intLit(0)))
+        apronState.assign(result, intDiv(x, y))
       }
       addr(result, resultType)
     }
-
-
-//    println(s"x = ${apronState.getBound(v1)}, y = ${apronState.getBound(v2)}, x / y = ${apronState.getBound(intDiv(v1, v2))}\n")
-//    intDiv(v1,v2)
-
-//    val resultType = typeIntOps.div(v1._type, v2._type)
-//    apronState.withTempVars(resultType) { case (result, List()) =>
-//      apronState.assign(result, intDiv(v1,v2))
-//      addr(result, resultType)
-//    }
-
-
-//    val resultType = typeIntOps.div(v1._type, v2._type)
-//    apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-//      apronState.join{
-//        apronState.withConstraint(intLt(intLit(0), y)) {
-//          apronState.assign(result, intDiv(v1,v2))
-//          println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
-//        }
-//      } {
-//        apronState.withConstraint(intLt(y, intLit(0))) {
-//          apronState.assign(result, intDiv(v1, v2))
-//          println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}")
-//        }
-//      }
-//      println(s"x = ${apronState.getBound(x)}, y = ${apronState.getBound(y)}, result = ${apronState.getBound(addr(result, resultType))}, x / y = ${apronState.getBound(intDiv(v1, v2))}\n")
-//      addr(result, resultType)
-//    }
 
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -117,10 +91,12 @@ given ApronIntegerOps
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.remainder(v1._type, v2._type)
     apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-      apronState.ifThenElse(intEq(intLit(0), y)) {
-        f.fail(IntegerDivisionByZero, s"$v1 % $v2")
+      apronState.join {
+        apronState.addConstraint(intLt(intLit(0), y))
+        apronState.assign(result, intMod(x, y))
       } {
-        apronState.assign(result, intMod(v1, v2))
+        apronState.addConstraint(intLt(y, intLit(0)))
+        apronState.assign(result, intMod(x, y))
       }
       addr(result, resultType)
     }
