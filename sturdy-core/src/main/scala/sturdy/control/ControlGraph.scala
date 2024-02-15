@@ -1,6 +1,7 @@
 package sturdy.control
 
 enum Node[Atom, Section]:
+  case Start()
   case Atomic(atom: Atom)
   case BlockStart(sec: Section)
   case BlockEnd(label: Section)
@@ -23,6 +24,7 @@ object ControlGraph :
     }.fold("")((s1, s2) => s1 + (if s2 != "" then "\n" else "") + s2)
       + "\n" +
       edges.flatMap(e => List(e.from, e.to)).map {
+        case s: Start[Atom, Sec] => s"\"$s\" [style=filled, fillcolor=\"#FFFFBB\"]"
         case n: Atomic[Atom, Sec] => if(edges.exists { e => e.from == n && e.to == Failure() })
           s"\"$n\" [style=filled, fillcolor=\"#FFBBBB\"]"
         else

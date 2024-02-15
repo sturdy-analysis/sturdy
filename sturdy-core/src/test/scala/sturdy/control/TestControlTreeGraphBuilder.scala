@@ -14,6 +14,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
   type AtomPair = (ControlTree[String, String, String], Node[String, String])
   val controlTreeGraphBuilder: ControlTreeGraphBuilder[String, String, String] = ControlTreeGraphBuilder()
   private val nFailure: AtomPair = (Failed(), Node.Failure[String, String]())
+  private val nStart: AtomPair = (null, Node.Start())
 
   inline def testGraph[A, S, E](name: String)(f: => (ControlTree[A, S, E], Set[Edge[A, S]])): Unit =
     test(name) {
@@ -59,6 +60,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (ct,
       pairsToEdges(CF, Set(
+        nStart -> a1,
         a1 -> a2,
         a2 -> a3,
         a3 -> a4)))
@@ -72,6 +74,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (ct,
       pairsToEdges(CF, Set(
+        nStart -> a1,
         a1 -> a2)))
   }
 
@@ -84,6 +87,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (sec1,
       pairsToEdges(CF, Set(
+        nStart -> sec1.start,
         sec1.start -> a1,
         a1 -> a2,
         a2 -> sec1.end)) ++ pairsToEdges(BlockPair, Set(
@@ -103,6 +107,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (sec3,
       pairsToEdges(CF, Set(
+        nStart -> sec3.start,
         sec3.start -> sec2.start,
         sec2.start -> a1,
         a1 -> sec1.start,
@@ -126,6 +131,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (sec2,
       pairsToEdges(CF, Set(
+        nStart -> sec2.start,
         sec2.start -> a1,
         a1 -> sec1.start,
         sec1.start -> sec1.end,
@@ -142,6 +148,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (nodes,
       pairsToEdges(CF, Set(
+        nStart -> a1,
         a1 -> a2,
         a2 -> nFailure)))
   }
@@ -154,6 +161,7 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     (sec1,
       pairsToEdges(CF, Set(
+        nStart -> sec1.start,
         sec1.start -> a1,
         a1 -> a2,
         a2 -> nFailure)))
@@ -166,10 +174,11 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
 
     val secNotClosed = createSection("secInner", a3 + nFailure)
-    val secMain = createSection("secMain", a1 + Fork(a2 + nFailure, secNotClosed))
+    val secMain = createSection("secMain", a1 + Fork(List(a2 + nFailure, secNotClosed)))
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> a2,
         a1 -> secNotClosed.start,
@@ -185,10 +194,11 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a4 = createAtomic("A4")
     val a5 = createAtomic("A5")
 
-    val secMain = createSection("if", a1 + Fork(a2 + a3, a4) + a5)
+    val secMain = createSection("if", a1 + Fork(List(a2 + a3, a4)) + a5)
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> a2,
         a1 -> a4,
@@ -204,10 +214,11 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a2 = createAtomic("A2")
     val a3 = createAtomic("A3")
 
-    val secMain = createSection("if", a1 + Fork(a2, Empty()) + a3)
+    val secMain = createSection("if", a1 + Fork(List(a2, Empty())) + a3)
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> a2,
         a2 -> a3,
@@ -224,12 +235,13 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a5 = createAtomic("A5")
     val a6 = createAtomic("A6")
 
-    val if2 = createSection("If(...) 2", Fork(a4, a5))
-    val if1 = createSection("If(...) 1", Fork(a2 + a3, if2))
+    val if2 = createSection("If(...) 2", Fork(List(a4, a5)))
+    val if1 = createSection("If(...) 1", Fork(List(a2 + a3, if2)))
     val secMain = createSection("secMain", a1 + if1 + a6)
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> if1.start,
         if1.start -> a2,
@@ -256,10 +268,11 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Fork(a2, a3 + nFailure) + a4)
+    val secMain = createSection("secMain", a1 + Fork(List(a2, a3 + nFailure)) + a4)
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> a2,
         a1 -> a3,
@@ -275,10 +288,11 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a2 = createAtomic("A2")
     val a3 = createAtomic("A3")
 
-    val secMain = createSection("secMain", a1 + Fork(a2 + nFailure, a3 + nFailure))
+    val secMain = createSection("secMain", a1 + Fork(List(a2 + nFailure, a3 + nFailure)))
 
     (secMain,
       pairsToEdges(CF, Set(
+        nStart -> secMain.start,
         secMain.start -> a1,
         a1 -> a2,
         a1 -> a3,
@@ -293,9 +307,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Try(a2 + a3, Map.empty) + a4)
+    val secMain = createSection("secMain", a1 + Try(a2 + a3, List.empty) + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -311,9 +326,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Try(a2 + Throw("Exc1"), Map("Exc1" -> a3)) + a4)
+    val secMain = createSection("secMain", a1 + Try(a2 + Throw("Exc1"), List(Handling("Exc1", a3))) + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -329,9 +345,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Try(a2 + Fork(Empty(), Throw("Exc1")), Map("Exc1" -> a3)) + a4)
+    val secMain = createSection("secMain", a1 + Try(a2 + Fork(List(Empty(), Throw("Exc1"))), List(Handling("Exc1", a3))) + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -351,12 +368,13 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val handleOut = createAtomic("Handle outer")
     val handleIn = createAtomic("Handle inner")
 
-    val tryInner = Try(a3 + Fork(Empty(), Throw("Exc1")), Map("Exc1" -> handleIn))
-    val tryOuter = Try(a2 + Fork(Empty(), Throw("Exc1")) + tryInner, Map("Exc1" -> handleOut))
+    val tryInner = Try(a3 + Fork(List(Empty(), Throw("Exc1"))), List(Handling("Exc1", handleIn)))
+    val tryOuter = Try(a2 + Fork(List(Empty(), Throw("Exc1"))) + tryInner, List(Handling("Exc1", handleOut)))
 
     val secMain = createSection("secMain", a1 + tryOuter + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -380,12 +398,13 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val handleIn = createAtomic("Handle Exc2 Inner")
     val handleOut = createAtomic("Handle Exc2 Outer")
 
-    val tryInner = Try(Fork(a1 + Throw("Exc1"), a2 + Throw("Exc2")), Map("Exc1" -> (handle + Throw("Exc2")), "Exc2" -> handleIn))
-    val tryOuter = Try(tryInner + a3, Map("Exc2" -> handleOut))
+    val tryInner = Try(Fork(List(a1 + Throw("Exc1"), a2 + Throw("Exc2"))), List(Handling("Exc1", handle + Throw("Exc2")), Handling("Exc2", handleIn)))
+    val tryOuter = Try(tryInner + a3, List(Handling("Exc2", handleOut)))
 
     val secMain = createSection("secMain", tryOuter + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       secMain.start -> a2,
       a1 -> handle,
@@ -406,12 +425,13 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
 
     val handle = createAtomic("Handle Exc1")
 
-    val tryInner = Try(a3 + Throw("Exc1"), Map.empty)
-    val tryOuter = Try(a2 + tryInner, Map("Exc1" -> handle))
+    val tryInner = Try(a3 + Throw("Exc1"), List.empty)
+    val tryOuter = Try(a2 + tryInner, List(Handling("Exc1", handle)))
 
     val secMain = createSection("secMain", a1 + tryOuter)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -430,12 +450,13 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val handleOut = createAtomic("Handle outer")
     val handleIn = createAtomic("Handle inner")
 
-    val tryInner = Try(a3 + Fork(Empty(), Throw("Exc1")), Map("Exc1" -> (handleIn + Throw("Exc1"))))
-    val tryOuter = Try(a2 + Fork(Empty(), Throw("Exc1")) + tryInner, Map("Exc1" -> handleOut))
+    val tryInner = Try(a3 + Fork(List(Empty(), Throw("Exc1"))), List(Handling("Exc1", (handleIn + Throw("Exc1")))))
+    val tryOuter = Try(a2 + Fork(List(Empty(), Throw("Exc1"))) + tryInner, List(Handling("Exc1", handleOut)))
 
     val secMain = createSection("secMain", a1 + tryOuter + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a3,
@@ -458,9 +479,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val handle1 = createAtomic("Handle Exc1")
     val handle2 = createAtomic("Handle Exc2")
 
-    val secMain = createSection("secMain", Try(a1 + Fork(a2, Fork(Throw("Exc1"), a3 + Throw("Exc2"))), Map("Exc1" -> handle1, "Exc2" -> handle2)) + a4)
+    val secMain = createSection("secMain", Try(a1 + Fork(List(a2, Throw("Exc1"), a3 + Throw("Exc2"))), List(Handling("Exc1", handle1), Handling("Exc2", handle2))) + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a1 -> handle1,
@@ -480,9 +502,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a3 = createAtomic("A3")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Try(Failed(), Map("Exc1" -> a3)))
+    val secMain = createSection("secMain", a1 + Try(Failed(), List(Handling("Exc1", a3))))
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> nFailure)))
   }
@@ -493,9 +516,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
     val a2 = createAtomic("A2")
     val a4 = createAtomic("A4")
 
-    val secMain = createSection("secMain", a1 + Try(a2 + Fork(Empty(), Throw("Exc1")), Map("Exc1" -> Failed())) + a4)
+    val secMain = createSection("secMain", a1 + Try(a2 + Fork(List(Empty(), Throw("Exc1"))), List(Handling("Exc1", Failed()))) + a4)
 
     (secMain, pairsToEdges(CF, Set(
+      nStart -> secMain.start,
       secMain.start -> a1,
       a1 -> a2,
       a2 -> a4,

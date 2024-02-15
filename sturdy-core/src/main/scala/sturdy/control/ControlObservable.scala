@@ -29,7 +29,8 @@ trait ControlObservable[Atom, Section, Exc] extends JoinObserver, ExceptObserver
   override def handling(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.Handle(exc))
   override def tryStart(): Unit = triggerControlEvent(ExceptionControlEvent.BeginTry())
   override def tryEnd(): Unit = triggerControlEvent(ExceptionControlEvent.EndTry())
-  override def catchStart(): Unit = triggerControlEvent(ExceptionControlEvent.Catching())
+
+  override def catchStart(): Unit = ()
   override def catchEnd(): Unit = ()
 
   

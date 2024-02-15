@@ -1,39 +1,30 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.Blocker
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEvent, ControlObserver, PrintingControlObserver}
-import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureKind
+import sturdy.control.*
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.generic.WasmFailure
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Abstractly
-import sturdy.values.Topped
+import sturdy.values.{Abstractly, Topped}
 import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
-import scala.reflect.ClassTag
-import scala.reflect.TypeTest
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
 
 
@@ -187,6 +178,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val recorder = interp.addControlObserver(new RecordingControlObserver)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
@@ -199,6 +191,18 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   )
 //  println(cfg.toGraphViz)
 //  println(interp.controlRecorder)
+
+  val ctGraphBuilder = ControlTreeGraphBuilder()
+
+  val r = ControlTree.buildControlTree(recorder.events.filter {
+    case FixpointControlEvent.BeginFixpoint() => false
+    case FixpointControlEvent.RecurrentCall(_) => false
+    case FixpointControlEvent.EndFixpoint() => false
+    case FixpointControlEvent.RepeatFixpoint() => false
+    case _ => true
+  })
+  val r2 = ctGraphBuilder.build(r)
+  println(ControlGraph.toGraphViz(r2))
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
   val deadLabels = ControlFlow.deadLabels(cfg)
