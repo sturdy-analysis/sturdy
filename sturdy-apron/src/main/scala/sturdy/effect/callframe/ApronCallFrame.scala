@@ -109,41 +109,41 @@ final class ApronCallFrame
     addressCallFrame.setState(state.addressCallFrameState)
 
   override def join: Join[ApronCallFrameState] =
-    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
-      val joinedRecencyStoreState = recencyStore.join(v1.recencyStoreState, v2.recencyStoreState)
-
-      val backupState = recencyStore.getState
-
-      try {
-        recencyStore.setState(joinedRecencyStoreState.get)
-
-        if (v1.addressCallFrameState.length != v2.addressCallFrameState.length) {
-          throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
-        } else {
-          val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            val sourceExpr = ApronExpr.Addr(virt2, apronStore.getType(virt2.physical))
-            recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
-            virt1
-          )
-
-          val updatedRecencyStoreState =
-            recencyStore.join(joinedRecencyStoreState.get, recencyStore.getState)
-
-          MaybeChanged(
-            ApronCallFrameState(
-              updatedRecencyStoreState.get,
-              joinedAddressCallFrameState
-            ),
-            joinedRecencyStoreState.hasChanged || updatedRecencyStoreState.hasChanged
-          )
-        }
-      } finally {
-        recencyStore.setState(backupState)
-      }
+    combineApronCallFrameStates(_, _, recencyStore.join)
 
   override def widen: Widen[ApronCallFrameState] =
-    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
-      throw new NotImplementedError()
+    combineApronCallFrameStates(_, _, recencyStore.widen)
+
+  def combineApronCallFrameStates[W <: Widening](state1: ApronCallFrameState, state2: ApronCallFrameState, combineRecencyStore: Combine[recencyStore.State, W]): MaybeChanged[ApronCallFrameState] =
+    val joinedRecencyStoreState = combineRecencyStore(state1.recencyStoreState, state2.recencyStoreState)
+
+    val backupState = recencyStore.getState
+
+    try {
+      recencyStore.setState(joinedRecencyStoreState.get)
+
+      if (state1.addressCallFrameState.length != state2.addressCallFrameState.length) {
+        throw new IllegalStateException(s"Cannot join call frames ${state1} and ${state2} of equal size")
+      } else {
+        val joinedAddressCallFrameState = state1.addressCallFrameState.zip(state2.addressCallFrameState).map((virt1, virt2) =>
+          val sourceExpr = ApronExpr.Addr(virt2, apronStore.getType(virt2.physical))
+          recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
+          virt1
+        )
+
+        val updatedRecencyStoreState = combineRecencyStore(joinedRecencyStoreState.get, recencyStore.getState)
+
+        MaybeChanged(
+          ApronCallFrameState(
+            updatedRecencyStoreState.get,
+            joinedAddressCallFrameState
+          ),
+          joinedRecencyStoreState.hasChanged || updatedRecencyStoreState.hasChanged
+        )
+      }
+    } finally {
+      recencyStore.setState(backupState)
+    }
 
   def closedEquality: ClosedEquality[recencyStore.addressTranslation.State, ApronCallFrameState] =
     new ClosedEquality[recencyStore.addressTranslation.State, ApronCallFrameState]:

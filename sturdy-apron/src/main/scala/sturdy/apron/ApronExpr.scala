@@ -242,11 +242,3 @@ enum CompareOp:
     case Le => "<="
     case Ge => ">="
     case Gt => ">"
-
-given JoinApronExpr[Var, Type]: Join[ApronExpr[Var, Type]] with
-  def apply(v1: ApronExpr[Var, Type], v2: ApronExpr[Var, Type]): MaybeChanged[ApronExpr[Var, Type]] =
-    throw NotImplementedError()
-
-given WidenApronExpr[Var, Type]: Widen[ApronExpr[Var, Type]] with
-  def apply(v1: ApronExpr[Var, Type], v2: ApronExpr[Var, Type]): MaybeChanged[ApronExpr[Var, Type]] =
-    throw NotImplementedError()
