@@ -78,10 +78,12 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
   }
 
   override type State = Map[Key, Mem[B]]
-  override def getState: Map[Key, Mem[B]] = memories
-  override def setState(s: Map[Key, Mem[B]]): Unit = memories = s
-  override def join: Join[Map[Key, Mem[B]]] = implicitly
-  override def widen: Widen[Map[Key, Mem[B]]] = implicitly
+  override def getState: State = memories
+  override def setState(s: State): Unit = memories = s
+  override def mapState(st: State, f:[A] => A => A): State =
+    memories.map((k,v) => (f[Key](k), v.map(f[B])))
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:
@@ -187,6 +189,7 @@ object ConstantAddressMemory:
     def read(a: Int, length: Int): JOptionA[Seq[B]]
     def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit])
     def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]])
+    def map[C: ClassTag](f: B => C): Mem[C]
 
   case class TopMem[B: ClassTag](isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
@@ -198,6 +201,7 @@ object ConstantAddressMemory:
       (newMem, JOptionA.noneSome(()))
     override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]]) = (None, JOptionA.noneSome(Topped.Top))
 
+    override def map[C: ClassTag](f: B => C): Mem[C] = TopMem(isDefinite, f(upperBound))
 
   case class SizeMem[B: ClassTag](size: Int, sizeLimit: Option[Int], isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
@@ -245,6 +249,8 @@ object ConstantAddressMemory:
           (None, JOptionA.none)
         }
 
+    override def map[C: ClassTag](f: B => C): Mem[C] =
+      SizeMem(size, sizeLimit, isDefinite, f(upperBound))
 
   case class Word[B](b1: B, b2: B, b3: B, b4: B):
     def toIterable: Iterable[B] = Iterable(b1, b2, b3, b4)
@@ -256,6 +262,8 @@ object ConstantAddressMemory:
       case 2 => Word(b1, b2, b, b4)
       case 3 => Word(b1, b2, b3, b)
       case _ => throw new IllegalArgumentException
+    def map[C](f: B => C): Word[C] = Word(f(b1), f(b2), f(b3), f(b4))
+
   val WordSize: Int = 4
 
   given CombineWord[B, W <: Widening](using Combine[B, W]): Combine[Word[B], W] with
@@ -408,6 +416,8 @@ object ConstantAddressMemory:
           (None, JOptionA.none)
         }
 
+    override def map[C: ClassTag](f: B => C): Mem[C] =
+      ImmutableByteMem(size, f(emptyB), words.map((i,w) => (i,w.map(f))), sizeLimit , isDefinite, f(upperBound))
 
 //  case class MutableByteMem[B: ClassTag](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: Option[Int], isDefinite: Boolean, upperBound: B) extends Mem[B]:
 //    override def cloned: MutableByteMem[B] = MutableByteMem(bytes.clone(), dirty.clone(), sizeLimit, isDefinite, upperBound)

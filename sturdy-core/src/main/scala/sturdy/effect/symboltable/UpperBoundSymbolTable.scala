@@ -57,7 +57,9 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
     IsSound.Sound
 
   type State = Map[Key, Entry]
-  override def getState: Map[Key, Entry] = tables
-  override def setState(s: Map[Key, Entry]): Unit = tables = s
-  override def join: Join[Map[Key, Entry]] = implicitly
-  override def widen: Widen[Map[Key, Entry]] = implicitly
+  override def getState: State = tables
+  override def setState(s: State): Unit = tables = s
+  override def mapState(st: State, f: [A] => A => A): State =
+    st.map((k,e) => (f[Key](k), f[Entry](e)))
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly

@@ -88,7 +88,8 @@ class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(
 
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
   override type State = List[V]
-  override def getState: List[V] = vars.toList
-  override def setState(s: List[V]): Unit = vars = s.toArray
-  override def join: Join[List[V]] = implicitly
-  override def widen: Widen[List[V]] = implicitly
+  override def getState: State = vars.toList
+  override def setState(s: State): Unit = vars = s.toArray
+  override def mapState(st: State, f: [A] => A => A): State = st.map(f[V])
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly

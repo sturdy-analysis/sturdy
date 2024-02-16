@@ -12,11 +12,12 @@ class PrintFiniteAlphabet[A](using Finite[A]) extends Print[A], Monotone:
     symbols += a
 
   override type State = Powerset[A]
-  override def getState: Powerset[A] = Powerset(symbols)
-  override def setState(st: Powerset[A]): Unit = symbols = st.set
-
-  override def join: Join[Powerset[A]] = implicitly
-  override def widen: Widen[Powerset[A]] = implicitly
+  override def getState: State = Powerset(symbols)
+  override def setState(st: State): Unit = symbols = st.set
+  override def mapState(st: State, f: [X] => X => X): State =
+    st.map(f[A])
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
   def isSound[C](c: CPrint[C])(using s: Soundness[C, A]): IsSound =
     c.getPrinted.foreach { c =>

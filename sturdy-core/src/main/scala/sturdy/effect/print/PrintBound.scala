@@ -14,9 +14,12 @@ class PrintBound[A](using Join[A], Widen[A]) extends Print[A], Monotone:
       case Some(old) => symbol = Some(Join(old, a).get)
 
   override type State = Option[A]
-  override def getState: Option[A] = symbol
-  override def setState(st: Option[A]): Unit =
+  override def getState: State = symbol
+  override def setState(st: State): Unit =
     symbol = st
+
+  override def mapState(st: State, f: [A] => A => A): State =
+    st.map(f[A])
 
   def combineSymbols(v1: Option[A], v2: Option[A], comb: (A, A) => MaybeChanged[A]): MaybeChanged[Option[A]] = (v1, v2) match
     case (None, None) => Unchanged(None)

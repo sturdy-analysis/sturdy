@@ -34,6 +34,8 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
   override def setState(st: State): Unit =
     mapping = st
 
+  override def mapState(st: Map[(Context, Int), PowRecency], f: [A] => A => A): State = st
+
   override def join: Join[State] = implicitly[Join[State]]
 
   override def widen: Widen[State] = implicitly[Widen[State]]

@@ -193,21 +193,11 @@ final class ApronStore[
   override type State = (TypeEnv, Abstract1)
 
   // TODO: find a better way to copy apronState without changing anything
-  def getState: State = (typeEnv, apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false))
-
-  def setState(s: State) =
+  override def getState: State = (typeEnv, apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false))
+  override def setState(s: State) =
     typeEnv = s._1
     apronState = s._2
-
-  def join: Join[State] = implicitly
-
-  def widen: Widen[State] = implicitly
-
-given ApronClosedEquality[Cls, Context, Type]:  ClosedEquality[Cls, (Map[PhysicalAddress[Context],Type], apron.Abstract1)] with
-  def closedEquals(closure1: Cls, a1: (Map[PhysicalAddress[Context], Type], apron.Abstract1), closure2: Cls, a2: (Map[PhysicalAddress[Context], Type], apron.Abstract1)): Boolean =
-    val (typeEnv1, abstract1) = a1
-    val (typeEnv2, abstract2) = a2
-    typeEnv1 == typeEnv2 && abstract1.isEqual(abstract1.getCreationManager(), abstract2)
-
-  def closedHashCode(closure: Cls, a: (Map[PhysicalAddress[Context], Type], apron.Abstract1)): Int =
-    a.hashCode()
+  override def mapState(st: State, f: [A] => A => A): State =
+    st
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly

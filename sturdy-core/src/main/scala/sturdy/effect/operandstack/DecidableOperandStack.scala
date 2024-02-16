@@ -71,11 +71,14 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V], Concrete
 /** Stacks of different execution branches are joined. */
 class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends DecidableOperandStack[V]:
   override type State = List[V]
-  override def getState: List[V] =
+  override def getState: State =
     stack.take(stack.size - framePointer)
-  override def setState(s: List[V]): Unit =
+  override def setState(s: State): Unit =
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
+
+  override def mapState(st: State, f: [A] => A => A): State =
+    st.map(f[V])
 
   def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false

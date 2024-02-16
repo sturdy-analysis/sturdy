@@ -14,7 +14,7 @@ import scala.reflect.ClassTag
 final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin],
    val addressTranslation: AddressTranslation[Context] = AddressTranslation.empty[Context])
-  (using Finite[Context], ClosedEquality[addressTranslation.State, initStore.State])
+  (using Finite[Context])
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 
   private val store: initStore.type = initStore
@@ -80,20 +80,18 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
 
   case class RecencyStoreState(store: initStore.State,
                                addrTrans: addressTranslation.State,
-                               mostRecent: Map[Context, Powerset[Int]]):
-    override def equals(obj: Any): Boolean = throw new UnsupportedOperationException("Use RecencyStore.closedEquality")
+                               mostRecent: Map[Context, Powerset[Int]])
 
-    override def hashCode(): Int = throw new UnsupportedOperationException("Use RecencyStore.closedEquality")
+  override def getState: RecencyStoreState =
+    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
 
-    override def toString: String = s"RecencyStoreState(${store}, ${addrTrans}, ${mostRecent})"
+  override inline def setState(st: RecencyStoreState): Unit =
+    store.setState(st.store.asInstanceOf)
+    addressTranslation.setState(st.addrTrans)
+    mostRecent = st.mostRecent
 
-  def closedEquality: ClosedEquality[addressTranslation.State, RecencyStoreState] =
-    new ClosedEquality[addressTranslation.State, RecencyStoreState]:
-      override def closedEquals(closure1: addressTranslation.State, state1: RecencyStoreState, closure2: addressTranslation.State, state2: RecencyStoreState): Boolean =
-        ClosedEquality(closure1, state1.store, closure2, state2.store)
-
-      override def closedHashCode(closure: addressTranslation.State, state: RecencyStoreState): Int =
-        ClosedHashCode(closure, state.store)
+  override def mapState(st: RecencyStoreState, f: [A] => A => A): RecencyStoreState =
+    RecencyStoreState(initStore.mapState(st.store, f), st.addrTrans, st.mostRecent)
 
   override def join: Join[RecencyStoreState] = new CombineRecencyStoreState(initStore.join)
   override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(initStore.widen)
@@ -104,14 +102,6 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
       val combinedMostRecent = Combine(state1.mostRecent, state2.mostRecent)
       MaybeChanged(RecencyStoreState(combinedStores.get, combinedAddrTrans.get, combinedMostRecent.get),
         hasChanged = combinedStores.hasChanged)
-
-  override def getState: RecencyStoreState =
-    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
-
-  override inline def setState(st: RecencyStoreState): Unit =
-    store.setState(st.store.asInstanceOf)
-    addressTranslation.setState(st.addrTrans)
-    mostRecent = st.mostRecent
 
   def virtualAddresses: PowVirtualAddress[Context] =
     addressTranslation.virtualAddresses

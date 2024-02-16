@@ -39,10 +39,13 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
       xs.reduce(x => store -= x)
 
   override type State = Map[A, V]
-  override def getState: Map[A, V] = store
-  override def setState(s: Map[A, V]): Unit = this.store = s
-  override def join: Join[Map[A, V]] = implicitly
-  override def widen: Widen[Map[A, V]] = implicitly
+  override def getState: State = store
+  override def setState(s: State): Unit = this.store = s
+
+  override def mapState(st: State, f: [X] => X => X): State =
+    st.map((k,v) => (f[A](k), f[V](v)))
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
   def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, AA], vSoundness: Soundness[cV, V]): IsSound =
     c.entries.foreachEntry { case (a, v) =>

@@ -11,7 +11,6 @@ import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
-import sturdy.effect.store.RecencyClosure
 import sturdy.values.Finite
 import sturdy.values.references.{AddressTranslation, VirtualAddress}
 import sturdy.values.integer.TypeIntegerOps
