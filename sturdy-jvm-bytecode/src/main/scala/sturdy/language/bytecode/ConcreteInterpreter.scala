@@ -73,8 +73,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, Value, AllocationSite, Mth, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, Value, AllocationSite, Mth, MayJoin.NoJoin, Value, ObjRep](identity, asObj, identity, Value.Obj.apply)(
+    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin, ObjRep](asObj, Value.Obj.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
 

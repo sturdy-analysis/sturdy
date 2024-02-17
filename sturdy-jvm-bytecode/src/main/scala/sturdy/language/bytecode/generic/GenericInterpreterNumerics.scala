@@ -56,9 +56,13 @@ class GenericInterpreterNumerics[Addr, Idx, V](bytecodeOps: BytecodeOps[Addr, Id
       i32ops.integerLit(inst.value)
     case inst: LoadInt =>
       i32ops.integerLit(inst.value)
+    case inst: LoadInt_W =>
+      i32ops.integerLit(inst.value)
     case inst: LoadLong =>
       i64ops.integerLit(inst.value)
     case inst: LoadFloat =>
+      f32ops.floatingLit(inst.value)
+    case inst: LoadFloat_W =>
       f32ops.floatingLit(inst.value)
     case inst: LoadDouble =>
       f64ops.floatingLit(inst.value)

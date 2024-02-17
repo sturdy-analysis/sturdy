@@ -52,7 +52,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, V, AllocationSite, Method, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, ObjRep, V, AllocationSite, Method, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -113,9 +113,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
     case x if (x == 19) =>
       inst match
         case inst: LoadInt_W =>
-          ???
+          stack.push(num.evalNumericOp(inst))
         case inst: LoadFloat_W =>
-          ???
+          stack.push(num.evalNumericOp(inst))
         case inst: LoadClass_W =>
           ???
         case inst: LoadString_W =>
