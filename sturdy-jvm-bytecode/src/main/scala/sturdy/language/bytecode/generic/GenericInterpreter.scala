@@ -19,6 +19,7 @@ import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
 
 import java.net.URL
+import scala.collection.immutable.ArraySeq
 
 
 /*
@@ -63,6 +64,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
   val alloc: Allocation[Addr, AllocationSite]
   val objAlloc: Allocation[OID, AllocationSite]
   val store: Store[Addr, V, J]
+  val staticVarStore: Store[(ObjectType, String), V, J]
 
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
@@ -369,7 +371,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
     // Load and Store Statics
     case x if (178 <= x && x <= 179) =>
-      ???
+      inst match
+        case inst: GETSTATIC =>
+          val v = staticVarStore.readOrElse((inst.declaringClass, inst.name), fail(UnboundStaticVar, inst.name))
+          stack.push(v)
+        case inst: PUTSTATIC =>
+          val v = stack.popOrAbort()
+          staticVarStore.write((inst.declaringClass, inst.name), v)
 
     // Load and Store Fields
     case x if (180 <= x && x <= 181) =>
@@ -404,10 +412,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
+            /*val numArgs = mth.descriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            stack.push(ret)*/
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
+            /*val numArgs = mth.descriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            stack.push(ret)*/
 
         case inst: INVOKESPECIAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
@@ -416,10 +434,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
+            /*val numArgs = mth.descriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            stack.push(ret)*/
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
+            /*val numArgs = mth.descriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            stack.push(ret)*/
 
         case _ =>
           val newFrameData = ()
@@ -504,6 +532,24 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
     case inst: IASTORE.type =>
       ???
 
+  def invokeMethodOnObjectInline(obj: V, mth: Method, args: Seq[V]): V =
+    val newFrameData = ()
+    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+    val thisAndArgs = List(obj) ++ args
+    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
+
+    val startingPC = mth.body.get.iterator.next().pc
+
+    var currInst = instructionMap.get(startingPC)
+
+    stack.withNewFrame(0) {
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+        runBlock(0, instructionMap, mth)
+      }
+    }
+    stack.popOrAbort()
 
   def invokeMethodOnObject(mth: Method) =
     val newFrameData = ()
@@ -542,9 +588,12 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
       }
   def invokeStatic(mth: Method) =
     val newFrameData = ()
-    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-    //println(mth.name)
-    //println(locals)
+
+    var locals: ArraySeq[ValType] = ArraySeq()
+    if (mth.body.get.maxLocals != 0){
+      locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+    }
+
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
     val numArgs = mth.descriptor.parametersCount
@@ -557,6 +606,25 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
     stack.withNewFrame(0){
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
+        runBlock(0, instructionMap, mth)
+      }
+    }
+
+  def initStaticVars(mth: Method) =
+    val newFrameData = ()
+
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+    val numArgs = mth.descriptor.parametersCount
+    val args = stack.popNOrAbort(numArgs)
+    val argsAndLocals = args.view
+
+    val startingPC = mth.body.get.iterator.next().pc
+
+    var currInst = instructionMap.get(startingPC)
+
+    stack.withNewFrame(0) {
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
         runBlock(0, instructionMap, mth)
       }
     }

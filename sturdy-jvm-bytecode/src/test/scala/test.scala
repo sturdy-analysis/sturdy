@@ -20,27 +20,31 @@ object test extends App{
     case _ => ValType.I32
 
   val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject"
+  val simpleMathName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject\\SimpleMath.class"
 
   val pWithNatives = Project(
     new java.io.File(classFileName), // path to the JAR files/directories containing the project
     org.opalj.bytecode.RTJar
   )
 
-  /*val cfs: List[ClassFile] =
-    process(new DataInputStream(new FileInputStream(classFileName))) { in =>
+  val cfs1: List[ClassFile] =
+    process(new DataInputStream(new FileInputStream(simpleMathName))) { in =>
       org.opalj.br.reader.Java8Framework.ClassFile(in)
     }
-  val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
+  /*val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
   println(locals.map(_.fieldType))
   val localtypes = locals.map(_.fieldType)
   val convertedTypes = localtypes.map(convertTypes(_))
   println(convertedTypes)*/
 
-  val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
+  //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
+  val cfs = cfs1.head
   val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
 
+  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map(), Map())
 
-  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map())
+  println(cfs.staticInitializer.get)
+  interp.invokeStatic(cfs.staticInitializer.get)
 
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
@@ -156,6 +160,13 @@ object test extends App{
 
   interp.eval(SIPUSH(201))
   interp.invokeStatic(nonCompactSwitchTest)
+  println(interp.stack.pop())
+
+  println("--- staticVarTest ---")
+  val staticVarTest = cfs.findMethod("staticVarTest").head
+  interp.invokeStatic(staticVarTest)
+  println(interp.stack.pop())
+  interp.invokeStatic(staticVarTest)
   println(interp.stack.pop())
 
   /*

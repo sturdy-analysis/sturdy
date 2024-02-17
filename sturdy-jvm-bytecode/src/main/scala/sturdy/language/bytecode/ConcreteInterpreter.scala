@@ -53,7 +53,8 @@ object ConcreteInterpreter extends Interpreter:
 
 
   type Store = Map[Addr, Value]
-  class Instance(files: Project[URL], initStore: Store) extends GenericInstance:
+  type StaticStore = Map[(ObjectType, String), Value]
+  class Instance(files: Project[URL], initStore: Store, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
@@ -67,6 +68,7 @@ object ConcreteInterpreter extends Interpreter:
     val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val store: CStore[Addr, Value] = new CStore(initStore)
+    val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
     val project: Project[URL] = files
 
