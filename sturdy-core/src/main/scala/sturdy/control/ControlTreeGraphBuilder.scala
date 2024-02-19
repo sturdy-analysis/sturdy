@@ -35,12 +35,12 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       addEdges(prev, begin)
       val (last, excs) = _build(body, Set(begin))
       addEdges(last, end)
-      if (!edges.contains(Edge(begin, end, EdgeType.CF)) && edges.exists(_.to == end))
+      if (!edges.contains(Edge(begin, end, EdgeType.CF)) && last.nonEmpty)
         addEdges(Set(begin), end, EdgeType.BlockPair)
-      if (edges.exists(_.to == end))
+      if (last.nonEmpty)
         (Set(end), excs)
       else
-        (Set(), Map())
+        (Set(), excs)
 
     case ControlTree.Seq(body) =>
       body.foldLeft((prev, Map[Exc, Set[CNode]]())) { (a, b) =>
@@ -52,20 +52,16 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       branches.map(_build(_, prev)).fold(Set.empty, Map.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)))
 
     case ControlTree.Try(body, handlers) =>
-      val (last, excBody) = _build(body, prev)
+      val (lastBody, excBody) = _build(body, prev)
+      val (lastHandlers, excEscalate) = handlers.map(_buildCatch(_, lastBody, excBody))
+        .fold(Set.empty, Map.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)))
 
-
-      val (lastHandlers, excEsc) = if (handlers.isEmpty)
-        (last, excBody)
-      else
-        handlers.map(_buildCatch(_, Set.empty, excBody)).fold(Set.empty, Map.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)))
-
-      (last ++ lastHandlers, excEsc)
+      (lastBody ++ lastHandlers, excEscalate)
 
     case ControlTree.Throw(exc) =>
       (Set(), Map(exc -> prev))
 
-    case ControlTree.Handling(exc, body) => throw new Exception("...")
+    case ControlTree.Handling(_, _) => throw new Exception("...")
 
     case ControlTree.Fixpoint(b, repeat) =>
       _build(repeat.getOrElse(b), prev)
@@ -74,22 +70,10 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       (if failing then Set.empty else prev, Map.empty)
 
   private def _buildCatch(ct: CT, prev: Set[CNode], activeExc: Map[Exc, Set[CNode]]): (Set[CNode], Map[Exc, Set[CNode]]) = ct match
-    case ControlTree.Fork(branches) => branches.map {
-      case ControlTree.Empty() =>
-        (prev, activeExc)
-      case ControlTree.Handling(exc, body) => activeExc.get(exc) match
-        case Some(prevExc) =>
-          _build(body, prevExc)
-        case None =>
-          (Set.empty, Map.empty)
-      case _ => throw new Exception("...")
-    }.fold(Set.empty, Map.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)))
-
     case ControlTree.Handling(exc, body) => activeExc.get(exc) match
-      case Some(prevExc) =>
-        _build(body, prevExc)
-      case None =>
-        (Set.empty, Map.empty)
+      case Some(prevExc) => _build(body, prevExc)
+      case None => throw new Exception("...")
+    case ControlTree.Empty() => (prev, activeExc) // TODO fix
     case _ => throw new Exception("...")
 
   private def addEdges(prev: Set[CNode], current: CNode): Unit =

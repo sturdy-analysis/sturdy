@@ -8,10 +8,10 @@ import scala.util.Random
 
 enum ControlTree[Atom, Sec, Exc]:
   case Empty()
+
   case Atomic(a: Atom)
   case Failed()
   case Section(section: Sec, body: ControlTree[Atom, Sec, Exc])
-
 
   case Seq(body: List[ControlTree[Atom, Sec, Exc]])
   case Fork(branches: List[ControlTree[Atom, Sec, Exc]])
@@ -61,7 +61,7 @@ enum ControlTree[Atom, Sec, Exc]:
 
       branches.last._print(buf)
 
-      branches.init.foreach { b =>
+      branches.init.foreach { _ =>
         buf += BranchingControlEvent.Join()
       }
 
@@ -71,8 +71,13 @@ enum ControlTree[Atom, Sec, Exc]:
     case ControlTree.Try(body, handlers) =>
       buf += ExceptionControlEvent.BeginTry()
       body._print(buf)
+
+      if (handlers.size == 1)
+        handlers.foreach(_._print(buf))
+      else if (handlers.size > 1)
+        Fork(handlers)._print(buf)
+
       buf += ExceptionControlEvent.EndTry()
-      handlers.foreach(_._print(buf))
 
     case ControlTree.Throw(exc) =>
       buf += ExceptionControlEvent.Throw(exc)
@@ -84,12 +89,12 @@ enum ControlTree[Atom, Sec, Exc]:
     case ControlTree.Fixpoint(b, repeat) =>
       buf += FixpointControlEvent.BeginFixpoint()
       b._print(buf)
+      buf += FixpointControlEvent.EndFixpoint()
       repeat match
         case None => ()
         case Some(repeatCt) =>
           buf += FixpointControlEvent.RepeatFixpoint()
           repeatCt._print(buf)
-      buf += FixpointControlEvent.EndFixpoint()
 
     case ControlTree.Recurrent(failing) =>
       buf += FixpointControlEvent.RecurrentCall(failing)
@@ -97,46 +102,46 @@ enum ControlTree[Atom, Sec, Exc]:
 
   private def _toGraphViz(p: String): Set[String] = this match
     case ControlTree.Empty() =>
-      val name = s"Empty(${randomString})"
+      val name = s"Empty($randomString)"
       Set(toGraphVizEdge(p, name))
 
     case ControlTree.Atomic(a) =>
-      val name = s"$a (${randomString})"
+      val name = s"$a ($randomString)"
       Set(toGraphVizEdge(p, name))
 
     case ControlTree.Seq(body) =>
-      val name = s"Seq (${randomString})"
+      val name = s"Seq ($randomString)"
       body.flatMap(_._toGraphViz(name)).toSet + toGraphVizEdge(p, name)
 
     case ControlTree.Section(section, body) =>
-      val name = s"Section $section (${randomString})"
+      val name = s"Section $section ($randomString)"
       body._toGraphViz(name) + toGraphVizEdge(p, name)
 
     case ControlTree.Fork(branches) =>
-      val name = s"Fork (${randomString})"
+      val name = s"Fork ($randomString)"
       branches.flatMap(_._toGraphViz(name)).toSet + toGraphVizEdge(p, name)
 
     case ControlTree.Failed() =>
-      val name = s"Failed(${randomString})"
+      val name = s"Failed($randomString)"
       Set(toGraphVizEdge(p, name))
 
     case ControlTree.Try(body, handlers) =>
-      val name = s"Try (${randomString})"
-      body._toGraphViz(name) ++ handlers.flatMap(_._toGraphViz(name)).toSet + toGraphVizEdge(p, name)
+      val name = s"Try ($randomString)"
+      body._toGraphViz(name) ++ Fork(handlers)._toGraphViz(name) + toGraphVizEdge(p, name)
 
     case ControlTree.Throw(exc) =>
-      val name = s"Throw $exc (${randomString})"
+      val name = s"Throw $exc ($randomString)"
       Set(toGraphVizEdge(p, name))
 
     case ControlTree.Handling(exc, body) =>
-      val name = s"Handle $exc (${randomString})"
+      val name = s"Handle $exc ($randomString)"
       body._toGraphViz(name) + toGraphVizEdge(p, name)
 
-    case ControlTree.Fixpoint(b, repeat) =>
+    case ControlTree.Fixpoint(_, _) =>
       ???
 
-    case ControlTree.Recurrent(failing) =>
-      val name = s"Recurrent (${randomString})"
+    case ControlTree.Recurrent(_) =>
+      val name = s"Recurrent ($randomString)"
       Set(toGraphVizEdge(p, name))
 
   private def randomString: String = Random.alphanumeric.take(10).mkString
@@ -174,7 +179,6 @@ object ControlTree:
         case BranchingControlEvent.Fork() => _buildFork(index)
         case _ => throw new Exception("Invalid Sequence")
 
-
       case event: ExceptionControlEvent[Exc] => event match
         case ExceptionControlEvent.BeginTry() => _buildTry(index)
         case ExceptionControlEvent.Throw(exc) => (ControlTree.Throw(exc), index + 1)
@@ -182,9 +186,9 @@ object ControlTree:
         case ExceptionControlEvent.Catching() => throw new Exception("Should not happen")
         case _ => throw new Exception("Invalid Sequence")
 
-
       case event: FixpointControlEvent => event match
         case FixpointControlEvent.BeginFixpoint() => _buildFixpoint(index)
+        case FixpointControlEvent.RecurrentCall(failing) => (ControlTree.Recurrent(failing), index + 1)
         case _ => throw new Exception("Invalid Sequence")
 
     def _buildSection(index: Int): (CT, Int) = events(index) match
@@ -236,34 +240,30 @@ object ControlTree:
     def _buildTry(index: Int): (CT, Int) = events(index) match
       case ExceptionControlEvent.BeginTry() =>
         var i = index + 1
+
         var cache: Option[CT] = None
         var body: Option[CT] = None
+
         var handlers: List[CT] = List.empty
 
         while (events(i) != ExceptionControlEvent.EndTry())
           val (t, skip) = _dispatch(i)
-          if (cache.isDefined)
+          if (cache.isDefined && !cache.contains(Empty()))
             body = concatenate(body, cache.get)
           cache = Some(t)
           i = skip
 
-        if (cache match
-          case Some(ControlTree.Fork(branches)) => branches.forall {
-            case Handling(_, _) => true
-            case Empty() => true
+        cache match
+          case Some(ControlTree.Fork(branches)) if branches.forall {
+            case Handling(_, _) | Empty() => true
             case _ => false
-          }
-          case Some(ControlTree.Handling(exc, body)) => true
-          case _ => false) {
-          handlers = List(cache.get)
-        }
-        else {
-          if (cache.isDefined)
-            body = concatenate(body, cache.get)
-        }
+          } => handlers = branches
+          case Some(h@ControlTree.Handling(_, _)) => handlers = List(h)
+          case Some(Empty()) => ()
+          case Some(_) => body = concatenate(body, cache.get)
+          case None => ()
 
         (ControlTree.Try(body.getOrElse(Empty()), handlers), i + 1)
-
 
       case _ => throw new Exception("Error in dispatch")
 
@@ -286,8 +286,27 @@ object ControlTree:
         (ControlTree.Handling(exc, body.getOrElse(Empty())), i)
       case _ => throw new Exception("Error in dispatch")
 
-    def _buildFixpoint(index: Int): (CT, Int) =
-      ???
+    def _buildFixpoint(index: Int): (CT, Int) = events(index) match
+      case FixpointControlEvent.BeginFixpoint() =>
+        var i = index + 1
+        var body: Option[CT] = None
+        var repeat: Option[CT] = None
 
+        while (events(i) != FixpointControlEvent.EndFixpoint())
+          val (t, skip) = _dispatch(i)
+          body = concatenate(body, t)
+          i = skip
+
+        i = i + 1
+
+        if (events(i) == FixpointControlEvent.RepeatFixpoint()) events(i + 1) match
+          case FixpointControlEvent.BeginFixpoint() =>
+            val (repeatSec, skip) = _buildFixpoint(i + 1)
+            repeat = Some(repeatSec)
+            i = skip
+
+        (ControlTree.Fixpoint(body.getOrElse(Empty()), None), i)
+
+      case _ => throw new Exception("Error in dispatch")
 
     build()
