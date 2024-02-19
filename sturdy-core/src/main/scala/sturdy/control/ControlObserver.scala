@@ -1,5 +1,6 @@
 package sturdy.control
 
+import sturdy.control
 import sturdy.control.BasicControlEvent.Begin
 
 import scala.collection.mutable.ListBuffer
@@ -55,8 +56,22 @@ class PrintingControlObserver[Atom, Section, Exc](_indent: String = "  ", sep: S
         occurrence(ev)
       case _ => occurrence(ev)
 
-  override def handle(ev: ExceptionControlEvent[Exc]): Unit = occurrence(ev)
-    
+  override def handle(ev: ExceptionControlEvent[Exc]): Unit =
+    import ExceptionControlEvent.*
+    ev match
+      case control.ExceptionControlEvent.BeginTry() =>
+        occurrence(ev)
+        indent += "  "
+      case control.ExceptionControlEvent.Throw(_) => occurrence(ev)
+      case control.ExceptionControlEvent.Catching() => throw new Exception("Should not happen")
+      case control.ExceptionControlEvent.Handle(_) =>
+        indent = indent.drop(2)
+        occurrence(ev)
+        indent += "  "
+      case control.ExceptionControlEvent.EndTry() =>
+        indent = indent.drop(2)
+        occurrence(ev)
+
   override def handle(ev: BranchingControlEvent): Unit =
     import BranchingControlEvent.*
     ev match
@@ -70,9 +85,19 @@ class PrintingControlObserver[Atom, Section, Exc](_indent: String = "  ", sep: S
       case BranchingControlEvent.Join() =>
         indent = indent.drop(2)
         occurrence(ev)
-    
-  override def handle(ev: FixpointControlEvent): Unit = occurrence(ev)
-  
+
+  override def handle(ev: FixpointControlEvent): Unit = ev match
+    case sturdy.control.FixpointControlEvent.BeginFixpoint() =>
+      occurrence(ev)
+      indent += "  "
+    case sturdy.control.FixpointControlEvent.RecurrentCall(failing) =>
+      occurrence(ev)
+    case sturdy.control.FixpointControlEvent.EndFixpoint() =>
+      indent = indent.drop(2)
+      occurrence(ev)
+    case sturdy.control.FixpointControlEvent.RepeatFixpoint() =>
+      occurrence(ev)
+
   def getString: String = buf.toString
 
 object PrintingControlObserver:
