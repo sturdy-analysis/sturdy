@@ -3,27 +3,33 @@ package sturdy.language.tip.analysis
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.*
+import sturdy.IsSound
 import sturdy.data.given
+import sturdy.Soundness
+import sturdy.control.{ControlEvent, ControlEventGraphBuilder, ControlGraph, ControlTree, ControlTreeGraphBuilder, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.failure.{AFallible, afallibleAbstractly, falliblePO, given}
+import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
-import sturdy.fix.StackConfig
+import sturdy.language.tip.ConcreteInterpreter
+import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.abstractions.isFunOrWhile
-import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
-import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
-import sturdy.language.tip.*
+import sturdy.language.tip.{Parser, Program}
+import sturdy.effect.failure.{afallibleAbstractly, falliblePO}
+import sturdy.fix.StackConfig
 import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
+import sturdy.{*, given}
+import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.values.{*, given}
-import sturdy.*
+import sturdy.language.tip.{*, given}
+import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
+import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
+import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
@@ -56,7 +62,6 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       val graphBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
       val recorder = analysis.addControlObserver(new RecordingControlObserver)
 
-      val ctGraphBuilder = ControlTreeGraphBuilder()
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
 
@@ -70,15 +75,16 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       println(graphBuilder.toGraphViz)
 
 
-      val r = ControlTree.buildControlTree(recorder.events.filter {
-        case FixpointControlEvent.BeginFixpoint() => false
-        case FixpointControlEvent.RecurrentCall(_) => false
-        case FixpointControlEvent.EndFixpoint() => false
-        case FixpointControlEvent.RepeatFixpoint() => false
-        case _ => true
-      })
-      val r2 = ctGraphBuilder.build(r)
-      println(ControlGraph.toGraphViz(r2))
+      val originalSequence = recorder.events
+      val tree = ControlTree.buildControlTree(originalSequence)
+      val treeSequence = tree.print
+      val tree2 = ControlTree.buildControlTree(treeSequence)
+      val treeSequence2 = tree2.print
+
+      assert(treeSequence == treeSequence2)
+      assert(tree == tree2)
+
+      println(ControlGraph.toGraphViz(ControlTreeGraphBuilder().build(tree)))
 
 
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))

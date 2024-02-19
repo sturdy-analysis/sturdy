@@ -192,17 +192,18 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 //  println(cfg.toGraphViz)
 //  println(interp.controlRecorder)
 
-  val ctGraphBuilder = ControlTreeGraphBuilder()
 
-  val r = ControlTree.buildControlTree(recorder.events.filter {
-    case FixpointControlEvent.BeginFixpoint() => false
-    case FixpointControlEvent.RecurrentCall(_) => false
-    case FixpointControlEvent.EndFixpoint() => false
-    case FixpointControlEvent.RepeatFixpoint() => false
-    case _ => true
-  })
-  val r2 = ctGraphBuilder.build(r)
-  println(ControlGraph.toGraphViz(r2))
+  val originalSequence = recorder.events
+  val tree = ControlTree.buildControlTree(originalSequence)
+  val treeSequence = tree.print
+  val tree2 = ControlTree.buildControlTree(treeSequence)
+  val treeSequence2 = tree2.print
+
+  assert(treeSequence == treeSequence2)
+  assert(tree == tree2)
+
+  println(ControlGraph.toGraphViz(ControlTreeGraphBuilder().build(tree)))
+
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
   val deadLabels = ControlFlow.deadLabels(cfg)
