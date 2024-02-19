@@ -94,7 +94,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   implicit val failure: Failure
 
   // effect stack
-  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure), {
+  val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure), {
     case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
     case _: FixIn.Eval => List(callFrame, store, alloc, input, failure)
   }, {

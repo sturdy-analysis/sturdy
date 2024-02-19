@@ -7,7 +7,7 @@ import apron.Interval
 import sturdy.Executor
 import sturdy.apron.*
 import sturdy.data.{JOption, JOptionC, NoJoin, WithJoin, given}
-import sturdy.effect.{EffectStack, given}
+import sturdy.effect.{Effect, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.{ApronCallFrame, DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, given}
 import sturdy.effect.callframe.ApronCallFrame.given
@@ -20,8 +20,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.apron.given
 import sturdy.fix
-import sturdy.fix.StackConfig
-import sturdy.fix.context
+import sturdy.fix.{StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
@@ -121,44 +120,44 @@ object RelationalAnalysis extends Interpreter,
     override val callFrame: DecidableMutableCallFrame[String, String, Value, Exp.Call] = new
         DecidableMutableCallFrame[String, String, Value, Exp.Call]("$main", Iterable.empty):
 
-      var intvars: BitSet = BitSet.empty
-
       override def getLocal(x: Int): JOptionC[Value] =
-        if (intvars.contains(x))
-          apronCallFrame.getLocal(x).map(exp => Value.IntValue(exp))
-        else
-          super.getLocal(x)
+        (apronCallFrame.getLocal(x), super.getLocal(x)) match
+          case (JOptionC.None(), JOptionC.None()) => JOptionC.None()
+          case (JOptionC.Some(exp), JOptionC.None()) => JOptionC.Some(Value.IntValue(exp))
+          case (JOptionC.None(), JOptionC.Some(v)) => JOptionC.Some(v)
+          case (JOptionC.Some(exp), JOptionC.Some(v)) => JOptionC.Some(Join(Value.IntValue(exp), v).get)
 
       override def setLocal(x: Int, v: Value): JOptionC[Unit] =
-        if (intvars.contains(x)) v match
+        v match
           case Value.IntValue(i) => apronCallFrame.setLocal(x, i)
-          case _ => throw new IllegalStateException(s"May not change the type of a variable $x := $v (was non-integer variable)")
-        else v match
-          case Value.IntValue(_) => throw new IllegalStateException(s"May not change the type of a variable $x := $v (was integer variable)")
           case _ => super.setLocal(x, v)
 
       override def withNew[A](d: String, newVars: Iterable[(String, Option[Value])], site: Exp.Call)(f: => A): A =
-        val snapIntvars = intvars
-        intvars = BitSet.empty
-        val newIntVars = newVars.zipWithIndex.collect {
-          case ((x, Some(Value.IntValue(i))), ix) =>
-            intvars += ix
-            x -> Some(i)
+        val newIntVars = newVars.map {
+          case (x,Some(Value.IntValue(exp))) => (x,Some(exp))
+          case (x,_) => (x, None)
         }
-        try super.withNew(d, newVars, site)(
-          apronCallFrame.withNew((), newIntVars, site)(f)
-        ) finally {
-          intvars = snapIntvars
+        val newOtherVars = newVars.map {
+          case (x,v@Some(Value.IntValue(_))) => (x,None)
+          case (x,v) => (x, v)
         }
 
-      override type State = (List[Value], BitSet, apronCallFrame.State)
+        try super.withNew(d, newOtherVars, site)(
+          apronCallFrame.withNew((), newIntVars, site)(
+            f
+          )
+        )
 
-      override def getState: State = (vars.toList, intvars, apronCallFrame.getState)
+      override type State = (List[Value], apronCallFrame.State)
+
+      override def getState: State = (vars.toList, apronCallFrame.getState)
 
       override def setState(st: State): Unit =
         vars = st._1.toArray
-        intvars = st._2
-        apronCallFrame.setState(st._3)
+        apronCallFrame.setState(st._2)
+
+      override def mapState(st: State, f: [A] => A => A): State =
+        (st._1.map(f[Value]), apronCallFrame.mapState(st._2, f))
 
       private given NoCombineBitSet[W <: Widening]: Combine[BitSet, W] with
         override def apply(v1: BitSet, v2: BitSet): MaybeChanged[BitSet] =
@@ -167,19 +166,13 @@ object RelationalAnalysis extends Interpreter,
           else
             MaybeChanged.Unchanged(v1)
 
-      override def join: Join[State] = (st1: State, st2: State) =>
-        if (st1._2 != st2._2)
-          throw new IllegalArgumentException(s"BitSets may not differ here $st1 and $st2")
-        val MaybeChanged(vars, varsChanged) = Join(st1._1, st2._1)
-        val MaybeChanged(apron, apronChanged) = apronCallFrame.join(st1._3, st2._3)
-        MaybeChanged((vars, st1._2, apron), varsChanged || apronChanged)
+      override def join: Join[State] = combineStates[Widening.No](_,_,implicitly, apronCallFrame.join)
+      override def widen: Widen[State] = combineStates[Widening.Yes](_,_,implicitly, apronCallFrame.widen)
 
-      override def widen: Widen[State] = (st1: State, st2: State) =>
-        if (st1._2 != st2._2)
-          throw new IllegalArgumentException(s"BitSets may not differ here $st1 and $st2")
-        val MaybeChanged(vars, varsChanged) = Widen(st1._1, st2._1)
-        val MaybeChanged(apron, apronChanged) = apronCallFrame.widen(st1._3, st2._3)
-        MaybeChanged((vars, st1._2, apron), varsChanged || apronChanged)
+      def combineStates[W <: Widening](st1: State, st2: State, combineSuper: Combine[List[Value],W], combineApronCallFrame: Combine[apronCallFrame.State, W]): MaybeChanged[State] =
+        val MaybeChanged(vars, varsChanged) = combineSuper(st1._1, st2._1)
+        val MaybeChanged(apron, apronChanged) = combineApronCallFrame(st1._2, st2._2)
+        MaybeChanged((vars, apron), varsChanged || apronChanged)
 
 
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)

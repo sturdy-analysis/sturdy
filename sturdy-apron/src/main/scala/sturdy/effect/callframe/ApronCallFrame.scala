@@ -94,23 +94,29 @@ final class ApronCallFrame
       f
     }
 
-  case class ApronCallFrameState(recencyStoreState: recencyStore.State, addressCallFrameState: addressCallFrame.State):
-    override def equals(obj: Any): Boolean = throw new UnsupportedOperationException("Use ApronCallFrame.closedEquality")
-    override def hashCode(): Int = throw new UnsupportedOperationException("Use ApronCallFrame.closedEquality")
+  case class ApronCallFrameState(recencyStoreState: recencyStore.State, addressCallFrameState: addressCallFrame.State)
 
 
   override type State = ApronCallFrameState
 
-  override def getState: ApronCallFrameState =
+  override def getState: State =
     ApronCallFrameState(recencyStore.getState, addressCallFrame.getState)
 
-  override def setState(state: ApronCallFrameState): Unit =
+  override def setState(state: State): Unit =
     recencyStore.setState(state.recencyStoreState)
     addressCallFrame.setState(state.addressCallFrameState)
 
-  override def join: Join[ApronCallFrameState] =
-    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
-      val joinedRecencyStoreState = recencyStore.join(v1.recencyStoreState, v2.recencyStoreState)
+  override def mapState(state: State, f: [A] => A => A): State =
+    ApronCallFrameState(
+      recencyStore.mapState(state.recencyStoreState, f),
+      addressCallFrame.mapState(state.addressCallFrameState, f)
+    )
+
+  override def join: Join[State] = combineApronCallFrameState(_, _, recencyStore.join)
+  override def widen: Widen[State] = combineApronCallFrameState(_, _, recencyStore.widen)
+
+  def combineApronCallFrameState[W <: Widening](v1: ApronCallFrameState, v2: ApronCallFrameState, combineRecencyStore: Combine[recencyStore.State, W]): MaybeChanged[ApronCallFrameState] =
+      val joinedRecencyStoreState = combineRecencyStore(v1.recencyStoreState, v2.recencyStoreState)
 
       val backupState = recencyStore.getState
 
@@ -127,7 +133,7 @@ final class ApronCallFrame
           )
 
           val updatedRecencyStoreState =
-            recencyStore.join(joinedRecencyStoreState.get, recencyStore.getState)
+            combineRecencyStore(joinedRecencyStoreState.get, recencyStore.getState)
 
           MaybeChanged(
             ApronCallFrameState(
@@ -140,22 +146,6 @@ final class ApronCallFrame
       } finally {
         recencyStore.setState(backupState)
       }
-
-  override def widen: Widen[ApronCallFrameState] =
-    (v1: ApronCallFrameState, v2: ApronCallFrameState) =>
-      throw new NotImplementedError()
-
-  def closedEquality: ClosedEquality[recencyStore.addressTranslation.State, ApronCallFrameState] =
-    new ClosedEquality[recencyStore.addressTranslation.State, ApronCallFrameState]:
-      val recencyStoreEquals = recencyStore.closedEquality
-
-      override def closedEquals(closure1: recencyStore.addressTranslation.State, state1: ApronCallFrameState, closure2: recencyStore.addressTranslation.State, state2: ApronCallFrameState): Boolean =
-        recencyStoreEquals.closedEquals(closure1, state1.recencyStoreState, closure2, state2.recencyStoreState) &&
-          ClosedEquality(closure1, state1.addressCallFrameState, closure2, state2.addressCallFrameState)
-
-      override def closedHashCode(closure: recencyStore.addressTranslation.State, state: ApronCallFrameState): Int =
-        (recencyStoreEquals.closedHashCode(closure, state.recencyStoreState),
-          ClosedHashCode(closure, state.addressCallFrameState)).hashCode()
 
   given VirtAddrJoin: Join[VirtAddr] with
     override def apply(v1: VirtAddr, v2: VirtAddr): MaybeChanged[VirtAddr] =
