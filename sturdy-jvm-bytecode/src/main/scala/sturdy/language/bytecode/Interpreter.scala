@@ -11,6 +11,7 @@ import sturdy.values.relational.*
 import generic.BytecodeFailure.*
 import sturdy.data.MayJoin
 import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps}
+import sturdy.values.arrays.{ConcreteArrayOps, LiftedArrayOps, ArrayOps}
 trait Interpreter:
   //type I8
   //type I16
@@ -23,9 +24,13 @@ trait Interpreter:
   type Mth
   type Addr
   type Idx
+
   type OID
   type ObjType
   type ObjRep
+
+  type AID
+  type ArrayRep
   enum Value:
     case TopValue
     //case Int8(b: I8)
@@ -35,6 +40,7 @@ trait Interpreter:
     case Float32(f: F32)
     case Float64(d: F64)
     case Obj(o: ObjRep)
+    case Array(a: ArrayRep)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
@@ -68,6 +74,10 @@ trait Interpreter:
       case Obj(o) => o
       case TopValue => topObj
       case _ => f.fail(TypeError, s"Expected obj but got $this")
+    def asArray(using f: Failure): ArrayRep = this match
+      case Array(a) => a
+      case TopValue => topArray
+      case _ => f.fail(TypeError, s"Expected array but got $this")
 
 
   //def topI8: I8
@@ -77,6 +87,7 @@ trait Interpreter:
   def topF32: F32
   def topF64: F64
   def topObj: ObjRep
+  def topArray: ArrayRep
 
   /*
   def typedTop(ty: ValType): Value = ty match
@@ -121,13 +132,14 @@ trait Interpreter:
     , f32EqOps: EqOps[F32, Bool]
     , f64EqOps: EqOps[F64, Bool]
     , objEqOps: EqOps[ObjRep, Bool]
+    , arrayEqOps: EqOps[ArrayRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
       ): BytecodeOps[Addr, Idx, Value] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
-    
+
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
@@ -183,6 +195,7 @@ trait Interpreter:
         case (Float32(f1), Float32(f2)) => boolean(EqOps.equ(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(EqOps.equ(d1, d2))
         case (Obj(o1), Obj(o2)) => boolean(EqOps.equ(o1, o2))
+        case (Array(a1), Array(a2)) => boolean(EqOps.equ(a1, a2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def neq(v1: Value, v2: Value): Value = (v1, v2) match
         case (Int32(i1), Int32(i2)) => boolean(EqOps.neq(i1, i2))
@@ -190,10 +203,11 @@ trait Interpreter:
         case (Float32(f1), Float32(f2)) => boolean(EqOps.neq(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(EqOps.neq(d1, d2))
         case (Obj(o1), Obj(o2)) => boolean(EqOps.neq(o1, o2))
+        case (Array(a1), Array(a2)) => boolean(EqOps.neq(a1, a2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, ObjType, ObjRep, NoJoin]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, NoJoin]

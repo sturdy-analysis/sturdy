@@ -15,6 +15,7 @@ import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
+import sturdy.values.arrays.ArrayOps
 import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
 
@@ -47,13 +48,17 @@ enum JvmExcept:
 
 enum AllocationSite:
   case classFile(cfs: ClassFile)
-  case objField(cfs: ClassFile)
+  case objField(cfs: ClassFile, field: String)
+  case array(array: ArrayType)
+  case arrayVals(idx: Int)
+  case default
 
-trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoin[_]]:
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
   val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, ObjRep, V, AllocationSite, Method, J]
+  val arrayOps: ArrayOps[Addr, AID, V, V, V, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -63,7 +68,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
   val except: Except[JvmExcept, JvmExcept, J]
   val alloc: Allocation[Addr, AllocationSite]
   val objAlloc: Allocation[OID, AllocationSite]
+  val arrayValAlloc: Allocation[Addr, AllocationSite]
+  val arrayAlloc: Allocation[AID, AllocationSite]
   val store: Store[Addr, V, J]
+  val arrayValStore: Store[Addr, V, J]
   val staticVarStore: Store[(ObjectType, String), V, J]
 
   type FrameData = Unit
@@ -137,7 +145,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
     //load from array
     case x if (46 <= x && x <= 53) =>
-      ???
+      val idx = stack.popOrAbort()
+      val array = stack.popOrAbort()
+      stack.push(eval_array_load(inst, array, idx))
 
     // store local variable
     case x if (54 <= x && x <= 78) =>
@@ -146,8 +156,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
     // store in array
     case x if (79 <= x && x <= 86) =>
-      val v1 = stack.popOrAbort()
-      ???
+      val v = stack.popOrAbort()
+      val idx = stack.popOrAbort()
+      val array = stack.popOrAbort()
+      eval_array_store(inst, array, idx, v)
 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
@@ -446,6 +458,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
             /*val numArgs = mth.descriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
             val obj = stack.popOrAbort()
+            stack.push(obj)
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
             stack.push(ret)*/
 
@@ -463,14 +476,33 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
       inst match
         case inst: NEW =>
           val cfs = project.classFile(inst.objectType).get
-          val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs)))
+          val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
           val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
           stack.push(obj)
 
 
     // Arrays
     case x if (188 <= x && x <= 190) =>
-      ???
+      inst match
+        case inst: NEWARRAY =>
+          val size = stack.popOrAbort()
+          val arrayVals = arrayOps.initArray(size)
+          val convertedArrayVals = arrayVals.map(_ => inst.arrayType.componentType).map(convertTypes).map(defaultValue)
+            .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array(inst.arrayType)), convertedArrayVals)
+          stack.push(array)
+        case inst: ANEWARRAY =>
+          val size = stack.popOrAbort()
+          val arrayVals = arrayOps.initArray(size)
+          val convertedArrayVals = arrayVals.map(_ => inst.arrayType.componentType).map(convertTypes).map(defaultValue)
+            .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array(inst.arrayType)), convertedArrayVals)
+          stack.push(array)
+        case inst: ARRAYLENGTH.type =>
+          val array = stack.popOrAbort()
+          val length = arrayOps.arrayLength(array)
+          stack.push(i32ops.integerLit(length))
+
 
     // athrow
     case x if (x == 191) =>
@@ -498,7 +530,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
 
     // multianewarray
     case x if (x == 197) =>
-      ???
+      inst match
+        case inst: MULTIANEWARRAY =>
+          ???
 
     // ifnull, ifnonnull
     case x if (198 <= x && x <= 199) =>
@@ -524,20 +558,26 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
     case inst: StoreLocalVariableInstruction =>
       frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-  def eval_array_load(inst: Instruction): V = inst match
-    case inst: IALOAD.type =>
-      ???
+  def eval_array_load(inst: Instruction, array: V, idx: V): V = inst match
+    case inst: ArrayLoadInstruction =>
+      //val idx = stack.popOrAbort()
+      //val array = stack.popOrAbort()
+      arrayOps.getVal(array, idx).getOrElse(fail(IndexOutOfBounds, s"Index $idx out of bounds"))
 
-  def eval_array_store(inst: Instruction, v: V): Unit = inst match
-    case inst: IASTORE.type =>
-      ???
+  def eval_array_store(inst: Instruction, array: V, idx: V, v: V): Unit = inst match
+    case inst: ArrayStoreInstruction =>
+      //val toBeStored = stack.popOrAbort()
+      //val idx = stack.popOrAbort()
+      //val array = stack.popOrAbort()
+      arrayOps.setVal(array, idx, v)
 
-  def invokeMethodOnObjectInline(obj: V, mth: Method, args: Seq[V]): V =
+  def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): V =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
-    val thisAndArgs = List(obj) ++ args
+    val objVal = stack.popOrAbort()
+    val thisAndArgs = List(objVal) ++ args
     val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
 
     val startingPC = mth.body.get.iterator.next().pc
@@ -549,7 +589,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
         runBlock(0, instructionMap, mth)
       }
     }
-    stack.popOrAbort()
+    val ret = stack.popOrAbort()
+    ret
 
   def invokeMethodOnObject(mth: Method) =
     val newFrameData = ()
@@ -655,7 +696,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
     case opalTypes: DoubleType => ValType.F64
     case opalTypes: BooleanType => ValType.I32
     case opalTypes: ObjectType => ValType.Obj
-    case opalTypes: ArrayType => ???
+    case opalTypes: ArrayType => ValType.Array
     case _ => ???
 
   def defaultValue(ty: ValType): V = ty match
@@ -664,3 +705,4 @@ trait GenericInterpreter[V, Addr, Idx, OID, ObjType, ObjRep, J[_] <: MayJoin[_]]
     case ValType.F32 => num.evalNumericOp(FCONST_0)
     case ValType.F64 => num.evalNumericOp(DCONST_0)
     case ValType.Obj => objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
+    case ValType.Array => arrayOps.makeArray(arrayAlloc(AllocationSite.default), Seq())

@@ -17,6 +17,7 @@ import sturdy.values.floating.FloatOps
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
+import sturdy.values.arrays.{*, given}
 
 import java.net.URL
 
@@ -35,6 +36,8 @@ object ConcreteInterpreter extends Interpreter:
   override type Idx = Int
   override type OID = Int
   override type ObjRep = Object[OID, ObjType, Addr]
+  override type AID = Int
+  override type ArrayRep = Array[AID, Addr]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -43,8 +46,11 @@ object ConcreteInterpreter extends Interpreter:
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
   override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
+  override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   def asObj(v: Value)(using Failure): ObjRep = v.asObj
+  def asArray(v: Value)(using Failure): ArrayRep = v.asArray
+  def asInt32(v: Value)(using Failure): I32 = v.asInt32
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
@@ -54,7 +60,7 @@ object ConcreteInterpreter extends Interpreter:
 
   type Store = Map[Addr, Value]
   type StaticStore = Map[(ObjectType, String), Value]
-  class Instance(files: Project[URL], initStore: Store, initStaticStore: StaticStore) extends GenericInstance:
+  class Instance(files: Project[URL], initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
@@ -67,7 +73,10 @@ object ConcreteInterpreter extends Interpreter:
     val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
     val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    val arrayAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    val arrayValAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val store: CStore[Addr, Value] = new CStore(initStore)
+    val arrayValStore: CStore[Addr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
     val project: Project[URL] = files
@@ -78,6 +87,10 @@ object ConcreteInterpreter extends Interpreter:
     val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin] =
       new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin, ObjRep](asObj, Value.Obj.apply)(
         using new ConcreteObjectOps(using alloc, store)
+      )
+    val arrayOps: ArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin] =
+      new LiftedArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin, ArrayRep, Int](asArray, Value.Array.apply, asInt32, Value.Int32.apply)(
+        using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
       )
 
 

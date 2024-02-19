@@ -40,8 +40,9 @@ object test extends App{
   //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
   val cfs = cfs1.head
   val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
+  println(pWithNatives.allClassFiles.filterNot(pWithNatives.isLibraryType(_)).map(_.staticInitializer))
 
-  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map(), Map())
+  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map(), Map(), Map())
 
   println(cfs.staticInitializer.get)
   interp.invokeStatic(cfs.staticInitializer.get)
@@ -167,6 +168,32 @@ object test extends App{
   interp.invokeStatic(staticVarTest)
   println(interp.stack.pop())
   interp.invokeStatic(staticVarTest)
+  println(interp.stack.pop())
+
+  println("--- arrayTest ---")
+  val arrayTest = cfs.findMethod("arrayTest").head
+  interp.invokeStatic(arrayTest)
+  println(interp.stack.pop())
+
+  val arrayTest2 = cfs.findMethod("arrayTest2").head
+  interp.invokeStatic(arrayTest2)
+  println(interp.stack.pop())
+
+  val arrayTest3 = cfs.findMethod("arrayTest3").head
+  interp.invokeStatic(arrayTest3)
+  println(interp.stack.pop())
+
+  val arrayCompTest = cfs.findMethod("arrayCompTest").head
+  interp.invokeStatic(arrayCompTest)
+  println(interp.stack.pop())
+
+  val arrayLengthTest = cfs.findMethod("arrayLengthTest").head
+  interp.invokeStatic(arrayLengthTest)
+  println(interp.stack.pop())
+
+  println("--- objectArrayTest ---")
+  val objectArrayTest = cfs.findMethod("objectArrayTest").head
+  interp.invokeStatic(objectArrayTest)
   println(interp.stack.pop())
 
   /*
