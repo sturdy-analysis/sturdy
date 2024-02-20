@@ -49,7 +49,7 @@ enum JvmExcept:
 enum AllocationSite:
   case classFile(cfs: ClassFile)
   case objField(cfs: ClassFile, field: String)
-  case array(array: ArrayType)
+  case array()
   case arrayVals(idx: Int)
   case default
 
@@ -486,17 +486,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: NEWARRAY =>
           val size = stack.popOrAbort()
-          val arrayVals = arrayOps.initArray(size)
-          val convertedArrayVals = arrayVals.map(_ => inst.arrayType.componentType).map(convertTypes).map(defaultValue)
-            .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array(inst.arrayType)), convertedArrayVals)
+          val array = createArray(size, inst.elementType)
           stack.push(array)
         case inst: ANEWARRAY =>
           val size = stack.popOrAbort()
-          val arrayVals = arrayOps.initArray(size)
-          val convertedArrayVals = arrayVals.map(_ => inst.arrayType.componentType).map(convertTypes).map(defaultValue)
-            .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array(inst.arrayType)), convertedArrayVals)
+          val array = createArray(size, inst.arrayType.elementType)
           stack.push(array)
         case inst: ARRAYLENGTH.type =>
           val array = stack.popOrAbort()
@@ -532,7 +526,19 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (x == 197) =>
       inst match
         case inst: MULTIANEWARRAY =>
-          ???
+          val dims = stack.popNOrAbort(inst.dimensions)
+
+          //val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
+          val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => createArray(dims(2), inst.arrayType.elementType)))
+          val testtestSeq = testSeq.map(arrays =>
+            val testtestSeq2 = arrays.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+            arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testtestSeq2)
+            )
+
+          val testSeq2 = testtestSeq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+
+          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testSeq2)
+          stack.push(array)
 
     // ifnull, ifnonnull
     case x if (198 <= x && x <= 199) =>
@@ -570,6 +576,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       //val idx = stack.popOrAbort()
       //val array = stack.popOrAbort()
       arrayOps.setVal(array, idx, v)
+
+  def createArray(size: V, compType: FieldType): V =
+    val arrayVals = arrayOps.initArray(size)
+    val convertedArrayVals = arrayVals.map(_ => compType).map(convertTypes).map(defaultValue)
+      .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+    val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals)
+    array
 
   def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): V =
     val newFrameData = ()
