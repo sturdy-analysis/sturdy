@@ -4,8 +4,7 @@ import org.opalj.br.instructions.*
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
+import sturdy.data.{JOptionC, MayJoin, noJoin}
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -528,17 +527,41 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: MULTIANEWARRAY =>
           val dims = stack.popNOrAbort(inst.dimensions)
 
-          //val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
-          val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => createArray(dims(2), inst.arrayType.elementType)))
-          val testtestSeq = testSeq.map(arrays =>
-            val testtestSeq2 = arrays.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-            arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testtestSeq2)
+          if (inst.dimensions == 2){
+            val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
+            val testSeq2 = testSeq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testSeq2)
+            stack.push(array)
+          }
+
+          if (inst.dimensions == 3){
+            val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => createArray(dims(2), inst.arrayType.elementType)))
+            val test2Seq = testSeq.map(arrays =>
+              val test3Seq = arrays.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+              arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test3Seq)
             )
 
-          val testSeq2 = testtestSeq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+            val test2Seq2 = test2Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
 
-          val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testSeq2)
-          stack.push(array)
+            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test2Seq2)
+            stack.push(array)
+          }
+
+          if (inst.dimensions == 4){
+            val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => arrayOps.initArray(dims(2)).map(_ => createArray(dims(3), inst.arrayType.elementType))))
+            val test2Seq = testSeq.map(arrays =>
+              val test3Seq = arrays.map(arrays2 =>
+                val test4Seq = arrays2.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+                arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test4Seq)
+                )
+              val test3Seq2 = test3Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+              arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test3Seq2)
+              )
+            val test2Seq2 = test2Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
+            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test2Seq2)
+            stack.push(array)
+          }
+
 
     // ifnull, ifnonnull
     case x if (198 <= x && x <= 199) =>
@@ -584,7 +607,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals)
     array
 
-  def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): V =
+  def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
@@ -602,7 +625,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         runBlock(0, instructionMap, mth)
       }
     }
-    val ret = stack.popOrAbort()
+    val ret = stack.pop()
     ret
 
   def invokeMethodOnObject(mth: Method) =

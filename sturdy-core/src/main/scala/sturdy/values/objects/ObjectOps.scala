@@ -13,7 +13,7 @@ trait ObjectOps[Addr, Idx, OID, V, CF, O, OV, Site, Mth, J[_] <: MayJoin[_]]:
   def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site)]): OV
   def getField(obj: OV, idx: Idx): JOption[J, V]
   def setField(obj: OV, idx: Idx, v: V): JOption[J, Unit]
-  def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => V): V
+  def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => JOptionC[V]): JOptionC[V]
 
 case class Object[OID, CF, Addr](oid: OID, cls: CF, fields: Vector[Addr])
 
@@ -40,7 +40,7 @@ given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth]
       store.write(obj.fields(idx), v)
       JOptionC.some(())
     }
-  override def invokeFunction(obj: Object[OID, CF, Addr], mth: Mth, args: Seq[V])(invoke: (Object[OID, CF, Addr], Mth, Seq[V]) => V): V =
+  override def invokeFunction(obj: Object[OID, CF, Addr], mth: Mth, args: Seq[V])(invoke: (Object[OID, CF, Addr], Mth, Seq[V]) => JOptionC[V]): JOptionC[V] =
     invoke(obj, mth, args)
 
 given ObjectEqOps[OID, CF, Addr]: EqOps[Object[OID, CF, Addr], Boolean] with

@@ -197,8 +197,18 @@ object test extends App{
   println(interp.stack.pop())
 
   println("--- multiDArrayTest ---")
-  val multiDArrayTest = cfs.findMethod("d3ArrayTest").head
+  val multiDArrayTest = cfs.findMethod("multiDArrayTest").head
   interp.invokeStatic(multiDArrayTest)
+  println(interp.stack.pop())
+
+  println("--- d3ArrayTest ---")
+  val d3ArrayTest = cfs.findMethod("d3ArrayTest").head
+  interp.invokeStatic(d3ArrayTest)
+  println(interp.stack.pop())
+
+  println("--- d4ArrayTest ---")
+  val d4ArrayTest = cfs.findMethod("d4ArrayTest").head
+  interp.invokeStatic(d4ArrayTest)
   println(interp.stack.pop())
 
   /*
