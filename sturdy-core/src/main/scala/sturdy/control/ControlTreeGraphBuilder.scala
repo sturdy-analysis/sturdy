@@ -42,14 +42,15 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       else
         (Set(), excs)
 
-    case ControlTree.Seq(body) =>
-      body.foldLeft((prev, Map[Exc, Set[CNode]]())) { (a, b) =>
-        val (last, exc) = _build(b, a._1)
-        (last, combineMaps(a._2, exc, _ ++ _))
-      }
+    case ControlTree.Seq(x, xs) =>
+      val (x_last, x_exc) = _build(x, prev)
+      val (xs_last, xs_exc) = _build(xs, x_last)
+      (xs_last, combineMaps(x_exc, xs_exc, _ ++ _))
 
-    case ControlTree.Fork(branches) =>
-      branches.map(_build(_, prev)).fold(Set.empty, Map.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)))
+    case ControlTree.Fork(b1, b2) =>
+      val (b1_last, b1_exc) = _build(b1, prev)
+      val (b2_last, b2_exc) = _build(b2, prev)
+      (b1_last ++ b2_last, combineMaps(b1_exc, b2_exc, _ ++ _))
 
     case ControlTree.Try(body, handlers) =>
       val (lastBody, excBody) = _build(body, prev)

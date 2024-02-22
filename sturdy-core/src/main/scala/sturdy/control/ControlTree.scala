@@ -13,8 +13,8 @@ enum ControlTree[Atom, Sec, Exc]:
   case Failed()
   case Section(section: Sec, body: ControlTree[Atom, Sec, Exc])
 
-  case Seq(body: List[ControlTree[Atom, Sec, Exc]])
-  case Fork(branches: List[ControlTree[Atom, Sec, Exc]])
+  case Seq(x: ControlTree[Atom, Sec, Exc], xs: ControlTree[Atom, Sec, Exc])
+  case Fork(b1: ControlTree[Atom, Sec, Exc], b2: ControlTree[Atom, Sec, Exc])
 
   case Try(body: ControlTree[Atom, Sec, Exc], handlers: List[ControlTree[Atom, Sec, Exc]])
   case Throw(exc: Exc)
@@ -25,17 +25,18 @@ enum ControlTree[Atom, Sec, Exc]:
 
   @targetName("plusToSeq")
   infix def +(that: ControlTree[Atom, Sec, Exc]): ControlTree[Atom, Sec, Exc] = (this, that) match
-    case (Seq(l1), Seq(l2)) => Seq(l1 ++ l2)
-    case (Seq(l1), e2) => Seq(l1 :+ e2)
-    case (e1, Seq(l2)) => Seq(e1 :: l2)
-    case (e1, e2) => Seq(List(e1, e2))
+    case (_, Empty()) => this
+    case (Empty(), _) => that
+    case (Seq(_, Empty()), _) => assert(false)
+    case (Seq(b1, b2), _) => Seq(b1, Seq(b2, that))
+    case (_, _) => Seq(this, that)
 
   def print: List[ControlEvent] =
     val buf: ListBuffer[ControlEvent] = ListBuffer.empty
     _print(buf)
     buf.toList
 
-  def toGraphViz: String = this._toGraphViz("Start").fold(s"")(_ + "\n" + _)
+  def toGraphViz: String = this._toGraphViz("Start").toList.sorted.fold(s"")(_ + "\n" + _)
 
   private def _print(buf: ListBuffer[ControlEvent]): Unit = this match
     case ControlTree.Empty() => ()
@@ -43,27 +44,21 @@ enum ControlTree[Atom, Sec, Exc]:
     case ControlTree.Atomic(a) =>
       buf += BasicControlEvent.Atomic(a)
 
-    case ControlTree.Seq(body) =>
-      body.foreach(_._print(buf))
+    case ControlTree.Seq(x, xs) =>
+      x._print(buf)
+      xs._print(buf)
 
     case ControlTree.Section(section, body) =>
       buf += BasicControlEvent.Begin(section)
       body._print(buf)
       buf += BasicControlEvent.End(section)
 
-    case ControlTree.Fork(branches) =>
-
-      branches.init.foreach { b =>
-        buf += BranchingControlEvent.Fork()
-        b._print(buf)
-        buf += BranchingControlEvent.Switch()
-      }
-
-      branches.last._print(buf)
-
-      branches.init.foreach { _ =>
-        buf += BranchingControlEvent.Join()
-      }
+    case ControlTree.Fork(b1, b2) =>
+      buf += BranchingControlEvent.Fork()
+      b1._print(buf)
+      buf += BranchingControlEvent.Switch()
+      b2._print(buf)
+      buf += BranchingControlEvent.Join()
 
     case ControlTree.Failed() =>
       buf += BasicControlEvent.Failed()
@@ -72,10 +67,19 @@ enum ControlTree[Atom, Sec, Exc]:
       buf += ExceptionControlEvent.BeginTry()
       body._print(buf)
 
-      if (handlers.size == 1)
-        handlers.foreach(_._print(buf))
-      else if (handlers.size > 1)
-        Fork(handlers)._print(buf)
+      if (handlers.nonEmpty) {
+        handlers.tail.foreach(_ =>
+          buf += BranchingControlEvent.Fork()
+        )
+
+        handlers.head._print(buf)
+
+        handlers.tail.foreach(handler =>
+          buf += BranchingControlEvent.Switch()
+          handler._print(buf)
+          buf += BranchingControlEvent.Join()
+        )
+      }
 
       buf += ExceptionControlEvent.EndTry()
 
@@ -109,17 +113,17 @@ enum ControlTree[Atom, Sec, Exc]:
       val name = s"$a ($randomString)"
       Set(toGraphVizEdge(p, name))
 
-    case ControlTree.Seq(body) =>
+    case ControlTree.Seq(x, xs) =>
       val name = s"Seq ($randomString)"
-      body.flatMap(_._toGraphViz(name)).toSet + toGraphVizEdge(p, name)
+      x._toGraphViz(name) ++ xs._toGraphViz(name) + toGraphVizEdge(p, name)
 
     case ControlTree.Section(section, body) =>
       val name = s"Section $section ($randomString)"
       body._toGraphViz(name) + toGraphVizEdge(p, name)
 
-    case ControlTree.Fork(branches) =>
+    case ControlTree.Fork(b1, b2) =>
       val name = s"Fork ($randomString)"
-      branches.flatMap(_._toGraphViz(name)).toSet + toGraphVizEdge(p, name)
+      b1._toGraphViz(name) ++ b2._toGraphViz(name) + toGraphVizEdge(p, name)
 
     case ControlTree.Failed() =>
       val name = s"Failed($randomString)"
@@ -127,7 +131,11 @@ enum ControlTree[Atom, Sec, Exc]:
 
     case ControlTree.Try(body, handlers) =>
       val name = s"Try ($randomString)"
-      body._toGraphViz(name) ++ Fork(handlers)._toGraphViz(name) + toGraphVizEdge(p, name)
+      body._toGraphViz(name)
+        ++ handlers.flatMap(
+        _._toGraphViz(name)
+      ).toSet
+        + toGraphVizEdge(p, name)
 
     case ControlTree.Throw(exc) =>
       val name = s"Throw $exc ($randomString)"
@@ -137,8 +145,9 @@ enum ControlTree[Atom, Sec, Exc]:
       val name = s"Handle $exc ($randomString)"
       body._toGraphViz(name) + toGraphVizEdge(p, name)
 
-    case ControlTree.Fixpoint(_, _) =>
-      ???
+    case ControlTree.Fixpoint(body, repeat) =>
+      val name = s"Fixpoint ($randomString)"
+      body._toGraphViz(name) ++ repeat.map(_._toGraphViz(name)).getOrElse(Set.empty) + toGraphVizEdge(p, name)
 
     case ControlTree.Recurrent(_) =>
       val name = s"Recurrent ($randomString)"
@@ -223,17 +232,11 @@ object ControlTree:
           b2 = concatenate(b2, t)
           i = skip
 
-        var branches: List[CT] = List.empty
+        val fork = b1 match
+          case Some(Fork(b11, b12)) => Fork(b11, Fork(b12, b2.getOrElse(Empty())))
+          case _ => Fork(b1.getOrElse(Empty()), b2.getOrElse(Empty()))
 
-        b2 match
-          case Some(Fork(branches2)) => branches = branches2
-          case _ => branches = b2.getOrElse(Empty()) :: branches
-
-        b1 match
-          case Some(Fork(branches1)) => branches = branches1 ++ branches
-          case _ => branches = b1.getOrElse(Empty()) :: branches
-
-        (ControlTree.Fork(branches), i + 1)
+        (fork, i + 1)
 
       case _ => throw new Exception("Error in dispatch")
 
@@ -254,10 +257,8 @@ object ControlTree:
           i = skip
 
         cache match
-          case Some(ControlTree.Fork(branches)) if branches.forall {
-            case Handling(_, _) | Empty() => true
-            case _ => false
-          } => handlers = branches
+          case Some(h@ControlTree.Fork(_, _)) if _getHandlers(h).isDefined =>
+            handlers = _getHandlers(h).get
           case Some(h@ControlTree.Handling(_, _)) => handlers = List(h)
           case Some(Empty()) => ()
           case Some(_) => body = concatenate(body, cache.get)
@@ -266,6 +267,22 @@ object ControlTree:
         (ControlTree.Try(body.getOrElse(Empty()), handlers), i + 1)
 
       case _ => throw new Exception("Error in dispatch")
+
+    def _getHandlers(ct: CT): Option[List[CT]] = ct match
+      case ControlTree.Fork(b1, b2) =>
+        val h1 = _getHandlers(b1)
+        if (h1.isDefined)
+          val h2 = _getHandlers(b2)
+          if (h2.isDefined)
+            Some(h1.get ++ h2.get)
+          else
+            None
+        else
+          None
+      case h@ControlTree.Handling(_, _) => Some(List(h))
+      case ControlTree.Empty() => Some(List(Empty()))
+      case _ => None
+
 
     def _buildHandle(index: Int): (CT, Int) = events(index) match
       case ExceptionControlEvent.Handle(exc: Exc) =>
