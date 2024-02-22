@@ -19,18 +19,13 @@ class EffectStack(_effects: => List[Effect],
   final override type In = List[Any]
   final override type Out = List[Any]
 
-  private inline def getEffectState(eff: List[Effect]): List[Any] =
+  protected def getEffectState(eff: List[Effect]): List[Any] =
     eff.map(_.getState)
-  private def setEffectState(eff: List[Effect], st: List[Any]): Unit = {
-    var effs = eff
-    var s = st
-    while (effs.nonEmpty) {
-      val e = effs.head
-      e.setState(s.head.asInstanceOf[e.State])
-      effs = effs.tail
-      s = s.tail
+  protected def setEffectState(effects: List[Effect], st: List[Any]): Unit =
+    effects.zip(st).foreach{ case (effect,state) =>
+      effect.setState(state.asInstanceOf)
     }
-  }
+
   private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine {
     override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
       var effs = eff

@@ -53,9 +53,9 @@ object RelationalAnalysis extends Interpreter,
     case Temp(ty: RelType)
   given Ordering[RelationalVar] = {
     case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
-    case (RelationalVar.Local(_), _) => -1
+    case (RelationalVar.Local(_), RelationalVar.Temp(_)) => -1
+    case (RelationalVar.Temp(_), RelationalVar.Local(_)) => 1
     case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
-    case (_, RelationalVar.Local(_)) => 1
   }
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
@@ -180,6 +180,25 @@ object RelationalAnalysis extends Interpreter,
       PowersetAddr(References.allocationSiteAddr(site)))
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
+
+    class ResolveVirtualAddressesEffectStack(
+      _effects: => List[Effect],
+      _inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty,
+      _outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty)
+      extends EffectStack(_effects, _inEffects, _outEffects):
+
+      override protected def getEffectState(effects: List[Effect]): List[Any] =
+        effects.map(effect =>
+          effect.mapState(effect.getState, [A] => (a: A) => resolveVirtualAddresses[A](a))
+        )
+      override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
+        effects.zip(states).foreach{
+          case (effect,state) =>
+            val newState = effect.mapState(state.asInstanceOf, [A] => (a: A) => unresolveVirtualAddresses[A](a))
+            effect.setState(newState)
+        }
+      def resolveVirtualAddresses[A](a: A): A = ???
+      def unresolveVirtualAddresses[A](a: A): A = ???
 
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
