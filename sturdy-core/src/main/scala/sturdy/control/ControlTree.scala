@@ -315,12 +315,12 @@ object ControlTree:
           i = skip
 
         i = i + 1
-
-        if (events(i) == FixpointControlEvent.RepeatFixpoint()) events(i + 1) match
-          case FixpointControlEvent.BeginFixpoint() =>
-            val (repeatSec, skip) = _buildFixpoint(i + 1)
-            repeat = Some(repeatSec)
-            i = skip
+        if (i < events.size)
+          if (events(i) == FixpointControlEvent.RepeatFixpoint()) events(i + 1) match
+            case FixpointControlEvent.BeginFixpoint() =>
+              val (repeatSec, skip) = _buildFixpoint(i + 1)
+              repeat = Some(repeatSec)
+              i = skip
 
         (ControlTree.Fixpoint(body.getOrElse(Empty()), repeat), i)
 
