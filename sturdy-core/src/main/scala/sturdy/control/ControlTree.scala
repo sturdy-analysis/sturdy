@@ -322,7 +322,7 @@ object ControlTree:
             repeat = Some(repeatSec)
             i = skip
 
-        (ControlTree.Fixpoint(body.getOrElse(Empty()), None), i)
+        (ControlTree.Fixpoint(body.getOrElse(Empty()), repeat), i)
 
       case _ => throw new Exception("Error in dispatch")
 
