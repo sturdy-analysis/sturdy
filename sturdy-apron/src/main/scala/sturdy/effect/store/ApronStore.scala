@@ -37,8 +37,8 @@ final class ApronStore[
 
   def abstract1: Abstract1 = apronState
 
-  def getType(powAddr: PowAddr): Type =
-    powAddr.reduce(typeEnv(_))
+  def getType(powAddr: PowAddr): JOptionA[Type] =
+    powAddr.reduce(addr => JOptionA(typeEnv.get(addr)))
 
   override def read(powAddr: PowAddr): JOptionA[Val] =
     if(powAddr.isEmpty)

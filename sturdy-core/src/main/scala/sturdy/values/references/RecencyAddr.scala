@@ -73,6 +73,16 @@ enum VirtualAddress[Context] extends AbstractAddr[VirtualAddress[Context]]:
           case PowRecency.Recent => PowersetAddr(Set(PhysicalAddress(ctx, Recency.Recent)))
           case PowRecency.RecentOld => PowersetAddr(Set(PhysicalAddress(ctx, Recency.Recent), PhysicalAddress(ctx, Recency.Old)))
 
+  def resolve: Resolved[Context] =
+    this match
+      case Virtual(ctx, n, addrTrans) => Resolved(ctx, n, addrTrans, addrTrans.getState(ctx,n))
+      case addr: Resolved[Context] => addr
+
+  def unresolve: Virtual[Context] =
+    this match
+      case Resolved(ctx, n, addressTranslation, _) => Virtual(ctx, n, addressTranslation)
+      case addr: Virtual[Context] => addr
+
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = physical.isStrong
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)

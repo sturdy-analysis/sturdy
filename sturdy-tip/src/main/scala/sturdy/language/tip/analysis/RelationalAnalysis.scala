@@ -148,31 +148,25 @@ object RelationalAnalysis extends Interpreter,
           )
         )
 
-      override type State = (List[Value], apronCallFrame.State)
+      case class CallFrameState(nonRelational: List[Value], relational: apronCallFrame.State)
+      override type State = CallFrameState
 
-      override def getState: State = (vars.toList, apronCallFrame.getState)
+      override def getState: State = CallFrameState(vars.toList, apronCallFrame.getState)
 
       override def setState(st: State): Unit =
-        vars = st._1.toArray
-        apronCallFrame.setState(st._2)
+        vars = st.nonRelational.toArray
+        apronCallFrame.setState(st.relational)
 
       override def mapState(st: State, f: [A] => A => A): State =
-        (st._1.map(f[Value]), apronCallFrame.mapState(st._2, f))
-
-      private given NoCombineBitSet[W <: Widening]: Combine[BitSet, W] with
-        override def apply(v1: BitSet, v2: BitSet): MaybeChanged[BitSet] =
-          if (v1 != v2)
-            throw new IllegalArgumentException(s"BitSets may not differ here $v1 and $v2")
-          else
-            MaybeChanged.Unchanged(v1)
+        CallFrameState(st.nonRelational.map(f[Value]), apronCallFrame.mapState(st.relational, f))
 
       override def join: Join[State] = combineStates[Widening.No](_,_,implicitly, apronCallFrame.join)
       override def widen: Widen[State] = combineStates[Widening.Yes](_,_,implicitly, apronCallFrame.widen)
 
       def combineStates[W <: Widening](st1: State, st2: State, combineSuper: Combine[List[Value],W], combineApronCallFrame: Combine[apronCallFrame.State, W]): MaybeChanged[State] =
-        val MaybeChanged(vars, varsChanged) = combineSuper(st1._1, st2._1)
-        val MaybeChanged(apron, apronChanged) = combineApronCallFrame(st1._2, st2._2)
-        MaybeChanged((vars, apron), varsChanged || apronChanged)
+        val MaybeChanged(vars, varsChanged) = combineSuper(st1.nonRelational, st2.nonRelational)
+        val MaybeChanged(apron, apronChanged) = combineApronCallFrame(st1.relational, st2.relational)
+        MaybeChanged(CallFrameState(vars, apron), varsChanged || apronChanged)
 
 
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
@@ -181,29 +175,29 @@ object RelationalAnalysis extends Interpreter,
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
-    class ResolveVirtualAddressesEffectStack extends EffectStack(
-      List(callFrame, store, alloc, print, input, failure),
-      {
-        case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
-        case _: FixIn.Eval => List(callFrame, store, alloc, input, failure)
-      }, {
-        case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
-        case _: FixIn.Eval => List(callFrame, alloc, failure)
-      }
-    ):
+    override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =
+      class ResolveVirtualAddressesEffectStack extends EffectStack(effects, inEffects, outEffects):
+        override protected def getEffectState(effects: List[Effect]): List[Any] =
+          effects.map(effect =>
+            effect.mapState(effect.getState, [A] => (a: A) => resolveVirtualAddresses[A](a))
+          )
+        override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
+          effects.zip(states).foreach{
+            case (effect,state) =>
+              val newState = effect.mapState(state.asInstanceOf, [A] => (a: A) => unresolveVirtualAddresses[A](a))
+              effect.setState(newState)
+          }
+        private def resolveVirtualAddresses[A](a: A): A =
+          a match
+            case addr: VirtualAddress.Virtual[?] => addr.resolve.asInstanceOf[A]
+            case _ => a
 
-      override protected def getEffectState(effects: List[Effect]): List[Any] =
-        effects.map(effect =>
-          effect.mapState(effect.getState, [A] => (a: A) => resolveVirtualAddresses[A](a))
-        )
-      override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
-        effects.zip(states).foreach{
-          case (effect,state) =>
-            val newState = effect.mapState(state.asInstanceOf, [A] => (a: A) => unresolveVirtualAddresses[A](a))
-            effect.setState(newState)
-        }
-      def resolveVirtualAddresses[A](a: A): A = ???
-      def unresolveVirtualAddresses[A](a: A): A = ???
+        private def unresolveVirtualAddresses[A](a: A): A =
+          a match
+            case addr: VirtualAddress.Resolved[?] => addr.unresolve.asInstanceOf[A]
+            case _ => a
+
+      new ResolveVirtualAddressesEffectStack
 
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 

@@ -60,7 +60,11 @@ object ApronJoins:
       else
         combinable1.joinCopy(manager, combinable2)
 
-    MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+    val res = MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+
+    println(s"Abstract1 Join:\ns1 = $s1\ns2 = $s2\nresult = ${res}\nhashcode = ${res.get.hashCode()}\n\n")
+
+    res
 
   def minus[A](env1: Environment, env2: Environment): Environment =
     var env = env1

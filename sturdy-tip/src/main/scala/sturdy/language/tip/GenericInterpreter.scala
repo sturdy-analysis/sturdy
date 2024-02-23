@@ -18,7 +18,7 @@ import sturdy.values.records.RecordOps
 import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
-import sturdy.effect.EffectStack
+import sturdy.effect.{Effect, EffectStack}
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -93,14 +93,20 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val input: UserInput[V]
   implicit val failure: Failure
 
-  // effect stack
-  val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure), {
+  // Factory method for effect stacks
+  def newEffectStack(effects: => List[Effect],
+                     inEffects: PartialFunction[Any, List[Effect]],
+                     outEffects: PartialFunction[Any, List[Effect]]): EffectStack =
+    EffectStack(effects, inEffects, outEffects)
+
+  val effectStack: EffectStack = newEffectStack(List(callFrame, store, alloc, print, input, failure), {
     case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
     case _: FixIn.Eval => List(callFrame, store, alloc, input, failure)
   }, {
     case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
     case _: FixIn.Eval => List(callFrame, alloc, failure)
   })
+
   given EffectStack = effectStack
 
   // analysis state

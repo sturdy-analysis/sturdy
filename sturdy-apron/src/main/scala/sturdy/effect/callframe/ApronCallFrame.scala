@@ -76,12 +76,18 @@ final class ApronCallFrame
       case Some(idx) => setLocal(idx, expr)
 
   override def getLocal(x: Int): JOptionC[ApronExprVirtAddr] =
-    addressCallFrame.getLocal(x).map(virt =>
-      ApronExpr.addr(virt, apronStore.getType(virt.physical)))
+    val r = for{
+      virt <- addressCallFrame.getLocal(x);
+      tpe <- apronStore.getType(virt.physical).toJOptionC
+    } yield ApronExpr.addr(virt, tpe)
+    r.asInstanceOf[JOptionC[ApronExprVirtAddr]]
 
   override def getLocalByName(x: Var): JOptionC[ApronExprVirtAddr] =
-    addressCallFrame.getLocalByName(x).map(virt =>
-      ApronExpr.addr(virt, apronStore.getType(virt.physical)))
+    val r = for {
+      virt <- addressCallFrame.getLocalByName(x);
+      tpe <- apronStore.getType(virt.physical).toJOptionC
+    } yield ApronExpr.addr(virt, tpe)
+    r.asInstanceOf[JOptionC[ApronExprVirtAddr]]
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[ApronExprVirtAddr])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
@@ -127,8 +133,10 @@ final class ApronCallFrame
           throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
         } else {
           val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            val sourceExpr = ApronExpr.Addr(virt2, apronStore.getType(virt2.physical))
-            recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
+            for(tpe <- apronStore.getType(virt2.physical).toOption) {
+              val sourceExpr = ApronExpr.Addr(virt2, tpe)
+              recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
+            }
             virt1
           )
 
