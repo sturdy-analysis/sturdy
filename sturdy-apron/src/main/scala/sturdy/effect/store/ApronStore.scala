@@ -32,10 +32,10 @@ final class ApronStore[
 
   type TypeEnv = Map[PhysicalAddress[Context], Type]
 
-  private var apronState : Abstract1 = initialState
+  private var _abstract1 : Abstract1 = initialState
   private var typeEnv: TypeEnv = initialTypeEnv
 
-  def abstract1: Abstract1 = apronState
+  def abstract1: Abstract1 = _abstract1
 
   def getType(powAddr: PowAddr): JOptionA[Type] =
     powAddr.reduce(addr => JOptionA(typeEnv.get(addr)))
@@ -46,11 +46,11 @@ final class ApronStore[
     else
       powAddr.reduce(addr =>
         val vAddr = ApronVar(addr)
-        if (apronState.getEnvironment().hasVar(vAddr)) {
+        if (_abstract1.getEnvironment().hasVar(vAddr)) {
           JOptionA.Some(
             makeIntVal(
               ApronExpr.Addr(vAddr, typeEnv(addr)),
-              apronState))
+              _abstract1))
         }
         else {
           JOptionA.None()
@@ -66,21 +66,21 @@ final class ApronStore[
           powAddr.reduce(toAddr =>
             addAddrToEnvs(toAddr, exp)
             val to = ApronVar(toAddr)
-            val env = apronState.getEnvironment
+            val env = _abstract1.getEnvironment
             assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
-            val aexp : apron.Texpr1Intern = exp.toIntern(apronState.getEnvironment)
-            apronState.assign(manager, to, aexp, null)
+            val aexp : apron.Texpr1Intern = exp.toIntern(_abstract1.getEnvironment)
+            _abstract1.assign(manager, to, aexp, null)
           )
         } else /* if(powAddr.isWeak) */ {
           // weak update implemented as join
           powAddr.reduce(toAddr =>
             addAddrToEnvs(toAddr, exp)
             val to = ApronVar(toAddr)
-            if (! apronState.getEnvironment.hasVar(to)) {
-              apronState.assign(manager, to, exp.toIntern(apronState.getEnvironment), null)
+            if (! _abstract1.getEnvironment.hasVar(to)) {
+              _abstract1.assign(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
             } else {
-              apronState.join(manager,
-                apronState.assignCopy(manager, to, exp.toIntern(apronState.getEnvironment), null))
+              _abstract1.join(manager,
+                _abstract1.assignCopy(manager, to, exp.toIntern(_abstract1.getEnvironment), null))
             }
           )
         }
@@ -96,11 +96,11 @@ final class ApronStore[
         case (Some(fromType), Some(toType)) =>
           typeEnv += to -> Join(toType, fromType).get
           typeEnv -= from
-          apronState.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
+          _abstract1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
         case (Some(fromType), None) =>
           typeEnv += to -> fromType
           typeEnv -= from
-          apronState.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
+          _abstract1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
         case (None, Some(_)) | (None, None) => // Nothing to do
     } else {
       copy(fromPow, toPow)
@@ -115,7 +115,7 @@ final class ApronStore[
    * and m is the number of target addresses.
    */
   override def copy(fromPow: PowAddr, toPow: PowAddr): Unit =
-    val env = apronState.getEnvironment
+    val env = _abstract1.getEnvironment
     val toSet = toPow.iterator.map(ApronVar(_)).toSet
     // remove `to` addresses, because they don't need to be copied
     val fromSet = fromPow.iterator.map(ApronVar(_)).toSet.diff(toSet)
@@ -125,8 +125,8 @@ final class ApronStore[
         case (Some(fromType), Some(toType)) =>
           if(fromType.apronRepresentation == toType.apronRepresentation) {
             typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
-            apronState.join(manager,
-              apronState.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
+            _abstract1.join(manager,
+              _abstract1.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
           } else {
             throw new IllegalStateException(
               s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.apronRepresentation}" +
@@ -135,7 +135,7 @@ final class ApronStore[
 
         case (Some(fromType), None) =>
           typeEnv += to.addr -> typeEnv(from.addr)
-          apronState.expand(manager, from, Array[Var](to))
+          _abstract1.expand(manager, from, Array[Var](to))
 
         case (None, Some(_)) | (None, None) =>
           // from is not bound. There is nothing to do.
@@ -145,11 +145,11 @@ final class ApronStore[
     if (powAddr.isStrong) {
       powAddr.reduce(addr =>
         val dest = ApronVar(addr)
-        val env = apronState.getEnvironment()
+        val env = _abstract1.getEnvironment()
         if(env.hasVar(dest)) {
           typeEnv -= dest.addr
-//          apronState.forget(manager, dest, false)
-          apronState.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
+//          _abstract1.forget(manager, dest, false)
+          _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
         }
       )
     }
@@ -157,16 +157,16 @@ final class ApronStore[
   class BottomFailure extends SturdyFailure
 
   def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
-    val constraints: Array[Tcons1] = Array(constraint.toApron(apronState.getEnvironment))
-    this.apronState.meet(manager, constraints)
-    if (this.apronState.isBottom(manager))
+    val constraints: Array[Tcons1] = Array(constraint.toApron(_abstract1.getEnvironment))
+    this._abstract1.meet(manager, constraints)
+    if (this._abstract1.isBottom(manager))
       throw new BottomFailure
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
-    apronState.getBound(apronState.getCreationManager, expr.toIntern(apronState.getEnvironment))
+    _abstract1.getBound(_abstract1.getCreationManager, expr.toIntern(_abstract1.getEnvironment))
 
   private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]) =
-    var env = apronState.getEnvironment()
+    var env = _abstract1.getEnvironment()
     val variable = ApronVar(addr)
     val tpe = expr._type
     if (!env.hasVar(variable)) {
@@ -175,7 +175,7 @@ final class ApronStore[
           env = env.add(Array[apron.Var](variable), Array[apron.Var]())
         case ApronRepresentation.Real =>
           env = env.add(Array[apron.Var](), Array[apron.Var](variable))
-      apronState.changeEnvironment(manager, env, false)
+      _abstract1.changeEnvironment(manager, env, false)
       typeEnv += addr -> tpe
     } else {
       if (typeEnv(addr).apronRepresentation == tpe.apronRepresentation) {
@@ -188,16 +188,27 @@ final class ApronStore[
     }
 
   def isBottom: Boolean =
-    apronState.isBottom(manager)
+    _abstract1.isBottom(manager)
 
-  override type State = (TypeEnv, Abstract1)
+  case class ApronStoreState(typeEnv: TypeEnv, abstract1: Abstract1)
+    override def equals(obj: Any): Boolean =
+      obj match
+        case ApronStoreState(tenv2, abs2) =>
+          this.typeEnv.equals(tenv2) && this.abstract1.isEqual(manager, abs2)
+    override def hashCode(): Int = (typeEnv, abstract1.hashCode(manager)).hashCode()
 
-  // TODO: find a better way to copy apronState without changing anything
-  override def getState: State = (typeEnv, apronState.changeEnvironmentCopy(manager, apronState.getEnvironment, false))
+  override type State = ApronStoreState
+
+  // TODO: find a better way to copy _abstract1 without changing anything
+  override def getState: State = ApronStoreState(typeEnv, _abstract1.changeEnvironmentCopy(manager, _abstract1.getEnvironment, false))
   override def setState(s: State) =
-    typeEnv = s._1
-    apronState = s._2
+    typeEnv = s.typeEnv
+    _abstract1 = s.abstract1
   override def mapState(st: State, f: [A] => A => A): State =
     st
-  override def join: Join[State] = implicitly
-  override def widen: Widen[State] = implicitly
+  override def join: Join[State] = CombineApronStoreState
+  override def widen: Widen[State] = CombineApronStoreState
+
+  given CombineApronStoreState[W <: Widening](using Combine[Type,W], Combine[Abstract1,W]): Combine[ApronStoreState, W] =
+    (s1: ApronStoreState, s2: ApronStoreState) =>
+      Combine[(TypeEnv,Abstract1),W]((s1.typeEnv, s1.abstract1), (s2.typeEnv, s2.abstract1)).map(ApronStoreState)
