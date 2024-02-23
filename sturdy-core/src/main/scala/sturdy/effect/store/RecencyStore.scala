@@ -25,7 +25,7 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
   def getAddressTranslation: AddressTranslation[Context] = this.addressTranslation
 
   private def virtToPhys(v: VirtualAddress[Context]): PowPhysicalAddress[Context] =
-    addressTranslation(v)
+    v.physical
 
   private def virtToPhys(vs: Virt): PowPhysicalAddress[Context] =
     if (vs.isEmpty)
@@ -41,11 +41,11 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
     val pa = virtToPhys(vs)
     store.write(pa, v)
 
-  override def free(vs: Virt): Unit =
-    val pa = virtToPhys(vs)
-    store.free(pa)
-    if (vs.isStrong)
-      vs.reduce(v => addressTranslation -= ((v.ctx,v.n)))
+  override def free(vs: Virt): Unit = {}
+//    val pa = virtToPhys(vs)
+//    store.free(pa)
+//    if (vs.isStrong)
+//      vs.reduce(v => addressTranslation -= ((v.ctx,v.n)))
 
   def alloc(ctx: Context): VirtualAddress[Context] =
     val fresh = getNext()
@@ -69,7 +69,7 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
   def joinRecentIntoOld(virt: Virt) =
     virt.iterator.foreach(
       v =>
-        val ctx = v.ctx
+        val (ctx,_) = v.identifier
         store.copy(
           PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
           PowersetAddr(PhysicalAddress(ctx, Recency.Old)))

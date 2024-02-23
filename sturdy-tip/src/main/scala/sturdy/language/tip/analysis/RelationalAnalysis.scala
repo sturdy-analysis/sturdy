@@ -142,7 +142,7 @@ object RelationalAnalysis extends Interpreter,
           case (x,v) => (x, v)
         }
 
-        try super.withNew(d, newOtherVars, site)(
+        super.withNew(d, newOtherVars, site)(
           apronCallFrame.withNew((), newIntVars, site)(
             f
           )
@@ -181,11 +181,16 @@ object RelationalAnalysis extends Interpreter,
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
-    class ResolveVirtualAddressesEffectStack(
-      _effects: => List[Effect],
-      _inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty,
-      _outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty)
-      extends EffectStack(_effects, _inEffects, _outEffects):
+    class ResolveVirtualAddressesEffectStack extends EffectStack(
+      List(callFrame, store, alloc, print, input, failure),
+      {
+        case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
+        case _: FixIn.Eval => List(callFrame, store, alloc, input, failure)
+      }, {
+        case _: FixIn.Run | _: FixIn.EnterFunction => List(callFrame, store, print, failure)
+        case _: FixIn.Eval => List(callFrame, alloc, failure)
+      }
+    ):
 
       override protected def getEffectState(effects: List[Effect]): List[Any] =
         effects.map(effect =>

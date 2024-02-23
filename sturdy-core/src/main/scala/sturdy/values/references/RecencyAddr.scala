@@ -10,9 +10,6 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
   given finiteVirt: Finite[(Context,Int)] with {}
   given finitePowRecency: Finite[PowRecency] with {}
 
-  def apply(virt: VirtualAddress[Context]): PowPhysicalAddress[Context] =
-    apply(virt.ctx, virt.n)
-
   def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] =
     mapping.get((ctx, n)) match
       case Some(PowRecency.Recent) => PowersetAddr(PhysicalAddress(ctx, Recency.Recent))
@@ -41,10 +38,10 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
   override def widen: Widen[State] = implicitly[Widen[State]]
 
   def virtualAddresses: PowVirtualAddress[Context] =
-    PowVirtualAddress(mapping.keySet.view.map((ctx,n) => VirtualAddress(ctx, n, this)))
+    PowVirtualAddress(mapping.keySet.view.map((ctx,n) => VirtualAddress.Virtual(ctx, n, this)))
 
   def virtualAddresses(ctx: Context): PowVirtualAddress[Context] =
-    PowVirtualAddress(mapping.keySet.view.filter(_._1 == ctx).map((ctx,n) => VirtualAddress(ctx, n, this)))
+    PowVirtualAddress(mapping.keySet.view.filter(_._1 == ctx).map((ctx,n) => VirtualAddress.Virtual(ctx, n, this)))
 
   def physicalAddressesByContext: Map[Context, PowPhysicalAddress[Context]] =
     mapping.groupMapReduce(_._1._1){
@@ -55,7 +52,7 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
 
   def virtualAddressesByContext: Map[Context, PowVirtualAddress[Context]] =
     mapping.groupMapReduce(_._1._1){
-        case ((ctx, n), _) => PowVirtualAddress(VirtualAddress(ctx, n, this))
+        case ((ctx, n), _) => PowVirtualAddress(VirtualAddress.Virtual(ctx, n, this))
       }(Join.compute)
 
   override def clone(): AddressTranslation[Context] = new AddressTranslation[Context](mapping)
@@ -63,15 +60,27 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
 object AddressTranslation:
   def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
 
-class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslation: AddressTranslation[Context])
-  extends AbstractAddr[VirtualAddress[Context]]:
+enum VirtualAddress[Context] extends AbstractAddr[VirtualAddress[Context]]:
+  case Virtual(ctx: Context, n: Int, addressTrans: AddressTranslation[Context])
+  case Resolved(ctx: Context, n: Int, addressTrans: AddressTranslation[Context], recency: PowRecency)
 
-  def physical: PowPhysicalAddress[Context] = addressTranslation(this)
+  def physical: PowPhysicalAddress[Context] =
+    this match
+      case Virtual(ctx, n, addressTranslation) => addressTranslation(ctx, n)
+      case Resolved(ctx, n, addressTranslation, recency) =>
+        recency match
+          case PowRecency.Old => PowersetAddr(Set(PhysicalAddress(ctx, Recency.Old)))
+          case PowRecency.Recent => PowersetAddr(Set(PhysicalAddress(ctx, Recency.Recent)))
+          case PowRecency.RecentOld => PowersetAddr(Set(PhysicalAddress(ctx, Recency.Recent), PhysicalAddress(ctx, Recency.Old)))
+
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = physical.isStrong
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)
   override def iterator: Iterator[VirtualAddress[Context]] = Iterator(this)
-  override def toString: String = s"VirtualAddress($ctx, $n)"
+  override def toString: String =
+    this match
+      case Virtual(ctx, n, _) => s"Virtual($ctx, $n)"
+      case Resolved(ctx, n, _, recency) => s"Resolved($ctx, $n, $recency)"
 
   final override def equals(obj: Any): Boolean =
     obj match
@@ -81,10 +90,22 @@ class VirtualAddress[Context](val ctx: Context, val n: Int, val addressTranslati
   final override def hashCode(): Int =
     physical.hashCode()
 
-  final def identifier: (Context,Int) = (ctx,n)
+  final def identifier: (Context,Int) =
+    this match
+      case Virtual(ctx, n, _) => (ctx,n)
+      case Resolved(ctx, n, _, _) => (ctx,n)
+
+  final def addressTranslation: AddressTranslation[Context] =
+    this match
+      case Virtual(_, _, addrTrans) => addrTrans
+      case Resolved(_, _, addrTrans, _) => addrTrans
+
+object VirtualAddress:
+  def apply[Context](ctx: Context, n: Int, addrTrans: AddressTranslation[Context]): Virtual[Context] =
+    VirtualAddress.Virtual(ctx,n,addrTrans)
 
 given VirtualAddressOrdering[Context : Ordering]: Ordering[VirtualAddress[Context]] =
-  Ordering.by(virt => (virt.ctx, virt.addressTranslation.getState(virt.identifier)))
+  Ordering.by(virt => virt.identifier)
 
 case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
   override def isEmpty: Boolean = false
@@ -142,7 +163,7 @@ type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], Physic
 class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressMap: Option[AddressTranslation[Context]]) extends AbstractAddr[VirtualAddress[Context]]:
   def virtualAddresses: Iterable[VirtualAddress[Context]] =
     addressMap match
-      case Some(addrMap) =>  addrs.flatMap((ctx,idxs) => idxs.map(idx => VirtualAddress(ctx, idx, addrMap)))
+      case Some(addrMap) =>  addrs.flatMap((ctx,idxs) => idxs.map(idx => VirtualAddress.Virtual(ctx, idx, addrMap)))
       case None => Iterable.empty
 
   def physicalAddresses: Set[PhysicalAddress[Context]] = virtualAddresses.flatMap(_.physical.addrs).toSet
@@ -175,7 +196,8 @@ object PowVirtualAddress:
     var addrs = Map.empty[Context, Set[Int]]
     var addrMap: Option[AddressTranslation[Context]] = None
     for (virt <- virtualAddresses) {
-      addrs += virt.ctx -> (addrs.getOrElse(virt.ctx, Set.empty[Int]) + virt.n)
+      val (ctx, n) = virt.identifier
+      addrs += ctx -> (addrs.getOrElse(ctx, Set.empty[Int]) + n)
       addrMap = Some(virt.addressTranslation)
     }
     new PowVirtualAddress(addrs, addrMap)
@@ -196,8 +218,8 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
               changed = true
             case Some(indices1) =>
               if(! changed) {
-                val physicals1 = indices1.map(idx => VirtualAddress(ctx2, idx, addrMap1).physical)
-                val physicals2 = indices2.map(idx => VirtualAddress(ctx2, idx, addrMap1).physical)
+                val physicals1 = indices1.map(idx => addrMap1(ctx2,idx))
+                val physicals2 = indices2.map(idx => addrMap1(ctx2,idx))
                 if (physicals1 != physicals2)
                   changed = true
               }
