@@ -62,7 +62,7 @@ object ApronJoins:
 
     val res = MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
 
-    println(s"Abstract1 Join:\ns1 = $s1\ns2 = $s2\nresult = ${res}\nhashcode = ${res.get.hashCode()}\n\n")
+    println(s"Abstract1 Join:\ns1 = $s1\thashcode = ${s1.hashCode(manager)}\ns2 = $s2\thashcode = ${s2.hashCode(manager)}\ns1 ${if(widen) "∇" else "⊔"} s2 = ${res}\thashcode = ${res.get.hashCode()}\n\n")
 
     res
 

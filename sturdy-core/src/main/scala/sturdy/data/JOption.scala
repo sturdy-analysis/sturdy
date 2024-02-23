@@ -88,6 +88,18 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
 
+  def toJOptionC: JOptionC[A] =
+    this match
+      case None() => JOptionC.None()
+      case NoneSome(a) => JOptionC.Some(a)
+      case Some(a) => JOptionC.Some(a)
+
+  def toOption: Option[A] =
+    this match
+      case None() => scala.None
+      case NoneSome(a) => scala.Some(a)
+      case Some(a) => scala.Some(a)
+
 object JOptionA:
   inline def none[A]: JOptionA[A] = JOptionA.None()
   inline def noneSome[A](a: A): JOptionA[A] = JOptionA.NoneSome(a)
