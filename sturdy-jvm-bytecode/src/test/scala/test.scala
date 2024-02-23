@@ -40,11 +40,11 @@ object test extends App{
   //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
   val cfs = cfs1.head
   val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
-  println(pWithNatives.allClassFiles.filterNot(pWithNatives.isLibraryType(_)).map(_.staticInitializer))
+  println(pWithNatives.classFile(ObjectType("ComplicatedMath")).get.staticInitializer)
 
   val interp = new ConcreteInterpreter.Instance(pWithNatives, Map(), Map(), Map())
 
-  println(cfs.staticInitializer.get)
+  println(cfs.staticInitializer)
   interp.invokeStatic(cfs.staticInitializer.get)
 
   interp.eval(BIPUSH(5))

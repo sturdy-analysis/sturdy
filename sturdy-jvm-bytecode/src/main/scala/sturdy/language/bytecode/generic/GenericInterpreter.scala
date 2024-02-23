@@ -527,6 +527,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: MULTIANEWARRAY =>
           val dims = stack.popNOrAbort(inst.dimensions)
 
+          stack.push(createNDArray(inst.dimensions, inst.arrayType.elementType, dims.reverse))
+          /*
           if (inst.dimensions == 2){
             val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
             val testSeq2 = testSeq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
@@ -560,7 +562,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
             val test2Seq2 = test2Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
             val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test2Seq2)
             stack.push(array)
-          }
+          }*/
 
 
     // ifnull, ifnonnull
@@ -607,6 +609,19 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals)
     array
 
+  def createNDArray(numDims: Int, compType: FieldType, dims: List[V]): V =
+    if (numDims == 2) {
+      val temp = arrayOps.initArray(dims(1))
+      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims(0), compType), AllocationSite.arrayVals(vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2)
+      array
+    }
+    else{
+      val temp = arrayOps.initArray(dims(numDims-1))
+      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType, dims), AllocationSite.arrayVals(vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2)
+      array
+    }
   def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
     val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
