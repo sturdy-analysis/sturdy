@@ -133,11 +133,13 @@ final class ApronCallFrame
           throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
         } else {
           val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            for(tpe <- apronStore.getType(virt2.physical).toOption) {
-              val sourceExpr = ApronExpr.Addr(virt2, tpe)
-              recencyStore.write(PowVirtualAddress(virt1), virtToPhys(sourceExpr))
+            val uVirt1 = virt1.unresolve
+            val uVirt2 = virt2.unresolve
+            for(tpe <- apronStore.getType(uVirt2.physical).toOption) {
+              val sourceExpr = ApronExpr.Addr(uVirt2, tpe)
+              recencyStore.write(PowVirtualAddress(uVirt1), virtToPhys(sourceExpr))
             }
-            virt1
+            uVirt1.resolve
           )
 
           val updatedRecencyStoreState =

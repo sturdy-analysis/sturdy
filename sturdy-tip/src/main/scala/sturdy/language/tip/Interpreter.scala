@@ -28,6 +28,15 @@ trait Interpreter:
     case FunValue(fun: VFun)
     case RecValue(rec: VRecord)
 
+    def mapValues(f: [A] => A => A): Value =
+      this match
+        case TopValue => this
+        case BoolValue(b) => BoolValue(f[VBool](b))
+        case IntValue(i) => IntValue(f[VInt](i))
+        case RefValue(addr) => RefValue(f[VRef](addr))
+        case FunValue(fun) => FunValue(f[VFun](fun))
+        case RecValue(rec) => RecValue(f[VRecord](rec))
+
     def asBoolean(using inst: Instance): VBool = Interpreter.this.asBoolean(this)
     def asInt(using inst: Instance): VInt = Interpreter.this.asInt(this)
     def asFunction(using inst: Instance): VFun = this match

@@ -190,20 +190,25 @@ final class ApronStore[
   def isBottom: Boolean =
     _abstract1.isBottom(manager)
 
-  case class ApronStoreState(typeEnv: TypeEnv, abstract1: Abstract1)
+  case class ApronStoreState(tenv: TypeEnv, abs1: Abstract1):
     override def equals(obj: Any): Boolean =
       obj match
         case ApronStoreState(tenv2, abs2) =>
-          this.typeEnv.equals(tenv2) && this.abstract1.isEqual(manager, abs2)
-    override def hashCode(): Int = (typeEnv, abstract1.hashCode(manager)).hashCode()
+          tenv.equals(tenv2) && abs1.isEqual(manager, abs2)
+    override def hashCode(): Int = (tenv, abs1.hashCode(manager)).hashCode()
 
   override type State = ApronStoreState
 
-  // TODO: find a better way to copy _abstract1 without changing anything
-  override def getState: State = ApronStoreState(typeEnv, _abstract1.changeEnvironmentCopy(manager, _abstract1.getEnvironment, false))
+  // It is important to copy abstract1 when getting and setting a state, because
+  // ApronStore mutate abstract1
+  override def getState: State =
+    ApronStoreState(typeEnv, copyAbstract1(_abstract1))
   override def setState(s: State) =
-    typeEnv = s.typeEnv
-    _abstract1 = s.abstract1
+    typeEnv = s.tenv
+    _abstract1 = copyAbstract1(s.abs1)
+
+  def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
+
   override def mapState(st: State, f: [A] => A => A): State =
     st
   override def join: Join[State] = CombineApronStoreState
@@ -211,4 +216,4 @@ final class ApronStore[
 
   given CombineApronStoreState[W <: Widening](using Combine[Type,W], Combine[Abstract1,W]): Combine[ApronStoreState, W] =
     (s1: ApronStoreState, s2: ApronStoreState) =>
-      Combine[(TypeEnv,Abstract1),W]((s1.typeEnv, s1.abstract1), (s2.typeEnv, s2.abstract1)).map(ApronStoreState)
+      Combine[(TypeEnv,Abstract1),W]((s1.tenv, s1.abs1), (s2.tenv, s2.abs1)).map(ApronStoreState)

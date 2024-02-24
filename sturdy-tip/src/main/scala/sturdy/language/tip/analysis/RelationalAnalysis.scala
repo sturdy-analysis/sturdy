@@ -190,11 +190,15 @@ object RelationalAnalysis extends Interpreter,
         private def resolveVirtualAddresses[A](a: A): A =
           a match
             case addr: VirtualAddress.Virtual[?] => addr.resolve.asInstanceOf[A]
+            case value: Value => value.mapValues([A] => (a: A) => resolveVirtualAddresses[A](a)).asInstanceOf[A]
+            case expr: ApronExpr[Addr,?] => expr.mapAddrSame(resolveVirtualAddresses[Addr]).asInstanceOf[A]
             case _ => a
 
         private def unresolveVirtualAddresses[A](a: A): A =
           a match
             case addr: VirtualAddress.Resolved[?] => addr.unresolve.asInstanceOf[A]
+            case value: Value => value.mapValues([A] => (a: A) => unresolveVirtualAddresses[A](a)).asInstanceOf[A]
+            case expr: ApronExpr[Addr,?] => expr.mapAddrSame(unresolveVirtualAddresses[Addr]).asInstanceOf[A]
             case _ => a
 
       new ResolveVirtualAddressesEffectStack

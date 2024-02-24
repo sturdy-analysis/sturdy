@@ -171,11 +171,10 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.read(a1) should be(JOptionA.Some(NumericInterval(3, 4)))
 
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 2)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 6)))
 
-    an [Exception] should be thrownBy a3.physical
-//    a3.physical shouldBe PhysicalAddress(ctx1, Recent)
-//    store.read(a3) should be(JOptionA.Some(NumericInterval(1, 6)))
+    a3.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
+    store.read(a3) should be(JOptionA.Some(NumericInterval(1, 6)))
   }
 
   test("Allocate addresses for the same context in separate branches") {

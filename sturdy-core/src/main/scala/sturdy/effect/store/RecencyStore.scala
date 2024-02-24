@@ -80,10 +80,19 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
 
   case class RecencyStoreState(store: initStore.State,
                                addrTrans: addressTranslation.State,
-                               mostRecent: Map[Context, Powerset[Int]])
+                               mostRecent: Map[Context, Powerset[Int]]):
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: RecencyStoreState => this.store.equals(other.store)
+        case _ => false
+
+    override def hashCode(): Int =
+      store.hashCode()
 
   override def getState: RecencyStoreState =
-    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
+    val state = RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
+//    println(s"state: $state\nhashCode: ${state.hashCode()}\n")
+    state
 
   override inline def setState(st: RecencyStoreState): Unit =
     store.setState(st.store.asInstanceOf)

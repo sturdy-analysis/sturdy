@@ -42,6 +42,15 @@ enum ApronExpr[Addr, Type]:
       case Binary(op, expr1, expr2, roundingType, roundingDir, _type) =>
         Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir, _type)
 
+  def mapAddrSame(f: Addr => Addr): ApronExpr[Addr,Type] =
+    this match
+      case Addr(_var, _type) => Addr(_var.mapAddr(f), _type)
+      case Constant(coeff, _type) => Constant(coeff, _type)
+      case Unary(op, expr, roundingType, roundingDir, _type) =>
+        Unary(op, expr.mapAddrSame(f), roundingType, roundingDir, _type)
+      case Binary(op, expr1, expr2, roundingType, roundingDir, _type) =>
+        Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, _type)
+
   def addrs: Set[Addr] = this match
     case Addr(v, _) => Set(v.addr)
     case Constant(coeff, _) => Set()
