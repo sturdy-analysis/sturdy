@@ -81,23 +81,6 @@ object test extends App{
   println(result5)
 
 
-  val instList = List(
-    BIPUSH(5),
-    ISTORE_0,
-    BIPUSH(6),
-    ISTORE_1,
-    BIPUSH(29),
-    ILOAD_0,
-    ILOAD_1,
-    IADD
-  )
-  val localList = List(ValType.I32, ValType.I32, ValType.I32, ValType.I32)
-
-  interp.invokeStatic(localList, instList, List())
-
-  println(interp.stack.pop())
-  println(interp.stack.pop())
-
   println("--- SubTest ---")
   val testMethod = cfs.findMethod("sub2").head
   interp.eval(BIPUSH(5))
@@ -119,7 +102,7 @@ object test extends App{
 
   println("--- ReturnTest ---")
   val testReturn = cfs.findMethod("returnTest").head
-  interp.eval(ICONST_0)
+  interp.eval(ICONST_1)
   interp.invokeStatic(testReturn)
   println(interp.stack.pop())
   println(interp.stack.size)
@@ -209,6 +192,16 @@ object test extends App{
   println("--- d4ArrayTest ---")
   val d4ArrayTest = cfs.findMethod("d4ArrayTest").head
   interp.invokeStatic(d4ArrayTest)
+  println(interp.stack.pop())
+
+  println("--- interfaceTest ---")
+  val interfaceTest = cfs2.findMethod("interfaceTest").head
+  interp.invokeStatic(interfaceTest)
+  println(interp.stack.pop())
+
+  println("--- lambdaTest ---")
+  val lambdaTest = cfs2.findMethod("lambdaTest").head
+  interp.invokeStatic(lambdaTest)
   println(interp.stack.pop())
 
   /*

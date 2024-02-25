@@ -22,6 +22,8 @@ trait Interpreter:
   type Bool
   
   type Mth
+  type MthName
+  type MthSig
   type Addr
   type Idx
 

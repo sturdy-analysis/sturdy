@@ -13,10 +13,11 @@ import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ObjectType}
+import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType}
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
+import sturdy.values.objects.Object
 
 import java.net.URL
 import scala.collection.immutable.ArraySeq
@@ -56,7 +57,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, ObjRep, V, AllocationSite, Method, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, V, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -461,13 +462,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
             stack.push(ret)*/
 
-        case _ =>
-          val newFrameData = ()
-          val args: List[V] = ???
-          frame.withNew(newFrameData, args.zipWithIndex.map(_.swap)) {
+        case inst: INVOKEINTERFACE =>
+          val numArgs = inst.methodDescriptor.parametersCount
+          val args = stack.popNOrAbort(numArgs)
+          val obj = stack.popOrAbort()
+          val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+          invokeMethodOnObject(mth, args, obj)
 
-          }
-          ???
+        case inst: INVOKEDYNAMIC =>
+          ()
 
 
     // NEW
@@ -622,9 +625,31 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2)
       array
     }
-  def invokeMethodOnObjectInline(obj: ObjRep, mth: Method, args: Seq[V]): JOptionC[V] =
+
+  def findMethodOfObj(obj: Object[OID, ClassFile, Addr], name: String, sig: MethodDescriptor): Method =
+    if(project.isLibraryType(obj.cls.thisType)){
+      val source = nativeClassFileWrapper(obj.cls.thisType)
+      val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+      cfs.findMethod(name, sig).get
+    }
+    else{
+      obj.cls.findMethod(name, sig).get
+    }
+
+
+  def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
-    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+
+    var locals: ArraySeq[ValType] = ArraySeq()
+    if (!mth.body.get.localVariableTable.isEmpty) {
+      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+      locals = localstemp
+    }
+    else {
+      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
+      locals = localstemp
+    }
+
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
     val objVal = stack.popOrAbort()
@@ -645,7 +670,17 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   def invokeMethodOnObject(mth: Method) =
     val newFrameData = ()
-    val locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+
+    var locals: ArraySeq[ValType] = ArraySeq()
+    if (!mth.body.get.localVariableTable.isEmpty) {
+      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+      locals = localstemp
+    }
+    else {
+      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
+      locals = localstemp
+    }
+
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
     val numArgs = mth.descriptor.parametersCount
@@ -664,26 +699,49 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       }
     }
 
-  def invokeStatic(locals: List[ValType], instructionList: List[Instruction], args: List[V]) =
-      //val cls = ???
-      //val mth = ???
-      //val params = ???
-      val newFrameData = ()
-      val localVars = locals.map(defaultValue)
+  def invokeMethodOnObject(mth: Method, args: List[V], obj: V) =
+    val newFrameData = ()
 
-      stack.withNewFrame(0) {
-        frame.withNew(newFrameData, localVars.view.zipWithIndex.map(_.swap)) {
-          for (inst <- instructionList) {
-            eval(inst)
-          }
-        }
+    var locals: ArraySeq[ValType] = ArraySeq()
+    if (!mth.body.get.localVariableTable.isEmpty) {
+      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+      locals = localstemp
+    }
+    else{
+      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
+      locals = localstemp
+    }
+
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+    //val numArgs = mth.descriptor.parametersCount
+    //val args = stack.popNOrAbort(numArgs)
+    //val obj = stack.popOrAbort()
+    val thisAndArgs = List(obj) ++ args
+    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
+
+    val startingPC = mth.body.get.iterator.next().pc
+
+    var currInst = instructionMap.get(startingPC)
+
+    stack.withNewFrame(0) {
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+        runBlock(0, instructionMap, mth)
       }
+    }
+
+
   def invokeStatic(mth: Method) =
     val newFrameData = ()
 
     var locals: ArraySeq[ValType] = ArraySeq()
-    if (mth.body.get.maxLocals != 0){
-      locals = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+    if (!mth.body.get.localVariableTable.isEmpty) {
+      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+      locals = localstemp
+    }
+    else {
+      val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+      locals = localstemp
     }
 
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap

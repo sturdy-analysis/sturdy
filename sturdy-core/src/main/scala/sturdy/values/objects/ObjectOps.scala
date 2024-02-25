@@ -9,16 +9,17 @@ import sturdy.values.relational.EqOps
 import scala.collection.mutable
 
 
-trait ObjectOps[Addr, Idx, OID, V, CF, O, OV, Site, Mth, J[_] <: MayJoin[_]]:
+trait ObjectOps[Addr, Idx, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, J[_] <: MayJoin[_]]:
   def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site)]): OV
   def getField(obj: OV, idx: Idx): JOption[J, V]
   def setField(obj: OV, idx: Idx, v: V): JOption[J, Unit]
   def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => JOptionC[V]): JOptionC[V]
+  def findFunction(obj: OV, name: MthName, sig: MthSig)(invoke: (O, MthName, MthSig) => Mth): Mth
 
 case class Object[OID, CF, Addr](oid: OID, cls: CF, fields: Vector[Addr])
 
-given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth]
-    (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, Int, OID, V, CF, Object[OID,CF,Addr], Object[OID,CF,Addr], Site, Mth, NoJoin] with
+given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth, MthName, MthSig]
+    (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, Int, OID, V, CF, Object[OID,CF,Addr], Object[OID,CF,Addr], Site, Mth, MthName, MthSig, NoJoin] with
   override def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site)]): Object[OID, CF, Addr] =
     val fieldAddrs = vals.map { (v, site) =>
       val addr = alloc(site)
@@ -42,6 +43,9 @@ given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth]
     }
   override def invokeFunction(obj: Object[OID, CF, Addr], mth: Mth, args: Seq[V])(invoke: (Object[OID, CF, Addr], Mth, Seq[V]) => JOptionC[V]): JOptionC[V] =
     invoke(obj, mth, args)
+
+  override def findFunction(obj: Object[OID, CF, Addr], name: MthName, sig: MthSig)(invoke: (Object[OID, CF, Addr], MthName, MthSig) => Mth): Mth =
+    invoke(obj, name, sig)
 
 given ObjectEqOps[OID, CF, Addr]: EqOps[Object[OID, CF, Addr], Boolean] with
   override def equ(v1: Object[OID, CF, Addr], v2: Object[OID, CF, Addr]): Boolean = v1.oid == v2.oid

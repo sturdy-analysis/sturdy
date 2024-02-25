@@ -1,6 +1,6 @@
 package sturdy.language.bytecode
 
-import org.opalj.br.{ClassFile, Method, ObjectType}
+import org.opalj.br.{ClassFile, Method, MethodDescriptor, ObjectType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
@@ -31,6 +31,8 @@ object ConcreteInterpreter extends Interpreter:
   override type Bool = Boolean
 
   override type Mth = Method
+  override type MthName = String
+  override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
@@ -84,8 +86,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MayJoin.NoJoin, ObjRep](asObj, Value.Obj.apply)(
+    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, MayJoin.NoJoin, ObjRep](asObj, Value.Obj.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin] =
