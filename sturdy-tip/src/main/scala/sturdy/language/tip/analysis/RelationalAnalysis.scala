@@ -6,7 +6,7 @@ import apron.Texpr1CstNode
 import apron.Interval
 import sturdy.Executor
 import sturdy.apron.*
-import sturdy.data.{JOption, JOptionC, NoJoin, WithJoin, given}
+import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{Effect, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.{ApronCallFrame, DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, given}
@@ -53,9 +53,9 @@ object RelationalAnalysis extends Interpreter,
     case Temp(ty: RelType)
   given Ordering[RelationalVar] = {
     case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
+    case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
     case (RelationalVar.Local(_), RelationalVar.Temp(_)) => -1
     case (RelationalVar.Temp(_), RelationalVar.Local(_)) => 1
-    case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
   }
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
@@ -169,7 +169,7 @@ object RelationalAnalysis extends Interpreter,
         MaybeChanged(CallFrameState(vars, apron), varsChanged || apronChanged)
 
 
-    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded[AllocationSiteAddr, Addr, Value](initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site)))
     override val print: PrintBound[Value] = new PrintBound
@@ -189,16 +189,16 @@ object RelationalAnalysis extends Interpreter,
           }
         private def resolveVirtualAddresses[A](a: A): A =
           a match
-            case addr: VirtualAddress.Virtual[?] => addr.resolve.asInstanceOf[A]
-            case value: Value => value.mapValues([A] => (a: A) => resolveVirtualAddresses[A](a)).asInstanceOf[A]
-            case expr: ApronExpr[Addr,?] => expr.mapAddrSame(resolveVirtualAddresses[Addr]).asInstanceOf[A]
+            case addr: RelAddr => addr.resolve.asInstanceOf[A]
+            case value: Value => value.mapValues([B] => (b: B) => resolveVirtualAddresses[B](b)).asInstanceOf[A]
+            case expr: VInt => expr.mapAddrSame(resolveVirtualAddresses[RelAddr]).asInstanceOf[A]
             case _ => a
 
         private def unresolveVirtualAddresses[A](a: A): A =
           a match
-            case addr: VirtualAddress.Resolved[?] => addr.unresolve.asInstanceOf[A]
-            case value: Value => value.mapValues([A] => (a: A) => unresolveVirtualAddresses[A](a)).asInstanceOf[A]
-            case expr: ApronExpr[Addr,?] => expr.mapAddrSame(unresolveVirtualAddresses[Addr]).asInstanceOf[A]
+            case addr: RelAddr => addr.unresolve.asInstanceOf[A]
+            case value: Value => value.mapValues([B] => (b: B) => unresolveVirtualAddresses[B](b)).asInstanceOf[A]
+            case expr: VInt => expr.mapAddrSame(unresolveVirtualAddresses[RelAddr]).asInstanceOf[A]
             case _ => a
 
       new ResolveVirtualAddressesEffectStack

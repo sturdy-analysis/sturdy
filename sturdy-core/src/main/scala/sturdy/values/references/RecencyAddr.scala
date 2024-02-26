@@ -29,7 +29,8 @@ final class AddressTranslation[Context](init: Map[(Context,Int), PowRecency]) ex
   override def getState: State = mapping
 
   override def setState(st: State): Unit =
-    mapping = st
+    for((k,v) <- st)
+      mapping += (k -> v)
 
   override def mapState(st: Map[(Context, Int), PowRecency], f: [A] => A => A): State = st
 

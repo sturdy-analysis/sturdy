@@ -1,8 +1,8 @@
 package sturdy.data
 
-import sturdy.values.{Combine, MaybeChanged, Finite, Widening, Join, Widen}
+import sturdy.values.{Combine, Finite, Join, MaybeChanged, Widen, Widening}
 
-import scala.collection.immutable.IntMap
+import scala.collection.immutable.{HashMap, IntMap}
 
 given FiniteMap[K, V](using Finite[K], Finite[V]): Finite[Map[K, V]] with {}
 
@@ -77,3 +77,13 @@ inline def combineMaps[K, V](m1: Map[K, V], m2: Map[K, V], inline combine: (V, V
       case Some(v2) =>
         result += k -> combine(v1, v2)
   result
+
+given CombineFiniteKeyHashMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finite[K]): Combine[HashMap[K, V], W] with
+  override def apply(v1: HashMap[K, V], v2: HashMap[K, V]): MaybeChanged[HashMap[K, V]] =
+    var changed = false
+    val result = v1.merged(v2){case ((k,v1),(_,v2)) =>
+      val combined = Combine(v1,v2)
+      changed |= combined.hasChanged
+      (k, combined.get)
+    }
+    MaybeChanged(result, changed || result.size > v1.size)

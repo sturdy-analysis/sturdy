@@ -18,7 +18,7 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 
   private val store: initStore.type = initStore
-  protected var mostRecent: Map[Context, Powerset[Int]] = HashMap()
+  protected var mostRecent: HashMap[Context, Powerset[Int]] = HashMap()
   protected var next: Int = 0
   def getNext() = { next += 1; next }
 
@@ -80,24 +80,25 @@ final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[
 
   case class RecencyStoreState(store: initStore.State,
                                addrTrans: addressTranslation.State,
-                               mostRecent: Map[Context, Powerset[Int]]):
+                               mostRecent: HashMap[Context, Powerset[Int]]):
     override def equals(obj: Any): Boolean =
       obj match
-        case other: RecencyStoreState => this.store.equals(other.store)
+        case other: RecencyStoreState =>
+          this.store.equals(other.store)
         case _ => false
 
     override def hashCode(): Int =
       store.hashCode()
 
   override def getState: RecencyStoreState =
-    val state = RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
-//    println(s"state: $state\nhashCode: ${state.hashCode()}\n")
-    state
+    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
 
   override inline def setState(st: RecencyStoreState): Unit =
     store.setState(st.store.asInstanceOf)
     addressTranslation.setState(st.addrTrans)
-    mostRecent = st.mostRecent
+    mostRecent = mostRecent.merged(st.mostRecent) {
+      case ((ctx1,recent1),(_,recent2)) => (ctx1, recent1 ++ recent2)
+    }
 
   override def mapState(st: RecencyStoreState, f: [A] => A => A): RecencyStoreState =
     RecencyStoreState(initStore.mapState(st.store, f), st.addrTrans, st.mostRecent)
