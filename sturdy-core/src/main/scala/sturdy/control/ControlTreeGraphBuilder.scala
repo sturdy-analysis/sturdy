@@ -53,11 +53,13 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
       (b1_last ++ b2_last, combineMaps(b1_exc, b2_exc, _ ++ _))
 
     case ControlTree.Try(body, handlers) =>
-      val (lastBody, excBody) = _build(body, prev)
-      val (lastHandlers, excEscalate, handledExc) = handlers.map(_buildCatch(_, lastBody, excBody))
-        .fold(Set.empty, Map.empty, Set.empty)((a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _), a._3 ++ b._3))
+      val (lastBody, excs) = _build(body, prev)
 
-      (lastBody ++ lastHandlers, combineMaps(excBody.filterNot((k, _) => handledExc.contains(k)), excEscalate, _ ++ _))
+      excs.flatMap { exc =>
+        handlers.map { handler =>
+          _buildCatch(handler, exc._2, exc._1)
+        }
+      }.fold(lastBody, Map.empty) { (a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)) }
 
     case ControlTree.Throw(exc) =>
       (Set(), Map(exc -> prev))
@@ -70,11 +72,13 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc] {
     case ControlTree.Recurrent(failing) =>
       (if failing then Set.empty else prev, Map.empty)
 
-  private def _buildCatch(ct: CT, prev: Set[CNode], activeExc: Map[Exc, Set[CNode]]): (Set[CNode], Map[Exc, Set[CNode]], Set[Exc]) = ct match
-    case ControlTree.Handling(exc, body) => activeExc.get(exc) match
-      case Some(prevExc) => _build(body, prevExc) ++ Tuple1(Set(exc))
-      case None => throw new Exception("...")
-    case ControlTree.Empty() => (prev, Map[Exc, Set[CNode]](), Set.empty)
+  private def _buildCatch(ct: CT, prev: Set[CNode], activeExc: Exc): (Set[CNode], Map[Exc, Set[CNode]]) = ct match
+    case ControlTree.Handling(exc, body) =>
+      if (exc == activeExc)
+        _build(body, prev)
+      else
+        (Set.empty, Map.empty)
+    case ControlTree.Empty() => (Set.empty, Map.empty)
     case _ => throw new Exception("...")
 
   private def addEdges(prev: Set[CNode], current: CNode): Unit =
