@@ -204,6 +204,12 @@ object test extends App{
   interp.invokeStatic(lambdaTest)
   println(interp.stack.pop())
 
+  println("--- exceptionTest ---")
+  println(pWithNatives.classFile(ObjectType("SimpleMath")).get.findMethod("exceptionTest").head)
+  val exceptionTest = cfs.findMethod("exceptionTest").head
+  interp.invokeStatic(exceptionTest)
+  println(interp.stack.pop())
+
   /*
 
   */

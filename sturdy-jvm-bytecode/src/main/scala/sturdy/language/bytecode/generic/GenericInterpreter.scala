@@ -412,32 +412,40 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (182 <= x && x <= 186) =>
       inst match
         case inst: INVOKESTATIC =>
-          // Overloaded Functions!
-          //val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-          val mth = project.classFile(inst.declaringClass).get.findMethod(inst.name, inst.methodDescriptor).get
-          invokeStatic(mth)
+          if (project.isLibraryType(inst.declaringClass)){
+            val source = nativeClassFileWrapper(inst.declaringClass)
+            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+            invokeStatic(mth)
+          }
+          else{
+            val mth = project.classFile(inst.declaringClass).get.findMethod(inst.name, inst.methodDescriptor).get
+            invokeStatic(mth)
+          }
 
         case inst: INVOKEVIRTUAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
           if (project.isLibraryType(objectType))
-            val source = nativeClassFileWrapper(objectType)
-            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethodOnObject(mth)
-            /*val numArgs = mth.descriptor.parametersCount
+            val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
             val obj = stack.popOrAbort()
+            stack.push(obj)
+            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
-            stack.push(ret)*/
+            if (!mth.descriptor.returnType.isVoidType){
+              stack.push(ret.get)
+            }
+
           else
-            val cfs = project.classFile(objectType).get
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethodOnObject(mth)
-            /*val numArgs = mth.descriptor.parametersCount
+            val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
             val obj = stack.popOrAbort()
+            stack.push(obj)
+            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
-            stack.push(ret)*/
+            if (!mth.descriptor.returnType.isVoidType) {
+              stack.push(ret.get)
+            }
 
         case inst: INVOKESPECIAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
@@ -446,21 +454,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
-            /*val numArgs = mth.descriptor.parametersCount
-            val args = stack.popNOrAbort(numArgs)
-            val obj = stack.popOrAbort()
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
-            stack.push(ret)*/
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invokeMethodOnObject(mth)
-            /*val numArgs = mth.descriptor.parametersCount
-            val args = stack.popNOrAbort(numArgs)
-            val obj = stack.popOrAbort()
-            stack.push(obj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
-            stack.push(ret)*/
 
         case inst: INVOKEINTERFACE =>
           val numArgs = inst.methodDescriptor.parametersCount
@@ -477,10 +474,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (x == 187) =>
       inst match
         case inst: NEW =>
-          val cfs = project.classFile(inst.objectType).get
-          val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
-          val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
-          stack.push(obj)
+          if (project.isLibraryType(inst.objectType)){
+            val source = nativeClassFileWrapper(inst.objectType)
+            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+            val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
+            val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
+            stack.push(obj)
+          }
+          else{
+            val cfs = project.classFile(inst.objectType).get
+            val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
+            val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
+            stack.push(obj)
+          }
+
 
 
     // Arrays
