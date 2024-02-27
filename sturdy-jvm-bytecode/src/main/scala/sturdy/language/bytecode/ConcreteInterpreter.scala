@@ -19,6 +19,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
 import sturdy.values.arrays.{*, given}
 
+import java.io.File
 import java.net.URL
 
 object ConcreteInterpreter extends Interpreter:
@@ -66,7 +67,7 @@ object ConcreteInterpreter extends Interpreter:
 
   type Store = Map[Addr, Value]
   type StaticStore = Map[(ObjectType, String), Value]
-  class Instance(files: Project[URL], initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = ()
     val args: List[Value] = List()
 
@@ -86,6 +87,7 @@ object ConcreteInterpreter extends Interpreter:
     val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
     val project: Project[URL] = files
+    val projectSource: String = path
 
     private given Failure = failure
 

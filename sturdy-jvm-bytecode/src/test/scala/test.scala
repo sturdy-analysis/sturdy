@@ -6,7 +6,7 @@ import sturdy.language.bytecode.ConcreteInterpreter
 import sturdy.language.bytecode.generic.ValType
 import sturdy.values.integer.IntegerOps
 
-import java.io.{DataInputStream, FileInputStream}
+import java.io.{DataInputStream, FileInputStream, File}
 import java.net.URL
 import scala.Float.NaN
 import scala.collection.mutable
@@ -42,12 +42,12 @@ object test extends App{
   val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
   println(pWithNatives.classFile(ObjectType("ComplicatedMath")).get.staticInitializer)
 
-  val interp = new ConcreteInterpreter.Instance(pWithNatives, Map(), Map(), Map())
+  val sourceFile = classFileName
 
-  println(cfs.staticInitializer)
-  interp.invokeStatic(cfs.staticInitializer.get)
+  val interp = new ConcreteInterpreter.Instance(pWithNatives, sourceFile, Map(), Map(), Map())
+  
 
-  interp.eval(BIPUSH(5))
+  /*interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
   interp.eval(IADD)
   interp.eval(BIPUSH(3))
@@ -230,7 +230,12 @@ object test extends App{
   interp.invokeStatic(typeTestInterface)
   println(interp.stack.pop())
   val typeTestArray = cfs2.findMethod("typeTestArray").head
-  interp.invokeStatic(typeTestArray)
+  //interp.invokeStatic(typeTestArray)
+  //println(interp.stack.pop())*/
+
+  println("--- stringTest ---")
+  val stringTest = cfs.findMethod("stringTest").head
+  interp.invokeStatic(stringTest)
   println(interp.stack.pop())
 
 

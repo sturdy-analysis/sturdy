@@ -13,12 +13,14 @@ import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType}
+import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType}
+import org.opalj.io.process
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
 import sturdy.values.objects.Object
 
+import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
 import scala.collection.immutable.ArraySeq
 
@@ -77,13 +79,21 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
   type FrameData = Unit
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
   val project: Project[URL]
+  val projectSource: String
 
   val nativeSource = org.opalj.bytecode.RTJar
   val objectCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
+  val stringCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
+
+  var staticInitialized: Set[ObjectType] = Set()
 
   def nativeClassFileWrapper(obj: ObjectType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
     source
+
+  def nonNativeClassFileWrapper(obj: ObjectType): String =
+    val path = projectSource ++ "\\" ++ obj.simpleName ++ ".class"
+    path
 
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
@@ -115,7 +125,12 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: LoadClass =>
           ???
         case inst: LoadString =>
-          ???
+          val string = inst.value.toCharArray.map(l => l.toInt).toSeq
+          val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
+          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))))
+          val stringObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(stringCF)), stringCF, Seq((stringArray, AllocationSite.default)))
+          stack.push(stringObj)
+
         case inst: LoadMethodHandle =>
           ???
         case inst: LoadMethodType =>
@@ -387,11 +402,51 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (178 <= x && x <= 179) =>
       inst match
         case inst: GETSTATIC =>
-          val v = staticVarStore.readOrElse((inst.declaringClass, inst.name), fail(UnboundStaticVar, inst.name))
+          val objCF = inst.declaringClass
+          if(!staticInitialized.contains(objCF)){
+            if (project.isLibraryType(objCF)){
+              staticInitialized += objCF
+              val source = nativeClassFileWrapper(objCF)
+              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+              invokeStatic(cfs.staticInitializer.get)
+            }
+            else{
+              staticInitialized += objCF
+              val source = nonNativeClassFileWrapper(objCF)
+              val cfs: List[ClassFile] =
+                process(new DataInputStream(new FileInputStream(source))) { in =>
+                  org.opalj.br.reader.Java8Framework.ClassFile(in)
+                }
+              invokeStatic(cfs.head.staticInitializer.get)
+            }
+          }
+
+          val v = staticVarStore.readOrElse((objCF, inst.name), fail(UnboundStaticVar, inst.name))
           stack.push(v)
+
         case inst: PUTSTATIC =>
+          val objCF = inst.declaringClass
+          if (!staticInitialized.contains(objCF)) {
+            if (project.isLibraryType(objCF)) {
+              staticInitialized += objCF
+              val source = nativeClassFileWrapper(objCF)
+              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+              invokeStatic(cfs.staticInitializer.get)
+            }
+            else {
+              staticInitialized += objCF
+              val source = nonNativeClassFileWrapper(objCF)
+              println(projectSource)
+              println(source)
+              val cfs: List[ClassFile] =
+                process(new DataInputStream(new FileInputStream(source))) { in =>
+                  org.opalj.br.reader.Java8Framework.ClassFile(in)
+                }
+              invokeStatic(cfs.head.staticInitializer.get)
+            }
+          }
           val v = stack.popOrAbort()
-          staticVarStore.write((inst.declaringClass, inst.name), v)
+          staticVarStore.write((objCF, inst.name), v)
 
     // Load and Store Fields
     case x if (180 <= x && x <= 181) =>
@@ -469,7 +524,19 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
           invokeMethodOnObject(mth, args, obj)
 
         case inst: INVOKEDYNAMIC =>
-          ()
+          val receiver = inst.bootstrapMethod.handle
+          receiver match
+            case receiver: InvokeStaticMethodHandle =>
+              if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
+                val source = nativeClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+                val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+                val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
+                invokeStatic(mth)
+
+              }
+              else{
+                ???
+              }
 
 
     // NEW
@@ -515,7 +582,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
     // checkcast
     case x if (x == 192) =>
-      ???
+      inst match
+        case inst: CHECKCAST =>
+          val v = stack.popOrAbort()
+          if (objectOps.checkType(v, inst.referenceType.mostPreciseObjectType)(checkType)) {
+            stack.push(v)
+          }
+          else {
+            stack.push(i32ops.integerLit(0))
+          }
 
     // instanceof
     case x if (x == 193) =>
@@ -526,7 +601,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
             stack.push(i32ops.integerLit(1))
           }
           else{
-            stack.push(i32ops.integerLit(0))
+            ???
           }
 
 
