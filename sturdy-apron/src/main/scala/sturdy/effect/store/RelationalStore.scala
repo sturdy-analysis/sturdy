@@ -18,11 +18,11 @@ import scala.reflect.ClassTag
 /**
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
  **/
-final class ApronStore[
+final class RelationalStore[
   Context: Ordering: Finite,
   Type : ApronType : Join: Widen,
   PowAddr <: AbstractAddr[PhysicalAddress[Context]],
-  Val : Join]
+  Val : Join: Widen]
   (val manager: Manager,
    initialState: Abstract1,
    initialTypeEnv: Map[PhysicalAddress[Context], Type],
@@ -34,6 +34,7 @@ final class ApronStore[
 
   private var _abstract1 : Abstract1 = initialState
   private var typeEnv: TypeEnv = initialTypeEnv
+  private val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(Map())
 
   def abstract1: Abstract1 = _abstract1
 
@@ -43,19 +44,24 @@ final class ApronStore[
   override def read(powAddr: PowAddr): JOptionA[Val] =
     if(powAddr.isEmpty)
       JOptionA.None()
-    else
-      powAddr.reduce(addr =>
+    else {
+      val v1 = powAddr.reduce(addr =>
         val vAddr = ApronVar(addr)
         if (_abstract1.getEnvironment().hasVar(vAddr)) {
           JOptionA.Some(
             makeIntVal(
               ApronExpr.Addr(vAddr, typeEnv(addr)),
               _abstract1))
-        }
-        else {
+        } else {
           JOptionA.None()
         }
       )
+      val v2 = nonRelationalStore.read(powAddr)
+      (v1,v2) match
+        case (JOptionA.None(),_) => v2
+        case (_,JOptionA.None()) => v1
+        case (_,_) => Join(v1,v2).get
+    }
 
   override def write(powAddr: PowAddr, v : Val): Unit =
     getIntVal(v) match
@@ -85,9 +91,11 @@ final class ApronStore[
           )
         }
       case None =>
-        throw new NotImplementedError("")
+        nonRelationalStore.write(powAddr, v)
 
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
+    nonRelationalStore.move(fromPow, toPow)
+
     if (fromPow.isStrong && fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
       val from = fromPow.iterator.next()
       val to = toPow.iterator.next()
@@ -115,6 +123,8 @@ final class ApronStore[
    * and m is the number of target addresses.
    */
   override def copy(fromPow: PowAddr, toPow: PowAddr): Unit =
+    nonRelationalStore.copy(fromPow, toPow)
+
     val env = _abstract1.getEnvironment
     val toSet = toPow.iterator.map(ApronVar(_)).toSet
     // remove `to` addresses, because they don't need to be copied
@@ -142,6 +152,8 @@ final class ApronStore[
     }
 
   override def free(powAddr: PowAddr): Unit =
+    nonRelationalStore.free(powAddr)
+
     if (powAddr.isStrong) {
       powAddr.reduce(addr =>
         val dest = ApronVar(addr)
@@ -190,30 +202,31 @@ final class ApronStore[
   def isBottom: Boolean =
     _abstract1.isBottom(manager)
 
-  case class ApronStoreState(tenv: TypeEnv, abs1: Abstract1):
+  case class RelationalStoreState(tenv: TypeEnv, abs1: Abstract1, nonRelationalStoreState: nonRelationalStore.State):
     override def equals(obj: Any): Boolean =
       obj match
-        case ApronStoreState(tenv2, abs2) =>
-          tenv.equals(tenv2) && abs1.isEqual(manager, abs2)
-    override def hashCode(): Int = (tenv, abs1.hashCode(manager)).hashCode()
+        case RelationalStoreState(tenv2, abs2, nonRel2) =>
+          tenv.equals(tenv2) && abs1.isEqual(manager, abs2) && nonRelationalStoreState.equals(nonRel2)
+    override def hashCode(): Int = (tenv, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
 
-  override type State = ApronStoreState
+  override type State = RelationalStoreState
 
   // It is important to copy abstract1 when getting and setting a state, because
-  // ApronStore mutate abstract1
+  // RelationalStore mutates abstract1
   override def getState: State =
-    ApronStoreState(typeEnv, copyAbstract1(_abstract1))
+    RelationalStoreState(typeEnv, copyAbstract1(_abstract1), nonRelationalStore.getState)
   override def setState(s: State) =
     typeEnv = s.tenv
     _abstract1 = copyAbstract1(s.abs1)
+    nonRelationalStore.setState(s.nonRelationalStoreState)
 
   def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
 
   override def mapState(st: State, f: [A] => A => A): State =
-    st
+    RelationalStoreState(st.tenv, st.abs1, nonRelationalStore.mapState(st.nonRelationalStoreState, f))
   override def join: Join[State] = CombineApronStoreState
   override def widen: Widen[State] = CombineApronStoreState
 
-  given CombineApronStoreState[W <: Widening](using Combine[Type,W], Combine[Abstract1,W]): Combine[ApronStoreState, W] =
-    (s1: ApronStoreState, s2: ApronStoreState) =>
-      Combine[(TypeEnv,Abstract1),W]((s1.tenv, s1.abs1), (s2.tenv, s2.abs1)).map(ApronStoreState)
+  given CombineApronStoreState[W <: Widening](using Combine[Type,W], Combine[Abstract1,W], Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
+    (s1: RelationalStoreState, s2: RelationalStoreState) =>
+      Combine[(TypeEnv,Abstract1,nonRelationalStore.State),W]((s1.tenv, s1.abs1, s1.nonRelationalStoreState), (s2.tenv, s2.abs1, s2.nonRelationalStoreState)).map(RelationalStoreState.apply)

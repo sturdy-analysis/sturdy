@@ -4,7 +4,7 @@ import apron.{Interval, Var}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.store.{ApronStore, RecencyStore}
+import sturdy.effect.store.{RelationalStore, RecencyStore}
 import sturdy.values.Join
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, PowersetAddr, VirtualAddress, given}
@@ -67,7 +67,7 @@ trait ApronRecencyState
   (
     temporaryVariableAllocator: Allocator[Ctx, Type],
     recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[PhysicalAddress[Ctx],Type]],
-    apronStore: ApronStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
+    relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
   ) extends ApronState[VirtualAddress[Ctx], Type]:
 
   val effectStack = EffectStack(List(recencyStore))
@@ -92,17 +92,17 @@ trait ApronRecencyState
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     try {
-      apronStore.write(v.physical, virtToPhys(expr))
+      relationalStore.write(v.physical, virtToPhys(expr))
     } catch {
       case e: IllegalArgumentException =>
         e.printStackTrace()
     }
 
   override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]): Unit =
-    apronStore.addConstraint(virtToPhys(constraint))
+    relationalStore.addConstraint(virtToPhys(constraint))
 
   override def getBound(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
-    apronStore.getBound(virtToPhys(expr))
+    relationalStore.getBound(virtToPhys(expr))
 
   override def join[A: Join](f: => A)(g: => A): A =
     effectStack.joinComputations {
@@ -120,7 +120,7 @@ trait ApronRecencyState
       g
     }
 
-  protected def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx],Type]): ApronExpr[PhysicalAddress[Ctx],Type] =
+  def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx],Type]): ApronExpr[PhysicalAddress[Ctx],Type] =
     // To convert ApronExprVirtAddr to ApronExprPhysAddr, we need to combine virtual addresses
     // that map to two physical addresses {(ctx,recent),(ctx,old)}.
     // Specifically, we join (ctx,recent) into (ctx,old), such that the virtual address
@@ -136,7 +136,7 @@ trait ApronRecencyState
           throw IllegalStateException(s"${virt} did not map to a single physical address, but to ${physicals}")
     )
 
-  protected  def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx],Type] =
+  def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx],Type] =
     val virtRecentOlds = PowVirtualAddress(constrVirtAddr.addrs.filter(virt => virt.physical.addrs.size == 2))
     recencyStore.joinRecentIntoOld(virtRecentOlds)
     constrVirtAddr.mapAddr(

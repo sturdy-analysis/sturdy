@@ -5,7 +5,7 @@ import sturdy.apron.*
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.effect.store.{ApronRecencyStore, ApronStore, RecencyStore, given}
+import sturdy.effect.store.{RecencyRelationalStore, RelationalStore, RecencyStore, given}
 import sturdy.utils.TestContexts.{*, given}
 import sturdy.utils.TestTypes.{*, given}
 import sturdy.values.*
@@ -18,7 +18,7 @@ class ApronOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type
   maxValue = 100,
   makeOrderingOps = {
     val apronManager: Manager = new apron.Polka(true)
-    val (recencyStore, apronStore) = ApronRecencyStore[Ctx, Type](apronManager)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type](apronManager)
     given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
     new ApronOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)

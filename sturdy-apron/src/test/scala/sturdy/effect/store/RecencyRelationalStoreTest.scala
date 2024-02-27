@@ -19,7 +19,7 @@ type PAddr = PhysicalAddress[Ctx]
 type PowPAddr = PowersetAddr[PAddr, PAddr]
 type ApAddr = PhysicalAddress[Ctx]
 given Widen[NumericInterval[Int]] = NumericIntervalWiden[Int](Set(10, 20, 30, 40, 50, 60, 70, 80, 90), 0, 100)
-class ApronRecencyStoreTest extends RecencyAbstractionTest({
+class RecencyRelationalStoreTest extends RecencyAbstractionTest({
   val man = new apron.Polka(true)
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
@@ -27,7 +27,7 @@ class ApronRecencyStoreTest extends RecencyAbstractionTest({
   given effectState: EffectStack = EffectStack(List(failure))
   given Finite[FailureKind] with {}
 
-  val apronStore = new ApronStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]](
+  val apronStore = new RelationalStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]](
     man,
     initialState,
     Map(),

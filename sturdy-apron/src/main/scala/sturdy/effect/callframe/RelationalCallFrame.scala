@@ -5,7 +5,7 @@ import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronT
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
-import sturdy.effect.store.{ApronRecencyStore, ApronStore, RecencyStore, given}
+import sturdy.effect.store.{RecencyRelationalStore, RelationalStore, RecencyStore, given}
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
@@ -23,7 +23,7 @@ final class ApronCallFrame
     initData: Data,
     initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx],Type]])],
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[PhysicalAddress[Ctx],Type]],
-    val apronStore: ApronStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
+    val apronStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
   )
   (using
    temporaryVariableAllocator: Allocator[Ctx, Type],
@@ -139,7 +139,7 @@ final class ApronCallFrame
               val sourceExpr = ApronExpr.Addr(uVirt2, tpe)
               recencyStore.write(PowVirtualAddress(uVirt1), virtToPhys(sourceExpr))
             }
-            uVirt1.resolve
+            virt1
           )
 
           val updatedRecencyStoreState =
@@ -177,5 +177,5 @@ object ApronCallFrame:
     apronManager: Manager
   ): ApronCallFrame[Data, Var, CallSite, Ctx, Type] =
 
-    val (recencyStore,apronStore) = ApronRecencyStore[Ctx,Type](apronManager)
+    val (recencyStore,apronStore) = RecencyRelationalStore[Ctx,Type](apronManager)
     new ApronCallFrame(initData, initVars, recencyStore, apronStore)

@@ -9,7 +9,7 @@ import sturdy.apron.*
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.effect.store.{ApronRecencyStore, ApronStore, RecencyStore, given}
+import sturdy.effect.store.{RecencyRelationalStore, RelationalStore, RecencyStore, given}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}
@@ -24,7 +24,7 @@ class ApronIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]]
   maxValue = 100,
   makeIntegerOps = {
     val apronManager: Manager = new apron.Polka(true)
-    val (recencyStore, apronStore) = ApronRecencyStore[Ctx, Type](apronManager)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type](apronManager)
     given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
     new ApronIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)

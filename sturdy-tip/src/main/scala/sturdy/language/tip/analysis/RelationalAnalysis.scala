@@ -15,8 +15,7 @@ import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
-import sturdy.effect.store.AStoreThreaded
-import sturdy.effect.store.Store
+import sturdy.effect.store.{AStoreThreaded, RecencyStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.apron.given
 import sturdy.fix
@@ -25,6 +24,7 @@ import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
 import sturdy.language.tip.abstractions.{CfgConfig, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
+import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelationalVar}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -43,7 +43,7 @@ import scala.collection.immutable.BitSet
 
 
 object RelationalAnalysis extends Interpreter,
-  Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, ControlFlow, Fix:
+  Functions.Powerset, Records.PreciseFieldsOrTop, ControlFlow, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -51,17 +51,28 @@ object RelationalAnalysis extends Interpreter,
   enum RelationalVar:
     case Local(x: String)
     case Temp(ty: RelType)
+    case Alloc(label: Label)
+
   given Ordering[RelationalVar] = {
     case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
     case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
-    case (RelationalVar.Local(_), RelationalVar.Temp(_)) => -1
-    case (RelationalVar.Temp(_), RelationalVar.Local(_)) => 1
+    case (RelationalVar.Alloc(l1), RelationalVar.Alloc(l2)) => l1.toString.compareTo(l2.toString)
+    case (RelationalVar.Local(_), _) => -1
+    case (_, RelationalVar.Alloc(_)) => -1
+    case (_, RelationalVar.Local(_)) => 1
+    case (RelationalVar.Alloc(_),_) => 1
   }
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
 
   override type VInt = ApronExpr[RelAddr, RelType]
   override type VBool = ApronCons[RelAddr, RelType]
+
+  final type Addr = PowVirtualAddress[RelationalVar]
+  final type PAddr = PowersetAddr[PhysicalAddress[RelationalVar],PhysicalAddress[RelationalVar]]
+  final type VRef = AbstractReference[Addr]
+  final type Environment = Map[String, Value]
+  final type InitStore = Map[RelAddr, Value]
 
   final def asBoolean(v: Value)(using inst: Instance): VBool = v match
     case Value.BoolValue(toppedBool) => toppedBool
@@ -87,6 +98,9 @@ object RelationalAnalysis extends Interpreter,
   override def topBool(using inst: Instance): VBool =
     import inst.given
     ApronCons.top
+
+  override def topReference(using self: Instance): VRef =
+    ???
 
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
@@ -168,11 +182,18 @@ object RelationalAnalysis extends Interpreter,
         val MaybeChanged(apron, apronChanged) = combineApronCallFrame(st1.relational, st2.relational)
         MaybeChanged(CallFrameState(vars, apron), varsChanged || apronChanged)
 
+    override val store: RecencyStore[RelationalVar, Addr, Value] = ???
 
-    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded[AllocationSiteAddr, Addr, Value](initStore)
-    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
-      PowersetAddr(References.allocationSiteAddr(site)))
-    override val print: PrintBound[Value] = new PrintBound
+    override val alloc: AAllocatorFromContext[AllocationSite, Addr] =
+      new AAllocatorFromContext(site =>
+        PowVirtualAddress(apronCallFrame.recencyStore.alloc(allocSiteToAddr(site)))
+      )
+    def allocSiteToAddr(site: AllocationSite): RelationalVar =
+      site match
+        case AllocationSite.Alloc(e) => RelationalVar.Alloc(e.label)
+        case AllocationSite.Record(r) => RelationalVar.Alloc(r.label)
+
+    override val print: PrintBound[Value] = ??? // new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
     override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =

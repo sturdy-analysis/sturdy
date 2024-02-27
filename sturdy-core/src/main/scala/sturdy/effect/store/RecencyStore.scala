@@ -11,7 +11,7 @@ import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
 
-final class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
+class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin],
    val addressTranslation: AddressTranslation[Context] = AddressTranslation.empty[Context])
   (using Finite[Context])
