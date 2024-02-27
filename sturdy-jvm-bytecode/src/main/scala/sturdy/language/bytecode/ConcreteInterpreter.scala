@@ -36,6 +36,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
+  override type TypeRep = ObjectType
   override type NullVal = Null
   override type OID = Int
   override type ObjRep = Object[OID, ObjType, Addr]
@@ -89,8 +90,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
+    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin] =

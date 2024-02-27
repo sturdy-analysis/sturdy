@@ -27,6 +27,7 @@ trait Interpreter:
   type Addr
   type Idx
   
+  type TypeRep
   type NullVal
   type OID
   type ObjType

@@ -198,6 +198,9 @@ object test extends App{
   val interfaceTest = cfs2.findMethod("interfaceTest").head
   interp.invokeStatic(interfaceTest)
   println(interp.stack.pop())
+  val defaultInterfaceTest = cfs2.findMethod("defaultInterfaceTest").head
+  interp.invokeStatic(defaultInterfaceTest)
+  println(interp.stack.pop())
 
   println("--- lambdaTest ---")
   val lambdaTest = cfs2.findMethod("lambdaTest").head
@@ -217,6 +220,17 @@ object test extends App{
   println(interp.stack.pop())
   interp.eval(NEW(ObjectType("SimpleMath")))
   interp.invokeStatic(nullTest)
+  println(interp.stack.pop())
+
+  println("--- typeTest ---")
+  val typeTest = cfs.findMethod("typeTest").head
+  interp.invokeStatic(typeTest)
+  println(interp.stack.pop())
+  val typeTestInterface = cfs2.findMethod("typeTestInterface").head
+  interp.invokeStatic(typeTestInterface)
+  println(interp.stack.pop())
+  val typeTestArray = cfs2.findMethod("typeTestArray").head
+  interp.invokeStatic(typeTestArray)
   println(interp.stack.pop())
 
 

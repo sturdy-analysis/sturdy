@@ -57,7 +57,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, ObjectType, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, V, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -519,7 +519,16 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
     // instanceof
     case x if (x == 193) =>
-      ???
+      inst match
+        case inst: INSTANCEOF =>
+          val v = stack.popOrAbort()
+          if(objectOps.checkType(v, inst.referenceType.mostPreciseObjectType)(checkType)){
+            stack.push(i32ops.integerLit(1))
+          }
+          else{
+            stack.push(i32ops.integerLit(0))
+          }
+
 
     // monitorenter
     case x if (x == 194) =>
@@ -646,15 +655,21 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     }
 
   def findMethodOfObj(obj: Object[OID, ClassFile, Addr], name: String, sig: MethodDescriptor): Method =
-    if(project.isLibraryType(obj.cls.thisType)){
+    if (project.isLibraryType(obj.cls.thisType)) {
       val source = nativeClassFileWrapper(obj.cls.thisType)
       val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-      cfs.findMethod(name, sig).get
+      cfs.findMethod(name, sig)
+        .getOrElse(cfs.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig).get).head)
     }
-    else{
-      obj.cls.findMethod(name, sig).get
+    else {
+      obj.cls.findMethod(name, sig)
+        .getOrElse(obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig).get).head)
     }
 
+
+
+  def checkType(obj: Object[OID, ClassFile, Addr], check: ObjectType): Boolean =
+    obj.cls.thisType.isSubtypeOf(check)(project.classHierarchy)
 
   def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
