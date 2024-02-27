@@ -36,6 +36,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
+  override type NullVal = Null
   override type OID = Int
   override type ObjRep = Object[OID, ObjType, Addr]
   override type AID = Int
@@ -49,10 +50,12 @@ object ConcreteInterpreter extends Interpreter:
   override def topF64: Double = throw new UnsupportedOperationException
   override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
   override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
+  override def topNull: Null = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   def asObj(v: Value)(using Failure): ObjRep = v.asObj
   def asArray(v: Value)(using Failure): ArrayRep = v.asArray
   def asInt32(v: Value)(using Failure): I32 = v.asInt32
+  def asNull(v: Value)(using Failure): NullVal = v.asNull
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
@@ -86,8 +89,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, MayJoin.NoJoin, ObjRep](asObj, Value.Obj.apply)(
+    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin] =

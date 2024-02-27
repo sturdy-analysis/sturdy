@@ -11,7 +11,7 @@ import sturdy.values.relational.*
 import generic.BytecodeFailure.*
 import sturdy.data.MayJoin
 import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps}
-import sturdy.values.arrays.{ConcreteArrayOps, LiftedArrayOps, ArrayOps}
+import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
 trait Interpreter:
   //type I8
   //type I16
@@ -26,7 +26,8 @@ trait Interpreter:
   type MthSig
   type Addr
   type Idx
-
+  
+  type NullVal
   type OID
   type ObjType
   type ObjRep
@@ -43,6 +44,7 @@ trait Interpreter:
     case Float64(d: F64)
     case Obj(o: ObjRep)
     case Array(a: ArrayRep)
+    case Null(n: NullVal)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
@@ -80,6 +82,10 @@ trait Interpreter:
       case Array(a) => a
       case TopValue => topArray
       case _ => f.fail(TypeError, s"Expected array but got $this")
+    def asNull(using f: Failure): NullVal = this match
+      case Null(n) => n
+      case TopValue => topNull
+      case _ => f.fail(TypeError, s"Expected null but got $this")
 
 
   //def topI8: I8
@@ -90,6 +96,7 @@ trait Interpreter:
   def topF64: F64
   def topObj: ObjRep
   def topArray: ArrayRep
+  def topNull: NullVal
 
   /*
   def typedTop(ty: ValType): Value = ty match

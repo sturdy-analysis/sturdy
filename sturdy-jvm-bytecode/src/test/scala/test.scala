@@ -207,8 +207,18 @@ object test extends App{
   println("--- exceptionTest ---")
   println(pWithNatives.classFile(ObjectType("SimpleMath")).get.findMethod("exceptionTest").head)
   val exceptionTest = cfs.findMethod("exceptionTest").head
-  interp.invokeStatic(exceptionTest)
+  //interp.invokeStatic(exceptionTest)
+  //println(interp.stack.pop())
+
+  println("--- nullTest ---")
+  val nullTest = cfs.findMethod("nullTest").head
+  interp.eval(ACONST_NULL)
+  interp.invokeStatic(nullTest)
   println(interp.stack.pop())
+  interp.eval(NEW(ObjectType("SimpleMath")))
+  interp.invokeStatic(nullTest)
+  println(interp.stack.pop())
+
 
   /*
 

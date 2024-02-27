@@ -57,7 +57,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, V, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -97,7 +97,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
     // push NULL on stack
     case x if (x == 1) =>
-      ???
+      inst match
+        case inst: ACONST_NULL.type =>
+          stack.push(objectOps.makeNull())
 
     // Lit Ops
     case x if (2 <= x && x <= 17) =>
@@ -577,7 +579,17 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
     // ifnull, ifnonnull
     case x if (198 <= x && x <= 199) =>
-      ???
+      inst match
+        case inst: IFNULL =>
+          val v = stack.popOrAbort()
+          if(objectOps.isNull(v)){
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          }
+        case inst: IFNONNULL =>
+          val v = stack.popOrAbort()
+          if (!objectOps.isNull(v)) {
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          }
 
     // goto_w
     case x if (x == 200) =>
