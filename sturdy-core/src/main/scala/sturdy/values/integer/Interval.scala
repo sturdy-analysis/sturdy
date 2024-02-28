@@ -5,9 +5,11 @@ import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.relational.*
 
+import scala.collection.immutable.TreeSet
+
 enum Interval:
   case ITop
-  case I (low: Int, high: Int)
+  case I (low: Double, high: Double)
 
   def <(s2: Interval): Boolean = s2 == ITop || ((this,s2) match
     case (I(l1,h1),I(l2,h2)) => h1 < l2
@@ -41,7 +43,27 @@ given CombineInterval[W <: Widening]: Combine[Interval, W] with
 
 
 
-given IntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
+class IntervalWiden(bounds: => Set[Double], minValue: Double, maxValue: Double)(using Numeric[Double]) extends Widen[Interval]:
+  private lazy val treeSet: TreeSet[Double] = TreeSet.from(bounds)
+
+  override def apply(v1: Interval, v2: Interval): MaybeChanged[Interval] =
+    if v1 == v2 then Unchanged(v1)
+    else (v1, v2) match
+      case (I(l1, h1), I(l2, h2)) =>
+        val low =
+          if (l1 <= l2) l1
+          else treeSet.maxBefore(l2 + summon[Numeric[Double]].fromInt(1)).getOrElse(minValue)
+        val high =
+          if (h1 >= h2) h1
+          else treeSet.minAfter(h2).getOrElse(maxValue)
+        MaybeChanged(Interval.I(low, high), v1)
+
+      case _ => Changed(ITop)
+
+
+
+
+given MyIntervalIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, Interval] with
   def integerLit(i: B): Interval =
     val iInt = base.toInt(i)
     I(iInt, iInt)

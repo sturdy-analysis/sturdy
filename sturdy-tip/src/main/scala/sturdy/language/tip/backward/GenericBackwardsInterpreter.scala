@@ -167,6 +167,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
     //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
+      println(s"????Getting adress for ${e} and ${topAddr.toString}: ${store.read(topAddr)}")
       val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
       val refined = assert(v, expected)
       val addr = evalBack(e, refValue(topAddr))
@@ -182,7 +183,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //    case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
 
 
-    //    case r@Exp.Record(fields) =>
+//        case r@Exp.Record(fields) =>
 //      // represents record as a reference to a record value
 //      val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
 //      val rec = makeRecord(fieldVals)
@@ -197,9 +198,10 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
   def evalBackNonzero(e: Exp, expected: V)(using BackFixed): V =
     val v = evalBack(e, expected)
+    println(s"Backwards evaluation: ($e,$expected): $v and ${integerLit(0)}")
     // then block can only run backwards if condition was != 0
     branchOps.boolBranch(eqOps.equ(v, integerLit(0))) {
-      failure(BackwardsUnreachable, s"pre-condition $v == 0")
+      failure(BackwardsUnreachable, s"($e,$expected): pre-condition $v == 0")
     } {
     }
     // TODO refinement?
@@ -244,6 +246,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       callFrame.setLocalByName(x, topValue)
       v
     case Assignable.ADeref(e) =>
+      println(s"!!!????Getting adress for ${e}: ${store.read(topAddr)}")
       val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
       val addr = evalBack(e, refValue(topAddr))
       store.write(refAddr(addr), topValue)

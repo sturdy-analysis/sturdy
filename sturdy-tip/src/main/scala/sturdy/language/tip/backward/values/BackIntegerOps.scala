@@ -4,7 +4,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
 import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
-import sturdy.values.integer.{CombineIntSign, IntSign, Interval, IntervalIntegerOps, SignIntegerOps}
+import sturdy.values.integer.{CombineIntSign, IntSign, Interval, MyIntervalIntegerOps, SignIntegerOps}
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.Interval.{I, *}
 import sturdy.values.integer.CombineIntSign
@@ -150,7 +150,7 @@ given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integr
     case ZeroOrPos =>
       v(ZeroOrPos); ZeroOrPos
     case Pos =>
-      v(Pos); Pos
+      v(Neg); Pos
 
   override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
     case TopSign =>
@@ -252,7 +252,7 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
       val a1 = v1(ITop)
       val a2 = v2(ITop)
       println("I am here")
-      IntervalIntegerOps.add(a1,a2)
+      MyIntervalIntegerOps.add(a1,a2)
 
     case I(l, h) => v2(ITop) match
       case I(l2, h2) =>
@@ -267,23 +267,20 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
     case ITop =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
-      IntervalIntegerOps.sub(a1,a2)
-
+      MyIntervalIntegerOps.sub(a1,a2)
 
     case I(l, h) => v2(ITop) match
       case I(l2, h2) =>
-        // println("I was here")
         val I(l1, h1) = v1(I(l + l2, h + h2))
         I(l1 - h2, h1 -l2)
       case ITop =>
-        //println(s"I was here in ITOP " )
         val v1Refine = v1(ITop)
         I(l, h)
 
   override def neg(v: Interval => Interval, r: Interval): Interval = r match
     case ITop =>
       val n = v(ITop);
-      IntervalIntegerOps.neg(n)
+      MyIntervalIntegerOps.neg(n)
     case I(l, h) =>
       v(I(-h,-l)); I(l,h)
 
@@ -292,7 +289,7 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
       case ITop =>
         val a1 = v1(ITop)
         val a2 = v2(ITop)
-        IntervalIntegerOps.mul(a1, a2)
+        MyIntervalIntegerOps.mul(a1, a2)
 
       case I(l, h) => v2(ITop) match
         case I(l2, h2) =>
@@ -309,7 +306,7 @@ given IntervalBackIntegerOps[B](using failure: Failure, j: EffectStack, base: In
     case ITop =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
-      IntervalIntegerOps.div(a1, a2)
+      MyIntervalIntegerOps.div(a1, a2)
     case I(l, h) => v2(ITop) match
       case I(l2, h2) if l2 != 0 && h2 != 0 =>
         val prods = List(l * l2, l * h2, h * l2, h * h2)

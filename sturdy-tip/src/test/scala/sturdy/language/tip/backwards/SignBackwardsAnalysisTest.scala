@@ -37,7 +37,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString == "simple6.tip"
+    p.getFileName.toString == "simple9.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -63,6 +63,11 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
       //println(s"Program is ${program}")
       val analysis = new SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
       val expectedVal = analysis.intOps.toValue(List(5))
+
+      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val evalVal = interp.failure.fallible(interp.execute(program))
+
+      println(s"Expected output of the program is ${evalVal} ")
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
 

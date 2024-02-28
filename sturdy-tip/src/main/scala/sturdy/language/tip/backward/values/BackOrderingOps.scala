@@ -73,7 +73,7 @@ given SignBackOrderingOps: BackOrderingOps[IntSign, Topped[Boolean]] with
       case Topped.Top =>
         val a2 = v2(TopSign)
         val a1 = v1(TopSign)
-        SignOrderingOps.lt(a1, a2)
+        SignOrderingOps.gt(a1, a2)
       case Topped.Actual(true) => v2(TopSign) match
         case Pos | ZeroOrPos | Zero => v1(Pos); r
         case Neg | NegOrZero | TopSign => v1(TopSign); r
@@ -132,7 +132,7 @@ given IntervalBackOrderingOps: BackOrderingOps[Interval, Topped[Boolean]] with
     case Topped.Top =>
       val a1 = v1(ITop)
       val a2 = v2(ITop)
-      println(s"Got here: ${a1} and ${a2} with result ${IntervalOrderingOps.gt(a1, a2)}")
+      //println(s"Got here: ${a1} and ${a2} with result ${IntervalOrderingOps.gt(a1, a2)}")
       IntervalOrderingOps.gt(a1, a2)
     case Topped.Actual(true) => v2(ITop) match
       case I(l, h) =>

@@ -6,10 +6,8 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.{EffectStack, TrySturdy, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
-
 import sturdy.effect.store.must.PowersetAddrMustStore
 import sturdy.effect.store.Store
-
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
@@ -26,10 +24,11 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 
+import scala.collection.immutable.Set
+
 object IntervalBackwardAnalysis extends BackwardsInterpreter, References.AllocationSites, Ints.MInterval, Functions.Powerset, Records.PreciseFieldsOrTop, Fix:
 
   given Lazy[Join[Value]] = lazily(CombineValue)
-
   //  var bounds: Set[Double] = Set()
   //  given Widen[Interval] = new IntervalWiden(bounds, Double.MinValue, Double.MaxValue)
   //  given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
@@ -41,7 +40,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
-    override val topInt: Value = Value.IntValue(Interval.I(1,1))
+    override val topInt: Value = Value.IntValue(Interval.ITop) // Value.IntValue(Interval.I(Int.MinValue,Int.MaxValue))
     override def topFunction: Value = Value.FunValue(Powerset.apply(functions.values.toSet))
 
     override def topAddr: Powerset[AllocationSiteAddr] =
@@ -88,6 +87,10 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
 
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
+
+    var bounds: Set[Double] = Set()
+    given Widen[Interval] = new IntervalWiden(bounds, Double.MinValue, Double.MaxValue)
+    //given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     def getState = this.effectStack.getAllState.head
 
