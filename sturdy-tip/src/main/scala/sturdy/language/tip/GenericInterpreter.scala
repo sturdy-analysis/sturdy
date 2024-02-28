@@ -25,8 +25,6 @@ import scala.collection.mutable.ListBuffer
 
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
-  case ParamBinding(fun: Function, name: String)
-  case LocalBinding(fun: Function, name: String)
   case Record(r: Exp.Record)
 
 case class Field(name: String)

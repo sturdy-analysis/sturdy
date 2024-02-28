@@ -60,8 +60,8 @@
      "code.tip")
 
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//     p.toString.endsWith(".tip") && p.toString.contains("")
-    p.endsWith("late_effect.tip")
+     p.toString.endsWith(".tip") && p.toString.contains("")
+//    p.endsWith("late_effect.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates())

@@ -30,17 +30,19 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
   val apronStore = new RelationalStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]](
     man,
     initialState,
-    Map(),
-    (v: NumericInterval[Int]) => Option(ApronExpr.intInterval(v.low, v.high)),
-    (e: ApronExpr[ApAddr, BaseType[Int]], s: Abstract1) =>
-      val iv = s.getBound(man, e.toIntern(s.getEnvironment))
+    Map()):
+    override def getRelationalVal(v: NumericInterval[Int]): Option[ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]] =
+      Option(ApronExpr.intInterval(v.low, v.high))
+
+    override def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]): NumericInterval[Int] =
+      val iv = this.getBound(expr)
       val d = Array[Double](0)
       iv.inf().toDouble(d, 0)
       val lower = d(0).intValue()
       iv.sup().toDouble(d, 0)
       val upper = d(0).intValue()
       NumericInterval(lower, upper)
-  )
+
 
   val addressTranslation = AddressTranslation.empty[Ctx]
   new RecencyStore[Ctx, VAddr, NumericInterval[Int]](apronStore, addressTranslation)

@@ -4,11 +4,11 @@ import apron.{Interval, Var}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.store.{RelationalStore, RecencyStore}
-import sturdy.values.Join
+import sturdy.effect.store.{RecencyStore, RelationalStore}
+import sturdy.values.{Join, Widen}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, PowersetAddr, VirtualAddress, given}
-import sturdy.data.{*,given}
+import sturdy.data.{*, given}
 
 import scala.reflect.ClassTag
 
@@ -62,12 +62,13 @@ object ApronState:
 trait ApronRecencyState
   [
     Ctx: Ordering,
-    Type: ApronType : Join
+    Type: ApronType : Join,
+    Val: Join: Widen
   ]
   (
     temporaryVariableAllocator: Allocator[Ctx, Type],
-    recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[PhysicalAddress[Ctx],Type]],
-    relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx],Type]]
+    val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
+    val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   ) extends ApronState[VirtualAddress[Ctx], Type]:
 
   val effectStack = EffectStack(List(recencyStore))
@@ -92,7 +93,7 @@ trait ApronRecencyState
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     try {
-      relationalStore.write(v.physical, virtToPhys(expr))
+      relationalStore.write(v.physical, relationalStore.makeRelationalVal(virtToPhys(expr)))
     } catch {
       case e: IllegalArgumentException =>
         e.printStackTrace()

@@ -5,7 +5,7 @@ import org.scalacheck.Gen
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import sturdy.apron.*
+import sturdy.apron.{*, given}
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -18,13 +18,14 @@ import sturdy.utils.TestTypes.{*, given}
 import sturdy.utils.TestContexts.{*, given}
 
 type VirtAddr = VirtualAddress[Ctx]
+type PhysAddr = PhysicalAddress[Ctx]
 
 class ApronIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
   minValue = -100,
   maxValue = 100,
   makeIntegerOps = {
-    val apronManager: Manager = new apron.Polka(true)
-    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type](apronManager)
+    given apronManager: Manager = new apron.Polka(true)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
     new ApronIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)

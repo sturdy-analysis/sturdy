@@ -5,19 +5,18 @@ import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Interval
 import sturdy.Executor
-import sturdy.apron.*
+import sturdy.apron.{*, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{Effect, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
-import sturdy.effect.callframe.{ApronCallFrame, DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, given}
-import sturdy.effect.callframe.ApronCallFrame.given
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame, given}
+import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
-import sturdy.effect.store.{AStoreThreaded, RecencyStore, Store}
+import sturdy.effect.store.{AStoreThreaded, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.apron.given
 import sturdy.fix
 import sturdy.fix.{StackConfig, State, context}
 import sturdy.language.tip
@@ -112,15 +111,11 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(RelationalVar.Temp.apply)
-    implicit val localRelationaAlloc: AAllocatorFromContext[String, RelationalVar] = AAllocatorFromContext(RelationalVar.Local.apply)
-
-    given Manager = apronManager
-    implicit val apronCallFrame: ApronCallFrame[Unit, String, Exp.Call, RelationalVar, RelType] =
-      ApronCallFrame[Unit, String, Exp.Call, RelationalVar, RelType]((), Iterable.empty)
 
     given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, ApronCons.from)
+
     given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, ApronCons.from)
+
     given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from)
 
     override val intOps: IntegerOps[Int, Value] = implicitly
@@ -131,69 +126,58 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: DecidableMutableCallFrame[String, String, Value, Exp.Call] = new
-        DecidableMutableCallFrame[String, String, Value, Exp.Call]("$main", Iterable.empty):
 
-      override def getLocal(x: Int): JOptionC[Value] =
-        (apronCallFrame.getLocal(x), super.getLocal(x)) match
-          case (JOptionC.None(), JOptionC.None()) => JOptionC.None()
-          case (JOptionC.Some(exp), JOptionC.None()) => JOptionC.Some(Value.IntValue(exp))
-          case (JOptionC.None(), JOptionC.Some(v)) => JOptionC.Some(v)
-          case (JOptionC.Some(exp), JOptionC.Some(v)) => JOptionC.Some(Join(Value.IntValue(exp), v).get)
+    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(RelationalVar.Temp.apply)
+    implicit val localRelationaAlloc: AAllocatorFromContext[String, RelationalVar] = AAllocatorFromContext(RelationalVar.Local.apply)
 
-      override def setLocal(x: Int, v: Value): JOptionC[Unit] =
+    given Manager = apronManager
+
+    type VirtAddr = VirtualAddress[RelationalVar]
+    type PhysAddr = PhysicalAddress[RelationalVar]
+    type PowVirtAddr = PowVirtualAddress[RelationalVar]
+    type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
+    type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
+
+    val relationalStore = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
+      manager = apronManager,
+      initialState = apron.Abstract1(apronManager, new apron.Environment()),
+      initialTypeEnv = Map()
+    ):
+      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
         v match
-          case Value.IntValue(i) => apronCallFrame.setLocal(x, i)
-          case _ => super.setLocal(x, v)
+          case Value.IntValue(iv) => Some(apronState.virtToPhys(iv))
+          case _ => None
 
-      override def withNew[A](d: String, newVars: Iterable[(String, Option[Value])], site: Exp.Call)(f: => A): A =
-        val newIntVars = newVars.map {
-          case (x,Some(Value.IntValue(exp))) => (x,Some(exp))
-          case (x,_) => (x, None)
-        }
-        val newOtherVars = newVars.map {
-          case (x,v@Some(Value.IntValue(_))) => (x,None)
-          case (x,v) => (x, v)
-        }
+      override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
+        val iv = getBound(expr)
+        Value.IntValue(ApronExpr.constant(iv, expr._type))
 
-        super.withNew(d, newOtherVars, site)(
-          apronCallFrame.withNew((), newIntVars, site)(
-            f
-          )
-        )
+    val recencyStore = new RecencyStore[RelationalVar, PowVirtAddr, Value](relationalStore)
+    given apronState: ApronRecencyState[RelationalVar, RelType, Value] = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore) {}
 
-      case class CallFrameState(nonRelational: List[Value], relational: apronCallFrame.State)
-      override type State = CallFrameState
+    override val callFrame: RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value] =
+      new RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value](
+        initData = "$main",
+        initVars = Iterable.empty,
+        localVariableAllocator = localRelationaAlloc
+      ):
+        override def toIntern(v: Value): Value = v
+        override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
 
-      override def getState: State = CallFrameState(vars.toList, apronCallFrame.getState)
 
-      override def setState(st: State): Unit =
-        vars = st.nonRelational.toArray
-        apronCallFrame.setState(st.relational)
 
-      override def mapState(st: State, f: [A] => A => A): State =
-        CallFrameState(st.nonRelational.map(f[Value]), apronCallFrame.mapState(st.relational, f))
-
-      override def join: Join[State] = combineStates[Widening.No](_,_,implicitly, apronCallFrame.join)
-      override def widen: Widen[State] = combineStates[Widening.Yes](_,_,implicitly, apronCallFrame.widen)
-
-      def combineStates[W <: Widening](st1: State, st2: State, combineSuper: Combine[List[Value],W], combineApronCallFrame: Combine[apronCallFrame.State, W]): MaybeChanged[State] =
-        val MaybeChanged(vars, varsChanged) = combineSuper(st1.nonRelational, st2.nonRelational)
-        val MaybeChanged(apron, apronChanged) = combineApronCallFrame(st1.relational, st2.relational)
-        MaybeChanged(CallFrameState(vars, apron), varsChanged || apronChanged)
-
-    override val store: RecencyStore[RelationalVar, Addr, Value] = ???
+    override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] =
       new AAllocatorFromContext(site =>
-        PowVirtualAddress(apronCallFrame.recencyStore.alloc(allocSiteToAddr(site)))
+        PowVirtualAddress(recencyStore.alloc(allocSiteToAddr(site)))
       )
     def allocSiteToAddr(site: AllocationSite): RelationalVar =
       site match
         case AllocationSite.Alloc(e) => RelationalVar.Alloc(e.label)
         case AllocationSite.Record(r) => RelationalVar.Alloc(r.label)
 
-    override val print: PrintBound[Value] = ??? // new PrintBound
+    override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
     override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =

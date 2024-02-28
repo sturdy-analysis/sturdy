@@ -22,6 +22,8 @@ class RelationalStoreTest extends AnyFunSuite:
   type VAddr = VirtualAddress[Context]
   type PowVAddr = PowVirtualAddress[Context]
   type ApAddr = PhysicalAddress[Context]
+  type Type = BaseType[Int]
+  type Val = ApronExpr[PhysicalAddress[Context], Type]
 
   given Finite[Context] with {}
   given failure: Failure = new CollectedFailures[FailureKind]
@@ -29,10 +31,12 @@ class RelationalStoreTest extends AnyFunSuite:
   given Finite[FailureKind] with {}
 
 
-  val man = new apron.Polka(true)
+  given CombineVal[W <: Widening]: Combine[Val, W] = ???
+
+  given apron.Manager = new apron.Polka(true)
 
   test("Retire a recent address") {
-    val (recencyStore, apronStore) = RecencyRelationalStore[Context, BaseType[Int]](man)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type]
 
     val xRecent = PhysicalAddress("x", Recency.Recent)
     val xOld = PhysicalAddress("x", Recency.Old)
@@ -57,7 +61,7 @@ class RelationalStoreTest extends AnyFunSuite:
 
   type AExpr = ApronExpr[ApAddr, BaseType[Int]]
   test("with recencystore") {
-    val (recencyStore, apronStore) = RecencyRelationalStore[Context, BaseType[Int]](man)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type]
 
     val x = recencyStore.alloc("x")
     val xPow = PowVirtualAddress(x)

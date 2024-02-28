@@ -1,7 +1,7 @@
 package sturdy.values.ordering
 
 import apron.*
-import sturdy.apron.*
+import sturdy.apron.{*, given}
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -17,8 +17,8 @@ class ApronOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type
   minValue = -100,
   maxValue = 100,
   makeOrderingOps = {
-    val apronManager: Manager = new apron.Polka(true)
-    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type](apronManager)
+    given apronManager: Manager = new apron.Polka(true)
+    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
     given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
     new ApronOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)

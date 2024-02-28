@@ -18,17 +18,20 @@ import scala.reflect.ClassTag
 /**
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
  **/
-final class RelationalStore[
-  Context: Ordering: Finite,
-  Type : ApronType : Join: Widen,
-  PowAddr <: AbstractAddr[PhysicalAddress[Context]],
-  Val : Join: Widen]
+trait RelationalStore
+  [
+    Context: Ordering: Finite,
+    Type : ApronType : Join: Widen,
+    PowAddr <: AbstractAddr[PhysicalAddress[Context]],
+    Val : Join: Widen
+  ]
   (val manager: Manager,
    initialState: Abstract1,
-   initialTypeEnv: Map[PhysicalAddress[Context], Type],
-   val getIntVal: Val => Option[ApronExpr[PhysicalAddress[Context], Type]],
-   val makeIntVal: (ApronExpr[PhysicalAddress[Context], Type], Abstract1) => Val)
+   initialTypeEnv: Map[PhysicalAddress[Context], Type])
   extends Store[PowAddr, Val, WithJoin]:
+
+  def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
+  def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Context], Type]): Val
 
   type TypeEnv = Map[PhysicalAddress[Context], Type]
 
@@ -48,10 +51,7 @@ final class RelationalStore[
       val v1 = powAddr.reduce(addr =>
         val vAddr = ApronVar(addr)
         if (_abstract1.getEnvironment().hasVar(vAddr)) {
-          JOptionA.Some(
-            makeIntVal(
-              ApronExpr.Addr(vAddr, typeEnv(addr)),
-              _abstract1))
+          JOptionA.Some(makeRelationalVal(ApronExpr.Addr(vAddr, typeEnv(addr))))
         } else {
           JOptionA.None()
         }
@@ -64,7 +64,7 @@ final class RelationalStore[
     }
 
   override def write(powAddr: PowAddr, v : Val): Unit =
-    getIntVal(v) match
+    getRelationalVal(v) match
       case Some(exp) =>
         if(powAddr.isEmpty) {
           // nothing
