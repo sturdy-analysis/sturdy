@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
 
-given ApronBooleanOps
+given RelationalBooleanOps
   [
     Addr: Ordering: ClassTag,
     Type : ApronType : Join

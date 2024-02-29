@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
 
-given ApronIntegerOps
+given RelationalIntegerOps
   [
     Addr: Ordering: ClassTag,
     Type : ApronType : Join

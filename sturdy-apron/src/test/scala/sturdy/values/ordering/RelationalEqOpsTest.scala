@@ -9,18 +9,23 @@ import sturdy.effect.store.{RecencyRelationalStore, RelationalStore, RecencyStor
 import sturdy.utils.TestContexts.{*, given}
 import sturdy.utils.TestTypes.{*, given}
 import sturdy.values.*
-import sturdy.values.ordering.*
+import sturdy.values.ordering.{*,given}
 import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
 
-class ApronOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]](
+type VirtAddr = VirtualAddress[Ctx]
+type PhysAddr = PhysicalAddress[Ctx]
+given Structural[Int] with {}
+given EqOps[Int,Boolean] = StructuralEqOps[Int]
+
+class RelationalEqOpsTest extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]](
   minValue = -100,
   maxValue = 100,
   makeOrderingOps = {
     given apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
     given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
-    new ApronOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
+    new ApronEqOps[VirtAddr, Type] with IntervalEqOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
       override def getBool(b: ApronExpr[VirtAddr, Type]): Topped[Boolean] =

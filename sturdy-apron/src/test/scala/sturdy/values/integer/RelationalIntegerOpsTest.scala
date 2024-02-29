@@ -20,14 +20,14 @@ import sturdy.utils.TestContexts.{*, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-class ApronIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
+class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
   minValue = -100,
   maxValue = 100,
   makeIntegerOps = {
     given apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
-    new ApronIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
+    new RelationalIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
       override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) = apronState.getIntBound(n)
@@ -35,7 +35,7 @@ class ApronIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]]
   }
 )
 
-class ApronIntegerOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
+class RelationalIntegerOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
   def chooseInt: Gen[Int] = Gen.chooseNum(Integer.MIN_VALUE, Integer.MAX_VALUE)
 
   test("fromUnsigned(toUnsigned(x)) = x") {
