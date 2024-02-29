@@ -16,15 +16,15 @@ import ApronExpr.*
 import ApronCons.*
 
 
-given ApronConsOrderingOps[Addr, Type](using IntegerOps[Int,Type]): OrderingOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
+given ApronConsRelationalOrderingOps[Addr, Type](using IntegerOps[Int,Type]): OrderingOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
   override def lt(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intLt(v1, v2)
   override def le(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intLe(v1, v2)
 
-given ApronConsEqOps[Addr, Type](using IntegerOps[Int,Type]): EqOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
+given ApronConsRelationalEqOps[Addr, Type](using IntegerOps[Int,Type]): EqOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
   override def equ(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intEq(v1, v2)
   override def neq(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] = ApronCons.intNeq(v1, v2)
 
-given ApronOrderingOps
+given RelationalOrderingOps
   [
     Addr: Ordering: ClassTag,
     Type : ApronType : Join
@@ -40,7 +40,7 @@ given ApronOrderingOps
   override def le(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronState.comparison(intLe(_,_), v1, v2, typeOrderingOps.le(v1._type, v2._type))
 
-given ApronEqOps
+given RelationalEqOps
   [
     Addr: Ordering: ClassTag,
     Type : ApronType : Join

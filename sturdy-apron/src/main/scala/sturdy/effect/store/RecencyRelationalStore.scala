@@ -67,4 +67,7 @@ object RecencyRelationalStore:
       RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[PhysicalAddress[Ctx], Type]],
       RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx], Type]]
     ) =
-    ???
+    apply[Ctx, Type, ApronExpr[PhysicalAddress[Ctx],Type]](
+      _getRelationalVal = Some(_),
+      _makeRelationalVal = (_,expr) => expr
+    )

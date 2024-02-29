@@ -42,18 +42,18 @@ class RelationalStoreTest extends AnyFunSuite:
     val xOld = PhysicalAddress("x", Recency.Old)
 
     apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(0, 10))
-    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.Some(ApronExpr.intInterval(0,10))
+    apronStore.getBound(ApronExpr.Addr(xRecent, BaseType[Int])) shouldBe Interval(0,10)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(0,10))
+    apronStore.getBound(ApronExpr.Addr(xOld, BaseType[Int])) shouldBe Interval(0,10)
 
     apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(15, 20))
-    apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.Some(ApronExpr.intInterval(15,20))
+    apronStore.getBound(ApronExpr.Addr(xRecent, BaseType[Int])) shouldBe Interval(15,20)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(0, 20))
+    apronStore.getBound(ApronExpr.Addr(xOld, BaseType[Int])) shouldBe Interval(0,20)
 
 //    apronStore.addConstraint(ApronCons.intLt[PhysicalAddress[Context],BaseType[Int]](ApronExpr.intLit(10), ApronExpr.addr(xOld, BaseType[Int])))
 //    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(11, 20))
@@ -64,17 +64,20 @@ class RelationalStoreTest extends AnyFunSuite:
     val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type]
 
     val x = recencyStore.alloc("x")
+    val y = recencyStore.alloc("y")
     val xPow = PowVirtualAddress(x)
-    val yPow = PowVirtualAddress(recencyStore.alloc("y"))
+    val yPow = PowVirtualAddress(y)
 
     recencyStore.write(xPow, ApronExpr.intInterval(0, 10))
-    recencyStore.read(xPow) shouldBe JOptionA.Some(ApronExpr.intInterval(0,10))
 
     x.physical.reduce(x =>
       // ApronExpr already works on virtual addresses here...
+      apronStore.getBound(ApronExpr.addr(x, BaseType[Int])) shouldBe Interval(0, 10)
       recencyStore.write(yPow, ApronExpr.intAdd(ApronExpr.addr(x, BaseType[Int]), ApronExpr.intLit(1)))
-      recencyStore.read(yPow) shouldBe JOptionA.Some(ApronExpr.intInterval(1,11))
-      ()
+      y.physical.reduce(y =>
+        apronStore.getBound(ApronExpr.addr(y, BaseType[Int])) shouldBe Interval(1, 11)
+        ()
+      )
     )
   }
   
