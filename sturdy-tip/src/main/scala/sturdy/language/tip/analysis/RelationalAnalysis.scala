@@ -5,7 +5,7 @@ import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Interval
 import sturdy.Executor
-import sturdy.apron.{*, given}
+import sturdy.apron.{ApronRecencyState, *, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{Effect, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -23,7 +23,7 @@ import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
 import sturdy.language.tip.abstractions.{CfgConfig, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
-import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelationalVar}
+import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelType, RelationalVar}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -102,29 +102,6 @@ object RelationalAnalysis extends Interpreter,
     ???
 
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
-    given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
-
-    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
-    given Failure = failure
-
-    override def jv: WithJoin[Value] = implicitly
-
-    given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-
-
-    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, ApronCons.from)
-
-    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, ApronCons.from)
-
-    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from)
-
-    override val intOps: IntegerOps[Int, Value] = implicitly
-    override val compareOps: OrderingOps[Value, Value] = implicitly
-    override val eqOps: EqOps[Value, Value] = implicitly
-    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
-    override val refOps: ReferenceOps[Addr, Value] = implicitly
-    override val recOps: RecordOps[Field, Value, Value] = implicitly
-    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
 
     implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(RelationalVar.Temp.apply)
@@ -138,7 +115,8 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
-    val relationalStore = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
+    var apronState: ApronRecencyState[RelationalVar, RelType, Value] = null
+    val relationalStore: RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialTypeEnv = Map()
@@ -152,19 +130,19 @@ object RelationalAnalysis extends Interpreter,
         val iv = getBound(expr)
         Value.IntValue(ApronExpr.constant(iv, expr._type))
 
-    val recencyStore = new RecencyStore[RelationalVar, PowVirtAddr, Value](relationalStore)
-    given apronState: ApronRecencyState[RelationalVar, RelType, Value] = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore) {}
+    val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore)
+    apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore) {}
+    given ApronRecencyState[RelationalVar, RelType, Value] = apronState
 
     override val callFrame: RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value] =
       new RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value](
         initData = "$main",
         initVars = Iterable.empty,
-        localVariableAllocator = localRelationaAlloc
+        localVariableAllocator = localRelationaAlloc,
+        apronState
       ):
         override def toIntern(v: Value): Value = v
         override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
-
-
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 
@@ -208,7 +186,29 @@ object RelationalAnalysis extends Interpreter,
 
       new ResolveVirtualAddressesEffectStack
 
+    given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
+
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
+    given Failure = failure
+
+    override def jv: WithJoin[Value] = implicitly
+
+    given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+
+    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, ApronCons.from)
+
+    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, ApronCons.from)
+
+    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from)
+
+    override val intOps: IntegerOps[Int, Value] = implicitly
+    override val compareOps: OrderingOps[Value, Value] = implicitly
+    override val eqOps: EqOps[Value, Value] = implicitly
+    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val refOps: ReferenceOps[Addr, Value] = implicitly
+    override val recOps: RecordOps[Field, Value, Value] = implicitly
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override def execute(p: Program): Value =
       super.execute(p)
