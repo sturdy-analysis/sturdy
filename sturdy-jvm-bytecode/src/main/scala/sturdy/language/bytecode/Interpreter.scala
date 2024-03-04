@@ -34,6 +34,7 @@ trait Interpreter:
   type ObjRep
 
   type AID
+  type AType
   type ArrayRep
   enum Value:
     case TopValue

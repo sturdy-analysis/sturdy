@@ -1,6 +1,6 @@
 package sturdy.language.bytecode
 
-import org.opalj.br.{ClassFile, Method, MethodDescriptor, ObjectType}
+import org.opalj.br.{ArrayType, ClassFile, FieldType, Method, MethodDescriptor, ObjectType, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.CAllocationIntIncrement
@@ -37,12 +37,13 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjType = ClassFile
   override type Addr = Int
   override type Idx = Int
-  override type TypeRep = ObjectType
+  override type TypeRep = ReferenceType
   override type NullVal = Null
   override type OID = Int
   override type ObjRep = Object[OID, ObjType, Addr]
   override type AID = Int
-  override type ArrayRep = Array[AID, Addr]
+  override type AType = ArrayType
+  override type ArrayRep = Array[AID, Addr, AType]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -51,7 +52,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
   override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
-  override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
+  override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr, ConcreteInterpreter.AType] = throw new UnsupportedOperationException
   override def topNull: Null = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   def asObj(v: Value)(using Failure): ObjRep = v.asObj
@@ -96,8 +97,8 @@ object ConcreteInterpreter extends Interpreter:
       new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
-    val arrayOps: ArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin] =
-      new LiftedArrayOps[Addr, AID, Value, Value, Value, AllocationSite, MayJoin.NoJoin, ArrayRep, Int](asArray, Value.Array.apply, asInt32, Value.Int32.apply)(
+    val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =
+      new LiftedArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin, ArrayRep, Int](asArray, Value.Array.apply, asInt32, Value.Int32.apply)(
         using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
       )
 

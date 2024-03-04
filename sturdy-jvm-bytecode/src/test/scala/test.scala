@@ -46,8 +46,8 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithNatives, sourceFile, Map(), Map(), Map())
   
-
-  /*interp.eval(BIPUSH(5))
+  ///*
+  interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
   interp.eval(IADD)
   interp.eval(BIPUSH(3))
@@ -174,9 +174,17 @@ object test extends App{
   interp.invokeStatic(arrayLengthTest)
   println(interp.stack.pop())
 
+  val arrayTypeTest = cfs.findMethod("arrayTypeTest").head
+  interp.invokeStatic(arrayTypeTest)
+  println(interp.stack.pop())
+
   println("--- objectArrayTest ---")
   val objectArrayTest = cfs.findMethod("objectArrayTest").head
   interp.invokeStatic(objectArrayTest)
+  println(interp.stack.pop())
+
+  val objectArrayTypeTest = cfs.findMethod("objectArrayTypeTest").head
+  interp.invokeStatic(objectArrayTypeTest)
   println(interp.stack.pop())
 
   println("--- multiDArrayTest ---")
@@ -208,7 +216,7 @@ object test extends App{
   println(interp.stack.pop())
 
   println("--- exceptionTest ---")
-  println(pWithNatives.classFile(ObjectType("SimpleMath")).get.findMethod("exceptionTest").head)
+  println(pWithNatives.classFile(ObjectType("SimpleMath")).get.findMethod("exceptionTest").head.exceptionTable)
   val exceptionTest = cfs.findMethod("exceptionTest").head
   //interp.invokeStatic(exceptionTest)
   //println(interp.stack.pop())
@@ -230,14 +238,14 @@ object test extends App{
   interp.invokeStatic(typeTestInterface)
   println(interp.stack.pop())
   val typeTestArray = cfs2.findMethod("typeTestArray").head
-  //interp.invokeStatic(typeTestArray)
-  //println(interp.stack.pop())*/
-
+  interp.invokeStatic(typeTestArray)
+  println(interp.stack.pop())
+/*
   println("--- stringTest ---")
   val stringTest = cfs.findMethod("stringTest").head
   interp.invokeStatic(stringTest)
   println(interp.stack.pop())
-
+*/
 
   /*
 

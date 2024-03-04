@@ -13,9 +13,10 @@ import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType}
+import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ReferenceType}
 import org.opalj.io.process
 import sturdy.values.arrays.ArrayOps
+import sturdy.values.arrays.Array
 import sturdy.values.objects.ObjectOps
 import sturdy.values.relational.EqOps
 import sturdy.values.objects.Object
@@ -59,8 +60,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, ObjectType, J]
-  val arrayOps: ArrayOps[Addr, AID, V, V, V, AllocationSite, J]
+  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, ReferenceType, J]
+  val arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -127,7 +128,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))))
+          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
           val stringObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(stringCF)), stringCF, Seq((stringArray, AllocationSite.default)))
           stack.push(stringObj)
 
@@ -564,11 +565,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: NEWARRAY =>
           val size = stack.popOrAbort()
-          val array = createArray(size, inst.elementType)
+          val array = createArray(size, inst.arrayType)
           stack.push(array)
         case inst: ANEWARRAY =>
           val size = stack.popOrAbort()
-          val array = createArray(size, inst.arrayType.elementType)
+          val array = createArray(size, inst.arrayType)
           stack.push(array)
         case inst: ARRAYLENGTH.type =>
           val array = stack.popOrAbort()
@@ -585,7 +586,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: CHECKCAST =>
           val v = stack.popOrAbort()
-          if (objectOps.checkType(v, inst.referenceType.mostPreciseObjectType)(checkType)) {
+          var flag = false
+          try{
+            flag = objectOps.checkType(v, inst.referenceType)(checkTypeObj)
+          }
+          catch{
+            case _ =>
+              flag = arrayOps.checkType(v, inst.referenceType.asArrayType)(checkTypeArray)
+          }
+          if (flag) {
             stack.push(v)
           }
           else {
@@ -597,7 +606,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: INSTANCEOF =>
           val v = stack.popOrAbort()
-          if(objectOps.checkType(v, inst.referenceType.mostPreciseObjectType)(checkType)){
+          var flag = false
+          try {
+            flag = objectOps.checkType(v, inst.referenceType)(checkTypeObj)
+          }
+          catch {
+            case _ =>
+              flag = arrayOps.checkType(v, inst.referenceType.asArrayType)(checkTypeArray)
+          }
+          if(flag){
             stack.push(i32ops.integerLit(1))
           }
           else{
@@ -623,7 +640,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: MULTIANEWARRAY =>
           val dims = stack.popNOrAbort(inst.dimensions)
 
-          stack.push(createNDArray(inst.dimensions, inst.arrayType.elementType, dims.reverse))
+          stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse))
           /*
           if (inst.dimensions == 2){
             val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
@@ -666,12 +683,28 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: IFNULL =>
           val v = stack.popOrAbort()
-          if(objectOps.isNull(v)){
+          var flag = false
+          try{
+            flag = objectOps.isNull(v)
+          }
+          catch{
+            case _ =>
+              flag = false
+          }
+          if(flag){
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
           }
         case inst: IFNONNULL =>
           val v = stack.popOrAbort()
-          if (!objectOps.isNull(v)) {
+          var flag = false
+          try {
+            flag = objectOps.isNull(v)
+          }
+          catch {
+            case _ =>
+              flag = false
+          }
+          if (!flag) {
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
           }
 
@@ -708,24 +741,24 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       //val array = stack.popOrAbort()
       arrayOps.setVal(array, idx, v)
 
-  def createArray(size: V, compType: FieldType): V =
+  def createArray(size: V, compType: ArrayType): V =
     val arrayVals = arrayOps.initArray(size)
-    val convertedArrayVals = arrayVals.map(_ => compType).map(convertTypes).map(defaultValue)
+    val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
       .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-    val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals)
+    val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals, compType)
     array
 
-  def createNDArray(numDims: Int, compType: FieldType, dims: List[V]): V =
+  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V]): V =
     if (numDims == 2) {
       val temp = arrayOps.initArray(dims(1))
       val temp2 = temp.zipWithIndex.map(vals => (createArray(dims(0), compType), AllocationSite.arrayVals(vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2)
+      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2, compType)
       array
     }
     else{
       val temp = arrayOps.initArray(dims(numDims-1))
-      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType, dims), AllocationSite.arrayVals(vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2)
+      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims), AllocationSite.arrayVals(vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2, compType)
       array
     }
 
@@ -741,11 +774,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         .getOrElse(obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig).get).head)
     }
 
+  def checkTypeObj(obj: Object[OID, ClassFile, Addr], check: ReferenceType): Boolean =
+    obj.cls.thisType.isSubtypeOf(check.mostPreciseObjectType)(project.classHierarchy)
 
-
-  def checkType(obj: Object[OID, ClassFile, Addr], check: ObjectType): Boolean =
-    obj.cls.thisType.isSubtypeOf(check)(project.classHierarchy)
-
+  def checkTypeArray(array: Array[AID, Addr, ArrayType], check: ArrayType): Boolean =
+    array.arrayType == check
   def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
 
@@ -923,4 +956,4 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case ValType.F32 => num.evalNumericOp(FCONST_0)
     case ValType.F64 => num.evalNumericOp(DCONST_0)
     case ValType.Obj => objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
-    case ValType.Array => arrayOps.makeArray(arrayAlloc(AllocationSite.default), Seq())
+    case ValType.Array => arrayOps.makeArray(arrayAlloc(AllocationSite.default), Seq(), ArrayType.ArrayOfObject)
