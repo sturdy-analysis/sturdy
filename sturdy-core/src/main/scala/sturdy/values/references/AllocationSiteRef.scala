@@ -18,7 +18,7 @@ enum AllocationSiteRef:
 
 sealed trait AllocationSiteAddr extends ManageableAddr:
   override def toString: String = this match
-    case AllocationSiteAddr.Alloc(l) => s"alloc-$l"
+    case AllocationSiteAddr.Alloc(l) => s"alloc-${l}??"
     case AllocationSiteAddr.AllocRelative(l, name) => s"alloc-$l-$name"
     case AllocationSiteAddr.Variable(name) => s"&$name"
   def unmanaged: AllocationSiteAddr = this match

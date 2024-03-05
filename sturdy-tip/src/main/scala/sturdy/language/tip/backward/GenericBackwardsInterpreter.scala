@@ -13,7 +13,7 @@ import sturdy.effect.userinput.UserInput
 import sturdy.fix
 import sturdy.language.tip.TipFailure.UnboundVariable
 import sturdy.language.tip.backward.TipBackFailure.*
-import sturdy.language.tip.*
+import sturdy.language.tip.{Field, *}
 import sturdy.language.tip.backward.values.*
 import sturdy.util.Label
 import sturdy.values.*
@@ -75,7 +75,7 @@ given CombineBackFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[BackF
  * but also simplifies the soundness proof as no reasoning about the generic interpreter
  * is necessary (https://doi.org/10.1145/3236767).
  * @param V The type of values
- * @param Addr The type of addresses
+         * @param Addr The type of addresses
  * @param J Abstracts over if the interpreter joins or not.
  *           - The concrete interpreter defines `J` as [[NoJoin]], meaning the interpreter does not join.
  *           - The abstract interpreters defines `J` to be [[WithJoin]], meaning the interpreter does join.
@@ -104,6 +104,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   // effect components
   val callFrame: DecidableMutableCallFrame[Unit, String, V]
   val store: MustStore[Addr, V, WithJoin]
+  // val storeInverse: MustStore[V, Addr, WithJoin]
   val alloc: Allocation[Addr, AllocationSite]
   val print: UserInput[V]
   val input: Print[V]
@@ -156,8 +157,11 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       args.zip(argVals).reverse.map(evalBack(_,_))
       v
     case a@Exp.Alloc(e) =>
+      println(s"Allocating space for: ${a}")
       val addr = alloc(AllocationSite.Alloc(a))
+      println(s"Address is: ${addr}")
       val refined = assert(refValue(addr), expected)
+      println(s"Refined is: ${refined}")
       val v = store.read(addr).getOrElse(topValue)
       store.write(addr, topValue)
       evalBack(e, v)
@@ -167,8 +171,8 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
     //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
-      println(s"????Getting adress for ${e} and ${topAddr.toString}: ${store.read(topAddr)}")
       val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
+      println(s"????Getting adress for ${e} and ${topAddr.toString}: ${v}. Expected: $expected")
       val refined = assert(v, expected)
       val addr = evalBack(e, refValue(topAddr))
       store.write(refAddr(addr), refined)
@@ -183,17 +187,21 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //    case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
 
 
-//        case r@Exp.Record(fields) =>
+//    case r@Exp.Record(fields) =>
 //      // represents record as a reference to a record value
 //      val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
 //      val rec = makeRecord(fieldVals)
 //      val addr = alloc(AllocationSite.Record(r))
+//      println("This is the")
 //      store.write(addr, rec)
 //      refValue(addr)
-//    case Exp.FieldAccess(rec, field) =>
-//      val addr = refAddr(eval(rec))
-//      val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
-//      lookupRecordField(recVal, Field(field))
+    case Exp.FieldAccess(rec, field) =>
+      val v = store.read(topAddr).getOrElse(failure(UnboundVariable, topAddr.toString))
+      val recVal = evalBack(rec, v)
+      val fieldVal = lookupRecordField(recVal, Field(field))
+      println(s"FieldVal and expected:$fieldVal, $expected")
+      val refined = assert(fieldVal, expected)
+      refined
   }
 
   def evalBackNonzero(e: Exp, expected: V)(using BackFixed): V =

@@ -13,6 +13,7 @@ case class Powerset[A](val set: Set[A]) extends AnyVal {
   def mapJoin[B](f: A => B)(using EffectStack): Powerset[B] =
     sturdy.data.mapJoin(set, b => Powerset(f(b)))
   def foreach(f: A => Unit): Unit = set.foreach(f)
+  def toList: List[A] = set.toList
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {

@@ -36,6 +36,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
     private given Failure = failure
 
     override val topInt: Value = Value.IntValue(IntSign.TopSign)
+    override  val topValue: Value = Value.IntValue(IntSign.TopSign)
     override def topFunction: Value = Value.FunValue(Powerset(functions.values.toSet))
 
     override def topAddr: Powerset[AllocationSiteAddr] =
@@ -45,14 +46,16 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
         { case Exp.Alloc(e) => Set(AllocationSiteAddr.Alloc(e.label)(true)); case _ => Set() }
       )))
 
+    //val initStoreTop: Store =  topAddr.toList.map(x => (x,topValue)).toMap
+
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
     override val compareOps: BackOrderingOps[Value, Value] = implicitly
     override val backEqOps: BackEqOps[Value, Value] = new BackEqOps[Value, Value]:
       override def equ(v1: Value => Value, v2: Value => Value, r: Value): Value = asBoolean(r) match
-        case Topped.Top => v2(Value.TopValue); v1(Value.TopValue); r
-        case Topped.Actual(true) => v1(v2(Value.TopValue)); r
-        case Topped.Actual(false) => v2(Value.TopValue) match
+        case Topped.Top => v2(topValue); v1(topValue); r
+        case Topped.Actual(true) => v1(v2(topValue)); r
+        case Topped.Actual(false) => v2(topValue) match
           case Value.IntValue(IntSign.Zero) =>
             effectStack.joinComputations {
               v1(Value.IntValue(IntSign.Neg))
@@ -60,13 +63,14 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
               v1(Value.IntValue(IntSign.Pos))
             }
             r
-          case _ => v1(Value.TopValue); r
+          case _ => v1(topValue); r
 
       override def neq(v1: Value => Value, v2: Value => Value, r: Value): Value = asBoolean(r) match
-        case Topped.Top => v2(Value.TopValue); v1(Value.TopValue); r
+        case Topped.Top => v2(topValue); v1(topValue); r
         case Topped.Actual(b) => equ(v1, v2, boolean(Topped.Actual(!b))); r
 
     override val eqOps: EqOps[Value, Value] = implicitly
+
     override val functionOps: BackFunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
@@ -75,7 +79,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
     override val store: PowersetAddrMustStore[AllocationSiteAddr, Value] = new PowersetAddrMustStore(initStore)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
-    override val print: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
+    override val print: AUserInput[Value] = new AUserInput(topValue)
     override val input: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)

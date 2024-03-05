@@ -146,6 +146,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val rec = makeRecord(fieldVals)
       val addr = alloc(AllocationSite.Record(r))
       store.write(addr, rec)
+      println(s"This is address ${store.getState} and this is the value:${rec}")
       refValue(addr)
     case Exp.FieldAccess(rec, field) =>
       val addr = refAddr(eval(rec))

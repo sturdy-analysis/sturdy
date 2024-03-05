@@ -126,5 +126,5 @@ trait BackwardsInterpreter:
   type Instance <: GenericBackwardsInstance
   abstract class GenericBackwardsInstance extends GenericBackwardsInterpreter[Value, Addr]:
     given Instance = this.asInstanceOf[Instance]
-    override val topValue: Value = Value.TopValue
-    
+    //override val topValue: Value = Value.TopValue
+

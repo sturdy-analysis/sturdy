@@ -41,6 +41,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     private given Failure = failure
 
     override val topInt: Value = Value.IntValue(Interval.ITop) // Value.IntValue(Interval.I(Int.MinValue,Int.MaxValue))
+    override val topValue: Value = Value.IntValue(Interval.ITop)
     override def topFunction: Value = Value.FunValue(Powerset.apply(functions.values.toSet))
 
     override def topAddr: Powerset[AllocationSiteAddr] =
