@@ -198,8 +198,9 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.FieldAccess(rec, field) =>
       val v = store.read(topAddr).getOrElse(failure(UnboundVariable, topAddr.toString))
       val recVal = evalBack(rec, v)
+      println(s"RecVal and expected:$recVal, $expected")
       val fieldVal = lookupRecordField(recVal, Field(field))
-      println(s"FieldVal and expected:$fieldVal, $expected")
+      println(s"fieldVal and expected:$fieldVal, $expected")
       val refined = assert(fieldVal, expected)
       refined
   }
