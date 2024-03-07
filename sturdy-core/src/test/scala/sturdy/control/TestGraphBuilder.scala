@@ -8,9 +8,9 @@ import FixpointControlEvent.*
 
 class TestGraphBuilder extends AnyFunSuite {
 
-  inline def testGraph[A, S, E](name: String, code: String, es: List[ControlEvent], expected: Set[Edge[A, S]]): Unit =
+  inline def testGraph[A, S, E, F](name: String, code: String, es: List[ControlEvent], expected: Set[Edge[A, S]]): Unit =
     test(name) {
-      val graphBuilder = new ControlEventGraphBuilder[A, S, E]
+      val graphBuilder = new ControlEventGraphBuilder[A, S, E, F]
       es.foreach(graphBuilder.handle)
 
       val edgesMissing = expected.diff(graphBuilder.edges)
@@ -59,11 +59,11 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Begin("Call(main)"),
-      Begin("main"),
+      BeginSection("Call(main)"),
+      BeginSection("main"),
       Atomic("output 3"),
-      End("main"),
-      End("Call(main)"),
+      EndSection(),
+      EndSection(),
     ),
     linearPath(List(
       Node.BlockStart("Call(main)"),
@@ -92,17 +92,17 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Begin("Call(main)"),
-      Begin("main"),
+      BeginSection("Call(main)"),
+      BeginSection("main"),
       Atomic("output 3"),
-      Begin("Call(foo)"),
-      Begin("foo"),
-      End("foo"),
-      End("Call(foo)"),
+      BeginSection("Call(foo)"),
+      BeginSection("foo"),
+      EndSection(),
+      EndSection(),
       Atomic("x = foo()"),
       Atomic("output x"),
-      End("main"),
-      End("Call(main)"),
+      EndSection(),
+      EndSection(),
     ),
     linearPath(List(
       Node.BlockStart("Call(main)"),
@@ -139,8 +139,8 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Begin("Call(main)"),
-      Begin("main"),
+      BeginSection("Call(main)"),
+      BeginSection("main"),
       Atomic("x = input"),
       Atomic("if(x)"),
       Fork(),
@@ -148,8 +148,8 @@ class TestGraphBuilder extends AnyFunSuite {
       Switch(),
       Atomic("output 1"),
       Join(),
-      End("main"),
-      End("Call(main)"),
+      EndSection(),
+      EndSection(),
     ),
     linearPath(List(
       Node.BlockStart("Call(main)"),
@@ -186,8 +186,8 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      Begin("Call(main)"),
-      Begin("main"),
+      BeginSection("Call(main)"),
+      BeginSection("main"),
       Atomic("x = input"),
       Atomic("if(x)"),
       Fork(),
@@ -200,8 +200,8 @@ class TestGraphBuilder extends AnyFunSuite {
       Switch(),
       Atomic("output 1"),
       Join(),
-      End("main"),
-      End("Call(main)"),
+      EndSection(),
+      EndSection(),
     ),
     linearPath(List(
       Node.BlockStart("Call(main)"),

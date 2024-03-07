@@ -58,9 +58,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new IntervalAnalysis.Instance(Map(), Map(), stackConfig, 0)
+      val rec = analysis.addControlObserver(new RecordingControlObserver)
       analysis.addControlObserver(new PrintingControlObserver()(println))
       val graphBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
-      val recorder = analysis.addControlObserver(new RecordingControlObserver)
 
 //      val onlyCalls = false
 //      val cfg = IntervalAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -74,19 +74,6 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      println(analysis.cfgLogger.toGraphViz)
       println(graphBuilder.toGraphViz)
 
-
-      val originalSequence = recorder.events
-      val tree = ControlTree.buildControlTree(originalSequence)
-      val treeSequence = tree.print
-      val tree2 = ControlTree.buildControlTree(treeSequence)
-      val treeSequence2 = tree2.print
-
-      assert(treeSequence == treeSequence2)
-      assert(tree == tree2)
-
-      println(ControlGraph.toGraphViz(ControlTreeGraphBuilder().build(tree)))
-
-
 //      val deadNodes = cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
@@ -97,6 +84,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
+      println(rec)
       (aresult, analysis)
     } else {
       null

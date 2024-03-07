@@ -80,7 +80,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this

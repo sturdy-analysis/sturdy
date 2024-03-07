@@ -12,9 +12,9 @@ object CallGraph {
   def toGraphViz(edges: Set[CallEdge]): String =
     edges.toList.map(e => s"\"${e.from.funcIx}\" -> \"${e.to.funcIx}\"").sorted.fold("")((s1, s2) => s1 + "\n" + s2)
 
-  def buildFromControlTree(tree: ControlTree[_, Control.Section, Control.Exc]): Set[CallEdge] = _rec(tree, None)._1
+  def buildFromControlTree(tree: ControlTree[_, Control.Section, Control.Exc, Control.Fx]): Set[CallEdge] = _rec(tree, None)._1
 
-  private def _rec(tree: ControlTree[_, Control.Section, Control.Exc], funcId: Option[FuncId]): (Set[CallEdge], Map[Control.Exc, Set[FuncId]]) = tree match
+  private def _rec(tree: ControlTree[_, Control.Section, Control.Exc, Control.Fx], funcId: Option[FuncId]): (Set[CallEdge], Map[Control.Exc, Set[FuncId]]) = tree match
 
     case ControlTree.Section(f: FuncId, body) =>
       val (edges, exc) = _rec(body, Some(f))
@@ -40,7 +40,7 @@ object CallGraph {
       val (b2_edges, b2_exc) = _rec(b2, funcId)
       (b1_edges ++ b2_edges, combineMaps(b1_exc, b2_exc, _ ++ _))
 
-    case ControlTree.Fixpoint(b, repeat) =>
+    case ControlTree.Fix(fx, b, repeat) =>
       val (b_edges, b_exc) = _rec(b, funcId)
       val (repeat_edges, repeat_exc) = repeat.map(_rec(_, funcId)).getOrElse((Set.empty, Map.empty))
       (b_edges ++ repeat_edges, combineMaps(b_exc, repeat_exc, _ ++ _))
@@ -53,17 +53,14 @@ object CallGraph {
 
     case ControlTree.Try(body, handlers) =>
       val (body_edges, body_exc) = _rec(body, funcId)
-      val (handlers_edges, handlers_exc, handled_exc) = handlers.map(handler => _recCatch(handler, body_exc))
+      val (handlers_edges, handlers_exc, handled_exc) = handlers.map(handler => _recCatch(handler._1, handler._2, body_exc))
         .foldLeft((Set[CallEdge](), Map[Control.Exc, Set[FuncId]](), Set[Control.Exc]())) { (a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _), b._3.map(a._3 + _).getOrElse(a._3)) }
 
       (body_edges ++ handlers_edges, combineMaps(handlers_exc, body_exc.filterNot((k, _) => handled_exc.contains(k)), _ ++ _))
 
-    case ControlTree.Handling(_, _) => throw new Exception("...")
-
-  private def _recCatch(tree: ControlTree[_, Control.Section, Control.Exc], activeExc: Map[Control.Exc, Set[FuncId]]): (Set[CallEdge], Map[Control.Exc, Set[FuncId]], Option[Control.Exc]) = tree match
-    case ControlTree.Empty() => (Set(), Map.empty, None)
-    case ControlTree.Handling(exc, body) => activeExc.get(exc) match
-      case Some(funcIds) => funcIds.map(funcId => _rec(body, Some(funcId))).fold((Set.empty, Map.empty)) { (a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)) } ++ Tuple1(Some(exc))
+  private def _recCatch(exc: Control.Exc, tree: ControlTree[_, Control.Section, Control.Exc, Control.Fx], activeExc: Map[Control.Exc, Set[FuncId]]): (Set[CallEdge], Map[Control.Exc, Set[FuncId]], Option[Control.Exc]) =
+    activeExc.get(exc) match
+      case Some(funcIds) => funcIds.map(funcId => _rec(tree, Some(funcId))).fold((Set.empty, Map.empty)) { (a, b) => (a._1 ++ b._1, combineMaps(a._2, b._2, _ ++ _)) } ++ Tuple1(Some(exc))
       case None => throw new Exception("...")
 
 }

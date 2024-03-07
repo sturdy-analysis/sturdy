@@ -24,8 +24,8 @@ enum BasicControlEvent[Atom, Section] extends ControlEvent:
   case Atomic(a: Atom)
   case Failed()
 
-  case Begin(sec: Section)
-  case End(sec: Section)
+  case BeginSection(sec: Section)
+  case EndSection()
 
 enum ExceptionControlEvent[Exc] extends ControlEvent:
   case BeginTry()
@@ -39,11 +39,11 @@ enum BranchingControlEvent extends ControlEvent:
   case Switch()
   case Join()
 
-enum FixpointControlEvent extends ControlEvent:
-  case BeginFixpoint()
-  case RecurrentCall(failing: Boolean)
-  case EndFixpoint()
+enum FixpointControlEvent[Fx] extends ControlEvent:
+  case BeginFixpoint(fx: Fx)
+  case Recurrent(fx: Fx)
   case RepeatFixpoint()
+  case EndFixpoint()
 
 /*
 

@@ -14,6 +14,7 @@ object Control:
   type Atom = Stm
   type Section = Function | Exp.Call | Stm.If
   type Exc = Unit
+  type Fx = (FixIn, List[Any])
 
   def getInNode(l: Labeled | Function): Option[TipControlNode] = l match
     case f: Function => Some(TipControlNode.Enter(f.name))
@@ -33,21 +34,21 @@ object Control:
 trait Control extends Interpreter:
   import Control.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc, Fx])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     effects.addJoinObserver(observable)
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.Begin(f))
-        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.Begin(c))
-        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.Begin(s))
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.BeginSection(f))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.BeginSection(c))
+        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.BeginSection(s))
         case FixIn.Run(s: Stm.While) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
         case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.End(f))
-        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.End(c))
-        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.End(s))
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.EndSection())
         case _ => // nothing
 
 

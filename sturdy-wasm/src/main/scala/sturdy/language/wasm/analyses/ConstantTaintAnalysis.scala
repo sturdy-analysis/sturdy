@@ -74,7 +74,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
-    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc]
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this

@@ -5,7 +5,7 @@ import sturdy.data.MayJoin
 import sturdy.data.finiteUnit
 import sturdy.effect.EffectStack
 import sturdy.fix
-import sturdy.fix.{Combinator, Contextual, StackConfig}
+import sturdy.fix.{Combinator, Contextual, StackConfig, Stack}
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -33,14 +33,14 @@ import sturdy.values.{Finite, Join, Widen}
 case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive):
   override def toString: String = s"$fix $ctx"
 
-  def withObservers(newObservers: Iterable[FixpointControlEvent => Unit]): WasmConfig = 
+  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): WasmConfig =
     WasmConfig(fix.withObservers(newObservers), ctx)
 
 object WasmConfig:
   def default = WasmConfig()
 
 case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedStates()), loopUnwinding: Int = 0):
-  def withObservers(newObservers: Iterable[FixpointControlEvent => Unit]): FixpointConfig =
+  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): FixpointConfig =
     FixpointConfig(iter.withObservers(newObservers))
   
   override def toString: String =

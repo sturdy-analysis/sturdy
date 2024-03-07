@@ -5,12 +5,12 @@ import sturdy.effect.except.ExceptObserver
 
 import scala.collection.mutable.ListBuffer
 
-trait ControlObservable[Atom, Section, Exc] extends JoinObserver, ExceptObserver[Exc]:
-  private val observers: ListBuffer[ControlObserver[Atom, Section, Exc]] = ListBuffer.empty
-  def addControlObserver(obs: ControlObserver[Atom, Section, Exc]): obs.type =
+trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObserver[Exc]:
+  private val observers: ListBuffer[ControlObserver[Atom, Section, Exc, Fx]] = ListBuffer.empty
+  def addControlObserver(obs: ControlObserver[Atom, Section, Exc, Fx]): obs.type =
     observers += obs
     obs
-  def removeControlObserver(obs: ControlObserver[Atom, Section, Exc]): Unit =
+  def removeControlObserver(obs: ControlObserver[Atom, Section, Exc, Fx]): Unit =
     observers -= obs
 
   def triggerControlEvent(ev: ControlEvent): Unit =

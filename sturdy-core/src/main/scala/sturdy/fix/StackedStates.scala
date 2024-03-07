@@ -17,7 +17,9 @@ import scala.util.Success
 import scala.util.Try
 
 final class StackedStates[Dom, Codom](val state: State)
-                                     (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[FixpointControlEvent => Unit])
+                                     (inStateWidening: InStateWidening[Dom, state.In],
+                                      readPriorOutput: Boolean,
+                                      observers: Iterable[Stack.FixEvent => Unit])
                                      (using Finite[Dom], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
@@ -47,7 +49,7 @@ final class StackedStates[Dom, Codom](val state: State)
 
   override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
 
-  private def fire(ev: FixpointControlEvent): Unit = observers.foreach(_.apply(ev))
+  private def fire(ev: FixpointControlEvent[(Dom, state.In)]): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
   
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
@@ -77,7 +79,7 @@ final class StackedStates[Dom, Codom](val state: State)
             val OutCacheEntry(result, out, _) = outEntry.get
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
-            fire(FixpointControlEvent.RecurrentCall(false))
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             return PushResult.Recurrent(result, Some(out))
           }
         }
@@ -88,7 +90,7 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
-        fire(FixpointControlEvent.BeginFixpoint())
+        fire(FixpointControlEvent.BeginFixpoint(stateFrame))
         PushResult.Continue(Some(widenedIn))
 
       // call is recurrent
@@ -100,12 +102,12 @@ final class StackedStates[Dom, Codom](val state: State)
           case None =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
-            fire(FixpointControlEvent.RecurrentCall(true))
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
-            fire(FixpointControlEvent.RecurrentCall(false))
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -158,7 +160,7 @@ final class StackedStates[Dom, Codom](val state: State)
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
-                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[FixpointControlEvent => Unit])
+                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
                        (using Finite[Dom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
     new StackedStates(state)(inStateWidening, readPriorOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 

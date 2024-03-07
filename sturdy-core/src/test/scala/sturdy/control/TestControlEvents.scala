@@ -4,9 +4,9 @@ import org.scalatest.funsuite.AnyFunSuite
 import BasicControlEvent.*, ExceptionControlEvent.*, BranchingControlEvent.*, FixpointControlEvent.*
 
 class TestControlEvents extends AnyFunSuite {
-  inline def testEvents[A,S,E](name: String, code: String, es: List[ControlEvent]): Unit =
+  inline def testEvents[A,S,E,F](name: String, code: String, es: List[ControlEvent]): Unit =
     test(name) {
-      val rec = new ControlEventChecker[A, S, E]()
+      val rec = new ControlEventChecker[A, S, E, F]()
       es.foreach(rec.handle)
     }
 
@@ -20,10 +20,10 @@ class TestControlEvents extends AnyFunSuite {
     List(
       Atomic("x = a"),
       Atomic("while (x)"),
-      BeginFixpoint(),
+      BeginFixpoint("while"),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
-      RecurrentCall(true),
+      Recurrent(true),
       EndFixpoint(),
       RepeatFixpoint(),
       Atomic("x = x - 1"),
@@ -40,15 +40,15 @@ class TestControlEvents extends AnyFunSuite {
        |    x = n * f(n - 1)
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
-      BeginFixpoint(),
+      BeginSection("f"),
+      BeginFixpoint("fun f"),
       Atomic("if"),
       Fork(),
       Atomic("x = 1"),
       Switch(),
-      Begin("f"),
-      RecurrentCall(true),
-      End("f"),
+      BeginSection("f"),
+      Recurrent(true),
+      EndSection(),
       Join(),
       Atomic("ret x"),
       EndFixpoint(),
@@ -61,7 +61,7 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("x = n * f(n-1)"),
       Join(),
       Atomic("ret x"),
-      End("f"),
+      EndSection(),
     )
   )
 
@@ -77,7 +77,7 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
+      BeginSection("f"),
       BeginTry(),
         Atomic("x = 1"),
         Throw("A"),
@@ -85,7 +85,7 @@ class TestControlEvents extends AnyFunSuite {
         Handle("A"),
         Atomic("x = 3"),
       EndTry(),
-      End("f")
+      EndSection()
     )
   )
 
@@ -100,7 +100,7 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
+      BeginSection("f"),
       BeginTry(),
         Atomic("x = 1"),
         Throw("B"),
@@ -108,7 +108,7 @@ class TestControlEvents extends AnyFunSuite {
         Handle("B"),
         Atomic("x = 4"),
       EndTry(),
-      End("f")
+      EndSection()
     )
   )
 
@@ -124,7 +124,7 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
+      BeginSection("f"),
       BeginTry(),
         Atomic("If(???)"),
         Fork(),
@@ -141,7 +141,7 @@ class TestControlEvents extends AnyFunSuite {
           Atomic("x = 4"),
         Join(),
       EndTry(),
-      End("f")
+      EndSection()
     )
   )
 
@@ -158,7 +158,7 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
+      BeginSection("f"),
       BeginTry(),
         Atomic("If(???)"),
         Fork(),
@@ -177,7 +177,7 @@ class TestControlEvents extends AnyFunSuite {
           Atomic("x = 4"),
         Join(),
       EndTry(),
-      End("f")
+      EndSection()
     )
   )
 
@@ -196,7 +196,7 @@ class TestControlEvents extends AnyFunSuite {
        |    x = 4
        |  ret x""".stripMargin,
     List(
-      Begin("f"),
+      BeginSection("f"),
       BeginTry(),
         Atomic("If(???)"),
         Fork(),
@@ -215,7 +215,7 @@ class TestControlEvents extends AnyFunSuite {
           Atomic("x = 4"),
         Join(),
       EndTry(),
-      End("f")
+      EndSection()
     )
   )
 

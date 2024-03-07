@@ -22,11 +22,12 @@ object Control:
   type Atom = (Inst, InstLoc)
   type Section = FuncId | (Block | Loop | If | Call | CallIndirect, InstLoc)
   type Exc = JumpTarget
+  type Fx = (FixIn, List[Any])
 
 trait Control extends Interpreter:
   import Control.*
 
-  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc],
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc, Fx],
                          obsJoin: ObservableJoin,
                          obsExc: ObservableExcept[WasmException[Value]]
                         )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
@@ -34,14 +35,14 @@ trait Control extends Interpreter:
     obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.Begin(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.Begin((c,loc)))
+        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.BeginSection(id))
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection((c,loc)))
         case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic((inst, loc)))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.End(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.End((c, loc)))
+        case FixIn.EnterWasmFunction(_, _, _) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.EndSection())
         case _ => // nothing
 
 
