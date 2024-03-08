@@ -7,7 +7,7 @@ import sturdy.values.integer.*
 import sturdy.data.{JOptionC, MayJoin, noJoin}
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.except.Except
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.{CFailureException, Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
@@ -545,10 +545,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: NEW =>
           if (project.isLibraryType(inst.objectType)){
-            val source = nativeClassFileWrapper(inst.objectType)
-            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-            val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
-            val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
+            val obj = create_native_obj(inst.objectType)
             stack.push(obj)
           }
           else{
@@ -720,6 +717,12 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (x == 202) =>
       ???
 
+  def create_native_obj(toLoad: ObjectType): V =
+    val source = nativeClassFileWrapper(toLoad)
+    val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+    val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
+    val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
+    obj
   def eval_local_load(inst: Instruction): V = inst match
     case inst: LoadLocalVariableInstruction =>
       frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
@@ -931,7 +934,22 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         currPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
         currInst = instructionMap(currPC)
         //println(currInst.toString ++ " " ++ currPC.toString)
-        eval(currInst, currPC)
+        try{
+          eval(currInst, currPC)
+        }
+        catch{
+          case f: CFailureException =>
+            if(mth.body.get.exceptionHandlersFor(currPC).nonEmpty){
+              val handler = mth.body.get.exceptionHandlersFor(currPC).head
+              val catchPC = handler.handlerPC
+              val exceptionObject = create_native_obj(handler.catchType.get)
+              stack.push(exceptionObject)
+              except.throws(JvmExcept.Jump(catchPC))
+            }
+            else{
+              throw f
+            }
+        }
       }
 
     } {
