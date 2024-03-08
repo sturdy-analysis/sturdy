@@ -31,7 +31,8 @@ enum ExceptionControlEvent[Exc] extends ControlEvent:
   case BeginTry()
   case Throw(exc: Exc)
   case Catching()
-  case Handle(exc: Exc)
+  case BeginHandle(exc: Exc)
+  case EndHandle()
   case EndTry()
 
 enum BranchingControlEvent extends ControlEvent:
@@ -42,8 +43,8 @@ enum BranchingControlEvent extends ControlEvent:
 enum FixpointControlEvent[Fx] extends ControlEvent:
   case BeginFixpoint(fx: Fx)
   case Recurrent(fx: Fx)
-  case RepeatFixpoint()
   case EndFixpoint()
+  case Restart()
 
 /*
 

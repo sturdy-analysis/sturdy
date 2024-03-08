@@ -62,11 +62,16 @@ class PrintingControlObserver[Atom, Section, Exc, Fx](_indent: String = "  ", se
         occurrence(ev)
         indent += "  "
       case control.ExceptionControlEvent.Throw(_) => occurrence(ev)
-      case control.ExceptionControlEvent.Catching() => throw new Exception("Should not happen")
-      case control.ExceptionControlEvent.Handle(_) =>
+      case control.ExceptionControlEvent.Catching() =>
         indent = indent.drop(2)
         occurrence(ev)
         indent += "  "
+      case control.ExceptionControlEvent.BeginHandle(_) =>
+        occurrence(ev)
+        indent += "  "
+      case control.ExceptionControlEvent.EndHandle() =>
+        indent = indent.drop(2)
+        occurrence(ev)
       case control.ExceptionControlEvent.EndTry() =>
         indent = indent.drop(2)
         occurrence(ev)
@@ -86,16 +91,17 @@ class PrintingControlObserver[Atom, Section, Exc, Fx](_indent: String = "  ", se
         occurrence(ev)
 
   override def handle(ev: FixpointControlEvent[Fx]): Unit = ev match
-    case sturdy.control.FixpointControlEvent.BeginFixpoint(fx) =>
+    case FixpointControlEvent.BeginFixpoint(fx) =>
       occurrence(ev)
       indent += "  "
-    case sturdy.control.FixpointControlEvent.Recurrent(failing) =>
+    case FixpointControlEvent.Recurrent(failing) =>
       occurrence(ev)
-    case sturdy.control.FixpointControlEvent.EndFixpoint() =>
+    case FixpointControlEvent.EndFixpoint() =>
       indent = indent.drop(2)
       occurrence(ev)
-    case sturdy.control.FixpointControlEvent.RepeatFixpoint() =>
+    case FixpointControlEvent.Restart() =>
       occurrence(ev)
+
 
   def getString: String = buf.toString
 

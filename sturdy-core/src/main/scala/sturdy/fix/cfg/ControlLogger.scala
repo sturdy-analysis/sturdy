@@ -62,12 +62,14 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
         exceptions += exc -> combinedPreds
     predecessors = Map()
 
-  override def handling(exc: Exc): Unit =
+  override def handlingStart(exc: Exc): Unit =
     catchExceptions.get(exc) match
       case None => predecessors = Map()
       case Some(preds) =>
         predecessors = preds
         catchExceptions -= exc
+
+  override def handlingEnd(): Unit = ()
 
   override def tryStart(): Unit =
     exceptStack = exceptions :: exceptStack

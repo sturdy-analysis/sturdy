@@ -91,9 +91,9 @@ def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[I
   )
 
   val originalSequence = recorder.events
-  val tree = ControlTree.buildControlTree(originalSequence)
+  val tree = ControlEventParser.parse(originalSequence)
   val treeSequence = tree.print
-  val tree2 = ControlTree.buildControlTree(treeSequence)
+  val tree2 = ControlEventParser.parse(treeSequence)
   val treeSequence2 = tree2.print
 
   assert(treeSequence == treeSequence2)

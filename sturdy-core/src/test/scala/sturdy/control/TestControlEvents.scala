@@ -25,9 +25,12 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("while (x)"),
       Recurrent(true),
       EndFixpoint(),
-      RepeatFixpoint(),
+      Restart(),
+      BeginFixpoint("while"),
       Atomic("x = x - 1"),
       Atomic("while (x)"),
+      Recurrent(true),
+      EndFixpoint(),
       Atomic("y = x")
     )
   )
@@ -53,7 +56,8 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("ret x"),
       EndFixpoint(),
 
-      RepeatFixpoint(),
+      Restart(),
+      BeginFixpoint("fun f"),
       Atomic("if"),
       Fork(),
       Atomic("x = 1"),
@@ -61,6 +65,8 @@ class TestControlEvents extends AnyFunSuite {
       Atomic("x = n * f(n-1)"),
       Join(),
       Atomic("ret x"),
+      EndFixpoint(),
+
       EndSection(),
     )
   )
@@ -82,8 +88,9 @@ class TestControlEvents extends AnyFunSuite {
         Atomic("x = 1"),
         Throw("A"),
         Catching(),
-        Handle("A"),
-        Atomic("x = 3"),
+        BeginHandle("A"),
+          Atomic("x = 3"),
+        EndHandle(),
       EndTry(),
       EndSection()
     )
@@ -105,8 +112,9 @@ class TestControlEvents extends AnyFunSuite {
         Atomic("x = 1"),
         Throw("B"),
         Catching(),
-        Handle("B"),
-        Atomic("x = 4"),
+        BeginHandle("B"),
+          Atomic("x = 4"),
+        EndHandle(),
       EndTry(),
       EndSection()
     )
@@ -137,8 +145,9 @@ class TestControlEvents extends AnyFunSuite {
         Fork(),
         Switch(),
           Catching(),
-          Handle("A"),
-          Atomic("x = 4"),
+          BeginHandle("A"),
+            Atomic("x = 4"),
+          EndHandle(),
         Join(),
       EndTry(),
       EndSection()
@@ -170,11 +179,13 @@ class TestControlEvents extends AnyFunSuite {
         Join(),
         Catching(),
         Fork(),
-          Handle("A"),
-          Atomic("x = 3"),
+          BeginHandle("A"),
+            Atomic("x = 3"),
+          EndHandle(),
         Switch(),
-          Handle("B"),
-          Atomic("x = 4"),
+          BeginHandle("B"),
+            Atomic("x = 4"),
+          EndHandle(),
         Join(),
       EndTry(),
       EndSection()
@@ -211,8 +222,9 @@ class TestControlEvents extends AnyFunSuite {
         Fork(),
         Switch(),
           Catching(),
-          Handle("A"),
-          Atomic("x = 4"),
+          BeginHandle("A"),
+            Atomic("x = 4"),
+          EndHandle(),
         Join(),
       EndTry(),
       EndSection()

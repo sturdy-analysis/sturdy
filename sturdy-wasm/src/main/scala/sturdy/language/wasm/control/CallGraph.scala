@@ -40,10 +40,12 @@ object CallGraph {
       val (b2_edges, b2_exc) = _rec(b2, funcId)
       (b1_edges ++ b2_edges, combineMaps(b1_exc, b2_exc, _ ++ _))
 
-    case ControlTree.Fix(fx, b, repeat) =>
-      val (b_edges, b_exc) = _rec(b, funcId)
-      val (repeat_edges, repeat_exc) = repeat.map(_rec(_, funcId)).getOrElse((Set.empty, Map.empty))
-      (b_edges ++ repeat_edges, combineMaps(b_exc, repeat_exc, _ ++ _))
+    case ControlTree.Fix(fx, b) =>
+      _rec(b, funcId)
+//      val (repeat_edges, repeat_exc) = repeat.map(_rec(_, funcId)).getOrElse((Set.empty, Map.empty))
+      // (b_edges ++ repeat_edges, combineMaps(b_exc, repeat_exc, _ ++ _))
+
+    case ControlTree.Restart() => (Set.empty, Map.empty)
 
     case ControlTree.Throw(exc) =>
       if (funcId.isDefined)

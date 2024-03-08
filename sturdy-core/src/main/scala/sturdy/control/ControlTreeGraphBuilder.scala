@@ -71,16 +71,18 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
     case ControlTree.Throw(exc) =>
       Result(Set(), List(exc -> pred))
 
-    case ControlTree.Fix(fx, b, repeat) =>
+    case ControlTree.Fix(fx, b) =>
       val r = _build(b, pred)
       // register result of `b`
       fixpoints += fx -> (fixpoints.getOrElse(fx, Result.empty) || r)
-      repeat match
-        case None => r
-        case Some(t) => _build(t, pred)
+      r
 
     case ControlTree.Recurrent(fx) =>
       fixpoints.getOrElse(fx, Result.empty)
+
+    case ControlTree.Restart() =>
+      // restart in t without predecessors
+      Result.empty
 
   private def addEdges(prev: Set[CNode], current: CNode): Unit =
     edges ++= prev.map(p => Edge(p, current, EdgeType.CF))

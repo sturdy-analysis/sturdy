@@ -60,7 +60,8 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case BeginTry() => ()
       case Throw(exc) => ()
       case Catching() => ()
-      case Handle(exc) => ()
+      case BeginHandle(exc) => ()
+      case EndHandle() => ()
       case EndTry() => ()
 
 
@@ -88,9 +89,9 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         fixpointAncestors = predecessors
       case Recurrent(_) =>
         predecessors = List.empty
-      case RepeatFixpoint() =>
-        predecessors = fixpointAncestors
       case EndFixpoint() => ()
+      case Restart() =>
+        predecessors = List.empty
 
 
   def toGraphViz : String =

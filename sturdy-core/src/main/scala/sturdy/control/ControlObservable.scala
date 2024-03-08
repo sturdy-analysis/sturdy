@@ -23,14 +23,15 @@ trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObse
     triggerControlEvent(BranchingControlEvent.Join())
 
   override def repeating(): Unit =
-    triggerControlEvent(FixpointControlEvent.RepeatFixpoint())
+    triggerControlEvent(FixpointControlEvent.Restart())
   
   override def throwing(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.Throw(exc))
-  override def handling(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.Handle(exc))
+  override def handlingStart(exc: Exc): Unit = triggerControlEvent(ExceptionControlEvent.BeginHandle(exc))
+  override def handlingEnd(): Unit = triggerControlEvent(ExceptionControlEvent.EndHandle())
   override def tryStart(): Unit = triggerControlEvent(ExceptionControlEvent.BeginTry())
   override def tryEnd(): Unit = triggerControlEvent(ExceptionControlEvent.EndTry())
 
-  override def catchStart(): Unit = ()
+  override def catchStart(): Unit = triggerControlEvent(ExceptionControlEvent.Catching())
   override def catchEnd(): Unit = ()
 
   
