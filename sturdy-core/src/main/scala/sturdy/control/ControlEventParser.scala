@@ -46,8 +46,14 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
     case Entry.Tree(t) :: Nil => t
     case _ => error(s"Ill-formatted stack, expected singular tree: $stack")
 
+  def assertNoCatching(): Unit =
+    if (isCatching) {
+      error(s"Control event while catching but outside handler")
+    }
+
   override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
     import BasicControlEvent.*
+    assertNoCatching()
     ev match
       case BasicControlEvent.Atomic(a) => addTree(CT.Atomic(a))
       case BasicControlEvent.Failed() => addTree(CT.Failed())
@@ -81,8 +87,11 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
     import ExceptionControlEvent.*
     ev match
       case BeginTry() =>
+        assertNoCatching()
         stack = Entry.Tree(CT.Empty()) :: Entry.Try :: stack
-      case Throw(exc: Exc) => addTree(CT.Throw(exc))
+      case Throw(exc: Exc) =>
+        assertNoCatching()
+        addTree(CT.Throw(exc))
       case Catching() => stack match
         case Entry.Tree(body) :: Entry.Try :: stack_ =>
           stack = Entry.Catching(body, List()) :: stack_
@@ -104,6 +113,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
 
   override def handle(ev: FixpointControlEvent[Fx]): Unit =
     import FixpointControlEvent.*
+    assertNoCatching()
     ev match
       case BeginFixpoint(fx) =>
         stack = Entry.Tree(CT.Empty()) :: Entry.Fixpoint(fx) :: stack

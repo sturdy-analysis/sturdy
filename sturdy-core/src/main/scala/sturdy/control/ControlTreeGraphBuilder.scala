@@ -2,10 +2,13 @@ package sturdy.control
 
 import sturdy.data.combineMaps
 
+import scala.language.implicitConversions
+
 class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
 
   private type CT = ControlTree[Atom, Sec, Exc, Fx]
-  private type CNode = Node[Atom, Sec]
+  private case class CNode(n: Node[Atom, Sec], exc: Boolean)
+  private implicit def cnode[A <: Atom,S <: Sec](n: Node[A, S]): CNode = CNode(n, false)
   private type CEdge = Edge[Atom, Sec]
   private case class Result(tails: Set[CNode], xs: List[(Exc, Set[CNode])]):
     def ||(that: Result): Result =
@@ -25,7 +28,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       Result(pred, List())
 
     case ControlTree.Atomic(a) =>
-      val current: CNode = Node.Atomic(a)
+      val current = Node.Atomic(a)
       addEdges(pred, current)
       Result(Set(current), List())
 
@@ -40,9 +43,12 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       val Result(tails, xs) = _build(body, Set(begin))
       addEdges(pred, begin)
       addEdges(tails, end)
-      if (!edges.contains(Edge(begin, end, EdgeType.CF)) && tails.nonEmpty)
-        addEdges(Set(begin), end, EdgeType.BlockPair)
-      Result(Set(end), xs)
+      if (tails.isEmpty)
+        Result(Set.empty, xs)
+      else {
+        addBlockPairEdges(Set(begin), end)
+        Result(Set(end), xs)
+      }
 
     case ControlTree.Seq(t1, t2) =>
       val Result(tails1, xs1) = _build(t1, pred)
@@ -60,13 +66,14 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       val rs = for ((hx, ht) <- handlers) yield {
         val hpred = excs.flatMap { case (x, xpred) =>
           if (x == hx)
-            xpred
+            xpred.map(_.copy(exc = true))
           else
             Set()
         }.toSet
         _build(ht, hpred)
       }
-      rs.foldRight(Result.empty)(_||_)
+      val result = rs.foldRight(Result(lastBody, List()))(_ || _)
+      result
 
     case ControlTree.Throw(exc) =>
       Result(Set(), List(exc -> pred))
@@ -85,9 +92,14 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       Result.empty
 
   private def addEdges(prev: Set[CNode], current: CNode): Unit =
-    edges ++= prev.map(p => Edge(p, current, EdgeType.CF))
+    edges ++= prev.map(p =>
+      Edge(p.n, current.n, if (p.exc) EdgeType.Exceptional else EdgeType.CF)
+    )
 
-  private def addEdges(prev: Set[CNode], current: CNode, edgeType: EdgeType): Unit =
-    edges ++= prev.map(p => Edge(p, current, edgeType))
+  private def addBlockPairEdges(prev: Set[CNode], current: CNode): Unit =
+    prev.foreach { p =>
+      if (!edges.contains(Edge(p.n, current.n, EdgeType.CF)))
+        edges += Edge(p.n, current.n, EdgeType.BlockPair)
+    }
 }
 
