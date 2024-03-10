@@ -29,6 +29,7 @@ trait Interpreter:
   
   type TypeRep
   type NullVal
+  type FieldName
   type OID
   type ObjType
   type ObjRep

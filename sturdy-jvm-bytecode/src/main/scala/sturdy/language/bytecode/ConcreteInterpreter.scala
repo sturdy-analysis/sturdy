@@ -40,7 +40,8 @@ object ConcreteInterpreter extends Interpreter:
   override type TypeRep = ReferenceType
   override type NullVal = Null
   override type OID = Int
-  override type ObjRep = Object[OID, ObjType, Addr]
+  override type FieldName = String
+  override type ObjRep = Object[OID, ObjType, Addr, FieldName]
   override type AID = Int
   override type AType = ArrayType
   override type ArrayRep = Array[AID, Addr, AType]
@@ -51,7 +52,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
-  override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr] = throw new UnsupportedOperationException
+  override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr, ConcreteInterpreter.FieldName] = throw new UnsupportedOperationException
   override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr, ConcreteInterpreter.AType] = throw new UnsupportedOperationException
   override def topNull: Null = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
@@ -93,8 +94,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
+    val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =

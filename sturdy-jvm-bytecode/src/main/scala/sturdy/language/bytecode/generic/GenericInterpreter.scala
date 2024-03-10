@@ -13,7 +13,7 @@ import sturdy.effect.allocation.Allocation
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ReferenceType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ObjectTypes, ReferenceType, ShortType}
 import org.opalj.io.process
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.arrays.Array
@@ -60,7 +60,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, OID, V, ClassFile, Object[OID, ClassFile, Addr], V, AllocationSite, Method, String, MethodDescriptor, V, ReferenceType, J]
+  val objectOps: ObjectOps[Addr, Int, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, ReferenceType, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -129,7 +129,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
           val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
-          val stringObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(stringCF)), stringCF, Seq((stringArray, AllocationSite.default)))
+          val stringObj = create_native_obj(ObjectType("java/lang/String"))
+          objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
 
         case inst: LoadMethodHandle =>
@@ -455,15 +456,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: GETFIELD =>
           val obj = stack.popOrAbort()
           val objCF = project.classFile(inst.declaringClass).get
-          val fieldIndex = objCF.fields.map(_.name).indexOf(inst.name)
-          val field = objectOps.getField(obj, fieldIndex).getOrElse(fail(UnboundField, inst.name))
+          val field = objectOps.getField(obj, inst.name).getOrElse(fail(UnboundField, inst.name))
           stack.push(field)
         case inst: PUTFIELD =>
           val value = stack.popOrAbort()
           val obj = stack.popOrAbort()
           val objCF = project.classFile(inst.declaringClass).get
-          val fieldIndex = objCF.fields.map(_.name).indexOf(inst.name)
-          objectOps.setField(obj, fieldIndex, value)
+          objectOps.setField(obj, inst.name, value)
 
 
     // Invoke Functions
@@ -525,6 +524,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
           invokeMethodOnObject(mth, args, obj)
 
         case inst: INVOKEDYNAMIC =>
+          val test = inst.bootstrapMethod
+          val test1 = inst.name
+          val test2 = inst.methodDescriptor
           val receiver = inst.bootstrapMethod.handle
           receiver match
             case receiver: InvokeStaticMethodHandle =>
@@ -550,7 +552,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
           }
           else{
             val cfs = project.classFile(inst.objectType).get
-            val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
+            val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq.distinct
+            val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
             val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
             stack.push(obj)
           }
@@ -720,7 +723,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
   def create_native_obj(toLoad: ObjectType): V =
     val source = nativeClassFileWrapper(toLoad)
     val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-    val fields = cfs.fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name)))
+    val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
+    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
     val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
     obj
   def eval_local_load(inst: Instruction): V = inst match
@@ -765,24 +769,44 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       array
     }
 
-  def findMethodOfObj(obj: Object[OID, ClassFile, Addr], name: String, sig: MethodDescriptor): Method =
+  def findMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor): Method =
     if (project.isLibraryType(obj.cls.thisType)) {
-      val source = nativeClassFileWrapper(obj.cls.thisType)
-      val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-      cfs.findMethod(name, sig)
-        .getOrElse(cfs.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig).get).head)
+      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
+      obj.cls.findMethod(name, sig)
+        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
     }
     else {
+      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
       obj.cls.findMethod(name, sig)
-        .getOrElse(obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig).get).head)
+        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
     }
 
-  def checkTypeObj(obj: Object[OID, ClassFile, Addr], check: ReferenceType): Boolean =
+  def findInheritedMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
+    if(inheritedObj == ObjectType("java/lang/Object")){
+      obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head.getOrElse(fail(MethodNotFound, s"Method $sig, $name not found"))
+    }
+    else{
+      if (project.isLibraryType(inheritedObj)) {
+        val source = nativeClassFileWrapper(inheritedObj)
+        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
+        cfs.findMethod(name, sig)
+          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
+      }
+      else {
+        val cfs = project.classFile(inheritedObj).get
+        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
+        cfs.findMethod(name, sig)
+          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
+      }
+    }
+
+  def checkTypeObj(obj: Object[OID, ClassFile, Addr, String], check: ReferenceType): Boolean =
     obj.cls.thisType.isSubtypeOf(check.mostPreciseObjectType)(project.classHierarchy)
 
   def checkTypeArray(array: Array[AID, Addr, ArrayType], check: ArrayType): Boolean =
     array.arrayType == check
-  def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr], mth: Method, args: Seq[V]): JOptionC[V] =
+  def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = ()
 
     var locals: ArraySeq[ValType] = ArraySeq()
@@ -959,11 +983,14 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match
+    case opalTypes: ByteType => ValType.I32
+    case opalTypes: ShortType => ValType.I32
     case opalTypes: IntegerType => ValType.I32
     case opalTypes: FloatType => ValType.F32
     case opalTypes: LongType => ValType.I64
     case opalTypes: DoubleType => ValType.F64
     case opalTypes: BooleanType => ValType.I32
+    case opalTypes: CharType => ValType.I32
     case opalTypes: ObjectType => ValType.Obj
     case opalTypes: ArrayType => ValType.Array
     case _ => ???

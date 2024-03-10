@@ -3,13 +3,13 @@ package sturdy.values.objects
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
 
-class LiftedObjectOps[Addr, Idx, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, TypeRep, J[_] <: MayJoin[_], UOV, UNV]
+class LiftedObjectOps[Addr, Idx, FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, TypeRep, J[_] <: MayJoin[_], UOV, UNV]
   (extractO: OV => UOV, injectO: UOV => OV, extractNull: NV => UNV, injectNull: UNV => NV)
-  (using ops: ObjectOps[Addr, Idx, OID, V, CF, O, UOV, Site, Mth, MthName, MthSig, UNV, TypeRep, J]) extends ObjectOps[Addr, Idx, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, TypeRep, J]:
+  (using ops: ObjectOps[Addr, Idx, FieldName, OID, V, CF, O, UOV, Site, Mth, MthName, MthSig, UNV, TypeRep, J]) extends ObjectOps[Addr, Idx, FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, TypeRep, J]:
 
-  override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site)]): OV = injectO(ops.makeObject(oid, cfs, vals))
-  override def getField(obj: OV, idx: Idx): JOption[J, V] = ops.getField(extractO(obj), idx)
-  override def setField(obj: OV, idx: Idx, v: V): JOption[J, Unit] = ops.setField(extractO(obj), idx, v)
+  override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site, FieldName)]): OV = injectO(ops.makeObject(oid, cfs, vals))
+  override def getField(obj: OV, name: FieldName): JOption[J, V] = ops.getField(extractO(obj), name)
+  override def setField(obj: OV, name: FieldName, v: V): JOption[J, Unit] = ops.setField(extractO(obj), name, v)
   override def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => JOptionC[V]): JOptionC[V] =
     ops.invokeFunction(extractO(obj), mth, args)(invoke)
   override def findFunction(obj: OV, name: MthName, sig: MthSig)(invoke: (O, MthName, MthSig) => Mth): Mth =

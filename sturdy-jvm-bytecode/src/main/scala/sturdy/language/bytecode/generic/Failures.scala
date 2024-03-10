@@ -9,6 +9,7 @@ enum BytecodeFailure extends FailureKind:
   case UnboundField
   case UnboundStaticVar
   case IndexOutOfBounds
+  case MethodNotFound
   case TypeError
   
 given Finite[BytecodeFailure] with {}
