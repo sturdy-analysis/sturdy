@@ -1,6 +1,7 @@
 package sturdy.language.wasm.simple
 
 import cats.effect.{Blocker, IO}
+import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
@@ -181,6 +182,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   interp.addControlObserver(new ControlEventChecker)
   val recorder = interp.addControlObserver(new RecordingControlObserver)
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
@@ -204,7 +206,15 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   assert(treeSequence == treeSequence2)
   assert(tree == tree2)
 
-  println(ControlGraph.toGraphViz(ControlTreeGraphBuilder().build(tree)))
+  val graphFromTree = tree.toGraph
+  val graphFromEvents = graphBuilder.get
+
+  val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
+  val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
+  assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
+  assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
+
+  println(graphFromTree.toGraphViz)
 
 
 //  println(tree.toGraphViz)

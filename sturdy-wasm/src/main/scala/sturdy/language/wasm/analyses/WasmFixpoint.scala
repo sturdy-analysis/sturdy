@@ -33,14 +33,14 @@ import sturdy.values.{Finite, Join, Widen}
 case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive):
   override def toString: String = s"$fix $ctx"
 
-  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): WasmConfig =
+  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): WasmConfig =
     WasmConfig(fix.withObservers(newObservers), ctx)
 
 object WasmConfig:
   def default = WasmConfig()
 
 case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedStates()), loopUnwinding: Int = 0):
-  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): FixpointConfig =
+  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): FixpointConfig =
     FixpointConfig(iter.withObservers(newObservers))
   
   override def toString: String =

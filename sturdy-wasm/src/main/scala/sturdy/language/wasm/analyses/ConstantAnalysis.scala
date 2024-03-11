@@ -34,7 +34,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
-import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
+import sturdy.language.wasm.abstractions.Control.Exc
 
 object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]

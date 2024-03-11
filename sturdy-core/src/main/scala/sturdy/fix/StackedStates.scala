@@ -49,7 +49,7 @@ final class StackedStates[Dom, Codom](val state: State)
 
   override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
 
-  private def fire(ev: FixpointControlEvent[(Dom, state.In)]): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
+  private def fire(ev: Stack.FixEvent): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
   
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()

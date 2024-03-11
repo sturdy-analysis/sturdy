@@ -15,7 +15,7 @@ enum Config:
   case Outermost(config: StackConfig)
   case Topmost(config: StackConfig)
 
-  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): Config = this match
+  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): Config = this match
     case Innermost(config) => Innermost(config.withObservers(newObservers))
     case Outermost(config) => Outermost(config.withObservers(newObservers))
     case Topmost(config) => Topmost(config.withObservers(newObservers))

@@ -8,13 +8,14 @@ import FixpointControlEvent.*
 
 class TestGraphBuilder extends AnyFunSuite {
 
-  inline def testGraph[A, S, E, F](name: String, code: String, es: List[ControlEvent], expected: Set[Edge[A, S]]): Unit =
+  inline def testGraph[A, S, E, F](name: String, code: String, es: List[ControlEvent[A,S,E,F]], expected: Set[Edge[A, S]]): Unit =
     test(name) {
       val graphBuilder = new ControlEventGraphBuilder[A, S, E, F]
       es.foreach(graphBuilder.handle)
 
-      val edgesMissing = expected.diff(graphBuilder.edges)
-      val edgesUnexpected = graphBuilder.edges.diff(expected)
+      val edges = graphBuilder.get.edges
+      val edgesMissing = expected.diff(edges)
+      val edgesUnexpected = edges.diff(expected)
 
       (edgesMissing.isEmpty, edgesUnexpected.isEmpty) match
         case (true, true) => ()

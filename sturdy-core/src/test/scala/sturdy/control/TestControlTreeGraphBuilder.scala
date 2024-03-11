@@ -22,10 +22,10 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
       val (ct, expected) = f
       val actual = graphBuilder.build(ct)
 
-      val edgesMissing = expected.diff(actual)
-      val edgesUnexpected = actual.diff(expected)
+      val edgesMissing = expected.diff(actual.edges)
+      val edgesUnexpected = actual.edges.diff(expected)
 
-      println(ControlGraph.toGraphViz(actual))
+      println(actual.toGraphViz)
 
       (edgesMissing.isEmpty, edgesUnexpected.isEmpty) match
         case (true, true) => ()

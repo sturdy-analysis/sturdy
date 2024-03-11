@@ -1,99 +1,173 @@
 package sturdy.control
 
-import java.util.Optional
-import scala.annotation.tailrec
-import scala.collection.{immutable, mutable}
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
+import sturdy.control.FixpointControlEvent.BeginFixpoint
+
+import scala.collection.mutable
+import scala.language.implicitConversions
 
 class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
+  import ControlEventGraphBuilder.*
 
-  type CNode = Node[Atom, Section]
-  type CEdge = Edge[Atom, Section]
+  private case class CNode(n: Node[Atom, Section], exc: Boolean)
+  private implicit def cnode[A <: Atom,S <: Section](n: Node[A, S]): CNode = CNode(n, false)
+  private type CEdge = Edge[Atom, Section]
 
-  private enum ProgramStructure:
-    case Block(start: CNode)
-    case Fork(origin: List[CNode], lastFirstBranch: List[CNode])
+  private type ActiveExc = List[(Exc, List[CNode])]
 
-  val edges: mutable.Set[CEdge] = mutable.Set.empty
-  val nodes: mutable.Set[CNode] = mutable.Set.empty
+  private enum Entry:
+    case Sec(s: Section)
+    case Try(outside: ActiveExc)
+    case Catching(bodyTails: List[CNode], bodyExc: ActiveExc, outside: ActiveExc, handlers: List[Result])
+    case Handler(exc: Exc)
+    case ForkFirst(originTails: List[CNode], originExc: ActiveExc)
+    case ForkSecond(firstTails: List[CNode], firstOriginExc: ActiveExc)
+    case Fixpoint(fx: Fx)
 
-  private var structureStack: List[ProgramStructure] = List.empty
-  private var predecessors: List[CNode] = List.empty
+  private case class Result(tails: List[CNode], xs: ActiveExc):
+    def ||(that: Result): Result =
+      Result(this.tails ++ that.tails, this.xs ++ that.xs)
+  private object Result:
+    val empty: Result = Result(List(), List())
 
-  private var fixpointAncestors: List[CNode] = List.empty
+  private var stack: List[Entry] = List()
+  private var predecessors: List[CNode] = List(Node.Start())
+  private var activeExc: ActiveExc = List()
+  private val edges: mutable.Set[CEdge] = mutable.Set.empty
+  private var fixpoints: Map[Fx, Result] = Map()
 
-  var checker: ControlEventChecker[Atom, Section, Exc, Fx] = new ControlEventChecker
+  def get: ControlGraph[Atom, Section] =
+    if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
+    ControlGraph(edges.toSet)
 
-  private def addNode(node : CNode) : List[CNode] =
+  def isCatching: Boolean = stack match
+    case (_: Entry.Catching) :: _ => true
+    case _ => false
+
+  private def addNode(node: CNode): List[CNode] =
     val previous = predecessors
-    predecessors.foreach(n => edges += Edge(n, node, EdgeType.CF))
+    predecessors.foreach(n => edges += Edge(n.n, node.n, if (n.exc) EdgeType.Exceptional else EdgeType.CF))
     predecessors = List(node)
-    nodes += node
     previous
 
-  override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
+  private def addBlockPairEdges(sec: Section): Unit =
+    if (!edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)))
+      edges += Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)
+
+  def assertNoCatching(): Unit =
+    if (isCatching) {
+      error(s"Control event while catching but outside handler")
+    }
+
+  override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*
+    assertNoCatching()
     ev match
-      case Atomic(a: Atom) => addNode(Node.Atomic(a))
-      case BeginSection(sec: Section) =>
-        val current : CNode = Node.BlockStart(sec)
-        addNode(current)
-        structureStack = ProgramStructure.Block(current) :: structureStack
-      case EndSection() =>
-        structureStack.head match
-          case ProgramStructure.Block(start@Node.BlockStart(sec)) =>
-            val end : CNode = Node.BlockEnd(sec)
-            val prev = addNode(end) // check to print helper BlockPair edge only if there is no direct CF edge between the two Block nodes
-            structureStack = structureStack.tail
-            if (prev.nonEmpty && !prev.contains(Node.BlockStart(sec)))
-              edges += Edge(start, end, EdgeType.BlockPair)
-          case _ => throw new Exception("Illegal control event sequence")
+      case BasicControlEvent.Atomic(a) => addNode(Node.Atomic(a))
       case BasicControlEvent.Failed() =>
         addNode(Node.Failure())
-        predecessors = List()
+        predecessors = List.empty
+      case BasicControlEvent.BeginSection(sec: Section) =>
+        addNode(Node.BlockStart(sec))
+        stack = Entry.Sec(sec) :: stack
+      case BasicControlEvent.EndSection() => stack match
+        case Entry.Sec(sec) :: stack_ =>
+          stack = stack_
+          if (predecessors.isEmpty) {
+            // nothing
+          } else {
+            addNode(Node.BlockEnd(sec))
+            addBlockPairEdges(sec)
+          }
+        case _ => error(s"Entry mismatch, expected end of $ev: $stack")
+
+  override def handle(ev: BranchingControlEvent[Atom,Section,Exc,Fx]): Unit =
+    import BranchingControlEvent.*
+    if (isCatching) {
+      // skip forks while catching
+      return
+    }
+    ev match
+      case Fork() =>
+        stack = Entry.ForkFirst(predecessors, activeExc) :: stack
+        activeExc = List.empty
+      case Switch() => stack match
+        case Entry.ForkFirst(originTails, originExc) :: stack_ =>
+          stack = Entry.ForkSecond(predecessors, originExc ++ activeExc) :: stack_
+          predecessors = originTails
+          activeExc = List.empty
+        case _ => error(s"Entry mismatch, expected ForkFirst for $ev: $stack")
+      case BranchingControlEvent.Join() => stack match
+        case Entry.ForkSecond(firstTails, firstOriginExc) :: stack_ =>
+          stack = stack_
+          predecessors = firstTails ++ predecessors
+          activeExc = firstOriginExc ++ activeExc
+        case _ => error(s"Entry mismatch, expected ForkSecond for $ev: $stack")
 
 
-  override def handle(ev: ExceptionControlEvent[Exc]): Unit =
+  override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
     import ExceptionControlEvent.*
     ev match
-      case BeginTry() => ()
-      case Throw(exc) => ()
-      case Catching() => ()
-      case BeginHandle(exc) => ()
-      case EndHandle() => ()
-      case EndTry() => ()
+      case BeginTry() =>
+        assertNoCatching()
+        stack = Entry.Try(outside = activeExc) :: stack
+        activeExc = List.empty
+      case Throw(exc: Exc) =>
+        assertNoCatching()
+        activeExc = activeExc :+ (exc -> predecessors)
+        predecessors = List.empty
+      case Catching() => stack match
+        case Entry.Try(outside) :: stack_ =>
+          stack = Entry.Catching(
+            bodyTails = predecessors,
+            bodyExc = activeExc,
+            outside,
+            handlers = List.empty
+          ) :: stack_
+        case _ => error(s"Entry mismatch, expected Try for $ev: $stack")
+      case BeginHandle(exc: Exc) => stack match
+        case (c: Entry.Catching) :: stack_ =>
+          stack = Entry.Handler(exc) :: c :: stack_
+          predecessors = c.bodyExc.filter(_._1 == exc).flatMap(_._2).map(_.copy(exc = true))
+          activeExc = List.empty
+        case _ => error(s"Entry mismatch, expected Catching for $ev: $stack")
+      case EndHandle() => stack match
+        case Entry.Handler(hx) :: Entry.Catching(bodyTails, bodyExc, outside, hres) :: stack_ =>
+          stack = Entry.Catching(bodyTails, bodyExc, outside, hres :+ Result(predecessors, activeExc)) :: stack_
+        case _ => error(s"Entry mismatch, expected Handler for $ev: $stack")
+      case EndTry() => stack match
+        case Entry.Try(outside) :: stack_ =>
+          stack = stack_
+          activeExc = outside
+        case Entry.Catching(bodyTails, bodyExc, outside, hs) :: stack_ =>
+          stack = stack_
+          predecessors = bodyTails ++ hs.flatMap(_.tails)
+          activeExc = outside ++ hs.flatMap(_.xs)
+        case _ => error(s"Entry mismatch, expected Try or Catching for $ev: $stack")
 
-
-  override def handle(ev: BranchingControlEvent): Unit =
-    import BranchingControlEvent.*
-    ev match
-      case Fork() => structureStack = ProgramStructure.Fork(predecessors, List.empty) :: structureStack
-      case Switch() =>
-        structureStack.head match
-          case ProgramStructure.Fork(origin, _) =>
-            structureStack = ProgramStructure.Fork(origin, predecessors) :: structureStack.tail
-            predecessors = origin
-          case _ => throw new Exception("Illegal control event sequence")
-      case Join() =>
-        structureStack.head match
-          case ProgramStructure.Fork(_, lastFirstBranch) =>
-            predecessors = predecessors ++ lastFirstBranch
-            structureStack = structureStack.tail
-          case _ => throw new Exception("Illegal control event sequence")
-
-  override def handle(ev: FixpointControlEvent[Fx]): Unit =
+  override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =
     import FixpointControlEvent.*
+    assertNoCatching()
     ev match
       case BeginFixpoint(fx) =>
-        fixpointAncestors = predecessors
-      case Recurrent(_) =>
-        predecessors = List.empty
-      case EndFixpoint() => ()
+        stack = Entry.Fixpoint(fx) :: stack
+      case Recurrent(fx) =>
+        val Result(tails, xs) = fixpoints.getOrElse(fx, Result.empty)
+        predecessors = tails
+        activeExc = xs
+      case EndFixpoint() => stack match
+        case Entry.Fixpoint(fx) :: stack_ =>
+          stack = stack_
+          fixpoints += fx -> (fixpoints.getOrElse(fx, Result.empty) || Result(predecessors, activeExc))
+        case _ =>
+          error(s"Entry mismatch, expected Fixpoint for $ev: $stack")
       case Restart() =>
         predecessors = List.empty
+        activeExc = List.empty
 
 
-  def toGraphViz : String =
-    if(structureStack.nonEmpty) throw new Exception(s"Stack non empty $structureStack")
-    ControlGraph.toGraphViz(edges.toSet)
+object ControlEventGraphBuilder:
+  private def error(msg: String): Nothing =
+    println(s"############ Control Event Error: $msg")
+    throw InvalidControlEventSequence(msg)
+
+  case class InvalidControlEventSequence(msg: String) extends Exception(msg)

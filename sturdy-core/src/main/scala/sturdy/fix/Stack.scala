@@ -17,9 +17,9 @@ object Stack:
       StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput, observers)
     case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent, observers) =>
       StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent) // TODO pass observers
-  
-  type FixEvent = FixpointControlEvent[Any]
-  
+
+  type FixEvent = FixpointControlEvent[Nothing,Nothing,Nothing,Any]
+
 trait Stack[Dom, Codom, In, Out]:
   enum PushResult:
     case Recurrent(result: TrySturdy[Codom], widenedOut: Option[Out])
@@ -39,7 +39,7 @@ enum StackConfig:
   case StackedStates(readPriorOutput: Boolean = true, observers: Iterable[Stack.FixEvent => Unit] = Seq())
   case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true, observers: Iterable[Stack.FixEvent => Unit] = Seq())
 
-  def withObservers(newObservers: Iterable[Stack.FixEvent => Unit]): StackConfig = this match
-    case ss: StackedStates => StackedStates(false, observers = ss.observers ++ newObservers)
-    case ss: StackedCfgNodes => StackedCfgNodes(false, observers = ss.observers ++ newObservers)
+  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): StackConfig = this match
+    case ss: StackedStates => StackedStates(false, observers = ss.observers ++ newObservers.map(_.asInstanceOf[Stack.FixEvent => Unit]))
+    case ss: StackedCfgNodes => StackedCfgNodes(false, observers = ss.observers ++ newObservers.map(_.asInstanceOf[Stack.FixEvent => Unit]))
 

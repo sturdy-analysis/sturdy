@@ -13,7 +13,7 @@ trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObse
   def removeControlObserver(obs: ControlObserver[Atom, Section, Exc, Fx]): Unit =
     observers -= obs
 
-  def triggerControlEvent(ev: ControlEvent): Unit =
+  def triggerControlEvent(ev: ControlEvent[Atom,Section,Exc,Fx]): Unit =
     observers.foreach(_.handle(ev))
 
   override def joinStart(): Unit = triggerControlEvent(BranchingControlEvent.Fork())

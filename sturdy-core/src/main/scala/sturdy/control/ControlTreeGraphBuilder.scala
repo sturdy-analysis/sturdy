@@ -19,9 +19,9 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
   private var edges: Set[CEdge] = Set.empty
   private var fixpoints: Map[Fx, Result] = Map()
 
-  def build(ct: CT): Set[CEdge] =
+  def build(ct: CT): ControlGraph[Atom, Sec] =
     _build(ct, Set(Node.Start()))
-    edges
+    ControlGraph(edges)
 
   private def _build(ct: CT, pred: Set[CNode]): Result = ct match
     case ControlTree.Empty() =>
@@ -46,7 +46,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       if (tails.isEmpty)
         Result(Set.empty, xs)
       else {
-        addBlockPairEdges(Set(begin), end)
+        addBlockPairEdges(section)
         Result(Set(end), xs)
       }
 
@@ -96,10 +96,8 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       Edge(p.n, current.n, if (p.exc) EdgeType.Exceptional else EdgeType.CF)
     )
 
-  private def addBlockPairEdges(prev: Set[CNode], current: CNode): Unit =
-    prev.foreach { p =>
-      if (!edges.contains(Edge(p.n, current.n, EdgeType.CF)))
-        edges += Edge(p.n, current.n, EdgeType.BlockPair)
-    }
+  private def addBlockPairEdges(sec: Sec): Unit =
+    if (!edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)))
+      edges += Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)
 }
 

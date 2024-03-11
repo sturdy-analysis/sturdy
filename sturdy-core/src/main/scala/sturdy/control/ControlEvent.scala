@@ -18,16 +18,16 @@ package sturdy.control
   */
 
 
-trait ControlEvent
+trait ControlEvent[+Atom, +Section, +Exc, +Fx]
 
-enum BasicControlEvent[Atom, Section] extends ControlEvent:
+enum BasicControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case Atomic(a: Atom)
   case Failed()
 
   case BeginSection(sec: Section)
   case EndSection()
 
-enum ExceptionControlEvent[Exc] extends ControlEvent:
+enum ExceptionControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case BeginTry()
   case Throw(exc: Exc)
   case Catching()
@@ -35,12 +35,12 @@ enum ExceptionControlEvent[Exc] extends ControlEvent:
   case EndHandle()
   case EndTry()
 
-enum BranchingControlEvent extends ControlEvent:
+enum BranchingControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case Fork()
   case Switch()
   case Join()
 
-enum FixpointControlEvent[Fx] extends ControlEvent:
+enum FixpointControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case BeginFixpoint(fx: Fx)
   case Recurrent(fx: Fx)
   case EndFixpoint()

@@ -99,7 +99,7 @@ def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[I
   assert(treeSequence == treeSequence2)
   assert(tree == tree2)
 
-  println(ControlGraph.toGraphViz(ControlTreeGraphBuilder().build(tree)))
+  println(tree.toGraph.toGraphViz)
 
   b
 

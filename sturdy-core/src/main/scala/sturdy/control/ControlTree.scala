@@ -32,14 +32,16 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
     case (Seq(b1, b2), _) => Seq(b1, Seq(b2, that))
     case (_, _) => Seq(this, that)
 
-  def print: List[ControlEvent] =
-    val buf: ListBuffer[ControlEvent] = ListBuffer.empty
+  def print: List[ControlEvent[Atom,Sec,Exc,Fx]] =
+    val buf: ListBuffer[ControlEvent[Atom,Sec,Exc,Fx]] = ListBuffer.empty
     _print(buf)
     buf.toList
 
-  def toGraphViz: String = this._toGraphViz("Start").toList.sorted.fold(s"")(_ + "\n" + _)
+  lazy val toGraph: ControlGraph[Atom, Sec] =
+    val builder = new ControlTreeGraphBuilder[Atom, Sec, Exc, Fx]
+    builder.build(this)
 
-  private def _print(buf: ListBuffer[ControlEvent]): Unit = this match
+  private def _print(buf: ListBuffer[ControlEvent[Atom,Sec,Exc,Fx]]): Unit = this match
     case ControlTree.Empty() => ()
 
     case ControlTree.Atomic(a) =>

@@ -51,7 +51,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
       error(s"Control event while catching but outside handler")
     }
 
-  override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
+  override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*
     assertNoCatching()
     ev match
@@ -64,7 +64,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
           stack = addTree(CT.Section(sec, t), stack_)
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 
-  override def handle(ev: BranchingControlEvent): Unit =
+  override def handle(ev: BranchingControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BranchingControlEvent.*
     if (isCatching) {
       // skip forks while catching
@@ -83,7 +83,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
         case _ => error(s"Entry mismatch, expected ForkSecond for $ev: $stack")
 
 
-  override def handle(ev: ExceptionControlEvent[Exc]): Unit =
+  override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
     import ExceptionControlEvent.*
     ev match
       case BeginTry() =>
@@ -111,7 +111,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
           stack = addTree(CT.Try(body, hs), stack_)
         case _ => error(s"Entry mismatch, expected Try or Catching for $ev: $stack")
 
-  override def handle(ev: FixpointControlEvent[Fx]): Unit =
+  override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =
     import FixpointControlEvent.*
     assertNoCatching()
     ev match
@@ -135,7 +135,7 @@ object ControlEventParser:
 
   case class InvalidControlEventSequence(msg: String) extends Exception(msg)
 
-  def parse[Atom,Section,Exc,Fx](es: Iterable[ControlEvent]): ControlTree[Atom,Section,Exc,Fx] =
+  def parse[Atom,Section,Exc,Fx](es: Iterable[ControlEvent[Atom,Section,Exc,Fx]]): ControlTree[Atom,Section,Exc,Fx] =
     val parser = new ControlEventParser[Atom,Section,Exc,Fx]
     es.foreach(parser.handle)
     parser.getFinalTree

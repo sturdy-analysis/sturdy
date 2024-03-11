@@ -15,8 +15,8 @@ enum EdgeType:
 case class Edge[Atom, Section](from: Node[Atom, Section], to: Node[Atom, Section], edgeType: EdgeType)
 
 
-object ControlGraph :
-  def toGraphViz[Atom, Sec](edges: Set[Edge[Atom, Sec]]): String =
+case class ControlGraph[Atom,Sec](edges: Set[Edge[Atom, Sec]]):
+  lazy val toGraphViz: String =
     def mayFail(n: Node[Atom,Sec]) = edges.exists { e =>
       e.from == n && e.to == Node.Failure()
     }

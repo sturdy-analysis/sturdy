@@ -19,17 +19,17 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
   private def pushEntry(e: Entry): Unit =
     stack = e :: stack
 
-  private def updateEntry(ev: ControlEvent)(f: PartialFunction[Entry, Option[Entry]]): Unit = stack match
+  private def updateEntry(ev: ControlEvent[Atom,Section,Exc,Fx])(f: PartialFunction[Entry, Option[Entry]]): Unit = stack match
     case Nil => error(s"No entry to close, stack is empty: $ev")
     case e :: rest => f.lift(e) match
       case None => error(s"Entry mismatch, expected end of $e: $ev")
       case Some(None) => stack = rest
       case Some(Some(replace)) => stack = replace :: rest
 
-  private def updateThroughForks(ev: ControlEvent)(f: PartialFunction[Entry, Option[Entry]]): Unit =
+  private def updateThroughForks(ev: ControlEvent[Atom,Section,Exc,Fx])(f: PartialFunction[Entry, Option[Entry]]): Unit =
     stack = updateThroughForks_(stack, ev)(f)
 
-  private def updateThroughForks_(entries: List[Entry], ev: ControlEvent)(f: PartialFunction[Entry, Option[Entry]]): List[Entry] = entries match
+  private def updateThroughForks_(entries: List[Entry], ev: ControlEvent[Atom,Section,Exc,Fx])(f: PartialFunction[Entry, Option[Entry]]): List[Entry] = entries match
     case Nil => error(s"No try entry to catch, stack is empty: $ev")
     case e :: rest => f.lift(e) match
       case None => e match
@@ -39,7 +39,7 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
       case Some(Some(replace)) => replace :: rest
 
   
-  override def handle(ev: BasicControlEvent[Atom, Section]): Unit =
+  override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*
     ev match
       case BasicControlEvent.Atomic(a) => // fine
@@ -47,14 +47,14 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
       case BasicControlEvent.BeginSection(sec: Section) => pushEntry(Entry.Sec)
       case BasicControlEvent.EndSection() => updateEntry(ev) { case Entry.Sec => None }
 
-  override def handle(ev: BranchingControlEvent): Unit =
+  override def handle(ev: BranchingControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BranchingControlEvent.*
     ev match
       case Fork() => pushEntry(Entry.ForkFirst)
       case Switch() => updateEntry(ev) { case Entry.ForkFirst => Some(Entry.ForkSecond) }
       case BranchingControlEvent.Join() => updateEntry(ev) { case Entry.ForkSecond => None }
 
-  override def handle(ev: ExceptionControlEvent[Exc]): Unit =
+  override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
     import ExceptionControlEvent.*
     ev match
       case BeginTry() => pushEntry(Entry.Try)
@@ -66,7 +66,7 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
       case EndHandle() => updateEntry(ev) { case Entry.Handle => None }
       case EndTry() => updateEntry(ev) { case Entry.Try | Entry.Catching => None }
 
-  override def handle(ev: FixpointControlEvent[Fx]): Unit =
+  override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =
     import FixpointControlEvent.*
     ev match
       case BeginFixpoint(fx) => pushEntry(Entry.Fixpoint(fx))

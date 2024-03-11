@@ -4,7 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import BasicControlEvent.*, ExceptionControlEvent.*, BranchingControlEvent.*, FixpointControlEvent.*
 
 class TestControlEvents extends AnyFunSuite {
-  inline def testEvents[A,S,E,F](name: String, code: String, es: List[ControlEvent]): Unit =
+  inline def testEvents[A,S,E,F](name: String, code: String, es: List[ControlEvent[A,S,E,F]]): Unit =
     test(name) {
       val rec = new ControlEventChecker[A, S, E, F]()
       es.foreach(rec.handle)
