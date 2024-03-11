@@ -140,8 +140,9 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
           activeExc = outside
         case Entry.Catching(bodyTails, bodyExc, outside, hs) :: stack_ =>
           stack = stack_
-          predecessors = bodyTails ++ hs.flatMap(_.tails)
-          activeExc = outside ++ hs.flatMap(_.xs)
+          val result = hs.foldRight(Result(bodyTails, List()))(_ || _)
+          predecessors = result.tails
+          activeExc = outside ++ result.xs
         case _ => error(s"Entry mismatch, expected Try or Catching for $ev: $stack")
 
   override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =

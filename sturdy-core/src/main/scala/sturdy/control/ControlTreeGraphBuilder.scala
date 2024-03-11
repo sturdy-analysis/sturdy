@@ -40,8 +40,8 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       val begin: CNode = Node.BlockStart(section)
       val end: CNode = Node.BlockEnd(section)
 
-      val Result(tails, xs) = _build(body, Set(begin))
       addEdges(pred, begin)
+      val Result(tails, xs) = _build(body, Set(begin))
       addEdges(tails, end)
       if (tails.isEmpty)
         Result(Set.empty, xs)
@@ -64,13 +64,8 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       val Result(lastBody, excs) = _build(body, pred)
 
       val rs = for ((hx, ht) <- handlers) yield {
-        val hpred = excs.flatMap { case (x, xpred) =>
-          if (x == hx)
-            xpred.map(_.copy(exc = true))
-          else
-            Set()
-        }.toSet
-        _build(ht, hpred)
+        val hpred = excs.filter(_._1 == hx).flatMap(_._2).map(_.copy(exc = true))
+        _build(ht, hpred.toSet)
       }
       val result = rs.foldRight(Result(lastBody, List()))(_ || _)
       result

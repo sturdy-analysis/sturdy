@@ -38,9 +38,25 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
       case Some(None) => rest
       case Some(Some(replace)) => replace :: rest
 
-  
+  def isCatching: Boolean = isCatching(stack)
+  def isCatching(st: List[Entry]): Boolean = st match
+    case Entry.Catching :: _ => true
+    case (Entry.ForkFirst | Entry.ForkSecond) :: st_ => isCatching(st_)
+    case _ => false
+
+  private def assertNoCatching(): Unit =
+    if (isCatching) {
+      error(s"Control event while catching but outside handler: $stack")
+    }
+
+  private def assertCatching(): Unit =
+    if (!isCatching) {
+      error(s"Expected catching mode: $stack")
+    }
+
   override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*
+    assertNoCatching()
     ev match
       case BasicControlEvent.Atomic(a) => // fine
       case BasicControlEvent.Failed() => // fine
@@ -57,11 +73,14 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
   override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
     import ExceptionControlEvent.*
     ev match
-      case BeginTry() => pushEntry(Entry.Try)
-      case Throw(exc: Exc) => // fine
+      case BeginTry() =>
+        assertNoCatching()
+        pushEntry(Entry.Try)
+      case Throw(exc: Exc) =>
+        assertNoCatching()
       case Catching() => updateEntry(ev) { case Entry.Try => Some(Entry.Catching) }
-      case BeginHandle(exc: Exc) => 
-        updateThroughForks(ev) { case Entry.Catching => Some(Entry.Catching) }
+      case BeginHandle(exc: Exc) =>
+        assertCatching()
         pushEntry(Entry.Handle)
       case EndHandle() => updateEntry(ev) { case Entry.Handle => None }
       case EndTry() => updateEntry(ev) { case Entry.Try | Entry.Catching => None }

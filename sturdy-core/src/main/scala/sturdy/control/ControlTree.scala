@@ -18,7 +18,6 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
 
   case Try(body: ControlTree[Atom, Sec, Exc, Fx], handlers: List[(Exc, ControlTree[Atom, Sec, Exc, Fx])])
   case Throw(exc: Exc)
-//  case Handling(exc: Exc, body: ControlTree[Atom, Sec, Exc, Fx])
 
   case Fix(fx: Fx, b: ControlTree[Atom, Sec, Exc, Fx])
   case Recurrent(fx: Fx)
