@@ -80,7 +80,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
             // nothing
           } else {
             addNode(Node.BlockEnd(sec))
-//            addBlockPairEdges(sec)
+            addBlockPairEdges(sec)
           }
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 

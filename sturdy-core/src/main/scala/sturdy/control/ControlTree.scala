@@ -23,6 +23,19 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
   case Recurrent(fx: Fx)
   case Restart() // restart control at the next subtree
 
+  def size: Int = this match
+    case ControlTree.Empty() => 1
+    case ControlTree.Atomic(a) => 1
+    case ControlTree.Failed() => 1
+    case ControlTree.Section(section, body) => 1 + body.size
+    case ControlTree.Seq(t1, t2) => 1 + t1.size + t2.size
+    case ControlTree.Fork(t1, t2) => 1 + t1.size + t2.size
+    case ControlTree.Try(body, handlers) => 1 + body.size + handlers.map(_._2.size).sum
+    case ControlTree.Throw(exc) => 1
+    case ControlTree.Fix(fx, b) => 1 + b.size
+    case ControlTree.Recurrent(fx) => 1
+    case ControlTree.Restart() => 1
+
   @targetName("plusToSeq")
   infix def +(that: ControlTree[Atom, Sec, Exc, Fx]): ControlTree[Atom, Sec, Exc, Fx] = (this, that) match
     case (_, Empty()) => this

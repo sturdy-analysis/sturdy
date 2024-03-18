@@ -49,8 +49,8 @@ class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-//    interp.addControlObserver(new PrintingControlObserver()(println))
-//    val parser = interp.addControlObserver(new ControlEventParser)
+    interp.addControlObserver(new ControlEventChecker)
+    val parser = interp.addControlObserver(new ControlEventParser)
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
     val modInst = interp.initializeModule(module)
@@ -74,14 +74,17 @@ class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
 //    assert(treeSequence == treeSequence2)
 //    assert(tree == tree2)
 
-//    val graphFromTree = tree.toGraph
     val graphFromEvents = graphBuilder.get
     println(s"Graph size: ${graphFromEvents.edges.size}")
+    val tree = parser.getFinalTree
+    println(s"Tree size: ${tree.size}")
 
-//    val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
-//    val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
-//    assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
-//    assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
-
+    if (tree.size < 50000) {
+      val graphFromTree = tree.toGraph
+      val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
+      val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
+      assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
+      assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
+    }
 //    println(graphFromEvents.toGraphViz)
 
