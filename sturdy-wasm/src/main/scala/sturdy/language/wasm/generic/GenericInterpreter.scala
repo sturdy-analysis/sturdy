@@ -75,6 +75,11 @@ enum InstLoc:
   case InInit(mod: ModuleInstance, pc: Int)
   case InvokeExported(mod: ModuleInstance, funName: String)
 
+  override def hashCode(): Int = this match
+    case InFunction(FuncId(mod, funcIx), pc) => mod.hashCode() + 7 * funcIx + 3 * pc
+    case InInit(mod, pc) => mod.hashCode() + 101 * pc
+    case InvokeExported(mod, funName) => mod.hashCode() + 331 * funName.hashCode
+
   override def toString: String = this match
     case InFunction(func, pc) => s"$func:$pc"
     case InInit(mod, pc) => s"$mod.INIT:$pc"

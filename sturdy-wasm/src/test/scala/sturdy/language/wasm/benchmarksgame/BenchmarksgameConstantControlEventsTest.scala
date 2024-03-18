@@ -49,8 +49,8 @@ class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-    interp.addControlObserver(new PrintingControlObserver()(println))
-    //    val parser = interp.addControlObserver(new ControlEventParser)
+//    interp.addControlObserver(new PrintingControlObserver()(println))
+//    val parser = interp.addControlObserver(new ControlEventParser)
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
     val modInst = interp.initializeModule(module)
@@ -75,7 +75,8 @@ class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
 //    assert(tree == tree2)
 
 //    val graphFromTree = tree.toGraph
-//    val graphFromEvents = graphBuilder.get
+    val graphFromEvents = graphBuilder.get
+    println(s"Graph size: ${graphFromEvents.edges.size}")
 
 //    val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
 //    val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)

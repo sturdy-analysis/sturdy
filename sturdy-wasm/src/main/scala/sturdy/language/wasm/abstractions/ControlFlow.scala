@@ -19,8 +19,8 @@ import swam.OpCode
 import collection.mutable
 
 object Control:
-  type Atom = (Inst, InstLoc)
-  type Section = FuncId | (Block | Loop | If | Call | CallIndirect, InstLoc)
+  type Atom = InstLoc
+  type Section = FuncId | InstLoc
   type Exc = JumpTarget
   type Fx = (FixIn, List[Any])
 
@@ -36,8 +36,8 @@ trait Control extends Interpreter:
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
         case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.BeginSection(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection((c,loc)))
-        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic((inst, loc)))
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection(loc))
+        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic(loc))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match

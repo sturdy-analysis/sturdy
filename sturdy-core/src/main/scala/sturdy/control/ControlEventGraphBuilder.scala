@@ -3,6 +3,7 @@ package sturdy.control
 import sturdy.control.FixpointControlEvent.BeginFixpoint
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 
 class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
@@ -12,7 +13,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
   private implicit def cnode[A <: Atom,S <: Section](n: Node[A, S]): CNode = CNode(n, false)
   private type CEdge = Edge[Atom, Section]
 
-  private type ActiveExc = List[(Exc, List[CNode])]
+  private type ActiveExc = Set[(Exc, List[CNode])]
 
   private enum Entry:
     case Sec(s: Section)
@@ -27,11 +28,11 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     def ||(that: Result): Result =
       Result(this.tails ++ that.tails, this.xs ++ that.xs)
   private object Result:
-    val empty: Result = Result(List(), List())
+    val empty: Result = Result(List(), Set())
 
   private var stack: List[Entry] = List()
   private var predecessors: List[CNode] = List(Node.Start())
-  private var activeExc: ActiveExc = List()
+  private var activeExc: ActiveExc = Set()
   private val edges: mutable.Set[CEdge] = mutable.Set.empty
   private val fixpoints: mutable.Map[Fx, Result] = mutable.Map.empty
 
@@ -45,7 +46,10 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
 
   private def addNode(node: CNode): List[CNode] =
     val previous = predecessors
-    predecessors.foreach(n => edges += Edge(n.n, node.n, if (n.exc) EdgeType.Exceptional else EdgeType.CF))
+    predecessors.foreach { n =>
+      val edge = Edge(n.n, node.n, if (n.exc) EdgeType.Exceptional else EdgeType.CF)
+      edges += edge
+    }
     predecessors = List(node)
     previous
 
@@ -76,7 +80,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
             // nothing
           } else {
             addNode(Node.BlockEnd(sec))
-            addBlockPairEdges(sec)
+//            addBlockPairEdges(sec)
           }
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 
@@ -89,12 +93,12 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     ev match
       case Fork() =>
         stack = Entry.ForkFirst(predecessors, activeExc) :: stack
-        activeExc = List.empty
+        activeExc = Set.empty
       case Switch() => stack match
         case Entry.ForkFirst(originTails, originExc) :: stack_ =>
           stack = Entry.ForkSecond(predecessors, originExc ++ activeExc) :: stack_
           predecessors = originTails
-          activeExc = List.empty
+          activeExc = Set.empty
         case _ => error(s"Entry mismatch, expected ForkFirst for $ev: $stack")
       case BranchingControlEvent.Join() => stack match
         case Entry.ForkSecond(firstTails, firstOriginExc) :: stack_ =>
@@ -110,10 +114,10 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case BeginTry() =>
         assertNoCatching()
         stack = Entry.Try(outside = activeExc) :: stack
-        activeExc = List.empty
+        activeExc = Set.empty
       case Throw(exc: Exc) =>
         assertNoCatching()
-        activeExc = activeExc :+ (exc -> predecessors)
+        activeExc = activeExc + (exc -> predecessors)
         predecessors = List.empty
       case Catching() => stack match
         case Entry.Try(outside) :: stack_ =>
@@ -127,8 +131,8 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case BeginHandle(exc: Exc) => stack match
         case (c: Entry.Catching) :: stack_ =>
           stack = Entry.Handler(exc) :: c :: stack_
-          predecessors = c.bodyExc.filter(_._1 == exc).flatMap(_._2).map(_.copy(exc = true))
-          activeExc = List.empty
+          predecessors = c.bodyExc.filter(_._1 == exc).flatMap(_._2).toList.map(_.copy(exc = true))
+          activeExc = Set.empty
         case _ => error(s"Entry mismatch, expected Catching for $ev: $stack")
       case EndHandle() => stack match
         case Entry.Handler(hx) :: Entry.Catching(bodyTails, bodyExc, outside, hres) :: stack_ =>
@@ -140,7 +144,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
           activeExc = outside
         case Entry.Catching(bodyTails, bodyExc, outside, hs) :: stack_ =>
           stack = stack_
-          val result = hs.foldRight(Result(bodyTails, List()))(_ || _)
+          val result = hs.foldRight(Result(bodyTails, Set()))(_ || _)
           predecessors = result.tails
           activeExc = outside ++ result.xs
         case _ => error(s"Entry mismatch, expected Try or Catching for $ev: $stack")
@@ -163,7 +167,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
           error(s"Entry mismatch, expected Fixpoint for $ev: $stack")
       case Restart() =>
         predecessors = List.empty
-        activeExc = List.empty
+        activeExc = Set.empty
 
 
 object ControlEventGraphBuilder:
