@@ -33,7 +33,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
   private var predecessors: List[CNode] = List(Node.Start())
   private var activeExc: ActiveExc = List()
   private val edges: mutable.Set[CEdge] = mutable.Set.empty
-  private var fixpoints: Map[Fx, Result] = Map()
+  private val fixpoints: mutable.Map[Fx, Result] = mutable.Map.empty
 
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")

@@ -181,7 +181,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   interp.addControlObserver(new ControlEventChecker)
-  val recorder = interp.addControlObserver(new RecordingControlObserver)
+  val parser = interp.addControlObserver(new ControlEventParser)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
@@ -197,8 +197,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 //  println(interp.controlRecorder)
 
 
-  val originalSequence = recorder.events
-  val tree = ControlEventParser.parse(originalSequence)
+  val tree = parser.getFinalTree
   val treeSequence = tree.print
   val tree2 = ControlEventParser.parse(treeSequence)
   val treeSequence2 = tree2.print
