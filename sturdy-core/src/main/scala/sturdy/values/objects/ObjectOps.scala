@@ -9,20 +9,19 @@ import sturdy.values.relational.EqOps
 import scala.collection.mutable
 
 
-trait ObjectOps[Addr, Idx, FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, TypeRep, J[_] <: MayJoin[_]]:
+trait ObjectOps[Addr, Idx, FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, NV, J[_] <: MayJoin[_]]:
   def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site,FieldName)]): OV
   def getField(obj: OV, name: FieldName): JOption[J, V]
   def setField(obj: OV, name: FieldName, v: V): JOption[J, Unit]
   def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => JOptionC[V]): JOptionC[V]
   def findFunction(obj: OV, name: MthName, sig: MthSig)(invoke: (O, MthName, MthSig) => Mth): Mth
   def makeNull(): NV
-  def isNull(nullVal: NV): Boolean
-  def checkType(obj: OV, check: TypeRep)(checkFun: (O, TypeRep) => Boolean): Boolean
+  //def isNull(nullVal: NV): Boolean
 
 case class Object[OID, CF, Addr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, Addr])
 
-given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth, MthName, MthSig, TypeRep]
-    (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, Int, String, OID, V, CF, Object[OID,CF,Addr,String], Object[OID,CF,Addr,String], Site, Mth, MthName, MthSig, Null, TypeRep, NoJoin] with
+given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth, MthName, MthSig]
+    (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, Int, String, OID, V, CF, Object[OID,CF,Addr,String], Object[OID,CF,Addr,String], Site, Mth, MthName, MthSig, Null, NoJoin] with
   override def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site,String)]): Object[OID, CF, Addr, String] =
     val fieldAddrs = vals.map { (v, site, name) =>
       val addr = alloc(site)
@@ -52,11 +51,10 @@ given ConcreteObjectOps[Addr, OID, V, Site, CF, Mth, MthName, MthSig, TypeRep]
 
   override def makeNull(): Null = null
 
-  override def isNull(nullVal: Null): Boolean = nullVal == null
+  //override def isNull(nullVal: Null): Boolean = nullVal == null
 
-  override def checkType(obj: Object[OID, CF, Addr, String], check: TypeRep)(checkFun: (Object[OID, CF, Addr, String], TypeRep) => Boolean): Boolean =
-    checkFun(obj, check)
 
 given ObjectEqOps[OID, CF, Addr]: EqOps[Object[OID, CF, Addr, String], Boolean] with
   override def equ(v1: Object[OID, CF, Addr, String], v2: Object[OID, CF, Addr, String]): Boolean = v1.oid == v2.oid
   override def neq(v1: Object[OID, CF, Addr, String], v2: Object[OID, CF, Addr, String]): Boolean = v1.oid != v2.oid
+

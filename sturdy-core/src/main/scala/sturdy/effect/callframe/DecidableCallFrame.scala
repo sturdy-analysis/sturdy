@@ -31,6 +31,8 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
   setVars(initVars)
 
   def data: Data = _data
+  def setData(d: Data): Unit =
+    _data = d
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =

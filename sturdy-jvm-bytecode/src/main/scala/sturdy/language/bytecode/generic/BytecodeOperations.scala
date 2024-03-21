@@ -7,7 +7,7 @@ import sturdy.values.integer.*
 import sturdy.values.relational.*
 import sturdy.values.objects.*
  
-trait BytecodeOps[Addr, Idx, V]:
+trait BytecodeOps[Addr, Idx, V, TypeRep]:
   //val i8ops:  IntegerOps[Byte, V]
   //val i16ops: IntegerOps[Short, V]
   val i32ops: IntegerOps[Int, V]
@@ -16,6 +16,7 @@ trait BytecodeOps[Addr, Idx, V]:
   val f64ops: FloatOps[Double, V]
   val compareOps: OrderingOps[V, V]
   val eqOps: EqOps[V, V]
+  val typeOps: TypeOps[V, TypeRep, V]
   
   val convert_i32_i64: ConvertIntLong[V, V]
   val convert_i32_f32: ConvertIntFloat[V, V]

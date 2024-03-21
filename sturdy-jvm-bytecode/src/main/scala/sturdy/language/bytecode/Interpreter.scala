@@ -2,15 +2,18 @@ package sturdy.language.bytecode
 
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.bytecode.generic.{AllocationSite, BytecodeOps, GenericInterpreter}
+import sturdy.language.bytecode.generic.{AllocationSite, BytecodeOps, GenericInterpreter, JvmExcept}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.relational.*
 import generic.BytecodeFailure.*
+import org.opalj.br.ObjectType
 import sturdy.data.MayJoin
-import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps}
+import sturdy.effect.except.{ConcreteExcept, Except}
+import sturdy.values.exceptions.ConcreteExceptional
+import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, TypeOps}
 import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
 trait Interpreter:
   //type I8
@@ -37,6 +40,8 @@ trait Interpreter:
   type AID
   type AType
   type ArrayRep
+
+  val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
   enum Value:
     case TopValue
     //case Int8(b: I8)
@@ -79,6 +84,7 @@ trait Interpreter:
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
     def asObj(using f: Failure): ObjRep = this match
       case Obj(o) => o
+      case Null(n) => except.throws(JvmExcept.Throw(ObjectType("java/lang/NullPointerException")))
       case TopValue => topObj
       case _ => f.fail(TypeError, s"Expected obj but got $this")
     def asArray(using f: Failure): ArrayRep = this match
@@ -145,8 +151,11 @@ trait Interpreter:
     , f64EqOps: EqOps[F64, Bool]
     , objEqOps: EqOps[ObjRep, Bool]
     , arrayEqOps: EqOps[ArrayRep, Bool]
+    , objTypeOps: TypeOps[ObjRep, TypeRep, Bool]
+    , arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool]
+    , nullTypeOps: TypeOps[NullVal, TypeRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
-      ): BytecodeOps[Addr, Idx, Value] with
+      ): BytecodeOps[Addr, Idx, Value, TypeRep] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
@@ -218,8 +227,17 @@ trait Interpreter:
         case (Array(a1), Array(a2)) => boolean(EqOps.neq(a1, a2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
+    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
+      import Value.*
+
+      override def instanceOf(v: Value, check: TypeRep): Value = v match
+        case Obj(o1) => boolean(TypeOps.instanceOf(o1, check))
+        case Array(a1) => boolean(TypeOps.instanceOf(a1, check))
+        case Null(n1) => boolean(TypeOps.instanceOf(n1, check))
+        case _ => throw new IllegalArgumentException(s"Expected values of type object or array but got $v")
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, NoJoin]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, NoJoin]
+

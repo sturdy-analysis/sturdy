@@ -11,7 +11,5 @@ class LiftedArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_], 
   override def arrayLength(array: AV): Int = ops.arrayLength(extractA(array))
   override def initArray(size: Idx): Seq[Any] = ops.initArray(extractIdx(size))
 
-  override def checkType(array: AV, check: AType)(checkFun: (A, AType) => Boolean): Boolean =
-    ops.checkType(extractA(array), check)(checkFun)
 
 

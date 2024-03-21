@@ -17,9 +17,8 @@ import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, Doub
 import org.opalj.io.process
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.arrays.Array
-import sturdy.values.objects.ObjectOps
+import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.relational.EqOps
-import sturdy.values.objects.Object
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
@@ -48,6 +47,7 @@ val jumpTargets: Map[String, InstructionIndex]
 
 enum JvmExcept:
   case Jump(pc: Int)
+  case Throw(exception: ObjectType)
 
 enum AllocationSite:
   case classFile(cfs: ClassFile)
@@ -56,11 +56,11 @@ enum AllocationSite:
   case arrayVals(idx: Int)
   case default
 
-trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] <: MayJoin[_]]:
 
-  val bytecodeOps: BytecodeOps[Addr, Idx, V]
+  val bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, ReferenceType, J]
+  val objectOps: ObjectOps[Addr, Int, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -77,7 +77,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
   val arrayValStore: Store[Addr, V, J]
   val staticVarStore: Store[(ObjectType, String), V, J]
 
-  type FrameData = Unit
+  type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
   val project: Project[URL]
   val projectSource: String
@@ -99,7 +99,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
-  lazy val num = new GenericInterpreterNumerics[Addr, Idx, V](bytecodeOps)
+  lazy val num = new GenericInterpreterNumerics[Addr, Idx, V, ReferenceType](bytecodeOps)
 
   def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
@@ -166,7 +166,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case x if (46 <= x && x <= 53) =>
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      stack.push(eval_array_load(inst, array, idx))
+      stack.push(eval_array_load(inst, array, idx, pc))
 
     // store local variable
     case x if (54 <= x && x <= 78) =>
@@ -178,7 +178,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       val v = stack.popOrAbort()
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      eval_array_store(inst, array, idx, v)
+      eval_array_store(inst, array, idx, v, pc)
 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
@@ -371,7 +371,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
         case inst: GOTO =>
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
         case inst: JSR =>
-          ???
+          ??? //something about return address
+          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
         case inst: RET =>
           ???
         case inst: TABLESWITCH =>
@@ -586,18 +587,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: CHECKCAST =>
           val v = stack.popOrAbort()
-          var flag = false
-          try{
-            flag = objectOps.checkType(v, inst.referenceType)(checkTypeObj)
-          }
-          catch{
-            case _ =>
-              flag = arrayOps.checkType(v, inst.referenceType.asArrayType)(checkTypeArray)
-          }
-          if (flag) {
+          val flag = typeOps.instanceOf(v, inst.referenceType)
+          branchOpsUnit.boolBranch(flag){
             stack.push(v)
-          }
-          else {
+          }{
             stack.push(i32ops.integerLit(0))
           }
 
@@ -606,19 +599,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: INSTANCEOF =>
           val v = stack.popOrAbort()
-          var flag = false
-          try {
-            flag = objectOps.checkType(v, inst.referenceType)(checkTypeObj)
-          }
-          catch {
-            case _ =>
-              flag = arrayOps.checkType(v, inst.referenceType.asArrayType)(checkTypeArray)
-          }
-          if(flag){
+          val flag = typeOps.instanceOf(v, inst.referenceType)
+          branchOpsUnit.boolBranch(flag){
             stack.push(i32ops.integerLit(1))
-          }
-          else{
-            ???
+          }{
+            stack.push(i32ops.integerLit(0))
           }
 
 
@@ -683,28 +668,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
       inst match
         case inst: IFNULL =>
           val v = stack.popOrAbort()
-          var flag = false
-          try{
-            flag = objectOps.isNull(v)
-          }
-          catch{
-            case _ =>
-              flag = false
-          }
-          if(flag){
+          val flag = typeOps.instanceOf(v, null)
+
+          branchOpsUnit.boolBranch(flag){
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          }{
+
           }
         case inst: IFNONNULL =>
           val v = stack.popOrAbort()
-          var flag = false
-          try {
-            flag = objectOps.isNull(v)
-          }
-          catch {
-            case _ =>
-              flag = false
-          }
-          if (!flag) {
+          val flag = typeOps.instanceOf(v, null)
+
+          branchOpsUnit.boolBranch(flag){
+
+          }{
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
           }
 
@@ -735,18 +712,18 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case inst: StoreLocalVariableInstruction =>
       frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-  def eval_array_load(inst: Instruction, array: V, idx: V): V = inst match
+  def eval_array_load(inst: Instruction, array: V, idx: V, pc: Int): V = inst match
     case inst: ArrayLoadInstruction =>
       //val idx = stack.popOrAbort()
       //val array = stack.popOrAbort()
-      arrayOps.getVal(array, idx).getOrElse(fail(IndexOutOfBounds, s"Index $idx out of bounds"))
+      arrayOps.getVal(array, idx).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
-  def eval_array_store(inst: Instruction, array: V, idx: V, v: V): Unit = inst match
+  def eval_array_store(inst: Instruction, array: V, idx: V, v: V, pc: Int): Unit = inst match
     case inst: ArrayStoreInstruction =>
       //val toBeStored = stack.popOrAbort()
       //val idx = stack.popOrAbort()
       //val array = stack.popOrAbort()
-      arrayOps.setVal(array, idx, v)
+      arrayOps.setVal(array, idx, v).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
   def createArray(size: V, compType: ArrayType): V =
     val arrayVals = arrayOps.initArray(size)
@@ -783,7 +760,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
   def findInheritedMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
     if(inheritedObj == ObjectType("java/lang/Object")){
-      obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head.getOrElse(fail(MethodNotFound, s"Method $sig, $name not found"))
+      obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
+        .getOrElse(fail(MethodNotFound, s"Method $sig, $name not found"))
     }
     else{
       if (project.isLibraryType(inheritedObj)) {
@@ -807,7 +785,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
   def checkTypeArray(array: Array[AID, Addr, ArrayType], check: ArrayType): Boolean =
     array.arrayType == check
   def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
-    val newFrameData = ()
+    val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
     if (!mth.body.get.localVariableTable.isEmpty) {
@@ -838,7 +816,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     ret
 
   def invokeMethodOnObject(mth: Method) =
-    val newFrameData = ()
+    val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
     if (!mth.body.get.localVariableTable.isEmpty) {
@@ -869,7 +847,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     }
 
   def invokeMethodOnObject(mth: Method, args: List[V], obj: V) =
-    val newFrameData = ()
+    val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
     if (!mth.body.get.localVariableTable.isEmpty) {
@@ -901,7 +879,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
 
 
   def invokeStatic(mth: Method) =
-    val newFrameData = ()
+    val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
     if (!mth.body.get.localVariableTable.isEmpty) {
@@ -930,7 +908,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     }
 
   def initStaticVars(mth: Method) =
-    val newFrameData = ()
+    val newFrameData = 0
 
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
@@ -952,33 +930,25 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     except.tryCatch {
       var currPC = pc
       var currInst = instructionMap(currPC)
-      //println(currInst.toString ++ " " ++ currPC.toString)
       eval(currInst, currPC)
       while(currInst.nextInstructions(pc)(mth.body.get).nonEmpty){
         currPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
+        frame.setData(currPC)
         currInst = instructionMap(currPC)
-        //println(currInst.toString ++ " " ++ currPC.toString)
-        try{
           eval(currInst, currPC)
-        }
-        catch{
-          case f: CFailureException =>
-            if(mth.body.get.exceptionHandlersFor(currPC).nonEmpty){
-              val handler = mth.body.get.exceptionHandlersFor(currPC).head
-              val catchPC = handler.handlerPC
-              val exceptionObject = create_native_obj(handler.catchType.get)
-              stack.push(exceptionObject)
-              except.throws(JvmExcept.Jump(catchPC))
-            }
-            else{
-              throw f
-            }
-        }
       }
-
     } {
       case JvmExcept.Jump(targetPC) =>
         runBlock(targetPC, instructionMap, mth)
+      case JvmExcept.Throw(exception) =>
+        println(exception)
+        val currPC = frame.data
+        val handler = mth.body.get.exceptionHandlersFor(currPC)
+          .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
+          .getOrElse(except.throws(JvmExcept.Throw(exception)))
+        val exceptionObject = create_native_obj(exception)
+        stack.push(exceptionObject)
+        runBlock(handler.handlerPC, instructionMap, mth)
     }
 
 
@@ -995,6 +965,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, J[_] <: MayJoi
     case opalTypes: ArrayType => ValType.Array
     case _ => ???
 
+  //val defaultObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
   def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => num.evalNumericOp(ICONST_0)
     case ValType.I64 => num.evalNumericOp(LCONST_0)

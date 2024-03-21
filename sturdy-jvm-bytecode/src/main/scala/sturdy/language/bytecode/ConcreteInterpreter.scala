@@ -41,10 +41,10 @@ object ConcreteInterpreter extends Interpreter:
   override type NullVal = Null
   override type OID = Int
   override type FieldName = String
-  override type ObjRep = Object[OID, ObjType, Addr, FieldName]
+  override type ObjRep = Object[OID, ClassFile, Addr, FieldName]
   override type AID = Int
   override type AType = ArrayType
-  override type ArrayRep = Array[AID, Addr, AType]
+  override type ArrayRep = Array[AID, Addr, ArrayType]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException
@@ -70,10 +70,10 @@ object ConcreteInterpreter extends Interpreter:
   type Store = Map[Addr, Value]
   type StaticStore = Map[(ObjectType, String), Value]
   class Instance(files: Project[URL], path: String, initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
-    val newFrameData: FrameData = ()
+    val newFrameData: FrameData = 0
     val args: List[Value] = List()
 
-    val joinUnit: MayJoin.NoJoin[FrameData] = implicitly
+    val joinUnit: MayJoin.NoJoin[Unit] = implicitly
     val jvV: MayJoin.NoJoin[Value] = implicitly
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
@@ -93,9 +93,31 @@ object ConcreteInterpreter extends Interpreter:
 
     private given Failure = failure
 
-    val bytecodeOps: BytecodeOps[Addr, Idx, Value] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, TypeRep, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
+    given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool]  with
+      override def instanceOf(v: ObjRep, check: ReferenceType): Boolean =
+        if (check == null){
+          false
+        }
+        else{
+          v.cls.thisType.isSubtypeOf(check.mostPreciseObjectType)(project.classHierarchy)
+        }
+
+    given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
+      override def instanceOf(v: ArrayRep, check: ReferenceType): Boolean =
+        v.arrayType == check.asArrayType
+        
+    given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
+      override def instanceOf(v: NullVal, check: ReferenceType): Boolean =
+        if (check == null){
+          true
+        }
+        else{
+          false
+        }
+
+    val bytecodeOps: BytecodeOps[Addr, Idx, Value, TypeRep] = implicitly
+    val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using alloc, store)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =

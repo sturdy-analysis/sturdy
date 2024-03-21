@@ -15,7 +15,7 @@ import org.opalj.br.instructions.*
 import scala.Float.NaN
 
 
-class GenericInterpreterNumerics[Addr, Idx, V](bytecodeOps: BytecodeOps[Addr, Idx, V]):
+class GenericInterpreterNumerics[Addr, Idx, V, TypeRep](bytecodeOps: BytecodeOps[Addr, Idx, V, TypeRep]):
 
 
   import bytecodeOps.*
