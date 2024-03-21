@@ -143,11 +143,9 @@ trait RelationalCallFrame
           throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
         } else {
           val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            val uVirt1 = virt1.unresolve
-            val uVirt2 = virt2.unresolve
-            for(tpe <- apronState.relationalStore.getType(uVirt2.physical).toOption) {
-              val sourceExpr = ApronExpr.Addr(uVirt2, tpe)
-              apronState.recencyStore.write(PowVirtualAddress(uVirt1), toIntern(makeRelationalVal(sourceExpr)))
+            for(tpe <- apronState.relationalStore.getType(virt2.physical).toOption) {
+              val sourceExpr = ApronExpr.Addr(virt2, tpe)
+              apronState.recencyStore.write(PowVirtualAddress(virt1), toIntern(makeRelationalVal(sourceExpr)))
             }
             virt1
           )

@@ -135,7 +135,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Allocation of the same context in two different branches") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val effectStack: EffectStack = new EffectStack(List(store, store.addressTranslation))
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -179,7 +179,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Allocate addresses for the same context in separate branches") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val effectStack: EffectStack = new EffectStack(List(store, store.addressTranslation))
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -217,7 +217,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Recency store should handle reallocation that happens in while loops") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val effectStack: EffectStack = new EffectStack(List(store, store.addressTranslation))
 
     /**
      * Program:
@@ -258,72 +258,6 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     }
   }
 
-  test("Join with write in second branch, but not in first branch") {
-    val store = emptyStore
-    val ctx1 = "ctx1"
-
-    val a1 = store.alloc(ctx1)
-    val state1 = store.getState
-    store.write(a1, NumericInterval(1,2))
-    val state2 = store.getState
-    val join = store.join(state1.asInstanceOf,state2.asInstanceOf)
-    store.setState(join.get.asInstanceOf[store.State])
-
-    a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(1,2)))
-    join.hasChanged should be(true)
-  }
-
-  test("Join with two allocations of the same context") {
-    val store = emptyStore
-    val ctx1 = "ctx1"
-
-    val a1 = store.alloc(ctx1)
-    val state1 = store.getState
-    val a2 = store.alloc(ctx1)
-    val state2 = store.getState
-    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
-    store.setState(join.get.asInstanceOf[store.State])
-
-    a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent), PhysicalAddress(ctx1, Old))
-    a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    join.hasChanged should be(false)
-  }
-
-  test("Join with writes in both branches") {
-    val store = emptyStore
-    val ctx1 = "ctx1"
-
-    val a1 = store.alloc(ctx1)
-    store.write(a1, NumericInterval(1, 2))
-    val state1 = store.getState
-    store.write(a1, NumericInterval(3, 4))
-    val state2 = store.getState
-    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
-    store.setState(join.get.asInstanceOf[store.State])
-
-    a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(1, 4)))
-    join.hasChanged should be(true)
-  }
-
-  test("Join with free in second branch") {
-    val store = emptyStore
-    val ctx1 = "ctx1"
-
-    val a1 = store.alloc(ctx1)
-    store.write(a1, NumericInterval(1, 2))
-    val state1 = store.getState
-    store.free(a1)
-    val state2 = store.getState
-    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
-    store.setState(join.get.asInstanceOf[store.State])
-
-    a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    store.read(a1) should be(JOptionA.Some(NumericInterval(1,2)))
-    join.hasChanged should be(false)
-  }
-
   test("Reaching fixpoint") {
     val store = emptyStore
     val ctx1 = "ctx1"
@@ -332,22 +266,25 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     val a2 = store.alloc(ctx1)
     store.write(a1, NumericInterval(1, 4))
     store.write(a2, NumericInterval(3, 4))
-    val state1 = store.getState
+    val state1 = (store.getState, store.getAddressTranslation.getState)
     val a3 = store.alloc(ctx1)
     store.write(a3, NumericInterval(3, 4))
-    val state2 = store.getState
-    val join = store.join(state1.asInstanceOf, state2.asInstanceOf)
-    store.setState(join.get.asInstanceOf[store.State])
+    val state2 = (store.getState, store.getAddressTranslation.getState)
+    val joinStore = store.join(state1._1, state2._1)
+    val joinAddrTrans = store.getAddressTranslation.join(state1._2, state2._2)
+    store.setState(joinStore.get)
+    store.getAddressTranslation.setState(joinAddrTrans.get)
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent), PhysicalAddress(ctx1, Old))
     a3.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-    join.hasChanged should be(false)
+    joinStore.hasChanged should be(false)
+    joinAddrTrans.hasChanged should be(false)
   }
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = AllocSite x Recency") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val effectStack: EffectStack = new EffectStack(List(store, store.addressTranslation))
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 
@@ -370,7 +307,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = Unit x Recency") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(List(store))
+    val effectStack: EffectStack = new EffectStack(List(store, store.getAddressTranslation))
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 

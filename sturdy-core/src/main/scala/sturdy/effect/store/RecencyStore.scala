@@ -18,9 +18,6 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
   extends Store[Virt, V, WithJoin], Allocator[VirtualAddress[Context], Context]:
 
   private val store: initStore.type = initStore
-  protected var mostRecent: HashMap[Context, Powerset[Int]] = HashMap()
-  protected var next: Int = 0
-  def getNext() = { next += 1; next }
 
   def getAddressTranslation: AddressTranslation[Context] = this.addressTranslation
 
@@ -48,23 +45,10 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
 //      vs.reduce(v => addressTranslation -= ((v.ctx,v.n)))
 
   def alloc(ctx: Context): VirtualAddress[Context] =
-    val fresh = getNext()
-    mostRecent.get(ctx) match
-      case Some(mostRecentVirts) =>
-        mostRecent += ctx -> Powerset(fresh)
-        val virt = VirtualAddress(ctx, fresh, addressTranslation)
-        addressTranslation += virt.identifier -> PowRecency.Recent
-        store.move(
-          PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
-          PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
-        for(mostRecentVirt <- mostRecentVirts)
-          addressTranslation += (ctx,mostRecentVirt) -> PowRecency.Old
-        virt
-      case None =>
-        mostRecent += ctx -> Powerset(fresh)
-        val virt = VirtualAddress(ctx, fresh, addressTranslation)
-        addressTranslation += virt.identifier -> PowRecency.Recent
-        virt
+    store.move(
+      PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
+      PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
+    addressTranslation.alloc(ctx)
 
   def joinRecentIntoOld(virt: Virt) =
     virt.iterator.foreach(
@@ -73,14 +57,12 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
         store.copy(
           PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
           PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
-        addressTranslation += v.identifier -> PowRecency.Old
+        addressTranslation.joinRecentIntoOld(v)
     )
 
   override type State = RecencyStoreState
 
-  case class RecencyStoreState(store: initStore.State,
-                               addrTrans: addressTranslation.State,
-                               mostRecent: HashMap[Context, Powerset[Int]]):
+  case class RecencyStoreState(store: initStore.State):
     override def equals(obj: Any): Boolean =
       obj match
         case other: RecencyStoreState =>
@@ -91,26 +73,20 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
       store.hashCode()
 
   override def getState: RecencyStoreState =
-    RecencyStoreState(this.store.getState.asInstanceOf, this.addressTranslation.getState, this.mostRecent)
+    RecencyStoreState(this.store.getState.asInstanceOf)
 
   override inline def setState(st: RecencyStoreState): Unit =
     store.setState(st.store.asInstanceOf)
-    addressTranslation.setState(st.addrTrans)
-    mostRecent = mostRecent.merged(st.mostRecent) {
-      case ((ctx1,recent1),(_,recent2)) => (ctx1, recent1 ++ recent2)
-    }
 
   override def mapState(st: RecencyStoreState, f: [A] => A => A): RecencyStoreState =
-    RecencyStoreState(initStore.mapState(st.store, f), st.addrTrans, st.mostRecent)
+    RecencyStoreState(initStore.mapState(st.store, f))
 
   override def join: Join[RecencyStoreState] = new CombineRecencyStoreState(initStore.join)
   override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(initStore.widen)
   private class CombineRecencyStoreState[W <: Widening](combineStore: Combine[initStore.State, W]) extends Combine[RecencyStoreState, W]:
     override def apply(state1: RecencyStoreState, state2: RecencyStoreState): MaybeChanged[RecencyStoreState] =
       val combinedStores = combineStore(state1.store, state2.store)
-      val combinedAddrTrans = Combine(state1.addrTrans, state2.addrTrans)
-      val combinedMostRecent = Combine(state1.mostRecent, state2.mostRecent)
-      MaybeChanged(RecencyStoreState(combinedStores.get, combinedAddrTrans.get, combinedMostRecent.get),
+      MaybeChanged(RecencyStoreState(combinedStores.get),
         hasChanged = combinedStores.hasChanged)
 
   def virtualAddresses: PowVirtualAddress[Context] =

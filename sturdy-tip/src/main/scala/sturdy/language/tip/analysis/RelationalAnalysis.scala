@@ -159,32 +159,20 @@ object RelationalAnalysis extends Interpreter,
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
     override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =
-      class ResolveVirtualAddressesEffectStack extends EffectStack(effects, inEffects, outEffects):
+      class AddressClosureEffectStack extends EffectStack(effects, inEffects, outEffects):
+        val closure = AddressClosure[RelationalVar](recencyStore.addressTranslation, this)
         override protected def getEffectState(effects: List[Effect]): List[Any] =
-          effects.map(effect =>
-            effect.mapState(effect.getState, [A] => (a: A) => resolveVirtualAddresses[A](a))
+          val states = effects.map(effect =>
+            effect.getState
           )
+          List[Any](closure.AddressClosureState(recencyStore.addressTranslation.getState, states.asInstanceOf))
+          //TODO: 
         override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
           effects.zip(states).foreach{
-            case (effect,state) =>
-              val newState = effect.mapState(state.asInstanceOf, [A] => (a: A) => unresolveVirtualAddresses[A](a))
-              effect.setState(newState)
+            case (effect,state) => effect.setState(state.asInstanceOf)
           }
-        private def resolveVirtualAddresses[A](a: A): A =
-          a match
-            case addr: RelAddr => addr.resolve.asInstanceOf[A]
-            case value: Value => value.mapValues([B] => (b: B) => resolveVirtualAddresses[B](b)).asInstanceOf[A]
-            case expr: VInt => expr.mapAddrSame(resolveVirtualAddresses[RelAddr]).asInstanceOf[A]
-            case _ => a
 
-        private def unresolveVirtualAddresses[A](a: A): A =
-          a match
-            case addr: RelAddr => addr.unresolve.asInstanceOf[A]
-            case value: Value => value.mapValues([B] => (b: B) => unresolveVirtualAddresses[B](b)).asInstanceOf[A]
-            case expr: VInt => expr.mapAddrSame(unresolveVirtualAddresses[RelAddr]).asInstanceOf[A]
-            case _ => a
-
-      new ResolveVirtualAddressesEffectStack
+      new AddressClosureEffectStack
 
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
