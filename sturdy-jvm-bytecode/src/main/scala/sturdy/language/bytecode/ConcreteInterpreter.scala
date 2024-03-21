@@ -104,7 +104,12 @@ object ConcreteInterpreter extends Interpreter:
 
     given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
       override def instanceOf(v: ArrayRep, check: ReferenceType): Boolean =
-        v.arrayType == check.asArrayType
+        if (check == null){
+          false
+        }
+        else{
+          v.arrayType == check.asArrayType
+        }
         
     given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
       override def instanceOf(v: NullVal, check: ReferenceType): Boolean =

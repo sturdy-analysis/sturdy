@@ -242,6 +242,14 @@ object test extends App{
   val typeTestArray = cfs2.findMethod("typeTestArray").head
   interp.invokeStatic(typeTestArray)
   println(interp.stack.pop())
+  val typeTest2 = cfs.findMethod("typeTest2").head
+  interp.eval(NEW(ObjectType("SimpleMath")))
+  interp.invokeStatic(typeTest2)
+  println(interp.stack.pop())
+  interp.eval(ACONST_NULL)
+  interp.invokeStatic(typeTest2)
+  println(interp.stack.pop())
+
 
   println("--- stringTest ---")
   val stringTest = cfs.findMethod("stringTest").head
