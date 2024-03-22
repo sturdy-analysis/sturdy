@@ -28,7 +28,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   val intType: Type = Type.IntType(BaseType[Int])
 
   given failure: Failure = new CollectedFailures[FailureKind]
-  given effectState: EffectStack = EffectStack(List(failure))
+  given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
 
   given Manager = new apron.Polka(true)

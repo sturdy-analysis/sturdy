@@ -24,7 +24,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
   given failure: Failure = new CollectedFailures[FailureKind]
-  given effectState: EffectStack = EffectStack(List(failure))
+  given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
 
   val apronStore = new RelationalStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]](

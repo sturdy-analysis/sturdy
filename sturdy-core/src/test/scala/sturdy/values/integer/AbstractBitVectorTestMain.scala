@@ -126,7 +126,7 @@ object AbstractBitVectorTestMain:
 class AbstractBitVectorIntegerOpsTest:
   // TODO: somehow implement Failure and EffectStack
   given Failure = ConcreteFailure() //sturdy/effect/failure/concretefailure
-  given EffectStack = EffectStack(List()) //sturdy/effect/effectstack
+  given EffectStack = EffectStack() //sturdy/effect/effectstack
   val con: ConcreteIntegerOps = new ConcreteIntegerOps()
   val abs: AbstractBitVectorIntegerOps[Int] = new AbstractBitVectorIntegerOps[Int]()
   val ord: AbstractBitVectorOrdering[Int] = new AbstractBitVectorOrdering[Int]()
@@ -522,7 +522,7 @@ class AbstractBitVectorIntegerOpsTest:
 
 class AbstractOrderingTest:
   given Failure = ConcreteFailure() //sturdy/effect/failure/concretefailure
-  given EffectStack = EffectStack(List()) //sturdy/effect/effectstack
+  given EffectStack = EffectStack() //sturdy/effect/effectstack
 
   val con: ConcreteIntegerOps = new ConcreteIntegerOps()
   val abs: AbstractBitVectorIntegerOps[Int] = new AbstractBitVectorIntegerOps[Int]()

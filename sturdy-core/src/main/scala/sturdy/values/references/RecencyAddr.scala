@@ -38,7 +38,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   def recency(ctx: Context, n: Int): PowRecency =
     recency(mapping, ctx, n)
 
-  private def recency(mapping: Map[Context, RecencyRegion], ctx: Context, n: Int): PowRecency =
+  def recency(mapping: Map[Context, RecencyRegion], ctx: Context, n: Int): PowRecency =
     mapping.get(ctx) match
       case Some(RecencyRegion(recent, old)) =>
         if (recent.contains(n) && old.contains(n))
@@ -51,6 +51,9 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
       case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
   def region(ctx: Context): Option[RecencyRegion] =
+    region(mapping, ctx)
+
+  def region(mapping: Map[Context, RecencyRegion], ctx: Context): Option[RecencyRegion] =
     mapping.get(ctx)
 
   def isEqual(v1: VirtualAddress[Context], v2: VirtualAddress[Context]): Boolean =
@@ -159,6 +162,26 @@ case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTr
 given VirtualAddressOrdering[Context : Ordering]: Ordering[VirtualAddress[Context]] =
   Ordering.by(virt => virt.identifier)
 
+given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] =
+  (virt1: VirtualAddress[Context], virt2: VirtualAddress[Context]) =>
+    if(virt1.ctx == virt2.ctx) {
+      val addrTrans = virt1.addressTrans
+      val mapping = addrTrans.mapping
+      val otherMapping = addrTrans.otherMapping.getOrElse(mapping)
+      val region1 = addrTrans.region(mapping, virt1.ctx).get
+      val recency1 = addrTrans.recency(mapping, virt1.ctx, virt1.n)
+      val recency2 = addrTrans.recency(otherMapping, virt2.ctx, virt2.n)
+      val joinedRecency = Join(recency1, recency2)
+      if (joinedRecency.hasChanged)
+        addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old + virt1.n)
+      joinedRecency.map(_ => virt1)
+    } else {
+      throw new IllegalArgumentException(s"Cannot join virtual addresses with different contexts $virt1, $virt2")
+    }
+
+
+
+
 case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
   override def isEmpty: Boolean = false
   override def isStrong: Boolean = recency == Recency.Recent
@@ -200,7 +223,7 @@ given CombinePowRencency[W <: Widening]: Combine[PowRecency, W] with
     (v1,v2) match
       case (PowRecency.Recent, PowRecency.Recent) => Unchanged(PowRecency.Recent)
       case (PowRecency.Old, PowRecency.Old) => Unchanged(PowRecency.Old)
-      case (PowRecency.RecentOld, PowRecency.RecentOld) => Unchanged(PowRecency.RecentOld)
+      case (PowRecency.RecentOld, _) => Unchanged(PowRecency.RecentOld)
       case (_,_) => Changed(PowRecency.RecentOld)
 
 
@@ -231,14 +254,15 @@ class PowVirtualAddress[Context](val addrs: Map[Context, Set[Int]], val addressM
     virtualAddresses.iterator
 
   override def toString: String =
-    virtualAddresses.toString
+    s"PowVirtualAddresses(${addrs})"
 
   override def equals(obj: Any): Boolean =
     obj match
       case other: PowVirtualAddress[?] =>
+        // TODO: This is wrong. Do equality based on physical addresses
         this.addrs.equals(other.addrs)
 
-  override def hashCode(): Int = addrs.hashCode()
+  override def hashCode(): Int = physicalAddresses.hashCode()
 
 object PowVirtualAddress:
   def empty[Context]: PowVirtualAddress[Context] = new PowVirtualAddress[Context](Map.empty, None)
@@ -255,12 +279,14 @@ object PowVirtualAddress:
     new PowVirtualAddress(addrs, addrMap)
 
 given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddress[Context], W] with
-  override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
+  override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] = combinePowVirtualAddress(v1,v2)
+
+def combinePowVirtualAddress[Context](v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
     (v1.addressMap,v2.addressMap) match
       case (None, None) => Unchanged(v1)
       case (Some(_), None) => Changed(v1)
       case (None, Some(_)) => Changed(v2)
-      case (Some(addrMap1), Some(_)) =>
+      case (Some(addrTrans), Some(_)) =>
         var joined = v1.addrs
         var changed = false
         for ((ctx2, indices2) <- v2.addrs)
@@ -270,73 +296,75 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
               changed = true
             case Some(indices1) =>
               if(! changed) {
-                val physicals1 = indices1.map(idx => addrMap1(ctx2,idx))
-                val physicals2 = indices2.map(idx => addrMap1(ctx2,idx))
-                if (physicals1 != physicals2)
-                  changed = true
+                val physicals1 = indices1.map(idx => addrTrans.recency(addrTrans.mapping, ctx2, idx)).reduce(Join(_,_).get)
+                val physicals2 = indices2.map(idx => addrTrans.recency(addrTrans.otherMapping.getOrElse(addrTrans.mapping), ctx2, idx)).reduce(Join(_,_).get)
+                val joinedPhysicals = Join(physicals1,physicals2)
+                changed ||= joinedPhysicals.hasChanged
               }
               joined += ctx2 -> indices1.union(indices2)
-        MaybeChanged(new PowVirtualAddress(joined, v1.addressMap), changed)
+        val res = MaybeChanged(new PowVirtualAddress(joined, v1.addressMap), changed)
+        res
 
 given PowVirtAddrOrdering[Context]: PartialOrder[PowVirtualAddress[Context]] with
   override def lteq(x: PowVirtualAddress[Context], y: PowVirtualAddress[Context]): Boolean =
     x.physicalAddresses.subsetOf(y.physicalAddresses)
 
+case class AddressClosure[Context](addrTrans: AddressTranslation[Context], effect: Effect) extends Effect:
 
-final class AddressClosure[Context, State](val addrTrans: AddressTranslation[Context], val addrTransState: addrTrans.State, val state: State):
+  override type State = AddressClosureState
+  override def getState: State =
+    AddressClosureState(addrTrans.getState, effect.getState)
 
-  override def equals(obj: Any): Boolean =
-    obj match
-      case other: AddressClosure[?,?] =>
-        val snapshotMapping = addrTrans.mapping
-        val snapshotOtherMapping = addrTrans.otherMapping
-        try {
-          addrTrans.mapping = this.addrTransState
-          addrTrans.otherMapping = Some(other.addrTransState.asInstanceOf)
-          this.state.equals(other.state)
-        } finally {
-          addrTrans.mapping = snapshotMapping
-          addrTrans.otherMapping = snapshotOtherMapping
-        }
-      case _ => false
+  override def setState(st: AddressClosureState): Unit =
+    addrTrans.setState(st.addrTransState)
+    effect.setState(st.effectState)
 
-  override def hashCode(): Int =
-    val snapshotMapping = addrTrans.mapping
-    try {
-      addrTrans.mapping = this.addrTransState
-      this.state.hashCode()
-    } finally {
-      addrTrans.mapping = snapshotMapping
-    }
+  override def join: Join[State] = combine(addrTrans.join, effect.join)
+  override def widen: Widen[State] = combine(addrTrans.widen, effect.widen)
+  override def mapState(st: State, f: [A] => A => A): State =
+    AddressClosureState(
+      addrTrans.mapState(st.addrTransState, f),
+      effect.mapState(st.effectState, f)
+    )
 
-  override def toString: String =
-    f"AddressClosure(${addrTransState}, ${state})"
+  final class AddressClosureState(val addrTransState: addrTrans.State, val effectState: effect.State):
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: AddressClosureState =>
+          val snapshotMapping = addrTrans.mapping
+          val snapshotOtherMapping = addrTrans.otherMapping
+          try {
+            addrTrans.mapping = this.addrTransState
+            addrTrans.otherMapping = Some(other.addrTransState.asInstanceOf)
+            this.effectState.equals(other.effectState)
+          } finally {
+            addrTrans.mapping = snapshotMapping
+            addrTrans.otherMapping = snapshotOtherMapping
+          }
+        case _ => false
 
-  def join(joinState: Join[State]): Join[AddressClosure[Context, State]] =
-    (v1: AddressClosure[Context, State], v2: AddressClosure[Context, State]) =>
+    override def hashCode(): Int =
       val snapshotMapping = addrTrans.mapping
-      val snapshotOtherMapping = addrTrans.otherMapping
       try {
-        addrTrans.mapping = v1.addrTransState
-        addrTrans.otherMapping = Some(v2.addrTransState)
-        val j1 = addrTrans.join(v1.addrTransState, v2.addrTransState)
-        val j2 = joinState(v1.state, v2.state)
-        MaybeChanged(AddressClosure(addrTrans, j1.get, j2.get), j1.hasChanged || j2.hasChanged)
+        addrTrans.mapping = this.addrTransState
+        this.effectState.hashCode()
       } finally {
         addrTrans.mapping = snapshotMapping
-        addrTrans.otherMapping = snapshotOtherMapping
       }
 
-  def widen(widenState: Widen[State]): Widen[AddressClosure[Context, State]] =
-    (v1: AddressClosure[Context, State], v2: AddressClosure[Context, State]) =>
+    override def toString: String =
+      f"AddressClosure(${hashCode()}, ${addrTransState}, ${effectState})"
+
+  def combine[W <: Widening](combineAddrTrans: Combine[addrTrans.State, W], combineState: Combine[effect.State, W]): Combine[AddressClosureState, W] =
+    (v1: AddressClosureState, v2: AddressClosureState) =>
       val snapshotMapping = addrTrans.mapping
       val snapshotOtherMapping = addrTrans.otherMapping
       try {
         addrTrans.mapping = v1.addrTransState
         addrTrans.otherMapping = Some(v2.addrTransState)
-        val j1 = addrTrans.widen(v1.addrTransState, v2.addrTransState)
-        val j2 = widenState(v1.state, v2.state)
-        MaybeChanged(AddressClosure(addrTrans, j1.get, j2.get), j1.hasChanged || j2.hasChanged)
+        val j1 = combineAddrTrans(v1.addrTransState, v2.addrTransState)
+        val j2 = combineState(v1.effectState, v2.effectState)
+        MaybeChanged(AddressClosureState(j1.get, j2.get), j1.hasChanged || j2.hasChanged)
       } finally {
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping

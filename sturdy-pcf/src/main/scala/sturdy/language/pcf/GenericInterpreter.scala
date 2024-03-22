@@ -1,7 +1,7 @@
 package sturdy.language.pcf
 
 import sturdy.data.MayJoin
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.CyclicEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -11,7 +11,7 @@ import sturdy.util.{IntLabel, Labeled}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.closures.ClosureOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.ordering.{OrderingOps, EqOps}
+import sturdy.values.ordering.{EqOps, OrderingOps}
 
 import scala.collection.immutable.List
 
@@ -32,7 +32,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   val environment: CyclicEnvironment[String, V, J] with ClosableEnvironment[String, V, Env, J]
   val input: UserInput[V]
 
-  val effectStack: EffectStack = new EffectStack(List(failure, environment, input))
+  val effectStack: EffectStack = EffectStack(failure, environment, input)
   given EffectStack = effectStack
 
   // joins

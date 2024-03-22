@@ -21,7 +21,7 @@ class ApronJoinTest extends AnyFunSuite:
   val manager: Manager = new Polka(false)
   val state1 = new Abstract1(manager, env)
   given failure: Failure = new CollectedFailures[FailureKind]
-  given effectState: EffectStack = EffectStack(List(failure))
+  given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
 
   test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {

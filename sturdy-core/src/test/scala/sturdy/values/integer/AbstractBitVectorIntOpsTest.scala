@@ -12,7 +12,7 @@ import sturdy.values.integer.AbstractBitVector.*
 class AbstractBitVectorIntOpsTest extends AnyFunSuite:
 
   given Failure = ConcreteFailure() //sturdy/effect/failure/concretefailure
-  given EffectStack = EffectStack(List()) //sturdy/effect/effectstack
+  given EffectStack = EffectStack() //sturdy/effect/effectstack
 
   val con: ConcreteIntegerOps = new ConcreteIntegerOps()
   val abs: AbstractBitVectorIntegerOps[Int] = new AbstractBitVectorIntegerOps[Int]()

@@ -7,7 +7,7 @@ import apron.Interval
 import sturdy.Executor
 import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
-import sturdy.effect.{Effect, EffectStack, given}
+import sturdy.effect.{Effect, EffectList, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame, given}
 import sturdy.effect.callframe.RelationalCallFrame.given
@@ -136,14 +136,15 @@ object RelationalAnalysis extends Interpreter,
 
     given apronState: ApronRecencyState[RelationalVar, RelType, Value] = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
 
-    override val callFrame: RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value] =
-      new RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value](
-        initData = "$main",
-        initVars = Iterable.empty,
-        localVariableAllocator = localRelationaAlloc,
-        apronState
-      ):
-        override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
+    final class TipCallFrame extends RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value](
+      initData = "$main",
+      initVars = Iterable.empty,
+      localVariableAllocator = localRelationaAlloc,
+      apronState
+    ):
+      override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
+
+    override val callFrame: TipCallFrame = new TipCallFrame
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 
@@ -159,22 +160,17 @@ object RelationalAnalysis extends Interpreter,
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
-    override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =
-      class AddressClosureEffectStack extends EffectStack(effects, inEffects, outEffects):
-        override protected def getEffectState(effects: List[Effect]): List[Any] =
-          val states = effects.map(effect =>
-            effect.getState
-          )
-          List[Any](AddressClosure(recencyStore.getAddressTranslation, recencyStore.getAddressTranslation.getState, states.asInstanceOf))
-        override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
-          states match
-            case List(cls: AddressClosure[RelationalVar, List[Any]]) =>
-              recencyStore.getAddressTranslation.setState(cls.addrTransState.asInstanceOf)
-              effects.zip(cls.state).foreach{
-                case (effect,state) => effect.setState(state.asInstanceOf)
-              }
+    override def newEffectStack(effects: => Effect, inEffects: PartialFunction[Any, Effect], outEffects: PartialFunction[Any, Effect]): EffectStack =
+      new EffectStack(
+        AddressClosure(recencyStore.addressTranslation, removeStore(effects)),
+        (dom: Any) => AddressClosure(recencyStore.addressTranslation, removeStore(inEffects(dom))),
+        (dom: Any) => AddressClosure(recencyStore.addressTranslation, removeStore(outEffects(dom)))
+      )
 
-      new AddressClosureEffectStack
+    private def removeStore(effect: Effect): Effect =
+      effect match
+        case EffectList(effects) => new EffectList(effects.filter(eff => eff != store))
+        case _ => throw IllegalArgumentException(s"Expected EffectList, but got $effect")
 
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])

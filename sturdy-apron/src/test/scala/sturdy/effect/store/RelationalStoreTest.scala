@@ -27,7 +27,7 @@ class RelationalStoreTest extends AnyFunSuite:
 
   given Finite[Context] with {}
   given failure: Failure = new CollectedFailures[FailureKind]
-  given effectState: EffectStack = EffectStack(List(failure))
+  given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
 
 

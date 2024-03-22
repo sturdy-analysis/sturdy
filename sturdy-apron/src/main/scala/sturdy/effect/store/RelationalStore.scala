@@ -224,9 +224,16 @@ trait RelationalStore
 
   override def mapState(st: State, f: [A] => A => A): State =
     RelationalStoreState(st.tenv, st.abs1, nonRelationalStore.mapState(st.nonRelationalStoreState, f))
-  override def join: Join[State] = CombineApronStoreState
-  override def widen: Widen[State] = CombineApronStoreState
+  override def join: Join[State] = combineRelationalStoreState
+  override def widen: Widen[State] = combineRelationalStoreState
 
-  given CombineApronStoreState[W <: Widening](using Combine[Type,W], Combine[Abstract1,W], Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
+  def combineRelationalStoreState[W <: Widening](using combineTypeEnv: Combine[TypeEnv,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
-      Combine[(TypeEnv,Abstract1,nonRelationalStore.State),W]((s1.tenv, s1.abs1, s1.nonRelationalStoreState), (s2.tenv, s2.abs1, s2.nonRelationalStoreState)).map(RelationalStoreState.apply)
+      val joinedTypeEnv = combineTypeEnv(s1.tenv, s2.tenv)
+      val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
+      val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
+      val res = MaybeChanged(
+        RelationalStoreState(joinedTypeEnv.get, joinedAbs1.get, joinedNonRelationalStore.get),
+        joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
+      )
+      res

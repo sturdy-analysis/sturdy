@@ -3,12 +3,11 @@ package sturdy.language.wasm.generic
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.data.CombineUnit
-import sturdy.effect.ComputationJoiner
-import sturdy.effect.EffectStack
+import sturdy.effect.{ComputationJoiner, EffectList, EffectStack}
 import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.{Soundness, fix, IsSound}
+import sturdy.{IsSound, Soundness, fix}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.CollectedFailures
@@ -29,7 +28,7 @@ import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
-import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
+import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
@@ -141,12 +140,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(List(stack, memory, globals, funTable, callFrame, except, failure), {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => List(memory, globals, callFrame)
-    case _: FixIn.Eval => List(stack, memory, globals, callFrame)
+  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, funTable, callFrame, except, failure), {
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(memory, globals, callFrame)
+    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame)
   }, {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => List(stack, memory, globals, failure)
-    case _: FixIn.Eval => List(stack, memory, globals, callFrame, except)
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(stack, memory, globals, failure)
+    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame, except)
   })
   given EffectStack = effectStack
 

@@ -7,7 +7,7 @@ import sturdy.values.{Finite, Top}
 
 given failure: Failure = new CollectedFailures[FailureKind]
 given Finite[FailureKind] with {}
-given effectState: EffectStack = EffectStack(List(failure))
+given effectState: EffectStack = EffectStack(failure)
 
 class NumericIntervalTestingIntegerOps[I]
   (using 

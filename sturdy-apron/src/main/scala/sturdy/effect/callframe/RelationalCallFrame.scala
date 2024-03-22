@@ -43,9 +43,6 @@ trait RelationalCallFrame
       initData,
       Iterable.empty
     )
-//
-//  val recencyStore = apronState.recencyStore
-//  val relationalStore = apronState.relationalStore
 
   override def data: Data = addressCallFrame.data
 
@@ -135,42 +132,24 @@ trait RelationalCallFrame
   override def widen: Widen[State] = combineApronCallFrameState(_, _, apronState.recencyStore.widen)
 
   def combineApronCallFrameState[W <: Widening](v1: ApronCallFrameState, v2: ApronCallFrameState, combineRecencyStore: Combine[apronState.recencyStore.State, W]): MaybeChanged[ApronCallFrameState] =
-      val joinedRecencyStoreState = combineRecencyStore(v1.recencyStoreState, v2.recencyStoreState)
+    if (v1.addressCallFrameState.length != v2.addressCallFrameState.length) {
+      throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
+    } else {
+      val addrTrans = apronState.recencyStore.addressTranslation
+      var changed = false
+      val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
+        val joinedVirt = Join(virt1, virt2)
+        changed ||= joinedVirt.hasChanged
+        joinedVirt.get
+      )
+      val joinedRecencyState = combineRecencyStore(v1.recencyStoreState, v2.recencyStoreState)
 
-      val backupState = apronState.recencyStore.getState
-
-      try {
-        apronState.recencyStore.setState(joinedRecencyStoreState.get)
-
-        if (v1.addressCallFrameState.length != v2.addressCallFrameState.length) {
-          throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
-        } else {
-          val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-            for(tpe <- apronState.relationalStore.getType(virt2.physical).toOption) {
-              val sourceExpr = ApronExpr.Addr(virt2, tpe)
-              apronState.recencyStore.write(PowVirtualAddress(virt1), makeRelationalVal(sourceExpr))
-            }
-            virt1
-          )
-
-          val updatedRecencyStoreState =
-            combineRecencyStore(joinedRecencyStoreState.get, apronState.recencyStore.getState)
-
-          MaybeChanged(
-            ApronCallFrameState(
-              updatedRecencyStoreState.get,
-              joinedAddressCallFrameState
-            ),
-            joinedRecencyStoreState.hasChanged || updatedRecencyStoreState.hasChanged
-          )
-        }
-      } finally {
-        apronState.recencyStore.setState(backupState)
-      }
-
-  given VirtAddrJoin: Join[VirtAddr] with
-    override def apply(v1: VirtAddr, v2: VirtAddr): MaybeChanged[VirtAddr] =
-      throw UnsupportedOperationException("Virtual Addresses cannot be joined directly. Instead, they are joined inside of the apronStore.")
+      val res = MaybeChanged(
+        ApronCallFrameState(joinedRecencyState.get, joinedAddressCallFrameState),
+        changed || joinedRecencyState.hasChanged
+      )
+      res
+    }
 
 object RelationalCallFrame:
 //  def apply[

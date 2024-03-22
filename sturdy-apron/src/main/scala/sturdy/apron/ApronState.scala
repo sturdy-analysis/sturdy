@@ -2,7 +2,7 @@ package sturdy.apron
 
 import apron.{Interval, Var}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
-import sturdy.effect.{EffectStack, SturdyFailure}
+import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
 import sturdy.values.{Join, Widen}
@@ -71,7 +71,7 @@ final class ApronRecencyState
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   ) extends ApronState[VirtualAddress[Ctx], Type]:
 
-  val effectStack = EffectStack(List(recencyStore, recencyStore.getAddressTranslation))
+  val effectStack = EffectStack(EffectList(recencyStore, recencyStore.getAddressTranslation))
   val convertExpr = ApronExprConverter(recencyStore, relationalStore)
 
   override def withTempVars[A](resultType: Type, exprs: ApronExpr[VirtualAddress[Ctx], Type]*)(f: PartialFunction[(VirtualAddress[Ctx],List[ApronExpr[VirtualAddress[Ctx], Type]]), A]): A =
