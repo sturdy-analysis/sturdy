@@ -70,9 +70,9 @@ class RelationalStoreTest extends AnyFunSuite:
 
     recencyStore.write(xPow, ApronExpr.intInterval(0, 10))
 
-    x.physical.reduce(x =>
+    x.physical.reduce(xPhys =>
       // ApronExpr already works on virtual addresses here...
-      apronStore.getBound(ApronExpr.addr(x, BaseType[Int])) shouldBe Interval(0, 10)
+      apronStore.getBound(ApronExpr.addr(xPhys, BaseType[Int])) shouldBe Interval(0, 10)
       recencyStore.write(yPow, ApronExpr.intAdd(ApronExpr.addr(x, BaseType[Int]), ApronExpr.intLit(1)))
       y.physical.reduce(y =>
         apronStore.getBound(ApronExpr.addr(y, BaseType[Int])) shouldBe Interval(1, 11)

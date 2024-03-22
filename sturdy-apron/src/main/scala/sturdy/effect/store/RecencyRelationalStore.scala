@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{ApronExpr, ApronRecencyState, ApronState, ApronType, given}
+import sturdy.apron.{ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, ApronExprConverter, given}
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore, given}
@@ -18,8 +18,8 @@ object RecencyRelationalStore:
       Val: Join: Widen
     ]
     (
-      _getRelationalVal: Val => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
-      _makeRelationalVal: (RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val], ApronExpr[PhysicalAddress[Ctx], Type]) => Val
+      _getRelationalVal: (ApronExprConverter[Ctx, Type, Val],Val) => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
+      _makeRelationalVal: (ApronExprConverter[Ctx, Type, Val], ApronExpr[PhysicalAddress[Ctx], Type]) => Val
     )
     (using
      apronManager: Manager,
@@ -35,16 +35,18 @@ object RecencyRelationalStore:
     type ApronExprVirtAddr = ApronExpr[VirtualAddress[Ctx], Type]
     type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx], Type]
 
+    var convertExpr: ApronExprConverter[Ctx, Type, Val] = null
+
     val apronStore: RelationalStore[Ctx, Type, PowPhysAddr, Val] = new RelationalStore[Ctx, Type, PowPhysAddr, Val](
       apronManager,
       Abstract1(apronManager, new Environment()),
       Map()
     ):
       override def getRelationalVal(v:Val): Option[ApronExpr[PhysicalAddress[Ctx], Type]] =
-        _getRelationalVal(v)
+        _getRelationalVal(convertExpr, v)
 
       override def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Ctx], Type]): Val =
-        _makeRelationalVal(this, expr)
+        _makeRelationalVal(convertExpr, expr)
 
     val addressTranslation: AddressTranslation[Ctx] = AddressTranslation.empty
 
@@ -52,6 +54,8 @@ object RecencyRelationalStore:
       RecencyStore(
         apronStore,
         addressTranslation)
+
+    convertExpr = new ApronExprConverter[Ctx, Type, Val](recencyStore, apronStore)
 
     (recencyStore, apronStore)
 
@@ -64,10 +68,10 @@ object RecencyRelationalStore:
       apronManager: Manager
     ):
     (
-      RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[PhysicalAddress[Ctx], Type]],
-      RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[PhysicalAddress[Ctx], Type]]
+      RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[VirtualAddress[Ctx], Type]],
+      RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[VirtualAddress[Ctx], Type]]
     ) =
-    apply[Ctx, Type, ApronExpr[PhysicalAddress[Ctx],Type]](
-      _getRelationalVal = Some(_),
-      _makeRelationalVal = (_,expr) => expr
-    )
+      apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]](
+        _getRelationalVal = (convertExpr, expr) => Some(convertExpr.virtToPhys(expr)),
+        _makeRelationalVal = (convertExpr, expr) => convertExpr.physToVirt(expr)
+      )

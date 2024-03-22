@@ -26,7 +26,7 @@ class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, T
   makeIntegerOps = {
     given apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
+    given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore)
     new RelationalIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)

@@ -37,7 +37,7 @@ trait RelationalStore
 
   private var _abstract1 : Abstract1 = initialState
   private var typeEnv: TypeEnv = initialTypeEnv
-  private val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(Map())
+  val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(Map())
 
   def abstract1: Abstract1 = _abstract1
 
@@ -58,8 +58,8 @@ trait RelationalStore
       )
       val v2 = nonRelationalStore.read(powAddr)
       (v1,v2) match
-        case (JOptionA.None(),_) => v2
-        case (_,JOptionA.None()) => v1
+        case (JOptionA.None(), _) => v2
+        case (_, JOptionA.None()) => v1
         case (_,_) => Join(v1,v2).get
     }
 

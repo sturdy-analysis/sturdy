@@ -2,7 +2,7 @@ package sturdy.effect.callframe
 
 import apron.*
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, given}
-import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin}
+import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
 import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
@@ -18,14 +18,13 @@ trait RelationalCallFrame
     CallSite,
     Ctx: Ordering: Finite,
     Type: ApronType: Join: Widen,
-    Val: Join: Widen,
-    ValIntern: Join : Widen
+    Val: Join: Widen
   ]
   (
     initData: Data,
     initVars: Iterable[(Var, Option[Val])],
     val localVariableAllocator: Allocator[Ctx, Var],
-    val apronState: ApronRecencyState[Ctx, Type, ValIntern]
+    val apronState: ApronRecencyState[Ctx, Type, Val]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
      with DecidableCallFrame[Data, Var, Val, CallSite]:
@@ -37,7 +36,6 @@ trait RelationalCallFrame
   final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Ctx],Type]
   final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx],Type]
 
-  def toIntern(v: Val): ValIntern
   def makeRelationalVal(expr: ApronExprVirtAddr): Val
 
   val addressCallFrame: JoinableDecidableCallFrame[Data, Var, VirtAddr, CallSite] =
@@ -69,7 +67,7 @@ trait RelationalCallFrame
 
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
     addressCallFrame.getLocal(idx).map(virt =>
-      apronState.recencyStore.write(PowVirtualAddress(virt), toIntern(v))
+      apronState.recencyStore.write(PowVirtualAddress(virt), v)
     )
 
   override def setLocalByName(x: Var, v: Val): JOptionC[Unit] =
@@ -78,26 +76,31 @@ trait RelationalCallFrame
       case Some(idx) => setLocal(idx, v)
 
   override def getLocal(x: Int): JOptionC[Val] =
-    val v1 = for{
-      virt <- addressCallFrame.getLocal(x)
-      tpe <- apronState.relationalStore.getType(virt.physical).toJOptionC
-    } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
+    addressCallFrame.getLocal(x) match
+      case JOptionC.Some(virt) =>
+        val v1 = for{
+          tpe <- apronState.relationalStore.getType(virt.physical)
+        } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
 
-    val v2 = for {
-      virt <- addressCallFrame.getLocal(x)
-    } yield apronState.relationalStore.read(virt.physical)
+        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
 
-//    Join(v1,v2).get.toJOptionC
+        Join(v1,v2).get.toJOptionC
 
-    ???
-
+      case JOptionC.None() => JOptionC.none
 
   override def getLocalByName(x: Var): JOptionC[Val] =
-    val r = for {
-      virt <- addressCallFrame.getLocalByName(x);
-      tpe <- apronState.relationalStore.getType(virt.physical).toJOptionC
-    } yield ApronExpr.addr(virt, tpe)
-    r.asInstanceOf[JOptionC[Val]]
+    addressCallFrame.getLocalByName(x) match
+      case JOptionC.Some(virt) =>
+
+        val v1 = for {
+          tpe <- apronState.relationalStore.getType(virt.physical)
+        } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
+
+        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
+
+        Join(v1,v2).get.toJOptionC
+
+      case JOptionC.None() => JOptionC.none
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
@@ -145,7 +148,7 @@ trait RelationalCallFrame
           val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
             for(tpe <- apronState.relationalStore.getType(virt2.physical).toOption) {
               val sourceExpr = ApronExpr.Addr(virt2, tpe)
-              apronState.recencyStore.write(PowVirtualAddress(virt1), toIntern(makeRelationalVal(sourceExpr)))
+              apronState.recencyStore.write(PowVirtualAddress(virt1), makeRelationalVal(sourceExpr))
             }
             virt1
           )
@@ -170,35 +173,32 @@ trait RelationalCallFrame
       throw UnsupportedOperationException("Virtual Addresses cannot be joined directly. Instead, they are joined inside of the apronStore.")
 
 object RelationalCallFrame:
-  def apply[
-    Data,
-    Var: Ordering,
-    CallSite,
-    Ctx: Ordering : Finite,
-    Type: ApronType : Join : Widen,
-    Val: Join: Widen,
-    ValIntern: Join: Widen
-  ]
-  (
-    initData: Data,
-    initVars: Iterable[(Var, Option[Val])],
-    _toIntern: Val => ValIntern,
-    _makeRelationalVal: ApronExpr[VirtualAddress[Ctx], Type] => Val,
-    _getRelationalValIntern: ValIntern => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
-    _makeRelationalValIntern: (RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ValIntern], ApronExpr[PhysicalAddress[Ctx], Type]) => ValIntern
-  )
-  (using
-    temporaryVariableAllocator: Allocator[Ctx, Type],
-    localVariableAllocator: Allocator[Ctx, Var],
-    apronManager: Manager
-  ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val, ValIntern], ApronRecencyState[Ctx, Type, ValIntern]) =
-
-    val (recencyStore,relationalStore) = RecencyRelationalStore[Ctx,Type, ValIntern](_getRelationalValIntern, _makeRelationalValIntern)
-    given state: ApronRecencyState[Ctx, Type, ValIntern] = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore) {}
-    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val, ValIntern](initData, initVars, localVariableAllocator, state):
-      override def toIntern(v: Val): ValIntern = _toIntern(v)
-      override def makeRelationalVal(expr: ApronExprVirtAddr): Val = _makeRelationalVal(expr)
-    (callFrame,state)
+//  def apply[
+//    Data,
+//    Var: Ordering,
+//    CallSite,
+//    Ctx: Ordering : Finite,
+//    Type: ApronType : Join : Widen,
+//    Val: Join: Widen
+//  ]
+//  (
+//    initData: Data,
+//    initVars: Iterable[(Var, Option[Val])],
+//    _makeRelationalVal: ApronExpr[VirtualAddress[Ctx], Type] => Val,
+//    _getRelationalValIntern: Val => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
+//    _makeRelationalValIntern: (RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val], ApronExpr[PhysicalAddress[Ctx], Type]) => Val
+//  )
+//  (using
+//    temporaryVariableAllocator: Allocator[Ctx, Type],
+//    localVariableAllocator: Allocator[Ctx, Var],
+//    apronManager: Manager
+//  ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val], ApronRecencyState[Ctx, Type, Val]) =
+//
+//    val (recencyStore,relationalStore) = RecencyRelationalStore[Ctx,Type, Val](_getRelationalValIntern, _makeRelationalValIntern)
+//    given state: ApronRecencyState[Ctx, Type, Val] = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore) {}
+//    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val](initData, initVars, localVariableAllocator, state):
+//      override def makeRelationalVal(expr: ApronExprVirtAddr): Val = _makeRelationalVal(expr)
+//    (callFrame,state)
 
   def apply[
     Data,
@@ -213,11 +213,10 @@ object RelationalCallFrame:
      temporaryVariableAllocator: Allocator[Ctx, Type],
      localVariableAllocator: Allocator[Ctx, Var],
      apronManager: Manager
-   ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[PhysicalAddress[Ctx], Type]], ApronRecencyState[Ctx, Type, ApronExpr[PhysicalAddress[Ctx], Type]]) =
+   ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val (recencyStore,relationalStore) = RecencyRelationalStore[Ctx,Type]
-    given state: ApronRecencyState[Ctx, Type, ApronExpr[PhysicalAddress[Ctx], Type]] = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore) {}
-    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[PhysicalAddress[Ctx], Type]](initData, initVars, localVariableAllocator, state):
-      override def toIntern(v: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] = state.virtToPhys(v)
+    given state: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = new ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](temporaryVariableAllocator, recencyStore, relationalStore)
+    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](initData, initVars, localVariableAllocator, state):
       override def makeRelationalVal(expr: ApronExprVirtAddr): ApronExpr[VirtualAddress[Ctx], Type] = expr
 
     (callFrame, state)

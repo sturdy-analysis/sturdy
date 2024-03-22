@@ -25,28 +25,15 @@ class EffectStack(_effects: => List[Effect],
     effects.zip(st).foreach{ case (effect,state) =>
       effect.setState(state.asInstanceOf)
     }
-
-  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine {
-    override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
-      var effs = eff
-      var s1 = st1
-      var s2 = st2
-      val res = ListBuffer[Any]()
+  protected def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] =
+    (st1: List[Any], st2: List[Any]) =>
       var changed = false
-      while (effs.nonEmpty) {
-        val e = effs.head
-        comb(e)(s1.head, s2.head) match
-          case MaybeChanged.Changed(a) =>
-            res += a
-            changed |= true
-          case MaybeChanged.Unchanged(a) =>
-            res += a
-        effs = effs.tail
-        s1 = s1.tail
-        s2 = s2.tail
+      val res = eff.zip(st1.zip(st2)).map{ case (effect, (state1, state2)) =>
+        val join = comb(effect)(state1, state2)
+        changed ||= join.hasChanged
+        join.get
       }
-      MaybeChanged(res.toList, changed)
-  }
+      MaybeChanged(res, changed)
 
   override def getAllState: All = getEffectState(effects)
   override def getInState(dom: Any): In = getEffectState(inEffects(dom))

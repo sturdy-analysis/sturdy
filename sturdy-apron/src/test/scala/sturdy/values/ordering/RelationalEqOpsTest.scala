@@ -24,7 +24,7 @@ class RelationalEqOpsTest extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], Apro
   makeOrderingOps = {
     given apronManager: Manager = new apron.Polka(true)
     val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
-    given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore) {}
+    given apronSt: ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore)
     new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)

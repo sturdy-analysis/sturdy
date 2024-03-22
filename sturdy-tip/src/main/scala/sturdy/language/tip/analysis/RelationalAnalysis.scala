@@ -5,8 +5,8 @@ import apron.Tcons1
 import apron.Texpr1CstNode
 import apron.Interval
 import sturdy.Executor
-import sturdy.apron.{ApronRecencyState, *, given}
-import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
+import sturdy.apron.{*, given}
+import sturdy.data.{*, given}
 import sturdy.effect.{Effect, EffectStack, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame, given}
@@ -73,22 +73,24 @@ object RelationalAnalysis extends Interpreter,
   final type Environment = Map[String, Value]
   final type InitStore = Map[RelAddr, Value]
 
-  final def asBoolean(v: Value)(using inst: Instance): VBool = v match
-    case Value.BoolValue(toppedBool) => toppedBool
-    case Value.IntValue(i) =>
-      given Failure = inst.failure
-      given EffectStack = inst.effectStack
-      ApronCons.intNeq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0))
-    case Value.TopValue => topBool
-    case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
+  final def asBoolean(v: Value)(using inst: Instance): VBool =
+    v match
+      case Value.BoolValue(toppedBool) => toppedBool
+      case Value.IntValue(i) =>
+        given Failure = inst.failure
+        given EffectStack = inst.effectStack
+        ApronCons.intNeq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0))
+      case Value.TopValue => topBool
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
-  final def asInt(v: Value)(using inst: Instance): VInt = v match
-    case Value.BoolValue(bool) =>
-      import inst.given
-      BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1), ApronExpr.intLit[RelAddr, RelType](0))
-    case Value.IntValue(i) => i
-    case Value.TopValue => topInt
-    case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
+  final def asInt(v: Value)(using inst: Instance): VInt =
+    v match
+      case Value.BoolValue(bool) =>
+        import inst.given
+        BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1), ApronExpr.intLit[RelAddr, RelType](0))
+      case Value.IntValue(i) => i
+      case Value.TopValue => topInt
+      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
   override def topInt(using inst: Instance): VInt =
     given Failure = inst.failure
@@ -115,7 +117,7 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
-    var apronState: ApronRecencyState[RelationalVar, RelType, Value] = null
+    var exprConverter: ApronExprConverter[RelationalVar, RelType, Value] = null
     val relationalStore: RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
@@ -123,25 +125,24 @@ object RelationalAnalysis extends Interpreter,
     ):
       override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
         v match
-          case Value.IntValue(iv) => Some(apronState.virtToPhys(iv))
+          case Value.IntValue(iv) => Some(exprConverter.virtToPhys(iv))
           case _ => None
 
       override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
-        val iv = getBound(expr)
-        Value.IntValue(ApronExpr.constant(iv, expr._type))
+        Value.IntValue(exprConverter.physToVirt(expr))
 
     val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore)
-    apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore) {}
-    given ApronRecencyState[RelationalVar, RelType, Value] = apronState
+    exprConverter = ApronExprConverter(recencyStore, relationalStore)
 
-    override val callFrame: RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value] =
-      new RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value, Value](
+    given apronState: ApronRecencyState[RelationalVar, RelType, Value] = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
+
+    override val callFrame: RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value] =
+      new RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value](
         initData = "$main",
         initVars = Iterable.empty,
         localVariableAllocator = localRelationaAlloc,
         apronState
       ):
-        override def toIntern(v: Value): Value = v
         override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
@@ -160,17 +161,18 @@ object RelationalAnalysis extends Interpreter,
 
     override def newEffectStack(effects: => List[Effect], inEffects: PartialFunction[Any, List[Effect]], outEffects: PartialFunction[Any, List[Effect]]): EffectStack =
       class AddressClosureEffectStack extends EffectStack(effects, inEffects, outEffects):
-        val closure = AddressClosure[RelationalVar](recencyStore.addressTranslation, this)
         override protected def getEffectState(effects: List[Effect]): List[Any] =
           val states = effects.map(effect =>
             effect.getState
           )
-          List[Any](closure.AddressClosureState(recencyStore.addressTranslation.getState, states.asInstanceOf))
-          //TODO: 
+          List[Any](AddressClosure(recencyStore.getAddressTranslation, recencyStore.getAddressTranslation.getState, states.asInstanceOf))
         override protected def setEffectState(effects: List[Effect], states: List[Any]): Unit =
-          effects.zip(states).foreach{
-            case (effect,state) => effect.setState(state.asInstanceOf)
-          }
+          states match
+            case List(cls: AddressClosure[RelationalVar, List[Any]]) =>
+              recencyStore.getAddressTranslation.setState(cls.addrTransState.asInstanceOf)
+              effects.zip(cls.state).foreach{
+                case (effect,state) => effect.setState(state.asInstanceOf)
+              }
 
       new AddressClosureEffectStack
 

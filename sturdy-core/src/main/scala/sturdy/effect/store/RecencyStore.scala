@@ -53,11 +53,13 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
   def joinRecentIntoOld(virt: Virt) =
     virt.iterator.foreach(
       v =>
-        val (ctx,_) = v.identifier
-        store.copy(
-          PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
-          PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
-        addressTranslation.joinRecentIntoOld(v)
+        if(v.recency == PowRecency.Recent || v.recency == PowRecency.RecentOld) {
+          val (ctx, _) = v.identifier
+          store.copy(
+            PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
+            PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
+          addressTranslation.joinRecentIntoOld(v)
+        }
     )
 
   override type State = RecencyStoreState
