@@ -7,7 +7,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
 import sturdy.values.{Join, Widen}
 import sturdy.values.booleans.BooleanOps
-import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
+import sturdy.values.references.{AddressClosure, PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
 import sturdy.data.{*, given}
 
 import scala.reflect.ClassTag
@@ -71,7 +71,7 @@ final class ApronRecencyState
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   ) extends ApronState[VirtualAddress[Ctx], Type]:
 
-  val effectStack = EffectStack(EffectList(recencyStore, recencyStore.getAddressTranslation))
+  val effectStack = EffectStack(AddressClosure(recencyStore.getAddressTranslation, recencyStore))
   val convertExpr = ApronExprConverter(recencyStore, relationalStore)
 
   override def withTempVars[A](resultType: Type, exprs: ApronExpr[VirtualAddress[Ctx], Type]*)(f: PartialFunction[(VirtualAddress[Ctx],List[ApronExpr[VirtualAddress[Ctx], Type]]), A]): A =
