@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.apron.{*, given}
-import sturdy.effect.Stateless
+import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
@@ -26,7 +26,12 @@ class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, T
   maxValue = 100,
   makeIntegerOps = {
     given apronManager: Manager = new apron.Polka(true)
-    given apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = RecencyRelationalStore[Ctx, Type]
+    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
+    given effectStack: EffectStack = new EffectStack(
+      AddressClosure(apronState.recencyStore.addressTranslation, apronState.recencyStore)
+    )
+    apronState = RecencyRelationalStore[Ctx, Type]
+    given ApronState[VirtAddr, Type] = apronState
     val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
     new RelationalIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)

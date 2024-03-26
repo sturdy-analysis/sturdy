@@ -1,10 +1,11 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, ApronExprConverter, given}
-import sturdy.effect.Stateless
+import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronState, ApronType, ApronVar, CombineApronExpr, given}
+import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore, given}
+import sturdy.util.{Lazy, lazily}
 import sturdy.values.{Combine, Finite, Join, MaybeChanged, Widen, Widening}
 import sturdy.values.references.{*, given}
 
@@ -65,13 +66,17 @@ object RecencyRelationalStore:
       Type: ApronType : Join : Widen
     ]
     (using
-      apronManager: Manager
+      temporaryVariableAllocator: Allocator[Ctx, Type],
+      apronManager: Manager,
+      effectStack: EffectStack
     ):
-    (
-      RecencyStore[Ctx, PowVirtualAddress[Ctx], ApronExpr[VirtualAddress[Ctx], Type]],
-      RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], ApronExpr[VirtualAddress[Ctx], Type]]
-    ) =
-      apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]](
+    ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] =
+      var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = null
+      given Lazy[ApronState[VirtualAddress[Ctx], Type]] = lazily(apronState)
+      val (recencyStore, relationalStore) = apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]](
         _getRelationalVal = (convertExpr, expr) => Some(convertExpr.virtToPhys(expr)),
         _makeRelationalVal = (convertExpr, expr) => convertExpr.physToVirt(expr)
       )
+      apronState = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore)
+
+      apronState

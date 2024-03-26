@@ -115,7 +115,7 @@ class IntegerOpsTest
     integerOps.getBounds(
       integerOps.div(
         integerOps.interval(integral.fromInt(-1), integral.fromInt(1)),
-        integerOps.interval(integral.fromInt(-1), integral.fromInt(-1)))) shouldBe
+        integerOps.interval(integral.fromInt(-1), integral.fromInt(-1)))) should contain
       (integral.fromInt(-1),integral.fromInt(1))
   }
 

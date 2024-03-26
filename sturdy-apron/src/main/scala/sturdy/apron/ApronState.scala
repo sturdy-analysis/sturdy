@@ -69,9 +69,12 @@ final class ApronRecencyState
     temporaryVariableAllocator: Allocator[Ctx, Type],
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
-  ) extends ApronState[VirtualAddress[Ctx], Type]:
+  )
+  (using
+    effectStack: EffectStack
+  )
+  extends ApronState[VirtualAddress[Ctx], Type]:
 
-  val effectStack = EffectStack(AddressClosure(recencyStore.getAddressTranslation, recencyStore))
   val convertExpr = ApronExprConverter(recencyStore, relationalStore)
 
   def unapply: (RecencyStore[Ctx, PowVirtualAddress[Ctx], Val], RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]) =

@@ -3,9 +3,11 @@ package sturdy.effect.callframe
 import apron.*
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
+import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
 import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
@@ -152,32 +154,6 @@ trait RelationalCallFrame
     }
 
 object RelationalCallFrame:
-//  def apply[
-//    Data,
-//    Var: Ordering,
-//    CallSite,
-//    Ctx: Ordering : Finite,
-//    Type: ApronType : Join : Widen,
-//    Val: Join: Widen
-//  ]
-//  (
-//    initData: Data,
-//    initVars: Iterable[(Var, Option[Val])],
-//    _makeRelationalVal: ApronExpr[VirtualAddress[Ctx], Type] => Val,
-//    _getRelationalValIntern: Val => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
-//    _makeRelationalValIntern: (RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val], ApronExpr[PhysicalAddress[Ctx], Type]) => Val
-//  )
-//  (using
-//    temporaryVariableAllocator: Allocator[Ctx, Type],
-//    localVariableAllocator: Allocator[Ctx, Var],
-//    apronManager: Manager
-//  ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val], ApronRecencyState[Ctx, Type, Val]) =
-//
-//    val (recencyStore,relationalStore) = RecencyRelationalStore[Ctx,Type, Val](_getRelationalValIntern, _makeRelationalValIntern)
-//    given state: ApronRecencyState[Ctx, Type, Val] = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore) {}
-//    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, Val](initData, initVars, localVariableAllocator, state):
-//      override def makeRelationalVal(expr: ApronExprVirtAddr): Val = _makeRelationalVal(expr)
-//    (callFrame,state)
 
   def apply[
     Data,
@@ -191,10 +167,11 @@ object RelationalCallFrame:
    )(using
      temporaryVariableAllocator: Allocator[Ctx, Type],
      localVariableAllocator: Allocator[Ctx, Var],
-     apronManager: Manager
+     apronManager: Manager,
+     effectStack: EffectStack
    ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
-    val (recencyStore,relationalStore) = RecencyRelationalStore[Ctx,Type]
-    given state: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = new ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](temporaryVariableAllocator, recencyStore, relationalStore)
+    val state = RecencyRelationalStore[Ctx,Type]
+    given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)
     val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](initData, initVars, localVariableAllocator, state):
       override def makeRelationalVal(expr: ApronExprVirtAddr): ApronExpr[VirtualAddress[Ctx], Type] = expr
 

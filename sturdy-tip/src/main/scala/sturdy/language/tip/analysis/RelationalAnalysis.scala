@@ -47,6 +47,7 @@ object RelationalAnalysis extends Interpreter,
   override type J[A] = WithJoin[A]
 
   type RelType = BaseType[Int]
+
   enum RelationalVar:
     case Local(x: String)
     case Temp(ty: RelType)
@@ -118,6 +119,8 @@ object RelationalAnalysis extends Interpreter,
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
     var exprConverter: ApronExprConverter[RelationalVar, RelType, Value] = null
+    var apronState: ApronRecencyState[RelationalVar, RelType, Value] = null
+    given lazyApronState: Lazy[ApronState[VirtualAddress[RelationalVar], RelType]] = lazily(apronState)
     val relationalStore: RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
@@ -133,8 +136,8 @@ object RelationalAnalysis extends Interpreter,
 
     val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
-
-    given apronState: ApronRecencyState[RelationalVar, RelType, Value] = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
+    apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
+    given ApronState[VirtualAddress[RelationalVar], RelType] = apronState
 
     final class TipCallFrame extends RelationalCallFrame[String, String, Exp.Call, RelationalVar, RelType, Value](
       initData = "$main",

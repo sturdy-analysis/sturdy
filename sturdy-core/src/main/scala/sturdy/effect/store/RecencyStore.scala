@@ -64,15 +64,7 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
 
   override type State = RecencyStoreState
 
-  case class RecencyStoreState(store: initStore.State):
-    override def equals(obj: Any): Boolean =
-      obj match
-        case other: RecencyStoreState =>
-          this.store.equals(other.store)
-        case _ => false
-
-    override def hashCode(): Int =
-      store.hashCode()
+  case class RecencyStoreState(store: initStore.State)
 
   override def getState: RecencyStoreState =
     RecencyStoreState(this.store.getState.asInstanceOf)

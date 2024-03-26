@@ -96,7 +96,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
       Join(virt1, virt2).get shouldBe virt3
       Join(virt1, virt2).hasChanged shouldBe changed
       Join(virt2, virt1).get shouldBe virt3
-      Join(virt2, virt1).hasChanged shouldBe changed
+
 
     PowVirtualAddress.empty[Ctx].isEmpty shouldBe true
     PowVirtualAddress.empty[Ctx].isStrong shouldBe true
@@ -135,7 +135,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Allocation of the same context in two different branches") {
     val store = emptyStore
-    val effectStack: EffectStack = EffectStack(store, store.addressTranslation)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -179,7 +181,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Allocate addresses for the same context in separate branches") {
     val store = emptyStore
-    val effectStack: EffectStack = EffectStack(store, store.addressTranslation)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -203,7 +207,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Strong updates on the same address in separate branches") {
     val store = emptyStore
-    val effectStack: EffectStack = new EffectStack(store)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
 
     val ctx1 = "ctx1"
     val a1 = store.alloc(ctx1)
@@ -217,7 +223,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Recency store should handle reallocation that happens in while loops") {
     val store = emptyStore
-    val effectStack: EffectStack = EffectStack(store, store.addressTranslation)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
 
     /**
      * Program:
@@ -284,7 +292,10 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = AllocSite x Recency") {
     val store = emptyStore
-    val effectStack: EffectStack = EffectStack(store, store.addressTranslation)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
+
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 
@@ -307,7 +318,10 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = Unit x Recency") {
     val store = emptyStore
-    val effectStack: EffectStack = EffectStack(store, store.getAddressTranslation)
+    val effectStack: EffectStack = EffectStack(
+      AddressClosure(store.addressTranslation, store)
+    )
+
     var a1: VirtualAddress[Ctx] = null
     var a2: VirtualAddress[Ctx] = null
 

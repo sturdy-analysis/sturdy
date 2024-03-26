@@ -137,6 +137,10 @@ object AddressTranslation:
   def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
 
 case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTranslation[Context]) extends AbstractAddr[VirtualAddress[Context]]:
+  val myAddress: Boolean = ctx.toString == "Local(s)" && n == 8
+  if(myAddress) {
+    println("check")
+  }
   def physical: PowPhysicalAddress[Context] =
     addressTrans(ctx, n)
   def recency: PowRecency =
@@ -291,7 +295,8 @@ object PowVirtualAddress:
     new PowVirtualAddress(addrs, addrMap)
 
 given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddress[Context], W] with
-  override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] = combinePowVirtualAddress(v1,v2)
+  override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
+    combinePowVirtualAddress(v1,v2)
 
 def combinePowVirtualAddress[Context](v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
     (v1.addressMap,v2.addressMap) match
@@ -347,9 +352,10 @@ case class AddressClosure[Context](addrTrans: AddressTranslation[Context], effec
       try {
         addrTrans.mapping = v1.addrTransState
         addrTrans.otherMapping = Some(v2.addrTransState)
-        val j1 = combineAddrTrans(v1.addrTransState, v2.addrTransState)
-        val j2 = combineState(v1.effectState, v2.effectState)
-        MaybeChanged(AddressClosureState(addrTrans, j1.get, j2.get), j1.hasChanged || j2.hasChanged)
+        val j1 = combineState(v1.effectState, v2.effectState)
+        val j2 = combineAddrTrans(v1.addrTransState, v2.addrTransState)
+        val j3 = combineAddrTrans(j2.get, addrTrans.getState)
+        MaybeChanged(AddressClosureState(addrTrans, j3.get, j1.get), j1.hasChanged || j2.hasChanged || j3.hasChanged)
       } finally {
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping
