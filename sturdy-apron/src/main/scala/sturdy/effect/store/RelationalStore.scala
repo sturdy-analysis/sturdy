@@ -206,7 +206,9 @@ trait RelationalStore
     override def equals(obj: Any): Boolean =
       obj match
         case RelationalStoreState(tenv2, abs2, nonRel2) =>
-          tenv.equals(tenv2) && abs1.isEqual(manager, abs2) && nonRelationalStoreState.equals(nonRel2)
+          tenv.equals(tenv2) && abs1.isEqual(manager, abs2) && MapEquals(nonRelationalStoreState,nonRel2)
+        case _ =>
+          false
     override def hashCode(): Int = (tenv, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
 
   override type State = RelationalStoreState

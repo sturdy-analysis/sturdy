@@ -4,13 +4,14 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import sturdy.values.references.Recency.*
 import sturdy.data.{*, given}
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.store.{RelationalStore, given}
 import sturdy.apron.{ApronCons, ApronExpr, ApronVar, BinOp, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden, TypeIntegerOps}
 import sturdy.values.references.{*, given}
 import apron.{Abstract1, Environment, Interval, MpqScalar, Polka}
+import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.types.{BaseType, given}
 
@@ -30,13 +31,15 @@ class RelationalStoreTest extends AnyFunSuite:
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
 
-
+  given Allocator[Context, Type] with Stateless with
+    override def alloc(tpe: Type): Context =
+      s"tmp_$tpe"
   given CombineVal[W <: Widening]: Combine[Val, W] = ???
 
   given apron.Manager = new apron.Polka(true)
 
   test("Retire a recent address") {
-    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type]
+    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type].unapply
 
     val xRecent = PhysicalAddress("x", Recency.Recent)
     val xOld = PhysicalAddress("x", Recency.Old)
@@ -61,7 +64,7 @@ class RelationalStoreTest extends AnyFunSuite:
 
   type AExpr = ApronExpr[ApAddr, BaseType[Int]]
   test("with recencystore") {
-    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type]
+    val (recencyStore, apronStore) = RecencyRelationalStore[Context, Type].unapply
 
     val x = recencyStore.alloc("x")
     val y = recencyStore.alloc("y")

@@ -1,6 +1,7 @@
 package sturdy.apron
 
 import apron.{Abstract1, Coeff, Environment, Manager, StringVar}
+import sturdy.util.Lazy
 import sturdy.values.{Combine, Widen, Widening}
 
 import scala.reflect.ClassTag
@@ -77,24 +78,25 @@ object ApronJoins:
         env = env.remove(Array(x))
     env
 
-given CombineApronExpr[Addr: Ordering: ClassTag, Type : Join, W <: Widening]: Combine[ApronExpr[Addr,Type], W] =
-  (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) => throw new NotImplementedError()
 
-//given CombineApronExpr[Addr: Ordering: ClassTag, Type : Join, W <: Widening](using apronState: ApronState[Addr,Type]): Combine[ApronExpr[Addr,Type], W] =
-//  (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
-//    val resultType = Join(e1._type, e2._type).get
-//    val iv1 = apronState.getBound(e1)
-//    val iv2 = apronState.getBound(e2)
-//    apronState.withTempVars(resultType) {
-//      case (result, List()) =>
-//        apronState.join {
-//          apronState.assign(result, e1)
-//        } {
-//          apronState.assign(result, e2)
-//        }
-//        val iv3 = apronState.getBound(e2)
-//        MaybeChanged(ApronExpr.addr(result, resultType), iv3.isLeq(iv1))
-//    }
+given CombineApronExpr[Addr: Ordering: ClassTag, Type : Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr,Type]]): Combine[ApronExpr[Addr,Type], W] =
+  (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
+    if(e1 == e2)
+      Unchanged(e1)
+    else
+      val apronState = lazyApronState.value
+      val resultType = Join(e1._type, e2._type).get
+      val iv1 = apronState.getBound(e1)
+      apronState.withTempVars(resultType) {
+        case (result, List()) =>
+          apronState.join {
+            apronState.assign(result, e1)
+          } {
+            apronState.assign(result, e2)
+          }
+          val iv3 = apronState.getBound(e2)
+          MaybeChanged(ApronExpr.addr(result, resultType), iv3.isLeq(iv1))
+      }
 
 given Join[Coeff] = (c1,c2) =>
   val inf1 = c1.inf()

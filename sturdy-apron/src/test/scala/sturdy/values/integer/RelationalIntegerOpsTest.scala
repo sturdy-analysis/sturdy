@@ -9,7 +9,8 @@ import sturdy.apron.{*, given}
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.effect.store.{RecencyRelationalStore, RelationalStore, RecencyStore, given}
+import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.util.{Lazy, lazily}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}
@@ -25,12 +26,12 @@ class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, T
   maxValue = 100,
   makeIntegerOps = {
     given apronManager: Manager = new apron.Polka(true)
-    val (recencyStore, apronStore) = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = new ApronRecencyState(tempVariableAllocator, recencyStore, apronStore)
+    given apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = RecencyRelationalStore[Ctx, Type]
+    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
     new RelationalIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
-      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) = apronState.getIntBound(n)
+      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) = this.apronState.getIntBound(n)
     }
   }
 )

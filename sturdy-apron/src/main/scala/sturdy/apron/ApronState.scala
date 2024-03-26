@@ -74,6 +74,9 @@ final class ApronRecencyState
   val effectStack = EffectStack(AddressClosure(recencyStore.getAddressTranslation, recencyStore))
   val convertExpr = ApronExprConverter(recencyStore, relationalStore)
 
+  def unapply: (RecencyStore[Ctx, PowVirtualAddress[Ctx], Val], RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]) =
+    (recencyStore, relationalStore)
+
   override def withTempVars[A](resultType: Type, exprs: ApronExpr[VirtualAddress[Ctx], Type]*)(f: PartialFunction[(VirtualAddress[Ctx],List[ApronExpr[VirtualAddress[Ctx], Type]]), A]): A =
     val tempVars = exprs.map ( expr =>
       if(expr.addrs.isEmpty) {
