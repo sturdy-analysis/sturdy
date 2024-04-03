@@ -9,11 +9,14 @@ import sturdy.values.Widening
 
 trait JOption[J[_] <: MayJoin[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
+
   inline final def getOrElse(default: => A): J[A] ?=> A =
     option(default)(identity)
   inline final def orElseAndThen[B](default: => A)(f: A => B): J[B] ?=> B =
     option(f(default))(f)
   final def get: J[A] ?=> A = option(throw new MatchError(this))(identity)
+
+
 
   def map[B](f: A => B): JOption[J, B]
   def flatMap[B](f: A => JOption[J, B]): JOption[J, B]

@@ -1,101 +1,79 @@
 package sturdy.language.pcf
 
 import sturdy.data.MayJoin
-import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.*
-import sturdy.values.MaybeChanged
-import sturdy.values.booleans.*
-import sturdy.values.{Finite, Top, Combine, Widening}
-import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
-import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
-import sturdy.values.records.{LiftedRecordOps, RecordOps}
-import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.relational.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.data.MayJoin.NoJoin
+import sturdy.effect.Concrete
+import sturdy.effect.environment.{AbstractCyclicEnvironment, Box, ClosableEnvironment, ConcreteCyclicEnvironment, ConcreteEnvironment, CyclicEnvironment, WithJoinConcreteCyclicEnvironment}
+import sturdy.effect.failure.Failure
+import sturdy.values.{Combine, Finite, MaybeChanged, Widening}
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.LiftedBooleanBranching
+import sturdy.values.closures.ClosureOps
+import sturdy.values.closures.LiftedClosureOps
+import sturdy.values.integer.IntegerOps
+import sturdy.values.integer.LiftedIntegerOps
+import sturdy.values.relational.EqOps
+import sturdy.values.relational.LiftedOrderingOps
+import sturdy.values.relational.OrderingOps
 
-/**
- * Trait [[Interpreter]] allows sharing code between concrete and abstract interpreters.
- * The trait defines different types of values and conversions between them.
- */
 trait Interpreter:
+
   type J[A] <: MayJoin[A]
-  type VBool
-  type VNat
-  type VFun
+
+  type VInt
+  type VClosure
+  type VBoolean
+  type Env
+
+  def boolean(b: VBoolean): Value
+  def asBoolean(v: Value)(using Failure): VBoolean
 
   enum Value:
+    case Int(i: VInt)
+    case Closure(closure: VClosure)
     case TopValue
-    case NatValue(i: VInt)
-    case FunValue(fun: VFun)
 
-    def asBoolean(using Failure): VBool = Interpreter.this.asBoolean(this)
-    def asNat(using failure: Failure): VNat = this match
-      case NatValue(n) => n
-      case TopValue => topNat
-      case _ => failure(TipFailure.TypeError, s"Expected Int but got $this")
-    def asFunction(using inst: Instance): VFun = this match
-      case FunValue(f) => f
-      case TopValue => topFun
-      case _ => inst.failure(TipFailure.TypeError, s"Expected Function but got $this")
-    def asReference(using inst: Instance): VRef = this match
-      case RefValue(a) => a
-      case TopValue => topReference
-      case _ => inst.failure(TipFailure.TypeError, s"Expected Reference but got $this")
-    def asRecord(using failure: Failure): VRecord = this match
-      case RecValue(rec) => rec
-      case TopValue => topRecord
-      case _ => failure(TipFailure.TypeError, s"Expected Record but got $this")
+    def asInt(using failure: Failure): VInt = this match
+      case Int(i) => i
+      case _ => failure(TypeError, s"Expected Int but got $this")
+    def asClosure(using Failure): VClosure = this match
+      case Closure(closure) => closure
+      case _ => Failure(TypeError, s"Expected Closure but got $this")
 
-  def topNat: VNat
-  def topFun(using Instance): VFun
-  def topBool: VBool
 
-  def asBoolean(v: Value)(using Failure): VBool
-  def boolean(b: VBool): Value
+  given FiniteVClosure: Finite[VClosure] with {}
+  given FiniteVInt: Finite[VInt] with {}
+  given FiniteValue(using Finite[VInt], Finite[VClosure]): Finite[Value] with {}
 
-  given Top[Value] with
-    def top = Value.TopValue
-
-  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
+  given CombineValue[W <: Widening] (using Combine[VInt, W]): Combine[Value, W] with
     import Value.*
+
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => Combine[VInt, W](i1, i2).map(IntValue.apply)
-      case (FunValue(funs1), FunValue(funs2)) => Combine[VFun, W](funs1, funs2).map(FunValue.apply)
-      case (RefValue(addrs1), RefValue(addrs2)) => Combine[VRef, W](addrs1, addrs2).map(RefValue.apply)
-      case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
+      case (Int(i1), Int(i2)) => Combine[VInt, W](i1, i2).map(Int.apply)
+      //case (Closure(c1), Closure(c2)) => Combine[VClosure, W](c1, c2).map(Closure.apply)
       case _ => MaybeChanged(TopValue, v1)
 
-  given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
-  import Value.*
   given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
-    new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
-  given ValueOrderingOps(using Failure, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
-    new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, boolean)
-  given ValueEqOps(using EqOps[VNat, VBool], EqOps[VFun, VBool]): EqOps[Value, Value] with
-    def equ(v1: Value, v2: Value): Value = (v1, v2) match
-      case (NatValue(i1), NatValue(i2)) => boolean(EqOps.equ(i1, i2))
-      case (FunValue(f1), FunValue(f2)) => boolean(EqOps.equ(f1, f2))
-      case (TopValue, _) | (_, TopValue) => boolean(topBool)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-    def neq(v1: Value, v2: Value): Value = (v1, v2) match
-      case (NatValue(i1), NatValue(i2)) => boolean(EqOps.neq(i1, i2))
-      case (FunValue(f1), FunValue(f2)) => boolean(EqOps.neq(f1, f2))
-      case (TopValue, _) | (_, TopValue) => boolean(topBool)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+    new LiftedIntegerOps(_.asInt, Value.Int.apply)
+  given ValueEqOps(using Failure, EqOps[VInt, VBoolean]): EqOps[Value, Value] with
+    override def equ(v1: Value, v2: Value): Value = (v1, v2) match
+      case (Value.Int(i1), Value.Int(i2)) => boolean(EqOps.equ(i1, i2))
+      case _ => Failure(TypeError, s"Cannot compare $v1 and $v2")
+    override def neq(v1: Value, v2: Value): Value = (v1, v2) match
+      case (Value.Int(i1), Value.Int(i2)) => boolean(EqOps.neq(i1, i2))
+      case _ => Failure(TypeError, s"Cannot compare $v1 and $v2")
+  given ValueOrderingOps(using Failure, OrderingOps[VInt, VBoolean]): OrderingOps[Value, Value] =
+    new LiftedOrderingOps(_.asInt, boolean)
+  given ValueBranchOps(using Failure, BooleanBranching[VBoolean, Value]): BooleanBranching[Value, Value] =
+    new LiftedBooleanBranching(asBoolean)
+  given ValueClosureOps(using Failure, ClosureOps[String, Exp, Env, Value, VClosure]): ClosureOps[String, Exp, Env, Value, Value] =
+    new LiftedClosureOps(_.asClosure, Value.Closure.apply)
 
-//  given ValueFunctionOps(using Instance, FunctionOps[Function, Seq[Value], Value, VFun]): FunctionOps[Function, Seq[Value], Value, Value] =
-//    new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)
+  given ConcreteCyclicEnvironmentOps:  WithJoinConcreteCyclicEnvironment[String, Value]
+       = new WithJoinConcreteCyclicEnvironment[String, Value](Map.empty)
 
 
-  given ValueBranchingOps(using Failure, BooleanBranching[VBool, Unit]): BooleanBranching[Value, Unit] =
-    new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean)
-  given ValueBooleanSelection(using Failure, BooleanSelection[VBool, VBool]): BooleanSelection[Value, VBool] =
-    new LiftedBooleanSelection(_.asBoolean)
-
-  /**
-   * Instances instantiate the interpreter, which is needed because the semantics are stateful.
-   * Specifically, each evaluation of a program requires a new instances with a fresh frame, fresh store, etc.
-   */
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
+  abstract class GenericInstance extends GenericInterpreter[Value, Env, J]:
     given Instance = this.asInstanceOf[Instance]

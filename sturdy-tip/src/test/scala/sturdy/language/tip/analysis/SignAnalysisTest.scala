@@ -54,6 +54,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
+    println(s"The program is: $program")
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)

@@ -195,6 +195,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 //      println("This is the")
 //      store.write(addr, rec)
 //      refValue(addr)
+
     case Exp.FieldAccess(rec, field) =>
       val v = store.read(topAddr).getOrElse(failure(UnboundVariable, topAddr.toString))
       val recVal = evalBack(rec, v)
