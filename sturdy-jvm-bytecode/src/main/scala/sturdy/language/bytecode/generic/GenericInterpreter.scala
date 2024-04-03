@@ -84,6 +84,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   val nativeSource = org.opalj.bytecode.RTJar
   val objectCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
+  val classCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Class.class").head
   val stringCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
 
   var staticInitialized: Set[ObjectType] = Set()
@@ -124,7 +125,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadFloat =>
           stack.push(num.evalNumericOp(inst))
         case inst: LoadClass =>
-          ???
+          val obj = create_native_obj(inst.value.mostPreciseObjectType)
+          val mth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
+          invokeMethodOnObject(mth, List(), obj)
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
@@ -532,6 +535,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           receiver match
             case receiver: InvokeStaticMethodHandle =>
               if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
+                val mthTypeSource = nativeClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
+                val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
+                val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
+                stack.push(create_native_obj(inst.methodDescriptor.returnType.asObjectType))
+                stack.push(create_native_obj(inst.methodDescriptor.parameterType(0).asObjectType))
+                val mthTypeObj = invokeStatic(mthTypeMth.get)
+
                 val source = nativeClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
                 val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
@@ -747,21 +757,21 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     }
 
   def findMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor): Method =
-    if (project.isLibraryType(obj.cls.thisType)) {
+    if (obj.cls.thisType != ObjectType("java/lang/Object")) {
       val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
       obj.cls.findMethod(name, sig)
         .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
     }
     else {
-      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
-      obj.cls.findMethod(name, sig)
-        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
+      obj.cls.findMethod(name, sig).getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
     }
 
   def findInheritedMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
     if(inheritedObj == ObjectType("java/lang/Object")){
-      obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
-        .getOrElse(fail(MethodNotFound, s"Method $sig, $name not found"))
+      objectCF.findMethod(name, sig).getOrElse(
+          obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
+            .getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
+      )
     }
     else{
       if (project.isLibraryType(inheritedObj)) {
