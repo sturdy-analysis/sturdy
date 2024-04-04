@@ -222,6 +222,13 @@ object test extends App{
   val nullPointerTest = cfs.findMethod("nullPointerTest").head
   interp.invoke(nullPointerTest, true)
   println(interp.stack.pop())
+  val throwTest = cfs.findMethod("throwTest").head
+  interp.eval(BIPUSH(1))
+  interp.invoke(throwTest, true)
+  println(interp.stack.pop())
+  interp.eval(BIPUSH(0))
+  interp.invoke(throwTest, true)
+  println(interp.stack.pop())
 
   println("--- nullTest ---")
   val nullTest = cfs.findMethod("nullTest").head

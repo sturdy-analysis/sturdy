@@ -26,9 +26,10 @@ import scala.collection.View
 import scala.collection.immutable.ArraySeq
 
 
-enum JvmExcept:
+enum JvmExcept[V]:
   case Jump(pc: Int)
   case Throw(exception: ObjectType)
+  case ThrowObject(exception: V)
 
 enum AllocationSite:
   case classFile(cfs: ClassFile)
@@ -38,6 +39,7 @@ enum AllocationSite:
   case default
 
 trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] <: MayJoin[_]]:
+
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType]
   import bytecodeOps.*
@@ -49,7 +51,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   val stack: DecidableOperandStack[V]
   val failure: Failure
-  val except: Except[JvmExcept, JvmExcept, J]
+  val except: Except[JvmExcept[V], JvmExcept[V], J]
   val alloc: Allocation[Addr, AllocationSite]
   val objAlloc: Allocation[OID, AllocationSite]
   val arrayValAlloc: Allocation[Addr, AllocationSite]
@@ -108,7 +110,9 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadClass =>
           val obj = createNativeObj(inst.value.mostPreciseObjectType)
           val mth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-          stack.push(objectOps.invokeFunction(obj, mth, List())(invokeMethodOnObject).get)
+          val test = createNativeObj(ObjectType("java/lang/Class"))
+          stack.push(test)
+          //stack.push(objectOps.invokeFunction(obj, mth, List())(invokeMethodOnObject).get)
 
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
@@ -574,7 +578,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     // athrow
     case x if (x == 191) =>
-      ???
+      inst match
+        case inst: ATHROW.type =>
+          val thrown = stack.popOrAbort()
+          except.throws(JvmExcept.ThrowObject(thrown))
+
 
     // checkcast
     case x if (x == 192) =>
@@ -759,14 +767,25 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     val startingPC = mth.body.get.iterator.next().pc
 
     var currInst = instructionMap.get(startingPC)
-
-    stack.withNewFrame(0) {
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        runBlock(0, instructionMap, mth)
-      }
+    
+    //THIS IS SUPER TEMPORARY
+    if(mth.name == "desiredAssertionStatus"){
+      JOptionC.some(i32ops.integerLit(1))
     }
-    val ret = stack.pop()
-    ret
+    else if(mth.name == "fillInStackTrace"){
+      JOptionC.some(objVal)
+    }
+    else{
+      stack.withNewFrame(0) {
+        frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+          runBlock(0, instructionMap, mth)
+        }
+      }
+      val ret = stack.pop()
+      ret
+    }
+
+
 
   def invoke(mth: Method, isStatic: Boolean) =
     val newFrameData = 0
@@ -853,6 +872,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
         val exceptionObject = createNativeObj(exception)
         stack.push(exceptionObject)
+        runBlock(handler.handlerPC, instructionMap, mth)
+      case JvmExcept.ThrowObject(exception) =>
+        val currPC = frame.data
+        val handler = mth.body.get.exceptionHandlersFor(currPC)
+          .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
+          .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
+        stack.push(exception)
         runBlock(handler.handlerPC, instructionMap, mth)
     }
 

@@ -41,7 +41,7 @@ trait Interpreter:
   type AType
   type ArrayRep
 
-  val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
+  val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
   enum Value:
     case TopValue
     //case Int8(b: I8)

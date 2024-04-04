@@ -79,7 +79,7 @@ object ConcreteInterpreter extends Interpreter:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
-    val except: Except[JvmExcept, JvmExcept, MayJoin.NoJoin] = new ConcreteExcept
+    val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
     val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val arrayAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
