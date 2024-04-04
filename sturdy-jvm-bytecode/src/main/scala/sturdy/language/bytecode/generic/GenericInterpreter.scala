@@ -22,28 +22,9 @@ import sturdy.values.relational.EqOps
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
+import scala.collection.View
 import scala.collection.immutable.ArraySeq
 
-
-/*
-
-1. alles was einfach ist
-2. invoke static: how to manage operand stack
-3. read up on exceptions in Sturdy
-4. how do jumps/branching work on the JVM
-
-  i1
-  i2
-l0:
-  i3
-  jump l3
-  i5
-l3:
-  jump l0
-
-val jumpTargets: Map[String, InstructionIndex]
-
- */
 
 enum JvmExcept:
   case Jump(pc: Int)
@@ -125,14 +106,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadFloat =>
           stack.push(num.evalNumericOp(inst))
         case inst: LoadClass =>
-          val obj = create_native_obj(inst.value.mostPreciseObjectType)
+          val obj = createNativeObj(inst.value.mostPreciseObjectType)
           val mth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-          invokeMethodOnObject(mth, List(), obj)
+          stack.push(objectOps.invokeFunction(obj, mth, List())(invokeMethodOnObject).get)
+
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
           val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
-          val stringObj = create_native_obj(ObjectType("java/lang/String"))
+          val stringObj = createNativeObj(ObjectType("java/lang/String"))
           objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
 
@@ -163,25 +145,25 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     // load Local variable
     case x if (21 <= x && x <= 45) =>
-      stack.push(eval_local_load(inst))
+      stack.push(evalLocalLoad(inst))
 
     //load from array
     case x if (46 <= x && x <= 53) =>
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      stack.push(eval_array_load(inst, array, idx, pc))
+      stack.push(evalArrayLoad(inst, array, idx, pc))
 
     // store local variable
     case x if (54 <= x && x <= 78) =>
       val v1 = stack.popOrAbort()
-      eval_local_store(inst, v1)
+      evalLocalStore(inst, v1)
 
     // store in array
     case x if (79 <= x && x <= 86) =>
       val v = stack.popOrAbort()
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      eval_array_store(inst, array, idx, v, pc)
+      evalArrayStore(inst, array, idx, v, pc)
 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
@@ -218,7 +200,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           val bot = stack.popOrAbort()
           stack.push(top)
           stack.push(bot)
-      
+
     // Arithmetic Ops
     case x if (96 <= x && x <= 115) =>
       val (v1, v2) = stack.pop2OrAbort()
@@ -414,7 +396,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
               staticInitialized += objCF
               val source = nativeClassFileWrapper(objCF)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              invokeStatic(cfs.staticInitializer.get)
+              invoke(cfs.staticInitializer.get, true)
             }
             else{
               staticInitialized += objCF
@@ -423,7 +405,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
                 process(new DataInputStream(new FileInputStream(source))) { in =>
                   org.opalj.br.reader.Java8Framework.ClassFile(in)
                 }
-              invokeStatic(cfs.head.staticInitializer.get)
+              invoke(cfs.head.staticInitializer.get, true)
             }
           }
 
@@ -437,7 +419,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
               staticInitialized += objCF
               val source = nativeClassFileWrapper(objCF)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              invokeStatic(cfs.staticInitializer.get)
+              invoke(cfs.staticInitializer.get, true)
             }
             else {
               staticInitialized += objCF
@@ -448,7 +430,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
                 process(new DataInputStream(new FileInputStream(source))) { in =>
                   org.opalj.br.reader.Java8Framework.ClassFile(in)
                 }
-              invokeStatic(cfs.head.staticInitializer.get)
+              invoke(cfs.head.staticInitializer.get, true)
             }
           }
           val v = stack.popOrAbort()
@@ -477,11 +459,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
             val source = nativeClassFileWrapper(inst.declaringClass)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeStatic(mth)
+            invoke(mth, true)
           }
           else{
             val mth = project.classFile(inst.declaringClass).get.findMethod(inst.name, inst.methodDescriptor).get
-            invokeStatic(mth)
+            invoke(mth, true)
           }
 
         case inst: INVOKEVIRTUAL =>
@@ -492,7 +474,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
             val obj = stack.popOrAbort()
             stack.push(obj)
             val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
             if (!mth.descriptor.returnType.isVoidType){
               stack.push(ret.get)
             }
@@ -503,7 +485,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
             val obj = stack.popOrAbort()
             stack.push(obj)
             val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObjectInline)
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
             if (!mth.descriptor.returnType.isVoidType) {
               stack.push(ret.get)
             }
@@ -514,18 +496,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
             val source = nativeClassFileWrapper(objectType)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethodOnObject(mth)
+            invoke(mth, false)
           else
             val cfs = project.classFile(objectType).get
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invokeMethodOnObject(mth)
+            invoke(mth, false)
 
         case inst: INVOKEINTERFACE =>
           val numArgs = inst.methodDescriptor.parametersCount
           val args = stack.popNOrAbort(numArgs)
           val obj = stack.popOrAbort()
           val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-          invokeMethodOnObject(mth, args, obj)
+          stack.push(obj)
+          stack.pushN(args)
+          invoke(mth, false)
 
         case inst: INVOKEDYNAMIC =>
           val test = inst.bootstrapMethod
@@ -538,14 +522,14 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
                 val mthTypeSource = nativeClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
                 val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
                 val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
-                stack.push(create_native_obj(inst.methodDescriptor.returnType.asObjectType))
-                stack.push(create_native_obj(inst.methodDescriptor.parameterType(0).asObjectType))
-                val mthTypeObj = invokeStatic(mthTypeMth.get)
+                stack.push(createNativeObj(inst.methodDescriptor.returnType.asObjectType))
+                stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asObjectType))
+                val mthTypeObj = invoke(mthTypeMth.get, true)
 
                 val source = nativeClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
                 val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
-                invokeStatic(mth)
+                invoke(mth, true)
 
               }
               else{
@@ -558,7 +542,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         case inst: NEW =>
           if (project.isLibraryType(inst.objectType)){
-            val obj = create_native_obj(inst.objectType)
+            val obj = createNativeObj(inst.objectType)
             stack.push(obj)
           }
           else{
@@ -634,44 +618,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         case inst: MULTIANEWARRAY =>
           val dims = stack.popNOrAbort(inst.dimensions)
-
           stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse))
-          /*
-          if (inst.dimensions == 2){
-            val testSeq = arrayOps.initArray(dims(0)).map(_ => createArray(dims(1), inst.arrayType.elementType))
-            val testSeq2 = testSeq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), testSeq2)
-            stack.push(array)
-          }
-
-          if (inst.dimensions == 3){
-            val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => createArray(dims(2), inst.arrayType.elementType)))
-            val test2Seq = testSeq.map(arrays =>
-              val test3Seq = arrays.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-              arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test3Seq)
-            )
-
-            val test2Seq2 = test2Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-
-            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test2Seq2)
-            stack.push(array)
-          }
-
-          if (inst.dimensions == 4){
-            val testSeq = arrayOps.initArray(dims(0)).map(_ => arrayOps.initArray(dims(1)).map(_ => arrayOps.initArray(dims(2)).map(_ => createArray(dims(3), inst.arrayType.elementType))))
-            val test2Seq = testSeq.map(arrays =>
-              val test3Seq = arrays.map(arrays2 =>
-                val test4Seq = arrays2.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-                arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test4Seq)
-                )
-              val test3Seq2 = test3Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-              arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test3Seq2)
-              )
-            val test2Seq2 = test2Seq.zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-            val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), test2Seq2)
-            stack.push(array)
-          }*/
-
 
     // ifnull, ifnonnull
     case x if (198 <= x && x <= 199) =>
@@ -707,32 +654,27 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case x if (x == 202) =>
       ???
 
-  def create_native_obj(toLoad: ObjectType): V =
+  def createNativeObj(toLoad: ObjectType): V =
     val source = nativeClassFileWrapper(toLoad)
     val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
     val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
     obj
-  def eval_local_load(inst: Instruction): V = inst match
+  def evalLocalLoad(inst: Instruction): V = inst match
     case inst: LoadLocalVariableInstruction =>
       frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-  def eval_local_store(inst: Instruction, v: V): Unit = inst match
+  def evalLocalStore(inst: Instruction, v: V): Unit = inst match
     case inst: StoreLocalVariableInstruction =>
       frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-  def eval_array_load(inst: Instruction, array: V, idx: V, pc: Int): V = inst match
+  def evalArrayLoad(inst: Instruction, array: V, idx: V, pc: Int): V = inst match
     case inst: ArrayLoadInstruction =>
-      //val idx = stack.popOrAbort()
-      //val array = stack.popOrAbort()
       arrayOps.getVal(array, idx).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
-  def eval_array_store(inst: Instruction, array: V, idx: V, v: V, pc: Int): Unit = inst match
+  def evalArrayStore(inst: Instruction, array: V, idx: V, v: V, pc: Int): Unit = inst match
     case inst: ArrayStoreInstruction =>
-      //val toBeStored = stack.popOrAbort()
-      //val idx = stack.popOrAbort()
-      //val array = stack.popOrAbort()
       arrayOps.setVal(array, idx, v).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
   def createArray(size: V, compType: ArrayType): V =
@@ -794,7 +736,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   def checkTypeArray(array: Array[AID, Addr, ArrayType], check: ArrayType): Boolean =
     array.arrayType == check
-  def invokeMethodOnObjectInline(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
+
+  def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
@@ -825,7 +768,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     val ret = stack.pop()
     ret
 
-  def invokeMethodOnObject(mth: Method) =
+  def invoke(mth: Method, isStatic: Boolean) =
     val newFrameData = 0
 
     var locals: ArraySeq[ValType] = ArraySeq()
@@ -834,85 +777,37 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       locals = localstemp
     }
     else {
-      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
-      locals = localstemp
+      if(isStatic){
+        val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+        locals = localstemp
+      }
+      else{
+        val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
+        locals = localstemp
+      }
     }
 
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
+    var argsAndLocals: View[V] = View()
     val numArgs = mth.descriptor.parametersCount
-    val args = stack.popNOrAbort(numArgs)
-    val obj = stack.popOrAbort()
-    val thisAndArgs = List(obj) ++ args
-    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
 
-    val startingPC = mth.body.get.iterator.next().pc
-
-    var currInst = instructionMap.get(startingPC)
-
-    stack.withNewFrame(0) {
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        runBlock(0, instructionMap, mth)
-      }
-    }
-
-  def invokeMethodOnObject(mth: Method, args: List[V], obj: V) =
-    val newFrameData = 0
-
-    var locals: ArraySeq[ValType] = ArraySeq()
-    if (!mth.body.get.localVariableTable.isEmpty) {
-      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-      locals = localstemp
+    if(isStatic){
+      val args = stack.popNOrAbort(numArgs)
+      argsAndLocals = args.view ++ locals.map(defaultValue)
     }
     else{
-      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
-      locals = localstemp
+      val args = stack.popNOrAbort(numArgs)
+      val obj = stack.popOrAbort()
+      val thisAndArgs = List(obj) ++ args
+      argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
     }
 
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-    //val numArgs = mth.descriptor.parametersCount
-    //val args = stack.popNOrAbort(numArgs)
-    //val obj = stack.popOrAbort()
-    val thisAndArgs = List(obj) ++ args
-    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
-
     val startingPC = mth.body.get.iterator.next().pc
-
     var currInst = instructionMap.get(startingPC)
 
     stack.withNewFrame(0) {
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        runBlock(0, instructionMap, mth)
-      }
-    }
-
-
-  def invokeStatic(mth: Method) =
-    val newFrameData = 0
-
-    var locals: ArraySeq[ValType] = ArraySeq()
-    if (!mth.body.get.localVariableTable.isEmpty) {
-      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-      locals = localstemp
-    }
-    else {
-      val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
-      locals = localstemp
-    }
-
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-    val numArgs = mth.descriptor.parametersCount
-    val args = stack.popNOrAbort(numArgs)
-    val argsAndLocals = args.view ++ locals.map(defaultValue)
-
-    val startingPC = mth.body.get.iterator.next().pc
-
-    var currInst = instructionMap.get(startingPC)
-
-    stack.withNewFrame(0){
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)){
         runBlock(0, instructionMap, mth)
       }
     }
@@ -956,7 +851,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
-        val exceptionObject = create_native_obj(exception)
+        val exceptionObject = createNativeObj(exception)
         stack.push(exceptionObject)
         runBlock(handler.handlerPC, instructionMap, mth)
     }
