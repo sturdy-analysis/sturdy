@@ -84,6 +84,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[Addr, Idx, V, ReferenceType](bytecodeOps)
+  lazy val native = new JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, AllocationSite, J](bytecodeOps)(objectOps)(arrayOps)
 
   def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
@@ -137,7 +138,12 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadClass_W =>
           ???
         case inst: LoadString_W =>
-          ???
+          val string = inst.value.toCharArray.map(l => l.toInt).toSeq
+          val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
+          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
+          val stringObj = createNativeObj(ObjectType("java/lang/String"))
+          objectOps.setField(stringObj, "value", stringArray)
+          stack.push(stringObj)
         case inst: LoadMethodHandle_W =>
           ???
         case inst: LoadMethodType_W =>
@@ -172,10 +178,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
       inst match
+        //Somehow values go missing
         case inst: POP.type =>
-          stack.popOrAbort()
+          ()
         case inst: POP2.type =>
-          stack.pop2OrAbort()
+          ???
         case inst: DUP.type =>
           val dup = stack.popOrAbort()
           stack.push(dup)
@@ -747,35 +754,31 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = 0
-
-    var locals: ArraySeq[ValType] = ArraySeq()
-    if (!mth.body.get.localVariableTable.isEmpty) {
-      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-      locals = localstemp
-    }
-    else {
-      val localstemp = ArraySeq.fill(mth.body.get.maxLocals-1)(0).map(_ => ValType.I32)
-      locals = localstemp
-    }
-
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
     val objVal = stack.popOrAbort()
-    val thisAndArgs = List(objVal) ++ args
-    val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
 
-    val startingPC = mth.body.get.iterator.next().pc
-
-    var currInst = instructionMap.get(startingPC)
-    
-    //THIS IS SUPER TEMPORARY
-    if(mth.name == "desiredAssertionStatus"){
-      JOptionC.some(i32ops.integerLit(1))
-    }
-    else if(mth.name == "fillInStackTrace"){
-      JOptionC.some(objVal)
+    if (native.nativeFunList.contains(mth.name)) {
+      native.evalNative(objVal, mth, args)
     }
     else{
+      var locals: ArraySeq[ValType] = ArraySeq()
+      if (!mth.body.get.localVariableTable.isEmpty) {
+        val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+        locals = localstemp
+      }
+      else {
+        val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
+        locals = localstemp
+      }
+
+      val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+      val thisAndArgs = List(objVal) ++ args
+      val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
+
+      val startingPC = mth.body.get.iterator.next().pc
+
+      var currInst = instructionMap.get(startingPC)
+
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
           runBlock(0, instructionMap, mth)
@@ -787,49 +790,68 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
 
 
+
+
   def invoke(mth: Method, isStatic: Boolean) =
     val newFrameData = 0
-
-    var locals: ArraySeq[ValType] = ArraySeq()
-    if (!mth.body.get.localVariableTable.isEmpty) {
-      val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-      locals = localstemp
-    }
-    else {
-      if(isStatic){
-        val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
-        locals = localstemp
-      }
-      else{
-        val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
-        locals = localstemp
-      }
-    }
-
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-    var argsAndLocals: View[V] = View()
     val numArgs = mth.descriptor.parametersCount
+    val args = stack.popNOrAbort(numArgs)
 
-    if(isStatic){
-      val args = stack.popNOrAbort(numArgs)
-      argsAndLocals = args.view ++ locals.map(defaultValue)
+    if (native.nativeFunList.contains(mth.name) && !isStatic) {
+      val obj = stack.popOrAbort()
+      val ret = native.evalNative(obj, mth, args)
+      if (!mth.descriptor.returnType.isVoidType) {
+        stack.push(ret.get)
+      }
+    }
+    else if (native.nativeFunList.contains(mth.name) && isStatic) {
+      val ret = native.evalNativeStatic(mth, args)
+      if (!mth.descriptor.returnType.isVoidType) {
+        stack.push(ret.get)
+      }
     }
     else{
-      val args = stack.popNOrAbort(numArgs)
-      val obj = stack.popOrAbort()
-      val thisAndArgs = List(obj) ++ args
-      argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
-    }
+      var locals: ArraySeq[ValType] = ArraySeq()
+      if (!mth.body.get.localVariableTable.isEmpty) {
+        val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+        locals = localstemp
+      }
+      else {
+        if (isStatic) {
+          val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+          locals = localstemp
+        }
+        else {
+          val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
+          locals = localstemp
+        }
+      }
 
-    val startingPC = mth.body.get.iterator.next().pc
-    var currInst = instructionMap.get(startingPC)
+      val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
-    stack.withNewFrame(0) {
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        runBlock(0, instructionMap, mth)
+      var argsAndLocals: View[V] = View()
+
+      if (isStatic) {
+        argsAndLocals = args.view ++ locals.map(defaultValue)
+      }
+      else {
+        val obj = stack.popOrAbort()
+        val thisAndArgs = List(obj) ++ args
+        argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
+      }
+
+      val startingPC = mth.body.get.iterator.next().pc
+      var currInst = instructionMap.get(startingPC)
+
+      stack.withNewFrame(0) {
+        frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+          runBlock(0, instructionMap, mth)
+        }
       }
     }
+
+
+
 
   def initStaticVars(mth: Method) =
     val newFrameData = 0

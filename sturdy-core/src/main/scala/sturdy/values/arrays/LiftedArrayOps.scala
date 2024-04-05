@@ -10,6 +10,8 @@ class LiftedArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_], 
   override def setVal(array: AV, idx: Idx, v: V): JOption[J, Unit] = ops.setVal(extractA(array), extractIdx(idx), v)
   override def arrayLength(array: AV): Int = ops.arrayLength(extractA(array))
   override def initArray(size: Idx): Seq[Any] = ops.initArray(extractIdx(size))
+  override def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit] =
+    ops.arraycopy(extractA(src), extractIdx(srcPos), extractA(dest), extractIdx(destPos), extractIdx(length))
 
 
 

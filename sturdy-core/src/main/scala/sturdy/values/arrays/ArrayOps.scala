@@ -1,6 +1,7 @@
 package sturdy.values.arrays
 
 import sturdy.data.MayJoin.NoJoin
+import sturdy.data.noJoin
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
@@ -12,6 +13,7 @@ trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
   def setVal(array: AV, idx: Idx, v: V): JOption[J, Unit]
   def arrayLength(array: AV): Int
   def initArray(size: Idx): Seq[Any]
+  def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
 
 case class Array[AID, Addr, AType](aid: AID, vals: Vector[Addr], arrayType: AType)
 
@@ -40,6 +42,18 @@ given ConcreteArrayOps[Addr, AID, V, AType, Site]
     array.vals.size
   override def initArray(size: Int): Seq[Any] =
     Seq.fill(size){}
+
+  override def arraycopy(src: Array[AID, Addr, AType], srcPos: Int, dest: Array[AID, Addr, AType], destPos: Int, length: Int): JOption[MayJoin.NoJoin, Unit] =
+    for (i <- 0 until length){
+      if(srcPos+i >= src.vals.size || destPos+i >= dest.vals.size){
+        return JOptionC.none
+      }
+      else{
+        val toCopy = store.read(src.vals(srcPos + i)).get
+        store.write(dest.vals(destPos + i), toCopy)
+      }
+    }
+    JOptionC.some(())
 
 given ArrayEqOps[AID, Addr, AType]: EqOps[Array[AID, Addr, AType], Boolean] with
   override def equ(v1: Array[AID, Addr, AType], v2: Array[AID, Addr, AType]): Boolean = v1.aid == v2.aid
