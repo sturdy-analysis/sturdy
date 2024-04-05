@@ -180,7 +180,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         //Somehow values go missing
         case inst: POP.type =>
-          ()
+          stack.popOrAbort()
         case inst: POP2.type =>
           ???
         case inst: DUP.type =>
@@ -779,12 +779,14 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
       var currInst = instructionMap.get(startingPC)
 
+      val remainingOperands = stack.popNOrAbort(stack.size)
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
           runBlock(0, instructionMap, mth)
         }
       }
       val ret = stack.pop()
+      stack.pushN(remainingOperands)
       ret
     }
 
@@ -843,11 +845,21 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       val startingPC = mth.body.get.iterator.next().pc
       var currInst = instructionMap.get(startingPC)
 
+      val remainingOperands = stack.popNOrAbort(stack.size)
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
           runBlock(0, instructionMap, mth)
         }
       }
+      if(!mth.descriptor.returnType.isVoidType){
+        val ret = stack.popOrAbort()
+        stack.pushN(remainingOperands)
+        stack.push(ret)
+      }
+      else{
+        stack.pushN(remainingOperands)
+      }
+
     }
 
 
