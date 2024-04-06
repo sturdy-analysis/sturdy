@@ -36,11 +36,4 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
 
       MaybeChanged(ArraySeq.from(joinedStates), changed)
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {
-    val joiners: Seq[ComputationJoiner[A]] = effects.flatMap(_.makeComputationJoiner[A])
-    override def inbetween(): Unit = joiners.foreach(_.inbetween())
-    override def retainNone(): Unit = joiners.foreach(_.retainNone())
-    override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
-    override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
-  })
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](effects))

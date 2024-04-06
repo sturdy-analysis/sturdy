@@ -1,7 +1,7 @@
 package sturdy.values.references
 
 import sturdy.data.given
-import sturdy.effect.{ComputationJoiner, Effect, TrySturdy}
+import sturdy.effect.{ComputationJoiner, Effect, EffectListJoiner, TrySturdy}
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
@@ -384,6 +384,8 @@ case class AddressClosure[Context](addrTrans: AddressTranslation[Context], effec
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping
       }
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](List(addrTrans, effect)))
 
 final class AddressClosureState[Context,EffectState](val addrTrans: AddressTranslation[Context], val addrTransState: addrTrans.State, val effectState: EffectState):
   override def equals(obj: Any): Boolean =

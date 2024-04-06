@@ -1,5 +1,6 @@
 package sturdy.effect.failure
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.RecurrentCall
 import sturdy.effect.failure.AFallible.{Diverging, MaybeFailing}
 import sturdy.values.Abstractly
@@ -50,3 +51,14 @@ given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
     case (AFallible.Failing(fails1), AFallible.MaybeFailing(t2, fails2)) => fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case (AFallible.MaybeFailing(t1, fails1), AFallible.MaybeFailing(t2, fails2)) => po.lteq(t1, t2) && fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case _ => false
+
+given soundnessAFallible[C,A](using Soundness[C,A]): Soundness[CFallible[C], AFallible[A]] = {
+  case (CFallible.Failing(kind,msg), AFallible.Failing(failures)) =>
+    IsSound(failures.set.contains((kind,msg)), s"Abstract failures $failures do not contain concrete failure ${(kind,msg)}")
+  case (CFallible.Failing(kind,msg), AFallible.MaybeFailing(_,failures)) =>
+    IsSound(failures.set.contains((kind,msg)), s"Abstract failures $failures do not contain concrete failure ${(kind,msg)}")
+  case (CFallible.Unfailing(c), AFallible.Unfailing(a)) => Soundness.isSound(c,a)
+  case (CFallible.Unfailing(c), AFallible.MaybeFailing(a,_)) => Soundness.isSound(c,a)
+  case (cfallible,afallible) =>
+    IsSound.NotSound(s"Abstract Fallible $afallible does not overapproximate concrete fallible $cfallible")
+}

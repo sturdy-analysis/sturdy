@@ -28,6 +28,14 @@ trait ComputationJoiner[A]:
         snd.retainBoth(fRes, gRes)
     }
 
+final class EffectListJoiner[A](effects: Seq[Effect]) extends ComputationJoiner[A]:
+    val joiners: Seq[ComputationJoiner[A]] = effects.flatMap(_.makeComputationJoiner[A])
+    override def inbetween(): Unit = joiners.foreach(_.inbetween())
+    override def retainNone(): Unit = joiners.foreach(_.retainNone())
+    override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
+    override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
+
 //
 //abstract class ComputationJoinerWithSuper[A](sup: ComputationJoiner[A]) extends ComputationJoiner[A]:
 //  def inbetween(): Unit
