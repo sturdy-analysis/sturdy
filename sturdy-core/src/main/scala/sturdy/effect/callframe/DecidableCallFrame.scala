@@ -30,6 +30,8 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
   }
   setVars(initVars)
 
+  def getVars: Array[V] = vars.clone()
+
   def data: Data = _data
   def getFrameNames: Map[Var, Int] = names
 

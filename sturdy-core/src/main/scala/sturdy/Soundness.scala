@@ -25,6 +25,13 @@ enum IsSound:
     case Sound => "Sound"
     case NotSound(msg, ex) => s"NotSound($msg) in\n${ex.getStackTrace.mkString("\n")}"
 
+object IsSound:
+  def apply(isSound: Boolean, unsoundMsg: String): IsSound =
+    if(isSound)
+      IsSound.Sound
+    else
+      IsSound.NotSound(unsoundMsg)
+
 trait Soundness[-C, -A]:
   def isSound(c: C, a: A): IsSound
 

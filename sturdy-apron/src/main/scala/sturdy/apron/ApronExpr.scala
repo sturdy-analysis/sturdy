@@ -233,7 +233,8 @@ object ApronCons:
   }
   def from[Addr, Type](tb: Topped[Boolean])(using integerOps: IntegerOps[Int, Type]): ApronCons[Addr, Type] = tb match
     case Topped.Top => top
-    case Topped.Actual(b) => Constant(b, integerOps.integerLit(if (b) 0 else 1))
+    case Topped.Actual(b) => from(b)
+  def from[Addr, Type](b: Boolean)(using integerOps: IntegerOps[Int, Type]): ApronCons[Addr, Type] = Constant(b, integerOps.integerLit(if (b) 0 else 1))
 
 
 enum CompareOp:

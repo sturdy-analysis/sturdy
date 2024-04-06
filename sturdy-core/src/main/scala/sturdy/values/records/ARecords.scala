@@ -1,5 +1,6 @@
 package sturdy.values.records
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.util.*
@@ -85,3 +86,16 @@ given ARecordEqOps[F, V, B](using Lazy[EqOps[V, B]], BooleanSelection[B, Topped[
       Topped.Actual(true)
 
   override def neq(v1: ARecord[F, V], v2: ARecord[F, V]): Topped[Boolean] = equ(v1, v2).map(!_)
+
+given soundnessARecord[F, CV, V](using Soundness[CV, V]): Soundness[Map[F,CV], ARecord[F, V]] = {
+  case (_, ARecord.Top()) => IsSound.Sound
+  case (cRec, ARecord.Map(aRec)) =>
+    if(cRec.keySet == aRec.keySet)
+      var soundness = IsSound.Sound
+      for((field, cval) <- cRec)
+        if(Soundness.isSound(cval, aRec(field)).isNotSound)
+          soundness = IsSound.NotSound(s"Abstract value ${aRec(field)} of field $field in abstract record $aRec does not overapproximate value $cval of field $field in concrete record $cRec")
+      soundness
+    else
+      IsSound.NotSound(s"abstract record $aRec does not have the same fields as concrete record $cRec")
+}

@@ -65,12 +65,12 @@ object RelationalAnalysis extends Interpreter,
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
 
-  override type VInt = ApronExpr[RelAddr, RelType]
-  override type VBool = ApronCons[RelAddr, RelType]
+  override final type VInt = ApronExpr[RelAddr, RelType]
+  override final type VBool = ApronCons[RelAddr, RelType]
+  override final type VRef = AbstractReference[Addr]
 
   final type Addr = PowVirtualAddress[RelationalVar]
   final type PAddr = PowersetAddr[PhysicalAddress[RelationalVar],PhysicalAddress[RelationalVar]]
-  final type VRef = AbstractReference[Addr]
   final type Environment = Map[String, Value]
   final type InitStore = Map[RelAddr, Value]
 

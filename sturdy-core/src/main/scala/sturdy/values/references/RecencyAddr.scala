@@ -1,7 +1,7 @@
 package sturdy.values.references
 
 import sturdy.data.given
-import sturdy.effect.Effect
+import sturdy.effect.{ComputationJoiner, Effect, TrySturdy}
 import sturdy.values.*
 import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 
@@ -99,13 +99,42 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     mapping
 
   override def setState(st: State): Unit =
-    mapping = st
+    for((ctx, regionState) <- st) {
+      mapping.get(ctx) match
+        case None =>
+          mapping += (ctx) -> regionState
+        case Some(regionCurrent) =>
+          mapping += (ctx) -> Join(regionCurrent, regionState).get
+    }
 
   override def mapState(st: State, f: [A] => A => A): State = st
 
   given finiteVirt: Finite[Context] with {}
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
+    val snapshotMapping = mapping
+    private var afterFirst: State = _
+
+    override def inbetween(): Unit =
+      afterFirst = mapping
+      mapping = snapshotMapping
+
+    override def retainNone(): Unit =
+      mapping = snapshotMapping
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      mapping = afterFirst
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      () // do nothing
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      val afterSecond = mapping
+      val joined = join(afterFirst, afterSecond)
+      mapping = joined.get
+  )
 
   def virtualAddresses: PowVirtualAddress[Context] =
     PowVirtualAddress(mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)
@@ -137,10 +166,6 @@ object AddressTranslation:
   def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
 
 case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTranslation[Context]) extends AbstractAddr[VirtualAddress[Context]]:
-  val myAddress: Boolean = ctx.toString == "Local(s)" && n == 8
-  if(myAddress) {
-    println("check")
-  }
   def physical: PowPhysicalAddress[Context] =
     addressTrans(ctx, n)
   def recency: PowRecency =
@@ -353,9 +378,8 @@ case class AddressClosure[Context](addrTrans: AddressTranslation[Context], effec
         addrTrans.mapping = v1.addrTransState
         addrTrans.otherMapping = Some(v2.addrTransState)
         val j1 = combineState(v1.effectState, v2.effectState)
-        val j2 = combineAddrTrans(v1.addrTransState, v2.addrTransState)
-        val j3 = combineAddrTrans(j2.get, addrTrans.getState)
-        MaybeChanged(AddressClosureState(addrTrans, j3.get, j1.get), j1.hasChanged || j2.hasChanged || j3.hasChanged)
+        val j2 = combineAddrTrans(addrTrans.getState, v2.addrTransState)
+        MaybeChanged(AddressClosureState(addrTrans, j2.get, j1.get), j1.hasChanged || j2.hasChanged)
       } finally {
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping

@@ -1,9 +1,10 @@
 package sturdy.values.references
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.ordering.EqOps
-import sturdy.values.{Combine, Finite, MaybeChanged, PartialOrder, Structural, Topped, Widen, Widening}
+import sturdy.values.{Abstractly, Combine, Finite, MaybeChanged, PartialOrder, Structural, Topped, Widen, Widening}
 
 enum AbstractReference[+Addr]:
   case Null
@@ -58,6 +59,30 @@ given combineAbstractReference[Addr, W <: Widening](using Combine[Addr, W]): Com
       case (NullAddr(a1, m1), Null) => MaybeChanged.Unchanged(NullAddr(a1, m1))
       case (NullAddr(a1, m1), Addr(a2, m2)) => combine(a1, m1, a2, m2).map(NullAddr.apply)
       case (NullAddr(a1, m1), NullAddr(a2, m2)) => combine(a1, m1, a2, m2).map(NullAddr.apply)
+
+given soundnessAbstractReference[CAddr, Addr](using Soundness[CAddr, Addr]): Soundness[Reference[CAddr], AbstractReference[Addr]] with
+  override def isSound(cRef: Reference[CAddr], aRef: AbstractReference[Addr]): IsSound =
+    (cRef, aRef) match
+      case (Reference.Null, AbstractReference.NullAddr(_,_)) => IsSound.Sound
+      case (Reference.Null, AbstractReference.Null) => IsSound.Sound
+      case (Reference.Addr(cAddr, cManaged), AbstractReference.NullAddr(aAddr,aManaged)) =>
+        if(! isSoundManaged(cManaged, aManaged))
+          IsSound.NotSound(s"abstract managed $aManaged does not overapproximate concrete managed $cManaged")
+        else
+          Soundness.isSound(cAddr, aAddr)
+      case (Reference.Addr(cAddr, cManaged), AbstractReference.Addr(aAddr, aManaged)) =>
+        if (! isSoundManaged(cManaged, aManaged))
+          IsSound.NotSound(s"abstract managed $aManaged does not overapproximate concrete managed $cManaged")
+        else
+          Soundness.isSound(cAddr, aAddr)
+      case (_,_) =>
+        IsSound.NotSound(s"abstract reference $aRef does not overapproximate concrete reference $cRef")
+
+  private def isSoundManaged(cManaged: Boolean, aManaged: Boolean): Boolean =
+    (cManaged, aManaged) match
+      case (_, false) => true
+      case (true, true) => true
+      case (false, true) => false
 
 given abstractReferenceEqOps[Addr](using eqA: EqOps[Addr, Topped[Boolean]]) : EqOps[AbstractReference[Addr], Topped[Boolean]] with
   override def equ(v1: AbstractReference[Addr], v2: AbstractReference[Addr]): Topped[Boolean] = (v1, v2) match

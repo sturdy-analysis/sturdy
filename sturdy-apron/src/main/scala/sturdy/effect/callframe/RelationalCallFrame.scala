@@ -1,6 +1,7 @@
 package sturdy.effect.callframe
 
 import apron.*
+import sturdy.{IsSound, Soundness, seqIsSound}
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
@@ -11,7 +12,7 @@ import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
-import scala.collection.immutable.HashMap
+import scala.collection.immutable.{ArraySeq, HashMap}
 
 trait RelationalCallFrame
   [
@@ -64,6 +65,14 @@ trait RelationalCallFrame
 
   setVars(initVars)
 
+  def getVars: ArraySeq[Val] =
+    ArraySeq.from(addressCallFrame.getVars).map {
+      virt =>
+        getByVirt(virt).getOrElse(
+          throw new IllegalStateException(s"Virtual Address $virt not bound in call frame ${this.getState}")
+        )
+    }
+
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
     addressCallFrame.getLocal(idx).map(virt =>
       apronState.recencyStore.write(PowVirtualAddress(virt), v)
@@ -75,31 +84,17 @@ trait RelationalCallFrame
       case Some(idx) => setLocal(idx, v)
 
   override def getLocal(x: Int): JOptionC[Val] =
-    addressCallFrame.getLocal(x) match
-      case JOptionC.Some(virt) =>
-        val v1 = for{
-          tpe <- apronState.relationalStore.getType(virt.physical)
-        } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
-
-        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
-
-        Join(v1,v2).get.toJOptionC
-
-      case JOptionC.None() => JOptionC.none
+    addressCallFrame.getLocal(x).flatMap(getByVirt).asInstanceOf
 
   override def getLocalByName(x: Var): JOptionC[Val] =
-    addressCallFrame.getLocalByName(x) match
-      case JOptionC.Some(virt) =>
+    addressCallFrame.getLocalByName(x).flatMap(getByVirt).asInstanceOf
 
-        val v1 = for {
-          tpe <- apronState.relationalStore.getType(virt.physical)
-        } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
-
-        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
-
-        Join(v1,v2).get.toJOptionC
-
-      case JOptionC.None() => JOptionC.none
+  private def getByVirt(virt: VirtAddr): JOptionC[Val] =
+    val v1 = for {
+      tpe <- apronState.relationalStore.getType(virt.physical)
+    } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
+    val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
+    Join(v1, v2).get.toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
@@ -152,6 +147,16 @@ trait RelationalCallFrame
       )
       res
     }
+
+  def isSound[cData, cVal](c: ConcreteCallFrame[cData, Var, cVal, CallSite])(using vSoundness: Soundness[cVal, Val], dSoundness: Soundness[cData, Data]): IsSound =
+    val dataIsSound = dSoundness.isSound(c.data, data)
+    if (dataIsSound.isNotSound)
+      return dataIsSound
+    if (addressCallFrame.getFrameNames != c.getFrameNames)
+      return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$addressCallFrame.getFrameNames")
+    val cVals: Array[cVal] = c.getVars
+    val aVals: ArraySeq[Val] = getVars
+    seqIsSound.isSound(cVals, aVals)
 
 object RelationalCallFrame:
 
