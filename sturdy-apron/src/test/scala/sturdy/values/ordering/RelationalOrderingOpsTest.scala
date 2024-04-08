@@ -5,7 +5,7 @@ import sturdy.apron.{*, given}
 import sturdy.effect.{EffectList, EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.utils.TestContexts.{*, given}
 import sturdy.utils.TestTypes.{*, given}
@@ -21,7 +21,7 @@ class RelationalOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr,
     given apronManager: Manager = new apron.Polka(true)
     var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
     given effectStack: EffectStack = new EffectStack(
-      AddressClosure(apronState.recencyStore.addressTranslation, apronState.recencyStore)
+      RecencyClosure(apronState.recencyStore)
     )
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = apronState

@@ -107,46 +107,21 @@ trait RelationalCallFrame
       f
     }
 
-  case class ApronCallFrameState(recencyStoreState: apronState.recencyStore.State, addressCallFrameState: addressCallFrame.State)
 
-
-  override type State = ApronCallFrameState
+  override type State = addressCallFrame.State
 
   override def getState: State =
-    ApronCallFrameState(apronState.recencyStore.getState, addressCallFrame.getState)
+    addressCallFrame.getState
 
   override def setState(state: State): Unit =
-    apronState.recencyStore.setState(state.recencyStoreState)
-    addressCallFrame.setState(state.addressCallFrameState)
+    addressCallFrame.setState(state)
 
   override def mapState(state: State, f: [A] => A => A): State =
-    ApronCallFrameState(
-      apronState.recencyStore.mapState(state.recencyStoreState, f),
-      addressCallFrame.mapState(state.addressCallFrameState, f)
-    )
+    addressCallFrame.mapState(state, f)
 
-  override def join: Join[State] = combineApronCallFrameState(_, _, apronState.recencyStore.join)
-  override def widen: Widen[State] = combineApronCallFrameState(_, _, apronState.recencyStore.widen)
 
-  def combineApronCallFrameState[W <: Widening](v1: ApronCallFrameState, v2: ApronCallFrameState, combineRecencyStore: Combine[apronState.recencyStore.State, W]): MaybeChanged[ApronCallFrameState] =
-    if (v1.addressCallFrameState.length != v2.addressCallFrameState.length) {
-      throw new IllegalStateException(s"Cannot join call frames ${v1} and ${v2} of equal size")
-    } else {
-      val addrTrans = apronState.recencyStore.addressTranslation
-      var changed = false
-      val joinedAddressCallFrameState = v1.addressCallFrameState.zip(v2.addressCallFrameState).map((virt1, virt2) =>
-        val joinedVirt = Join(virt1, virt2)
-        changed ||= joinedVirt.hasChanged
-        joinedVirt.get
-      )
-      val joinedRecencyState = combineRecencyStore(v1.recencyStoreState, v2.recencyStoreState)
-
-      val res = MaybeChanged(
-        ApronCallFrameState(joinedRecencyState.get, joinedAddressCallFrameState),
-        changed || joinedRecencyState.hasChanged
-      )
-      res
-    }
+  override def join: Join[State] = implicitly[Join[State]]
+  override def widen: Widen[State] = implicitly[Widen[State]]
 
   def isSound[cData, cVal](c: ConcreteCallFrame[cData, Var, cVal, CallSite])(using vSoundness: Soundness[cVal, Val], dSoundness: Soundness[cData, Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.data, data)

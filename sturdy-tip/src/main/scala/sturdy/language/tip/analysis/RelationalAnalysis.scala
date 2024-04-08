@@ -15,7 +15,7 @@ import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
-import sturdy.effect.store.{AStoreThreaded, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix
 import sturdy.fix.{StackConfig, State, context}
@@ -165,10 +165,13 @@ object RelationalAnalysis extends Interpreter,
 
     override def newEffectStack(effects: => Effect, inEffects: PartialFunction[Any, Effect], outEffects: PartialFunction[Any, Effect]): EffectStack =
       new EffectStack(
-        AddressClosure(recencyStore.addressTranslation, removeStore(effects)),
-        (dom: Any) => AddressClosure(recencyStore.addressTranslation, removeStore(inEffects(dom))),
-        (dom: Any) => AddressClosure(recencyStore.addressTranslation, removeStore(outEffects(dom)))
+        newEffectClosure(removeStore(effects)),
+        (dom: Any) => newEffectClosure(removeStore(inEffects(dom))),
+        (dom: Any) => newEffectClosure(removeStore(outEffects(dom)))
       )
+
+    def newEffectClosure(effect: Effect): Effect =
+      RecencyClosure(recencyStore, effect)
 
     private def removeStore(effect: Effect): Effect =
       effect match

@@ -7,7 +7,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
 import sturdy.values.{Join, Widen}
 import sturdy.values.booleans.BooleanOps
-import sturdy.values.references.{AddressClosure, PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
+import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
 import sturdy.data.{*, given}
 
 import scala.reflect.ClassTag

@@ -14,10 +14,12 @@ class ApronJoinTest extends AnyFunSuite:
 
   val x = ApronVar("x")
   val y = ApronVar("y")
+  val z = ApronVar("z")
   val env = new Environment(Array[Var](), Array[Var]())
   val env_x = env.add(Array[Var](x), Array[Var]())
   val env_y = env.add(Array[Var](y), Array[Var]())
   val env_xy = env.add(Array[Var](x,y), Array[Var]())
+  val env_xz = env.add(Array[Var](x,z), Array[Var]())
   val manager: Manager = new Polka(false)
   val state1 = new Abstract1(manager, env)
   given failure: Failure = new CollectedFailures[FailureKind]
@@ -71,4 +73,19 @@ class ApronJoinTest extends AnyFunSuite:
     joined.hasChanged shouldBe true
     joined.get.getBound(manager, x) shouldBe Interval(10, 20)
     joined.get.getBound(manager, y) shouldBe Interval(10, 20)
+  }
+
+  test("{x = 1, y = 2} ⊔ {x = 3, z = 4} = {x ∈ [1,3], y = 2, z = 4}") {
+    val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
+      .assignCopy(manager, x, ApronExpr.Constant(Interval(1, 1), BaseType[Int]).toIntern(env_xy), null)
+      .assignCopy(manager, y, ApronExpr.Constant(Interval(2, 2), BaseType[Int]).toIntern(env_xy), null)
+    val state3 = state1.changeEnvironmentCopy(manager, env_xz, false)
+      .assignCopy(manager, x, ApronExpr.Constant(Interval(3, 3), BaseType[Int]).toIntern(env_xz), null)
+      .assignCopy(manager, z, ApronExpr.Constant(Interval(4, 4), BaseType[Int]).toIntern(env_xz), null)
+    val joined = Join(state2, state3)
+
+    joined.hasChanged shouldBe true
+    joined.get.getBound(manager, x) shouldBe Interval(1, 3)
+    joined.get.getBound(manager, y) shouldBe Interval(2, 2)
+    joined.get.getBound(manager, z) shouldBe Interval(4, 4)
   }

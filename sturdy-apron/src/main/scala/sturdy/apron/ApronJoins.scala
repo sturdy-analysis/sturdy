@@ -29,16 +29,14 @@ object ApronJoins:
     val s1ExtEnv = s1.changeEnvironmentCopy(manager, lce, false)
     val s2ExtEnv = s2.changeEnvironmentCopy(manager, lce, false)
 
-    val top = ApronExpr.topConstant(null).toIntern(lce)
-
     val env2_minus_env1 = minus(env2,env1).getVars
     val combinable1 =
       if(env2_minus_env1.nonEmpty)
         s1ExtEnv.assignCopy(
           manager,
           env2_minus_env1,
-          Array.fill(env2_minus_env1.length)(top),
-          s2ExtEnv
+          env2_minus_env1.map(v => ApronExpr.constant(s2ExtEnv.getBound(manager, v), null).toIntern(lce)),
+          null
         )
       else
         s1ExtEnv
@@ -49,8 +47,8 @@ object ApronJoins:
         s2ExtEnv.assignCopy(
           manager,
           env1_minus_env2,
-          Array.fill(env1_minus_env2.length)(top),
-          s1ExtEnv
+          env1_minus_env2.map(v => ApronExpr.constant(s1ExtEnv.getBound(manager, v), null).toIntern(lce)),
+          null
         )
       else
         s2ExtEnv
@@ -62,14 +60,6 @@ object ApronJoins:
         combinable1.joinCopy(manager, combinable2)
 
     MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
-//
-//    println(s"Abstract1 Join:\n"+
-//      s"s1 = $s1\thashcode = ${s1.hashCode(manager)}\n"+
-//      s"s2 = $s2\thashcode = ${s2.hashCode(manager)}\n"+
-//      s"s1 ${if(widen) "∇" else "⊔"} s2 = ${res}\thashcode = ${res.get.hashCode(manager)}\n" +
-//      s"s1 ${if (widen) "∇" else "⊔"} s2 == s1: ${res.get.isEqual(manager,s1)}\n" +
-//      s"s1 ${if (widen) "∇" else "⊔"} s2 == s2: ${res.get.isEqual(manager,s2)}\n\n"
-//    )
 
   def minus[A](env1: Environment, env2: Environment): Environment =
     var env = env1

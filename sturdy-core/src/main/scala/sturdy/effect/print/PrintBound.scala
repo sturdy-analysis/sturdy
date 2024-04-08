@@ -21,11 +21,12 @@ class PrintBound[A](using Join[A], Widen[A]) extends Print[A], Monotone:
   override def mapState(st: State, f: [A] => A => A): State =
     st.map(f[A])
 
-  def combineSymbols(v1: Option[A], v2: Option[A], comb: (A, A) => MaybeChanged[A]): MaybeChanged[Option[A]] = (v1, v2) match
-    case (None, None) => Unchanged(None)
-    case (Some(a), None) => Unchanged(v1)
-    case (None, Some(a)) => Changed(v2)
-    case (Some(a1), Some(a2)) => comb(a1, a2).map(Some.apply)
+  private def combineSymbols(v1: Option[A], v2: Option[A], comb: (A, A) => MaybeChanged[A]): MaybeChanged[Option[A]] =
+    (v1, v2) match
+      case (None, None) => Unchanged(None)
+      case (Some(a), None) => Unchanged(v1)
+      case (None, Some(a)) => Changed(v2)
+      case (Some(a1), Some(a2)) => comb(a1, a2).map(Some.apply)
   override def join: Join[Option[A]] = combineSymbols(_, _, summon[Join[A]].apply)
   override def widen: Widen[Option[A]] = combineSymbols(_, _, summon[Widen[A]].apply)
 
@@ -33,7 +34,7 @@ class PrintBound[A](using Join[A], Widen[A]) extends Print[A], Monotone:
     cp.getPrinted.foreach { c =>
       val isSound = s.isSound(c, symbol.getOrElse(return IsSound.NotSound(s"Abstract semantic predicted no prints, but got ${cp.getPrinted}")))
       if (isSound.isNotSound)
-        return IsSound.NotSound(s"Concretely printed symbol $c not approximated by ${symbol.get}")
+        return IsSound.NotSound(s"Concretely printed symbol $c not approximated by ${symbol.get}: ${isSound.toString}")
     }
     IsSound.Sound
 

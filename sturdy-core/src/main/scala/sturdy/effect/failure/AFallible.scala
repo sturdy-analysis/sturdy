@@ -54,9 +54,9 @@ given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
 
 given soundnessAFallible[C,A](using Soundness[C,A]): Soundness[CFallible[C], AFallible[A]] = {
   case (CFallible.Failing(kind,msg), AFallible.Failing(failures)) =>
-    IsSound(failures.set.contains((kind,msg)), s"Abstract failures $failures do not contain concrete failure ${(kind,msg)}")
+    IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
   case (CFallible.Failing(kind,msg), AFallible.MaybeFailing(_,failures)) =>
-    IsSound(failures.set.contains((kind,msg)), s"Abstract failures $failures do not contain concrete failure ${(kind,msg)}")
+    IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
   case (CFallible.Unfailing(c), AFallible.Unfailing(a)) => Soundness.isSound(c,a)
   case (CFallible.Unfailing(c), AFallible.MaybeFailing(a,_)) => Soundness.isSound(c,a)
   case (cfallible,afallible) =>
