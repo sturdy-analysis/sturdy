@@ -13,8 +13,7 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, J
 import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
-import sturdy.effect.print.PrintBound
-import sturdy.effect.print.given
+import sturdy.effect.print.{PrintBound, PrintBoundSerializable, Serializer, given}
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix
@@ -52,15 +51,15 @@ object RelationalAnalysis extends Interpreter,
     case Local(x: String)
     case Temp(ty: RelType)
     case Alloc(label: Label)
+    case Print(ty: RelType)
 
   given Ordering[RelationalVar] = {
     case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
     case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
     case (RelationalVar.Alloc(l1), RelationalVar.Alloc(l2)) => l1.toString.compareTo(l2.toString)
+    case (RelationalVar.Print(ty1), RelationalVar.Print(ty2)) => ty1.toString.compareTo(ty2.toString)
+    case (RelationalVar.Print(_),_) | (RelationalVar.Alloc(_),_) | (RelationalVar.Temp(_),_) => 1
     case (RelationalVar.Local(_), _) => -1
-    case (_, RelationalVar.Alloc(_)) => -1
-    case (_, RelationalVar.Local(_)) => 1
-    case (RelationalVar.Alloc(_),_) => 1
   }
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
@@ -160,7 +159,20 @@ object RelationalAnalysis extends Interpreter,
         case AllocationSite.Alloc(e) => RelationalVar.Alloc(e.label)
         case AllocationSite.Record(r) => RelationalVar.Alloc(r.label)
 
-    override val print: PrintBound[Value] = new PrintBound
+    given serializeValue: Serializer[Value,Value] = {
+      case Value.IntValue(expr) =>
+        val addr = recencyStore.alloc(RelationalVar.Print(expr._type))
+        recencyStore.joinRecentIntoOld(PowVirtualAddress(addr)) // Ensure the allocated address is old
+        apronState.join[Unit] {
+          apronState.assign(addr, expr)
+        } {
+          // do nothing
+        }
+        Value.IntValue(ApronExpr.addr(addr, expr._type))
+      case v => v
+    }
+
+    override val print: PrintBoundSerializable[Value,Value] = new PrintBoundSerializable[Value,Value]
     override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
 
     override def newEffectStack(effects: => Effect, inEffects: PartialFunction[Any, Effect], outEffects: PartialFunction[Any, Effect]): EffectStack =
