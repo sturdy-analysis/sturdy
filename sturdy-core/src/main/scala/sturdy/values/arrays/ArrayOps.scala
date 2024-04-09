@@ -14,6 +14,7 @@ trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
   def arrayLength(array: AV): Int
   def initArray(size: Idx): Seq[Any]
   def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
+  def getArray(array: AV): Seq[JOption[J, V]]
 
 case class Array[AID, Addr, AType](aid: AID, vals: Vector[Addr], arrayType: AType)
 
@@ -54,6 +55,10 @@ given ConcreteArrayOps[Addr, AID, V, AType, Site]
       }
     }
     JOptionC.some(())
+
+  override def getArray(array: Array[AID, Addr, AType]): Seq[JOption[NoJoin, V]] =
+    val arrayVals = array.vals.map(addr => getVal(array, array.vals.indexOf(addr)))
+    arrayVals
 
 given ArrayEqOps[AID, Addr, AType]: EqOps[Array[AID, Addr, AType], Boolean] with
   override def equ(v1: Array[AID, Addr, AType], v2: Array[AID, Addr, AType]): Boolean = v1.aid == v2.aid

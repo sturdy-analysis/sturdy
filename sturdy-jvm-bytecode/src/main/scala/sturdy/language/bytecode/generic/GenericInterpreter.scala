@@ -72,11 +72,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   var staticInitialized: Set[ObjectType] = Set()
 
-  def nativeClassFileWrapper(obj: ObjectType): String =
+  def javaLibClassFileWrapper(obj: ObjectType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
     source
 
-  def nonNativeClassFileWrapper(obj: ObjectType): String =
+  def nonJavaLibClassFileWrapper(obj: ObjectType): String =
     val path = projectSource ++ "\\" ++ obj.simpleName ++ ".class"
     path
 
@@ -84,7 +84,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[Addr, Idx, V, ReferenceType](bytecodeOps)
-  lazy val native = new JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, AllocationSite, J](bytecodeOps)(objectOps)(arrayOps)
+  lazy val native = new JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, AllocationSite, J](bytecodeOps, objectOps, arrayOps)
 
   def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
     // No Op
@@ -376,16 +376,6 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           val transformedOffsets = Iterator.from(0).zip(inst.jumpOffsets).toSeq.map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
           val offset = transformedOffsets.get(index).getOrElse(inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
-          /*
-          val lowAsV = i32ops.integerLit(inst.low)
-          val highAsV = i32ops.integerLit(inst.high)
-          val ge = compareOps.ge(index, lowAsV)
-          val le = compareOps.le(index, highAsV)
-          branchOpsUnit.boolBranch(eqOps.equ(ge, le)){
-            except.throws(JvmExcept.Jump(pc + transformedOffsets(index)))
-          }{
-            except.throws(JvmExcept.Jump(pc + inst.defaultOffset))
-          }*/
         case inst: LOOKUPSWITCH =>
           val key = stack.popOrAbort()
           val transformedOffsets = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
@@ -405,13 +395,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           if(!staticInitialized.contains(objCF)){
             if (project.isLibraryType(objCF)){
               staticInitialized += objCF
-              val source = nativeClassFileWrapper(objCF)
+              val source = javaLibClassFileWrapper(objCF)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
               invoke(cfs.staticInitializer.get, true)
             }
             else{
               staticInitialized += objCF
-              val source = nonNativeClassFileWrapper(objCF)
+              val source = nonJavaLibClassFileWrapper(objCF)
               val cfs: List[ClassFile] =
                 process(new DataInputStream(new FileInputStream(source))) { in =>
                   org.opalj.br.reader.Java8Framework.ClassFile(in)
@@ -428,13 +418,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           if (!staticInitialized.contains(objCF)) {
             if (project.isLibraryType(objCF)) {
               staticInitialized += objCF
-              val source = nativeClassFileWrapper(objCF)
+              val source = javaLibClassFileWrapper(objCF)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
               invoke(cfs.staticInitializer.get, true)
             }
             else {
               staticInitialized += objCF
-              val source = nonNativeClassFileWrapper(objCF)
+              val source = nonJavaLibClassFileWrapper(objCF)
               println(projectSource)
               println(source)
               val cfs: List[ClassFile] =
@@ -467,7 +457,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         case inst: INVOKESTATIC =>
           if (project.isLibraryType(inst.declaringClass)){
-            val source = nativeClassFileWrapper(inst.declaringClass)
+            val source = javaLibClassFileWrapper(inst.declaringClass)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invoke(mth, true)
@@ -504,7 +494,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: INVOKESPECIAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
           if (project.isLibraryType(objectType))
-            val source = nativeClassFileWrapper(objectType)
+            val source = javaLibClassFileWrapper(objectType)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invoke(mth, false)
@@ -529,15 +519,29 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           val receiver = inst.bootstrapMethod.handle
           receiver match
             case receiver: InvokeStaticMethodHandle =>
+              if (inst.name == "makeConcatWithConstants"){
+                val test3 = inst.bootstrapMethod.arguments.head.toJava
+                val test4 = test3.drop(2).dropRight(1)
+                eval(LoadString(test4))
+
+                val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+                val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+                val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
+                val args = stack.popNOrAbort(2)
+                evalNativeStatic(mth, args)
+              }
+          /*
+          receiver match
+            case receiver: InvokeStaticMethodHandle =>
               if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
-                val mthTypeSource = nativeClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
+                val mthTypeSource = javaLibClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
                 val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
                 val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
                 stack.push(createNativeObj(inst.methodDescriptor.returnType.asObjectType))
                 stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asObjectType))
                 val mthTypeObj = invoke(mthTypeMth.get, true)
 
-                val source = nativeClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+                val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
                 val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
                 invoke(mth, true)
@@ -546,7 +550,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
               else{
                 ???
               }
-
+          */
 
     // NEW
     case x if (x == 187) =>
@@ -618,15 +622,17 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     // monitorenter
     case x if (x == 194) =>
-      ???
+      stack.popOrAbort()
 
     // monitorexit
     case x if (x == 195) =>
-      ???
+      stack.popOrAbort()
 
     // WIDE
     case x if (x == 196) =>
-      ???
+      inst match
+        case inst: WIDE.type =>
+          ()
 
     // multianewarray
     case x if (x == 197) =>
@@ -659,18 +665,23 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     // goto_w
     case x if (x == 200) =>
-      ???
+      inst match
+        case inst: GOTO_W =>
+          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
 
     // jsr_wt
     case x if (x == 201) =>
-      ???
+      inst match
+        case inst: JSR_W =>
+          ??? //something about return address
+          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
 
     // breakpoint
     case x if (x == 202) =>
-      ???
+      ()
 
   def createNativeObj(toLoad: ObjectType): V =
-    val source = nativeClassFileWrapper(toLoad)
+    val source = javaLibClassFileWrapper(toLoad)
     val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
@@ -732,7 +743,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     }
     else{
       if (project.isLibraryType(inheritedObj)) {
-        val source = nativeClassFileWrapper(inheritedObj)
+        val source = javaLibClassFileWrapper(inheritedObj)
         val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
         val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
         cfs.findMethod(name, sig)
@@ -745,12 +756,6 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
       }
     }
-
-  def checkTypeObj(obj: Object[OID, ClassFile, Addr, String], check: ReferenceType): Boolean =
-    obj.cls.thisType.isSubtypeOf(check.mostPreciseObjectType)(project.classHierarchy)
-
-  def checkTypeArray(array: Array[AID, Addr, ArrayType], check: ArrayType): Boolean =
-    array.arrayType == check
 
   def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
     val newFrameData = 0
@@ -789,10 +794,6 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       stack.pushN(remainingOperands)
       ret
     }
-
-
-
-
 
   def invoke(mth: Method, isStatic: Boolean) =
     val newFrameData = 0
@@ -862,6 +863,19 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     }
 
+  def evalNativeStatic(mth: Method, args: Seq[V]) =
+    mth.name match
+      case "makeConcatWithConstants" =>
+        val baseString = arrayOps.getArray(objectOps.getField(args(0), "value").get).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(args(1), "value").get).map(vals => vals.get)
+        val concattedString = (baseString ++ constantString).zipWithIndex
+        val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()),
+          concattedString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
+        val stringObj = createNativeObj(ObjectType("java/lang/String"))
+        objectOps.setField(stringObj, "value", stringArray)
+        stack.push(stringObj)
+      case _ =>
+        native.evalNativeStatic(mth, args)
 
 
 
