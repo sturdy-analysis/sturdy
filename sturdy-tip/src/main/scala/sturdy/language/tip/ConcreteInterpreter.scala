@@ -8,6 +8,7 @@ import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
+import sturdy.fix.{Combinator, Contextual}
 import sturdy.language.tip.Function
 import sturdy.language.tip.*
 import sturdy.values.booleans.{*, given}
@@ -73,7 +74,16 @@ object ConcreteInterpreter extends Interpreter:
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)
 
-    override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
+    override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]] {
+      override protected def contextInsensitive: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]] =
+        (f: FixIn => FixOut[Value]) => (in: FixIn) =>
+          try {
+            f(in)
+          } catch {
+            case e: StackOverflowError => failure.fail(TipFailure.StackOverflow, e.toString)
+            case e => throw e
+          }
+    }
 
   def apply(nextInput: () => Value): Instance =
     new Instance(nextInput)

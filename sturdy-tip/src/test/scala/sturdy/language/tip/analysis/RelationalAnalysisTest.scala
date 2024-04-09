@@ -17,13 +17,14 @@
  import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
  import sturdy.language.tip.abstractions.{CfgNode, isFunOrWhile}
  import sturdy.language.tip.*
- import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
+ import sturdy.util.{IntLabel, Labeled, LinearStateOperationCounter, Profiler, SynLabel}
  import sturdy.values.booleans.{*, given}
  import sturdy.values.functions.{*, given}
  import sturdy.values.integer.{*, given}
  import sturdy.values.ordering.{*, given}
  import sturdy.values.records.{*, given}
  import sturdy.values.references.{*, given}
+ import sturdy.values.types.BaseType
  import sturdy.values.{*, given}
 
  import java.nio.file.{Files, Path, Paths}
@@ -45,7 +46,7 @@
 
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
      p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-//    p.endsWith("code.tip")
+//    p.endsWith("diverge.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -110,3 +111,27 @@
        null
      }
 
+   "The ordering on RelationalVar" should "be Print <= Alloc <= Temp <= Local" in {
+     import RelationalAnalysis.given
+     import RelationalAnalysis.RelationalVar.*
+
+     val printInt = Print(BaseType[Int])
+     val alloc1 = Alloc(IntLabel(1))
+     val tempInt = Temp(BaseType[Int])
+     val localX = Local("x")
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, alloc1) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, localX) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(localX, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, alloc1) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, localX) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(localX, alloc1) shouldBe 1
+   }

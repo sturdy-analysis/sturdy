@@ -54,12 +54,17 @@ object RelationalAnalysis extends Interpreter,
     case Print(ty: RelType)
 
   given Ordering[RelationalVar] = {
+    // Print <= Alloc <= Temp <= Local
     case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
     case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
     case (RelationalVar.Alloc(l1), RelationalVar.Alloc(l2)) => l1.toString.compareTo(l2.toString)
     case (RelationalVar.Print(ty1), RelationalVar.Print(ty2)) => ty1.toString.compareTo(ty2.toString)
-    case (RelationalVar.Print(_),_) | (RelationalVar.Alloc(_),_) | (RelationalVar.Temp(_),_) => 1
-    case (RelationalVar.Local(_), _) => -1
+    case (RelationalVar.Print(_),_) => -1
+    case (_,RelationalVar.Print(_)) => 1
+    case (RelationalVar.Alloc(_),_) => -1
+    case (_,RelationalVar.Alloc(_)) => 1
+    case (RelationalVar.Temp(_),_) => -1
+    case (_,RelationalVar.Temp(_)) => 1
   }
   given FiniteRelationalVar(using Finite[RelType]): Finite[RelationalVar] with {}
   type RelAddr = VirtualAddress[RelationalVar]
