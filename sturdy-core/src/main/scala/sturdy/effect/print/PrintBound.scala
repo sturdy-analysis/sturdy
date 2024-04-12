@@ -2,7 +2,7 @@ package sturdy.effect.print
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.Monotone
+import sturdy.effect.{Effect, Monotone}
 import sturdy.values.{*, given}
 
 trait Serializer[A, Serialized]:
@@ -13,7 +13,7 @@ final class IdSerializer[A] extends Serializer[A,A]:
 
 class PrintBound[A: Join: Widen] extends PrintBoundSerializable[A,A](using serializer = IdSerializer[A], joinSerialized = implicitly, widenSerialized = implicitly)
 
-class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSerialized: Join[S], widenSerialized: Widen[S]) extends Print[A], Monotone:
+class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSerialized: Join[S], widenSerialized: Widen[S]) extends Print[A], Effect:
   protected var symbol: Option[S] = None
 
   override def apply(a: A): Unit =

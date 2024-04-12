@@ -106,7 +106,8 @@ object RelationalAnalysis extends Interpreter,
     ApronCons.top
 
   override def topReference(using self: Instance): VRef =
-    ???
+    val addrs = self.store.virtualAddresses
+    AbstractReference.NullAddr(addrs, false)
 
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
 

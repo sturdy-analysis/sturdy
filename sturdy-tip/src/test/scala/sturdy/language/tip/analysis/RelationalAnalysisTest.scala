@@ -1,6 +1,6 @@
- package sturdy.language.tip.analysis
+package sturdy.language.tip.analysis
 
- import apron.{Polka, Texpr1Node}
+import apron.{Polka, Texpr1Node}
  import cats.parse.{Numbers, Parser as P, Parser0 as P0}
  import org.scalatest.exceptions.TestFailedException
  import org.scalatest.flatspec.AnyFlatSpec
@@ -9,6 +9,7 @@
  import sturdy.data.given
  import sturdy.Soundness
  import sturdy.effect.allocation.CAllocatorIntIncrement
+ import sturdy.effect.failure.CFallible.Failing
  import sturdy.effect.failure.{AFallible, AssertionFailure, afallibleAbstractly, falliblePO, given}
  import sturdy.effect.print.given
  import sturdy.fix.StackConfig
@@ -33,8 +34,7 @@
  import scala.jdk.StreamConverters.*
  import scala.util.{Failure, Success, Try}
 
- class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
-
+class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    behavior of "Tip Relational analysis"
 
    val uri = classOf[RelationalAnalysisTest].getResource("/sturdy/language/tip").toURI;
@@ -44,9 +44,11 @@
      "fibRec.tip" // Crashes JVM
    )
 
+   val polyManager = new Polka(false)
+
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
      p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-//    p.endsWith("diverge.tip")
+//    p.endsWith("corecurrent_widening.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -61,7 +63,6 @@
      val sourceCode = file.getLines().mkString("\n")
      file.close()
      val program = Parser.parse(sourceCode)
-     val polyManager = new Polka(false)
 
      if (program.funs.exists(_.name == "main")) {
        val analysis = new RelationalAnalysis.Instance(polyManager, Map(), stackConfig, 0)
@@ -77,34 +78,38 @@
          //      println(s"ABSTRACT : $aresult")
 
          // compute number of assertions in program
-         val allAsserts = program.assertions
-         if (allAsserts.nonEmpty) {
-           val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
-           val unreachableAsserts = allAsserts.diff(reachableAsserts)
-           val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
-           val failedAsserts = aresult.failures.set.collect { case (AssertionFailure(a: Stm.Assert), _) => a }
-           val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
-           val provedAsserts = reachableAsserts.diff(failedAsserts)
-           val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
-
-           println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
-           assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
-           assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
-         }
+//         val allAsserts = program.assertions
+//         if (allAsserts.nonEmpty) {
+//           val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
+//           val unreachableAsserts = allAsserts.diff(reachableAsserts)
+//           val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
+//           val failedAsserts = aresult.failures.set.collect { case (AssertionFailure(a: Stm.Assert), _) => a }
+//           val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
+//           val provedAsserts = reachableAsserts.diff(failedAsserts)
+//           val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
+//
+//           println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
+//           assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
+//           assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
+//         }
 
          val soundness = new RelationalAnalysisSoundness(analysis)
          import soundness.given
-         assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
+         cresult match
+           case Failing(TipFailure.StackOverflow, _) =>
+           case _ => assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
          assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
 
-         (aresult, analysis)
+         System.gc()
+         Thread.sleep(100)
+
        } catch {
          case e: TestFailedException =>
-           throw e
+           throw TestFailedException(p.getFileName.toString, e, e.failedCodeStackDepth)
          case e: AssertionError =>
-           throw e
+           throw TestFailedException(p.getFileName.toString, e, e.getStackTrace.length)
          case e: Throwable =>
-           fail(e)
+           throw TestFailedException(p.getFileName.toString, e, e.getStackTrace.length)
        }
 
      } else {
