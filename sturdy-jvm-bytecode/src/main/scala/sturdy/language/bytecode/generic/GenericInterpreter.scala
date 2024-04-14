@@ -894,11 +894,42 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
     stack.withNewFrame(0) {
       frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        runBlock(0, instructionMap, mth)
+        run(0, instructionMap, mth)
       }
     }
 
-  def runBlock(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
+  def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
+    except.tryCatch {
+      val currPC = pc
+      val currInst = instructionMap(currPC)
+      eval(currInst, currPC)
+      if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
+        val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
+        frame.setData(nextPC)
+        run(nextPC, instructionMap, mth)
+      }
+    } {
+      case JvmExcept.Jump(targetPC) =>
+        run(targetPC, instructionMap, mth)
+      case JvmExcept.Throw(exception) =>
+        println(exception)
+        val currPC = frame.data
+        val handler = mth.body.get.exceptionHandlersFor(currPC)
+          .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
+          .getOrElse(except.throws(JvmExcept.Throw(exception)))
+        val exceptionObject = createNativeObj(exception)
+        stack.push(exceptionObject)
+        run(handler.handlerPC, instructionMap, mth)
+      case JvmExcept.ThrowObject(exception) =>
+        val currPC = frame.data
+        val handler = mth.body.get.exceptionHandlersFor(currPC)
+          .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
+          .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
+        stack.push(exception)
+        run(handler.handlerPC, instructionMap, mth)
+    }
+  //Deprecated
+  /*def runBlock(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
     except.tryCatch {
       var currPC = pc
       var currInst = instructionMap(currPC)
@@ -928,7 +959,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
         stack.push(exception)
         runBlock(handler.handlerPC, instructionMap, mth)
-    }
+    }*/
 
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match

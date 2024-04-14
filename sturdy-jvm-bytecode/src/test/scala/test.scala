@@ -46,7 +46,7 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithNatives, sourceFile, Map(), Map(), Map())
   
-  /*
+  ///*
   interp.eval(BIPUSH(5))
   interp.eval(BIPUSH(10))
   interp.eval(IADD)
@@ -255,7 +255,7 @@ object test extends App{
   println(interp.stack.pop())
   interp.eval(ACONST_NULL)
   interp.invoke(typeTest2, true)
-  println(interp.stack.pop())*/
+  println(interp.stack.pop())
 
 
   println("--- stringTest ---")
