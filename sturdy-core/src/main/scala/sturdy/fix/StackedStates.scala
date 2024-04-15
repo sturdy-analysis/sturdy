@@ -48,7 +48,7 @@ final class StackedStates[Dom, Codom](val state: State)
   private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
   def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
-  override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
+  override def toString: String = stack.keysView().collect(k => k.hashCode()).makeString("Stack(", ", ", ")")
 
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
@@ -72,6 +72,7 @@ final class StackedStates[Dom, Codom](val state: State)
     if (Fixpoint.DEBUG)
       widenedIn.toOption.foreach(_ => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
 
+    println(s"${toString}.get(${stateFrame.hashCode()})")
     Option(stack.get(stateFrame)) match
       case None =>
         // call is not recurrent

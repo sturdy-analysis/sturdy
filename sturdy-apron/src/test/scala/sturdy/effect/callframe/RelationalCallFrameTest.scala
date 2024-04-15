@@ -108,17 +108,19 @@ class RelationalCallFrameTest extends AnyFunSuite:
       initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
     )
 
-    val state1 = callFrame.getState
+    val state1 = (callFrame.getState, state.recencyStore.getState)
 
     callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](5, 15))
 
-    val state2 = callFrame.getState
+    val state2 = (callFrame.getState, state.recencyStore.getState)
 
-    val joinedStates = callFrame.join(state1, state2)
+    val joinedFrames = callFrame.join(state1._1, state2._1)
+    val joinedStores = state.recencyStore.join(state1._2, state2._2)
+    joinedFrames.hasChanged shouldBe false
+    joinedStores.hasChanged shouldBe true
 
-    joinedStates.hasChanged shouldBe true
-
-    callFrame.setState(joinedStates.get)
+    callFrame.setState(joinedFrames.get)
+    state.recencyStore.setState(joinedStores.get)
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getBound(xExpr) shouldBe Interval(0, 15)

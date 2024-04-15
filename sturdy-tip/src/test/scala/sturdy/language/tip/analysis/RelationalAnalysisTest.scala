@@ -47,15 +47,19 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    val polyManager = new Polka(false)
 
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-//    p.endsWith("corecurrent_widening.tip")
+//     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
+    p.endsWith("corecurrent_widening.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
-       runRelationalAnalysis(p, StackConfig.StackedStates())
+       for(i <- 1 until 100) {
+         runRelationalAnalysis(p, StackConfig.StackedStates())
+         println("=========================================")
+       }
      }
- //    it must s"soundly analyze ${p.getFileName} with stacked frames" in {
- //      runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
- //    }
+
+//     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+//       runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
+//     }
    }
 
    def runRelationalAnalysis(p: Path, stackConfig: StackConfig) =
@@ -99,9 +103,6 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
            case Failing(TipFailure.StackOverflow, _) =>
            case _ => assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
          assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
-
-         System.gc()
-         Thread.sleep(100)
 
        } catch {
          case e: TestFailedException =>
