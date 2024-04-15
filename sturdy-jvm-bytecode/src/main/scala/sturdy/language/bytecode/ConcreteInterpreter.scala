@@ -9,6 +9,7 @@ import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.store.CStore
+import sturdy.fix.Fixpoint
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.generic.*
 import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching}
@@ -18,6 +19,7 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
 import sturdy.values.arrays.{*, given}
+import sturdy.fix
 
 import java.io.File
 import java.net.URL
@@ -80,11 +82,11 @@ object ConcreteInterpreter extends Interpreter:
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
     val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
-    val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    val objFieldAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val arrayAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
     val arrayValAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
-    val store: CStore[Addr, Value] = new CStore(initStore)
+    val objFieldStore: CStore[Addr, Value] = new CStore(initStore)
     val arrayValStore: CStore[Addr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
@@ -123,11 +125,14 @@ object ConcreteInterpreter extends Interpreter:
     val bytecodeOps: BytecodeOps[Addr, Idx, Value, TypeRep] = implicitly
     val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
       new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
-        using new ConcreteObjectOps(using alloc, store)
+        using new ConcreteObjectOps(using objFieldAlloc, objFieldStore)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =
       new LiftedArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin, ArrayRep, Int](asArray, Value.Array.apply, asInt32, Value.Int32.apply)(
         using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
       )
+
+    val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut]
+    override val fixpointSuper = fixpoint
 
 

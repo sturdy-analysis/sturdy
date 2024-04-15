@@ -15,10 +15,13 @@ import BytecodeFailure.*
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ObjectTypes, ReferenceType, ShortType}
 import org.opalj.io.process
+import sturdy.effect.EffectStack
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.relational.EqOps
+import sturdy.fix
+import sturdy.values.Finite
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
@@ -38,8 +41,19 @@ enum AllocationSite:
   case arrayVals(idx: Int)
   case default
 
+enum FixIn:
+  case Eval(inst: Instruction, pc: Int)
+
+enum FixOut:
+  case Eval()
+
+given finiteFixIn: Finite[FixIn] with {}
+
 trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] <: MayJoin[_]]:
 
+  val fixpoint: fix.ContextualFixpoint[FixIn, FixOut]
+  val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
+  type Fixed = FixIn => FixOut
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType]
   import bytecodeOps.*
@@ -52,16 +66,23 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   val stack: DecidableOperandStack[V]
   val failure: Failure
   val except: Except[JvmExcept[V], JvmExcept[V], J]
-  val alloc: Allocation[Addr, AllocationSite]
+  val objFieldAlloc: Allocation[Addr, AllocationSite]
   val objAlloc: Allocation[OID, AllocationSite]
   val arrayValAlloc: Allocation[Addr, AllocationSite]
   val arrayAlloc: Allocation[AID, AllocationSite]
-  val store: Store[Addr, V, J]
+  val objFieldStore: Store[Addr, V, J]
   val arrayValStore: Store[Addr, V, J]
   val staticVarStore: Store[(ObjectType, String), V, J]
-
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
+
+  /*val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame), {
+    case _: FixIn.Eval => List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame)
+  }, {
+    case _: FixIn.Eval => List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame)
+  })
+  given EffectStack = effectStack*/
+
   val project: Project[URL]
   val projectSource: String
 
@@ -86,7 +107,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   lazy val num = new GenericInterpreterNumerics[Addr, Idx, V, ReferenceType](bytecodeOps)
   lazy val native = new JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, AllocationSite, J](bytecodeOps, objectOps, arrayOps)
 
-  def eval(inst: Instruction, pc: Int = 0): Unit = inst.opcode match
+  def eval(inst: Instruction, pc: Int = 0)(using Fixed): Unit = inst.opcode match
     // No Op
     case x if (x == 0) =>
       ()
@@ -757,7 +778,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       }
     }
 
-  def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V]): JOptionC[V] =
+  def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V])(using Fixed): JOptionC[V] =
     val newFrameData = 0
     val objVal = stack.popOrAbort()
 
@@ -787,7 +808,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       val remainingOperands = stack.popNOrAbort(stack.size)
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-          runBlock(0, instructionMap, mth)
+          run(0, instructionMap, mth)
         }
       }
       val ret = stack.pop()
@@ -795,7 +816,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       ret
     }
 
-  def invoke(mth: Method, isStatic: Boolean) =
+  def invoke(mth: Method, isStatic: Boolean)(using Fixed) =
     val newFrameData = 0
     val numArgs = mth.descriptor.parametersCount
     val args = stack.popNOrAbort(numArgs)
@@ -849,7 +870,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       val remainingOperands = stack.popNOrAbort(stack.size)
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-          runBlock(0, instructionMap, mth)
+          run(0, instructionMap, mth)
         }
       }
       if(!mth.descriptor.returnType.isVoidType){
@@ -879,7 +900,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
 
 
-  def initStaticVars(mth: Method) =
+  def initStaticVars(mth: Method)(using Fixed) =
     val newFrameData = 0
 
     val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
@@ -898,11 +919,26 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       }
     }
 
-  def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
+  def invokeExternal(mth: Method, isStatic: Boolean) = external {
+    invoke(mth, isStatic)
+  }
+  def evalExternal(inst: Instruction) = external {
+    eval(inst)
+  }
+  inline def evalFix(inst: Instruction, pc: Int)(using rec: Fixed): FixOut =
+    rec(FixIn.Eval(inst, pc))
+
+  private def fixed: Fixed = fixpointSuper{
+    case FixIn.Eval(inst, pc) =>
+      eval(inst, pc)
+      FixOut.Eval()
+  }
+  inline def external[A](f: Fixed ?=> A): A = f(using fixed)
+  def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
     except.tryCatch {
       val currPC = pc
       val currInst = instructionMap(currPC)
-      eval(currInst, currPC)
+      evalFix(currInst, currPC)
       if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
         val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
         frame.setData(nextPC)

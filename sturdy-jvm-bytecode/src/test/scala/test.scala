@@ -3,10 +3,12 @@ import org.opalj.br.instructions.*
 import org.opalj.br.*
 import org.opalj.io.process
 import sturdy.language.bytecode.ConcreteInterpreter
-import sturdy.language.bytecode.generic.ValType
+import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
 import sturdy.values.integer.IntegerOps
+import sturdy.fix
+import sturdy.fix.ConcreteFixpoint
 
-import java.io.{DataInputStream, FileInputStream, File}
+import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
 import scala.Float.NaN
 import scala.collection.mutable
@@ -45,222 +47,224 @@ object test extends App{
   val sourceFile = classFileName
 
   val interp = new ConcreteInterpreter.Instance(pWithNatives, sourceFile, Map(), Map(), Map())
+
+  val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
   ///*
-  interp.eval(BIPUSH(5))
-  interp.eval(BIPUSH(10))
-  interp.eval(IADD)
-  interp.eval(BIPUSH(3))
-  interp.eval(ISUB)
-  interp.eval(INEG)
+  interp.evalExternal(BIPUSH(5))
+  interp.evalExternal(BIPUSH(10))
+  interp.evalExternal(IADD)
+  interp.evalExternal(BIPUSH(3))
+  interp.evalExternal(ISUB)
+  interp.evalExternal(INEG)
   val result = interp.stack.pop()
   println(result)
 
-  interp.eval(LoadFloat(3.2f))
-  interp.eval(LoadFloat(4.2f))
-  interp.eval(FADD)
+  interp.evalExternal(LoadFloat(3.2f))
+  interp.evalExternal(LoadFloat(4.2f))
+  interp.evalExternal(FADD)
   val result2 = interp.stack.pop()
   println(result2)
 
-  interp.eval(BIPUSH(12))
-  interp.eval(BIPUSH(5))
-  interp.eval(IREM)
+  interp.evalExternal(BIPUSH(12))
+  interp.evalExternal(BIPUSH(5))
+  interp.evalExternal(IREM)
   val result3 = interp.stack.pop()
   println(result3)
 
-  interp.eval(LoadFloat(12.7f))
-  interp.eval(LoadFloat(5.0f))
-  interp.eval(FREM)
+  interp.evalExternal(LoadFloat(12.7f))
+  interp.evalExternal(LoadFloat(5.0f))
+  interp.evalExternal(FREM)
   val result4 = interp.stack.pop()
   println(result4)
 
-  interp.eval(LoadFloat(12.0f))
-  interp.eval(LoadFloat(NaN))
-  interp.eval(FCMPL)
+  interp.evalExternal(LoadFloat(12.0f))
+  interp.evalExternal(LoadFloat(NaN))
+  interp.evalExternal(FCMPL)
   val result5 = interp.stack.pop()
   println(result5)
 
 
   println("--- SubTest ---")
   val testMethod = cfs.findMethod("sub2").head
-  interp.eval(BIPUSH(5))
-  interp.eval(BIPUSH(7))
-  interp.invoke(testMethod, true)
+  interp.evalExternal(BIPUSH(5))
+  interp.evalExternal(BIPUSH(7))
+  interp.invokeExternal(testMethod, true)
   println(interp.stack.pop())
 
 
   println("--- BranchTest ---")
   val testBranch = cfs.findMethod("branching").head
-  interp.eval(ICONST_0)
-  interp.invoke(testBranch, true)
+  interp.evalExternal(ICONST_0)
+  interp.invokeExternal(testBranch, true)
   println(interp.stack.pop())
 
-  interp.eval(ICONST_1)
-  interp.invoke(testBranch, true)
+  interp.evalExternal(ICONST_1)
+  interp.invokeExternal(testBranch, true)
   println(interp.stack.pop())
   println(interp.stack.size)
 
   println("--- ReturnTest ---")
   val testReturn = cfs.findMethod("returnTest").head
-  interp.eval(ICONST_1)
-  interp.invoke(testReturn, true)
+  interp.evalExternal(ICONST_1)
+  interp.invokeExternal(testReturn, true)
   println(interp.stack.pop())
   println(interp.stack.size)
 
   println("--- ObjectTest ---")
   val testObj = cfs.findMethod("objectTest").head
-  interp.invoke(testObj, true)
+  interp.invokeExternal(testObj, true)
   println(interp.stack.pop())
 
   println("--- InheritanceTest ---")
   val testInherit = cfs.findMethod("inheritanceTest").head
-  interp.invoke(testInherit, true)
+  interp.invokeExternal(testInherit, true)
   println(interp.stack.pop())
 
   println("--- objectCompTest ---")
   val testObjCompTrue = cfs.findMethod("objectCompTestTrue").head
-  interp.invoke(testObjCompTrue, true)
+  interp.invokeExternal(testObjCompTrue, true)
   println(interp.stack.pop())
 
   val testObjCompFalse = cfs.findMethod("objectCompTestFalse").head
-  interp.invoke(testObjCompFalse, true)
+  interp.invokeExternal(testObjCompFalse, true)
   println(interp.stack.pop())
 
   println("--- switchTest ---")
   val switchTest = cfs.findMethod("switchTest").head
-  interp.eval(BIPUSH(2))
-  interp.invoke(switchTest, true)
+  interp.evalExternal(BIPUSH(2))
+  interp.invokeExternal(switchTest, true)
   println(interp.stack.pop())
 
-  interp.eval(SIPUSH(200))
-  interp.invoke(switchTest, true)
+  interp.evalExternal(SIPUSH(200))
+  interp.invokeExternal(switchTest, true)
   println(interp.stack.pop())
 
   println("--- nonCompactSwitchTest ---")
   val nonCompactSwitchTest = cfs.findMethod("nonCompactSwitchTest").head
-  interp.eval(SIPUSH(200))
-  interp.invoke(nonCompactSwitchTest, true)
+  interp.evalExternal(SIPUSH(200))
+  interp.invokeExternal(nonCompactSwitchTest, true)
   println(interp.stack.pop())
 
-  interp.eval(SIPUSH(201))
-  interp.invoke(nonCompactSwitchTest, true)
+  interp.evalExternal(SIPUSH(201))
+  interp.invokeExternal(nonCompactSwitchTest, true)
   println(interp.stack.pop())
 
   println("--- staticVarTest ---")
   val staticVarTest = cfs.findMethod("staticVarTest").head
-  interp.invoke(staticVarTest, true)
+  interp.invokeExternal(staticVarTest, true)
   println(interp.stack.pop())
-  interp.invoke(staticVarTest, true)
+  interp.invokeExternal(staticVarTest, true)
   println(interp.stack.pop())
 
   println("--- arrayTest ---")
   val arrayTest = cfs.findMethod("arrayTest").head
-  interp.invoke(arrayTest, true)
+  interp.invokeExternal(arrayTest, true)
   println(interp.stack.pop())
 
   val arrayTest2 = cfs.findMethod("arrayTest2").head
-  interp.invoke(arrayTest2, true)
+  interp.invokeExternal(arrayTest2, true)
   println(interp.stack.pop())
 
   val arrayTest3 = cfs.findMethod("arrayTest3").head
-  interp.invoke(arrayTest3, true)
+  interp.invokeExternal(arrayTest3, true)
   println(interp.stack.pop())
 
   val arrayCompTest = cfs.findMethod("arrayCompTest").head
-  interp.invoke(arrayCompTest, true)
+  interp.invokeExternal(arrayCompTest, true)
   println(interp.stack.pop())
 
   val arrayLengthTest = cfs.findMethod("arrayLengthTest").head
-  interp.invoke(arrayLengthTest, true)
+  interp.invokeExternal(arrayLengthTest, true)
   println(interp.stack.pop())
 
   val arrayTypeTest = cfs.findMethod("arrayTypeTest").head
-  interp.invoke(arrayTypeTest, true)
+  interp.invokeExternal(arrayTypeTest, true)
   println(interp.stack.pop())
 
   println("--- objectArrayTest ---")
   val objectArrayTest = cfs.findMethod("objectArrayTest").head
-  interp.invoke(objectArrayTest, true)
+  interp.invokeExternal(objectArrayTest, true)
   println(interp.stack.pop())
 
   val objectArrayTypeTest = cfs.findMethod("objectArrayTypeTest").head
-  interp.invoke(objectArrayTypeTest, true)
+  interp.invokeExternal(objectArrayTypeTest, true)
   println(interp.stack.pop())
 
   println("--- multiDArrayTest ---")
   val multiDArrayTest = cfs.findMethod("multiDArrayTest").head
-  interp.invoke(multiDArrayTest, true)
+  interp.invokeExternal(multiDArrayTest, true)
   println(interp.stack.pop())
 
   println("--- d3ArrayTest ---")
   val d3ArrayTest = cfs.findMethod("d3ArrayTest").head
-  interp.invoke(d3ArrayTest, true)
+  interp.invokeExternal(d3ArrayTest, true)
   println(interp.stack.pop())
 
   println("--- d4ArrayTest ---")
   val d4ArrayTest = cfs.findMethod("d4ArrayTest").head
-  interp.invoke(d4ArrayTest, true)
+  interp.invokeExternal(d4ArrayTest, true)
   println(interp.stack.pop())
 
   println("--- interfaceTest ---")
   val interfaceTest = cfs2.findMethod("interfaceTest").head
-  interp.invoke(interfaceTest, true)
+  interp.invokeExternal(interfaceTest, true)
   println(interp.stack.pop())
   val defaultInterfaceTest = cfs2.findMethod("defaultInterfaceTest").head
-  interp.invoke(defaultInterfaceTest, true)
+  interp.invokeExternal(defaultInterfaceTest, true)
   println(interp.stack.pop())
 
   println("--- lambdaTest ---")
   val lambdaTest = cfs2.findMethod("lambdaTest").head
-  interp.invoke(lambdaTest, true)
+  interp.invokeExternal(lambdaTest, true)
   println(interp.stack.pop())
 
   println("--- exceptionTest ---")
   val exceptionTest = cfs.findMethod("exceptionTest").head
-  interp.invoke(exceptionTest, true)
+  interp.invokeExternal(exceptionTest, true)
   println(interp.stack.pop())
   val nullPointerTest = cfs.findMethod("nullPointerTest").head
-  interp.invoke(nullPointerTest, true)
+  interp.invokeExternal(nullPointerTest, true)
   println(interp.stack.pop())
   val throwTest = cfs.findMethod("throwTest").head
-  interp.eval(BIPUSH(1))
-  interp.invoke(throwTest, true)
+  interp.evalExternal(BIPUSH(1))
+  interp.invokeExternal(throwTest, true)
   println(interp.stack.pop())
-  interp.eval(BIPUSH(0))
-  interp.invoke(throwTest, true)
+  interp.evalExternal(BIPUSH(0))
+  interp.invokeExternal(throwTest, true)
   println(interp.stack.pop())
 
   println("--- nullTest ---")
   val nullTest = cfs.findMethod("nullTest").head
-  interp.eval(ACONST_NULL)
-  interp.invoke(nullTest, true)
+  interp.evalExternal(ACONST_NULL)
+  interp.invokeExternal(nullTest, true)
   println(interp.stack.pop())
-  interp.eval(NEW(ObjectType("SimpleMath")))
-  interp.invoke(nullTest, true)
+  interp.evalExternal(NEW(ObjectType("SimpleMath")))
+  interp.invokeExternal(nullTest, true)
   println(interp.stack.pop())
 
   println("--- typeTest ---")
   val typeTest = cfs.findMethod("typeTest").head
-  interp.invoke(typeTest, true)
+  interp.invokeExternal(typeTest, true)
   println(interp.stack.pop())
   val typeTestInterface = cfs2.findMethod("typeTestInterface").head
-  interp.invoke(typeTestInterface, true)
+  interp.invokeExternal(typeTestInterface, true)
   println(interp.stack.pop())
   val typeTestArray = cfs2.findMethod("typeTestArray").head
-  interp.invoke(typeTestArray, true)
+  interp.invokeExternal(typeTestArray, true)
   println(interp.stack.pop())
   val typeTest2 = cfs.findMethod("typeTest2").head
-  interp.eval(NEW(ObjectType("SimpleMath")))
-  interp.invoke(typeTest2, true)
+  interp.evalExternal(NEW(ObjectType("SimpleMath")))
+  interp.invokeExternal(typeTest2, true)
   println(interp.stack.pop())
-  interp.eval(ACONST_NULL)
-  interp.invoke(typeTest2, true)
+  interp.evalExternal(ACONST_NULL)
+  interp.invokeExternal(typeTest2, true)
   println(interp.stack.pop())
 
 
   println("--- stringTest ---")
   val stringTest = cfs.findMethod("stringTest").head
-  interp.invoke(stringTest, true)
+  interp.invokeExternal(stringTest, true)
   println(interp.stack.pop())
   val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
   //interp.invoke(stringBuilderTest, true)
