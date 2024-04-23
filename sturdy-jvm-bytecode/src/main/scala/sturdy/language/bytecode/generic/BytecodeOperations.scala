@@ -17,6 +17,7 @@ trait BytecodeOps[Addr, Idx, V, TypeRep]:
   val compareOps: OrderingOps[V, V]
   val eqOps: EqOps[V, V]
   val typeOps: TypeOps[V, TypeRep, V]
+  val sizeOps: SizeOps[V, V]
   
   val convert_i32_i64: ConvertIntLong[V, V]
   val convert_i32_f32: ConvertIntFloat[V, V]

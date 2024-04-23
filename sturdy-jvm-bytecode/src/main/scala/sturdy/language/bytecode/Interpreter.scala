@@ -13,7 +13,7 @@ import org.opalj.br.ObjectType
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.values.exceptions.ConcreteExceptional
-import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, TypeOps}
+import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, SizeOps, TypeOps}
 import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
 trait Interpreter:
   //type I8
@@ -154,6 +154,12 @@ trait Interpreter:
     , objTypeOps: TypeOps[ObjRep, TypeRep, Bool]
     , arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool]
     , nullTypeOps: TypeOps[NullVal, TypeRep, Bool]
+    , i32SizeOps: SizeOps[I32, Bool]
+    , i64SizeOps: SizeOps[I64, Bool]
+    , f32SizeOps: SizeOps[F32, Bool]
+    , f64SizeOps: SizeOps[F64, Bool]
+    , objSizeOps: SizeOps[ObjRep, Bool]
+    , arraySizeOps: SizeOps[ArrayRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
       ): BytecodeOps[Addr, Idx, Value, TypeRep] with
 
@@ -235,6 +241,18 @@ trait Interpreter:
         case Array(a1) => boolean(TypeOps.instanceOf(a1, check))
         case Null(n1) => boolean(TypeOps.instanceOf(n1, check))
         case _ => throw new IllegalArgumentException(s"Expected values of type object or array but got $v")
+
+    final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
+      import Value.*
+
+      override def is32Bit(v: Value): Value = v match
+        case Int32(v) => boolean(SizeOps.is32Bit(v))
+        case Int64(v) => boolean(SizeOps.is32Bit(v))
+        case Float32(v) => boolean(SizeOps.is32Bit(v))
+        case Float64(v) => boolean(SizeOps.is32Bit(v))
+        case Obj(v) => boolean(SizeOps.is32Bit(v))
+        case Array(v) => boolean(SizeOps.is32Bit(v))
+
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 

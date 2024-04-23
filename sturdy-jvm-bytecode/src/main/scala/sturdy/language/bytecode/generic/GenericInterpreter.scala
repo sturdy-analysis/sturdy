@@ -199,11 +199,15 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
       inst match
-        //Somehow values go missing
         case inst: POP.type =>
           stack.popOrAbort()
         case inst: POP2.type =>
-          ???
+          val v = stack.popOrAbort()
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(v)){
+            stack.popOrAbort()
+          }{
+
+          }
         case inst: DUP.type =>
           val dup = stack.popOrAbort()
           stack.push(dup)
@@ -215,18 +219,84 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           stack.push(ins)
           stack.push(dup)
         case inst: DUP_X2.type =>
-          ???
+          val dup = stack.popOrAbort()
+          val secondElem = stack.popOrAbort()
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(secondElem)){
+            val thirdElem = stack.popOrAbort()
+            stack.push(dup)
+            stack.push(thirdElem)
+            stack.push(secondElem)
+            stack.push(dup)
+          }{
+            stack.push(dup)
+            stack.push(secondElem)
+            stack.push(dup)
+          }
         case inst: DUP2.type =>
           val dup1 = stack.popOrAbort()
-          val dup2 = stack.popOrAbort()
-          stack.push(dup2)
-          stack.push(dup1)
-          stack.push(dup2)
-          stack.push(dup1)
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+            val dup2 = stack.popOrAbort()
+            stack.push(dup2)
+            stack.push(dup1)
+            stack.push(dup2)
+            stack.push(dup1)
+          }{
+            stack.push(dup1)
+            stack.push(dup1)
+          }
+
         case inst: DUP2_X1.type =>
-          ???
+          val dup1 = stack.popOrAbort()
+          val dup2 = stack.popOrAbort()
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+            val thirdElem = stack.popOrAbort()
+            stack.push(dup2)
+            stack.push(dup1)
+            stack.push(thirdElem)
+            stack.push(dup2)
+            stack.push(dup1)
+          }{
+            stack.push(dup1)
+            stack.push(dup2)
+            stack.push(dup1)
+          }
         case inst: DUP2_X2.type =>
-          ???
+          val dup1 = stack.popOrAbort()
+          val dup2 = stack.popOrAbort()
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(dup2)){
+              //dup1 64bit and dup2 32bit
+              val thirdElem = stack.popOrAbort()
+              stack.push(dup1)
+              stack.push(thirdElem)
+              stack.push(dup2)
+              stack.push(dup1)
+            }{
+              //dup1 and dup2 64bit
+              stack.push(dup1)
+              stack.push(dup2)
+              stack.push(dup2)
+            }
+          }{
+            val thirdElem = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(thirdElem)){
+              //all elements 32bit
+              val fourthElem = stack.popOrAbort()
+              stack.push(dup2)
+              stack.push(dup1)
+              stack.push(fourthElem)
+              stack.push(thirdElem)
+              stack.push(dup2)
+              stack.push(dup1)
+            }{
+              //dup1 and dup2 32bit, thirdElem 64bit
+              stack.push(dup2)
+              stack.push(dup1)
+              stack.push(thirdElem)
+              stack.push(dup2)
+              stack.push(dup1)
+            }
+          }
         case inst: SWAP.type =>
           val top = stack.popOrAbort()
           val bot = stack.popOrAbort()
@@ -541,9 +611,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           receiver match
             case receiver: InvokeStaticMethodHandle =>
               if (inst.name == "makeConcatWithConstants"){
-                val test3 = inst.bootstrapMethod.arguments.head.toJava
-                val test4 = test3.drop(2).dropRight(1)
-                eval(LoadString(test4))
+                if(stack.size < 2){
+                  val test3 = inst.bootstrapMethod.arguments.head.toJava
+                  val test4 = test3.drop(2).dropRight(1)
+                  eval(LoadString(test4))
+                }
 
                 val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
@@ -938,10 +1010,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     except.tryCatch {
       val currPC = pc
       val currInst = instructionMap(currPC)
+      frame.setData(currPC)
       evalFix(currInst, currPC)
       if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
         val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
-        frame.setData(nextPC)
         run(nextPC, instructionMap, mth)
       }
     } {

@@ -122,6 +122,25 @@ object ConcreteInterpreter extends Interpreter:
           false
         }
 
+    given intSizeOps: SizeOps[I32, Boolean] with
+      override def is32Bit(v: I32): Boolean = true
+
+    given floatSizeOps: SizeOps[F32, Boolean] with
+      override def is32Bit(v: F32): Boolean = true
+
+    given longSizeOps: SizeOps[I64, Boolean] with
+      override def is32Bit(v: I64): Boolean = false
+
+    given doubleSizeOps: SizeOps[F64, Boolean] with
+      override def is32Bit(v: F64): Boolean = false
+      
+    given objectSizeOps: SizeOps[ObjRep, Boolean] with
+      override def is32Bit(v: ObjRep): Boolean = true
+      
+    given arraySizeOps: SizeOps[ArrayRep, Boolean] with
+      override def is32Bit(v: ArrayRep): Boolean = true
+
+
     val bytecodeOps: BytecodeOps[Addr, Idx, Value, TypeRep] = implicitly
     val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
       new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
