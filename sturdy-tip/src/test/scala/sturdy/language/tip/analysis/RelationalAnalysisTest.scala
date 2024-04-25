@@ -41,20 +41,16 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    val recursiveProgram: Array[String] = Source.fromFile(classOf[RelationalAnalysisTest].getResource("/sturdy/language/recursive_programs").toURI).getLines.toArray
 
    val excluded : ArraySeq[String] = ArraySeq(
-     "fibRec.tip" // Crashes JVM
+//     "fibRec.tip" // Crashes JVM
    )
 
    val polyManager = new Polka(false)
 
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-    p.endsWith("corecurrent_widening.tip")
+     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
-       for(i <- 1 until 100) {
-         runRelationalAnalysis(p, StackConfig.StackedStates())
-         println("=========================================")
-       }
+       runRelationalAnalysis(p, StackConfig.StackedStates())
      }
 
 //     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
@@ -66,6 +62,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
      val file = Source.fromURI(p.toUri)
      val sourceCode = file.getLines().mkString("\n")
      file.close()
+     Labeled.reset()
      val program = Parser.parse(sourceCode)
 
      if (program.funs.exists(_.name == "main")) {
@@ -82,20 +79,20 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
          //      println(s"ABSTRACT : $aresult")
 
          // compute number of assertions in program
-//         val allAsserts = program.assertions
-//         if (allAsserts.nonEmpty) {
-//           val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
-//           val unreachableAsserts = allAsserts.diff(reachableAsserts)
-//           val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
-//           val failedAsserts = aresult.failures.set.collect { case (AssertionFailure(a: Stm.Assert), _) => a }
-//           val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
-//           val provedAsserts = reachableAsserts.diff(failedAsserts)
-//           val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
-//
-//           println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
+         val allAsserts = program.assertions
+         if (allAsserts.nonEmpty) {
+           val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
+           val unreachableAsserts = allAsserts.diff(reachableAsserts)
+           val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
+           val failedAsserts = aresult.failures.set.collect { case (AssertionFailure(a: Stm.Assert), _) => a }
+           val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
+           val provedAsserts = reachableAsserts.diff(failedAsserts)
+           val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
+
+           println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
 //           assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
-//           assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
-//         }
+           assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
+         }
 
          val soundness = new RelationalAnalysisSoundness(analysis)
          import soundness.given

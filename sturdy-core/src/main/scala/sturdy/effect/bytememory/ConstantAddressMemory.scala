@@ -80,8 +80,6 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
   override type State = Map[Key, Mem[B]]
   override def getState: State = memories
   override def setState(s: State): Unit = memories = s
-  override def mapState(st: State, f:[A] => A => A): State =
-    memories.map((k,v) => (f[Key](k), v.map(f[B])))
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 

@@ -39,7 +39,6 @@ class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using 
   override type State = constantAddressMemory.State
   override def getState: State = constantAddressMemory.getState
   override def setState(s: State): Unit = constantAddressMemory.setState(s)
-  override def mapState(s: State, f: [A] => A => A): State = constantAddressMemory.mapState(s, f)
   override def join: Join[constantAddressMemory.State] = constantAddressMemory.join
   override def widen: Widen[constantAddressMemory.State] = constantAddressMemory.widen
 

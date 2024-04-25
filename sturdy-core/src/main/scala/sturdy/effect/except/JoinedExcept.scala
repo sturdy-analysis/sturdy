@@ -78,7 +78,5 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
   override type State = JOptionA[E]
   override def getState: State = exception
   override def setState(s: State): Unit = exception = s
-
-  override def mapState(st: State, f: [A] => A => A): State = st.map(f[E])
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly

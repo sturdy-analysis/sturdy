@@ -17,11 +17,7 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
     effects.view.zip(st).foreach((effect,state) =>
       effect.setState(state.asInstanceOf)
     )
-
-  override def mapState(st: State, f: [A] => A => A): State =
-    val mappedStates = effects.view.zip(st).map((effect,state) => effect.mapState(state.asInstanceOf, f))
-    ArraySeq(mappedStates)
-
+    
   override def join: Join[ArraySeq[Any]] = combine((effect) => (s1, s2) => effect.join(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   override def widen: Widen[ArraySeq[Any]] = combine((effect) => (s1, s2) => effect.widen(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   def combine[W <: Widening](combineEffectState: Effect => (Any, Any) => MaybeChanged[Any]): Combine[State, W] =

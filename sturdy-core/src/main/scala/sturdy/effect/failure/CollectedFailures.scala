@@ -36,9 +36,6 @@ class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Mono
   override type State = Powerset[FailureKind]
   override def getState: State = Powerset(failureKinds)
   override def setState(s: State): Unit = failureKinds = s.set
-
-  override def mapState(st: State, f: [A] => A => A): State =
-    st.map(f[FailureKind])
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 

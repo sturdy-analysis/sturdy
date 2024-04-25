@@ -25,10 +25,6 @@ class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSer
   override def getState: State = symbol
   override def setState(st: State): Unit =
     symbol = st
-
-  override def mapState(st: State, f: [A] => A => A): State =
-    st.map(f[S])
-
   private def combineSymbols(v1: State, v2: State, comb: (S, S) => MaybeChanged[S]): MaybeChanged[State] =
     (v1, v2) match
       case (None, None) => Unchanged(None)

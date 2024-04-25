@@ -224,8 +224,6 @@ trait RelationalStore
 
   def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
 
-  override def mapState(st: State, f: [A] => A => A): State =
-    RelationalStoreState(st.tenv, st.abs1, nonRelationalStore.mapState(st.nonRelationalStoreState, f))
   override def join: Join[State] = combineRelationalStoreState
   override def widen: Widen[State] = combineRelationalStoreState
 

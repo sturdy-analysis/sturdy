@@ -47,8 +47,6 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     constantSymbolTable.getState
   def setState(state: State): Unit =
     constantSymbolTable.setState(state)
-  override def mapState(st: State, f: [A] => A => A): State =
-    constantSymbolTable.mapState(st, f)
   override def join: Join[State] = constantSymbolTable.join
   override def widen: Widen[State] = constantSymbolTable.widen
 

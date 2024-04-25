@@ -49,15 +49,6 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   override type State = Tables[Key, Symbol, Entry]
   override def getState: State = tables
   override def setState(s: State): Unit = tables = s
-  override def mapState(st: State, f: [A] => A => A): State =
-    st.map {
-      (k, t) =>
-        val t1 = t match
-          case Left(tbl) => Left(tbl.map(f[Symbol], f[Entry]))
-          case Right(entry) => Right(f[Entry](entry))
-        (f[Key](k), t1)
-    }
-
   override def join: Join[State] = JoinMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)

@@ -116,10 +116,6 @@ trait RelationalCallFrame
   override def setState(state: State): Unit =
     addressCallFrame.setState(state)
 
-  override def mapState(state: State, f: [A] => A => A): State =
-    addressCallFrame.mapState(state, f)
-
-
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]
 

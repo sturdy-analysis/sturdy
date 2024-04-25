@@ -92,6 +92,5 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
   override type State = List[V]
   override def getState: State = vars.toList
   override def setState(s: State): Unit = vars = s.toArray
-  override def mapState(st: State, f: [A] => A => A): State = st.map(f[V])
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly

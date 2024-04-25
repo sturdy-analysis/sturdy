@@ -107,8 +107,6 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
           mapping += (ctx) -> Join(regionCurrent, regionState).get
     }
 
-  override def mapState(st: State, f: [A] => A => A): State = st
-
   given finiteVirt: Finite[Context] with {}
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]

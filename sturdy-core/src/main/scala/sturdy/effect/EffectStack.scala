@@ -34,9 +34,6 @@ class EffectStack(_effects: => Effect,
   final override type State = All
   override def getState: State = getAllState
   override def setState(st: State): Unit = setAllState(st)
-
-  override def mapState(st: State, f: [A] => A => A): State =
-    effects.mapState(st.asInstanceOf, f).asInstanceOf
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
 

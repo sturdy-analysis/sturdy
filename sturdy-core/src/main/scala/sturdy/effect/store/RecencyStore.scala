@@ -79,9 +79,6 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
     this.addressTranslation.setState(st.addrTrans)
     store.setState(st.store.asInstanceOf)
 
-  override def mapState(st: RecencyStoreState, f: [A] => A => A): RecencyStoreState =
-    RecencyStoreState(addressTranslation.mapState(st.addrTrans, f), initStore.mapState(st.store, f))
-
   override def join: Join[RecencyStoreState] = new CombineRecencyStoreState(addressTranslation.join, initStore.join)
   override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(addressTranslation.widen, initStore.widen)
   private class CombineRecencyStoreState[W <: Widening](combineAddrTrans: Combine[addressTranslation.State, W], combineStore: Combine[initStore.State, W]) extends Combine[RecencyStoreState, W]:
@@ -134,12 +131,6 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
 
   override def join: Join[State] = combine(recencyStore.join, effect.join)
   override def widen: Widen[State] = combine(recencyStore.widen, effect.widen)
-  override def mapState(st: State, f: [A] => A => A): State =
-    RecencyClosureState(
-      recencyStore,
-      recencyStore.mapState(st.recencyStoreState.asInstanceOf, f),
-      effect.mapState(st.effectState, f)
-    )
 
   def combine[W <: Widening](combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W]): Combine[State, W] =
     (v1: State, v2: State) =>

@@ -77,9 +77,6 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
 
-  override def mapState(st: State, f: [A] => A => A): State =
-    st.map(f[V])
-
   def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false
     val joinedFrame = ops1.zipAll[V,V](ops2, null.asInstanceOf[V], null.asInstanceOf[V]).map {
