@@ -1,8 +1,5 @@
 package sturdy.fix
 
-import org.eclipse.collections.api.RichIterable
-import org.eclipse.collections.api.factory.Maps
-import org.eclipse.collections.api.map.MutableMap
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
@@ -27,11 +24,12 @@ final class StackedStates[Dom, Codom](val state: State)
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
    */
-  private val stack: MutableMap[(Dom, state.In), FrameInstanceInfo] = Maps.mutable.empty()
+//  private val stack: MutableMap[(Dom, state.In), FrameInstanceInfo] = Maps.mutable.empty()
+  private val stack: mutable.Map[(Dom, state.In), FrameInstanceInfo] = mutable.Map()
   private var stackHeight: Int = 0
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
-  private val outCache: MutableMap[(Dom, state.In), OutCacheEntry] = Maps.mutable.empty()
+  private val outCache: mutable.Map[(Dom, state.In), OutCacheEntry] = mutable.Map()
 
   case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
     def isStable: Boolean = stability eq Stability.Stable
@@ -48,7 +46,7 @@ final class StackedStates[Dom, Codom](val state: State)
   private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
   def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
-  override def toString: String = stack.keysView().collect(k => k.hashCode()).makeString("Stack(", ", ", ")")
+  override def toString: String = stack.keys.map(k => k.hashCode()).toString()
 
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
@@ -69,15 +67,16 @@ final class StackedStates[Dom, Codom](val state: State)
     val widenedIn = inStateWidening.push(dom, in)
     val stateFrame = (dom, widenedIn.get)
 
-    if (Fixpoint.DEBUG)
+    if (Fixpoint.DEBUG) {
       widenedIn.toOption.foreach(_ => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
+//      println(s"${toString}.get(${stateFrame.hashCode()}) = ${stack.get(stateFrame)}")
+    }
 
-    println(s"${toString}.get(${stateFrame.hashCode()})")
-    Option(stack.get(stateFrame)) match
+    stack.get(stateFrame) match
       case None =>
         // call is not recurrent
         if (readPriorOutput) {
-          val outEntry = Option(outCache.get(stateFrame))
+          val outEntry = outCache.get(stateFrame)
           if (outEntry.exists(_.isStable)) {
             // previous input subsumes current input and previous result still stable => return previous result
             val OutCacheEntry(result, out, _) = outEntry.get
@@ -97,7 +96,7 @@ final class StackedStates[Dom, Codom](val state: State)
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
-        Option(outCache.get(stateFrame)) match
+        outCache.get(stateFrame) match
           case None =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}BOTTOM RECURRENT  $stateFrame:$currentOut")
@@ -126,13 +125,14 @@ final class StackedStates[Dom, Codom](val state: State)
     }
     val previousInfo = stack.remove(stateFrame)
     if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null) {
-      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
+//      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
+      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.mkString("\n")}")
     }
     stackHeight = newStackHeight
     updatedResult
 
 
-  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = Option(outCache.get(frame)) match
+  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
