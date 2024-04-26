@@ -175,7 +175,7 @@ final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualA
         }
       case _ => false
 
-  override def hashCode(): Int =
+  private lazy val _hashCode: Int =
     val snapshotMapping = addrTrans.mapping
     try {
       addrTrans.mapping = this.recencyStoreState.addrTrans
@@ -184,5 +184,7 @@ final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualA
       addrTrans.mapping = snapshotMapping
     }
 
+  override def hashCode(): Int = _hashCode
+
   override def toString: String =
-    f"RecencyClosureState(${hashCode()}, ${recencyStoreState}, ${effectState})"
+    f"RecencyClosureState(${recencyStoreState}, ${effectState})"
