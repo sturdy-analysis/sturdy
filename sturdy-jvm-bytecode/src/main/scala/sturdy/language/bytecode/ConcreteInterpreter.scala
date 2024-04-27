@@ -142,8 +142,8 @@ object ConcreteInterpreter extends Interpreter:
 
 
     val bytecodeOps: BytecodeOps[Addr, Idx, Value, TypeRep] = implicitly
-    val objectOps: ObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, Idx, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
+    val objectOps: ObjectOps[Addr, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[Addr, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using objFieldAlloc, objFieldStore)
       )
     val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =

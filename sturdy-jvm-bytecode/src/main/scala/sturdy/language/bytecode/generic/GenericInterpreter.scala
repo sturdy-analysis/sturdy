@@ -57,7 +57,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   val bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, Int, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[Addr, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]
 
   implicit val joinUnit: J[Unit]

@@ -31,7 +31,7 @@ object test extends App{
 
   val cfs1: List[ClassFile] =
     process(new DataInputStream(new FileInputStream(simpleMathName))) { in =>
-      org.opalj.br.reader.Java8Framework.ClassFile(in)
+      org.opalj.br.reader.Java17Framework.ClassFile(in)
     }
   /*val locals = cfs.head.findMethod("return10").head.body.get.localVariableTable.get
   println(locals.map(_.fieldType))
