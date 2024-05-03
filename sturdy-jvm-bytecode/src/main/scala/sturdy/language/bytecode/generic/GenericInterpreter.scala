@@ -31,6 +31,7 @@ import scala.collection.immutable.ArraySeq
 
 enum JvmExcept[V]:
   case Jump(pc: Int)
+  case Ret(pc: V)
   case Throw(exception: ObjectType)
   case ThrowObject(exception: V)
 
@@ -458,19 +459,20 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: GOTO =>
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
         case inst: JSR =>
-          ??? //something about return address
+          stack.push(i32ops.integerLit(pc))
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
         case inst: RET =>
-          ???
+          val index = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+          except.throws(JvmExcept.Ret(index))
         case inst: TABLESWITCH =>
           val index = stack.popOrAbort()
           val transformedOffsets = Iterator.from(0).zip(inst.jumpOffsets).toSeq.map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
-          val offset = transformedOffsets.get(index).getOrElse(inst.defaultOffset)
+          val offset = transformedOffsets.getOrElse(index, inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
         case inst: LOOKUPSWITCH =>
           val key = stack.popOrAbort()
           val transformedOffsets = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
-          val offset = transformedOffsets.get(key).getOrElse(inst.defaultOffset)
+          val offset = transformedOffsets.getOrElse(key, inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
 
 
@@ -766,7 +768,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case x if (x == 201) =>
       inst match
         case inst: JSR_W =>
-          ??? //something about return address
+          stack.push(i32ops.integerLit(pc))
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
 
     // breakpoint
@@ -873,11 +875,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       val thisAndArgs = List(objVal) ++ args
       val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
 
-      val startingPC = mth.body.get.iterator.next().pc
-
-      var currInst = instructionMap.get(startingPC)
-
       val remainingOperands = stack.popNOrAbort(stack.size)
+
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
           run(0, instructionMap, mth)
@@ -936,10 +935,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
       }
 
-      val startingPC = mth.body.get.iterator.next().pc
-      var currInst = instructionMap.get(startingPC)
-
       val remainingOperands = stack.popNOrAbort(stack.size)
+
       stack.withNewFrame(0) {
         frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
           run(0, instructionMap, mth)
@@ -1008,17 +1005,21 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
   def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
     except.tryCatch {
-      val currPC = pc
-      val currInst = instructionMap(currPC)
-      frame.setData(currPC)
-      evalFix(currInst, currPC)
+      val currInst = instructionMap(pc)
+      frame.setData(pc)
+      evalFix(currInst, pc)
       if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
-        val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
+        val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
         run(nextPC, instructionMap, mth)
       }
     } {
       case JvmExcept.Jump(targetPC) =>
         run(targetPC, instructionMap, mth)
+      case JvmExcept.Ret(currPC) =>
+        //TODO transform V to Int
+        //val currInst = instructionMap(currPC)
+        //val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
+        //run(nextPC, instructionMap, mth)
       case JvmExcept.Throw(exception) =>
         println(exception)
         val currPC = frame.data
