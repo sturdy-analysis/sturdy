@@ -96,26 +96,26 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool]  with
-      override def instanceOf(v: ObjRep, check: ReferenceType): Boolean =
-        if (check == null){
+      override def instanceOf(v: ObjRep, target: ReferenceType): Boolean =
+        if (target == null){
           false
         }
         else{
-          v.cls.thisType.isSubtypeOf(check.mostPreciseObjectType)(project.classHierarchy)
+          v.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
         }
 
     given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
-      override def instanceOf(v: ArrayRep, check: ReferenceType): Boolean =
-        if (check == null){
+      override def instanceOf(v: ArrayRep, target: ReferenceType): Boolean =
+        if (target == null){
           false
         }
         else{
-          v.arrayType == check.asArrayType
+          v.arrayType == target.asArrayType
         }
-        
+
     given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
-      override def instanceOf(v: NullVal, check: ReferenceType): Boolean =
-        if (check == null){
+      override def instanceOf(v: NullVal, target: ReferenceType): Boolean =
+        if (target == null){
           true
         }
         else{

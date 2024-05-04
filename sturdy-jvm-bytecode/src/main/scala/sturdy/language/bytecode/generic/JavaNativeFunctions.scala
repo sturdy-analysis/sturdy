@@ -36,7 +36,7 @@ class JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, Site, J[_] <:
         val destPos = args(3)
         val length = args(4)
         arrayOps.arraycopy(src, srcPos, dest, destPos, length)
-        JOptionC.some(bytecodeOps.i32ops.integerLit(0))
+        JOptionC.none
 
 
 

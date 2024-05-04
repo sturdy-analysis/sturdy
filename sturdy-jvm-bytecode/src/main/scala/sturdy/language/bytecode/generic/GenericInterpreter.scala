@@ -131,17 +131,16 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadFloat =>
           stack.push(num.evalNumericOp(inst))
         case inst: LoadClass =>
-          val obj = createNativeObj(inst.value.mostPreciseObjectType)
+          val obj = createLibraryObj(inst.value.mostPreciseObjectType)
           val mth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-          val test = createNativeObj(ObjectType("java/lang/Class"))
+          val test = createLibraryObj(ObjectType("java/lang/Class"))
           stack.push(test)
-          //stack.push(objectOps.invokeFunction(obj, mth, List())(invokeMethodOnObject).get)
 
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
           val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
-          val stringObj = createNativeObj(ObjectType("java/lang/String"))
+          val stringObj = createLibraryObj(ObjectType("java/lang/String"))
           objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
 
@@ -163,7 +162,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
           val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
-          val stringObj = createNativeObj(ObjectType("java/lang/String"))
+          val stringObj = createLibraryObj(ObjectType("java/lang/String"))
           objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
         case inst: LoadMethodHandle_W =>
@@ -183,7 +182,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case x if (46 <= x && x <= 53) =>
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      stack.push(evalArrayLoad(inst, array, idx, pc))
+      stack.push(evalArrayLoad(inst, array, idx))
 
     // store local variable
     case x if (54 <= x && x <= 78) =>
@@ -195,7 +194,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       val v = stack.popOrAbort()
       val idx = stack.popOrAbort()
       val array = stack.popOrAbort()
-      evalArrayStore(inst, array, idx, v, pc)
+      evalArrayStore(inst, array, idx, v)
 
     // Manip stack
     case x if (87 <= x && x <= 95) =>
@@ -466,13 +465,13 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
           except.throws(JvmExcept.Ret(index))
         case inst: TABLESWITCH =>
           val index = stack.popOrAbort()
-          val transformedOffsets = Iterator.from(0).zip(inst.jumpOffsets).toSeq.map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
-          val offset = transformedOffsets.getOrElse(index, inst.defaultOffset)
+          val transformedIndices = Iterator.from(0).zip(inst.jumpOffsets).map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
+          val offset = transformedIndices.getOrElse(index, inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
         case inst: LOOKUPSWITCH =>
           val key = stack.popOrAbort()
-          val transformedOffsets = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
-          val offset = transformedOffsets.getOrElse(key, inst.defaultOffset)
+          val transformedIndices = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
+          val offset = transformedIndices.getOrElse(key, inst.defaultOffset)
           except.throws(JvmExcept.Jump(pc + offset))
 
 
@@ -535,13 +534,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         case inst: GETFIELD =>
           val obj = stack.popOrAbort()
-          val objCF = project.classFile(inst.declaringClass).get
           val field = objectOps.getField(obj, inst.name).getOrElse(fail(UnboundField, inst.name))
           stack.push(field)
         case inst: PUTFIELD =>
           val value = stack.popOrAbort()
           val obj = stack.popOrAbort()
-          val objCF = project.classFile(inst.declaringClass).get
           objectOps.setField(obj, inst.name, value)
 
 
@@ -556,33 +553,22 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
             invoke(mth, true)
           }
           else{
-            val mth = project.classFile(inst.declaringClass).get.findMethod(inst.name, inst.methodDescriptor).get
+            val cfs: ClassFile = project.classFile(inst.declaringClass).get
+            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
             invoke(mth, true)
           }
 
         case inst: INVOKEVIRTUAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
-          if (project.isLibraryType(objectType))
-            val numArgs = inst.methodDescriptor.parametersCount
-            val args = stack.popNOrAbort(numArgs)
-            val obj = stack.popOrAbort()
-            stack.push(obj)
-            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
-            if (!mth.descriptor.returnType.isVoidType){
-              stack.push(ret.get)
-            }
-
-          else
-            val numArgs = inst.methodDescriptor.parametersCount
-            val args = stack.popNOrAbort(numArgs)
-            val obj = stack.popOrAbort()
-            stack.push(obj)
-            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
-            if (!mth.descriptor.returnType.isVoidType) {
-              stack.push(ret.get)
-            }
+          val numArgs = inst.methodDescriptor.parametersCount
+          val args = stack.popNOrAbort(numArgs)
+          val obj = stack.popOrAbort()
+          stack.push(obj)
+          val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+          val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
+          if (!mth.descriptor.returnType.isVoidType){
+            stack.push(ret.get)
+          }
 
         case inst: INVOKESPECIAL =>
           val objectType = inst.declaringClass.mostPreciseObjectType
@@ -652,7 +638,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
       inst match
         case inst: NEW =>
           if (project.isLibraryType(inst.objectType)){
-            val obj = createNativeObj(inst.objectType)
+            val obj = createLibraryObj(inst.objectType)
             stack.push(obj)
           }
           else{
@@ -775,7 +761,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case x if (x == 202) =>
       ()
 
-  def createNativeObj(toLoad: ObjectType): V =
+  def createLibraryObj(toLoad: ObjectType): V =
     val source = javaLibClassFileWrapper(toLoad)
     val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
@@ -790,11 +776,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case inst: StoreLocalVariableInstruction =>
       frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-  def evalArrayLoad(inst: Instruction, array: V, idx: V, pc: Int): V = inst match
+  def evalArrayLoad(inst: Instruction, array: V, idx: V): V = inst match
     case inst: ArrayLoadInstruction =>
       arrayOps.getVal(array, idx).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
-  def evalArrayStore(inst: Instruction, array: V, idx: V, v: V, pc: Int): Unit = inst match
+  def evalArrayStore(inst: Instruction, array: V, idx: V, v: V): Unit = inst match
     case inst: ArrayStoreInstruction =>
       arrayOps.setVal(array, idx, v).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
@@ -961,32 +947,11 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         val concattedString = (baseString ++ constantString).zipWithIndex
         val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()),
           concattedString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
-        val stringObj = createNativeObj(ObjectType("java/lang/String"))
+        val stringObj = createLibraryObj(ObjectType("java/lang/String"))
         objectOps.setField(stringObj, "value", stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNativeStatic(mth, args)
-
-
-
-  def initStaticVars(mth: Method)(using Fixed) =
-    val newFrameData = 0
-
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-    val numArgs = mth.descriptor.parametersCount
-    val args = stack.popNOrAbort(numArgs)
-    val argsAndLocals = args.view
-
-    val startingPC = mth.body.get.iterator.next().pc
-
-    var currInst = instructionMap.get(startingPC)
-
-    stack.withNewFrame(0) {
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-        run(0, instructionMap, mth)
-      }
-    }
 
   def invokeExternal(mth: Method, isStatic: Boolean) = external {
     invoke(mth, isStatic)
@@ -1026,7 +991,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
-        val exceptionObject = createNativeObj(exception)
+        val exceptionObject = createLibraryObj(exception)
         stack.push(exceptionObject)
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
@@ -1037,39 +1002,6 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         stack.push(exception)
         run(handler.handlerPC, instructionMap, mth)
     }
-  //Deprecated
-  /*def runBlock(pc: Int, instructionMap: Map[Int, Instruction], mth: Method): Unit =
-    except.tryCatch {
-      var currPC = pc
-      var currInst = instructionMap(currPC)
-      eval(currInst, currPC)
-      while(currInst.nextInstructions(pc)(mth.body.get).nonEmpty){
-        currPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
-        frame.setData(currPC)
-        currInst = instructionMap(currPC)
-          eval(currInst, currPC)
-      }
-    } {
-      case JvmExcept.Jump(targetPC) =>
-        runBlock(targetPC, instructionMap, mth)
-      case JvmExcept.Throw(exception) =>
-        println(exception)
-        val currPC = frame.data
-        val handler = mth.body.get.exceptionHandlersFor(currPC)
-          .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
-          .getOrElse(except.throws(JvmExcept.Throw(exception)))
-        val exceptionObject = createNativeObj(exception)
-        stack.push(exceptionObject)
-        runBlock(handler.handlerPC, instructionMap, mth)
-      case JvmExcept.ThrowObject(exception) =>
-        val currPC = frame.data
-        val handler = mth.body.get.exceptionHandlersFor(currPC)
-          .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
-          .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
-        stack.push(exception)
-        runBlock(handler.handlerPC, instructionMap, mth)
-    }*/
-
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match
     case opalTypes: ByteType => ValType.I32
@@ -1090,5 +1022,5 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
     case ValType.I64 => num.evalNumericOp(LCONST_0)
     case ValType.F32 => num.evalNumericOp(FCONST_0)
     case ValType.F64 => num.evalNumericOp(DCONST_0)
-    case ValType.Obj => objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
-    case ValType.Array => arrayOps.makeArray(arrayAlloc(AllocationSite.default), Seq(), ArrayType.ArrayOfObject)
+    case ValType.Obj => objectOps.makeNull()
+    case ValType.Array => objectOps.makeNull()
