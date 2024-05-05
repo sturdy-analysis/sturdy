@@ -139,7 +139,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadString =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
+          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
           val stringObj = createLibraryObj(ObjectType("java/lang/String"))
           objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
@@ -161,7 +161,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         case inst: LoadString_W =>
           val string = inst.value.toCharArray.map(l => l.toInt).toSeq
           val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
+          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
           val stringObj = createLibraryObj(ObjectType("java/lang/String"))
           objectOps.setField(stringObj, "value", stringArray)
           stack.push(stringObj)
@@ -946,7 +946,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         val constantString = arrayOps.getArray(objectOps.getField(args(1), "value").get).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()),
-          concattedString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(ObjectType("String")))
+          concattedString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
         val stringObj = createLibraryObj(ObjectType("java/lang/String"))
         objectOps.setField(stringObj, "value", stringArray)
         stack.push(stringObj)
@@ -986,7 +986,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
         //val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
         //run(nextPC, instructionMap, mth)
       case JvmExcept.Throw(exception) =>
-        println(exception)
+        //println(exception)
         val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))

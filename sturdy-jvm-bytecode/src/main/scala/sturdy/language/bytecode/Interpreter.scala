@@ -235,7 +235,6 @@ trait Interpreter:
 
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
       import Value.*
-
       override def instanceOf(v: Value, check: TypeRep): Value = v match
         case Obj(o1) => boolean(TypeOps.instanceOf(o1, check))
         case Array(a1) => boolean(TypeOps.instanceOf(a1, check))

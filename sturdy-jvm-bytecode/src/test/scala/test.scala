@@ -21,11 +21,11 @@ object test extends App{
     case DoubleType => ValType.F64
     case _ => ValType.I32
 
-  val classFileName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject"
+  val projectPath = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject"
   val simpleMathName = "C:\\Users\\Stefan Marx\\IdeaProjects\\CompileProject\\out\\production\\CompileProject\\SimpleMath.class"
 
-  val pWithNatives = Project(
-    new java.io.File(classFileName), // path to the JAR files/directories containing the project
+  val pWithLibrary = Project(
+    new java.io.File(projectPath), // path to the JAR files/directories containing the project
     org.opalj.bytecode.RTJar
   )
 
@@ -41,12 +41,12 @@ object test extends App{
 
   //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
   val cfs = cfs1.head
-  val cfs2 = pWithNatives.classFile(ObjectType("ComplicatedMath")).get
-  println(pWithNatives.classFile(ObjectType("ComplicatedMath")).get.staticInitializer)
+  val cfs2 = pWithLibrary.classFile(ObjectType("ComplicatedMath")).get
+  println(pWithLibrary.classFile(ObjectType("ComplicatedMath")).get.staticInitializer)
 
-  val sourceFile = classFileName
+  val sourceFile = projectPath
 
-  val interp = new ConcreteInterpreter.Instance(pWithNatives, sourceFile, Map(), Map(), Map())
+  val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
   val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
@@ -102,14 +102,12 @@ object test extends App{
   interp.evalExternal(ICONST_1)
   interp.invokeExternal(testBranch, true)
   println(interp.stack.pop())
-  println(interp.stack.size)
 
   println("--- ReturnTest ---")
   val testReturn = cfs.findMethod("returnTest").head
   interp.evalExternal(ICONST_1)
   interp.invokeExternal(testReturn, true)
   println(interp.stack.pop())
-  println(interp.stack.size)
 
   println("--- ObjectTest ---")
   val testObj = cfs.findMethod("objectTest").head
@@ -119,6 +117,14 @@ object test extends App{
   println("--- InheritanceTest ---")
   val testInherit = cfs.findMethod("inheritanceTest").head
   interp.invokeExternal(testInherit, true)
+  println(interp.stack.pop())
+
+  val testInherit2 = cfs.findMethod("inheritanceTest2").head
+  interp.invokeExternal(testInherit2, true)
+  println(interp.stack.pop())
+
+  val testInherit3 = cfs.findMethod("inheritanceTest3").head
+  interp.invokeExternal(testInherit3, true)
   println(interp.stack.pop())
 
   println("--- objectCompTest ---")
@@ -176,10 +182,6 @@ object test extends App{
 
   val arrayLengthTest = cfs.findMethod("arrayLengthTest").head
   interp.invokeExternal(arrayLengthTest, true)
-  println(interp.stack.pop())
-
-  val arrayTypeTest = cfs.findMethod("arrayTypeTest").head
-  interp.invokeExternal(arrayTypeTest, true)
   println(interp.stack.pop())
 
   println("--- objectArrayTest ---")
