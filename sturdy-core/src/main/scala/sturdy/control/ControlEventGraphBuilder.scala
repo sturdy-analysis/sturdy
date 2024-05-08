@@ -38,7 +38,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
 
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
-    ControlGraph(edges.toSet)
+    ControlGraph(addBlockPairEdges(edges.toSet))
 
   def isCatching: Boolean = stack match
     case (_: Entry.Catching) :: _ => true
@@ -52,10 +52,6 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     }
     predecessors = List(node)
     previous
-
-  private def addBlockPairEdges(sec: Section): Unit =
-    if (!edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)))
-      edges += Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)
 
   def assertNoCatching(): Unit =
     if (isCatching) {
@@ -80,7 +76,6 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
             // nothing
           } else {
             addNode(Node.BlockEnd(sec))
-            addBlockPairEdges(sec)
           }
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 
@@ -169,6 +164,22 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         predecessors = List.empty
         activeExc = Set.empty
 
+  private def addBlockPairEdges(edges: Set[CEdge]): Set[CEdge] =
+    val openedSections = edges.flatMap(e => List(e._1, e._2)).flatMap {
+      case Node.BlockStart(sec) => List(sec)
+      case _ => List.empty
+    }
+
+    val closedSections = openedSections.filter(sec =>
+      edges.exists(e => e.to == Node.BlockEnd(sec) || e.from == Node.BlockEnd(sec)))
+
+    val blockPairEdges: Set[CEdge] = closedSections.flatMap(sec =>
+      if edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)) then
+        List.empty
+      else
+        List(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)))
+
+    edges ++ blockPairEdges
 
 object ControlEventGraphBuilder:
   private def error(msg: String): Nothing =
