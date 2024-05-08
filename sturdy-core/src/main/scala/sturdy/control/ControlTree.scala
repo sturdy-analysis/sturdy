@@ -56,17 +56,20 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
   private def _print(buf: ListBuffer[ControlEvent[Atom,Sec,Exc,Fx]]): Unit = this match
     case ControlTree.Empty() => ()
 
+    case ControlTree.Failed() =>
+      buf += BasicControlEvent.Failed()
+
     case ControlTree.Atomic(a) =>
       buf += BasicControlEvent.Atomic(a)
-
-    case ControlTree.Seq(x, xs) =>
-      x._print(buf)
-      xs._print(buf)
 
     case ControlTree.Section(section, body) =>
       buf += BasicControlEvent.BeginSection(section)
       body._print(buf)
       buf += BasicControlEvent.EndSection()
+
+    case ControlTree.Seq(x, xs) =>
+      x._print(buf)
+      xs._print(buf)
 
     case ControlTree.Fork(b1, b2) =>
       buf += BranchingControlEvent.Fork()
@@ -75,8 +78,8 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
       b2._print(buf)
       buf += BranchingControlEvent.Join()
 
-    case ControlTree.Failed() =>
-      buf += BasicControlEvent.Failed()
+    case ControlTree.Throw(exc) =>
+      buf += ExceptionControlEvent.Throw(exc)
 
     case ControlTree.Try(body, handlers) =>
       buf += ExceptionControlEvent.BeginTry()
@@ -90,9 +93,6 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
       )
 
       buf += ExceptionControlEvent.EndTry()
-
-    case ControlTree.Throw(exc) =>
-      buf += ExceptionControlEvent.Throw(exc)
 
     case ControlTree.Fix(fx, b) =>
       buf += FixpointControlEvent.BeginFixpoint(fx)

@@ -2,6 +2,7 @@ package sturdy.control
 
 import sturdy.data.combineMaps
 
+import scala.annotation.tailrec
 import scala.language.implicitConversions
 
 class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
@@ -10,89 +11,112 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
   private case class CNode(n: Node[Atom, Sec], exc: Boolean)
   private implicit def cnode[A <: Atom,S <: Sec](n: Node[A, S]): CNode = CNode(n, false)
   private type CEdge = Edge[Atom, Sec]
-  private case class Result(tails: Set[CNode], xs: List[(Exc, Set[CNode])]):
-    def ||(that: Result): Result =
-      Result(this.tails ++ that.tails, this.xs ++ that.xs)
-  private object Result:
-    val empty: Result = Result(Set(), List())
 
-  private var edges: Set[CEdge] = Set.empty
-  private var fixpoints: Map[Fx, Result] = Map()
+  private type CNodes = List[CNode]
+  private type ActiveExc = Map[Exc, CNodes]
+  private type Fixpoints = Map[Fx, (CNodes, ActiveExc)]
+  private type Graph = Set[CEdge]
 
   def build(ct: CT): ControlGraph[Atom, Sec] =
-    _build(ct, Set(Node.Start()))
-    ControlGraph(edges)
+    val init_state = TreeBuilderState(preds = List(Node.Start()), aes = Map.empty, fixpoints = Map.empty, curg = Set.empty)
+    val builded_state = _build(ct, init_state)
+    val helper_edges_state = addBlockPairEdges(builded_state)
+    ControlGraph(helper_edges_state.curg)
 
-  private def _build(ct: CT, pred: Set[CNode]): Result = ct match
-    case ControlTree.Empty() =>
-      Result(pred, List())
+  private def addNode(state: TreeBuilderState, n: Node[Atom, Sec]): TreeBuilderState =
 
-    case ControlTree.Atomic(a) =>
-      val current = Node.Atomic(a)
-      addEdges(pred, current)
-      Result(Set(current), List())
+    state.copy(
+      preds = List(n),
+      curg = state.curg ++
+        state.preds.map(pred => Edge(pred.n, n, if pred.exc then EdgeType.Exceptional else EdgeType.CF))
+          .toSet)
 
-    case ControlTree.Failed() =>
-      addEdges(pred, Node.Failure())
-      Result.empty
+  private def mergeAes(aes1: ActiveExc, aes2: ActiveExc): ActiveExc =
+    aes1 ++ aes2.map { case (k, v) => k -> (aes1.getOrElse(k, List.empty) ++ v) }
 
-    case ControlTree.Section(section, body) =>
-      val begin: CNode = Node.BlockStart(section)
-      val end: CNode = Node.BlockEnd(section)
+  private def addAes(state: TreeBuilderState, exc: Exc): TreeBuilderState =
+    state.copy(aes = state.aes + (exc -> (state.preds.map(node => node.copy(exc = true)) ++ state.aes.getOrElse(exc, List.empty))))
 
-      addEdges(pred, begin)
-      val Result(tails, xs) = _build(body, Set(begin))
-      addEdges(tails, end)
-      if (tails.isEmpty)
-        Result(Set.empty, xs)
-      else {
-        addBlockPairEdges(section)
-        Result(Set(end), xs)
-      }
+  private def addFixpoint(state: TreeBuilderState, fx: Fx): TreeBuilderState =
+    state.copy(fixpoints = state.fixpoints + (fx ->
+      (state.preds ++ state.fixpoints.getOrElse(fx, (List.empty, Map.empty))._1,
+        mergeAes(state.aes, state.fixpoints.getOrElse(fx, (List.empty, Map.empty))._2)
+      )))
 
-    case ControlTree.Seq(t1, t2) =>
-      val Result(tails1, xs1) = _build(t1, pred)
-      val Result(tails2, xs2) = _build(t2, tails1)
-      Result(tails2, xs1 ++ xs2)
-
-    case ControlTree.Fork(b1, b2) =>
-      val Result(tails1, xs1) = _build(b1, pred)
-      val Result(tails2, xs2) = _build(b2, pred)
-      Result(tails1 ++ tails2, xs1 ++ xs2)
-
-    case ControlTree.Try(body, handlers) =>
-      val Result(lastBody, excs) = _build(body, pred)
-
-      val rs = for ((hx, ht) <- handlers) yield {
-        val hpred = excs.filter(_._1 == hx).flatMap(_._2).map(_.copy(exc = true))
-        _build(ht, hpred.toSet)
-      }
-      val result = rs.foldRight(Result(lastBody, List()))(_ || _)
-      result
-
-    case ControlTree.Throw(exc) =>
-      Result(Set(), List(exc -> pred))
-
-    case ControlTree.Fix(fx, b) =>
-      val r = _build(b, pred)
-      // register result of `b`
-      fixpoints += fx -> (fixpoints.getOrElse(fx, Result.empty) || r)
-      r
-
-    case ControlTree.Recurrent(fx) =>
-      fixpoints.getOrElse(fx, Result.empty)
-
-    case ControlTree.Restart() =>
-      // restart in t without predecessors
-      Result.empty
-
-  private def addEdges(prev: Set[CNode], current: CNode): Unit =
-    edges ++= prev.map(p =>
-      Edge(p.n, current.n, if (p.exc) EdgeType.Exceptional else EdgeType.CF)
+  private def restoreFixpoint(state: TreeBuilderState, fx: Fx): TreeBuilderState =
+    state.copy(
+      preds = state.fixpoints.getOrElse(fx, (List.empty, Map.empty))._1,
+      aes = state.fixpoints.getOrElse(fx, (List.empty, Map.empty))._2
     )
 
-  private def addBlockPairEdges(sec: Sec): Unit =
-    if (!edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)))
-      edges += Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)
+  private def _build(ct: CT, state: TreeBuilderState): TreeBuilderState = ct match
+    case ControlTree.Empty() => state
+
+    case ControlTree.Atomic(a) =>
+      addNode(state, Node.Atomic(a))
+
+    case ControlTree.Failed() =>
+      addNode(state, Node.Failure()).copy(preds = List.empty)
+
+    case ControlTree.Section(section, body) =>
+      val body_state = _build(body, addNode(state, Node.BlockStart(section)))
+      if (body_state.preds.isEmpty)
+        body_state
+      else
+        addNode(body_state, Node.BlockEnd(section))
+
+    case ControlTree.Seq(t1, t2) =>
+      _build(t2, _build(t1, state))
+
+    case ControlTree.Fork(b1, b2) =>
+      val state1 = _build(b1, state)
+      val state2 = _build(b2, state1.copy(preds = state.preds, aes = state.aes))
+      state2.copy(preds = state1.preds ++ state2.preds, aes = mergeAes(state1.aes, state2.aes))
+
+    case ControlTree.Try(body, handlers) =>
+      val state_body = _build(body, state.copy(aes = Map.empty))
+      val state_handlers = handlers.foldLeft(state_body.copy(aes = Map.empty))((s, handler) =>
+        val state_handler = _build(handler._2, s.copy(
+          preds = state_body.aes.getOrElse(handler._1, List.empty),
+          aes = Map.empty
+        ))
+        state_handler.copy(preds = s.preds ++ state_handler.preds, aes = mergeAes(s.aes, state_handler.aes))
+      )
+
+      state_handlers.copy(aes = state.aes ++ state_handlers.aes)
+
+    case ControlTree.Throw(exc) =>
+      addAes(state, exc).copy(preds = List.empty)
+
+    case ControlTree.Fix(fx, b) =>
+      val state1 = _build(b, state)
+      addFixpoint(state1, fx)
+
+    case ControlTree.Recurrent(fx) =>
+      restoreFixpoint(state, fx)
+
+    case ControlTree.Restart() =>
+      state.copy(preds = List.empty, aes = Map.empty)
+
+  private def addBlockPairEdges(state: TreeBuilderState): TreeBuilderState =
+    val openedSections = state.curg.flatMap(e => List(e._1, e._2)).flatMap {
+      case Node.BlockStart(sec) => List(sec)
+      case _ => List.empty
+    }
+    val closedSections = openedSections.filter(sec =>
+      state.curg.exists(e => e.to == Node.BlockEnd(sec) || e.from == Node.BlockEnd(sec)))
+    val blockPairEdges: Set[CEdge] = closedSections.flatMap(sec =>
+      if state.curg.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)) then
+        List.empty
+      else
+        List(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)))
+
+    state.copy(curg = state.curg ++ blockPairEdges)
+
+  private case class TreeBuilderState(preds: CNodes, aes: ActiveExc, fixpoints: Fixpoints, curg: Graph)
+
+
+
+
 }
 
