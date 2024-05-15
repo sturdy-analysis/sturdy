@@ -13,7 +13,7 @@ object Stack:
                             (using Finite[Dom], Finite[Ctx], Widen[Codom])
                             : Stack[Dom, Codom, state.In, state.Out] = config match
     case StackConfig.StackedStates(readPriorOutput) =>
-      StackedStates(state)(new ContextualInStateWidening(contextual)(using state.widenIn), readPriorOutput)
+      StackedStates(state)(new ContextualInStateWidening(contextual)(using state.stackWiden), readPriorOutput)
     case StackConfig.StackedCfgNodes(readPriorOutput, onlyWriteInCacheWhenRecurrent) =>
       StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent)
 

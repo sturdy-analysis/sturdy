@@ -5,14 +5,12 @@ import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Finite
-import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
+import sturdy.values.{Changed, Join, MaybeChanged, StackWidening, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import scala.jdk.CollectionConverters.*
 
 
@@ -171,7 +169,7 @@ class FiniteInStateWidening[Dom, In](using Finite[In]) extends InStateWidening[D
   def push(dom: Dom, in: In): MaybeChanged[In] = MaybeChanged.Unchanged(in)
   def pop(dom: Dom, in: In): Unit = ()
 
-class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => Widen[In]) extends InStateWidening[Dom, In]:
+class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => StackWidening[In]) extends InStateWidening[Dom, In]:
   class ContextEntry(var in: List[In])
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
@@ -182,7 +180,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in.head, in)}
+        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in, in)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 

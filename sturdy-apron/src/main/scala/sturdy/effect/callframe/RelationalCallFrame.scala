@@ -118,6 +118,12 @@ trait RelationalCallFrame
 
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]
+  override def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) =>
+      if(stack.contains(call))
+        Unchanged(call)
+      else
+        Changed(call)
 
   def isSound[cData, cVal](c: ConcreteCallFrame[cData, Var, cVal, CallSite])(using vSoundness: Soundness[cVal, Val], dSoundness: Soundness[cData, Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.data, data)

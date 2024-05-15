@@ -1,6 +1,6 @@
 package sturdy.effect
 
-import sturdy.values.{Combine, Join, MaybeChanged, Widen}
+import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen, WidenStateful}
 import sturdy.fix
 
 
@@ -27,6 +27,7 @@ class EffectStack(_effects: => Effect,
 
   override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
   override def joinOut(dom: Any): Join[Out] = (out1: Out, out2: Out) => outEffects(dom).join(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
   override def widenOut(dom: Any): Widen[Out] = (out1: Out, out2: Out) => outEffects(dom).widen(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
 
@@ -36,6 +37,8 @@ class EffectStack(_effects: => Effect,
   override def setState(st: State): Unit = setAllState(st)
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
+  override def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) => effects.stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
 
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()

@@ -1,6 +1,6 @@
 package sturdy.effect
 
-import sturdy.values.{Combine, Join, MaybeChanged, Widen, Widening}
+import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen, Widening}
 
 import scala.collection.immutable.ArraySeq
 
@@ -18,8 +18,8 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
       effect.setState(state.asInstanceOf)
     )
     
-  override def join: Join[ArraySeq[Any]] = combine((effect) => (s1, s2) => effect.join(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
-  override def widen: Widen[ArraySeq[Any]] = combine((effect) => (s1, s2) => effect.widen(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
+  override def join: Join[State] = combine((effect) => (s1, s2) => effect.join(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
+  override def widen: Widen[State] = combine((effect) => (s1, s2) => effect.widen(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   def combine[W <: Widening](combineEffectState: Effect => (Any, Any) => MaybeChanged[Any]): Combine[State, W] =
     (states1: State, states2: State) =>
       var changed = false
@@ -31,5 +31,18 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
       }
 
       MaybeChanged(ArraySeq.from(joinedStates), changed)
+
+  override def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) =>
+      var changed = false
+      val joinedCall = effects.view.zipWithIndex.map {
+        (effect, idx) =>
+          val joined = effect.stackWiden(stack.map(_.apply(idx)).asInstanceOf, call(idx).asInstanceOf)
+          changed ||= joined.hasChanged
+          joined.get
+      }
+
+      MaybeChanged(ArraySeq.from(joinedCall), changed)
+
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](effects))

@@ -1,7 +1,7 @@
 package sturdy.effect
 
 import sturdy.data.CombineUnit
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Changed, Join, MaybeChanged, StackWidening, Widen}
 
 trait Stateful:
   type State
@@ -9,6 +9,11 @@ trait Stateful:
   def setState(st: State): Unit
   def join: Join[State]
   def widen: Widen[State]
+  def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) =>
+      stack match
+        case Nil => Changed(call)
+        case mostRecentCall :: _ => widen(mostRecentCall, call)
 
 trait Effect extends Stateful:
   def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:

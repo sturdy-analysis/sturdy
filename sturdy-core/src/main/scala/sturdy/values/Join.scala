@@ -58,6 +58,13 @@ trait CombineStateful[S, V, W <: Widening]:
 type JoinStateful[S, V] = CombineStateful[S, V, Widening.No]
 type WidenStateful[S, V] = CombineStateful[S, V, Widening.Yes]
 
+trait StackWidening[V]:
+  /**
+   * Ensures that every stack has a recurrent recursive call by overapproximating the current call. More formally:
+   * Given an infinite sequence of calls C, then the sequence W_n := StackWidening(W_1..W_n-1, C_n) terminates with W_j = W_j+1 for some j and W_i >= C_i for all i.
+   */
+  def apply(stack: List[V], call: V): MaybeChanged[V]
+
 
 object Combine:
   inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): MaybeChanged[V] = (v1, v2) match {

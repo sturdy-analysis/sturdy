@@ -71,7 +71,12 @@ enum ApronExpr[Addr, Type]:
 
   def toIntern(env: apron.Environment): Texpr1Intern =
     val expr = this.toApron
-    new Texpr1Intern(env, expr)
+    try {
+      new Texpr1Intern(env, expr)
+    } catch {
+      case exc: Exception =>
+        throw new IllegalArgumentException(s"Exception while converting ApronExpr $expr with environment $env", exc)
+    }
 
 
 object ApronExpr:
