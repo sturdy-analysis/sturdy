@@ -48,7 +48,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
      p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-//    p.endsWith("manipulatePointer.tip")
+//    p.endsWith("fibRec.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates())
@@ -90,7 +90,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
          val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
 
          println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
-//           assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
+//         assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
          assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
        }
 

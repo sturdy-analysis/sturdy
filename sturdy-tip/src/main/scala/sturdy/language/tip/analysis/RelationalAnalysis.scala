@@ -183,13 +183,16 @@ object RelationalAnalysis extends Interpreter,
 
     override def newEffectStack(effects: => Effect, inEffects: PartialFunction[Any, Effect], outEffects: PartialFunction[Any, Effect]): EffectStack =
       new EffectStack(
-        newEffectClosure(removeStore(effects)),
-        (dom: Any) => newEffectClosure(removeStore(inEffects(dom))),
-        (dom: Any) => newEffectClosure(removeStore(outEffects(dom)))
+        RecencyClosure(recencyStore,EffectList(callFrame, alloc, print, input, failure)),
+        {
+          case _: FixIn.Run | _: FixIn.EnterFunction => RecencyClosure(recencyStore, EffectList(callFrame, print, failure))
+          case _: FixIn.Eval => RecencyClosure(recencyStore, EffectList(callFrame, alloc, input, failure))
+        },
+        {
+          case _: FixIn.Run | _: FixIn.EnterFunction => RecencyClosure(recencyStore, EffectList(callFrame, print, failure))
+          case _: FixIn.Eval => RecencyClosure(recencyStore, EffectList(callFrame, alloc, failure))
+        }
       )
-
-    def newEffectClosure(effect: Effect): Effect =
-      RecencyClosure(recencyStore, effect)
 
     private def removeStore(effect: Effect): Effect =
       effect match
