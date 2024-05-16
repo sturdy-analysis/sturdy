@@ -87,6 +87,8 @@ object ApronExpr:
 
   def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(0))
+  def longLit[Addr, Type](using intOps: IntegerOps[Int, Type])(l: Long): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(l)), intOps.integerLit(0))
   def bigIntLit[Addr, Type](using intOps: IntegerOps[Int, Type])(i: BigInt): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i.bigInteger)), intOps.integerLit(0))
   def intInterval[Addr, Type](using intOps: IntegerOps[Int,Type])(lower: Int, upper: Int): Constant[Addr, Type] =

@@ -5,7 +5,7 @@ import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.{Changed, Join, MaybeChanged, StackWidening, Unchanged, Widen}
+import sturdy.values.{Changed, Finite, Join, MaybeChanged, StackWidening, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -139,8 +139,8 @@ final class StackedStates[Dom, Codom](val state: State)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
-      val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, out)}
-
+      val currentOut = state.getOutState(frame._1)
+      val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, currentOut)}
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged

@@ -5,7 +5,7 @@ import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Combine, Join, MaybeChanged, Unchanged, Widen, Widening}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
 import sturdy.data.{*, given}
@@ -18,6 +18,8 @@ trait ApronState[Addr,Type]:
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraint(constraint: ApronCons[Addr,Type]): Unit
   def join[A: Join](f: => A)(g: => A): A
+  def join: Join[ApronExpr[Addr,Type]]
+  def widen: Widen[ApronExpr[Addr,Type]]
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
   def getBound(expr: ApronExpr[Addr, Type]): Interval
   def getIntBound(expr: ApronExpr[Addr, Type]): (Int,Int) =
@@ -127,3 +129,39 @@ final class ApronRecencyState
       addConstraint(condition.negated)
       g
     }
+
+  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = {
+    // The first two special cases avoid allocating a new temporary address
+    case (e1,e2) if (e1 == e2) => Unchanged(e1)
+//    case (e1@ApronExpr.Addr(ApronVar(addr1),tpe1), e2@ApronExpr.Addr(ApronVar(addr2),tpe2)) if(addr1.ctx == addr2.ctx && tpe1 == tpe2) =>
+//      val iv1 = getBound(e1)
+//      val virt = recencyStore.addressTranslation.allocRecentOld(addr1.ctx)
+//      val joinedExpr = ApronExpr.addr(virt, tpe1)
+//      val iv3 = getBound(joinedExpr)
+//      MaybeChanged(joinedExpr, iv3.isLeq(iv1))
+    // The general case allocates a new temporary address
+    case (e1,e2) =>
+      combineExpr(recencyStore.widen)(e1, e2)
+  }
+
+  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = {
+    case (e1,e2) if (e1 == e2) => Unchanged(e1)
+    case (e1,e2) => combineExpr(recencyStore.widen)(e1, e2)
+  }
+
+  private def combineExpr[W <: Widening](combineStore: Combine[recencyStore.State, W]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = (e1, e2) =>
+    val resultType = Join(e1._type, e2._type).get
+    val ctx = temporaryVariableAllocator(resultType)
+    val result = recencyStore.addressTranslation.allocOld(ctx)
+    val state1 = recencyStore.getState
+    assign(result, e1)
+    val state2 = recencyStore.getState
+    recencyStore.setState(state1)
+    assign(result, e2)
+    val state3 = recencyStore.getState
+    val joinedState = combineStore(state2, state3)
+    recencyStore.setState(joinedState.get)
+    if(joinedState.hasChanged)
+      println("Changed")
+    joinedState.map(_ => ApronExpr.addr(result, resultType))
+

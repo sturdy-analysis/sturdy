@@ -69,24 +69,15 @@ object ApronJoins:
     env
 
 
-given CombineApronExpr[Addr: Ordering: ClassTag, Type : Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr,Type]]): Combine[ApronExpr[Addr,Type], W] =
+given JoinApronExpr[Addr: Ordering : ClassTag, Type: Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr, Type]]): Join[ApronExpr[Addr, Type]] =
   (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
-    if(e1 == e2)
-      Unchanged(e1)
-    else
-      val apronState = lazyApronState.value
-      val resultType = Join(e1._type, e2._type).get
-      val iv1 = apronState.getBound(e1)
-      apronState.withTempVars(resultType) {
-        case (result, List()) =>
-          apronState.join {
-            apronState.assign(result, e1)
-          } {
-            apronState.assign(result, e2)
-          }
-          val iv3 = apronState.getBound(e2)
-          MaybeChanged(ApronExpr.addr(result, resultType), iv3.isLeq(iv1))
-      }
+    val apronState = lazyApronState.value
+    apronState.join(e1,e2)
+
+given WidenApronExpr[Addr: Ordering : ClassTag, Type: Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr, Type]]): Widen[ApronExpr[Addr, Type]] =
+  (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
+    val apronState = lazyApronState.value
+    apronState.widen(e1,e2)
 
 given Join[Coeff] = (c1,c2) =>
   val inf1 = c1.inf()
