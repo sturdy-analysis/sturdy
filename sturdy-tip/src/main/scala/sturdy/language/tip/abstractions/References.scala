@@ -11,8 +11,8 @@ import reflect.Selectable.reflectiveSelectable
 
 object References:
   def allocationSiteAddr(asite: AllocationSite): AllocationSiteAddr = asite match
-    case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)
-    case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)
+    case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)
+    case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
 
 
   trait AllocationSites extends Interpreter:
