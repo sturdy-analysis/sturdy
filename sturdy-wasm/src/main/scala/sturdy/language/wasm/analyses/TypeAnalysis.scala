@@ -11,7 +11,7 @@ import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, UpperBoundSymbol
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -32,8 +32,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 
-object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow:
+object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
@@ -61,22 +62,22 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  class Instance(config: WasmConfig) extends
-    GenericInstance
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
 
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
+      override protected def contextSensitive = observedConfig.fix.get
     }
-
-    override val fixpointSuper = fixpoint
 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
@@ -88,7 +89,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly

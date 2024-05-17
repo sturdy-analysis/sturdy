@@ -74,6 +74,11 @@ enum InstLoc:
   case InInit(mod: ModuleInstance, pc: Int)
   case InvokeExported(mod: ModuleInstance, funName: String)
 
+  override def hashCode(): Int = this match
+    case InFunction(FuncId(mod, funcIx), pc) => mod.hashCode() + 7 * funcIx + 3 * pc
+    case InInit(mod, pc) => mod.hashCode() + 101 * pc
+    case InvokeExported(mod, funName) => mod.hashCode() + 331 * funName.hashCode
+
   override def toString: String = this match
     case InFunction(func, pc) => s"$func:$pc"
     case InInit(mod, pc) => s"$mod.INIT:$pc"
@@ -115,7 +120,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
-  val fixpointSuper: fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
   // joins
@@ -401,7 +405,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: Fixed): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
-  private def fixed: Fixed = fixpointSuper {
+  private def fixed: Fixed = fixpoint {
     case FixIn.Eval(inst, loc) =>
       eval_open(inst, loc)
       FixOut.Eval()

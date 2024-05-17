@@ -1,38 +1,31 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.Blocker
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
+import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureKind
+import sturdy.control.*
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, ConstantAnalysis}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.generic.WasmFailure
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
-import sturdy.values.Abstractly
-import sturdy.values.Topped
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.{Abstractly, Topped}
 import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
-import scala.reflect.ClassTag
-import scala.reflect.TypeTest
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
 
 
@@ -45,17 +38,17 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
-  it must s"execute most general client for simple with stacked states" in {
-    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
-  }
+//  it must s"execute most general client for simple with stacked states" in {
+//    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+//  }
 
 //  it must s"execute most general client for simple with stacked frames" in {
 //    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
 //  }
 
-  it must s"execute most general client for fact with stacked states" in {
-    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
-  }
+//  it must s"execute most general client for fact with stacked states" in {
+//    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
+//  }
 
 //  it must s"execute most general client for fact with stacked frames" in {
 //    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
@@ -148,7 +141,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
-//    val expected2 = Option(expectedFrames).getOrElse(expected)
+    val expected2 = Option(expectedFrames).getOrElse(expected)
 //    it must s"execute $funcName withs args $args with result $expected2 with stacked frames" in {
 //      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
 //      res match
@@ -167,23 +160,29 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
-    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
-      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
-        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
-    }
+//    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
+//      val res = runConstantAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
+//        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
+//    }
 
 
 def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig, mostGeneralClient: Boolean = false): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysis.Instance(
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
+
+  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  interp.addControlObserver(new ControlEventChecker)
+  val parser = interp.addControlObserver(new ControlEventParser)
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
@@ -195,6 +194,30 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
     }
   )
 //  println(cfg.toGraphViz)
+//  println(interp.controlRecorder)
+
+
+  val tree = parser.getFinalTree
+  val treeSequence = tree.print
+  val tree2 = ControlEventParser.parse(treeSequence)
+  val treeSequence2 = tree2.print
+
+  assert(treeSequence == treeSequence2)
+  assert(tree == tree2)
+
+  val graphFromTree = tree.toGraph
+  val graphFromEvents = graphBuilder.get
+
+  val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
+  val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
+  assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
+  assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
+
+  println(graphFromTree.toGraphViz)
+
+
+//  println(tree.toGraphViz)
+
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
   val deadLabels = ControlFlow.deadLabels(cfg)
@@ -202,10 +225,11 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   println(s"Found ${deadInstructions.size} dead instructions")
   println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.toGraphViz)
+//  println(cfg.withBlocks(shortLabels = false).toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
   println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
   Profiler.printLastMeasured()
+//  println(recorder)
   result

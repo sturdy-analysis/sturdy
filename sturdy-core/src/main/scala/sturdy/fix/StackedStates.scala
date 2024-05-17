@@ -1,5 +1,6 @@
 package sturdy.fix
 
+import sturdy.control.{ControlObservable, FixpointControlEvent}
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
@@ -11,11 +12,11 @@ import scala.collection.mutable
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import scala.jdk.CollectionConverters.*
-
 
 final class StackedStates[Dom, Codom](val state: State)
-                                     (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean)
+                                     (inStateWidening: InStateWidening[Dom, state.In],
+                                      readPriorOutput: Boolean,
+                                      observers: Iterable[Stack.FixEvent => Unit])
                                      (using Finite[Dom], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
@@ -46,6 +47,8 @@ final class StackedStates[Dom, Codom](val state: State)
 
   override def toString: String = stack.keys.map(k => k.hashCode()).toString()
 
+  private def fire(ev: Stack.FixEvent): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
+
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
 
@@ -62,17 +65,11 @@ final class StackedStates[Dom, Codom](val state: State)
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
-    val widenedIn = inStateWidening.push(dom, in)
-    val stateFrame = (dom, widenedIn.get)
-
-    if (Fixpoint.DEBUG) {
-      widenedIn.toOption.foreach(_ => println(s"${stackHeightIndent}WIDENING PUSH from $in"))
-//      println(s"${toString}.get(${stateFrame.hashCode()}) = ${stack.get(stateFrame)}")
-    }
-
+    val widenedIn = inStateWidening.push(dom, in).get
+    val stateFrame = (dom, widenedIn)
     stack.get(stateFrame) match
+      // call is not recurrent
       case None =>
-        // call is not recurrent
         if (readPriorOutput) {
           val outEntry = outCache.get(stateFrame)
           if (outEntry.exists(_.isStable)) {
@@ -80,6 +77,7 @@ final class StackedStates[Dom, Codom](val state: State)
             val OutCacheEntry(result, out, _) = outEntry.get
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             return PushResult.Recurrent(result, Some(out))
           }
         }
@@ -90,20 +88,24 @@ final class StackedStates[Dom, Codom](val state: State)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $stateFrame:$currentOut")
         stackHeight += 1
-        PushResult.Continue(Some(widenedIn.get))
+        fire(FixpointControlEvent.BeginFixpoint(stateFrame))
+        PushResult.Continue(Some(widenedIn))
+
       case Some(info) =>
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
         outCache.get(stateFrame) match
           case None =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}BOTTOM RECURRENT  $stateFrame:$currentOut")
+              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(OutCacheEntry(res, previousOut, _)) =>
-            if (Fixpoint.DEBUG) {
-              println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame \n${stackHeightIndent}  <- $res:$previousOut")
-            }
+            if (Fixpoint.DEBUG)
+              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+            fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -122,11 +124,10 @@ final class StackedStates[Dom, Codom](val state: State)
       PopResult.Stable
     }
     val previousInfo = stack.remove(stateFrame)
-    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null) {
-//      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.entrySet().asScala.mkString("\n")}")
-      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not \n$stateFrame\n----\n${stack.mkString("\n")}")
-    }
+    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
+      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
     stackHeight = newStackHeight
+    fire(FixpointControlEvent.EndFixpoint())
     updatedResult
 
 
@@ -157,9 +158,9 @@ final class StackedStates[Dom, Codom](val state: State)
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
-                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean)
+                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
                        (using Finite[Dom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
-    new StackedStates(state)(inStateWidening, readPriorOutput).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
+    new StackedStates(state)(inStateWidening, readPriorOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 trait InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In]

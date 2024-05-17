@@ -1,6 +1,6 @@
 package sturdy.data
 
-import sturdy.values.{Combine, Finite, Join, MaybeChanged, Widen, Widening}
+import sturdy.values.*
 
 import scala.collection.immutable.{HashMap, IntMap}
 
@@ -68,14 +68,13 @@ given CombineFiniteKeyMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finit
     MaybeChanged(joined, changed)
 
 inline def combineMaps[K, V](m1: Map[K, V], m2: Map[K, V], inline combine: (V, V) => V): Map[K, V] =
-  val (small, large) = if (m1.size >= m2.size) (m1, m2) else (m2, m1)
+  val (large, small) = if (m1.size >= m2.size) (m1, m2) else (m2, m1)
   var result = large
   for ((k, v1) <- small)
-    large.get(k) match
-      case None =>
-        result += k -> v1
-      case Some(v2) =>
-        result += k -> combine(v1, v2)
+    val v = large.get(k) match
+      case None => v1
+      case Some(v2) => combine(v1, v2)
+    result += k -> v
   result
 
 given CombineFiniteKeyHashMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finite[K]): Combine[HashMap[K, V], W] with

@@ -233,7 +233,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
     Fixpoint.DEBUG = false
     val module = wasm.Parsing.fromText(path)
-    val interp = new IntervalAnalysis.Instance(
+    val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
     val modInst = interp.initializeModule(module)
     val result = interp.failure.fallible(

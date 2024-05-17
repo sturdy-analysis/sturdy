@@ -1,19 +1,50 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.effect.ObservableJoin
-import sturdy.effect.except.ObservableExcept
-import swam.syntax.{Block, CallIndirect, If, Inst, Loop}
+import sturdy.control.{BasicControlEvent, ControlEvent, ControlObservable}
+import sturdy.effect.{EffectStack, ObservableJoin, TrySturdy}
+import sturdy.effect.except.{LiftedExceptObserver, ObservableExcept}
+import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
 import sturdy.language.wasm.generic.InstLoc
 import sturdy.language.wasm.generic.FuncId
 import sturdy.fix
+import sturdy.fix.Logger
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
 import sturdy.language.wasm.generic.*
+import sturdy.values.booleans.ObservedBooleanBranching
 import swam.OpCode
 
 import collection.mutable
+
+object Control:
+  type Atom = InstLoc
+  type Section = FuncId | InstLoc
+  type Exc = JumpTarget
+  type Fx = (FixIn, List[Any])
+
+trait Control extends Interpreter:
+  import Control.*
+
+  def controlEventLogger(observable: ControlObservable[Atom, Section, Exc, Fx],
+                         obsJoin: ObservableJoin,
+                         obsExc: ObservableExcept[WasmException[Value]]
+                        )(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
+    obsJoin.addJoinObserver(observable)
+    obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
+    new Logger:
+      override def enter(dom: FixIn): Unit = dom match
+        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.BeginSection(id))
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection(loc))
+        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic(loc))
+        case _ => // nothing
+
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
+        case FixIn.EnterWasmFunction(_, _, _) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case _ => // nothing
+
 
 enum CfgNode extends ControlFlowGraph.Node:
   case Start
@@ -21,7 +52,7 @@ enum CfgNode extends ControlFlowGraph.Node:
   case Labled(inst: Block | Loop | If, loc: InstLoc)
   case LabledEnd(startNode: Labled)
   case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
-  case CallReturn(startNode: Call)
+  case CallReturn(startNode: CfgNode.Call)
   case Enter(funId: FuncId)
   case Exit(funId: FuncId)
 

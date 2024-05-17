@@ -4,6 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
@@ -49,13 +50,13 @@ class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => IntervalAnalysis.Instance] =
     Iterator(
-      () => new IntervalAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
-//      () => new IntervalAnalysisSturdyInstance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
-//      () => new IntervalAnalysisSturdyInstance(WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
+      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
+//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
+//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
+//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )
 
   Fixpoint.DEBUG = false
@@ -77,7 +78,8 @@ class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
   type CValue = ConcreteInterpreter.Value
   type AValue = IntervalAnalysis.Value
 
-  val cInterp = new ConcreteInterpreter.Instance()
+  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  aInterp.addControlObserver(new ControlEventChecker)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

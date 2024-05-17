@@ -12,14 +12,14 @@ import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.config.BytesSize
 import sturdy.values.convert.{*, given}
@@ -33,11 +33,12 @@ import swam.FuncType
 import swam.syntax.*
 import swam.traversal.Traverser
 
-import java.nio.{ByteOrder, ByteBuffer}
+import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 
-object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
+object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[NumericInterval[Byte]]
@@ -82,8 +83,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
-  class Instance(config: WasmConfig) extends
-      GenericInstance
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
@@ -102,7 +103,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =
@@ -159,14 +160,15 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       super.initializeModule(module, imports)
     }
 
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[IntervalAnalysis.Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[IntervalAnalysis.Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
+      override protected def contextSensitive = observedConfig.fix.get
     }
 
-    override val fixpointSuper = fixpoint
     override def toString: String = s"constant $config"

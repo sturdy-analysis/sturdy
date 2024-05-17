@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import sturdy.control.ControlObservable
 import sturdy.{Executor, data, fix}
 import sturdy.data.MayJoin
 import sturdy.data.{WithJoin, given}
@@ -8,12 +9,12 @@ import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.ObservableExcept
-import sturdy.effect.failure.{CollectedFailures, Failure}
+import sturdy.effect.failure.{CollectedFailures, Failure, ObservableFailure}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
 import sturdy.effect.store
-import sturdy.effect.store.{*,given}
+import sturdy.effect.store.{*, given}
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.StackConfig
@@ -37,10 +38,10 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
+  class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
 
-    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
@@ -75,13 +76,18 @@ object IntervalAnalysis extends Interpreter,
 
     val cfgLogger = controlLogger[CallString](callSites > 0)
 
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
+
     final override val fixpoint =
-      callSiteSensitive(callSites,
-        fix.log(cfgLogger.logger,
-          fix.dispatch(isFunOrWhile, Seq(
-            fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
-          ))
+      fix.log(controlEventLogger(this),
+        callSiteSensitive(callSites,
+          fix.log(cfgLogger.logger,
+            fix.dispatch(isFunOrWhile, Seq(
+              fix.iter.innermost(observedStackConfig), fix.iter.innermost(observedStackConfig)
+            ))
+          )
         )
       ).fixpoint
-      
+
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig, callSites)
+

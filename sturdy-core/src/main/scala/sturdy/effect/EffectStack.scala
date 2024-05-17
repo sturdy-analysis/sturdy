@@ -55,9 +55,15 @@ class EffectStack(_effects: => Effect,
   override def getAllState: All = effects.getState
   override def getInState(dom: Any): In = inEffects(dom).getState
   override def getOutState(dom: Any): Out = outEffects(dom).getState
-  override def setAllState(st: All): Unit = effects.setState(st.asInstanceOf)
+  override def setAllState(st: All): Unit = 
+    effects.setState(st.asInstanceOf)
+    repeating()
   override def setInState(dom: Any, in: In): Unit = inEffects(dom).setState(in.asInstanceOf)
   override def setOutState(dom: Any, out: Out): Unit = outEffects(dom).setState(out.asInstanceOf)
+  
+  final override type State = All
+  override def getState: State = getAllState
+  override def setState(st: State): Unit = setAllState(st)
 
   override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
@@ -65,10 +71,6 @@ class EffectStack(_effects: => Effect,
   override def joinOut(dom: Any): Join[Out] = (out1: Out, out2: Out) => outEffects(dom).join(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
   override def widenOut(dom: Any): Widen[Out] = (out1: Out, out2: Out) => outEffects(dom).widen(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
 
-
-  final override type State = All
-  override def getState: State = getAllState
-  override def setState(st: State): Unit = setAllState(st)
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def stackWiden: StackWidening[State] =

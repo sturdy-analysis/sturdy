@@ -1,7 +1,8 @@
 package sturdy.fix.iter
 
 import sturdy.*
-import sturdy.fix.{Combinator, Contextual, StackConfig}
+import sturdy.control.FixpointControlEvent
+import sturdy.fix.{Combinator, Contextual, Stack, StackConfig}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.report.Properties
@@ -13,6 +14,11 @@ enum Config:
   case Innermost(config: StackConfig)
   case Outermost(config: StackConfig)
   case Topmost(config: StackConfig)
+
+  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): Config = this match
+    case Innermost(config) => Innermost(config.withObservers(newObservers))
+    case Outermost(config) => Outermost(config.withObservers(newObservers))
+    case Topmost(config) => Topmost(config.withObservers(newObservers))
 
   override def toString: String = this match
     case Innermost(config) => s"innermost($config)"

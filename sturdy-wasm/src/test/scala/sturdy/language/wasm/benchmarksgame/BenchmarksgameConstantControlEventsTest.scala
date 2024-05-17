@@ -3,14 +3,14 @@ package sturdy.language.wasm.benchmarksgame
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.RecordingControlObserver
+import sturdy.control.{BasicControlEvent, BranchingControlEvent, ControlEventChecker, ControlEventGraphBuilder, ControlEventParser, ControlObserver, ExceptionControlEvent, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.*
 import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Topped
 import swam.ModuleLoader
@@ -21,7 +21,7 @@ import swam.validation.Validator
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
 
-class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
+class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame (recompiled) constant analysis"
 
   val funcName = "_start"
@@ -43,23 +43,58 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
 
   def run(p: Path, binary: Boolean, stackConfig: StackConfig) =
     Fixpoint.DEBUG = false
-    
+
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
+    interp.addControlObserver(new ControlEventChecker)
+    var count = 0
+    import sturdy.language.wasm.abstractions.Control.*
+    interp.addControlObserver(new ControlObserver {
+      override def handle(ev: BasicControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+      override def handle(ev: ExceptionControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+      override def handle(ev: BranchingControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+      override def handle(ev: FixpointControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+    })
+    val parser = interp.addControlObserver(new ControlEventParser)
+    val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
     val modInst = interp.initializeModule(module)
 
+    println(s"Running analysis on ${p.getFileName}")
     val res = Profiler.addTime("analysis") {
       interp.failure.fallible(
         interp.invokeExported(modInst, funcName, List.empty)
       )
     }
-    LinearStateOperationCounter.addToListAndReset()
+//    LinearStateOperationCounter.addToListAndReset()
     //    println(interp.effectStack.getAllState)
     //    println(s"${LinearStateOperationCounter.toString} in the last tests")
     //    println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-    Profiler.printLastMeasured()
+//    Profiler.printLastMeasured()
+
+//    val tree = parser.getFinalTree
+//    val treeSequence = tree.print
+//    val tree2 = ControlEventParser.parse(treeSequence)
+//    val treeSequence2 = tree2.print
+//
+//    assert(treeSequence == treeSequence2)
+//    assert(tree == tree2)
+
+    println(s"Events count: $count")
+    val graphFromEvents = graphBuilder.get
+    println(s"Graph size: ${graphFromEvents.edges.size}")
+    val tree = parser.getFinalTree
+    println(s"Tree size: ${tree.size}")
+
+    if (tree.size < 50000) {
+      val graphFromTree = tree.toGraph
+      val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
+      val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
+      assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
+      assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
+    }
+//    println(graphFromEvents.toGraphViz)
 

@@ -1,25 +1,19 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.Blocker
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureKind
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.control.*
+import sturdy.effect.failure.{AFallible, CFallible, FailureKind}
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.effect.failure.CFallible
-import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.generic.WasmFailure
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.generic.{FrameData, WasmFailure}
 import swam.syntax.Module
 import swam.text.*
+
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
 
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
@@ -87,8 +81,25 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = Parsing.fromText(path)
-  val interp = new ConcreteInterpreter.Instance()
+  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val recorder = interp.addControlObserver(new RecordingControlObserver)
+
   val modInst = interp.initializeModule(module)
-  interp.failure.fallible(
+  val b: CFallible[Iterable[Value]] = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
+
+  val originalSequence = recorder.events
+  val tree = ControlEventParser.parse(originalSequence)
+  val treeSequence = tree.print
+  val tree2 = ControlEventParser.parse(treeSequence)
+  val treeSequence2 = tree2.print
+
+  assert(treeSequence == treeSequence2)
+  assert(tree == tree2)
+
+  println(tree.toGraph.toGraphViz)
+
+  b
+

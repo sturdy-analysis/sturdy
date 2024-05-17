@@ -89,7 +89,7 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantTaintAnalysis.Instance(WasmConfig(ctx = CallSites(3)))
+  val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
 //  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
   //    val constants = ConstantTaintAnalysis.constantInstructions(interp)
   val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
