@@ -142,26 +142,26 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
       store.write(addr, eval(e))
-      refValue(addr)
+      mkManagedRef(addr)
     case Exp.VarRef(x) =>
       failure(VariableReferencesNotSupported, s"&$x")
 //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
 //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
-      val addr = refAddr(eval(e))
+      val addr = deref(eval(e))
       val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       result
     case Exp.NullRef() =>
-      nullValue
+      mkNullRef
     case r@Exp.Record(fields) =>
       // represents record as a reference to a record value
       val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
       val rec = makeRecord(fieldVals)
       val addr = alloc(AllocationSite.Record(r))
       store.write(addr, rec)
-      refValue(addr)
+      mkManagedRef(addr)
     case Exp.FieldAccess(rec, field) =>
-      val addr = refAddr(eval(rec))
+      val addr = deref(eval(rec))
       val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
   }
@@ -187,17 +187,17 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Assignable.AVar(x) =>
       callFrame.setLocalByName(x, v).getOrElse(failure(UnboundVariable, x))
     case Assignable.ADeref(e) =>
-      val addr = refAddr(eval(e))
+      val addr = deref(eval(e))
       store.write(addr, v)
     case Assignable.AField(recVar, field) =>
       val recRef = eval(Exp.Var(recVar))
-      val recAddr = refAddr(recRef)
+      val recAddr = deref(recRef)
       val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
     case Assignable.ADerefField(rec, field) =>
       val recRef = eval(rec)
-      val recAddr = refAddr(recRef)
+      val recAddr = deref(recRef)
       val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)

@@ -17,10 +17,10 @@ enum AbstractReference[+Addr]:
     case NullAddr(_, m) => m
 
 given abstractReferenceOps[Addr] (using f: Failure, effects: EffectStack): ReferenceOps[Addr, AbstractReference[Addr]] with
-  def nullValue: AbstractReference[Addr] = AbstractReference.Null
-  def refValue(addr: Addr): AbstractReference[Addr] = AbstractReference.Addr(addr, true)
-  def unmanagedRefValue(addr: Addr): AbstractReference[Addr] = AbstractReference.Addr(addr, false)
-  def refAddr(v: AbstractReference[Addr]): Addr = v match
+  override def mkNullRef: AbstractReference[Addr] = AbstractReference.Null
+  override def mkManagedRef(addr: Addr): AbstractReference[Addr] = AbstractReference.Addr(addr, true)
+  override def mkRef(addr: Addr): AbstractReference[Addr] = AbstractReference.Addr(addr, false)
+  override def deref(v: AbstractReference[Addr]): Addr = v match
     case AbstractReference.Null => f.fail(NullDereference, s"Cannot dereference $v")
     case AbstractReference.Addr(a, _) => a
     case AbstractReference.NullAddr(a, _) => effects.joinWithFailure(a)(f.fail(NullDereference, s"Cannot dereference $v"))

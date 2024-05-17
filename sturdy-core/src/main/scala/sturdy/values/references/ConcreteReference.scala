@@ -19,7 +19,7 @@ given structuralReference[A](using Structural[A]): Structural[Reference[A]] with
 given finiteReference[A](using Finite[A]): Finite[Reference[A]] with {}
 
 given referenceOps[Addr] (using f: Failure): ReferenceOps[Addr, Reference[Addr]] with
-  def nullValue: Reference[Addr] = Reference.Null
-  def refValue(addr: Addr): Reference[Addr] = Reference.Addr(addr, true)
-  def unmanagedRefValue(addr: Addr): Reference[Addr] = Reference.Addr(addr, false)
-  def refAddr(v: Reference[Addr]): Addr = v.getOrElse(f.fail(NullDereference, ""))
+  override def mkNullRef: Reference[Addr] = Reference.Null
+  override def mkManagedRef(addr: Addr): Reference[Addr] = Reference.Addr(addr, true)
+  override def mkRef(addr: Addr): Reference[Addr] = Reference.Addr(addr, false)
+  override def deref(v: Reference[Addr]): Addr = v.getOrElse(f.fail(NullDereference, ""))
