@@ -114,9 +114,9 @@ object RunnerConfig:
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
       Analysis.Binaryen(AnalysisConfig.nocontext),
-//      Analysis.Constant(AnalysisConfig.callSite1),
-//      Analysis.Type(AnalysisConfig.nocontext),
-//      Analysis.Taint(AnalysisConfig.callSite1)
+      Analysis.Constant(AnalysisConfig.callSite1),
+      Analysis.Type(AnalysisConfig.nocontext),
+      Analysis.Taint(AnalysisConfig.callSite1)
     ),
     "rootDir" -> rootDir,
     "datasetFilter" -> ((x: WASMBenchBinary) => true),

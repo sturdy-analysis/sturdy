@@ -8,9 +8,9 @@ import sturdy.values.closures.ClosureOps
 import sturdy.values.closures.LiftedClosureOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.integer.LiftedIntegerOps
-import sturdy.values.relational.EqOps
-import sturdy.values.relational.LiftedOrderingOps
-import sturdy.values.relational.OrderingOps
+import sturdy.values.ordering.EqOps
+import sturdy.values.ordering.LiftedOrderingOps
+import sturdy.values.ordering.OrderingOps
 
 trait Interpreter:
 

@@ -3,7 +3,7 @@ package sturdy.fix
 import sturdy.effect.{EffectStack, RecurrentCall, TrySturdy}
 import sturdy.values.Finite
 import sturdy.values.{Widen, Join}
-import sturdy.data.JoinTuple2
+import sturdy.data.CombineTuple2
 import sturdy.util.Profiler
 
 import scala.reflect.ClassTag

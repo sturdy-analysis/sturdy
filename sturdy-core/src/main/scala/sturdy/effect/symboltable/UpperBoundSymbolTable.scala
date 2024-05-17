@@ -21,6 +21,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new UpperBoundSymbolTableJoiner[A])
   private class UpperBoundSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Entry] = _
@@ -56,7 +57,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
     IsSound.Sound
 
   type State = Map[Key, Entry]
-  override def getState: Map[Key, Entry] = tables
-  override def setState(s: Map[Key, Entry]): Unit = tables = s
-  override def join: Join[Map[Key, Entry]] = implicitly
-  override def widen: Widen[Map[Key, Entry]] = implicitly
+  override def getState: State = tables
+  override def setState(s: State): Unit = tables = s
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly

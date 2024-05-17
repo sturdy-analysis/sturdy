@@ -7,7 +7,7 @@ import sturdy.IsSound
 import sturdy.data.given
 import sturdy.Soundness
 import sturdy.control.{ControlEvent, ControlEventGraphBuilder, ControlGraph, ControlTree, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.effect.print.given
 import sturdy.language.tip.ConcreteInterpreter
@@ -25,7 +25,6 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
@@ -78,9 +77,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      if (deadNodes.nonEmpty)
 //        println(s"Found dead code: $deadNodes")
 
-      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
-      given CAllocationIntIncrement[AllocationSite] = interp.alloc
+      given CAllocatorIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)

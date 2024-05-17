@@ -1,7 +1,7 @@
 package sturdy.effect
 
 import sturdy.data.CombineUnit
-import sturdy.values.{Join, Widen}
+import sturdy.values.{Changed, Join, StackWidening, Widen}
 
 /**
  * [[Effect]] is an interface for effectful computations, such as computations mutating variables or causing exceptions.
@@ -26,6 +26,12 @@ trait Effect:
 
   /** Widens two internal states of the effect. */
   def widen: Widen[State]
+
+  def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) =>
+      stack match
+        case Nil => Changed(call)
+        case mostRecentCall :: _ => widen(mostRecentCall, call)
 
   /** [[ComputationJoiner]] joins two effectful computations, including this effect.
    */

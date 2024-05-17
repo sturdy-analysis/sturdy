@@ -3,7 +3,7 @@ package sturdy.values.records
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 import scala.collection.immutable
 

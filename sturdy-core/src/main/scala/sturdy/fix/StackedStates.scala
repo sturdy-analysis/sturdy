@@ -1,15 +1,12 @@
 package sturdy.fix
 
-import org.eclipse.collections.api.factory.Maps
-import org.eclipse.collections.api.map.MutableMap
 import sturdy.control.{ControlObservable, FixpointControlEvent}
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.{CombineTrySturdy, TrySturdy}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Finite
-import sturdy.values.{Changed, Join, MaybeChanged, Unchanged, Widen}
+import sturdy.values.{Changed, Finite, Join, MaybeChanged, StackWidening, Unchanged, Widen}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -26,11 +23,12 @@ final class StackedStates[Dom, Codom](val state: State)
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
    */
-  private val stack: MutableMap[(Dom, state.In), FrameInstanceInfo] = Maps.mutable.empty()
+//  private val stack: MutableMap[(Dom, state.In), FrameInstanceInfo] = Maps.mutable.empty()
+  private val stack: mutable.Map[(Dom, state.In), FrameInstanceInfo] = mutable.Map()
   private var stackHeight: Int = 0
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
-  private val outCache: MutableMap[(Dom, state.In), OutCacheEntry] = Maps.mutable.empty()
+  private val outCache: mutable.Map[(Dom, state.In), OutCacheEntry] = mutable.Map()
 
   case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
     def isStable: Boolean = stability eq Stability.Stable
@@ -47,10 +45,10 @@ final class StackedStates[Dom, Codom](val state: State)
   private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
   def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
-  override def toString: String = stack.keysView().makeString("Stack(", ", ", ")")
+  override def toString: String = stack.keys.map(k => k.hashCode()).toString()
 
   private def fire(ev: Stack.FixEvent): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
-  
+
   /** Current height of the stack. */
   def height: Int = stackHeight //stack.size()
 
@@ -69,11 +67,11 @@ final class StackedStates[Dom, Codom](val state: State)
 
     val widenedIn = inStateWidening.push(dom, in).get
     val stateFrame = (dom, widenedIn)
-    Option(stack.get(stateFrame)) match
+    stack.get(stateFrame) match
       // call is not recurrent
       case None =>
         if (readPriorOutput) {
-          val outEntry = Option(outCache.get(stateFrame))
+          val outEntry = outCache.get(stateFrame)
           if (outEntry.exists(_.isStable)) {
             // previous input subsumes current input and previous result still stable => return previous result
             val OutCacheEntry(result, out, _) = outEntry.get
@@ -83,7 +81,7 @@ final class StackedStates[Dom, Codom](val state: State)
             return PushResult.Recurrent(result, Some(out))
           }
         }
-        
+
         // push call to stack
         val info = new FrameInstanceInfo(stackHeight)
         stack.put(stateFrame, info)
@@ -93,12 +91,12 @@ final class StackedStates[Dom, Codom](val state: State)
         fire(FixpointControlEvent.BeginFixpoint(stateFrame))
         PushResult.Continue(Some(widenedIn))
 
-      // call is recurrent
       case Some(info) =>
+        // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
-        Option(outCache.get(stateFrame)) match
+        outCache.get(stateFrame) match
           case None =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
@@ -122,7 +120,7 @@ final class StackedStates[Dom, Codom](val state: State)
       storeCorecurrentOutput(stateFrame, result, out)
     } else {
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in <- $result:$out")
+        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
       PopResult.Stable
     }
     val previousInfo = stack.remove(stateFrame)
@@ -133,19 +131,19 @@ final class StackedStates[Dom, Codom](val state: State)
     updatedResult
 
 
-  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = Option(outCache.get(frame)) match
+  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}")
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- ${Changed(result)}:$out")
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
-      val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, out)}
-
+      val currentOut = state.getOutState(frame._1)
+      val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, currentOut)}
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
       if (changed) {
         outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))
@@ -172,7 +170,7 @@ class FiniteInStateWidening[Dom, In](using Finite[In]) extends InStateWidening[D
   def push(dom: Dom, in: In): MaybeChanged[In] = MaybeChanged.Unchanged(in)
   def pop(dom: Dom, in: In): Unit = ()
 
-class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => Widen[In]) extends InStateWidening[Dom, In]:
+class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => StackWidening[In]) extends InStateWidening[Dom, In]:
   class ContextEntry(var in: List[In])
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
@@ -183,7 +181,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in.head, in)}
+        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in, in)}
         ce.in = widenedIn.get :: ce.in
         widenedIn
 

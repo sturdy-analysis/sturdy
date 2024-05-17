@@ -21,7 +21,7 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -108,14 +108,18 @@ object ConcreteInterpreter extends Interpreter with Control:
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
     val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
-    val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
+      new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
+        rootFrameData,
+        rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)
+      )
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 
-    val fixpoint = new fix.ContextInsensitiveFixpoint {
+    val fixpoint = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)
     }
 

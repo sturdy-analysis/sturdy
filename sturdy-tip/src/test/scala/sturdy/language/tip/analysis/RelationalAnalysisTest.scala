@@ -1,0 +1,131 @@
+package sturdy.language.tip.analysis
+
+import apron.{Polka, Texpr1Node}
+ import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+ import org.scalatest.exceptions.TestFailedException
+ import org.scalatest.flatspec.AnyFlatSpec
+ import org.scalatest.matchers.should.Matchers
+ import sturdy.{*, given}
+ import sturdy.data.given
+ import sturdy.Soundness
+ import sturdy.effect.allocation.CAllocatorIntIncrement
+ import sturdy.effect.failure.CFallible.Failing
+ import sturdy.effect.failure.{AFallible, AssertionFailure, afallibleAbstractly, falliblePO, given}
+ import sturdy.effect.print.given
+ import sturdy.fix.StackConfig
+ import sturdy.fix.cfg.ControlFlowGraph
+ import sturdy.language.tip.Parser.*
+ import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
+ import sturdy.language.tip.abstractions.{CfgNode, isFunOrWhile}
+ import sturdy.language.tip.*
+ import sturdy.util.{IntLabel, Labeled, LinearStateOperationCounter, Profiler, SynLabel}
+ import sturdy.values.booleans.{*, given}
+ import sturdy.values.functions.{*, given}
+ import sturdy.values.integer.{*, given}
+ import sturdy.values.ordering.{*, given}
+ import sturdy.values.records.{*, given}
+ import sturdy.values.references.{*, given}
+ import sturdy.values.types.BaseType
+ import sturdy.values.{*, given}
+
+ import java.nio.file.{Files, Path, Paths}
+ import scala.collection.immutable.ArraySeq
+ import scala.io.Source
+ import scala.jdk.StreamConverters.*
+ import scala.util.{Failure, Success, Try}
+
+class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
+   behavior of "Tip Relational analysis"
+
+   val uri = classOf[RelationalAnalysisTest].getResource("/sturdy/language/tip").toURI;
+   val recursiveProgram: Array[String] = Source.fromFile(classOf[RelationalAnalysisTest].getResource("/sturdy/language/recursive_programs").toURI).getLines.toArray
+
+   val excluded : ArraySeq[String] = ArraySeq(
+//     "fibRec.tip" // Crashes JVM
+   )
+
+   val polyManager = new Polka(false)
+
+   Files.list(Paths.get(uri)).toScala(List).filter(p =>
+     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
+//    p.endsWith("fibRec.tip")
+   ).sorted.foreach { p =>
+     it must s"soundly analyze ${p.getFileName} with stacked states" in {
+       runRelationalAnalysis(p, StackConfig.StackedStates())
+     }
+
+//     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
+//       runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
+//     }
+   }
+
+   def runRelationalAnalysis(p: Path, stackConfig: StackConfig) =
+     val file = Source.fromURI(p.toUri)
+     val sourceCode = file.getLines().mkString("\n")
+     file.close()
+     Labeled.reset()
+     val program = Parser.parse(sourceCode)
+
+     if (program.funs.exists(_.name == "main")) {
+       val analysis = new RelationalAnalysis.Instance(polyManager, Map(), stackConfig, 0)
+
+       val aresult = analysis.failure.fallible(analysis.execute(program))
+       val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
+       val cresult = interp.failure.fallible(interp.execute(program))
+
+       given CAllocatorIntIncrement[AllocationSite] = interp.alloc
+
+       //      println(s"CONCRETE : $cresult")
+       //      println(s"ABSTRACT : $aresult")
+
+       // compute number of assertions in program
+       val allAsserts = program.assertions
+       if (allAsserts.nonEmpty) {
+         val reachableAsserts = analysis.cfg.getNodes.collect { case ControlFlowGraph.CNode(CfgNode.Statement(a: Stm.Assert), _) => a }.toSet
+         val unreachableAsserts = allAsserts.diff(reachableAsserts)
+         val unreachablePercent = (100 * unreachableAsserts.size / allAsserts.size.toDouble).round
+         val failedAsserts = aresult.failures.set.collect { case (AssertionFailure(a: Stm.Assert), _) => a }
+         val failedPercent = (100 * failedAsserts.size / allAsserts.size.toDouble).round
+         val provedAsserts = reachableAsserts.diff(failedAsserts)
+         val provedPercent = (100 * provedAsserts.size / allAsserts.size.toDouble).round
+
+         println(s"Assertions: ${allAsserts.size} assertions, ${provedAsserts.size} ($provedPercent%) proved, ${unreachableAsserts.size} ($unreachablePercent%) unreachable, ${failedAsserts.size} ($failedPercent%) failed")
+//         assertResult(true, s", ${failedAsserts.size} assertion(s) have failed in ${p.getFileName}")(failedAsserts.isEmpty)
+         assertResult(true, s", ${unreachableAsserts.size} assertion(s) were unreachable in ${p.getFileName}")(unreachableAsserts.isEmpty)
+       }
+
+       val soundness = new RelationalAnalysisSoundness(analysis)
+       import soundness.given
+       cresult match
+         case Failing(TipFailure.StackOverflow, _) =>
+         case _ => assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
+       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+
+     } else {
+       null
+     }
+
+   "The ordering on RelationalVar" should "be Print <= Alloc <= Temp <= Local" in {
+     import RelationalAnalysis.given
+     import RelationalAnalysis.RelationalVar.*
+
+     val printInt = Print(BaseType[Int])
+     val alloc1 = Alloc(IntLabel(1))
+     val tempInt = Temp(FixIn.Eval(sturdy.language.tip.Exp.Var("y")))
+     val localX = Local("x")
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, alloc1) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, localX) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(localX, printInt) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, alloc1) shouldBe 1
+
+     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, localX) shouldBe -1
+     Ordering[RelationalAnalysis.RelationalVar].compare(localX, alloc1) shouldBe 1
+   }

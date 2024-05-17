@@ -14,7 +14,7 @@ import sturdy.language.wasm.analyses.IntervalAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.values.integer.given
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
 import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}

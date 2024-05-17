@@ -11,6 +11,8 @@ trait BooleanSelection[B, R]:
 object BooleanSelection:
   def apply[B, R](v: B, ifTrue: R, ifFalse: R)(using ops: BooleanSelection[B, R]): R =
     ops.boolSelect(v, ifTrue, ifFalse)
+  given throughBranching[B, R](using br: BooleanBranching[B, R]): BooleanSelection[B, R] with
+    override def boolSelect(v: B, ifTrue: R, ifFalse: R): R = br.boolBranch(v, ifTrue, ifFalse)
 
 /** Executes a branch depending on the given Boolean */
 trait BooleanBranching[B, R]:

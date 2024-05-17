@@ -22,8 +22,8 @@ import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.relational.EqOps
-import sturdy.values.taint.Taint.{Tainted, TopTaint, Untainted}
+import sturdy.values.ordering.EqOps
+import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader

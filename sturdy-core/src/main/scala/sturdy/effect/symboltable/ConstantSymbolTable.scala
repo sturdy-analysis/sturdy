@@ -47,15 +47,15 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     dirtyTables += key
 
   override type State = Tables[Key, Symbol, Entry]
-  def getState: Tables[Key, Symbol, Entry] = tables
-  def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
-  override def join: Join[Tables[Key, Symbol, Entry]] = JoinMap(using {
+  override def getState: State = tables
+  override def setState(s: State): Unit = tables = s
+  override def join: Join[State] = JoinMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
     case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
   })
-  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
+  override def widen: Widen[State] = CombineFiniteKeyMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
@@ -63,6 +63,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   })
 
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
   class ToppedSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables
@@ -181,7 +182,7 @@ object ConstantSymbolTable:
       }
       MaybeChanged(Table(tab, dirty), changed)
 
-  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
+  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], dirtySymbols: Set[Symbol]):
     def entries: Set[Entry] = underlying.values.map(_.get).toSet
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
       Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
@@ -198,4 +199,5 @@ object ConstantSymbolTable:
 
     def isAllMay: Boolean = underlying.forall((_,e) => !e.isMust)
 
-
+    def map[Symbol1, Entry1](mapSym: Symbol => Symbol1, mapEntry: Entry => Entry1): Table[Symbol1, Entry1] =
+      Table(underlying.map((sym, entry) => (mapSym(sym), entry.map(mapEntry))), dirtySymbols.map(mapSym))

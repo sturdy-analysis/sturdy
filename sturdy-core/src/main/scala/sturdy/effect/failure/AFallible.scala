@@ -1,6 +1,8 @@
 package sturdy.effect.failure
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.RecurrentCall
+import sturdy.effect.failure.AFallible.{Diverging, MaybeFailing}
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Powerset
@@ -21,6 +23,12 @@ enum AFallible[T]:
     case Unfailing(t) => t
     case MaybeFailing(t, _) => t
     case _ => throw new MatchError(this)
+  
+  def failures: Powerset[(FailureKind, String)] = this match
+    case Unfailing(_) => Powerset.empty
+    case MaybeFailing(_, fails) => fails
+    case Failing(fails) => fails
+    case Diverging(_) => throw new MatchError(this)
 
 given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
   override def apply(c: CFallible[C]): AFallible[A] = c match
@@ -43,3 +51,14 @@ given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
     case (AFallible.Failing(fails1), AFallible.MaybeFailing(t2, fails2)) => fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case (AFallible.MaybeFailing(t1, fails1), AFallible.MaybeFailing(t2, fails2)) => po.lteq(t1, t2) && fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case _ => false
+
+given soundnessAFallible[C,A](using Soundness[C,A]): Soundness[CFallible[C], AFallible[A]] = {
+  case (CFallible.Failing(kind,msg), AFallible.Failing(failures)) =>
+    IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
+  case (CFallible.Failing(kind,msg), AFallible.MaybeFailing(_,failures)) =>
+    IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
+  case (CFallible.Unfailing(c), AFallible.Unfailing(a)) => Soundness.isSound(c,a)
+  case (CFallible.Unfailing(c), AFallible.MaybeFailing(a,_)) => Soundness.isSound(c,a)
+  case (cfallible,afallible) =>
+    IsSound.NotSound(s"Abstract Fallible $afallible does not overapproximate concrete fallible $cfallible")
+}

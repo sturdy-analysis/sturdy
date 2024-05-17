@@ -39,11 +39,12 @@ class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
   override type State =  Map[Key, Map[Symbol, Entry]]
-  override def getState: Map[Key, Map[Symbol, Entry]] = tables
-  override def setState(st: Map[Key, Map[Symbol, Entry]]): Unit = tables = st
-  override def join: Join[Map[Key, Map[Symbol, Entry]]] = implicitly
-  override def widen: Widen[Map[Key, Map[Symbol, Entry]]] = implicitly
+  override def getState: State = tables
+  override def setState(st: State): Unit = tables = st
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Map[Symbol, Entry]] = null

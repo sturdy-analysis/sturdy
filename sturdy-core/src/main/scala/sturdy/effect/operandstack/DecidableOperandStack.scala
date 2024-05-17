@@ -71,9 +71,9 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V], Concrete
 /** Stacks of different execution branches are joined. */
 class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends DecidableOperandStack[V]:
   override type State = List[V]
-  override def getState: List[V] =
+  override def getState: State =
     stack.take(stack.size - framePointer)
-  override def setState(s: List[V]): Unit =
+  override def setState(s: State): Unit =
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
 
@@ -92,6 +92,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
   override def widen: Widen[List[V]] = combineFrames(_, _, summon[Widen[V]].apply)
 
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
   private class OperandStackJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = stack
     private var fStack: List[V] = _

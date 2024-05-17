@@ -1,0 +1,35 @@
+package sturdy.utils
+
+import scala.math.Ordered.orderingToOrdered
+import sturdy.values.Finite
+import TestTypes.*
+import sturdy.effect.Stateless
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
+
+
+object TestContexts:
+
+
+  enum Ctx:
+    case Var(name: String)
+    case TempVar(tpe: Type, n: Int)
+
+  given Finite[Ctx] with {}
+
+  given Ordering[Ctx] = {
+    case (Ctx.Var(n1), Ctx.Var(n2)) => n1.compare(n2)
+    case (Ctx.TempVar(t1, n1), Ctx.TempVar(t2, n2)) => (t1, n1).compare((t2, n2))
+    case (Ctx.Var(_), Ctx.TempVar(_, _)) => 1
+    case (Ctx.TempVar(_, _), Ctx.Var(_)) => -1
+    case _ => -1
+  }
+
+  given variableAllocator: Allocator[Ctx, String] =
+    AAllocatorFromContext(ctx => Ctx.Var(ctx))
+
+  given tempVariableAllocator: Allocator[Ctx, Type] = new Allocator[Ctx, Type] with Stateless:
+    var n = 0
+
+    override def alloc(ctx: Type): Ctx =
+      n += 1
+      Ctx.TempVar(ctx, n)

@@ -6,7 +6,7 @@ import scala.util.Try
 
 enum IsSound:
   case Sound
-  case NotSound(reason: String)
+  case NotSound(reason: String, ex: Exception = new Exception())
 
   def isSound: Boolean = this match
     case Sound => true
@@ -20,6 +20,17 @@ enum IsSound:
       other
     else
       this
+
+  override def toString: String = this match
+    case Sound => "Sound"
+    case NotSound(msg, ex) => s"NotSound($msg) in\n${ex.getStackTrace.mkString("\n")}"
+
+object IsSound:
+  def apply(isSound: Boolean, unsoundMsg: String): IsSound =
+    if(isSound)
+      IsSound.Sound
+    else
+      IsSound.NotSound(unsoundMsg)
 
 trait Soundness[-C, -A]:
   def isSound(c: C, a: A): IsSound

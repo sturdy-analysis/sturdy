@@ -89,5 +89,6 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(s"${p.getFileName}_frames-$stackConfig.dot")
-    val blockCfg = cfg.withBlocks(shortLabels = true)
-    Files.writeString(dotPath, blockCfg.toGraphViz)
+    val blockCfg = cfg.withBlocks(shortLabels = false)
+    Files.writeString(dotPath, cfg.toGraphViz)
+    println(s"Wrote CFG to $dotPath")

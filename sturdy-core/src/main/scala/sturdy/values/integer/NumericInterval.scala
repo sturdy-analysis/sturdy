@@ -7,7 +7,7 @@ import sturdy.values.*
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 import java.nio.{ByteOrder, ByteBuffer}
 import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}
@@ -92,11 +92,11 @@ case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Optio
 
 
 given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictIntegerOps[I, I, NoJoin], Numeric[I], Top[NumericInterval[I]])
-  (using Failure, EffectStack): IntervalIntegerOps[I] =
-  new IntervalIntegerOps(20)
+  (using Failure, EffectStack): NumericIntervalIntegerOps[I] =
+  new NumericIntervalIntegerOps(20)
 
 
-class IntervalIntegerOps[I]
+class NumericIntervalIntegerOps[I]
   (val feasibleNumberOfOps: Int)
   (using ordering: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]])(using f: Failure, j: EffectStack) extends IntegerOps[I, NumericInterval[I]]:
 

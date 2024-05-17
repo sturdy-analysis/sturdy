@@ -19,7 +19,7 @@ import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.ModuleInstance
 import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Topped
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.{IsSound, Soundness}

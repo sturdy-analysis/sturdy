@@ -42,3 +42,36 @@ trait ComputationJoiner[A]:
    * @param gRes the result of the second computation.
    */
   def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit
+
+  def compose(snd: ComputationJoiner[A]): ComputationJoiner[A] =
+    val fst = this
+    new ComputationJoiner[A] {
+      override def inbetween(fFailed: Boolean): Unit =
+        fst.inbetween(fFailed)
+        snd.inbetween(fFailed)
+
+      override def retainNone(): Unit =
+        fst.retainNone()
+        snd.retainNone()
+
+      override def retainFirst(fRes: TrySturdy[A]): Unit =
+        fst.retainFirst(fRes)
+        snd.retainFirst(fRes)
+
+      override def retainSecond(gRes: TrySturdy[A]): Unit =
+        fst.retainSecond(gRes)
+        snd.retainSecond(gRes)
+
+      override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+        fst.retainBoth(fRes, gRes)
+        snd.retainBoth(fRes, gRes)
+    }
+
+
+final class EffectListJoiner[A](effects: Seq[Effect]) extends ComputationJoiner[A]:
+  val joiners: Seq[ComputationJoiner[A]] = effects.flatMap(_.makeComputationJoiner[A])
+  override def inbetween(fFailed: Boolean): Unit = joiners.foreach(_.inbetween(fFailed))
+  override def retainNone(): Unit = joiners.foreach(_.retainNone())
+  override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
+  override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
+  override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))

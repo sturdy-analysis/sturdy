@@ -11,9 +11,8 @@ object Profiler:
 
   def addTime[R](name: String)(block: => R): R = {
     start(name)
-    val result = block    // call-by-name
-    end(name)
-    result
+    try block    // call-by-name
+    finally end(name)
   }
 
   def printLastMeasured(): Unit =

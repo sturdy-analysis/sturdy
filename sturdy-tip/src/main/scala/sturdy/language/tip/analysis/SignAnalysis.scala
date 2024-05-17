@@ -3,12 +3,12 @@ package sturdy.language.tip.analysis
 import sturdy.control.{ControlEvent, ControlObservable, RecordingControlObserver}
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.given
-import sturdy.effect.allocation.AAllocationFromContext
+import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind, ObservableFailure}
 import sturdy.effect.print.PrintFiniteAlphabet
 import sturdy.effect.print.given
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.AStoreThreaded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
@@ -21,7 +21,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
@@ -35,11 +35,10 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
-  class Instance(initEnvironment: Environment, initStore: Store, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+  class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
 
-    override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
-
+    override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
@@ -51,9 +50,11 @@ object SignAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
-    override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
+    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
+      PowersetAddr(References.allocationSiteAddr(site))
+    )
     override val print: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
 
@@ -65,6 +66,6 @@ object SignAnalysis extends Interpreter,
           parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
-  class DAIInstance(initEnvironment: Environment, initStore: Store) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
+  class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)

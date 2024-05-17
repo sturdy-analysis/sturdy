@@ -43,12 +43,15 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     constantSymbolTable.putNew(key)
 
   override type State = constantSymbolTable.State
-  override def getState: Tables[Key, I, Entry] =
+  override def getState: State =
     constantSymbolTable.getState
-  def setState(state: Tables[Key, I, Entry]): Unit =
+  def setState(state: State): Unit =
     constantSymbolTable.setState(state)
-  override def join: Join[Tables[Key, I, Entry]] = constantSymbolTable.join
-  override def widen: Widen[Tables[Key, I, Entry]] = constantSymbolTable.widen
+  override def join: Join[State] = constantSymbolTable.join
+  override def widen: Widen[State] = constantSymbolTable.widen
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
+    constantSymbolTable.makeComputationJoiner
 
   def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, I, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     constantSymbolTable.tableIsSound(c)
