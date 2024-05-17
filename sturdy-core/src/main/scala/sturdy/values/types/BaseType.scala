@@ -29,7 +29,7 @@ given FiniteBaseType[B]: Finite[BaseType[B]] with {}
 given JoinBaseType[B: ClassTag]: Join[BaseType[B]] with
   override def apply(v1: BaseType[B], v2: BaseType[B]): MaybeChanged[BaseType[B]] = MaybeChanged.Unchanged(v1)
 
-export sturdy.values.finiteWidening
+export sturdy.values.finitely
 
 given TopBaseType[B: ClassTag]: Top[BaseType[B]] with
   def top: BaseType[B] = BaseType[B]

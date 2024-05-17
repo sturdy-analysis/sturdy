@@ -131,7 +131,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     val snapshotMapping = mapping
     private var afterFirst: State = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       afterFirst = mapping
       mapping = snapshotMapping
 

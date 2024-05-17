@@ -49,7 +49,7 @@ class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[
     private val snapshot = tables
     private var fTables: Map[Key, Map[Symbol, Entry]] = null
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fTables = tables
       tables = snapshot
 

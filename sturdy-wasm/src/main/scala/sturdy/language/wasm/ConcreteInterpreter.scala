@@ -108,9 +108,9 @@ object ConcreteInterpreter extends Interpreter:
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
-    
+
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
-    
+
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]]
     override val fixpointSuper = fixpoint
 

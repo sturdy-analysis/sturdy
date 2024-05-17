@@ -71,7 +71,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     private var fTables: Tables[Key, Symbol, Entry] = _
     private var fDirty: Set[Key] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fTables = tables
       fDirty = dirtyTables
       tables = snapshot

@@ -5,7 +5,8 @@ import sturdy.data.MayJoin
 import sturdy.effect.Effect
 
 /**
- * The store interface.
+ * [[Store]] is a mapping from addresses to values.
+ * The value of an address can be mutated or freed.
  */
 trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
   def read(x: Addr): JOption[J, V]

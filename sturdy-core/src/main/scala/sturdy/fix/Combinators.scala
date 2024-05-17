@@ -8,6 +8,10 @@ import sturdy.fix.cfg.ControlLogger
 
 import scala.reflect.ClassTag
 
+/** A fixpoint combinator captures a certain aspect of the fixpoint algorithm,
+ * such as limiting the recursion depth or iterating.
+ * Its type `(Dom => Codom) => (Dom => Codom)` can be understood as a function,
+ * which manipulates the abstract interpreter function with its domain `Dom` and codomain `Codom`. */
 trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]:
   def fixpoint: CombinatorFixpoint[Dom, Codom] = new CombinatorFixpoint {
     override lazy val phi: Combinator[Dom, Codom] = Combinator.this
@@ -26,6 +30,14 @@ final class Const[Dom, Codom](c: Dom => Codom) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = c
 }
 
+/** Combinator [[Filter]] applies its argument combinator if the given predicate holds and skips the argument combinator if the predicate does not hold.
+ *
+ * Filter allows to optimize performance by skipping expressions, which cannot cause non-termination:
+ * {{{
+ * filter(isFunctionBody,
+ *   innermost(StackedStates(readPriorOutput = false)))
+ * }}}
+ */
 def filter[Dom, Codom](pred: Dom => Boolean, phi: Combinator[Dom, Codom]): Filter[Dom, Codom] = new Filter(pred, phi)
 final class Filter[Dom, Codom](pred: Dom => Boolean, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
@@ -37,6 +49,7 @@ final class Filter[Dom, Codom](pred: Dom => Boolean, val phi: Combinator[Dom, Co
 
 val UnwindingProperty = "loop unwinding"
 
+/** Unwinds the first `steps` iterations of a loop, analyzing each unwinded iteration separately. */
 def unwind[Dom, Codom](steps: Int, phi: Combinator[Dom, Codom]): Unwind[Dom, Codom] = new Unwind(steps, phi)
 final class Unwind[Dom, Codom](steps: Int, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   private var stepsLeft: Int = steps

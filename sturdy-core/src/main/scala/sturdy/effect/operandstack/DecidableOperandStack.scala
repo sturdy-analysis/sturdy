@@ -97,7 +97,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
     private val snapshot = stack
     private var fStack: List[V] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fStack = stack
       stack = snapshot
 

@@ -9,6 +9,7 @@ import sturdy.data.SomeJOption
 
 object StackUnderflow extends FailureKind
 
+/** [[OperandStack]] contains arguments to operations executed by a low-level machine. */
 trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
   def push(v: V): Unit
   def pop(): JOption[J, V]

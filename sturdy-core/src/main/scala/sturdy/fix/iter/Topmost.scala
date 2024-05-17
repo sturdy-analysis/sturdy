@@ -11,6 +11,11 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
+/**
+ * Fixpoint combinator [[Topmost]] iterates on the entire program.
+ * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
+ * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
+ */
 def topmost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])

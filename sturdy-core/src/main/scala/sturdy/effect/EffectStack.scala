@@ -1,13 +1,47 @@
 package sturdy.effect
 
-import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen, WidenStateful}
+import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen}
 import sturdy.fix
 
-
+/**
+ * `EffectStack` composes multiple effects.
+ *
+ * For example:
+ * {{{
+ * val callFrame: DecidableMutableCallFrame[Unit, String, V]
+ * val store: Store[Addr, V, J]
+ * val alloc: Allocation[Addr, AllocationSite]
+ * val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc))
+ * }}}
+ *
+ * `EffectStack` distinguishes inputs and outputs of effects based on the evaluated program expression.
+ *  - An effect state is an input for an evaluated expression, if a different effect state changes the evaluated result.
+ *  - An effect state is an output for an evaluated expression, if the output state can change compared to the input state.
+ *
+ * For example:
+ * {{{
+ * val effectStack: EffectStack = new EffectStack(
+ *   EffectList(stack, memory, globals, funTable, callFrame, except, failure),
+ *   { // Inputs
+ *     case _: EnterFunction => EffectList(memory, globals, callFrame)
+ *     case _: Eval => EffectList(stack, memory, globals, callFrame)
+ *   },
+ *   { // Outputs
+ *     case _: EnterFunction => EffectList(stack, memory, globals, failure)
+ *     case _: Eval => EffectList(stack, memory, globals, callFrame, except)
+ *   }
+ * )
+ * }}}
+ *  - The operand stack is an input for `Eval`,
+ *    because the evaluated expression has access to elements on the stack.
+ *  - The operand stack is not an input for `EnterFunction`,
+ *    because the function does not have access to stack elements defined outside the function.
+ *  - Function tables are neither inputs nor outputs, because they never change.
+ */
 class EffectStack(_effects: => Effect,
                   _inEffects: PartialFunction[Any, Effect] = PartialFunction.empty,
                   _outEffects: PartialFunction[Any, Effect] = PartialFunction.empty)
-                  extends fix.State, ObservableJoin, Effect:
+  extends fix.State, ObservableJoin, Effect:
 
   private lazy val effects: Effect = _effects
 
@@ -42,13 +76,13 @@ class EffectStack(_effects: => Effect,
 
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()
-    override def inbetween(): Unit = joinSwitch()
-    override def retainNone(): Unit = joinEnd()
-    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd()
+    override def inbetween(fFailed: Boolean): Unit = joinSwitch(fFailed)
+    override def retainNone(): Unit = joinEnd(true, true)
+    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd(false, true)
+    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd(true, false)
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd(false, false)
   }
-  
+
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
     for(joiner <- effects.makeComputationJoiner[A])
       yield(baseJoiner.compose(joiner))
@@ -57,7 +91,7 @@ class EffectStack(_effects: => Effect,
     val joiner = makeComputationJoiner[A].get
 
     val triedF = TrySturdy(f)
-    joiner.inbetween()
+    joiner.inbetween(triedF.isBottom)
     val triedG = TrySturdy(g)
 
     (triedF.isBottom, triedG.isBottom) match
@@ -73,7 +107,7 @@ class EffectStack(_effects: => Effect,
     val joiner = makeComputationJoiner[A].get
 
     val triedF = TrySturdy(f)
-    joiner.inbetween()
+    joiner.inbetween(triedF.isBottom)
     val triedG = TrySturdy[A](g)
 
     (triedF.isBottom, triedG.isBottom) match

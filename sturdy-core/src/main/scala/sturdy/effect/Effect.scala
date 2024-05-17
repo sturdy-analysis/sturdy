@@ -1,26 +1,45 @@
 package sturdy.effect
 
 import sturdy.data.CombineUnit
-import sturdy.values.{Changed, Join, MaybeChanged, StackWidening, Widen}
+import sturdy.values.{Changed, Join, StackWidening, Widen}
 
-trait Stateful:
+/**
+ * [[Effect]] is an interface for effectful computations, such as computations mutating variables or causing exceptions.
+ *
+ * [[Effect]]s carry an internal state that changes throughout the program evaluation.
+ */
+trait Effect:
+  /** The internal state of the effect. */
   type State
+
+  /**
+   * Returns the internal state of the effect.
+   * The returned state must not be mutated afterwards.
+   */
   def getState: State
+
+  /** Overwrite the current internal state of the effect with the given state. */
   def setState(st: State): Unit
+
+  /** Joins two internal states of the effect. */
   def join: Join[State]
+
+  /** Widens two internal states of the effect. */
   def widen: Widen[State]
+
   def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
       stack match
         case Nil => Changed(call)
         case mostRecentCall :: _ => widen(mostRecentCall, call)
 
-trait Effect extends Stateful:
+  /** [[ComputationJoiner]] joins two effectful computations, including this effect.
+   */
   def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
     private val original = getState
     private var afterFirst: State = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       afterFirst = getState
       setState(original)
 
@@ -39,45 +58,12 @@ trait Effect extends Stateful:
       setState(joined.get)
   )
 
-
-  protected def defaultComputationJoiner[A] = new ComputationJoiner[A] {
-    val snapshot = getState
-    var firstState: State = _
-
-    override def inbetween(): Unit =
-      firstState = getState
-      setState(snapshot)
-
-    override def retainNone(): Unit =
-      setState(snapshot)
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      setState(firstState)
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit =
-      {} // nothing
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      val joined = join(firstState, getState)
-      setState(joined.get)
-  }
-
-trait Monotone extends Effect:
-  final override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None
-
-trait Stateless extends Monotone:
+trait Stateless extends Effect:
   final type State = Unit
   final def getState: Unit = ()
   final def setState(st: Unit): Unit = ()
-
   final def join: Join[Unit] = CombineUnit
   final def widen: Widen[Unit] = CombineUnit
 
-trait Concrete extends Effect:
-  final type State = Unit
-  final def getState: Unit = ()
-  final def setState(st: Unit): Unit = ()
-
-  final def join: Join[Unit] = CombineUnit
-  final def widen: Widen[Unit] = CombineUnit
-  final override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = None
+trait Monotone extends Stateless
+trait Concrete extends Stateless

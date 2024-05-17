@@ -53,7 +53,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     val snapshot = memories
     var fmemories: Map[Key, Mem[B]] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fmemories = memories
       memories = snapshot
 

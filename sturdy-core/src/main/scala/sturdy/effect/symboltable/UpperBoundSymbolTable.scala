@@ -27,7 +27,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
     private var fTables: Map[Key, Entry] = _
     private var fDirty: Set[Key] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fTables = tables
       tables = snapshot
 

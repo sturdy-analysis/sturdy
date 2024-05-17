@@ -12,6 +12,10 @@ import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
 import sturdy.values.ordering.{OrderingOps, EqOps, LiftedOrderingOps}
 
+/**
+ * Trait [[Interpreter]] allows sharing code between concrete and abstract interpreters.
+ * The trait defines different types of values and conversions between them.
+ */
 trait Interpreter:
   type J[A] <: MayJoin[A]
   type VBool
@@ -110,6 +114,10 @@ trait Interpreter:
   given ValueBooleanSelection[R](using Instance, BooleanSelection[VBool, R]): BooleanSelection[Value, R] =
     new LiftedBooleanSelection(_.asBoolean)
 
+  /**
+   * Instances instantiate the interpreter, which is needed because the semantics are stateful.
+   * Specifically, each evaluation of a program requires a new instances with a fresh frame, fresh store, etc.
+   */
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
     protected given Instance = this.asInstanceOf[Instance]

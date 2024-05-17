@@ -59,7 +59,7 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
     val snapshot = exception
     var fExcept: JOptionA[E] = null
     
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fExcept = exception
       exception = snapshot
 

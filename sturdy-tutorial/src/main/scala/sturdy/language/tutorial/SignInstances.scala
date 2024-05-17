@@ -127,7 +127,7 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
   override def join: Join[Map[String, MayMust[Sign]]] = implicitly
   override def widen: Widen[Map[String, MayMust[Sign]]] = {
     given Finite[String] with {}
-    finiteWidening(using join, implicitly)
+    finitely(using join, implicitly)
   }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SignStoreJoiner)
@@ -135,7 +135,7 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
     private val snapshot = store
     private var fStore: Map[String, MayMust[Sign]] = _
 
-    override def inbetween(): Unit =
+    override def inbetween(fFailed: Boolean): Unit =
       fStore = store
       store = snapshot
 
@@ -215,12 +215,3 @@ class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Mono
       case recur: RecurrentCall => AFallible.Diverging(recur)
       case ex => throw ex
     }
-
-  override type State = Powerset[FailureKind]
-  override def getState: State = Powerset(failureKinds)
-  override def setState(s: State): Unit = failureKinds = s.set
-
-  override def join: Join[State] = implicitly
-  override def widen: Widen[State] = implicitly
-
-  
