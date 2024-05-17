@@ -8,6 +8,9 @@ constantCsv <- read.csv2(paste(path, "ConstantAnalysis(config=innermost(StackedS
 constantErrorsCsv <- read.csv2(paste(path, "ConstantAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).exceptions.csv", sep="/"), dec = ".")
 taintCsv <- read.csv2(paste(path, "ConstantTaintAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).results.csv", sep="/"), dec = ".")
 taintErrorsCsv <- read.csv2(paste(path, "ConstantTaintAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).exceptions.csv", sep="/"), dec = ".")
+binaryenCsv <- read.csv2(paste(path, "BinaryenAnalysis().results.csv", sep="/"), dec = ".")
+binaryenErrorsCsv <- read.csv2(paste(path, "BinaryenAnalysis().exceptions.csv", sep="/"), dec = ".")
+
 
 typeCol <- rgb(127/256, 205/256, 187/256)
 constantCol <- rgb(44/256, 127/256, 184/256)
@@ -19,6 +22,7 @@ colors <- c(rgb(127/256, 205/256, 187/256), rgb(44/256, 127/256, 184/256), rgb(4
 typeDuration <- typeCsv$duration / 1000
 constantDuration <- constantCsv$duration / 1000
 taintDuration <- taintCsv$duration / 1000
+binaryenDuration <- binaryenCsv$duration / 1000
 
 pdf(file = paste(path, "wasmbench-mgc-duration.pdf", sep="/"))
 boxplot(typeDuration, constantDuration, taintDuration,
@@ -42,8 +46,20 @@ constantDead <- constantCsv$deadInstructionPercent
 constantDeadMedian <- median(constantDead)
 constantConstant <- constantCsv$constantInstructionPercent
 constantConstantMedian <- median(constantConstant)
+constantElim <- constantCsv$eliminatablePercent
+constantElimMedian <- median(constantElim)
+constantElimMean <- mean(constantElim)
 safeMem <- 100 - taintCsv$taintedAccessesPercent
 safeMemMedian <- median(safeMem)
+binaryenDead <- binaryenCsv$deadInstructionPercent
+binaryenDeadMedian <- median(binaryenDead)
+binaryenDeadMean <- mean(binaryenDead)
+
+constantDurationMean <- mean(constantDuration)
+constantDurationMedian <- median(constantDuration)
+
+binaryenDurationMean <- mean(binaryenDuration)
+binaryenDurationMedian <- median(binaryenDuration)
 
 pdf(file = paste(path, "wasmbench-mgc-results.pdf", sep="/"))
 b <- boxplot(typeDead, constantDead, constantConstant, safeMem,
@@ -95,6 +111,26 @@ taintOtherErrors <- length(taintErrorMsgs) - constantTimeouts - constantInvalidI
 memsafeInstPercent <- 100 - taintCsv$taintedAccessesPercent
 memsafeBinaries <- length(which(memsafeInstPercent == 100)) / length(memsafeInstPercent)
 memsafeInstMean <- mean(memsafeInstPercent)
+
+
+
+
+pdf(file = paste(path, "wasmbench-binaryen-compare.pdf", sep="/"))
+b <- boxplot(constantElim, binaryenDead,
+             # main = "Multiple boxplots for comparision",
+             names = c("eliminated by us", "eliminated by binaryen"),
+             # las = 2,
+             ylim = c(0, 100),
+             ylab = "Percentage (%) of instructions",
+             #        pars=list(outcol=c(typeCol, typeCol, constantCol, taintCol)),
+             # xlab = "Analysis",
+             col = c(constantCol, taintCol)
+)
+means <- c(mean(constantElim), mean(binaryenDead))
+points(means, pch = 'x', col = "red" )
+text(means, labels = paste(round(means), '%'), col = "red", pos = 4, offset = 2.5)
+dev.off()
+
 
 # pdf(file = paste(path, "wasmbench-mgc-memsafe.pdf", sep="/"))
 # hist(memsafeYesNo)

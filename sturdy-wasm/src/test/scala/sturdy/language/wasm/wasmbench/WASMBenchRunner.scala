@@ -35,24 +35,28 @@ enum Analysis:
   case Constant(conf: AnalysisConfig)
   case Taint(conf: AnalysisConfig)
   case Type(conf: AnalysisConfig)
+  case Binaryen(conf: AnalysisConfig)
 
   def config: AnalysisConfig = this match
     case Interval(config) => config
     case Constant(config) => config
     case Taint(config) => config
     case Type(config) => config
-  
+    case Binaryen(config) => config
+
   override def toString: String = this match
     case Interval(config) => s"IntervalAnalysis(config=${config.wasmConfig},scope=${config.scope})"
     case Constant(config) => s"ConstantAnalysis(config=${config.wasmConfig},scope=${config.scope})"
     case Taint(config) => s"ConstantTaintAnalysis(config=${config.wasmConfig},scope=${config.scope})"
     case Type(config) => s"TypeAnalysis(config=${config.wasmConfig},scope=${config.scope})"
+    case Binaryen(config) => s"BinaryenAnalysis()"
 
   def csvHeader(): String = this match
     case Interval(_) => IntervalRunnable.getCsvHeadders
     case Constant(_) => ConstantRunnable.getCsvHeadders
     case Taint(_) => TaintRunnable.getCsvHeadders
     case Type(_) => TypeRunnable.getCsvHeadders
+    case Binaryen(_) => BinaryenMetricsCollector.getCsvHeadders
 
   def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, config: AnalysisConfig, binary: Boolean = false): AnalysisRunnable =
     val name = bin.md.hash
@@ -79,6 +83,8 @@ enum Analysis:
       case Analysis.Taint(config) =>
         val args = params.map(WASMType.toTaintAnalysisValue)
         new TaintRunnable(set, p, config.scope, args, config.wasmConfig, binary)
+      case Analysis.Binaryen(config) =>
+        new BinaryenMetricsCollector(set, p, config, binary)
 
 type RunnerConfig = RRecord {
   val filtering: Filtering
@@ -102,14 +108,17 @@ type AnalysisConfig = RRecord {
 }
 
 object RunnerConfig:
+
+  val rootDir = Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI)
   val default: RunnerConfig = RRecord(
     "filtering" -> Filtering.Filtered,
     "analyses" -> List(
-      Analysis.Constant(AnalysisConfig.callSite1),
+      Analysis.Binaryen(AnalysisConfig.nocontext),
+//      Analysis.Constant(AnalysisConfig.callSite1),
 //      Analysis.Type(AnalysisConfig.nocontext),
 //      Analysis.Taint(AnalysisConfig.callSite1)
     ),
-    "rootDir" -> Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI),
+    "rootDir" -> rootDir,
     "datasetFilter" -> ((x: WASMBenchBinary) => true),
 //      ((x: WASMBenchBinary) => x.ex.exists {
 //      case FuncDef(_, _, Some(name)) if name == "_start" => true
@@ -117,31 +126,32 @@ object RunnerConfig:
 //    }),
     "skipTestsIncludingIndex" -> -1, // default = -1
     "takeUntilIndex" -> None, //default = None
-    "onlyBinariesInCSV" -> None, // Some(Paths.get("/Users/seba/tmp/wasmbench-mgc/ConstantAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).timeout.csv")),
+    "onlyBinariesInCSV" -> Some(rootDir.resolve("results/ConstantAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).results.csv")),
   ).asInstanceOf[RunnerConfig]
 
 object AnalysisConfig:
+  val timeout = 120
   val nocontext: AnalysisConfig = RRecord(
-    "timeLimit" -> new GrainOfTime(60).seconds,
+    "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = Insensitive,
       fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
-    "saveResultsToDir" -> Path.of("/Users/seba/tmp/wasmbench-mgc"),
+    "saveResultsToDir" -> RunnerConfig.rootDir.resolve("results"),
     "logOpenOption" -> StandardOpenOption.CREATE_NEW, // default: CREATE_NEW
     "logErrors" -> true, // default: true
     "logResults" -> true // default: true
   ).asInstanceOf[AnalysisConfig]
 
   val callSite1: AnalysisConfig = RRecord(
-    "timeLimit" -> new GrainOfTime(60).seconds,
+    "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = CallSites(1),
       fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
-    "saveResultsToDir" -> Path.of("/Users/seba/tmp/wasmbench-mgc"),
+    "saveResultsToDir" -> RunnerConfig.rootDir.resolve("results"),
     "logOpenOption" -> StandardOpenOption.CREATE_NEW, // default: CREATE_NEW
     "logErrors" -> true, // default: true
     "logResults" -> true // default: true
@@ -246,11 +256,11 @@ class WASMBenchRunner extends AnyFunSpec :
         val name = bin.md.hash
         val p = WASMBench.mkBinPath(name, filtering)
         //      println(s"Test nr.: $num, hash: $name")
-        it(s"Test nr. $num of ${allbinaries.size}, $name: Size in bytes: ${md.sizeBytes} in $an") {
+        it(s"Test nr. $num of ${binaries.size}, $name: Size in bytes: ${md.sizeBytes} in $an") {
           //        TimeLimitedTests does not always terminate test after the specified time,
           //        utilize 'Thread.join(millis)' instead
 
-          println(s"Running test nr. $num of ${allbinaries.size}, $name: Size in bytes: ${md.sizeBytes} in $an")
+          println(s"Running test nr. $num of ${binaries.size}, $name: Size in bytes: ${md.sizeBytes} in $an")
 
           var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${cfg.timeLimit.toSeconds} seconds"))
 
@@ -308,14 +318,18 @@ class FileLogger(p: Path, oo: StandardOpenOption, doLog: Boolean = false, newLin
 
 object FileLogger:
   def succLogger(an: String, cfg: AnalysisConfig): FileLogger =
-    new FileLogger(cfg.saveResultsToDir.resolve(
-      s"$an.results.csv".replace(' ', '_')),
+    val p = cfg.saveResultsToDir.resolve(
+      s"$an.results.csv".replace(' ', '_'))
+    println(s"Success logging to $p")
+    new FileLogger(p,
       cfg.logOpenOption,
       cfg.logResults)
 
   def excLogger(an: String, cfg: AnalysisConfig): FileLogger =
-    new FileLogger(cfg.saveResultsToDir.resolve(
-      s"$an.exceptions.csv".replace(' ', '_')),
+    val p = cfg.saveResultsToDir.resolve(
+      s"$an.exceptions.csv".replace(' ', '_'))
+    println(s"Error logging to $p")
+    new FileLogger(p,
       cfg.logOpenOption,
       cfg.logErrors)
 
