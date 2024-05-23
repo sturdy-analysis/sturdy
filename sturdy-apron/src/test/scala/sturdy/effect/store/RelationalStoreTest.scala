@@ -25,6 +25,7 @@ class RelationalStoreTest extends AnyFunSuite:
   type ApAddr = PhysicalAddress[Context]
   type Type = BaseType[Int]
   type Val = ApronExpr[PhysicalAddress[Context], Type]
+  val intType: Type = BaseType[Int]
 
   given Finite[Context] with {}
   given failure: Failure = new CollectedFailures[FailureKind]
@@ -44,19 +45,19 @@ class RelationalStoreTest extends AnyFunSuite:
     val xRecent = PhysicalAddress("x", Recency.Recent)
     val xOld = PhysicalAddress("x", Recency.Old)
 
-    apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(0, 10))
-    apronStore.getBound(ApronExpr.Addr(xRecent, BaseType[Int])) shouldBe Interval(0,10)
+    apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(0, 10, intType))
+    apronStore.getBound(ApronExpr.Addr(xRecent, intType)) shouldBe Interval(0,10)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.getBound(ApronExpr.Addr(xOld, BaseType[Int])) shouldBe Interval(0,10)
+    apronStore.getBound(ApronExpr.Addr(xOld, intType)) shouldBe Interval(0,10)
 
-    apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(15, 20))
-    apronStore.getBound(ApronExpr.Addr(xRecent, BaseType[Int])) shouldBe Interval(15,20)
+    apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(15, 20, intType))
+    apronStore.getBound(ApronExpr.Addr(xRecent, intType)) shouldBe Interval(15,20)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.getBound(ApronExpr.Addr(xOld, BaseType[Int])) shouldBe Interval(0,20)
+    apronStore.getBound(ApronExpr.Addr(xOld, intType)) shouldBe Interval(0,20)
 
 //    apronStore.addConstraint(ApronCons.intLt[PhysicalAddress[Context],BaseType[Int]](ApronExpr.intLit(10), ApronExpr.addr(xOld, BaseType[Int])))
 //    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(11, 20))
@@ -71,14 +72,14 @@ class RelationalStoreTest extends AnyFunSuite:
     val xPow = PowVirtualAddress(x)
     val yPow = PowVirtualAddress(y)
 
-    recencyStore.write(xPow, ApronExpr.intInterval(0, 10))
+    recencyStore.write(xPow, ApronExpr.intInterval(0, 10, intType))
 
     x.physical.reduce(xPhys =>
       // ApronExpr already works on virtual addresses here...
-      apronStore.getBound(ApronExpr.addr(xPhys, BaseType[Int])) shouldBe Interval(0, 10)
-      recencyStore.write(yPow, ApronExpr.intAdd(ApronExpr.addr(x, BaseType[Int]), ApronExpr.intLit(1)))
+      apronStore.getBound(ApronExpr.addr(xPhys, intType)) shouldBe Interval(0, 10)
+      recencyStore.write(yPow, ApronExpr.intAdd[Int,VAddr,Type](ApronExpr.addr(x, intType), ApronExpr.intLit(1, intType)))
       y.physical.reduce(y =>
-        apronStore.getBound(ApronExpr.addr(y, BaseType[Int])) shouldBe Interval(1, 11)
+        apronStore.getBound(ApronExpr.addr(y,intType)) shouldBe Interval(1, 11)
         ()
       )
     )

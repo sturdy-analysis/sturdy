@@ -33,7 +33,7 @@ given ApronBooleanBranching
    typeBooleanOps: BooleanOps[Type]
   ): BooleanBranching[ApronExpr[Addr,Type], A] with
   override def boolBranch(v: ApronExpr[Addr, Type], thn: => A, els: => A): A =
-    apronState.ifThenElse(intEq(v, booleanLit(true))) {
+    apronState.ifThenElse(ApronCons.eq(v, booleanLit(true))) {
       thn
     } {
       els

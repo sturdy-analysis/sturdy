@@ -66,7 +66,7 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
         case (ConcreteInterpreter.Value.IntValue(i1), Value.IntValue(i2)) =>
           val s1 = MpqScalar(Mpz(i1))
           val iv1 = Interval(s1,s1)
-          val iv2 = apronState.getBound(i2)
+          val iv2 = apronState.getInterval(i2)
           IsSound(iv1.isLeq(iv2), s"Abstract value $a with range $iv2 does not overapproximate concrete value $c")
         case (ConcreteInterpreter.Value.RefValue(r1), Value.RefValue(r2)) =>
           Soundness.isSound(r1, r2)

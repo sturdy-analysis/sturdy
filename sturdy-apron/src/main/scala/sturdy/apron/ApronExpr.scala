@@ -11,7 +11,7 @@ import sturdy.values.{Join, MaybeChanged, Topped, Widen}
 import java.math.BigInteger
 import scala.reflect.ClassTag
 
-enum ApronExpr[Addr, Type]:
+enum ApronExpr[Addr, +Type]:
   case Addr(v: ApronVar[Addr], tpe: Type)
   case Constant(coeff: Coeff, tpe: Type)
   case Unary(op: UnOp,
@@ -85,16 +85,18 @@ object ApronExpr:
   def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
     Constant(iv, _type)
 
-  def intLit[Addr, Type](using intOps: IntegerOps[Int,Type])(i: Int): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), intOps.integerLit(0))
-  def longLit[Addr, Type](using intOps: IntegerOps[Int, Type])(l: Long): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(l)), intOps.integerLit(0))
-  def bigIntLit[Addr, Type](using intOps: IntegerOps[Int, Type])(i: BigInt): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i.bigInteger)), intOps.integerLit(0))
-  def intInterval[Addr, Type](using intOps: IntegerOps[Int,Type])(lower: Int, upper: Int): Constant[Addr, Type] =
-    Constant(Interval(lower, upper), intOps.integerLit(0))
-  def intTop[Addr, Type](using intOps: IntegerOps[Int, Type]): Constant[Addr, Type] =
-    Constant(topInterval, intOps.integerLit(0))
+  def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(i)), tpe)
+  def longLit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), tpe)
+  def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(i.bigInteger)), tpe)
+  def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
+    Constant(Interval(lower, upper), tpe)
+  def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
+    Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), tpe)
+  def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
+    Constant(topInterval, tpe)
 
   def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
     val n = if (b) 1 else 0
@@ -106,25 +108,25 @@ object ApronExpr:
   def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Binary(op, e1, e2, resultType, resultType.roundingType, resultType.roundingDir)
 
-  def intNegate[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, intOps.sub(intOps.integerLit(0), e1._type))
+  def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, e1._type)
 
-  def intAdd[Addr,Type: ApronType](using intOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+  def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, intOps.add(e1._type, e2._type))
 
-  def intSub[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Sub, e1, e2, intOps.sub(e1._type, e2._type))
 
-  def intMul[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def intMul[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, intOps.mul(e1._type, e2._type))
 
-  def intDiv[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def intDiv[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
 
-  def intMod[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def intMod[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mod, e1, e2, intOps.remainder(e1._type, e2._type))
 
-  def intPow[Addr, Type: ApronType](using intOps: IntegerOps[Int, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
 
   def topInterval: Interval =
@@ -222,24 +224,30 @@ object ApronCons:
   import CompareOp.*
 
   // issue below, make CompareOp[Addr]?
-  def intEq[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Eq, e1, e2, integerOps.sub(e1._type, e2._type))
-  def intNeq[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Neq, e1, e2, integerOps.sub(e1._type, e2._type))
-  def intLt[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Lt, e1, e2, integerOps.sub(e1._type, e2._type))
-  def intLe[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Le, e1, e2, integerOps.sub(e1._type, e2._type))
-  def intGe[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Ge, e1, e2, integerOps.sub(e1._type, e2._type))
-  def intGt[Addr, Type](using integerOps: IntegerOps[Int,Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
-    Compare(Gt, e1, e2, integerOps.sub(e1._type, e2._type))
-  def top[Addr, Type](using integerOps: IntegerOps[Int, Type]): Compare[Addr, Type] = {
-    val itop = ApronExpr.intTop[Addr, Type]
-    Compare(Eq, itop, itop, integerOps.sub(itop._type, itop._type))
+  def eq[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Eq, e1, e2, e1._type)
+  def neq[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Neq, e1, e2, e1._type)
+  def lt[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Lt, e1, e2, e1._type)
+  def le[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Le, e1, e2, e1._type)
+  def ge[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Ge, e1, e2, e1._type)
+  def gt[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): Compare[Addr, Type] =
+    assert(e1._type == e2._type)
+    Compare(Gt, e1, e2, e1._type)
+  def top[Addr, Type](tpe: Type): Compare[Addr, Type] = {
+    val itop = ApronExpr.constant[Addr,Type](ApronExpr.topInterval, tpe)
+    Compare(Eq, itop, itop, tpe)
   }
   def from[Addr, Type](tb: Topped[Boolean])(using integerOps: IntegerOps[Int, Type]): ApronCons[Addr, Type] = tb match
-    case Topped.Top => top
+    case Topped.Top => top(integerOps.integerLit(0))
     case Topped.Actual(b) => from(b)
   def from[Addr, Type](b: Boolean)(using integerOps: IntegerOps[Int, Type]): ApronCons[Addr, Type] = Constant(b, integerOps.integerLit(if (b) 0 else 1))
 

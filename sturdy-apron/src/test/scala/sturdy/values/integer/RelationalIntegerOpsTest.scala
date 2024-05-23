@@ -21,9 +21,9 @@ import sturdy.utils.TestContexts.{*, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
-  minValue = -100,
-  maxValue = 100,
+class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
+  minValue = Integer.MIN_VALUE,
+  maxValue = Integer.MAX_VALUE,
   makeIntegerOps = {
     given apronManager: Manager = new apron.Polka(true)
     var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
@@ -33,10 +33,32 @@ class RelationalIntegerOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, T
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = apronState
     val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    new RelationalIntegerOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
-      override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i)
-      override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high)
-      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) = this.apronState.getIntBound(n)
+    val intType: Type = Type.IntType(BaseType[Int])
+    new RelationalIntOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
+      override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
+      override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
+      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) = this.apronState.getIntInterval(n)
+    }
+  }
+)
+
+class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
+  minValue = Long.MinValue,
+  maxValue = Long.MaxValue,
+  makeIntegerOps = {
+    given apronManager: Manager = new apron.Polka(true)
+    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
+    given effectStack: EffectStack = new EffectStack(
+      RecencyClosure(apronState.recencyStore)
+    )
+    apronState = RecencyRelationalStore[Ctx, Type]
+    given ApronState[VirtAddr, Type] = apronState
+    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
+    val longType: Type = Type.LongType(BaseType[Long])
+    new RelationalLongOps[VirtAddr, Type] with TestingIntegerOps[Long, ApronExpr[VirtAddr, Type]] {
+      override def integerLit(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
+      override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
+      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Long, Long) = this.apronState.getLongInterval(n)
     }
   }
 )

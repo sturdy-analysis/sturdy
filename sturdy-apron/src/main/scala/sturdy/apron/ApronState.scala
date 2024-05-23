@@ -1,6 +1,7 @@
 package sturdy.apron
 
 import apron.{Interval, Var}
+import gmp.Mpq
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
@@ -21,23 +22,32 @@ trait ApronState[Addr,Type]:
   def join: Join[ApronExpr[Addr,Type]]
   def widen: Widen[ApronExpr[Addr,Type]]
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
-  def getBound(expr: ApronExpr[Addr, Type]): Interval
-  def getIntBound(expr: ApronExpr[Addr, Type]): (Int,Int) =
-    val iv = getBound(expr)
-    val d = Array[Double](0)
+  def getInterval(expr: ApronExpr[Addr, Type]): Interval
+  def getIntInterval(expr: ApronExpr[Addr, Type]): (Int,Int) =
+    val (lower,upper) = getBigIntInterval(expr, Integer.MIN_VALUE, Integer.MAX_VALUE)
+    (lower.toInt, upper.toInt)
+
+  def getLongInterval(expr: ApronExpr[Addr, Type]): (Long, Long) =
+    val (lower, upper) = getBigIntInterval(expr, Long.MinValue, Long.MaxValue)
+    (lower.toLong, upper.toLong)
+
+  private inline def getBigIntInterval(expr: ApronExpr[Addr, Type], minVal: Long, maxVal: Long): (BigInt,BigInt) =
+    val iv = getInterval(expr)
     val lower =
       if (iv.inf().isInfty() != 0)
-        Integer.MIN_VALUE
+        BigInt(minVal)
       else
-        iv.inf().toDouble(d, 0)
-        d(0).intValue()
+        val mpq = Mpq()
+        iv.inf().toMpq(mpq, 0)
+        BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue()))
 
     val upper =
       if (iv.sup().isInfty() != 0)
-        Integer.MAX_VALUE
+        BigInt(maxVal)
       else
-        iv.sup().toDouble(d, 0)
-        d(0).intValue()
+        val mpq = Mpq()
+        iv.sup().toMpq(mpq, 0)
+        BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue()))
 
     (lower, upper)
 
@@ -111,7 +121,7 @@ final class ApronRecencyState
   override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]): Unit =
     relationalStore.addConstraint(convertExpr.virtToPhys(constraint))
 
-  override def getBound(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
+  override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     relationalStore.getBound(convertExpr.virtToPhys(expr))
 
   override def join[A: Join](f: => A)(g: => A): A =

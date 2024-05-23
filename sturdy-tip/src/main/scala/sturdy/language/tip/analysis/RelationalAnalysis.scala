@@ -84,7 +84,7 @@ object RelationalAnalysis extends Interpreter,
       case Value.IntValue(i) =>
         given Failure = inst.failure
         given EffectStack = inst.effectStack
-        ApronCons.intNeq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0))
+        ApronCons.neq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
       case Value.TopValue => topBool
       case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
@@ -92,7 +92,7 @@ object RelationalAnalysis extends Interpreter,
     v match
       case Value.BoolValue(bool) =>
         import inst.given
-        BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1), ApronExpr.intLit[RelAddr, RelType](0))
+        BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1, BaseType[Int]), ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
       case Value.IntValue(i) => i
       case Value.TopValue => topInt
       case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
@@ -100,10 +100,10 @@ object RelationalAnalysis extends Interpreter,
   override def topInt(using inst: Instance): VInt =
     given Failure = inst.failure
     given EffectStack = inst.effectStack
-    ApronExpr.intTop
+    ApronExpr.top(BaseType[Int])
   override def topBool(using inst: Instance): VBool =
     import inst.given
-    ApronCons.top
+    ApronCons.top(BaseType[Int])
 
   override def topReference(using self: Instance): VRef =
     val addrs = self.store.virtualAddresses

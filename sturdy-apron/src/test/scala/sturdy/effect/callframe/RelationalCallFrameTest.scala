@@ -36,11 +36,11 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("getLocal") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10, intType)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0,10)
+    state.getInterval(xExpr) shouldBe Interval(0,10)
   }
 
   test("setLocal") {
@@ -49,10 +49,10 @@ class RelationalCallFrameTest extends AnyFunSuite:
       initVars = List("x" -> None)
     )
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10, intType))
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0, 10)
+    state.getInterval(xExpr) shouldBe Interval(0, 10)
   }
 
   test("strong update") {
@@ -61,39 +61,39 @@ class RelationalCallFrameTest extends AnyFunSuite:
       initVars = List("x" -> None)
     )
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10))
-    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](15, 20))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10, intType))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](15, 20, intType))
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(15, 20)
+    state.getInterval(xExpr) shouldBe Interval(15, 20)
   }
 
   test("weak update") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2, intType)))
     )
 
-    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5))), "f") {}
-    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8))), "f") {}
+    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5, intType))), "f") {}
+    callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8, intType))), "f") {}
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0, 5)
+    state.getInterval(xExpr) shouldBe Interval(0, 5)
   }
 
 
   test("withNew") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10, intType)))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    val xIv = state.getBound(xExpr)
+    val xIv = state.getInterval(xExpr)
 
     callFrame.withNew((), List("y" -> Some(xExpr)), "f") {
       val yExpr = callFrame.getLocalByName("y").getOrElse(fail(s"Variable y not bound in ${callFrame}"))
-      state.getBound(yExpr) shouldBe xIv
+      state.getInterval(yExpr) shouldBe xIv
 
       callFrame.getLocalByName("x") shouldBe JOptionC.None()
     }
@@ -105,12 +105,12 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("join") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 10, intType)))
     )
 
     val state1 = (callFrame.getState, state.recencyStore.getState)
 
-    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](5, 15))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](5, 15, intType))
 
     val state2 = (callFrame.getState, state.recencyStore.getState)
 
@@ -123,18 +123,18 @@ class RelationalCallFrameTest extends AnyFunSuite:
     state.recencyStore.setState(joinedStores.get)
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0, 15)
+    state.getInterval(xExpr) shouldBe Interval(0, 15)
   }
 
   test("join recent against old") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2)))
+      initVars = List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](0, 2, intType)))
     )
 
     val state1 = callFrame.getState
 
-    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5))), "f") {
+    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.intInterval[VirtualAddress[Ctx],Type](4, 5, intType))), "f") {
       callFrame.getState
     }
 
@@ -143,11 +143,11 @@ class RelationalCallFrameTest extends AnyFunSuite:
     callFrame.setState(joinedStates.get)
 
     var xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0, 5)
+    state.getInterval(xExpr) shouldBe Interval(0, 5)
 
     // Test that x is old
-    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8))
+    callFrame.setLocalByName("x", ApronExpr.intInterval[VirtualAddress[Ctx],Type](7, 8, intType))
     xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
-    state.getBound(xExpr) shouldBe Interval(0, 8)
+    state.getInterval(xExpr) shouldBe Interval(0, 8)
 
   }

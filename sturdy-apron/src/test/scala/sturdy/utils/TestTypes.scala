@@ -17,11 +17,16 @@ object TestTypes:
 
   enum Type:
     case IntType(baseType: BaseType[Int])
+    case LongType(baseType: BaseType[Long])
     case BoolType(baseType: BaseType[Boolean])
 
     def asInt(using f: Failure): BaseType[Int] =
       this match
         case IntType(tpe) => tpe
+        case _ => f.fail(TypeError, s"Expected int, but got $this")
+    def asLong(using f: Failure): BaseType[Long] =
+      this match
+        case LongType(tpe) => tpe
         case _ => f.fail(TypeError, s"Expected int, but got $this")
 
     def asBool(using f: Failure): BaseType[Boolean] =
@@ -41,6 +46,7 @@ object TestTypes:
   }
 
   given IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = Type.IntType(_))
+  given IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = Type.LongType(_))
   given OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
   given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
   given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = Type.BoolType(_))
