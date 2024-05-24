@@ -38,16 +38,17 @@ object ConcreteInterpreter extends Interpreter:
   override type MthName = String
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
-  override type Addr = Int
+  override type FieldAddr = Int
   override type Idx = Int
   override type TypeRep = ReferenceType
   override type NullVal = Null
-  override type OID = Int
+  override type ObjAddr = Int
   override type FieldName = String
-  override type ObjRep = Object[OID, ClassFile, Addr, FieldName]
-  override type AID = Int
+  override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
+  override type ArrayAddr = Int
   override type AType = ArrayType
-  override type ArrayRep = Array[AID, Addr, ArrayType]
+  override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType]
+  override type ArrayElemAddr = Int
 
   override type ExcV = JvmExcept[Value]
 
@@ -57,23 +58,59 @@ object ConcreteInterpreter extends Interpreter:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
-  override def topObj: Object[ConcreteInterpreter.OID, ClassFile, ConcreteInterpreter.Addr, ConcreteInterpreter.FieldName] = throw new UnsupportedOperationException
-  override def topArray: Array[ConcreteInterpreter.AID, ConcreteInterpreter.Addr, ConcreteInterpreter.AType] = throw new UnsupportedOperationException
+  override def topObj: Object[ConcreteInterpreter.ObjAddr, ClassFile, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.FieldName] = throw new UnsupportedOperationException
+  override def topArray: Array[ConcreteInterpreter.ArrayAddr, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.AType] = throw new UnsupportedOperationException
   override def topNull: Null = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
-  def asObj(v: Value)(using Failure): ObjRep = v.asObj
-  def asArray(v: Value)(using Failure): ArrayRep = v.asArray
-  def asInt32(v: Value)(using Failure): I32 = v.asInt32
-  def asNull(v: Value)(using Failure): NullVal = v.asNull
+
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
     else
       Value.Int32(0)
 
+  given objectTypeOps[OID, Addr, FieldName](using project: Project[URL]): TypeOps[Object[OID, ClassFile, Addr, FieldName], TypeRep, Bool] =
+    new ConcreteObjectTypeOps({ (cls, target) =>
+      if (target == null)
+        false
+      else
+        cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
+    })
 
-  type Store = Map[Addr, Value]
+  given arrayTypeOps[AID, Addr]: TypeOps[Array[AID, Addr, AType], ReferenceType, Boolean] =
+    new ConcreteArrayTypeOps((atype, target) => target != null && atype == target.asArrayType)
+
+  given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
+    override def instanceOf(v: NullVal, target: ReferenceType): Boolean =
+      if (target == null) {
+        true
+      }
+      else {
+        false
+      }
+
+  given intSizeOps: SizeOps[I32, Boolean] with
+    override def is32Bit(v: I32): Boolean = true
+
+  given floatSizeOps: SizeOps[F32, Boolean] with
+    override def is32Bit(v: F32): Boolean = true
+
+  given longSizeOps: SizeOps[I64, Boolean] with
+    override def is32Bit(v: I64): Boolean = false
+
+  given doubleSizeOps: SizeOps[F64, Boolean] with
+    override def is32Bit(v: F64): Boolean = false
+
+  given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
+    override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
+
+  given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType], Boolean] with
+    override def is32Bit(v: Array[AID, Addr, ArrayType]): Boolean = true
+
+
+  type Store = Map[FieldAddr, Value]
   type StaticStore = Map[(ObjectType, String), Value]
+
   class Instance(files: Project[URL], path: String, initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = 0
     val args: List[Value] = List()
@@ -85,72 +122,27 @@ object ConcreteInterpreter extends Interpreter:
     val failure: ConcreteFailure = new ConcreteFailure
     val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
     val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
-    val objFieldAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
-    val objAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
-    val arrayAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
-    val arrayValAlloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
-    val objFieldStore: CStore[Addr, Value] = new CStore(initStore)
-    val arrayValStore: CStore[Addr, Value] = new CStore(initArrayValStore)
+    val objAlloc: CAllocationIntIncrement[InstructionSite] = new CAllocationIntIncrement
+    val objFieldAlloc: CAllocationIntIncrement[FieldInitSite] = new CAllocationIntIncrement
+    val arrayAlloc: CAllocationIntIncrement[InstructionSite] = new CAllocationIntIncrement
+    val arrayValAlloc: CAllocationIntIncrement[ArrayElemInitSite] = new CAllocationIntIncrement
+    val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
+    val arrayValStore: CStore[FieldAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
     val project: Project[URL] = files
+    given Project[URL] = project
     val projectSource: String = path
 
     private given Failure = failure
 
-    given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool]  with
-      override def instanceOf(v: ObjRep, target: ReferenceType): Boolean =
-        if (target == null){
-          false
-        }
-        else{
-          v.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
-        }
-
-    given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
-      override def instanceOf(v: ArrayRep, target: ReferenceType): Boolean =
-        if (target == null){
-          false
-        }
-        else{
-          v.arrayType == target.asArrayType
-        }
-
-    given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
-      override def instanceOf(v: NullVal, target: ReferenceType): Boolean =
-        if (target == null){
-          true
-        }
-        else{
-          false
-        }
-
-    given intSizeOps: SizeOps[I32, Boolean] with
-      override def is32Bit(v: I32): Boolean = true
-
-    given floatSizeOps: SizeOps[F32, Boolean] with
-      override def is32Bit(v: F32): Boolean = true
-
-    given longSizeOps: SizeOps[I64, Boolean] with
-      override def is32Bit(v: I64): Boolean = false
-
-    given doubleSizeOps: SizeOps[F64, Boolean] with
-      override def is32Bit(v: F64): Boolean = false
-      
-    given objectSizeOps: SizeOps[ObjRep, Boolean] with
-      override def is32Bit(v: ObjRep): Boolean = true
-      
-    given arraySizeOps: SizeOps[ArrayRep, Boolean] with
-      override def is32Bit(v: ArrayRep): Boolean = true
-
-
-    val bytecodeOps: BytecodeOps[Addr, Idx, Value, TypeRep] = implicitly
-    val objectOps: ObjectOps[Addr, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
-      new LiftedObjectOps[Addr, FieldName, OID, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](asObj, Value.Obj.apply, asNull, Value.Null.apply)(
+    val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
+    val objectOps: ObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
         using new ConcreteObjectOps(using objFieldAlloc, objFieldStore)
       )
-    val arrayOps: ArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin] =
-      new LiftedArrayOps[Addr, AID, Value, Value, ArrayRep, Value, AType, AllocationSite, MayJoin.NoJoin, ArrayRep, Int](asArray, Value.Array.apply, asInt32, Value.Int32.apply)(
+    val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin] =
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin, ArrayRep, Int](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
         using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
       )
 

@@ -5,44 +5,42 @@ import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType,
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.EffectStack
-import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.DecidableMutableCallFrame
+import sturdy.effect.allocation.{AAllocationFromContext, Allocation}
+import sturdy.effect.callframe.{DecidableMutableCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.{Except, JoinedExcept}
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack}
-import sturdy.effect.store.Store
+import sturdy.effect.store.{AStoreMultiAddrThreadded, AStoreSingleAddrThreadded, Store, TopStore}
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.context.Sensitivity
 import sturdy.fix.{ContextualFixpoint, Fixpoint}
+import sturdy.language.bytecode.ConcreteInterpreter.{Bool, NullVal, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{ConstantValues, Exceptions}
-import sturdy.language.bytecode.generic.{AllocationSite, BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
-import sturdy.values.{Abstractly, Topped, given}
-import sturdy.values.integer.given
-import sturdy.values.floating.given
-import sturdy.values.objects.{Object, ObjectOps, given}
+import sturdy.language.bytecode.abstractions.{Exceptions, Numbers, Objects}
+import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
+import sturdy.values.{Abstractly, Finite, Topped, given}
+import sturdy.values.booleans.{*, given}
+import sturdy.values.convert.{*, given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.objects.{*, given}
+import sturdy.values.relational.{*, given}
 import sturdy.values.arrays.{Array, ArrayOps, given}
+import sturdy.values.references.{AllocationSiteAddr, given}
 
 import java.net.URL
 
-object ConstantAnalysis extends Interpreter, ConstantValues, Exceptions:
+object ConstantAnalysis extends Interpreter, Numbers, Objects, Exceptions:
   override type J[A] = WithJoin[A]
   type Mth = Method
   type MthName = String
   type MthSig = MethodDescriptor
-  type Addr = I32
   type Idx = I32
-  type TypeRep = ReferenceType
-  type FieldName = String
-  type OID = I32
-  type ObjType = ClassFile
-  type AID = I32
-  type AType = ArrayType
   override type ExcV = JvmExceptAbstract[Value]
 
 
-//  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
+  //  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
 //    override def apply(c: ConcreteInterpreter.Value): Value = c match
 //      case ConcreteInterpreter.Value.TopValue => Value.TopValue
 //      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
@@ -52,7 +50,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Exceptions:
 //      //case ConcreteInterpreter.Value.Obj(o) => Value.Obj(Topped.Actual(o))
 //      //case ConcreteInterpreter.Value.Array(a) => Value.Array(Topped.Actual(a))
 
-  class Instance extends GenericInstance:
+  class Instance(files: Project[URL], path: String) extends GenericInstance:
 
     private given Instance = this
 
@@ -67,20 +65,56 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Exceptions:
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objFieldAlloc = implicitly
-    override val objAlloc = implicitly
-    override val arrayValAlloc = implicitly
-    override val arrayAlloc = implicitly
-    override val objFieldStore = implicitly
-    override val arrayValStore = implicitly
-    override val staticVarStore = implicitly
-    override val frame = implicitly
-    override val project: Project[URL] = ???
-    override val projectSource: String = ???
+    override val objAlloc = new AAllocationFromContext(site => ObjAddr(site))
+    override val objFieldAlloc = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name))
+    override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
+    override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val objFieldStore = new TopStore()
+    override val arrayValStore = new TopStore()
+    override val staticVarStore = new TopStore()
+    override val frame = new JoinableDecidableCallFrame(0, List())
+    override val project: Project[URL] = files
+    override val projectSource: String = path
 
-    override val bytecodeOps: BytecodeOps[Topped[FrameData], Topped[FrameData], ConstantAnalysis.Value, ReferenceType] = ???
-    override val objectOps: ObjectOps[Topped[FrameData], String, Topped[FrameData], ConstantAnalysis.Value, ClassFile, Object[Topped[FrameData], ClassFile, Topped[FrameData], String], ConstantAnalysis.Value, AllocationSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, MayJoin.NoJoin] = ???
-    override val arrayOps: ArrayOps[Topped[FrameData], Topped[FrameData], ConstantAnalysis.Value, ConstantAnalysis.Value, Array[Topped[FrameData], Topped[FrameData], ArrayType], ConstantAnalysis.Value, ArrayType, AllocationSite, MayJoin.NoJoin] = ???
+    given Project[URL] = project
+    private given Failure = failure
+    import ConcreteInterpreter.given
+
+    given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool] with
+
+      override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] = v match
+        case Topped.Top => Topped.Top
+        case Topped.Actual(o) =>
+          if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+            Topped.Top // because `null <= o` and `instanceOf(null, target) == false`
+          else
+            Topped.Actual(false)
+
+    given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
+      override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match
+        case Topped.Top => Topped.Top
+        case Topped.Actual(o) =>
+          if (ConcreteInterpreter.arrayTypeOps.instanceOf(o, target))
+            Topped.Top // because `null <= o` and `instanceOf(null, target) == false`
+          else
+            Topped.Actual(false)
+
+    given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
+      override def instanceOf(v: NullVal, target: ReferenceType): Topped[Boolean] =
+        if (target == null)
+          Topped.Actual(true)
+        else
+          Topped.Actual(false)
+
+
+    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
+    override val objectOps: ObjectOps[String, ObjAddr, ConstantAnalysis.Value, ClassFile, Object[ObjAddr, ClassFile, FieldAddr, String], ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
+//      new LiftedObjectOps[FieldAddr, FieldName, ObjAddr, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
+//        using new ConcreteObjectOpsWithJoin(using objFieldAlloc, objFieldStore)
+//      )
+      ???
+    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
+      ???
 
 
 

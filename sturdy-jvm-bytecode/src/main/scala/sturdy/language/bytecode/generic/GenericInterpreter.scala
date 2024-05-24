@@ -34,31 +34,28 @@ enum JvmExcept[V]:
   case Throw(exception: ObjectType)
   case ThrowObject(exception: V)
 
-enum AllocationSite:
-  case classFile(cfs: ClassFile)
-  case objField(cfs: ClassFile, field: String)
-  case array()
-  case arrayVals(idx: Int)
-  case default
+case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
+case class ArrayElemInitSite(s: InstructionSite, ix: Int)
+case class FieldInitSite(s: InstructionSite, name: String)
 
 enum FixIn:
-  case Eval(inst: Instruction, pc: Int)
+  case Eval(inst: Instruction, mth: Method, pc: Int)
 
 enum FixOut:
   case Eval()
 
 given finiteFixIn: Finite[FixIn] with {}
 
-trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
 
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
   type Fixed = FixIn => FixOut
 
-  val bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType]
+  val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[Addr, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, AllocationSite, Method, String, MethodDescriptor, V, J]
-  val arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]
+  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, Object[ObjAddr, ClassFile, FieldAddr, String], V, FieldInitSite, Method, String, MethodDescriptor, V, J]
+  val arrayOps: ArrayOps[ArrayAddr, V, V, V, ArrayType, ArrayElemInitSite, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -66,12 +63,12 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
   val stack: DecidableOperandStack[V]
   val failure: Failure
   val except: Except[JvmExcept[V], ExcV, J]
-  val objFieldAlloc: Allocation[Addr, AllocationSite]
-  val objAlloc: Allocation[OID, AllocationSite]
-  val arrayValAlloc: Allocation[Addr, AllocationSite]
-  val arrayAlloc: Allocation[AID, AllocationSite]
-  val objFieldStore: Store[Addr, V, J]
-  val arrayValStore: Store[Addr, V, J]
+  val objAlloc: Allocation[ObjAddr, InstructionSite]
+  val objFieldAlloc: Allocation[FieldAddr, FieldInitSite]
+  val arrayAlloc: Allocation[ArrayAddr, InstructionSite]
+  val arrayValAlloc: Allocation[ArrayElemAddr, ArrayElemInitSite]
+  val objFieldStore: Store[FieldAddr, V, J]
+  val arrayValStore: Store[ArrayElemAddr, V, J]
   val staticVarStore: Store[(ObjectType, String), V, J]
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
@@ -100,668 +97,671 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
   private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
-  lazy val num = new GenericInterpreterNumerics[Addr, Idx, V, ReferenceType](bytecodeOps)
-  lazy val native = new JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, AllocationSite, J](bytecodeOps, objectOps, arrayOps)
+  lazy val num = new GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
+  lazy val native = new JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjRep, TypeRep, J](bytecodeOps, objectOps, arrayOps)
 
-  def eval(inst: Instruction, pc: Int = 0)(using Fixed): Unit = inst.opcode match
-    // No Op
-    case x if (x == 0) =>
-      ()
+  def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit = {
+    val site = InstructionSite(mth, pc)
+    inst.opcode match
+      // No Op
+      case x if (x == 0) =>
+        ()
 
-    // push NULL on stack
-    case x if (x == 1) =>
-      inst match
-        case inst: ACONST_NULL.type =>
-          stack.push(objectOps.makeNull())
+      // push NULL on stack
+      case x if (x == 1) =>
+        inst match
+          case inst: ACONST_NULL.type =>
+            stack.push(objectOps.makeNull())
 
-    // Lit Ops
-    case x if (2 <= x && x <= 17) =>
-      stack.push(num.evalNumericOp(inst))
+      // Lit Ops
+      case x if (2 <= x && x <= 17) =>
+        stack.push(num.evalNumericOp(inst))
 
-    // LDC
-    case x if (x == 18) =>
-      inst match
-        case inst: LoadInt =>
-          stack.push(num.evalNumericOp(inst))
-        case inst: LoadFloat =>
-          stack.push(num.evalNumericOp(inst))
-        case inst: LoadClass =>
-          val obj = createLibraryObj(inst.value.mostPreciseObjectType)
-          val mth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-          val test = createLibraryObj(ObjectType("java/lang/Class"))
-          stack.push(test)
+      // LDC
+      case x if (x == 18) =>
+        inst match
+          case inst: LoadInt =>
+            stack.push(num.evalNumericOp(inst))
+          case inst: LoadFloat =>
+            stack.push(num.evalNumericOp(inst))
+          case inst: LoadClass =>
+            val obj = createLibraryObj(inst.value.mostPreciseObjectType, site)
+            val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
+            val test = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
+            stack.push(test)
 
-        case inst: LoadString =>
-          val string = inst.value.toCharArray.map(l => l.toInt).toSeq
-          val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
-          val stringObj = createLibraryObj(ObjectType("java/lang/String"))
-          objectOps.setField(stringObj, "value", stringArray)
-          stack.push(stringObj)
+          case inst: LoadString =>
+            val string = inst.value.toCharArray.map(l => l.toInt).toSeq
+            val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
+            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+            val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
+            objectOps.setField(stringObj, "value", stringArray)
+            stack.push(stringObj)
 
-        case inst: LoadMethodHandle =>
-          ???
-        case inst: LoadMethodType =>
-          ???
+          case inst: LoadMethodHandle =>
+            ???
+          case inst: LoadMethodType =>
+            ???
 
-    // LDC_W
-    case x if (x == 19) =>
-      inst match
-        case inst: LoadInt_W =>
-          stack.push(num.evalNumericOp(inst))
-        case inst: LoadFloat_W =>
-          stack.push(num.evalNumericOp(inst))
-        case inst: LoadClass_W =>
-          ???
-        case inst: LoadString_W =>
-          val string = inst.value.toCharArray.map(l => l.toInt).toSeq
-          val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-          val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
-          val stringObj = createLibraryObj(ObjectType("java/lang/String"))
-          objectOps.setField(stringObj, "value", stringArray)
-          stack.push(stringObj)
-        case inst: LoadMethodHandle_W =>
-          ???
-        case inst: LoadMethodType_W =>
-          ???
+      // LDC_W
+      case x if (x == 19) =>
+        inst match
+          case inst: LoadInt_W =>
+            stack.push(num.evalNumericOp(inst))
+          case inst: LoadFloat_W =>
+            stack.push(num.evalNumericOp(inst))
+          case inst: LoadClass_W =>
+            ???
+          case inst: LoadString_W =>
+            val string = inst.value.toCharArray.map(l => l.toInt).toSeq
+            val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
+            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+            val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
+            objectOps.setField(stringObj, "value", stringArray)
+            stack.push(stringObj)
+          case inst: LoadMethodHandle_W =>
+            ???
+          case inst: LoadMethodType_W =>
+            ???
 
-    // LDC2_W
-    case x if (x == 20) =>
-      stack.push(num.evalNumericOp(inst))
+      // LDC2_W
+      case x if (x == 20) =>
+        stack.push(num.evalNumericOp(inst))
 
-    // load Local variable
-    case x if (21 <= x && x <= 45) =>
-      stack.push(evalLocalLoad(inst))
+      // load Local variable
+      case x if (21 <= x && x <= 45) =>
+        stack.push(evalLocalLoad(inst))
 
-    //load from array
-    case x if (46 <= x && x <= 53) =>
-      val idx = stack.popOrAbort()
-      val array = stack.popOrAbort()
-      stack.push(evalArrayLoad(inst, array, idx))
+      //load from array
+      case x if (46 <= x && x <= 53) =>
+        val idx = stack.popOrAbort()
+        val array = stack.popOrAbort()
+        stack.push(evalArrayLoad(inst, array, idx))
 
-    // store local variable
-    case x if (54 <= x && x <= 78) =>
-      val v1 = stack.popOrAbort()
-      evalLocalStore(inst, v1)
+      // store local variable
+      case x if (54 <= x && x <= 78) =>
+        val v1 = stack.popOrAbort()
+        evalLocalStore(inst, v1)
 
-    // store in array
-    case x if (79 <= x && x <= 86) =>
-      val v = stack.popOrAbort()
-      val idx = stack.popOrAbort()
-      val array = stack.popOrAbort()
-      evalArrayStore(inst, array, idx, v)
+      // store in array
+      case x if (79 <= x && x <= 86) =>
+        val v = stack.popOrAbort()
+        val idx = stack.popOrAbort()
+        val array = stack.popOrAbort()
+        evalArrayStore(inst, array, idx, v)
 
-    // Manip stack
-    case x if (87 <= x && x <= 95) =>
-      inst match
-        case inst: POP.type =>
-          stack.popOrAbort()
-        case inst: POP2.type =>
-          val v = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(v)){
+      // Manip stack
+      case x if (87 <= x && x <= 95) =>
+        inst match
+          case inst: POP.type =>
             stack.popOrAbort()
-          }{
+          case inst: POP2.type =>
+            val v = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(v)){
+              stack.popOrAbort()
+            }{
 
-          }
-        case inst: DUP.type =>
-          val dup = stack.popOrAbort()
-          stack.push(dup)
-          stack.push(dup)
-        case inst: DUP_X1.type =>
-          val dup = stack.popOrAbort()
-          val ins = stack.popOrAbort()
-          stack.push(dup)
-          stack.push(ins)
-          stack.push(dup)
-        case inst: DUP_X2.type =>
-          val dup = stack.popOrAbort()
-          val secondElem = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(secondElem)){
-            val thirdElem = stack.popOrAbort()
+            }
+          case inst: DUP.type =>
+            val dup = stack.popOrAbort()
             stack.push(dup)
-            stack.push(thirdElem)
-            stack.push(secondElem)
             stack.push(dup)
-          }{
+          case inst: DUP_X1.type =>
+            val dup = stack.popOrAbort()
+            val ins = stack.popOrAbort()
             stack.push(dup)
-            stack.push(secondElem)
+            stack.push(ins)
             stack.push(dup)
-          }
-        case inst: DUP2.type =>
-          val dup1 = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-            val dup2 = stack.popOrAbort()
-            stack.push(dup2)
-            stack.push(dup1)
-            stack.push(dup2)
-            stack.push(dup1)
-          }{
-            stack.push(dup1)
-            stack.push(dup1)
-          }
-
-        case inst: DUP2_X1.type =>
-          val dup1 = stack.popOrAbort()
-          val dup2 = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-            val thirdElem = stack.popOrAbort()
-            stack.push(dup2)
-            stack.push(dup1)
-            stack.push(thirdElem)
-            stack.push(dup2)
-            stack.push(dup1)
-          }{
-            stack.push(dup1)
-            stack.push(dup2)
-            stack.push(dup1)
-          }
-        case inst: DUP2_X2.type =>
-          val dup1 = stack.popOrAbort()
-          val dup2 = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-            branchOpsUnit.boolBranch(sizeOps.is32Bit(dup2)){
-              //dup1 64bit and dup2 32bit
+          case inst: DUP_X2.type =>
+            val dup = stack.popOrAbort()
+            val secondElem = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(secondElem)){
               val thirdElem = stack.popOrAbort()
+              stack.push(dup)
+              stack.push(thirdElem)
+              stack.push(secondElem)
+              stack.push(dup)
+            }{
+              stack.push(dup)
+              stack.push(secondElem)
+              stack.push(dup)
+            }
+          case inst: DUP2.type =>
+            val dup1 = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+              val dup2 = stack.popOrAbort()
+              stack.push(dup2)
+              stack.push(dup1)
+              stack.push(dup2)
+              stack.push(dup1)
+            }{
+              stack.push(dup1)
+              stack.push(dup1)
+            }
+
+          case inst: DUP2_X1.type =>
+            val dup1 = stack.popOrAbort()
+            val dup2 = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+              val thirdElem = stack.popOrAbort()
+              stack.push(dup2)
               stack.push(dup1)
               stack.push(thirdElem)
               stack.push(dup2)
               stack.push(dup1)
             }{
-              //dup1 and dup2 64bit
               stack.push(dup1)
-              stack.push(dup2)
-              stack.push(dup2)
-            }
-          }{
-            val thirdElem = stack.popOrAbort()
-            branchOpsUnit.boolBranch(sizeOps.is32Bit(thirdElem)){
-              //all elements 32bit
-              val fourthElem = stack.popOrAbort()
-              stack.push(dup2)
-              stack.push(dup1)
-              stack.push(fourthElem)
-              stack.push(thirdElem)
-              stack.push(dup2)
-              stack.push(dup1)
-            }{
-              //dup1 and dup2 32bit, thirdElem 64bit
-              stack.push(dup2)
-              stack.push(dup1)
-              stack.push(thirdElem)
               stack.push(dup2)
               stack.push(dup1)
             }
-          }
-        case inst: SWAP.type =>
-          val top = stack.popOrAbort()
-          val bot = stack.popOrAbort()
-          stack.push(top)
-          stack.push(bot)
-
-    // Arithmetic Ops
-    case x if (96 <= x && x <= 115) =>
-      val (v1, v2) = stack.pop2OrAbort()
-      stack.push(num.evalNumericBinOp(inst, v1, v2))
-
-    // Negation Ops
-    case x if (116 <= x && x <= 119) =>
-      val v1 = stack.popOrAbort()
-      stack.push(num.evalNumericUnOp(inst, v1))
-
-    // Bitshift Ops
-    case x if (120 <= x && x <= 131) =>
-      val (v1, v2) = stack.pop2OrAbort()
-      stack.push(num.evalNumericBinOp(inst, v1, v2))
-
-    // iinc
-    case x if (x == 132) =>
-      inst match
-        case inst: IINC =>
-          val toInc = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-          frame.setLocalOrElse(inst.lvIndex, i32ops.add(toInc, i32ops.integerLit(inst.constValue)), fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-
-    // Conversions
-    case x if (133 <= x && x <= 147) =>
-      val v1 = stack.popOrAbort()
-      stack.push(num.evalConvertOp(inst, v1))
-
-    // Numeric Comparison
-    case x if (148 <= x && x <= 152) =>
-      val (v1, v2) = stack.pop2OrAbort()
-      stack.push(num.evalNumericBinOp(inst, v1, v2))
-
-    // Branching
-    case x if (153 <= x && x <= 166) =>
-      inst match
-        case inst: IFEQ =>
-          val v = stack.popOrAbort()
-          val isEq = eqOps.equ(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isEq) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IFNE =>
-          val v = stack.popOrAbort()
-          val isNe = eqOps.neq(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isNe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          }{
-
-          }
-        case inst: IFLT =>
-          val v = stack.popOrAbort()
-          val isLt = compareOps.lt(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isLt) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IFGE =>
-          val v = stack.popOrAbort()
-          val isGe = compareOps.ge(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isGe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IFGT =>
-          val v = stack.popOrAbort()
-          val isGt = compareOps.gt(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isGt) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IFLE =>
-          val v = stack.popOrAbort()
-          val isLe = compareOps.le(v, i32ops.integerLit(0))
-          branchOpsUnit.boolBranch(isLe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPEQ =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isEq = eqOps.equ(v1, v2)
-          branchOpsUnit.boolBranch(isEq) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPNE =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isNe = eqOps.neq(v1, v2)
-          branchOpsUnit.boolBranch(isNe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPLT =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isLt = compareOps.lt(v1, v2)
-          branchOpsUnit.boolBranch(isLt) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPGE =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isGe = compareOps.ge(v1, v2)
-          branchOpsUnit.boolBranch(isGe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPGT =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isGt = compareOps.gt(v1, v2)
-          branchOpsUnit.boolBranch(isGt) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ICMPLE =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isLe = compareOps.le(v1, v2)
-          branchOpsUnit.boolBranch(isLe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-        case inst: IF_ACMPEQ =>
-          val(v1, v2) = stack.pop2OrAbort()
-          val isEq = eqOps.equ(v1, v2)
-          branchOpsUnit.boolBranch(isEq){
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          }{
-
-          }
-        case inst: IF_ACMPNE =>
-          val (v1, v2) = stack.pop2OrAbort()
-          val isNe = eqOps.neq(v1, v2)
-          branchOpsUnit.boolBranch(isNe) {
-            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          } {
-
-          }
-
-
-    // JUMPS
-    case x if (167 <= x && x <= 171) =>
-      inst match
-        case inst: GOTO =>
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        case inst: JSR =>
-          stack.push(i32ops.integerLit(pc))
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        case inst: RET =>
-          val index = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-          except.throws(JvmExcept.Ret(index))
-        case inst: TABLESWITCH =>
-          val index = stack.popOrAbort()
-          val transformedIndices = Iterator.from(0).zip(inst.jumpOffsets).map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
-          val offset = transformedIndices.getOrElse(index, inst.defaultOffset)
-          except.throws(JvmExcept.Jump(pc + offset))
-        case inst: LOOKUPSWITCH =>
-          val key = stack.popOrAbort()
-          val transformedIndices = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
-          val offset = transformedIndices.getOrElse(key, inst.defaultOffset)
-          except.throws(JvmExcept.Jump(pc + offset))
-
-
-    // Return
-    case x if (172 <= x && x <= 177) =>
-      ()
-
-    // Load and Store Statics
-    case x if (178 <= x && x <= 179) =>
-      inst match
-        case inst: GETSTATIC =>
-          val objCF = inst.declaringClass
-          if(!staticInitialized.contains(objCF)){
-            if (project.isLibraryType(objCF)){
-              staticInitialized += objCF
-              val source = javaLibClassFileWrapper(objCF)
-              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              invoke(cfs.staticInitializer.get, true)
-            }
-            else{
-              staticInitialized += objCF
-              val source = nonJavaLibClassFileWrapper(objCF)
-              val cfs: List[ClassFile] =
-                process(new DataInputStream(new FileInputStream(source))) { in =>
-                  org.opalj.br.reader.Java8Framework.ClassFile(in)
-                }
-              invoke(cfs.head.staticInitializer.get, true)
-            }
-          }
-
-          val v = staticVarStore.readOrElse((objCF, inst.name), fail(UnboundStaticVar, inst.name))
-          stack.push(v)
-
-        case inst: PUTSTATIC =>
-          val objCF = inst.declaringClass
-          if (!staticInitialized.contains(objCF)) {
-            if (project.isLibraryType(objCF)) {
-              staticInitialized += objCF
-              val source = javaLibClassFileWrapper(objCF)
-              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              invoke(cfs.staticInitializer.get, true)
-            }
-            else {
-              staticInitialized += objCF
-              val source = nonJavaLibClassFileWrapper(objCF)
-              println(projectSource)
-              println(source)
-              val cfs: List[ClassFile] =
-                process(new DataInputStream(new FileInputStream(source))) { in =>
-                  org.opalj.br.reader.Java8Framework.ClassFile(in)
-                }
-              invoke(cfs.head.staticInitializer.get, true)
-            }
-          }
-          val v = stack.popOrAbort()
-          staticVarStore.write((objCF, inst.name), v)
-
-    // Load and Store Fields
-    case x if (180 <= x && x <= 181) =>
-      inst match
-        case inst: GETFIELD =>
-          val obj = stack.popOrAbort()
-          val field = objectOps.getField(obj, inst.name).getOrElse(fail(UnboundField, inst.name))
-          stack.push(field)
-        case inst: PUTFIELD =>
-          val value = stack.popOrAbort()
-          val obj = stack.popOrAbort()
-          objectOps.setField(obj, inst.name, value)
-
-
-    // Invoke Functions
-    case x if (182 <= x && x <= 186) =>
-      inst match
-        case inst: INVOKESTATIC =>
-          if (project.isLibraryType(inst.declaringClass)){
-            val source = javaLibClassFileWrapper(inst.declaringClass)
-            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invoke(mth, true)
-          }
-          else{
-            val cfs: ClassFile = project.classFile(inst.declaringClass).get
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invoke(mth, true)
-          }
-
-        case inst: INVOKEVIRTUAL =>
-          val objectType = inst.declaringClass.mostPreciseObjectType
-          val numArgs = inst.methodDescriptor.parametersCount
-          val args = stack.popNOrAbort(numArgs)
-          val obj = stack.popOrAbort()
-          stack.push(obj)
-          val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-          val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
-          if (!mth.descriptor.returnType.isVoidType){
-            stack.push(ret.get)
-          }
-
-        case inst: INVOKESPECIAL =>
-          val objectType = inst.declaringClass.mostPreciseObjectType
-          if (project.isLibraryType(objectType))
-            val source = javaLibClassFileWrapper(objectType)
-            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invoke(mth, false)
-          else
-            val cfs = project.classFile(objectType).get
-            val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-            invoke(mth, false)
-
-        case inst: INVOKEINTERFACE =>
-          val numArgs = inst.methodDescriptor.parametersCount
-          val args = stack.popNOrAbort(numArgs)
-          val obj = stack.popOrAbort()
-          val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-          stack.push(obj)
-          stack.pushN(args)
-          invoke(mth, false)
-
-        case inst: INVOKEDYNAMIC =>
-          val test = inst.bootstrapMethod
-          val test1 = inst.name
-          val test2 = inst.methodDescriptor
-          val receiver = inst.bootstrapMethod.handle
-          receiver match
-            case receiver: InvokeStaticMethodHandle =>
-              if (inst.name == "makeConcatWithConstants"){
-                if(stack.size < 2){
-                  val test3 = inst.bootstrapMethod.arguments.head.toJava
-                  val test4 = test3.drop(2).dropRight(1)
-                  eval(LoadString(test4))
-                }
-
-                val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
-                val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-                val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
-                val args = stack.popNOrAbort(2)
-                evalNativeStatic(mth, args)
+          case inst: DUP2_X2.type =>
+            val dup1 = stack.popOrAbort()
+            val dup2 = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
+              branchOpsUnit.boolBranch(sizeOps.is32Bit(dup2)){
+                //dup1 64bit and dup2 32bit
+                val thirdElem = stack.popOrAbort()
+                stack.push(dup1)
+                stack.push(thirdElem)
+                stack.push(dup2)
+                stack.push(dup1)
+              }{
+                //dup1 and dup2 64bit
+                stack.push(dup1)
+                stack.push(dup2)
+                stack.push(dup2)
               }
-          /*
-          receiver match
-            case receiver: InvokeStaticMethodHandle =>
-              if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
-                val mthTypeSource = javaLibClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
-                val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
-                val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
-                stack.push(createNativeObj(inst.methodDescriptor.returnType.asObjectType))
-                stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asObjectType))
-                val mthTypeObj = invoke(mthTypeMth.get, true)
+            }{
+              val thirdElem = stack.popOrAbort()
+              branchOpsUnit.boolBranch(sizeOps.is32Bit(thirdElem)){
+                //all elements 32bit
+                val fourthElem = stack.popOrAbort()
+                stack.push(dup2)
+                stack.push(dup1)
+                stack.push(fourthElem)
+                stack.push(thirdElem)
+                stack.push(dup2)
+                stack.push(dup1)
+              }{
+                //dup1 and dup2 32bit, thirdElem 64bit
+                stack.push(dup2)
+                stack.push(dup1)
+                stack.push(thirdElem)
+                stack.push(dup2)
+                stack.push(dup1)
+              }
+            }
+          case inst: SWAP.type =>
+            val top = stack.popOrAbort()
+            val bot = stack.popOrAbort()
+            stack.push(top)
+            stack.push(bot)
 
-                val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+      // Arithmetic Ops
+      case x if (96 <= x && x <= 115) =>
+        val (v1, v2) = stack.pop2OrAbort()
+        stack.push(num.evalNumericBinOp(inst, v1, v2))
+
+      // Negation Ops
+      case x if (116 <= x && x <= 119) =>
+        val v1 = stack.popOrAbort()
+        stack.push(num.evalNumericUnOp(inst, v1))
+
+      // Bitshift Ops
+      case x if (120 <= x && x <= 131) =>
+        val (v1, v2) = stack.pop2OrAbort()
+        stack.push(num.evalNumericBinOp(inst, v1, v2))
+
+      // iinc
+      case x if (x == 132) =>
+        inst match
+          case inst: IINC =>
+            val toInc = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+            frame.setLocalOrElse(inst.lvIndex, i32ops.add(toInc, i32ops.integerLit(inst.constValue)), fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+
+      // Conversions
+      case x if (133 <= x && x <= 147) =>
+        val v1 = stack.popOrAbort()
+        stack.push(num.evalConvertOp(inst, v1))
+
+      // Numeric Comparison
+      case x if (148 <= x && x <= 152) =>
+        val (v1, v2) = stack.pop2OrAbort()
+        stack.push(num.evalNumericBinOp(inst, v1, v2))
+
+      // Branching
+      case x if (153 <= x && x <= 166) =>
+        inst match
+          case inst: IFEQ =>
+            val v = stack.popOrAbort()
+            val isEq = eqOps.equ(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isEq) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IFNE =>
+            val v = stack.popOrAbort()
+            val isNe = eqOps.neq(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isNe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            }{
+
+            }
+          case inst: IFLT =>
+            val v = stack.popOrAbort()
+            val isLt = compareOps.lt(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isLt) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IFGE =>
+            val v = stack.popOrAbort()
+            val isGe = compareOps.ge(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isGe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IFGT =>
+            val v = stack.popOrAbort()
+            val isGt = compareOps.gt(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isGt) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IFLE =>
+            val v = stack.popOrAbort()
+            val isLe = compareOps.le(v, i32ops.integerLit(0))
+            branchOpsUnit.boolBranch(isLe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPEQ =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isEq = eqOps.equ(v1, v2)
+            branchOpsUnit.boolBranch(isEq) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPNE =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isNe = eqOps.neq(v1, v2)
+            branchOpsUnit.boolBranch(isNe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPLT =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isLt = compareOps.lt(v1, v2)
+            branchOpsUnit.boolBranch(isLt) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPGE =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isGe = compareOps.ge(v1, v2)
+            branchOpsUnit.boolBranch(isGe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPGT =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isGt = compareOps.gt(v1, v2)
+            branchOpsUnit.boolBranch(isGt) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ICMPLE =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isLe = compareOps.le(v1, v2)
+            branchOpsUnit.boolBranch(isLe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+          case inst: IF_ACMPEQ =>
+            val(v1, v2) = stack.pop2OrAbort()
+            val isEq = eqOps.equ(v1, v2)
+            branchOpsUnit.boolBranch(isEq){
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            }{
+
+            }
+          case inst: IF_ACMPNE =>
+            val (v1, v2) = stack.pop2OrAbort()
+            val isNe = eqOps.neq(v1, v2)
+            branchOpsUnit.boolBranch(isNe) {
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            } {
+
+            }
+
+
+      // JUMPS
+      case x if (167 <= x && x <= 171) =>
+        inst match
+          case inst: GOTO =>
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          case inst: JSR =>
+            stack.push(i32ops.integerLit(pc))
+            except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+          case inst: RET =>
+            val index = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+            except.throws(JvmExcept.Ret(index))
+          case inst: TABLESWITCH =>
+            val index = stack.popOrAbort()
+            val transformedIndices = Iterator.from(0).zip(inst.jumpOffsets).map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
+            val offset = transformedIndices.getOrElse(index, inst.defaultOffset)
+            except.throws(JvmExcept.Jump(pc + offset))
+          case inst: LOOKUPSWITCH =>
+            val key = stack.popOrAbort()
+            val transformedIndices = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
+            val offset = transformedIndices.getOrElse(key, inst.defaultOffset)
+            except.throws(JvmExcept.Jump(pc + offset))
+
+
+      // Return
+      case x if (172 <= x && x <= 177) =>
+        ()
+
+      // Load and Store Statics
+      case x if (178 <= x && x <= 179) =>
+        inst match
+          case inst: GETSTATIC =>
+            val objCF = inst.declaringClass
+            if(!staticInitialized.contains(objCF)){
+              if (project.isLibraryType(objCF)){
+                staticInitialized += objCF
+                val source = javaLibClassFileWrapper(objCF)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-                val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
-                invoke(mth, true)
-
+                invoke(cfs.staticInitializer.get, true)
               }
               else{
-                ???
+                staticInitialized += objCF
+                val source = nonJavaLibClassFileWrapper(objCF)
+                val cfs: List[ClassFile] =
+                  process(new DataInputStream(new FileInputStream(source))) { in =>
+                    org.opalj.br.reader.Java8Framework.ClassFile(in)
+                  }
+                invoke(cfs.head.staticInitializer.get, true)
               }
-          */
+            }
 
-    // NEW
-    case x if (x == 187) =>
-      inst match
-        case inst: NEW =>
-          if (project.isLibraryType(inst.objectType)){
-            val obj = createLibraryObj(inst.objectType)
+            val v = staticVarStore.readOrElse((objCF, inst.name), fail(UnboundStaticVar, inst.name))
+            stack.push(v)
+
+          case inst: PUTSTATIC =>
+            val objCF = inst.declaringClass
+            if (!staticInitialized.contains(objCF)) {
+              if (project.isLibraryType(objCF)) {
+                staticInitialized += objCF
+                val source = javaLibClassFileWrapper(objCF)
+                val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+                invoke(cfs.staticInitializer.get, true)
+              }
+              else {
+                staticInitialized += objCF
+                val source = nonJavaLibClassFileWrapper(objCF)
+                println(projectSource)
+                println(source)
+                val cfs: List[ClassFile] =
+                  process(new DataInputStream(new FileInputStream(source))) { in =>
+                    org.opalj.br.reader.Java8Framework.ClassFile(in)
+                  }
+                invoke(cfs.head.staticInitializer.get, true)
+              }
+            }
+            val v = stack.popOrAbort()
+            staticVarStore.write((objCF, inst.name), v)
+
+      // Load and Store Fields
+      case x if (180 <= x && x <= 181) =>
+        inst match
+          case inst: GETFIELD =>
+            val obj = stack.popOrAbort()
+            val field = objectOps.getField(obj, inst.name).getOrElse(fail(UnboundField, inst.name))
+            stack.push(field)
+          case inst: PUTFIELD =>
+            val value = stack.popOrAbort()
+            val obj = stack.popOrAbort()
+            objectOps.setField(obj, inst.name, value)
+
+
+      // Invoke Functions
+      case x if (182 <= x && x <= 186) =>
+        inst match
+          case inst: INVOKESTATIC =>
+            if (project.isLibraryType(inst.declaringClass)){
+              val source = javaLibClassFileWrapper(inst.declaringClass)
+              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+              val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+              invoke(mth, true)
+            }
+            else{
+              val cfs: ClassFile = project.classFile(inst.declaringClass).get
+              val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+              invoke(mth, true)
+            }
+
+          case inst: INVOKEVIRTUAL =>
+            val objectType = inst.declaringClass.mostPreciseObjectType
+            val numArgs = inst.methodDescriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
             stack.push(obj)
+            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
+            if (!mth.descriptor.returnType.isVoidType){
+              stack.push(ret.get)
+            }
+
+          case inst: INVOKESPECIAL =>
+            val objectType = inst.declaringClass.mostPreciseObjectType
+            if (project.isLibraryType(objectType))
+              val source = javaLibClassFileWrapper(objectType)
+              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+              val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+              invoke(mth, false)
+            else
+              val cfs = project.classFile(objectType).get
+              val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
+              invoke(mth, false)
+
+          case inst: INVOKEINTERFACE =>
+            val numArgs = inst.methodDescriptor.parametersCount
+            val args = stack.popNOrAbort(numArgs)
+            val obj = stack.popOrAbort()
+            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+            stack.push(obj)
+            stack.pushN(args)
+            invoke(mth, false)
+
+          case inst: INVOKEDYNAMIC =>
+            val test = inst.bootstrapMethod
+            val test1 = inst.name
+            val test2 = inst.methodDescriptor
+            val receiver = inst.bootstrapMethod.handle
+            receiver match
+              case receiver: InvokeStaticMethodHandle =>
+                if (inst.name == "makeConcatWithConstants"){
+                  if(stack.size < 2){
+                    val test3 = inst.bootstrapMethod.arguments.head.toJava
+                    val test4 = test3.drop(2).dropRight(1)
+                    eval(LoadString(test4), mth, pc)
+                  }
+
+                  val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+                  val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+                  val invokedMth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
+                  val args = stack.popNOrAbort(2)
+                  evalNativeStatic(invokedMth, args)
+                }
+      /*
+      receiver match
+        case receiver: InvokeStaticMethodHandle =>
+          if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
+            val mthTypeSource = javaLibClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
+            val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
+            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
+            stack.push(createNativeObj(inst.methodDescriptor.returnType.asObjectType))
+            stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asObjectType))
+            val mthTypeObj = invoke(mthTypeMth.get, true)
+
+            val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+            val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
+            invoke(mth, true)
+
           }
           else{
-            val cfs = project.classFile(inst.objectType).get
-            val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq.distinct
-            val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
-            val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
-            stack.push(obj)
+            ???
           }
+      */
+
+      // NEW
+      case x if (x == 187) =>
+        inst match
+          case inst: NEW =>
+            if (project.isLibraryType(inst.objectType)){
+              val obj = createLibraryObj(inst.objectType, site)
+              stack.push(obj)
+            }
+            else{
+              val cfs = project.classFile(inst.objectType).get
+              val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq.distinct
+              val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), field.name)))
+              val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
+              stack.push(obj)
+            }
 
 
 
-    // Arrays
-    case x if (188 <= x && x <= 190) =>
-      inst match
-        case inst: NEWARRAY =>
-          val size = stack.popOrAbort()
-          val array = createArray(size, inst.arrayType)
-          stack.push(array)
-        case inst: ANEWARRAY =>
-          val size = stack.popOrAbort()
-          val array = createArray(size, inst.arrayType)
-          stack.push(array)
-        case inst: ARRAYLENGTH.type =>
-          val array = stack.popOrAbort()
-          val length = arrayOps.arrayLength(array)
-          stack.push(i32ops.integerLit(length))
+      // Arrays
+      case x if (188 <= x && x <= 190) =>
+        inst match
+          case inst: NEWARRAY =>
+            val size = stack.popOrAbort()
+            val array = createArray(size, inst.arrayType, site)
+            stack.push(array)
+          case inst: ANEWARRAY =>
+            val size = stack.popOrAbort()
+            val array = createArray(size, inst.arrayType, site)
+            stack.push(array)
+          case inst: ARRAYLENGTH.type =>
+            val array = stack.popOrAbort()
+            val length = arrayOps.arrayLength(array)
+            stack.push(i32ops.integerLit(length))
 
 
-    // athrow
-    case x if (x == 191) =>
-      inst match
-        case inst: ATHROW.type =>
-          val thrown = stack.popOrAbort()
-          except.throws(JvmExcept.ThrowObject(thrown))
+      // athrow
+      case x if (x == 191) =>
+        inst match
+          case inst: ATHROW.type =>
+            val thrown = stack.popOrAbort()
+            except.throws(JvmExcept.ThrowObject(thrown))
 
 
-    // checkcast
-    case x if (x == 192) =>
-      inst match
-        case inst: CHECKCAST =>
-          val v = stack.popOrAbort()
-          val flag = typeOps.instanceOf(v, inst.referenceType)
-          branchOpsUnit.boolBranch(flag){
-            stack.push(v)
-          }{
-            stack.push(i32ops.integerLit(0))
-          }
+      // checkcast
+      case x if (x == 192) =>
+        inst match
+          case inst: CHECKCAST =>
+            val v = stack.popOrAbort()
+            val flag = typeOps.instanceOf(v, inst.referenceType)
+            branchOpsUnit.boolBranch(flag){
+              stack.push(v)
+            }{
+              stack.push(i32ops.integerLit(0))
+            }
 
-    // instanceof
-    case x if (x == 193) =>
-      inst match
-        case inst: INSTANCEOF =>
-          val v = stack.popOrAbort()
-          val flag = typeOps.instanceOf(v, inst.referenceType)
-          branchOpsUnit.boolBranch(flag){
-            stack.push(i32ops.integerLit(1))
-          }{
-            stack.push(i32ops.integerLit(0))
-          }
+      // instanceof
+      case x if (x == 193) =>
+        inst match
+          case inst: INSTANCEOF =>
+            val v = stack.popOrAbort()
+            val flag = typeOps.instanceOf(v, inst.referenceType)
+            branchOpsUnit.boolBranch(flag){
+              stack.push(i32ops.integerLit(1))
+            }{
+              stack.push(i32ops.integerLit(0))
+            }
 
 
-    // monitorenter
-    case x if (x == 194) =>
-      stack.popOrAbort()
+      // monitorenter
+      case x if (x == 194) =>
+        stack.popOrAbort()
 
-    // monitorexit
-    case x if (x == 195) =>
-      stack.popOrAbort()
+      // monitorexit
+      case x if (x == 195) =>
+        stack.popOrAbort()
 
-    // WIDE
-    case x if (x == 196) =>
-      inst match
-        case inst: WIDE.type =>
-          ()
+      // WIDE
+      case x if (x == 196) =>
+        inst match
+          case inst: WIDE.type =>
+            ()
 
-    // multianewarray
-    case x if (x == 197) =>
-      inst match
-        case inst: MULTIANEWARRAY =>
-          val dims = stack.popNOrAbort(inst.dimensions)
-          stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse))
+      // multianewarray
+      case x if (x == 197) =>
+        inst match
+          case inst: MULTIANEWARRAY =>
+            val dims = stack.popNOrAbort(inst.dimensions)
+            stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse, site))
 
-    // ifnull, ifnonnull
-    case x if (198 <= x && x <= 199) =>
-      inst match
-        case inst: IFNULL =>
-          val v = stack.popOrAbort()
-          val flag = typeOps.instanceOf(v, null)
+      // ifnull, ifnonnull
+      case x if (198 <= x && x <= 199) =>
+        inst match
+          case inst: IFNULL =>
+            val v = stack.popOrAbort()
+            val flag = typeOps.instanceOf(v, null)
 
-          branchOpsUnit.boolBranch(flag){
+            branchOpsUnit.boolBranch(flag){
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            }{
+
+            }
+          case inst: IFNONNULL =>
+            val v = stack.popOrAbort()
+            val flag = typeOps.instanceOf(v, null)
+
+            branchOpsUnit.boolBranch(flag){
+
+            }{
+              except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+            }
+
+      // goto_w
+      case x if (x == 200) =>
+        inst match
+          case inst: GOTO_W =>
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          }{
 
-          }
-        case inst: IFNONNULL =>
-          val v = stack.popOrAbort()
-          val flag = typeOps.instanceOf(v, null)
-
-          branchOpsUnit.boolBranch(flag){
-
-          }{
+      // jsr_wt
+      case x if (x == 201) =>
+        inst match
+          case inst: JSR_W =>
+            stack.push(i32ops.integerLit(pc))
             except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-          }
 
-    // goto_w
-    case x if (x == 200) =>
-      inst match
-        case inst: GOTO_W =>
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+      // breakpoint
+      case x if (x == 202) =>
+        ()
+  }
 
-    // jsr_wt
-    case x if (x == 201) =>
-      inst match
-        case inst: JSR_W =>
-          stack.push(i32ops.integerLit(pc))
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-
-    // breakpoint
-    case x if (x == 202) =>
-      ()
-
-  def createLibraryObj(toLoad: ObjectType): V =
+  def createLibraryObj(toLoad: ObjectType, site: InstructionSite): V =
     val source = javaLibClassFileWrapper(toLoad)
     val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
-    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), AllocationSite.objField(cfs, field.name), field.name)))
-    val obj = objectOps.makeObject(objAlloc(AllocationSite.classFile(cfs)), cfs, fields)
+    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), field.name)))
+    val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
   def evalLocalLoad(inst: Instruction): V = inst match
     case inst: LoadLocalVariableInstruction =>
@@ -779,28 +779,28 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
     case inst: ArrayStoreInstruction =>
       arrayOps.setVal(array, idx, v).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
 
-  def createArray(size: V, compType: ArrayType): V =
+  def createArray(size: V, compType: ArrayType, site: InstructionSite): V =
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
-      .zipWithIndex.map(vals => (vals._1, AllocationSite.arrayVals(vals._2)))
-    val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), convertedArrayVals, compType)
+      .zipWithIndex.map(vals => (vals._1, ArrayElemInitSite(site, vals._2)))
+    val array = arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, compType)
     array
 
-  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V]): V =
+  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: InstructionSite): V =
     if (numDims == 2) {
       val temp = arrayOps.initArray(dims(1))
-      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims(0), compType), AllocationSite.arrayVals(vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2, compType)
+      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims.head, compType, site), ArrayElemInitSite(site, vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
       array
     }
     else{
       val temp = arrayOps.initArray(dims(numDims-1))
-      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims), AllocationSite.arrayVals(vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(AllocationSite.array()), temp2, compType)
+      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), ArrayElemInitSite(site, vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
       array
     }
 
-  def findMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor): Method =
+  def findMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor): Method =
     if (obj.cls.thisType != ObjectType("java/lang/Object")) {
       val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
       obj.cls.findMethod(name, sig)
@@ -810,7 +810,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
       obj.cls.findMethod(name, sig).getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
     }
 
-  def findInheritedMethodOfObj(obj: Object[OID, ClassFile, Addr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
+  def findInheritedMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
     if(inheritedObj == ObjectType("java/lang/Object")){
       objectCF.findMethod(name, sig).getOrElse(
           obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
@@ -833,7 +833,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
       }
     }
 
-  def invokeMethodOnObject(obj: Object[OID, ClassFile, Addr, String], mth: Method, args: Seq[V])(using Fixed): JOptionC[V] =
+  def invokeMethodOnObject(obj: Object[ObjAddr, ClassFile, FieldAddr, String], mth: Method, args: Seq[V])(using Fixed): JOptionC[V] =
     val newFrameData = 0
     val objVal = stack.popOrAbort()
 
@@ -940,9 +940,10 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
         val baseString = arrayOps.getArray(objectOps.getField(args(0), "value").get).map(vals => vals.get)
         val constantString = arrayOps.getArray(objectOps.getField(args(1), "value").get).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(AllocationSite.array()),
-          concattedString.map(vals => (vals._1, AllocationSite.arrayVals(vals._2))), ArrayType(IntegerType))
-        val stringObj = createLibraryObj(ObjectType("java/lang/String"))
+        val site = InstructionSite(mth, 0)
+        val stringArray = arrayOps.makeArray(arrayAlloc(site),
+          concattedString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+        val stringObj = createLibraryObj(ObjectType("java/lang/String"), InstructionSite(mth, 0))
         objectOps.setField(stringObj, "value", stringArray)
         stack.push(stringObj)
       case _ =>
@@ -952,14 +953,14 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
     invoke(mth, isStatic)
   }
   def evalExternal(inst: Instruction) = external {
-    eval(inst)
+    eval(inst, null, 0)
   }
-  inline def evalFix(inst: Instruction, pc: Int)(using rec: Fixed): FixOut =
-    rec(FixIn.Eval(inst, pc))
+  inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using rec: Fixed): FixOut =
+    rec(FixIn.Eval(inst, mth, pc))
 
   private def fixed: Fixed = fixpointSuper {
-    case FixIn.Eval(inst, pc) =>
-      eval(inst, pc)
+    case FixIn.Eval(inst, mth, pc) =>
+      eval(inst, mth, pc)
       FixOut.Eval()
   }
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
@@ -967,7 +968,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
     except.tryCatch {
       val currInst = instructionMap(pc)
       frame.setData(pc)
-      evalFix(currInst, pc)
+      evalFix(currInst, mth, pc)
       if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
         val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
         run(nextPC, instructionMap, mth)
@@ -986,7 +987,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
-        val exceptionObject = createLibraryObj(exception)
+        val exceptionObject = createLibraryObj(exception, InstructionSite(mth, pc))
         stack.push(exceptionObject)
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
@@ -1009,7 +1010,6 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV,
     case opalTypes: CharType => ValType.I32
     case opalTypes: ObjectType => ValType.Obj
     case opalTypes: ArrayType => ValType.Array
-    case _ => ???
 
   //val defaultObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
   def defaultValue(ty: ValType): V = ty match

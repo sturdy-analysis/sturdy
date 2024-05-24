@@ -2,7 +2,7 @@ package sturdy.language.bytecode
 
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.bytecode.generic.{AllocationSite, BytecodeOps, GenericInterpreter, JvmExcept}
+import sturdy.language.bytecode.generic.{InstructionSite, BytecodeOps, GenericInterpreter, JvmExcept}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
@@ -12,7 +12,7 @@ import generic.BytecodeFailure.*
 import org.opalj.br.ObjectType
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
-import sturdy.values.{Combine, MaybeChanged, Widening}
+import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, SizeOps, TypeOps}
 import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
@@ -31,17 +31,18 @@ trait Interpreter:
   type Mth
   type MthName
   type MthSig
-  type Addr
+  type FieldAddr
+  type ArrayElemAddr
   type Idx
   
   type TypeRep
   type NullVal
   type FieldName
-  type OID
+  type ObjAddr
   type ObjType
   type ObjRep
 
-  type AID
+  type ArrayAddr
   type AType
   type ArrayRep
   
@@ -113,6 +114,9 @@ trait Interpreter:
   def topArray: ArrayRep
   def topNull: NullVal
 
+  given Top[Value] with
+    override def top: Value = Value.TopValue  
+  
   /*
   def typedTop(ty: ValType): Value = ty match
     case ValType.I32 => Value.Int32(topI32)
@@ -186,7 +190,7 @@ trait Interpreter:
     , objSizeOps: SizeOps[ObjRep, Bool]
     , arraySizeOps: SizeOps[ArrayRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
-      ): BytecodeOps[Addr, Idx, Value, TypeRep] with
+      ): BytecodeOps[Idx, Value, TypeRep] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
@@ -281,5 +285,5 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV, J]
+  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J]
 

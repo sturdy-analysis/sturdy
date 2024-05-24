@@ -7,10 +7,10 @@ import sturdy.values.objects.{Object, ObjectOps}
 
 
 
-class JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, Site, J[_] <: MayJoin[_]]
-  (bytecodeOps: BytecodeOps[Addr, Idx, V, ReferenceType],
-   objectOps: ObjectOps[Addr, String, OID, V, ClassFile, Object[OID, ClassFile, Addr, String], V, Site, Method, String, MethodDescriptor, V, J],
-   arrayOps: ArrayOps[Addr, AID, V, V, Array[AID, Addr, ArrayType], V, ArrayType, AllocationSite, J]):
+class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, TypeRep, J[_] <: MayJoin[_]]
+  (bytecodeOps: BytecodeOps[Idx, V, ReferenceType],
+   objectOps: ObjectOps[String, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, String], V, _, Method, String, MethodDescriptor, V, J],
+   arrayOps: ArrayOps[AID, V, V, V, ArrayType, _, J]):
 
 
   val nativeFunList: List[String] = List(

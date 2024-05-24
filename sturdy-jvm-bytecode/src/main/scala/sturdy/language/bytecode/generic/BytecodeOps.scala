@@ -7,7 +7,7 @@ import sturdy.values.integer.*
 import sturdy.values.relational.*
 import sturdy.values.objects.*
  
-trait BytecodeOps[Addr, Idx, V, TypeRep]:
+trait BytecodeOps[Idx, V, TypeRep]:
   //val i8ops:  IntegerOps[Byte, V]
   //val i16ops: IntegerOps[Short, V]
   val i32ops: IntegerOps[Int, V]

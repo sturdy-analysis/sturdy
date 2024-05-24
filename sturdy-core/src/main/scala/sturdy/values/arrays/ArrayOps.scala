@@ -6,9 +6,10 @@ import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
 import sturdy.values.Structural
+import sturdy.values.objects.TypeOps
 import sturdy.values.relational.EqOps
 
-trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
+trait ArrayOps[AID, Idx, V, AV, AType, Site, J[_] <: MayJoin[_]]:
   def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType): AV
   def getVal(array: AV, idx: Idx): JOption[J, V]
   def setVal(array: AV, idx: Idx, v: V): JOption[J, Unit]
@@ -17,12 +18,12 @@ trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
   def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
   def getArray(array: AV): Seq[JOption[J, V]]
 
-case class Array[AID, Addr, AType](aid: AID, vals: Vector[Addr], arrayType: AType)
+case class Array[AID, ArrayElemAddr, AType](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType)
 
 given structuralArray[AID, Addr, AType]: Structural[Array[AID, Addr, AType]] with {}
 
 given ConcreteArrayOps[Addr, AID, V, AType, Site]
-  (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[Addr, AID, Int, V, Array[AID, Addr, AType], Array[AID, Addr, AType], AType, Site, NoJoin] with
+  (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, Array[AID, Addr, AType], AType, Site, NoJoin] with
   override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType): Array[AID, Addr, AType] =
     val valAddrs = vals.map{ (v, site) =>
       val addr = alloc(site)
@@ -66,3 +67,7 @@ given ConcreteArrayOps[Addr, AID, V, AType, Site]
 given ArrayEqOps[AID, Addr, AType]: EqOps[Array[AID, Addr, AType], Boolean] with
   override def equ(v1: Array[AID, Addr, AType], v2: Array[AID, Addr, AType]): Boolean = v1.aid == v2.aid
   override def neq(v1: Array[AID, Addr, AType], v2: Array[AID, Addr, AType]): Boolean = v1.aid != v2.aid
+
+class ConcreteArrayTypeOps[AID, Addr, AType, Type](f: (AType, Type) => Boolean) extends TypeOps[Array[AID, Addr, AType], Type, Boolean]:
+  override def instanceOf(v: Array[AID, Addr, AType], target: Type): Boolean = f(v.arrayType, target)
+
