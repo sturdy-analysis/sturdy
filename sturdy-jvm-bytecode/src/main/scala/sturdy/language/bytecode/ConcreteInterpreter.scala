@@ -25,6 +25,7 @@ import java.io.File
 import java.net.URL
 
 object ConcreteInterpreter extends Interpreter:
+  override type J[A] = NoJoin[A]
   //override type I8  = Byte
   //override type I16 = Short
   override type I32 = Int
@@ -47,6 +48,8 @@ object ConcreteInterpreter extends Interpreter:
   override type AID = Int
   override type AType = ArrayType
   override type ArrayRep = Array[AID, Addr, ArrayType]
+
+  override type ExcV = JvmExcept[Value]
 
   //override def topI8: Byte = throw new UnsupportedOperationException
   //override def topI16: Short = throw new UnsupportedOperationException

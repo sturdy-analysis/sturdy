@@ -4,6 +4,7 @@ import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin}
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
+import sturdy.values.Structural
 import sturdy.values.relational.EqOps
 
 import scala.collection.mutable
@@ -19,6 +20,8 @@ trait ObjectOps[Addr, FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, 
 
 
 case class Object[OID, CF, Addr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, Addr])
+
+given structuralObject[OID, CF, Addr, FieldName]: Structural[Object[OID, CF, Addr, FieldName]] with {}
 
 given ConcreteObjectOps[Addr, FieldName, OID, V, Site, CF, Mth, MthName, MthSig]
     (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ObjectOps[Addr, FieldName, OID, V, CF, Object[OID,CF,Addr,FieldName], Object[OID,CF,Addr,FieldName], Site, Mth, MthName, MthSig, Null, NoJoin] with

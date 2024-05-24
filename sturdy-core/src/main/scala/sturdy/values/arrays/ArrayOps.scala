@@ -5,6 +5,7 @@ import sturdy.data.noJoin
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
+import sturdy.values.Structural
 import sturdy.values.relational.EqOps
 
 trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
@@ -17,6 +18,8 @@ trait ArrayOps[Addr, AID, Idx, V, A, AV, AType, Site, J[_] <: MayJoin[_]]:
   def getArray(array: AV): Seq[JOption[J, V]]
 
 case class Array[AID, Addr, AType](aid: AID, vals: Vector[Addr], arrayType: AType)
+
+given structuralArray[AID, Addr, AType]: Structural[Array[AID, Addr, AType]] with {}
 
 given ConcreteArrayOps[Addr, AID, V, AType, Site]
   (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[Addr, AID, Int, V, Array[AID, Addr, AType], Array[AID, Addr, AType], AType, Site, NoJoin] with

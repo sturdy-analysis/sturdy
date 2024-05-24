@@ -21,13 +21,12 @@ import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.relational.EqOps
 import sturdy.fix
-import sturdy.values.Finite
+import sturdy.values.{Finite, Powerset}
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
 import scala.collection.View
 import scala.collection.immutable.ArraySeq
-
 
 enum JvmExcept[V]:
   case Jump(pc: Int)
@@ -50,9 +49,9 @@ enum FixOut:
 
 given finiteFixIn: Finite[FixIn] with {}
 
-trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
 
-  val fixpoint: fix.ContextualFixpoint[FixIn, FixOut]
+  val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
   type Fixed = FixIn => FixOut
 
@@ -66,7 +65,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
 
   val stack: DecidableOperandStack[V]
   val failure: Failure
-  val except: Except[JvmExcept[V], JvmExcept[V], J]
+  val except: Except[JvmExcept[V], ExcV, J]
   val objFieldAlloc: Allocation[Addr, AllocationSite]
   val objAlloc: Allocation[OID, AllocationSite]
   val arrayValAlloc: Allocation[Addr, AllocationSite]
@@ -77,12 +76,8 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
 
-  /*val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame), {
-    case _: FixIn.Eval => List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame)
-  }, {
-    case _: FixIn.Eval => List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame)
-  })
-  given EffectStack = effectStack*/
+  val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
+  given EffectStack = effectStack
 
   val project: Project[URL]
   val projectSource: String
@@ -962,7 +957,7 @@ trait GenericInterpreter[V, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, J[_] 
   inline def evalFix(inst: Instruction, pc: Int)(using rec: Fixed): FixOut =
     rec(FixIn.Eval(inst, pc))
 
-  private def fixed: Fixed = fixpointSuper{
+  private def fixed: Fixed = fixpointSuper {
     case FixIn.Eval(inst, pc) =>
       eval(inst, pc)
       FixOut.Eval()

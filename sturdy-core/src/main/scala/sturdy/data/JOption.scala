@@ -171,3 +171,10 @@ enum JOptionPowerset[A] extends JOption[WithJoin, A]:
     case (Some(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
+
+case class CombineOption[A, W <: Widening]()(using Combine[A, W]) extends Combine[Option[A], W]:
+  override def apply(v1: Option[A], v2: Option[A]): MaybeChanged[Option[A]] = (v1, v2) match
+    case (None, None) => MaybeChanged.Unchanged(None)
+    case (None, Some(v2)) => MaybeChanged.Changed(Some(v2))
+    case (Some(v1), None) => MaybeChanged.Unchanged(Some(v1))
+    case (Some(v1), Some(v2)) => Combine(v1, v2).map(Some.apply)

@@ -12,10 +12,14 @@ import generic.BytecodeFailure.*
 import org.opalj.br.ObjectType
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
+import sturdy.values.{Combine, MaybeChanged, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, SizeOps, TypeOps}
 import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
 trait Interpreter:
+
+  type J[A] <: MayJoin[A]
+  
   //type I8
   //type I16
   type I32
@@ -40,6 +44,8 @@ trait Interpreter:
   type AID
   type AType
   type ArrayRep
+  
+  type ExcV
 
   val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
   enum Value:
@@ -119,6 +125,25 @@ trait Interpreter:
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
 
+  given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], 
+                                    Combine[F32, W], Combine[F64, W], 
+                                    Combine[ObjRep, W], Combine[ArrayRep, W],
+                                    Combine[NullVal, W]): Combine[Value, W] with
+    import Value.*
+    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case (Int32(i1), Int32(i2)) => Combine[I32, W](i1, i2).map(Int32.apply)
+      case (Int64(i1), Int64(i2)) => Combine[I64, W](i1, i2).map(Int64.apply)
+      case (Float32(i1), Float32(i2)) => Combine[F32, W](i1, i2).map(Float32.apply)
+      case (Float64(i1), Float64(i2)) => Combine[F64, W](i1, i2).map(Float64.apply)
+      case (Obj(i1), Obj(i2)) => Combine[ObjRep, W](i1, i2).map(Obj.apply)
+      case (Array(i1), Array(i2)) => Combine[ArrayRep, W](i1, i2).map(Array.apply)
+
+      case (Null(_), _: (Obj | Array)) => MaybeChanged.Changed(v2)
+      case (_: (Obj | Array), Null(_)) => MaybeChanged.Unchanged(v1)
+      
+      case (Null(i1), Null(i2)) => Combine[NullVal, W](i1, i2).map(Null.apply)
+      case _ => MaybeChanged(TopValue, v1)
+  
   given ValueBytecodeOps
     (using failure: Failure
       //i8Ops: IntegerOps[Byte, I8]
@@ -256,5 +281,5 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, NoJoin]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, OID, AID, ObjType, ObjRep, TypeRep, ExcV, J]
 
