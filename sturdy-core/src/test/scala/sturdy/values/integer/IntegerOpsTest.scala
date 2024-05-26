@@ -32,6 +32,7 @@ class IntegerOpsTest
    concreteIntegerOps: IntegerOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
+  def newIntegerOps: TestingIntegerOps[L, N] = makeIntegerOps
 
   test("integer literal") {
     forAll("n") { (n: L) =>
@@ -68,15 +69,6 @@ class IntegerOpsTest
     testFun = _.min(_, _),
     expectedFun = concreteIntegerOps.min(_, _)
   )
-
-  test("min([0,0],[-1,0])") {
-      val integerOps = makeIntegerOps
-      integerOps.getBounds(
-        integerOps.min(
-          integerOps.interval(integral.fromInt(0), integral.fromInt(0)),
-          integerOps.interval(integral.fromInt(-1), integral.fromInt(0)))) shouldBe
-        (-1,0)
-  }
 
   binOpTest(
     testName = "max",
@@ -195,7 +187,17 @@ class IntegerOpsTest
   }
 
   def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (L,L) => L) =
-    test(testName) {
+    test(testName + " constant") {
+      forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
+        case (x, y) =>
+          whenever(precondition(x, y)) {
+            val integerOps = makeIntegerOps
+            integerOps.getBounds(testFun(integerOps, integerOps.integerLit(x), integerOps.integerLit(y))) should contain (expectedFun(x, y))
+          }
+      }
+    }
+
+    test(testName + " intervals") {
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
@@ -206,8 +208,19 @@ class IntegerOpsTest
     }
 
   def unOpTest(testName: String, precondition: L => Boolean, testFun: (IntegerOps[L,N],N) => N, expectedFun: L => L) =
-    test(testName) {
-      forAll((genInterval(minValue,maxValue), "x ∈ [x1,x2]")) {
+    test(testName + " constant") {
+      forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
+        case x =>
+          whenever(precondition(x)) {
+            val integerOps = makeIntegerOps
+            val expected = expectedFun(x)
+            integerOps.getBounds(testFun(integerOps, integerOps.integerLit(x))) should be (expected, expected)
+          }
+      }
+    }
+
+    test(testName + " interval") {
+      forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
             val integerOps = makeIntegerOps
@@ -215,6 +228,7 @@ class IntegerOpsTest
           }
       }
     }
+
   def contain(expected: L): Matcher[(L,L)] =
     contain(expected,expected)
 

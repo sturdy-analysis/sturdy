@@ -24,30 +24,30 @@ trait ApronState[Addr,Type]:
   def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
   def getInterval(expr: ApronExpr[Addr, Type]): Interval
   def getIntInterval(expr: ApronExpr[Addr, Type]): (Int,Int) =
-    val (lower,upper) = getBigIntInterval(expr, Integer.MIN_VALUE, Integer.MAX_VALUE)
-    (lower.toInt, upper.toInt)
+    val (lower,upper) = getBigIntInterval(expr)
+    (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
 
   def getLongInterval(expr: ApronExpr[Addr, Type]): (Long, Long) =
-    val (lower, upper) = getBigIntInterval(expr, Long.MinValue, Long.MaxValue)
-    (lower.toLong, upper.toLong)
+    val (lower, upper) = getBigIntInterval(expr)
+    (lower.getOrElse[BigInt](Long.MinValue).toLong, upper.getOrElse[BigInt](Long.MaxValue).toLong)
 
-  private inline def getBigIntInterval(expr: ApronExpr[Addr, Type], minVal: Long, maxVal: Long): (BigInt,BigInt) =
+  def getBigIntInterval(expr: ApronExpr[Addr, Type]): (Option[BigInt],Option[BigInt]) =
     val iv = getInterval(expr)
     val lower =
       if (iv.inf().isInfty() != 0)
-        BigInt(minVal)
+        None
       else
         val mpq = Mpq()
         iv.inf().toMpq(mpq, 0)
-        BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue()))
+        Some(BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue())))
 
     val upper =
       if (iv.sup().isInfty() != 0)
-        BigInt(maxVal)
+        None
       else
         val mpq = Mpq()
         iv.sup().toMpq(mpq, 0)
-        BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue()))
+        Some(BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue())))
 
     (lower, upper)
 
