@@ -21,6 +21,7 @@ object test extends App{
     case DoubleType => ValType.F64
     case _ => ValType.I32
 
+  //edit this
   val projectPath = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources"
   val simpleMathName = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources/SimpleMath.class"
 
