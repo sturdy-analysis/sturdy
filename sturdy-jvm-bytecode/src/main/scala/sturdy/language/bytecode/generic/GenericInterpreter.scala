@@ -1,10 +1,10 @@
 package sturdy.language.bytecode.generic
 
 import org.opalj.br.instructions.*
-import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.effect.operandstack.{DecidableOperandStack, OperandStack}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.data.{JOptionC, MayJoin, noJoin}
+import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin, noJoin}
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{CFailureException, Failure, FailureKind}
@@ -91,7 +91,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     source
 
   def nonJavaLibClassFileWrapper(obj: ObjectType): String =
-    val path = projectSource ++ "\\" ++ obj.simpleName ++ ".class"
+    val path = projectSource ++ File.separator ++ obj.simpleName ++ ".class"
     path
 
   private given Failure = failure
@@ -561,7 +561,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
             if (!mth.descriptor.returnType.isVoidType){
-              stack.push(ret.get)
+              stack.push(ret)
             }
 
           case inst: INVOKESPECIAL =>
@@ -833,7 +833,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       }
     }
 
-  def invokeMethodOnObject(obj: Object[ObjAddr, ClassFile, FieldAddr, String], mth: Method, args: Seq[V])(using Fixed): JOptionC[V] =
+  def invokeMethodOnObject(obj: Object[ObjAddr, ClassFile, FieldAddr, String], mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     val objVal = stack.popOrAbort()
 
@@ -863,9 +863,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           run(0, instructionMap, mth)
         }
       }
-      val ret = stack.pop()
+
+      //Temporary stuff
+      var returnValue = i32ops.integerLit(-1)
+      if(!mth.returnType.isVoidType){
+        returnValue = stack.popOrAbort()
+      }
       stack.pushN(remainingOperands)
-      ret
+
+      returnValue
     }
 
   def invoke(mth: Method, isStatic: Boolean)(using Fixed) =
@@ -877,13 +883,13 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       val obj = stack.popOrAbort()
       val ret = native.evalNative(obj, mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
-        stack.push(ret.get)
+        stack.push(ret)
       }
     }
     else if (native.nativeFunList.contains(mth.name) && isStatic) {
       val ret = native.evalNativeStatic(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
-        stack.push(ret.get)
+        stack.push(ret)
       }
     }
     else{

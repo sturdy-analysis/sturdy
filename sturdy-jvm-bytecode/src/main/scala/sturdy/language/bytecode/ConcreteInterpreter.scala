@@ -3,12 +3,12 @@ package sturdy.language.bytecode
 import org.opalj.br.{ArrayType, ClassFile, FieldType, Method, MethodDescriptor, ObjectType, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
-import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.allocation.{Allocation, CAllocationIntIncrement}
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.store.CStore
+import sturdy.effect.store.{CStore, Store}
 import sturdy.fix.Fixpoint
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.generic.*
@@ -107,11 +107,48 @@ object ConcreteInterpreter extends Interpreter:
   given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType], Boolean] with
     override def is32Bit(v: Array[AID, Addr, ArrayType]): Boolean = true
 
+  given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site, CF, Mth, MthName, MthSig]
+  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL]): ObjectOps[FieldName, OID, V, CF, Object[OID, CF, FieldAddr, FieldName], Object[OID, CF, FieldAddr, FieldName], Site, Mth, MthName, MthSig, Null, NoJoin] with
+    override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site, FieldName)]): Object[OID, CF, FieldAddr, FieldName] =
+      val fieldAddrs = vals.map { (v, site, name) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        (name, addr)
+      }.toVector.toMap
+      Object(oid, cfs, fieldAddrs)
 
-  type Store = Map[FieldAddr, Value]
+    override def getField(obj: Object[OID, CF, FieldAddr, FieldName], name: FieldName): JOption[NoJoin, V] =
+      if (!obj.fields.contains(name))
+        JOptionC.none
+      else
+        store.read(obj.fields(name))
+
+    override def setField(obj: Object[OID, CF, FieldAddr, FieldName], name: FieldName, v: V): JOptionC[Unit] =
+      if (!obj.fields.contains(name))
+        JOptionC.none
+      else {
+        store.write(obj.fields(name), v)
+        JOptionC.some(())
+      }
+
+    override def invokeFunctionCorrect(obj: Object[OID, CF, FieldAddr, FieldName], mthName: MthName, sig: MthSig, args: Seq[V])(invoke: (Object[OID, CF, FieldAddr, FieldName], Mth, Seq[V]) => JOption[NoJoin, V]): JOption[NoJoin, V] =
+      ???
+
+    override def invokeFunction(obj: Object[OID, CF, FieldAddr, FieldName], mth: Mth, args: Seq[V])
+                               (invoke: (Object[OID, CF, FieldAddr, FieldName], Mth, Seq[V]) => V): V =
+      invoke(obj, mth, args)
+
+    override def findFunction(obj: Object[OID, CF, FieldAddr, FieldName], name: MthName, sig: MthSig)
+                             (find: (Object[OID, CF, FieldAddr, FieldName], MthName, MthSig) => Mth): Mth =
+      find(obj, name, sig)
+
+    override def makeNull(): Null = null
+
+
+  type varStore = Map[FieldAddr, Value]
   type StaticStore = Map[(ObjectType, String), Value]
 
-  class Instance(files: Project[URL], path: String, initStore: Store, initArrayValStore: Store, initStaticStore: StaticStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: varStore, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = 0
     val args: List[Value] = List()
 
@@ -130,7 +167,7 @@ object ConcreteInterpreter extends Interpreter:
     val arrayValStore: CStore[FieldAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
 
-    val project: Project[URL] = files
+    override val project: Project[URL] = files
     given Project[URL] = project
     val projectSource: String = path
 
@@ -139,7 +176,7 @@ object ConcreteInterpreter extends Interpreter:
     val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
     val objectOps: ObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
       new LiftedObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
-        using new ConcreteObjectOps(using objFieldAlloc, objFieldStore)
+        using new TestConcObjectOps(using objFieldAlloc, objFieldStore, project)
       )
     val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin] =
       new LiftedArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin, ArrayRep, Int](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(

@@ -2,7 +2,7 @@ package sturdy.language.bytecode
 
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.bytecode.generic.{InstructionSite, BytecodeOps, GenericInterpreter, JvmExcept}
+import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter, InstructionSite, JvmExcept}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
@@ -10,12 +10,15 @@ import sturdy.values.convert.*
 import sturdy.values.relational.*
 import generic.BytecodeFailure.*
 import org.opalj.br.ObjectType
+import org.opalj.br.analyses.Project
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
-import sturdy.values.objects.{ConcreteObjectOps, LiftedObjectOps, ObjectOps, SizeOps, TypeOps}
+import sturdy.values.objects.{ObjectOps, SizeOps, TypeOps}
 import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
+
+import java.net.URL
 trait Interpreter:
 
   type J[A] <: MayJoin[A]
@@ -283,6 +286,7 @@ trait Interpreter:
 
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
+
 
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J]

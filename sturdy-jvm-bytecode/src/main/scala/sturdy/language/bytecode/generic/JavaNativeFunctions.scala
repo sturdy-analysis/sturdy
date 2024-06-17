@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.generic
 
-import org.opalj.br.{ArrayType, ReferenceType, ClassFile, Method, MethodDescriptor}
-import sturdy.data.{JOptionC, MayJoin}
+import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ReferenceType}
+import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
 
@@ -20,14 +20,15 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
     "makeConcatWithConstants"
   )
 
-  def evalNative(obj: V, mth: Method, args: Seq[V]): JOptionC[V] =
+  def evalNative(obj: V, mth: Method, args: Seq[V]): V =
     mth.name match
       case "desiredAssertionStatus" =>
-        JOptionC.some(bytecodeOps.i32ops.integerLit(1))
+        bytecodeOps.i32ops.integerLit(1)
       case "fillInStackTrace" =>
-        JOptionC.some(obj)
+        //temporary
+        bytecodeOps.i32ops.integerLit(-1)
 
-  def evalNativeStatic(mth: Method, args: Seq[V]): JOptionC[V] =
+  def evalNativeStatic(mth: Method, args: Seq[V]): V =
     mth.name match
       case "arraycopy" =>
         val src = args(0)
@@ -36,7 +37,8 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
         val destPos = args(3)
         val length = args(4)
         arrayOps.arraycopy(src, srcPos, dest, destPos, length)
-        JOptionC.none
+        //temporary
+        bytecodeOps.i32ops.integerLit(-1)
 
 
 

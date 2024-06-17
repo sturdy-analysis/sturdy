@@ -17,7 +17,7 @@ import sturdy.fix.context.Sensitivity
 import sturdy.fix.{ContextualFixpoint, Fixpoint}
 import sturdy.language.bytecode.ConcreteInterpreter.{Bool, NullVal, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{Exceptions, Numbers, Objects}
+import sturdy.language.bytecode.abstractions.{ConstantObjects, Exceptions, Numbers}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.{Abstractly, Finite, Topped, given}
 import sturdy.values.booleans.{*, given}
@@ -31,7 +31,7 @@ import sturdy.values.references.{AllocationSiteAddr, given}
 
 import java.net.URL
 
-object ConstantAnalysis extends Interpreter, Numbers, Objects, Exceptions:
+object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exceptions:
   override type J[A] = WithJoin[A]
   type Mth = Method
   type MthName = String
