@@ -1,7 +1,8 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ReferenceType}
+import org.opalj.br.{ClassFile, Method, MethodDescriptor}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, DoubleType, FieldType, FloatType, IntegerType, LongType, ObjectType, ReferenceType, ShortType}
 import org.opalj.constraints.NullValue
 import sturdy.data
 import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
@@ -52,30 +53,35 @@ trait TypeObjects extends Interpreter:
     override def apply(v1: ClassFile, v2: ClassFile): MaybeChanged[ClassFile] = 
       // super type of v1 v2
       ???
-
   given typeObjects(using project: Project[URL]): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
-      val pc = oid.pc
-      val objType = oid.mth.body.get.iterator.find(c => c.pc  == pc).get.instruction.asNEW.objectType
-
       cfs
 
     override def getField(obj: ClassFile, name: String): JOptionA[Value] =
-      JOptionA.noneSome(Value.TopValue)
+      val fieldType = obj.findField(name).head.fieldType
+      val toppedType: Value = fieldType match
+        case fieldType: ByteType => Value.Int32(topI32)
+        case fieldType: ShortType => Value.Int32(topI32)
+        case fieldType: IntegerType => Value.Int32(topI32)
+        case fieldType: FloatType => Value.Float32(topF32)
+        case fieldType: LongType => Value.Int64(topI64)
+        case fieldType: DoubleType => Value.Float64(topF64)
+        case fieldType: BooleanType => Value.Int32(topI32)
+        case fieldType: CharType => Value.Int32(topI32)
+        case fieldType: ObjectType => Value.Obj(topObj)
+        case fieldType: ArrayType => Value.Array(topArray)
+      JOptionA.noneSome(toppedType)
 
     override def setField(obj: ObjRep, name: String, v: Value): JOptionA[Unit] =
       JOptionA.noneSome(())
 
     override def invokeFunctionCorrect(obj: ClassFile, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => JOption[MayJoin.WithJoin, Value]): JOption[MayJoin.WithJoin, Value] =
-      val allSubTypeMths = project.classHierarchy.allSubclassTypes(obj.thisType, true)
+      val allMths = project.classHierarchy.allSubclassTypes(obj.thisType, true)
         .map(obj => project.classFile(obj))
-        .map(cfs => cfs.get.findMethod(mthName, sig).get)
+        .map(cfs => cfs.get.findMethod(mthName, sig).get).toSeq
+      // search method and superClasses for first occurence of method
       ???
-    /*override def invokeFunctionCorrect(obj: ClassFile, mth: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => JOptionA[Value]): JOptionA[Value] =
-      // for c subtype of obj
-      //   for m in c.methods if m.name == mth && m.sig == sig
-      val ms: Seq[Method] = ???
-      sturdy.data.mapJoin(ms, invoke(obj, _, arg))*/
+      //sturdy.data.mapJoin(allMths, invoke(obj, _, args))
 
     override def invokeFunction(obj: ClassFile, mth: Method, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => Value): Value = ???
 
