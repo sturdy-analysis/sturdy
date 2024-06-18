@@ -989,7 +989,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         //run(nextPC, instructionMap, mth)
       case JvmExcept.Throw(exception) =>
         //println(exception)
-        val currPC = frame.data
+        val currPC = pc
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
@@ -997,7 +997,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         stack.push(exceptionObject)
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
-        val currPC = frame.data
+        val currPC = pc
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))

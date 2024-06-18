@@ -9,6 +9,7 @@ import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.store.ManageableAddr
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
+import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.generic.InstructionSite
 import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widening}
@@ -41,7 +42,6 @@ trait ConstantObjects extends Interpreter:
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
 
 trait TypeObjects extends Interpreter:
-
   final type NullVal = Null
   final def topNull: NullVal = null
 
@@ -116,6 +116,37 @@ trait TypeObjects extends Interpreter:
     override def makeNull(): Null = null
   }*/
 
+  /*
+  def findMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, project: Project[URL]): Method =
+    if (obj.thisType != ObjectType("java/lang/Object")) {
+      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
+      obj.findMethod(name, sig)
+        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
+    }
+    else {
+      obj.findMethod(name, sig).getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
+    }
 
-  
+  def findInheritedMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, inheritedObj: ObjectType, project: Project[URL]): Method =
+    if (inheritedObj == ObjectType("java/lang/Object")) {
+      objectCF.findMethod(name, sig).getOrElse(
+        obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
+          .getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
+      )
+    }
+    else {
+      if (project.isLibraryType(inheritedObj)) {
+        val source = javaLibClassFileWrapper(inheritedObj)
+        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
+        cfs.findMethod(name, sig)
+          .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit))
+      }
+      else {
+        val cfs = project.classFile(inheritedObj).get
+        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
+        cfs.findMethod(name, sig)
+          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
+      }
+    }*/
 
