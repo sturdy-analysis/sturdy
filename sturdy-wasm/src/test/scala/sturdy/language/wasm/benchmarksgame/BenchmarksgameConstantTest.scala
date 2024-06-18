@@ -3,11 +3,11 @@ package sturdy.language.wasm.benchmarksgame
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.RecordingControlObserver
+import sturdy.control.{ControlEventGraphBuilder, RecordingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.*
 import sturdy.language.wasm.generic.FrameData
@@ -49,7 +49,9 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
 
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-
+    val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+    
     val modInst = interp.initializeModule(module)
 
     val res = Profiler.addTime("analysis") {
@@ -57,9 +59,14 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
         interp.invokeExported(modInst, funcName, List.empty)
       )
     }
-    LinearStateOperationCounter.addToListAndReset()
-    //    println(interp.effectStack.getAllState)
-    //    println(s"${LinearStateOperationCounter.toString} in the last tests")
-    //    println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-    Profiler.printLastMeasured()
+    
+    val newCfg = graphBuilder.get
+
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
+    Files.writeString(dotPath, oldCfg.toGraphViz)
+
+    val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".types.new.dot")
+    Files.writeString(dotPath2, newCfg.toGraphViz)
+
+    testCfgDifference(oldCfg, newCfg)
 

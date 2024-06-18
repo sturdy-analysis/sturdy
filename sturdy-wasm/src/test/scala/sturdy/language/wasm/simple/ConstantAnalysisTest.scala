@@ -10,7 +10,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
@@ -179,10 +179,11 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   interp.addControlObserver(new ControlEventChecker)
   val parser = interp.addControlObserver(new ControlEventParser)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+//  interp.addControlObserver(new PrintingControlObserver()(println))
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
@@ -213,7 +214,10 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
   assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
 
-  println(graphFromTree.toGraphViz)
+  testCfgDifference(cfg, graphFromEvents)
+
+//  println(cfg.toGraphViz)
+//  println(graphFromEvents.toGraphViz)
 
 
 //  println(tree.toGraphViz)

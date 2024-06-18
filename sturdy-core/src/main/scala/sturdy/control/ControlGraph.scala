@@ -16,6 +16,9 @@ case class Edge[Atom, Section](from: Node[Atom, Section], to: Node[Atom, Section
 
 
 case class ControlGraph[Atom,Sec](edges: Set[Edge[Atom, Sec]]):
+  lazy val nodes: Set[Node[Atom, Sec]] =
+    edges.flatMap(e => Set(e.from, e.to))
+  
   lazy val toGraphViz: String =
     def mayFail(n: Node[Atom,Sec]) = edges.exists { e =>
       e.from == n && e.to == Node.Failure()
