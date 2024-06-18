@@ -9,7 +9,7 @@ import math.Ordering.Implicits.infixOrderingOps
 object GenInterval:
   case class Interval[N](low: N, included: N, high: N)
 
-  def genInterval[N: Integral: Choose](minValue: N, maxValue: N): Gen[Interval[N]] =
+  def genInterval[N: Numeric: Choose](minValue: N, maxValue: N): Gen[Interval[N]] =
     for {
       low <- Gen.chooseNum(minValue, maxValue)
       high <- Gen.chooseNum(low, maxValue)
@@ -17,7 +17,7 @@ object GenInterval:
     }
     yield Interval(low, included, high)
 
-  given shrinkInterval[N: Integral: Ordering]: Shrink[Interval[N]] = Shrink.xmap[(N, N, N), Interval[N]](
+  given shrinkInterval[N: Numeric]: Shrink[Interval[N]] = Shrink.xmap[(N, N, N), Interval[N]](
     from = (low, included, high) => Interval(low, included, high),
     to = iv => (iv.low, iv.included, iv.high)
   ).suchThat { case Interval(low, included, high) =>

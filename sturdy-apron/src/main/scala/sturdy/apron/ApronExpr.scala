@@ -4,6 +4,7 @@ import apron.*
 import gmp.Mpz
 import sturdy.apron.ApronExpr.{Binary, Unary}
 import sturdy.values.booleans.BooleanOps
+import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.types.BaseType
 import sturdy.values.{Join, MaybeChanged, Topped, Widen}
@@ -91,6 +92,9 @@ object ApronExpr:
     Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), tpe)
   def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i.bigInteger)), tpe)
+  def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
+    Constant(new MpfrScalar(d, ???), tpe)
+
   def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(lower, upper), tpe)
   def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
@@ -111,17 +115,35 @@ object ApronExpr:
   def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     unary(UnOp.Negate, e1, e1._type)
 
+  def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, floatOps.negated(e1._type))
+
+  def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    unary(UnOp.Sqrt, e1, floatOps.sqrt(e1._type))
+
   def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, intOps.add(e1._type, e2._type))
+
+  def floatAdd[L,Addr,Type:ApronType](using floatOps: FloatOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    binary(BinOp.Add, e1, e2, floatOps.add(e1._type, e2._type))
 
   def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Sub, e1, e2, intOps.sub(e1._type, e2._type))
 
+  def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Sub, e1, e2, floatOps.sub(e1._type, e2._type))
+
   def intMul[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, intOps.mul(e1._type, e2._type))
 
+  def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))
+
   def intDiv[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
+
+  def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))
 
   def intMod[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mod, e1, e2, intOps.remainder(e1._type, e2._type))
@@ -133,6 +155,7 @@ object ApronExpr:
     val topItv = new Interval()
     topItv.setTop()
     topItv
+
   def topConstant[Type](_type: Type): Constant[_, Type] =
     Constant(topInterval, _type)
 

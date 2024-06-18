@@ -1,24 +1,56 @@
 package sturdy.values.floating
 
-import apron.Interval
-import apron.Texpr1VarNode
-import sturdy.data.CombineUnit
-import apron.{MpfrScalar, Tcons1, Texpr1BinNode, Texpr1CstNode, Texpr1Node, Texpr1UnNode}
-import sturdy.values.integer.{IntegerDivisionByZero, IntegerOps}
-
-import math.Numeric.Implicits.infixNumericOps
-import gmp.Mpfr
-// import sturdy.apron.{Apron, ApronCons, ApronExpr, ApronState, BinOp, JoinApronExpr, UnOp}
-import sturdy.effect.EffectStack
+import sturdy.apron.{ApronExpr, ApronState, ApronType}
 import sturdy.effect.failure.Failure
-import sturdy.values.{Topped, config}
-import sturdy.values.config.{Bits, Overflow}
-import sturdy.values.convert.{&&, LiftedConvert, NilCC, SomeCC, ToppedConvert, given}
-// import sturdy.values.ordering.{ApronEqOps, ApronOrderingOps}
-import sturdy.values.utils.{ConvertCoeff, convertToScalarMpfr, given}
+import sturdy.values.Join
+import scala.reflect.ClassTag
+import ApronExpr.*
 
-import java.nio.ByteOrder
-import scala.language.reflectiveCalls
+trait RelationalBaseFloatOps
+  [
+    L,
+    Addr: Ordering: ClassTag,
+    Type : ApronType : Join
+  ]
+  (using
+   apronState: ApronState[Addr,Type],
+   f: Failure,
+   typeFloatOps: FloatOps[L,Type]
+  ) extends FloatOps[L, ApronExpr[Addr,Type]]:
+  override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    floatAdd(v1, v2)
+
+  override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    floatSub(v1, v2)
+
+  override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    floatMul(v1, v2)
+
+  override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    floatDiv(v1, v2)
+
+  override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+
+  override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def negated(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def sqrt(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    floatSqrt(v)
+
+  override def ceil(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def floor(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def truncate(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def nearest(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+
+  override def copysign(v: ApronExpr[Addr, Type], sign: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  
 
 
 // given ApronFloatOps[B](using Fractional[B])
