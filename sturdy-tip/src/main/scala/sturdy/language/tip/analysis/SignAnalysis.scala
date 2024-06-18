@@ -17,7 +17,7 @@ import sturdy.fix.{StackConfig, given}
 import sturdy.language.tip.TipFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.integer.{*, given}
+import sturdy.values.integer.*
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
@@ -27,6 +27,9 @@ import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 import sturdy.language.tip.analysis.IntervalAnalysis.controlEventLogger
+
+import sturdy.values.integer.{given Abstractly[Int,IntSign], given Combine[IntSign, ?], given EqOps[IntSign, Topped[Boolean]], given Finite[IntSign], given OrderingOps[IntSign, Topped[Boolean]], given PartialOrder[IntSign]}
+import sturdy.values.integer.SignIntegerOps
 
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix, Control:
@@ -42,6 +45,8 @@ object SignAnalysis extends Interpreter,
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+
+    given IntegerOps[Int, IntSign] = new GradualSignIntegerOps[Int](new SignIntegerOps[Int](), new SafeSignIntegerOps[Int]())
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
