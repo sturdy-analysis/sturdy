@@ -557,9 +557,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
             val obj = stack.popOrAbort()
+
             stack.push(obj)
             val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
+            //val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
             if (!mth.descriptor.returnType.isVoidType){
               stack.push(ret)
             }

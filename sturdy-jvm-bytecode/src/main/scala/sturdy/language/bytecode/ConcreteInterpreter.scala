@@ -20,6 +20,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
 import sturdy.values.arrays.{*, given}
 import sturdy.fix
+import sturdy.language.bytecode.AuxillaryFunctions
 
 import java.io.File
 import java.net.URL
@@ -107,9 +108,9 @@ object ConcreteInterpreter extends Interpreter:
   given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType], Boolean] with
     override def is32Bit(v: Array[AID, Addr, ArrayType]): Boolean = true
 
-  given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site, CF, Mth, MthName, MthSig]
-  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL]): ObjectOps[FieldName, OID, V, CF, Object[OID, CF, FieldAddr, FieldName], Object[OID, CF, FieldAddr, FieldName], Site, Mth, MthName, MthSig, Null, NoJoin] with
-    override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site, FieldName)]): Object[OID, CF, FieldAddr, FieldName] =
+  given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
+  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
+    override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): Object[OID, ClassFile, FieldAddr, FieldName] =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
@@ -117,13 +118,13 @@ object ConcreteInterpreter extends Interpreter:
       }.toVector.toMap
       Object(oid, cfs, fieldAddrs)
 
-    override def getField(obj: Object[OID, CF, FieldAddr, FieldName], name: FieldName): JOption[NoJoin, V] =
+    override def getField(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: FieldName): JOption[NoJoin, V] =
       if (!obj.fields.contains(name))
         JOptionC.none
       else
         store.read(obj.fields(name))
 
-    override def setField(obj: Object[OID, CF, FieldAddr, FieldName], name: FieldName, v: V): JOptionC[Unit] =
+    override def setField(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: FieldName, v: V): JOptionC[Unit] =
       if (!obj.fields.contains(name))
         JOptionC.none
       else {
@@ -131,15 +132,16 @@ object ConcreteInterpreter extends Interpreter:
         JOptionC.some(())
       }
 
-    override def invokeFunctionCorrect(obj: Object[OID, CF, FieldAddr, FieldName], mthName: MthName, sig: MthSig, args: Seq[V])(invoke: (Object[OID, CF, FieldAddr, FieldName], Mth, Seq[V]) => JOption[NoJoin, V]): JOption[NoJoin, V] =
-      ???
-
-    override def invokeFunction(obj: Object[OID, CF, FieldAddr, FieldName], mth: Mth, args: Seq[V])
-                               (invoke: (Object[OID, CF, FieldAddr, FieldName], Mth, Seq[V]) => V): V =
+    override def invokeFunctionCorrect(obj: Object[OID, ClassFile, FieldAddr, FieldName], mthName: String, sig: MthSig, args: Seq[V])(invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Mth, Seq[V]) => JOption[NoJoin, V]): JOption[NoJoin, V] =
+      val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
       invoke(obj, mth, args)
 
-    override def findFunction(obj: Object[OID, CF, FieldAddr, FieldName], name: MthName, sig: MthSig)
-                             (find: (Object[OID, CF, FieldAddr, FieldName], MthName, MthSig) => Mth): Mth =
+    override def invokeFunction(obj: Object[OID, ClassFile, FieldAddr, FieldName], mth: Method, args: Seq[V])
+                               (invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Method, Seq[V]) => V): V =
+      invoke(obj, mth, args)
+
+    override def findFunction(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: MthName, sig: MthSig)
+                             (find: (Object[OID, ClassFile, FieldAddr, FieldName], MthName, MthSig) => Mth): Method =
       find(obj, name, sig)
 
     override def makeNull(): Null = null

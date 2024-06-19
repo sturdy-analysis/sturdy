@@ -7,6 +7,7 @@ import org.opalj.constraints.NullValue
 import sturdy.data
 import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
 import sturdy.data.MayJoin.WithJoin
+import sturdy.effect.failure.Failure
 import sturdy.effect.store.ManageableAddr
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
@@ -16,6 +17,8 @@ import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widening}
 import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
+import sturdy.language.bytecode.AuxillaryFunctions.*
+import sturdy.data.MakeJoined
 
 import java.net.URL
 
@@ -49,11 +52,12 @@ trait TypeObjects extends Interpreter:
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
   
   type ObjRep = ClassFile
-  given CombineTypeObj[W <: Widening]: Combine[ObjRep, W] with
+  given CombineTypeObj[W <: Widening](using project: Project[URL]): Combine[ObjRep, W] with
     override def apply(v1: ClassFile, v2: ClassFile): MaybeChanged[ClassFile] = 
       // super type of v1 v2
-      ???
-  given typeObjects(using project: Project[URL]): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+      val lcSuperType = project.classHierarchy.joinObjectTypes(v1.thisType, v2.thisType, true).head
+      MaybeChanged.Changed(project.classFile(lcSuperType).get)
+  given typeObjects(using project: Project[URL], f: Failure): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
       cfs
 
@@ -76,12 +80,13 @@ trait TypeObjects extends Interpreter:
       JOptionA.noneSome(())
 
     override def invokeFunctionCorrect(obj: ClassFile, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => JOption[MayJoin.WithJoin, Value]): JOption[MayJoin.WithJoin, Value] =
-      val allMths = project.classHierarchy.allSubclassTypes(obj.thisType, true)
+      val allSubMths = project.classHierarchy.allSubclassTypes(obj.thisType, true)
         .map(obj => project.classFile(obj))
         .map(cfs => cfs.get.findMethod(mthName, sig).get).toSeq
       // search method and superClasses for first occurence of method
+      val supMth = findMethodOfSuperclass(obj, mthName, sig, project)
       ???
-      //sturdy.data.mapJoin(allMths, invoke(obj, _, args))
+      //sturdy.data.mapJoin(supMth +: allSubMths, invoke(obj, _, args))
 
     override def invokeFunction(obj: ClassFile, mth: Method, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => Value): Value = ???
 
@@ -116,37 +121,6 @@ trait TypeObjects extends Interpreter:
     override def makeNull(): Null = null
   }*/
 
-  /*
-  def findMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, project: Project[URL]): Method =
-    if (obj.thisType != ObjectType("java/lang/Object")) {
-      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
-      obj.findMethod(name, sig)
-        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
-    }
-    else {
-      obj.findMethod(name, sig).getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
-    }
 
-  def findInheritedMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, inheritedObj: ObjectType, project: Project[URL]): Method =
-    if (inheritedObj == ObjectType("java/lang/Object")) {
-      objectCF.findMethod(name, sig).getOrElse(
-        obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
-          .getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
-      )
-    }
-    else {
-      if (project.isLibraryType(inheritedObj)) {
-        val source = javaLibClassFileWrapper(inheritedObj)
-        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
-          .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit))
-      }
-      else {
-        val cfs = project.classFile(inheritedObj).get
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
-          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
-      }
-    }*/
+
 
