@@ -80,7 +80,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         activeExc = Map.empty
       case Switch() => stack match
         case Entry.ForkFirst(originTails, originExc) :: stack_ =>
-          stack = Entry.ForkSecond(predecessors, originExc ++ activeExc) :: stack_
+          stack = Entry.ForkSecond(predecessors, mergeAes(originExc, activeExc)) :: stack_
           predecessors = originTails
           activeExc = originExc
         case _ => error(s"Entry mismatch, expected ForkFirst for $ev: $stack")
@@ -146,7 +146,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
           stack = stack_
           fixpoints += fx -> (
             predecessors ++ fixpoints.getOrElse(fx, (Set.empty, Map.empty))._1,
-            activeExc ++ fixpoints.getOrElse(fx, (Set.empty, Map.empty))._2)
+            mergeAes(activeExc, fixpoints.getOrElse(fx, (Set.empty, Map.empty))._2))
         case _ =>
           error(s"Entry mismatch, expected Fixpoint for $ev: $stack")
       case Restart() =>
