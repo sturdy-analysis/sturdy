@@ -17,22 +17,22 @@ enum ApronExpr[Addr, +Type]:
   case Constant(coeff: Coeff, tpe: Type)
   case Unary(op: UnOp,
              e: ApronExpr[Addr, Type],
-             tpe: Type,
              roundingType: RoundingType,
-             roundingDir: RoundingDir)
+             roundingDir: RoundingDir,
+             tpe: Type)
   case Binary(op: BinOp,
               l: ApronExpr[Addr, Type],
               r: ApronExpr[Addr, Type],
-              tpe: Type,
               roundingType: RoundingType,
-              roundingDir: RoundingDir)
+              roundingDir: RoundingDir,
+              tpe: Type)
 
   def _type: Type =
     this match
       case Addr(_, t) => t
       case Constant(_, t) => t
-      case Unary(_, _, t, _, _) => t
-      case Binary(_, _, _, t, _, _) => t
+      case Unary(_, _, _, _, t) => t
+      case Binary(_, _, _, _, _, t) => t
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
@@ -67,8 +67,8 @@ enum ApronExpr[Addr, +Type]:
   def toApron: Texpr1Node = this match
     case Addr(v, _) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
     case Constant(coeff, _) => new Texpr1CstNode(coeff)
-    case Unary(op, e, _, rtyp, rdir) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron)
-    case Binary(op, l, r, _, rtyp, rdir) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron, r.toApron)
+    case Unary(op, e, rtyp, rdir, _) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron)
+    case Binary(op, l, r, rtyp, rdir, _) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron, r.toApron)
 
   def toIntern(env: apron.Environment): Texpr1Intern =
     val expr = this.toApron
@@ -93,12 +93,15 @@ object ApronExpr:
   def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i.bigInteger)), tpe)
   def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpfrScalar(d, ???), tpe)
+    Constant(new DoubleScalar(d), tpe)
 
   def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(lower, upper), tpe)
   def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), tpe)
+  def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
+    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), tpe)
+
   def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, tpe)
 
@@ -107,10 +110,10 @@ object ApronExpr:
     Constant(new MpqScalar(new Mpz(n)), booleanOps.boolLit(b))
 
   def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
-    ApronExpr.Unary(op, e1, resultType, resultType.roundingType, resultType.roundingDir)
+    ApronExpr.Unary(op, e1, resultType.roundingType, resultType.roundingDir, resultType)
 
   def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
-    ApronExpr.Binary(op, e1, e2, resultType, resultType.roundingType, resultType.roundingDir)
+    ApronExpr.Binary(op, e1, e2, resultType.roundingType, resultType.roundingDir, resultType)
 
   def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     unary(UnOp.Negate, e1, e1._type)
@@ -150,6 +153,12 @@ object ApronExpr:
 
   def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
+
+  def floatPow[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    binary(BinOp.Pow, e1, e2, floatOps.mul(e1._type, e2._type))
+
+  def cast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, tpe: Type): ApronExpr[Addr, Type] =
+    Unary(UnOp.Cast, e, roundingType, roundingDir, tpe)
 
   def topInterval: Interval =
     val topItv = new Interval()

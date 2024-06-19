@@ -10,6 +10,7 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+
 trait RelationalBaseIntegerOps
     [
       L,
@@ -294,7 +295,7 @@ given RelationalIntOps
     intLit(i, typeIntOps.integerLit(i))
 
   override def randomInteger(): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.integerLit(0))
+    ApronExpr.top(typeIntOps.randomInteger())
 
 
 given RelationalLongOps
@@ -312,4 +313,4 @@ given RelationalLongOps
     longLit(i, typeIntOps.integerLit(i))
 
   override def randomInteger(): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.integerLit(0))
+    ApronExpr.top(typeIntOps.randomInteger())

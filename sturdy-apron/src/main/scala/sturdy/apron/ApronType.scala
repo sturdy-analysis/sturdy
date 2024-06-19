@@ -86,6 +86,13 @@ given BooleanApronType: ApronType[BaseType[Boolean]] with
 given FloatApronType: ApronType[BaseType[Float]] with
   extension (t: BaseType[Float])
     override def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
-    override def roundingDir: RoundingDir = RoundingDir.Nearest
+    override def roundingDir: RoundingDir = RoundingDir.Rnd
     override def roundingType: RoundingType = RoundingType.Single
     override def byteSize: Int = java.lang.Float.BYTES
+
+given DoubleApronType: ApronType[BaseType[Double]] with
+  extension (t: BaseType[Double])
+    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
+    override def roundingDir: RoundingDir = RoundingDir.Rnd
+    override def roundingType: RoundingType = RoundingType.Double
+    override def byteSize: Int = java.lang.Double.BYTES

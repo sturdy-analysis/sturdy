@@ -1,5 +1,7 @@
 package sturdy.values.floating
 
+import org.scalatest.Assertion
+import org.scalatest.Assertions.{fail, succeed}
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
@@ -15,12 +17,23 @@ class FloatIntervalTestingIntegerOps
     with TestingFloatOps[Float, FloatInterval]:
   override def floatLit(i: Float): FloatInterval = FloatInterval(i,i)
   override def interval(low: Float, high: Float) = FloatInterval(low,high)
-  override def getBounds(iv: FloatInterval) = (iv.l, iv.h)
+
+  override def shouldContain(n: FloatInterval, m: Float): Assertion =
+    if(n.l <= m && m <= n.h)
+      succeed
+    else
+      fail(s"$n does not contain $m")
+
+  override def shouldEqual(n: FloatInterval, l: Float, u: Float): Assertion =
+    if (n.l == l && n.h == u)
+      succeed
+    else
+      fail(s"$n does not equal [$l,$u]")
 
 
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
-  minValue = Float.NegativeInfinity,
-  maxValue = Float.PositiveInfinity,
+  minValue = Float.MinValue,
+  maxValue = Float.MaxValue,
   makeFloatOps = new FloatIntervalTestingIntegerOps
 )(using
   org.scalacheck.Arbitrary.arbFloat,

@@ -1,7 +1,7 @@
 package sturdy.apron
 
 import apron.{Interval, Var}
-import gmp.Mpq
+import gmp.{Mpfr, Mpq}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
@@ -50,6 +50,14 @@ trait ApronState[Addr,Type]:
         Some(BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue())))
 
     (lower, upper)
+
+  def getDoubleInterval(expr: ApronExpr[Addr, Type]): (Double, Double) =
+    val iv = getInterval(expr)
+    val lower: Array[Double] = Array(0.0)
+    iv.inf().toDouble(lower, Mpfr.RNDZ)
+    val upper: Array[Double] = Array(0.0)
+    iv.inf().toDouble(upper, Mpfr.RNDZ)
+    (lower(0), upper(0))
 
 object ApronState:
   def comparison[Addr: Ordering : ClassTag, Type]

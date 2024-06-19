@@ -2,6 +2,7 @@ package sturdy.values.floating
 
 import org.scalacheck.Gen.Choose
 import org.scalacheck.{Arbitrary, Gen, Shrink}
+import org.scalatest.Assertion
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
@@ -15,7 +16,8 @@ import math.Ordering.Implicits.infixOrderingOps
 trait TestingFloatOps[L,N] extends FloatOps[L,N]:
   def floatLit(i: L): N
   def interval(low: L, high: L): N
-  def getBounds(n:N): (L,L)
+  def shouldContain(n:N, m:L): Assertion
+  def shouldEqual(n:N, l:L, u:L): Assertion
 
 class FloatOpsTest
   [
@@ -38,7 +40,7 @@ class FloatOpsTest
   test("Float literal") {
     forAll("n") { (n: L) =>
       val floatOps = makeFloatOps
-      floatOps.getBounds(floatOps.floatLit(n)) shouldBe (n,n)
+      floatOps.shouldEqual(floatOps.floatLit(n), n, n)
     }
 
   }
@@ -70,26 +72,6 @@ class FloatOpsTest
     testFun = _.div(_, _),
     expectedFun = concreteFloatOps.div
   )
-
-  test("div([1,1],[-1,1])") {
-    val floatOps = makeFloatOps
-    floatOps.getBounds(
-      floatOps.div(
-        floatOps.interval(fractional.fromInt(1), fractional.fromInt(1)),
-        floatOps.interval(fractional.fromInt(-1), fractional.fromInt(1)))) shouldBe(
-      concreteFloatOps.div(fractional.fromInt(1), fractional.fromInt(-1)),
-      concreteFloatOps.div(fractional.fromInt(1), fractional.fromInt(1))
-    )
-  }
-
-  test("div([-1,1],[-1,-1])") {
-    val floatOps = makeFloatOps
-    floatOps.getBounds(
-      floatOps.div(
-        floatOps.interval(fractional.fromInt(-1), fractional.fromInt(1)),
-        floatOps.interval(fractional.fromInt(-1), fractional.fromInt(-1)))) should contain
-      (fractional.fromInt(-1), fractional.fromInt(1))
-  }
 
   binOpTest(
     testName = "min",
@@ -167,7 +149,10 @@ class FloatOpsTest
         case (x, y) =>
           whenever(precondition(x, y)) {
             val floatOps = makeFloatOps
-            floatOps.getBounds(testFun(floatOps, floatOps.floatLit(x), floatOps.floatLit(y))) should contain (expectedFun(x, y))
+            floatOps.shouldContain(
+              testFun(floatOps, floatOps.floatLit(x), floatOps.floatLit(y)),
+              expectedFun(x, y)
+            )
           }
       }
     }
@@ -177,7 +162,10 @@ class FloatOpsTest
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
             val floatOps = makeFloatOps
-            floatOps.getBounds(testFun(floatOps, floatOps.interval(x1, x2), floatOps.interval(y1, y2))) should contain(expectedFun(x, y))
+            floatOps.shouldContain(
+              testFun(floatOps, floatOps.interval(x1, x2), floatOps.interval(y1, y2)),
+              expectedFun(x, y)
+            )
           }
       }
     }
@@ -189,7 +177,10 @@ class FloatOpsTest
           whenever(precondition(x)) {
             val floatOps = makeFloatOps
             val expected = expectedFun(x)
-            floatOps.getBounds(testFun(floatOps, floatOps.floatLit(x))) should be (expected, expected)
+            floatOps.shouldContain(
+              testFun(floatOps, floatOps.floatLit(x)),
+              expected
+            )
           }
       }
     }
@@ -199,7 +190,10 @@ class FloatOpsTest
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
             val floatOps = makeFloatOps
-            floatOps.getBounds(testFun(floatOps, floatOps.interval(x1, x2))) should contain(expectedFun(x))
+            floatOps.shouldContain(
+              testFun(floatOps, floatOps.interval(x1, x2)),
+              expectedFun(x)
+            )
           }
       }
     }

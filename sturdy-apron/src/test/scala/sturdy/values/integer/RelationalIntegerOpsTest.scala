@@ -2,6 +2,7 @@ package sturdy.values.integer
 
 import apron.*
 import org.scalacheck.Gen
+import org.scalatest.Assertion
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -37,40 +38,21 @@ class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]
     new RelationalIntOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
-      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Int, Int) =
-        this.apronState.getBigIntInterval(n) match
-          case (Some(l),Some(u)) if (Integer.MIN_VALUE <= l && u <= Integer.MAX_VALUE) => (l.intValue, u.intValue)
-          case iv => throw new IllegalArgumentException(s"Interval $iv out of integer bounds ${(Integer.MIN_VALUE, Integer.MAX_VALUE)}")
+      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Int): Assertion =
+        val iv = this.apronState.getInterval(expr)
+        if(Interval(m,m).isLeq(iv))
+          succeed
+        else
+          fail(s"$iv does not include $m")
+      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Assertion =
+        val iv = this.apronState.getInterval(expr)
+        if(Interval(l, u).isEqual(iv))
+          succeed
+        else
+          fail(s"$iv does not include [$l,$u]")
     }
   }
 )
-//  test("-1 + -2147483648 = 2147483647") {
-//    val integerOps = newIntegerOps
-//    val x = integerOps.integerLit(-1)
-//    val y = integerOps.integerLit(-2147483648)
-//    val add = integerOps.add(x, y)
-//    integerOps.getBounds(add) shouldBe (2147483647, 2147483647)
-//  }
-//
-//  test("-1 mod 4294967296 = 4294967295") {
-//    val integerOps = newIntegerOps
-//    val x = integerOps.integerLit(-1)
-//    val y = ApronExpr.bigIntLit[VirtAddr, Type](4294967296L, Type.IntType(BaseType[Int]))
-//    val mod = integerOps.modulo(x, y)
-//    val expected = 4294967295L
-//    integerOps.getBounds(mod) shouldBe(expected, expected)
-//  }
-//
-//  test("-1 mod 10 = 9") {
-//    val integerOps = newIntegerOps
-//    val x = integerOps.integerLit(-1)
-//    val y = integerOps.integerLit(10)
-//    val mod = integerOps.modulo(x, y)
-//    val expected = java.lang.Math.floorMod(-1,10)
-//    integerOps.getBounds(mod) shouldBe(expected, expected)
-//  }
-
-
 class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
   minValue = Long.MinValue,
   maxValue = Long.MaxValue,
@@ -87,15 +69,21 @@ class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Typ
     new RelationalLongOps[VirtAddr, Type] with TestingIntegerOps[Long, ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
       override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
-      override def getBounds(n: ApronExpr[VirtAddr, Type]): (Long, Long) =
-        this.apronState.getBigIntInterval(n) match
-          case (Some(l), Some(u)) =>
-            if (Long.MinValue <= l && u <= Long.MaxValue)
-              (l.longValue, u.longValue)
-            else
-              throw new IllegalArgumentException(s"Interval ${(l,u)} out of integer bounds ${(Long.MinValue, Long.MaxValue)}")
-          case iv =>
-            throw new IllegalArgumentException(s"Unexpected infinite bounds ${iv}")
+      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Long): Assertion =
+        val iv = this.apronState.getInterval(expr)
+        val bm = BigInt(m).bigInteger
+        if(Interval(bm,bm).isLeq(iv))
+          succeed
+        else
+          fail(s"$iv does not include $m")
+      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Assertion =
+        val iv = this.apronState.getInterval(expr)
+        val bl = BigInt(l).bigInteger
+        val bu = BigInt(u).bigInteger
+        if(Interval(bl,bu).isEqual(iv))
+          succeed
+        else
+          fail(s"$iv does not include [$l,$u]")
     }
   }
 )
