@@ -4,11 +4,10 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.ControlEventChecker
+import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder}
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
-import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.Parsing
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
 import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
@@ -75,12 +74,15 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
   }
 
 
-class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
+class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  aInterp.addControlObserver(new ControlEventChecker)
+  
+  val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), aInterp)
+  val newCfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
+  
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
@@ -117,6 +119,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
+    testCfgDifference(oldCfg, newCfg.get)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

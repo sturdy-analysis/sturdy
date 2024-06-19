@@ -4,14 +4,14 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.PrintingControlObserver
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
@@ -169,13 +169,16 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = IntervalAnalysis.constantInstructions(interp)
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
 //  println(cfg.toGraphViz)
+
+  testCfgDifference(cfg, graphBuilder.get)
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
   val deadLabels = ControlFlow.deadLabels(cfg)
