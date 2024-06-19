@@ -9,7 +9,7 @@ import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
 
-trait RelationalFloatOps
+given RelationalFloatOps
   [
     L: Numeric,
     Addr: Ordering: ClassTag,
@@ -19,7 +19,7 @@ trait RelationalFloatOps
    apronState: ApronState[Addr,Type],
    f: Failure,
    typeFloatOps: FloatOps[L,Type]
-  ) extends FloatOps[L, ApronExpr[Addr,Type]]:
+  ): FloatOps[L, ApronExpr[Addr,Type]] with
   override def floatingLit(f: L): ApronExpr[Addr, Type] =
     ApronExpr.doubleLit(Numeric[L].toDouble(f), typeFloatOps.floatingLit(f))
   override def randomFloat(): ApronExpr[Addr, Type] =

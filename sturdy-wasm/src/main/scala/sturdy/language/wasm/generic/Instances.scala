@@ -25,6 +25,7 @@ given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
 given Structural[FunctionInstance] with {}
+given Ordering[MemoryAddr] = Ordering.by[MemoryAddr,Int](_.addr)
 
 class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
   override def equals(obj: Any): Boolean = obj match
@@ -90,6 +91,8 @@ class ModuleInstance:
     current
   
   override def toString: Name = Integer.toHexString(this.hashCode)
+
+given Ordering[ModuleInstance] = Ordering.by[ModuleInstance, Int](_.hashCode())
 
 given Structural[Func] with {}
 given Structural[FuncType] with {}

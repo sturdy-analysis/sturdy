@@ -12,7 +12,7 @@ import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.Finite
 import sturdy.values.references.{AddressTranslation, PhysicalAddress, VirtualAddress}
-import sturdy.values.integer.TypeIntegerOps
+import sturdy.values.integer.BaseTypeIntegerOps
 import sturdy.values.types.{BaseType, given}
 
 class RelationalCallFrameTest extends AnyFunSuite:

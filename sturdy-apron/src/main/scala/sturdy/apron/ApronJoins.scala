@@ -69,12 +69,12 @@ object ApronJoins:
     env
 
 
-given JoinApronExpr[Addr: Ordering : ClassTag, Type: Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr, Type]]): Join[ApronExpr[Addr, Type]] =
+given JoinApronExpr[Addr: Ordering : ClassTag, Type: Join](using lazyApronState: Lazy[ApronState[Addr, Type]]): Join[ApronExpr[Addr, Type]] =
   (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
     val apronState = lazyApronState.value
     apronState.join(e1,e2)
 
-given WidenApronExpr[Addr: Ordering : ClassTag, Type: Join, W <: Widening](using lazyApronState: Lazy[ApronState[Addr, Type]]): Widen[ApronExpr[Addr, Type]] =
+given WidenApronExpr[Addr: Ordering : ClassTag, Type: Join](using lazyApronState: Lazy[ApronState[Addr, Type]]): Widen[ApronExpr[Addr, Type]] =
   (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
     val apronState = lazyApronState.value
     apronState.widen(e1,e2)

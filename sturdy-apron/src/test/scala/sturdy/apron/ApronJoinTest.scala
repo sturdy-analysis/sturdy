@@ -8,7 +8,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.{Finite, Join}
 import sturdy.values.types.BaseType
-import sturdy.values.integer.TypeIntegerOps
+import sturdy.values.integer.BaseTypeIntegerOps
 
 class ApronJoinTest extends AnyFunSuite:
 

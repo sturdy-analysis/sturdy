@@ -8,7 +8,7 @@ import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.store.{RelationalStore, given}
 import sturdy.apron.{ApronCons, ApronExpr, ApronVar, BinOp, given}
 import sturdy.values.{*, given}
-import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden, TypeIntegerOps}
+import sturdy.values.integer.{NumericInterval, NumericIntervalJoin, NumericIntervalWiden, BaseTypeIntegerOps}
 import sturdy.values.references.{*, given}
 import apron.{Abstract1, Environment, Interval, MpqScalar, Polka}
 import sturdy.effect.allocation.Allocator

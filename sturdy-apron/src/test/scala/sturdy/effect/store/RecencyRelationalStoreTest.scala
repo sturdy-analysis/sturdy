@@ -5,7 +5,7 @@ import sturdy.apron.{ApronExpr, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.{Finite, Widen}
-import sturdy.values.integer.{NumericInterval, NumericIntervalWiden, NumericIntervalJoin, TypeIntegerOps}
+import sturdy.values.integer.{NumericInterval, NumericIntervalWiden, NumericIntervalJoin, BaseTypeIntegerOps}
 import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
 

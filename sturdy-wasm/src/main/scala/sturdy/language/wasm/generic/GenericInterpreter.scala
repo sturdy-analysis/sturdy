@@ -69,6 +69,8 @@ type Imports = mutable.Map[String, ModuleInstance]
 case class FuncId(mod: ModuleInstance, funcIx: Int):
   override def toString: String = s"$mod.$funcIx"
 
+given Ordering[FuncId] = Ordering.by[FuncId, (ModuleInstance,Int)](funcid => (funcid.mod, funcid.funcIx))
+
 enum InstLoc:
   case InFunction(func: FuncId, pc: Int)
   case InInit(mod: ModuleInstance, pc: Int)
