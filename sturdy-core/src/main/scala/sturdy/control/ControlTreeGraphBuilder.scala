@@ -81,7 +81,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
         state_handler.copy(preds = s.preds ++ state_handler.preds, aes = mergeAes(s.aes, state_handler.aes))
       )
 
-      state_handlers.copy(aes = state.aes ++ state_handlers.aes)
+      state_handlers.copy(aes = mergeAes(state.aes, state_handlers.aes))
 
     case ControlTree.Throw(exc) =>
       addAes(state, exc).copy(preds = Set.empty)

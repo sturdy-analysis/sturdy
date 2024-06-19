@@ -24,6 +24,9 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
   private var predecessors: CNodes = Set(Node.Start())
   private var activeExc: ActiveExc = Map()
 
+  private def mergeAes(aes1: ActiveExc, aes2: ActiveExc): ActiveExc =
+    aes1 ++ aes2.map { case (k, v) => k -> (aes1.getOrElse(k, Set.empty) ++ v) }
+
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
     ControlGraph(addBlockPairEdges(curg.toSet))
@@ -85,7 +88,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         case Entry.ForkSecond(firstTails, firstOriginExc) :: stack_ =>
           stack = stack_
           predecessors = firstTails ++ predecessors
-          activeExc = firstOriginExc ++ activeExc.map((k, v) => k -> (firstOriginExc.getOrElse(k, Set.empty) ++ v))
+          activeExc = mergeAes(firstOriginExc, activeExc)
         case _ => error(s"Entry mismatch, expected ForkSecond for $ev: $stack")
 
   override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
@@ -97,7 +100,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         activeExc = Map.empty
       case Throw(exc: Exc) =>
         assertNoCatching()
-        activeExc = activeExc + (exc -> (predecessors.map(_.copy(exc = true)) ++ activeExc.getOrElse(exc, Set.empty)))
+        activeExc = mergeAes(activeExc, Map(exc -> predecessors.map(_.copy(exc = true))))
         predecessors = Set.empty
       case Catching() => stack match
         case Entry.Try(outside) :: stack_ =>
@@ -117,7 +120,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         case Entry.Handler(hx, tails, bodyExc, outside, resultExc) :: stack_ =>
           stack = Entry.Catching(bodyExc, outside) :: stack_
           predecessors = tails ++ predecessors
-          activeExc = resultExc ++ activeExc
+          activeExc = mergeAes(resultExc, activeExc)
         case _ => error(s"Entry mismatch, expected Handler for $ev: $stack")
       case EndTry() => stack match
         case Entry.Try(outside) :: stack_ =>
@@ -125,7 +128,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
           activeExc = outside
         case Entry.Catching(bodyExc, outside) :: stack_ =>
           stack = stack_
-          activeExc = outside ++ activeExc
+          activeExc = mergeAes(outside, activeExc)
         case _ => error(s"Entry mismatch, expected Try or Catching for $ev: $stack")
 
   override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =

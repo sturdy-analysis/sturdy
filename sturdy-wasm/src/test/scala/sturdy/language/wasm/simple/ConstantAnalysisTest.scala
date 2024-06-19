@@ -94,40 +94,40 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 //  }
 
 
-//  testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
-//  testFunction(simple, "first", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
-//  testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
+  testFunction(simple, "first", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
+  testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
-//  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
-//  testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-br-and-return3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
-//  testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
-//  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
-//  testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//
-//  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Actual(1))))
-//  (2 to 8).foreach { arg =>
-//    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
-//  }
-//  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//
-//  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
+  testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
+  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
+  testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Actual(1))))
+  (2 to 8).foreach { arg =>
+    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
+  }
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
