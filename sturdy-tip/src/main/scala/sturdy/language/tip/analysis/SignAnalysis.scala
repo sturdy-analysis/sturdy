@@ -46,7 +46,7 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given IntegerOps[Int, IntSign] = new GradualSignIntegerOps[Int](new SignIntegerOps[Int](), new SafeSignIntegerOps[Int]())
+    given IntegerOps[Int, IntSign] = new UnsafeSignIntegerOps[Int]()
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly

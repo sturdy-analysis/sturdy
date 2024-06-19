@@ -20,6 +20,7 @@ import sturdy.language.tip.GenericInterpreter
 import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.data.{*, given}
+import sturdy.fix.StackConfig.StackedStates
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.integer.{*, given}
@@ -44,17 +45,63 @@ class GradualSignAnalysisTest  extends AnyFlatSpec, Matchers:
       """
 main(){
       var x;
-      x = 1 + 2;
+      x = 1 + 3;
       return x;
 }
     """.stripMargin
     val program = Parser.parse(sourceCode)
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.DAIInstance(Map(), Map())
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
 
       1 should be (1)
+
+    }
+  }
+
+  it should "correctly analyze while signs" in {
+    val sourceCode =
+      """
+  main(){
+        var x;
+        x = 0;
+        while (input) {
+          x = x + 1;
+          x = -1;
+        }
+        return x;
+  }
+      """.stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+
+      1 should be(1)
+
+    }
+  }
+
+  it should "correctly analyze fun signs" in {
+    val sourceCode =
+      """
+      foo(y) {
+        return y + 1;
+      }
+
+      main(){
+        return foo(1) - foo(0);
+      }
+      """.stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+
+      1 should be(1)
 
     }
   }
