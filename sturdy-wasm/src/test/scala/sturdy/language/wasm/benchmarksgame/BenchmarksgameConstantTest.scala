@@ -3,7 +3,7 @@ package sturdy.language.wasm.benchmarksgame
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventGraphBuilder, RecordingControlObserver}
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver, RecordingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
@@ -18,7 +18,9 @@ import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.validation.Validator
 
-import java.nio.file.{Files, Path, Paths}
+import java.io.{BufferedOutputStream, FileOutputStream}
+import java.nio.file.attribute.FileAttribute
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
@@ -47,9 +49,18 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
+    val logpath = p.getParent.resolve(p.getFileName.toString + ".types.new.log")
+    Files.deleteIfExists(logpath)
+    val f = Files.createFile(logpath)
+    val buf = BufferedOutputStream(new FileOutputStream(f.toFile))
+
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
     val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    interp.addControlObserver(new PrintingControlObserver()({ s =>
+      buf.write(s.getBytes)
+      buf.write("\n".getBytes)
+    }))
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
     
     val modInst = interp.initializeModule(module)
