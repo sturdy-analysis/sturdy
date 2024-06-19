@@ -12,7 +12,7 @@ import sturdy.values.booleans.ObservedBooleanBranching
 
 object Control:
   type Atom = Stm
-  type Section = Function | Exp.Call | Stm.If
+  type Section = String | Exp.Call | Stm.If
   type Exc = Unit
   type Fx = (FixIn, List[Any])
 
@@ -38,17 +38,16 @@ trait Control extends Interpreter:
     effects.addJoinObserver(observable)
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.BeginSection(f))
-        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.BeginSection(c))
-        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.BeginSection(s))
-        case FixIn.Run(s: Stm.While) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
-        case FixIn.Run(s: (Stm.Assign | Stm.Output)) => observable.triggerControlEvent(BasicControlEvent.Atomic(s))
+        case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.BeginSection(f.name)("enter"))
+        case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.BeginSection(c)(c.toString))
+        case FixIn.Run(_: (Stm.Block | Stm.Assign)) => // nothing
+        case FixIn.Run(s: Stm) => observable.triggerControlEvent(BasicControlEvent.Atomic(s)(s.toString))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
         case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.EndSection())
         case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.EndSection())
-        case FixIn.Run(s: Stm.If) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Run(s: Stm.Assign) => observable.triggerControlEvent(BasicControlEvent.Atomic(s)(s.toString))
         case _ => // nothing
 
 

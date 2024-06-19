@@ -4,6 +4,7 @@ import sturdy.control.{ControlGraph, EdgeType, Node}
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.generic.*
+import swam.syntax.{Block, If, Loop}
 
 def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph[InstLoc, FuncId | InstLoc]): Unit = {
   type OldNode = CfgNode
@@ -17,13 +18,23 @@ def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph
 
   def convert(n: OldNode): NewNode = n match
     case CfgNode.Start => Node.Start()
-    case CfgNode.Instruction(inst, loc) => Node.Atomic(loc)
-    case CfgNode.Labled(inst, loc) => Node.BlockStart(loc)
-    case CfgNode.LabledEnd(startNode) => Node.BlockEnd(startNode.loc)
-    case CfgNode.Call(inst, loc) => Node.BlockStart(loc)
-    case CfgNode.CallReturn(startNode) => Node.BlockEnd(startNode.loc)
-    case CfgNode.Enter(funId) => Node.BlockStart(funId)
-    case CfgNode.Exit(funId) => Node.BlockEnd(funId)
+    case CfgNode.Instruction(inst, loc) => Node.Atomic(loc)(inst.toString)
+    case CfgNode.Labled(inst, loc) =>
+      val label = inst match
+        case Block(_, _) => "Block"
+        case Loop(_, _) => "Loop"
+        case If(_, _, _) => "If"
+      Node.BlockStart(loc)(label)
+    case CfgNode.LabledEnd(startNode) =>
+      val label = startNode.inst match
+        case Block(_, _) => "Block"
+        case Loop(_, _) => "Loop"
+        case If(_, _, _) => "If"
+      Node.BlockEnd(startNode.loc)(label)
+    case CfgNode.Call(inst, loc) => Node.BlockStart(loc)(inst.toString)
+    case CfgNode.CallReturn(startNode) => Node.BlockEnd(startNode.loc)(startNode.inst.toString)
+    case CfgNode.Enter(funId) => Node.BlockStart(funId)("enter")
+    case CfgNode.Exit(funId) => Node.BlockEnd(funId)("enter")
 
   println(s"Old graph:   ${oldNodes.size} nodes, ${oldEdges.size} edges")
   println(s"New graph:   ${newNodes.size} nodes, ${newEdgesToSuccess.size} edges, ${newEdgesToFailure.size} failure edges")
@@ -55,6 +66,6 @@ def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph
   if (diffEdges2.nonEmpty)
     println(s"Old graph, ${diffEdges2.size} extra edges: ${diffEdges2.mkString(", ")}")
 
-  assert(diffEdges1.isEmpty, s"Old graph, ${diffEdges1.size} missing edges: ${diffEdges1.mkString(", ")} \n") // + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
-  assert(diffEdges2.isEmpty, s"Old graph, ${diffEdges2.size} extra edges: ${diffEdges2.mkString(", ")} \n") // + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
+  assert(diffEdges1.isEmpty, s"Old graph, ${diffEdges1.size} missing edges: ${diffEdges1.mkString(", ")} \n" + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
+  assert(diffEdges2.isEmpty, s"Old graph, ${diffEdges2.size} extra edges: ${diffEdges2.mkString(", ")} \n" + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
 }

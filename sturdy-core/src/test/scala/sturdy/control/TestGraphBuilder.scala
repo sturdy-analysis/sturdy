@@ -40,16 +40,16 @@ class TestGraphBuilder extends AnyFunSuite {
        |output z;
        |""".stripMargin,
     List(
-      Atomic("x = input"),
-      Atomic("y = x + 1"),
-      Atomic("z = input"),
-      Atomic("output z"),
+      atomic("x = input"),
+      atomic("y = x + 1"),
+      atomic("z = input"),
+      atomic("output z"),
     ),
     linearPath(List(
-      Node.Atomic("x = input"),
-      Node.Atomic("y = x + 1"),
-      Node.Atomic("z = input"),
-      Node.Atomic("output z")))
+      Node.atomic("x = input"),
+      Node.atomic("y = x + 1"),
+      Node.atomic("z = input"),
+      Node.atomic("output z")))
   )
 
   testGraph("Blocks",
@@ -60,21 +60,21 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      BeginSection("Call(main)"),
-      BeginSection("main"),
-      Atomic("output 3"),
+      beginSection("Call(main)"),
+      beginSection("main"),
+      atomic("output 3"),
       EndSection(),
       EndSection(),
     ),
     linearPath(List(
-      Node.BlockStart("Call(main)"),
-      Node.BlockStart("main"),
-      Node.Atomic("output 3"),
-      Node.BlockEnd("main"),
-      Node.BlockEnd("Call(main)")))
+      Node.blockStart("Call(main)"),
+      Node.blockStart("main"),
+      Node.atomic("output 3"),
+      Node.blockEnd("main"),
+      Node.blockEnd("Call(main)")))
       ++ Set(
-      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 
@@ -93,35 +93,35 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      BeginSection("Call(main)"),
-      BeginSection("main"),
-      Atomic("output 3"),
-      BeginSection("Call(foo)"),
-      BeginSection("foo"),
+      beginSection("Call(main)"),
+      beginSection("main"),
+      atomic("output 3"),
+      beginSection("Call(foo)"),
+      beginSection("foo"),
       EndSection(),
       EndSection(),
-      Atomic("x = foo()"),
-      Atomic("output x"),
+      atomic("x = foo()"),
+      atomic("output x"),
       EndSection(),
       EndSection(),
     ),
     linearPath(List(
-      Node.BlockStart("Call(main)"),
-      Node.BlockStart("main"),
-      Node.Atomic("output 3"),
-      Node.BlockStart("Call(foo)"),
-      Node.BlockStart("foo"),
-      Node.BlockEnd("foo"),
-      Node.BlockEnd("Call(foo)"),
-      Node.Atomic("x = foo()"),
-      Node.Atomic("output x"),
-      Node.BlockEnd("main"),
-      Node.BlockEnd("Call(main)")))
+      Node.blockStart("Call(main)"),
+      Node.blockStart("main"),
+      Node.atomic("output 3"),
+      Node.blockStart("Call(foo)"),
+      Node.blockStart("foo"),
+      Node.blockEnd("foo"),
+      Node.blockEnd("Call(foo)"),
+      Node.atomic("x = foo()"),
+      Node.atomic("output x"),
+      Node.blockEnd("main"),
+      Node.blockEnd("Call(main)")))
       ++ Set(
-      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
-      // Edge(Node.BlockStart("foo"), Node.BlockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
-      Edge(Node.BlockStart("Call(foo)"), Node.BlockEnd("Call(foo)"), EdgeType.BlockPair),
+      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
+      // Edge(Node.blockStart("foo"), Node.blockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
+      Edge(Node.blockStart("Call(foo)"), Node.blockEnd("Call(foo)"), EdgeType.BlockPair),
     )
   )
 
@@ -140,32 +140,32 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      BeginSection("Call(main)"),
-      BeginSection("main"),
-      Atomic("x = input"),
-      Atomic("if(x)"),
+      beginSection("Call(main)"),
+      beginSection("main"),
+      atomic("x = input"),
+      atomic("if(x)"),
       Fork(),
-      Atomic("output 0"),
+      atomic("output 0"),
       Switch(),
-      Atomic("output 1"),
+      atomic("output 1"),
       Join(),
       EndSection(),
       EndSection(),
     ),
     linearPath(List(
-      Node.BlockStart("Call(main)"),
-      Node.BlockStart("main"),
-      Node.Atomic("x = input"),
-      Node.Atomic("if(x)"),
-      Node.Atomic("output 0"),
-      Node.BlockEnd("main"),
-      Node.BlockEnd("Call(main)")
+      Node.blockStart("Call(main)"),
+      Node.blockStart("main"),
+      Node.atomic("x = input"),
+      Node.atomic("if(x)"),
+      Node.atomic("output 0"),
+      Node.blockEnd("main"),
+      Node.blockEnd("Call(main)")
     ))
       ++ Set(
-      Edge(Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
-      Edge(Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
-      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.atomic("if(x)"), Node.atomic("output 1"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.atomic("output 1"), Node.blockEnd("main"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 
@@ -187,40 +187,40 @@ class TestGraphBuilder extends AnyFunSuite {
        |}
        |""".stripMargin,
     List(
-      BeginSection("Call(main)"),
-      BeginSection("main"),
-      Atomic("x = input"),
-      Atomic("if(x)"),
+      beginSection("Call(main)"),
+      beginSection("main"),
+      atomic("x = input"),
+      atomic("if(x)"),
       Fork(),
-      Atomic("output 0"),
-      Atomic("if(x>10)"),
+      atomic("output 0"),
+      atomic("if(x>10)"),
       Fork(),
-      Atomic("output 2"),
+      atomic("output 2"),
       Switch(),
       Join(),
       Switch(),
-      Atomic("output 1"),
+      atomic("output 1"),
       Join(),
       EndSection(),
       EndSection(),
     ),
     linearPath(List(
-      Node.BlockStart("Call(main)"),
-      Node.BlockStart("main"),
-      Node.Atomic("x = input"),
-      Node.Atomic("if(x)"),
-      Node.Atomic("output 0"),
-      Node.Atomic("if(x>10)"),
-      Node.Atomic("output 2"),
-      Node.BlockEnd("main"),
-      Node.BlockEnd("Call(main)")
+      Node.blockStart("Call(main)"),
+      Node.blockStart("main"),
+      Node.atomic("x = input"),
+      Node.atomic("if(x)"),
+      Node.atomic("output 0"),
+      Node.atomic("if(x>10)"),
+      Node.atomic("output 2"),
+      Node.blockEnd("main"),
+      Node.blockEnd("Call(main)")
     ))
       ++ Set(
-      Edge(Node.Atomic("if(x)"), Node.Atomic("output 1"), EdgeType.CF), // Second part of the Fork
-      Edge(Node.Atomic("output 1"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the Fork
-      Edge(Node.Atomic("if(x>10)"), Node.BlockEnd("main"), EdgeType.CF), // Second part of the nested Fork
-      Edge(Node.BlockStart("main"), Node.BlockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.BlockStart("Call(main)"), Node.BlockEnd("Call(main)"), EdgeType.BlockPair),
+      Edge(Node.atomic("if(x)"), Node.atomic("output 1"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.atomic("output 1"), Node.blockEnd("main"), EdgeType.CF), // Second part of the Fork
+      Edge(Node.atomic("if(x>10)"), Node.blockEnd("main"), EdgeType.CF), // Second part of the nested Fork
+      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 

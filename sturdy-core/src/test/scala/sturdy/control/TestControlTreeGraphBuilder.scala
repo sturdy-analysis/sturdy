@@ -44,9 +44,9 @@ class TestControlTreeGraphBuilder extends AnyFunSuite {
   private given scala.Conversion[SectionPair, Section[String, String, String, String]] = _.n
 
   // Creates a ControlTree node and a GraphNode
-  private def createAtomic(atom: String): AtomPair = (Atomic(atom), Node.Atomic(atom))
+  private def createAtomic(atom: String): AtomPair = (Atomic(atom)(atom), Node.Atomic(atom)(atom))
 
-  private def createSection(section: String, body: CT): SectionPair = SectionPair(Section(section, body), (null, Node.BlockStart(section)), (null, Node.BlockEnd(section)))
+  private def createSection(section: String, body: CT): SectionPair = SectionPair(Section(section, body)(section), (null, Node.BlockStart(section)(section)), (null, Node.BlockEnd(section)(section)))
 
   case class SectionPair(n: Section[String, String, String, String], start: AtomPair, end: AtomPair)
 

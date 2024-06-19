@@ -9,9 +9,9 @@ import scala.util.Random
 enum ControlTree[Atom, Sec, Exc, Fx]:
   case Empty()
 
-  case Atomic(a: Atom)
+  case Atomic(a: Atom)(val label: String)
   case Failed()
-  case Section(section: Sec, body: ControlTree[Atom, Sec, Exc, Fx])
+  case Section(section: Sec, body: ControlTree[Atom, Sec, Exc, Fx])(val label: String)
 
   case Seq(t1: ControlTree[Atom, Sec, Exc, Fx], t2: ControlTree[Atom, Sec, Exc, Fx])
   case Fork(t1: ControlTree[Atom, Sec, Exc, Fx], t2: ControlTree[Atom, Sec, Exc, Fx])
@@ -59,11 +59,11 @@ enum ControlTree[Atom, Sec, Exc, Fx]:
     case ControlTree.Failed() =>
       buf += BasicControlEvent.Failed()
 
-    case ControlTree.Atomic(a) =>
-      buf += BasicControlEvent.Atomic(a)
+    case at@ControlTree.Atomic(a) =>
+      buf += BasicControlEvent.Atomic(a)(at.label)
 
-    case ControlTree.Section(section, body) =>
-      buf += BasicControlEvent.BeginSection(section)
+    case st@ControlTree.Section(section, body) =>
+      buf += BasicControlEvent.BeginSection(section)(st.label)
       body._print(buf)
       buf += BasicControlEvent.EndSection()
 

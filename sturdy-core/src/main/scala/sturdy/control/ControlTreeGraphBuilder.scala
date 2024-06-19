@@ -50,18 +50,18 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
   private def _build(ct: CT, state: TreeBuilderState): TreeBuilderState = ct match
     case ControlTree.Empty() => state
 
-    case ControlTree.Atomic(a) =>
-      addNode(state, Node.Atomic(a))
+    case at@ControlTree.Atomic(a) =>
+      addNode(state, Node.Atomic(a)(at.label))
 
     case ControlTree.Failed() =>
       addNode(state, Node.Failure()).copy(preds = Set.empty)
 
-    case ControlTree.Section(section, body) =>
-      val body_state = _build(body, addNode(state, Node.BlockStart(section)))
+    case st@ControlTree.Section(section, body) =>
+      val body_state = _build(body, addNode(state, Node.BlockStart(section)(st.label)))
       if (body_state.preds.isEmpty)
         body_state
       else
-        addNode(body_state, Node.BlockEnd(section))
+        addNode(body_state, Node.BlockEnd(section)(st.label))
 
     case ControlTree.Seq(t1, t2) =>
       _build(t2, _build(t1, state))
@@ -98,16 +98,27 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
 
   private def addBlockPairEdges(state: TreeBuilderState): TreeBuilderState =
     val openedSections = state.curg.flatMap(e => List(e._1, e._2)).flatMap {
-      case Node.BlockStart(sec) => List(sec)
+      case s@Node.BlockStart(sec) => List(s)
       case _ => List.empty
     }
-    val closedSections = openedSections.filter(sec =>
-      state.curg.exists(e => e.to == Node.BlockEnd(sec) || e.from == Node.BlockEnd(sec)))
-    val blockPairEdges: Set[CEdge] = closedSections.flatMap(sec =>
-      if state.curg.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)) then
+    val closedSections = openedSections.filter { s =>
+      val sec = s.sec
+      state.curg.exists {
+        case Edge(_, Node.BlockEnd(`sec`), _) => true
+        case Edge(Node.BlockEnd(`sec`), _, _) => true
+        case _ => false
+      }
+    }
+    val blockPairEdges: Set[CEdge] = closedSections.flatMap { s =>
+      val sec = s.sec
+      if (state.curg.exists {
+        case Edge(Node.BlockStart(`sec`), Node.BlockEnd(`sec`), _) => true
+        case _ => false
+      })
         List.empty
       else
-        List(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)))
+        List(Edge(s, Node.BlockEnd(sec)(s.label), EdgeType.BlockPair))
+    }
 
     state.copy(curg = state.curg ++ blockPairEdges)
 

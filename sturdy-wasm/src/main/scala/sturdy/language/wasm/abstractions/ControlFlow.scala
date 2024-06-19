@@ -35,14 +35,24 @@ trait Control extends Interpreter:
     obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.BeginSection(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection(loc))
-        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic(loc))
+        case FixIn.EnterWasmFunction(id, _, _) =>
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter"))
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
+          val label = c match
+            case Block(_, _) => "Block"
+            case Loop(_, _) => "Loop"
+            case If(_, _, _) => "If"
+            case _ => c.toString
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(loc)(label))
+        case FixIn.Eval(inst, loc) =>
+          observable.triggerControlEvent(BasicControlEvent.Atomic(loc)(inst.toString))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterWasmFunction(_, _, _) => observable.triggerControlEvent(BasicControlEvent.EndSection())
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.EnterWasmFunction(_, _, _) =>
+          observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
+          observable.triggerControlEvent(BasicControlEvent.EndSection())
         case _ => // nothing
 
 

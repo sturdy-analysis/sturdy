@@ -32,21 +32,21 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     import BasicControlEvent.*
     assertNoCatching()
     ev match
-      case BasicControlEvent.Atomic(a) =>
-        addNode(Node.Atomic(a))
+      case at@BasicControlEvent.Atomic(a) =>
+        addNode(Node.Atomic(a)(at.label))
       case BasicControlEvent.Failed() =>
         addNode(Node.Failure())
         predecessors = Set.empty
-      case BasicControlEvent.BeginSection(sec: Section) =>
-        addNode(Node.BlockStart(sec))
-        stack = Entry.Sec(sec) :: stack
+      case s@BasicControlEvent.BeginSection(sec: Section) =>
+        addNode(Node.BlockStart(sec)(s.label))
+        stack = Entry.Sec(sec)(s.label) :: stack
       case BasicControlEvent.EndSection() => stack match
-        case Entry.Sec(sec) :: stack_ =>
+        case (s@Entry.Sec(sec)) :: stack_ =>
           stack = stack_
           if (predecessors.isEmpty) {
             // nothing
           } else {
-            addNode(Node.BlockEnd(sec))
+            addNode(Node.BlockEnd(sec)(s.label))
           }
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 
@@ -151,7 +151,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         activeExc = Map.empty
 
   private enum Entry:
-    case Sec(s: Section)
+    case Sec(s: Section)(val label: String)
     case Try(outside: ActiveExc)
     case Catching(bodyExc: ActiveExc, outside: ActiveExc)
     case Handler(exc: Exc, tails: CNodes, bodyExc: ActiveExc, outside: ActiveExc, resultExc: ActiveExc)
@@ -161,18 +161,29 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
 
   private def addBlockPairEdges(edges: Set[CEdge]): Set[CEdge] =
     val openedSections = edges.flatMap(e => List(e._1, e._2)).flatMap {
-      case Node.BlockStart(sec) => List(sec)
+      case s@Node.BlockStart(sec) => List(s)
       case _ => List.empty
     }
 
-    val closedSections = openedSections.filter(sec =>
-      edges.exists(e => e.to == Node.BlockEnd(sec) || e.from == Node.BlockEnd(sec)))
+    val closedSections = openedSections.filter { s =>
+      val sec = s.sec
+      edges.exists {
+        case Edge(_, Node.BlockEnd(`sec`), _) => true
+        case Edge(Node.BlockEnd(`sec`), _, _) => true
+        case _ => false
+      }
+    }
 
-    val blockPairEdges: Set[CEdge] = closedSections.flatMap(sec =>
-      if edges.contains(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.CF)) then
+    val blockPairEdges: Set[CEdge] = closedSections.flatMap { s =>
+      val sec = s.sec
+      if (edges.exists {
+        case Edge(Node.BlockStart(`sec`), Node.BlockEnd(`sec`), _) => true
+        case _ => false
+      })
         List.empty
       else
-        List(Edge(Node.BlockStart(sec), Node.BlockEnd(sec), EdgeType.BlockPair)))
+        List(Edge(s, Node.BlockEnd(sec)(s.label), EdgeType.BlockPair))
+    }
 
     edges ++ blockPairEdges
 
