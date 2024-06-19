@@ -105,18 +105,21 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val input: UserInput[V]
   implicit val failure: Failure
 
+  class ElaborationEffect() extends sturdy.effect.Monotone
+  val elaboration = new ElaborationEffect()
+
   // Factory method for effect stacks
   def newEffectStack(effects: => Effect,
                      inEffects: PartialFunction[Any, Effect],
                      outEffects: PartialFunction[Any, Effect]): EffectStack =
     new EffectStack(effects, inEffects, outEffects)
 
-  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure), {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
-    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure)
+  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure, elaboration), {
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, elaboration)
+    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure, elaboration)
   }, {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
-    case _: FixIn.Eval => EffectList(callFrame, alloc, failure)
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, elaboration)
+    case _: FixIn.Eval => EffectList(callFrame, alloc, failure, elaboration)
   })
 
   given EffectStack = effectStack

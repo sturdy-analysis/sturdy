@@ -17,7 +17,7 @@ import sturdy.fix.{StackConfig, given}
 import sturdy.language.tip.TipFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.integer.*
+import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
@@ -28,7 +28,7 @@ import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 import sturdy.language.tip.analysis.IntervalAnalysis.controlEventLogger
 
-import sturdy.values.integer.{given Abstractly[Int,IntSign], given Combine[IntSign, ?], given EqOps[IntSign, Topped[Boolean]], given Finite[IntSign], given OrderingOps[IntSign, Topped[Boolean]], given PartialOrder[IntSign]}
+
 import sturdy.values.integer.SignIntegerOps
 
 object SignAnalysis extends Interpreter,
@@ -40,20 +40,25 @@ object SignAnalysis extends Interpreter,
 
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
+    println("jv")
+    println(jv)
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given IntegerOps[Int, IntSign] = new UnsafeSignIntegerOps[Int]()
-    override val intOps: IntegerOps[Int, Value] = implicitly
+    val gl = gradualLogger[IntSign]()
+    given GradualOps[IntSign, Value] with { val logger = gl}
+
+    override val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, VInt](_.asInt, Value.IntValue.apply)(using new UnsafeSignIntegerOps[Int, Value]())
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
+
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
@@ -66,9 +71,11 @@ object SignAnalysis extends Interpreter,
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
     override val fixpoint =
-      fix.log(controlEventLogger(this),
-        fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
-          parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
+      fix.log(gl,
+        fix.log(controlEventLogger(this),
+          fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
+            parameterSensitive(this, fix.iter.innermost(stackConfig))))
+      ).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
   class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):

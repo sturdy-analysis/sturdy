@@ -50,8 +50,10 @@ object RunConcreteInterpreter extends App:
     val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
     (interp.failure.fallible(interp.execute(program)), interp)
 
+
   val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI;
   val (res, interp) = runFile(Paths.get(uri))
   println(res)
   println(interp.callFrame.getState)
   println(interp.store.getState)
+

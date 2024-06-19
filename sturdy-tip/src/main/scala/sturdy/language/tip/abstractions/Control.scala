@@ -30,6 +30,27 @@ object Control:
     case a: Stm.Assign => Some(TipControlNode.Stm(a))
     case _ => None
 
+class GradualLogger[T,V] extends Logger[FixIn, FixOut[V]]:
+  var current: FixIn = _
+
+  override def enter(dom: FixIn): Unit =
+    current = dom
+    dom match
+      case FixIn.Eval(e) => println(s"Eval $e")
+      case FixIn.Run(s) => println(s"Run $s")
+      case FixIn.EnterFunction(f) => println(s"Enter $f")
+
+
+  override def exit(dom: FixIn, codom: TrySturdy[FixOut[V]]): Unit =
+    dom match
+      case FixIn.Eval(e) => println(s"Eval $e -> $codom")
+      case FixIn.Run(s) => println(s"Run $s -> $codom")
+      case FixIn.EnterFunction(f) => println(s"Enter $f -> $codom")
+
+  def insertCheck(uv: T, v: T): Unit = current match
+    case FixIn.Eval(e) => println(s"inserting check at ${e.label}")
+    case FixIn.Run(s) => println(s"inserting check at ${s.label}")
+    case FixIn.EnterFunction(f) => println(s"What to do here? $f")
 
 trait Control extends Interpreter:
   import Control.*
@@ -37,6 +58,9 @@ trait Control extends Interpreter:
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc, Fx])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     effects.addJoinObserver(observable)
     new Logger:
+      //var vurrent = _
+
+
       override def enter(dom: FixIn): Unit = dom match
         case FixIn.EnterFunction(f) => observable.triggerControlEvent(BasicControlEvent.BeginSection(f))
         case FixIn.Eval(c: Exp.Call) => observable.triggerControlEvent(BasicControlEvent.BeginSection(c))
@@ -67,6 +91,15 @@ trait Control extends Interpreter:
         case (FixIn.EnterFunction(f),_) => getOutNode(f)
       }
       (using effects, ObservableExcept.None)
+
+
+
+  def gradualLogger[T](): GradualLogger[T, Value] = new GradualLogger()
+
+
+
+
+
 
 enum TipControlNode extends ControlFlowGraph.Node:
   case Start

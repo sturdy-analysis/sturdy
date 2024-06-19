@@ -106,4 +106,26 @@ main(){
     }
   }
 
+  it should "correctly analyze print" in {
+    val sourceCode =
+      """
+      main(){
+        var x;
+        x = 1;
+        return x+1;
+      }
+      """.stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+      println(analysis.elaboration)
+      //println(s"Effect Stack: ${analysis.effectStack}")
+
+      1 should be(1)
+
+    }
+  }
+
 

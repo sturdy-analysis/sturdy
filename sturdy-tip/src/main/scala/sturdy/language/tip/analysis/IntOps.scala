@@ -2,11 +2,14 @@ package sturdy.language.tip.analysis
 
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.fix.Logger
+import sturdy.language.tip.abstractions.GradualLogger
+import sturdy.language.tip.{FixIn, FixOut}
 import sturdy.values.integer.IntSign.{Neg, NegOrZero, Pos, TopSign, Zero, ZeroOrPos}
 import sturdy.values.integer.{IntSign, IntegerDivisionByZero, IntegerOps}
 import sturdy.values.integer.SignIntegerOps
 import sturdy.values.PartialOrder
-import sturdy.values.integer.{given PartialOrder[IntSign]}
+import sturdy.values.integer.given PartialOrder[IntSign]
 
 
 object Foo{
@@ -30,11 +33,13 @@ object Foo{
   showAll(List(Neg, Zero))
 
 }
-trait GradualOps[T]:
+trait GradualOps[T, V]:
+  def logger: GradualLogger[T,V]
   def insertCheck(uv: T, sv: T)(using po: PartialOrder[T]): T =
     println(s"uv=${uv} | sv=${sv}")
     if(po.lt(uv, sv))
       println(s"insert a check to test if value is more precise than ${uv}")
+      logger.insertCheck(uv, sv)
     else if(!po.lteq(sv, uv))
       throw new Exception(s"unsafe value ${uv} is not related to safe value ${sv}")
     uv
@@ -43,14 +48,8 @@ trait GradualOps[T]:
     insertCheck(uv,sv)
 
 
-given GradualOps[IntSign] with {}
 
-class GradualSignIntegerOps[B](unsafe: IntegerOps[B, IntSign], safe: IntegerOps[B, IntSign])(using f: Failure, j: EffectStack, base: Integral[B], g: GradualOps[IntSign]) extends SignIntegerOps[B]:
-  override def add(v1: IntSign, v2: IntSign): IntSign =
-    g.insertCheck(unsafe.add(v1, v2), safe.add(v1,v2))
-
-
-class UnsafeSignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B], g: GradualOps[IntSign]) extends SafeSignIntegerOps[Int]:
+class UnsafeSignIntegerOps[B, V](using f: Failure, j: EffectStack, base: Integral[B], g: GradualOps[IntSign, V]) extends SafeSignIntegerOps[Int]:
   override def add(v1: IntSign, v2: IntSign): IntSign =
     g.withCheck(super.add(v1,v2)){
       (v1, v2) match
