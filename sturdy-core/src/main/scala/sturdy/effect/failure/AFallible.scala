@@ -19,10 +19,10 @@ enum AFallible[T]:
 
   def isSucceeding: Boolean = !isFailing
   
-  def get: T = this match
-    case Unfailing(t) => t
-    case MaybeFailing(t, _) => t
-    case _ => throw new MatchError(this)
+  def get: Option[T] = this match
+    case Unfailing(t) => Some(t)
+    case MaybeFailing(t, _) => Some(t)
+    case _ => None
   
   def failures: Powerset[(FailureKind, String)] = this match
     case Unfailing(_) => Powerset.empty
