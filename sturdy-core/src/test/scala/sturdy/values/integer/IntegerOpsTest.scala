@@ -9,40 +9,29 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.utils.GenInterval.{*, given}
+import sturdy.utils.{Bounded, TestIntervalOps}
 
 import math.Ordering.Implicits.infixOrderingOps
 import scala.util.Try
 
-
-trait TestingIntegerOps[L,N] extends IntegerOps[L,N]:
-  def integerLit(i: L): N
-  def interval(low: L, high: L): N
-  def shouldContain(n:N, m:L): Assertion
-  def shouldEqual(n:N, l:L, u:L): Assertion
-
 class IntegerOpsTest
   [
-    L: Ordering: Arbitrary: Choose,
+    L: Ordering: Arbitrary: Choose: Bounded,
     N
   ]
   (
-    minValue: L,
-    maxValue: L,
-    makeIntegerOps: => TestingIntegerOps[L, N]
+    makeIntegerOps: => (TestIntervalOps[L, N], IntegerOps[L, N])
   )
   (using
    integral: Integral[L],
    concreteIntegerOps: IntegerOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
-  def newIntegerOps: TestingIntegerOps[L, N] = makeIntegerOps
-
   test("integer literal") {
     forAll("n") { (n: L) =>
-      val integerOps = makeIntegerOps
-      integerOps.shouldContain(integerOps.integerLit(n), n)
+      val (ivOps, integerOps) = makeIntegerOps
+      ivOps.shouldContain(integerOps.integerLit(n), n)
     }
-
   }
 
   binOpTest(
@@ -95,22 +84,22 @@ class IntegerOpsTest
   )
 
   test("div([1,1],[-1,1])") {
-    val integerOps = makeIntegerOps
-    integerOps.shouldEqual(
+    val (ivOps,integerOps) = makeIntegerOps
+    ivOps.shouldEqual(
       integerOps.div(
-        integerOps.interval(integral.fromInt(1), integral.fromInt(1)),
-        integerOps.interval(integral.fromInt(-1), integral.fromInt(1))),
+        ivOps.interval(integral.fromInt(1), integral.fromInt(1)),
+        ivOps.interval(integral.fromInt(-1), integral.fromInt(1))),
       concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(-1)),
       concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1))
     )
   }
 
   test("div([-1,1],[-1,-1])") {
-    val integerOps = makeIntegerOps
-    integerOps.shouldEqual(
+    val (ivOps,integerOps) = makeIntegerOps
+    ivOps.shouldEqual(
       integerOps.div(
-        integerOps.interval(integral.fromInt(-1), integral.fromInt(1)),
-        integerOps.interval(integral.fromInt(-1), integral.fromInt(-1))),
+        ivOps.interval(integral.fromInt(-1), integral.fromInt(1)),
+        ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))),
       integral.fromInt(-1),integral.fromInt(1)
     )
   }
@@ -151,12 +140,12 @@ class IntegerOpsTest
   )
 
   test("shiftLeft([1,1], [-1,-1])") {
-    val integerOps = makeIntegerOps
+    val (ivOps,integerOps) = makeIntegerOps
     val result = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
-    integerOps.shouldEqual(
+    ivOps.shouldEqual(
       integerOps.shiftLeft(
-        integerOps.integerLit(integral.fromInt(1)),
-        integerOps.integerLit(integral.fromInt(-1))),
+        ivOps.constant(integral.fromInt(1)),
+        ivOps.constant(integral.fromInt(-1))),
       result, result
     )
   }
@@ -184,23 +173,26 @@ class IntegerOpsTest
   )
 
   test("countLeadingZeros([1,4])") {
-    val integerOps = makeIntegerOps
-    integerOps.shouldEqual(
+    val (ivOps,integerOps) = makeIntegerOps
+    ivOps.shouldEqual(
       integerOps.countLeadingZeros(
-        integerOps.interval(integral.fromInt(2), integral.fromInt(4))),
+        ivOps.interval(integral.fromInt(2), integral.fromInt(4))),
       concreteIntegerOps.countLeadingZeros(integral.fromInt(4)),
       concreteIntegerOps.countLeadingZeros(integral.fromInt(2))
     )
   }
 
-  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (L,L) => L) =
+  def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (L,L) => L) = {
     test(testName + " constant") {
-      forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
+      forAll(
+        (Gen.chooseNum[L](Bounded[L].minValue, Bounded[L].maxValue), "x"),
+        (Gen.chooseNum[L](Bounded[L].minValue, Bounded[L].maxValue), "y")
+      ) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            val integerOps = makeIntegerOps
-            integerOps.shouldContain(
-              testFun(integerOps, integerOps.integerLit(x), integerOps.integerLit(y)),
+            val (ivOps,integerOps) = makeIntegerOps
+            ivOps.shouldContain(
+              testFun(integerOps, ivOps.constant(x), ivOps.constant(y)),
               expectedFun(x, y)
             )
           }
@@ -208,27 +200,28 @@ class IntegerOpsTest
     }
 
     test(testName + " intervals") {
-      forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
+      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            val integerOps = makeIntegerOps
-            integerOps.shouldContain(
-              testFun(integerOps, integerOps.interval(x1, x2), integerOps.interval(y1, y2)),
+            val (ivOps,integerOps) = makeIntegerOps
+            ivOps.shouldContain(
+              testFun(integerOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)),
               expectedFun(x, y)
             )
           }
       }
     }
+  }
 
-  def unOpTest(testName: String, precondition: L => Boolean, testFun: (IntegerOps[L,N],N) => N, expectedFun: L => L) =
+  def unOpTest(testName: String, precondition: L => Boolean, testFun: (IntegerOps[L,N],N) => N, expectedFun: L => L) = {
     test(testName + " constant") {
-      forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
+      forAll((Gen.chooseNum[L](Bounded[L].minValue,Bounded[L].maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            val integerOps = makeIntegerOps
+            val (ivOps,integerOps) = makeIntegerOps
             val expected = expectedFun(x)
-            integerOps.shouldEqual(
-              testFun(integerOps, integerOps.integerLit(x)),
+            ivOps.shouldEqual(
+              testFun(integerOps, ivOps.constant(x)),
               expected, expected
             )
           }
@@ -236,22 +229,15 @@ class IntegerOpsTest
     }
 
     test(testName + " interval") {
-      forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
+      forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            val integerOps = makeIntegerOps
-            integerOps.shouldContain(
-              testFun(integerOps, integerOps.interval(x1, x2)),
+            val (ivOps,integerOps) = makeIntegerOps
+            ivOps.shouldContain(
+              testFun(integerOps, ivOps.interval(x1, x2)),
               expectedFun(x)
             )
           }
       }
     }
-
-//  def contain(expected_low: L, expected_high: L): Matcher[(L, L)] =
-//    (actual: (L, L)) =>
-//      MatchResult(
-//        actual._1 <= expected_low && expected_high <= actual._2,
-//        s"interval $actual does not contain ${(expected_low,expected_high)}",
-//        s"interval $actual contains ${(expected_low,expected_high)}"
-//      )
+  }

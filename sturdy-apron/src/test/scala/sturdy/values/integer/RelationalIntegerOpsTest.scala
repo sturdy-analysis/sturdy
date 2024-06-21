@@ -13,79 +13,85 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.*
-import sturdy.values.ordering.*
+import sturdy.values.config.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
+import sturdy.values.integer.{*, given}
+import sturdy.utils.{*, given}
 import sturdy.utils.TestTypes.{*, given}
 import sturdy.utils.TestContexts.{*, given}
+import sturdy.utils.TestIntervalOps
+import sturdy.values.convert.ConvertTest
 
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
+given RelationalIntTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Int, ApronExpr[VirtAddr, Type]] with
+  val intType: Type = Type.IntType(BaseType[Int])
+  override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
+  override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
+
+  override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Int): Assertion =
+    val iv = apronState.getInterval(expr)
+    if (Interval(m, m).isLeq(iv))
+      succeed
+    else
+      fail(s"$iv does not include $m")
+
+  override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Assertion =
+    val iv = apronState.getInterval(expr)
+    if (Interval(l, u).isEqual(iv))
+      succeed
+    else
+      fail(s"$iv does not include [$l,$u]")
+
+given RelationalLongTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Long, ApronExpr[VirtAddr, Type]] with
+  val longType: Type = Type.LongType(BaseType[Long])
+  override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
+  override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
+  override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Long): Assertion =
+    val iv = apronState.getInterval(expr)
+    val bm = BigInt(m).bigInteger
+    if (Interval(bm, bm).isLeq(iv))
+      succeed
+    else
+      fail(s"$iv does not include $m")
+  override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Assertion =
+    val iv = apronState.getInterval(expr)
+    val bl = BigInt(l).bigInteger
+    val bu = BigInt(u).bigInteger
+    if (Interval(bl, bu).isEqual(iv))
+      succeed
+    else
+      fail(s"$iv does not include [$l,$u]")
+
+def withApronState[T](f: (Manager, EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
+  given apronManager: Manager = new apron.Polka(true)
+  var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
+  given effectStack: EffectStack = new EffectStack(
+    RecencyClosure(apronState.recencyStore)
+  )
+  apronState = RecencyRelationalStore[Ctx, Type]
+  given ApronState[VirtAddr, Type] = apronState
+  f
+
 class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
-  minValue = Integer.MIN_VALUE,
-  maxValue = Integer.MAX_VALUE,
-  makeIntegerOps = {
-    given apronManager: Manager = new apron.Polka(true)
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    val intType: Type = Type.IntType(BaseType[Int])
-    new RelationalIntOps[VirtAddr, Type] with TestingIntegerOps[Int, ApronExpr[VirtAddr, Type]] {
-      override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
-      override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
-      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Int): Assertion =
-        val iv = this.apronState.getInterval(expr)
-        if(Interval(m,m).isLeq(iv))
-          succeed
-        else
-          fail(s"$iv does not include $m")
-      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Assertion =
-        val iv = this.apronState.getInterval(expr)
-        if(Interval(l, u).isEqual(iv))
-          succeed
-        else
-          fail(s"$iv does not include [$l,$u]")
-    }
-  }
+  withApronState(
+    (RelationalIntTestIntervalOps, new RelationalIntOps[VirtAddr, Type])
+  )
 )
+
+class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+  withApronState(
+    (new RelationalIntTestIntervalOps {}, new RelationalLongTestIntervalOps {}, RelationalConvertIntLong[VirtAddr,Type])
+  )
+)
+
 class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
-  minValue = Long.MinValue,
-  maxValue = Long.MaxValue,
-  makeIntegerOps = {
-    given apronManager: Manager = new apron.Polka(true)
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    val longType: Type = Type.LongType(BaseType[Long])
-    new RelationalLongOps[VirtAddr, Type] with TestingIntegerOps[Long, ApronExpr[VirtAddr, Type]] {
-      override def integerLit(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
-      override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
-      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Long): Assertion =
-        val iv = this.apronState.getInterval(expr)
-        val bm = BigInt(m).bigInteger
-        if(Interval(bm,bm).isLeq(iv))
-          succeed
-        else
-          fail(s"$iv does not include $m")
-      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Assertion =
-        val iv = this.apronState.getInterval(expr)
-        val bl = BigInt(l).bigInteger
-        val bu = BigInt(u).bigInteger
-        if(Interval(bl,bu).isEqual(iv))
-          succeed
-        else
-          fail(s"$iv does not include [$l,$u]")
-    }
-  }
+  withApronState(
+    (RelationalLongTestIntervalOps, new RelationalLongOps[VirtAddr, Type])
+  )
 )
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:

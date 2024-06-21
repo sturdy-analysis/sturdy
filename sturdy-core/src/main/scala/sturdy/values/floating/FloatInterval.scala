@@ -58,7 +58,7 @@ given WidenFloatInterval: Widen[FloatInterval] with
         Float.PositiveInfinity
     MaybeChanged(FloatInterval(low, high), v1)
 
-given FloatOps[Float, FloatInterval] = new IntervalFloatOps {}
+given FloatIntervalFloatOps: FloatOps[Float, FloatInterval] = new IntervalFloatOps {}
 trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
   def randomFloat(): FloatInterval = FloatInterval(0, 1)

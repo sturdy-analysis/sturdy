@@ -9,15 +9,10 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.utils.GenInterval.{*, given}
+import sturdy.utils.TestIntervalOps
 
 import math.Ordering.Implicits.infixOrderingOps
 
-
-trait TestingFloatOps[L,N] extends FloatOps[L,N]:
-  def floatLit(i: L): N
-  def interval(low: L, high: L): N
-  def shouldContain(n:N, m:L): Assertion
-  def shouldEqual(n:N, l:L, u:L): Assertion
 
 class FloatOpsTest
   [
@@ -27,7 +22,7 @@ class FloatOpsTest
   (
     minValue: L,
     maxValue: L,
-    makeFloatOps: => TestingFloatOps[L, N]
+    makeFloatOps: => TestIntervalOps[L,N] & FloatOps[L, N]
   )
   (using
    ord: Ordering[L],
@@ -35,12 +30,10 @@ class FloatOpsTest
    concreteFloatOps: FloatOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
-  def newFloatOps: TestingFloatOps[L, N] = makeFloatOps
-
   test("Float literal") {
     forAll("n") { (n: L) =>
       val floatOps = makeFloatOps
-      floatOps.shouldEqual(floatOps.floatLit(n), n, n)
+      floatOps.shouldEqual(floatOps.constant(n), n, n)
     }
 
   }
@@ -150,7 +143,7 @@ class FloatOpsTest
           whenever(precondition(x, y)) {
             val floatOps = makeFloatOps
             floatOps.shouldContain(
-              testFun(floatOps, floatOps.floatLit(x), floatOps.floatLit(y)),
+              testFun(floatOps, floatOps.constant(x), floatOps.constant(y)),
               expectedFun(x, y)
             )
           }
@@ -178,7 +171,7 @@ class FloatOpsTest
             val floatOps = makeFloatOps
             val expected = expectedFun(x)
             floatOps.shouldContain(
-              testFun(floatOps, floatOps.floatLit(x)),
+              testFun(floatOps, floatOps.constant(x)),
               expected
             )
           }

@@ -10,6 +10,7 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+import sturdy.values.config.{Bits, UnsupportedConfiguration}
 
 trait RelationalBaseIntegerOps
     [
@@ -216,7 +217,7 @@ trait RelationalBaseIntegerOps
   /**
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
-  private def toFixedSize(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def toFixedSize(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
 
     // Interval within range of the fixed-size integer
@@ -238,7 +239,7 @@ trait RelationalBaseIntegerOps
       toSigned(foldSecondRound)
     }
 
-  private def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
     if(iv.inf.sgn() >= 0) {
@@ -258,7 +259,7 @@ trait RelationalBaseIntegerOps
     }
 
 
-  private def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     val sMax = signedMaxValue(v._type)
     val uMax = unsignedMaxValue(v._type)
@@ -314,3 +315,9 @@ given RelationalLongOps
 
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
+
+given RelationalConvertIntLong[Addr: Ordering: ClassTag, Type: ApronType: Join](using convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+  case (from, conf@Bits.Signed)   => cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
+  case (from, conf@Bits.Unsigned) => ???
+  case (_,    conf@Bits.Raw)      => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+}

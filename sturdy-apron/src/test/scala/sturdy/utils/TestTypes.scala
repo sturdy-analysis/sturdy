@@ -3,6 +3,8 @@ package sturdy.utils
 import sturdy.apron.{*, given}
 import sturdy.effect.failure.{*, given}
 import sturdy.values.booleans.{BooleanOps, LiftedBooleanOps}
+import sturdy.values.config.Bits
+import sturdy.values.convert.LiftedConvert
 import sturdy.values.floating.{FloatOps, LiftedFloatOps}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{*, given}
@@ -100,6 +102,7 @@ object TestTypes:
   given OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
   given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
   given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = Type.BoolType(_))
+  given ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = Type.LongType(_))
 
   given ApronType[Type] with
     extension (tpe: Type)

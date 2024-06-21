@@ -5,6 +5,7 @@ import org.scalatest.Assertions.{fail, succeed}
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
+import sturdy.utils.TestIntervalOps
 import sturdy.values.floating.{FloatInterval, IntervalFloatOps}
 import sturdy.values.{Finite, Top}
 given Ordering[Float] = scala.math.Ordering.Float.TotalOrdering
@@ -12,10 +13,8 @@ given failure: Failure = new CollectedFailures[FailureKind]
 given Finite[FailureKind] with {}
 given effectState: EffectStack = EffectStack(failure)
 
-class FloatIntervalTestingIntegerOps
-  extends IntervalFloatOps
-    with TestingFloatOps[Float, FloatInterval]:
-  override def floatLit(i: Float): FloatInterval = FloatInterval(i,i)
+class FloatTestIntervalOps extends TestIntervalOps[Float, FloatInterval]:
+  override def constant(i: Float): FloatInterval = FloatInterval(i,i)
   override def interval(low: Float, high: Float) = FloatInterval(low,high)
 
   override def shouldContain(n: FloatInterval, m: Float): Assertion =
@@ -34,7 +33,7 @@ class FloatIntervalTestingIntegerOps
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
   minValue = Float.MinValue,
   maxValue = Float.MaxValue,
-  makeFloatOps = new FloatIntervalTestingIntegerOps
+  makeFloatOps = new FloatTestIntervalOps with IntervalFloatOps {}
 )(using
   org.scalacheck.Arbitrary.arbFloat,
   org.scalacheck.Gen.Choose.chooseFloat,
