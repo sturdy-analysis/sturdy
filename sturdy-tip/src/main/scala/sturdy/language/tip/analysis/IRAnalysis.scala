@@ -42,12 +42,26 @@ object IRAnalysis extends Interpreter,
 
     given IRBooleanBranching[R](using Join[R]): BooleanBranching[IR, R] with
       override def boolBranch(cond: IR, thn: => R, els: => R): R =
-        val r = joinComputations(thn) {
+        val vars = callFrame.getState
+        var fvars: Option[List[Value]] = None
+        var gvars: Option[List[Value]] = None
+        val r = joinComputations {
+          val rThn = thn
+          fvars = Some(callFrame.getState)
+          rThn
+        } {
           val rEls = els
           currentCond = Some(cond)
+          gvars = Some(callFrame.getState)
           rEls
         }
         currentCond = None
+        println(s"boolBranch($cond)")
+        println(s"  vars before = $vars")
+        println(s"  vars then   = $fvars")
+        println(s"  vars else   = $gvars")
+        println(s"  vars after  = ${callFrame.getState}")
+
         r
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
