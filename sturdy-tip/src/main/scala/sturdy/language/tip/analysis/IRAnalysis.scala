@@ -9,7 +9,7 @@ import sturdy.effect.failure.{CollectedFailures, Failure, ObservableFailure}
 import sturdy.effect.print.{Print, PrintBound, given}
 import sturdy.effect.{EffectStack, store, given}
 import sturdy.effect.store.{*, given}
-import sturdy.effect.userinput.{AUserInput, AUserInputFun}
+import sturdy.effect.userinput.{AUserInput, AUserInputFun, WithNamedUserInput}
 import sturdy.fix.StackConfig
 import sturdy.ir.{*, given}
 import sturdy.language.tip.abstractions.*
@@ -83,11 +83,44 @@ object IRAnalysis extends Interpreter,
       PowersetAddr(References.allocationSiteAddr(site))
     )
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInputFun[Value] = new AUserInputFun(Value.IntValue(IR.Unknonwn()))
+    override val input: AUserInputFun[Value] = new AUserInputFun(Value.IntValue(IR.Unknonwn())) with WithNamedUserInput(name => Value.IntValue(IR.External(name)))
 
     var bounds: Set[Int] = Set()
-    given Widen[VInt] = new Combine[VInt, Widening.Yes]:
-      override def apply(v1: IR, v2: IR): MaybeChanged[IR] = ???
+    given Widen[IR] = new Combine[VInt, Widening.Yes]:
+      var count = 0
+      override def apply(v1: IR, v2: IR): MaybeChanged[IR] = (v1, v2) match
+        case (feedback@IR.Feedback(init, Some(IR.Join(feedback2, other2))), other) if feedback == feedback2 =>
+          println(s"Widening, stable feedback loop ?")
+          println(s"  v1 = $v1")
+          println(s"  v2 = $other")
+          println(s"  other2 = $other2")
+          println(sturdy.ir.Export.toGraphViz(feedback))
+          println(sturdy.ir.Export.toGraphViz(other))
+
+          if (other == other2 || true) {
+            Unchanged(feedback)
+          } else
+            ???
+        case (feedback@IR.Feedback(init, None), other) =>
+          println(s"Widening, make feedback loop")
+          println(s"  v1 = $v1")
+          println(s"  v2 = $v2")
+
+          feedback.loop = Some(IR.Join(feedback, other))
+
+          println(sturdy.ir.Export.toGraphViz(feedback))
+          Changed(feedback)
+        case _ =>
+          println(s"Widening, prepare feedback loop ?")
+          println(s"  v1 = $v1")
+          println(s"  v2 = $v2")
+          val feedback = IR.Feedback(IR.Join(v1, v2), None)
+          println(sturdy.ir.Export.toGraphViz(feedback))
+          if (count > 3)
+            ???
+          count += 1
+          Changed(feedback)
+
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =

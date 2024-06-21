@@ -6,7 +6,7 @@ import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.ConcreteCyclicEnvironment
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.failure.Failure
-import sturdy.effect.userinput.CUserInput
+import sturdy.effect.userinput.{CUserInput, ImplicitlyNamedUserInput}
 import sturdy.fix
 import sturdy.values.booleans.{BooleanBranching, given}
 import sturdy.values.closures.{Closure, ClosureOps, given}
@@ -38,7 +38,7 @@ object ConcreteInterpreter extends Interpreter:
     override val branchOps: BooleanBranching[Value, Value] = implicitly
     override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
-    override val input: CUserInput[Value] = new CUserInput(nextInput)
+    override val input: CUserInput[Value] = new CUserInput(nextInput) with ImplicitlyNamedUserInput[Value]
     override val environment = new ConcreteCyclicEnvironment[String, Value](Map.empty)
 
     override val fixpoint = new fix.ConcreteFixpoint[Exp, Value]

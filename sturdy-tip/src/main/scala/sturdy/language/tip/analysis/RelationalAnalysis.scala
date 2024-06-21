@@ -15,7 +15,7 @@ import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.{PrintBound, PrintBoundSerializable, Serializer, given}
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
-import sturdy.effect.userinput.{AUserInput, AUserInputFun}
+import sturdy.effect.userinput.{AUserInput, AUserInputFun, ImplicitlyNamedUserInput}
 import sturdy.fix
 import sturdy.fix.{Logger, StackConfig, State, context}
 import sturdy.language.tip
@@ -179,7 +179,7 @@ object RelationalAnalysis extends Interpreter,
     }
 
     override val print: PrintBoundSerializable[Value,Value] = new PrintBoundSerializable[Value,Value]
-    override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt))
+    override val input: AUserInputFun[Value] = new AUserInputFun[RelationalAnalysis.Value](Value.IntValue(topInt)) with ImplicitlyNamedUserInput[Value]
 
     override def newEffectStack(effects: => Effect, inEffects: PartialFunction[Any, Effect], outEffects: PartialFunction[Any, Effect]): EffectStack =
       new EffectStack(

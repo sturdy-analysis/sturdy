@@ -6,7 +6,7 @@ import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
-import sturdy.effect.userinput.CUserInput
+import sturdy.effect.userinput.{CUserInput, ImplicitlyNamedUserInput}
 import sturdy.fix
 import sturdy.fix.{Combinator, Contextual}
 import sturdy.language.tip.Function
@@ -72,7 +72,7 @@ object ConcreteInterpreter extends Interpreter:
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement
     override val print: CPrint[Value] = new CPrint
-    override val input: CUserInput[Value] = new CUserInput(nextInput)
+    override val input: CUserInput[Value] = new CUserInput(nextInput) with ImplicitlyNamedUserInput[Value]
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]] =

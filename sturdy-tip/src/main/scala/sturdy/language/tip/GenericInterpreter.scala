@@ -226,6 +226,6 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   def execute(p: Program): V = external {
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
-    val args = main.params.map(_ => Exp.Input())
-    eval(Exp.Call(Exp.Var("main"), args))
+    val args = main.params.map(input.readField)
+    call(Exp.Call(Exp.Var("main"), Seq()))(main, args)
   }
