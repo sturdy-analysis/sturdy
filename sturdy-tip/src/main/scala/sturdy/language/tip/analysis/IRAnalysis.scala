@@ -1,15 +1,15 @@
 package sturdy.language.tip.analysis
 
 import sturdy.control.ControlObservable
-import sturdy.data.{MayJoin, WithJoin, given}
+import sturdy.data.{MayJoin, WithJoin, joinComputations, given}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.ObservableExcept
 import sturdy.effect.failure.{CollectedFailures, Failure, ObservableFailure}
 import sturdy.effect.print.{Print, PrintBound, given}
-import sturdy.effect.{store, given}
+import sturdy.effect.{EffectStack, store, given}
 import sturdy.effect.store.{*, given}
-import sturdy.effect.userinput.AUserInput
+import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix.StackConfig
 import sturdy.ir.{*, given}
 import sturdy.language.tip.abstractions.*
@@ -29,8 +29,6 @@ object IRAnalysis extends Interpreter,
 
   override type J[A] = WithJoin[A]
 
-  given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
-  
   def valueToIR(v: Value): IR = v match
     case Value.TopValue => IR.Unknonwn()
     case Value.BoolValue(b) => b
@@ -40,7 +38,24 @@ object IRAnalysis extends Interpreter,
     case Value.RecValue(rec) => rec
 
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+    private var currentCond: Option[IR] = None
+
+    given IRBooleanBranching[R](using Join[R]): BooleanBranching[IR, R] with
+      override def boolBranch(cond: IR, thn: => R, els: => R): R =
+        val r = joinComputations(thn) {
+          val rEls = els
+          currentCond = Some(cond)
+          rEls
+        }
+        currentCond = None
+        r
+    given Join[IR] = (v1: IR, v2: IR) => currentCond match
+      case None => Changed(IR.Join(v1, v2))
+      case Some(cond) => Changed(IR.Select(cond, v1, v2))
+
     override def jv: WithJoin[Value] = implicitly
+    given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
+
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
@@ -59,6 +74,7 @@ object IRAnalysis extends Interpreter,
       override def makeRecord(fields: Seq[(Field, IRAnalysis.Value)]): IRAnalysis.Value = ???
       override def lookupRecordField(rec: IRAnalysis.Value, field: Field): IRAnalysis.Value = ???
       override def updateRecordField(rec: IRAnalysis.Value, field: Field, newval: IRAnalysis.Value): IRAnalysis.Value = ???
+
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
@@ -67,7 +83,7 @@ object IRAnalysis extends Interpreter,
       PowersetAddr(References.allocationSiteAddr(site))
     )
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IR.Unknonwn()))
+    override val input: AUserInputFun[Value] = new AUserInputFun(Value.IntValue(IR.Unknonwn()))
 
     var bounds: Set[Int] = Set()
     given Widen[VInt] = new Combine[VInt, Widening.Yes]:
