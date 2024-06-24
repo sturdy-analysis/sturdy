@@ -9,7 +9,7 @@ import sturdy.values.objects.{Object, ObjectOps}
 
 class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, TypeRep, J[_] <: MayJoin[_]]
   (bytecodeOps: BytecodeOps[Idx, V, ReferenceType],
-   objectOps: ObjectOps[String, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, String], V, _, Method, String, MethodDescriptor, V, J],
+   objectOps: ObjectOps[String, OID, V, ClassFile, ObjRep, V, _, Method, String, MethodDescriptor, V, J],
    arrayOps: ArrayOps[AID, V, V, V, ArrayType, _, J]):
 
 

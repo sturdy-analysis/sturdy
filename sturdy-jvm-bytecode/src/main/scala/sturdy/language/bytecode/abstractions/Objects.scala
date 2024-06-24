@@ -57,6 +57,7 @@ trait TypeObjects extends Interpreter:
       // super type of v1 v2
       val lcSuperType = project.classHierarchy.joinObjectTypes(v1.thisType, v2.thisType, true).head
       MaybeChanged.Changed(project.classFile(lcSuperType).get)
+      
   given typeObjects(using project: Project[URL], f: Failure): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
       cfs
@@ -79,7 +80,7 @@ trait TypeObjects extends Interpreter:
     override def setField(obj: ObjRep, name: String, v: Value): JOptionA[Unit] =
       JOptionA.noneSome(())
 
-    override def invokeFunctionCorrect(obj: ClassFile, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => JOption[MayJoin.WithJoin, Value]): JOption[MayJoin.WithJoin, Value] =
+    override def invokeFunctionCorrect(obj: ClassFile, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => Value): Value =
       val allSubMths = project.classHierarchy.allSubclassTypes(obj.thisType, true)
         .map(obj => project.classFile(obj))
         .map(cfs => cfs.get.findMethod(mthName, sig).get).toSeq

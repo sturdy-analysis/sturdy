@@ -132,7 +132,7 @@ object ConcreteInterpreter extends Interpreter:
         JOptionC.some(())
       }
 
-    override def invokeFunctionCorrect(obj: Object[OID, ClassFile, FieldAddr, FieldName], mthName: String, sig: MthSig, args: Seq[V])(invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Mth, Seq[V]) => JOption[NoJoin, V]): JOption[NoJoin, V] =
+    override def invokeFunctionCorrect(obj: Object[OID, ClassFile, FieldAddr, FieldName], mthName: String, sig: MthSig, args: Seq[V])(invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Mth, Seq[V]) => V): V =
       val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
       invoke(obj, mth, args)
 

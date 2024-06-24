@@ -54,7 +54,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, Object[ObjAddr, ClassFile, FieldAddr, String], V, FieldInitSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, ObjRep, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[ArrayAddr, V, V, V, ArrayType, ArrayElemInitSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -125,8 +125,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           case inst: LoadFloat =>
             stack.push(num.evalNumericOp(inst))
           case inst: LoadClass =>
-            val obj = createLibraryObj(inst.value.mostPreciseObjectType, site)
-            val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
+            //val obj = createLibraryObj(inst.value.mostPreciseObjectType, site)
+            //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
             val test = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
             stack.push(test)
 
@@ -559,10 +559,10 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val obj = stack.popOrAbort()
 
             stack.push(obj)
-            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
-            //val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
-            if (!mth.descriptor.returnType.isVoidType){
+            //val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+            //val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
+            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
+            if (!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
             }
 
@@ -581,11 +581,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           case inst: INVOKEINTERFACE =>
             val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
-            val obj = stack.popOrAbort()
-            val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
+            val obj = stack.peekOrAbort()
+            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
+            if(!inst.methodDescriptor.returnType.isVoidType){
+              stack.push(ret)
+            }
+            /*val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             stack.push(obj)
             stack.pushN(args)
-            invoke(mth, false)
+            invoke(mth, false)*/
 
           case inst: INVOKEDYNAMIC =>
             val test = inst.bootstrapMethod
@@ -802,7 +806,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       array
     }
 
-  def findMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor): Method =
+  /*def findMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor): Method =
     if (obj.cls.thisType != ObjectType("java/lang/Object")) {
       val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
       obj.cls.findMethod(name, sig)
@@ -833,9 +837,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         cfs.findMethod(name, sig)
           .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
       }
-    }
+    }*/
 
-  def invokeMethodOnObject(obj: Object[ObjAddr, ClassFile, FieldAddr, String], mth: Method, args: Seq[V])(using Fixed): V =
+  def invokeMethodOnObject(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     val objVal = stack.popOrAbort()
 
@@ -867,9 +871,10 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       }
 
       //Temporary stuff
-      var returnValue = i32ops.integerLit(-1)
-      if(!mth.returnType.isVoidType){
-        returnValue = stack.popOrAbort()
+      val returnValue = if(!mth.returnType.isVoidType){
+        stack.popOrAbort()
+      } else {
+        i32ops.integerLit(-1)
       }
       stack.pushN(remainingOperands)
 
