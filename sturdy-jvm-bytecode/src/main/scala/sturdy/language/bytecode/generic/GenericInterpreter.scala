@@ -170,25 +170,35 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
       // load Local variable
       case x if (21 <= x && x <= 45) =>
-        stack.push(evalLocalLoad(inst))
+        inst match
+          case inst: LoadLocalVariableInstruction =>
+            val v = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+            stack.push(v)
 
       //load from array
       case x if (46 <= x && x <= 53) =>
         val idx = stack.popOrAbort()
         val array = stack.popOrAbort()
-        stack.push(evalArrayLoad(inst, array, idx))
+        val v = arrayOps.getVal(array, idx).getOrElse(
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ObjectType("java/lang/IndexOutOfBoundsException"), site)))
+        )
+        stack.push(v)
 
       // store local variable
       case x if (54 <= x && x <= 78) =>
-        val v1 = stack.popOrAbort()
-        evalLocalStore(inst, v1)
+        inst match
+          case inst: StoreLocalVariableInstruction =>
+            val v1 = stack.popOrAbort()
+            frame.setLocalOrElse(inst.lvIndex, v1, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
       // store in array
       case x if (79 <= x && x <= 86) =>
         val v = stack.popOrAbort()
         val idx = stack.popOrAbort()
         val array = stack.popOrAbort()
-        evalArrayStore(inst, array, idx, v)
+        arrayOps.setVal(array, idx, v).getOrElse(
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ObjectType("java/lang/IndexOutOfBoundsException"), site)))
+        )
 
       // Manip stack
       case x if (87 <= x && x <= 95) =>
@@ -769,6 +779,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), field.name)))
     val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
+
+  /*
   def evalLocalLoad(inst: Instruction): V = inst match
     case inst: LoadLocalVariableInstruction =>
       frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
@@ -779,11 +791,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
   def evalArrayLoad(inst: Instruction, array: V, idx: V): V = inst match
     case inst: ArrayLoadInstruction =>
-      arrayOps.getVal(array, idx).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
+      arrayOps.getVal(array, idx).getOrElse(
+        except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException")))
+      )
 
   def evalArrayStore(inst: Instruction, array: V, idx: V, v: V): Unit = inst match
     case inst: ArrayStoreInstruction =>
-      arrayOps.setVal(array, idx, v).getOrElse(except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException"))))
+      arrayOps.setVal(array, idx, v).getOrElse(
+        except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException")))
+      )*/
 
   def createArray(size: V, compType: ArrayType, site: InstructionSite): V =
     val arrayVals = arrayOps.initArray(size)
