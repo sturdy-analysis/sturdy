@@ -4,8 +4,8 @@ import sturdy.apron.{*, given}
 import sturdy.effect.failure.{*, given}
 import sturdy.values.booleans.{BooleanOps, LiftedBooleanOps}
 import sturdy.values.config.Bits
-import sturdy.values.convert.LiftedConvert
-import sturdy.values.floating.{FloatOps, LiftedFloatOps}
+import sturdy.values.convert.{*,given}
+import sturdy.values.floating.{*,given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
@@ -52,7 +52,7 @@ object TestTypes:
     override def toString: String =
       this match
         case IntType(_) => "int"
-        case LongType(_) => "int"
+        case LongType(_) => "long"
         case FloatType(_) => "float"
         case DoubleType(_) => "doulbe"
         case BoolType(_) => "boolean"
@@ -103,6 +103,7 @@ object TestTypes:
   given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
   given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = Type.BoolType(_))
   given ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = Type.LongType(_))
+  given ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = Type.IntType(_))
 
   given ApronType[Type] with
     extension (tpe: Type)

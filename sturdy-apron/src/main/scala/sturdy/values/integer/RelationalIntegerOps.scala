@@ -25,13 +25,13 @@ trait RelationalBaseIntegerOps
     ) extends IntegerOps[L, ApronExpr[Addr,Type]]:
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    toFixedSize(intAdd(v1, v2))
+    foldInteger(intAdd(v1, v2))
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    toFixedSize(intSub(v1, v2))
+    foldInteger(intSub(v1, v2))
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    toFixedSize(intMul(v1, v2))
+    foldInteger(intMul(v1, v2))
 
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -78,9 +78,9 @@ trait RelationalBaseIntegerOps
     if(iv.inf.sgn() >= 0) {
       v
     } else if(iv.sup.sgn() < 0) {
-      toFixedSize(intNegate(v))
+      foldInteger(intNegate(v))
     } else {
-      toFixedSize(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
+      foldInteger(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
     }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -100,7 +100,7 @@ trait RelationalBaseIntegerOps
         addr(result, resultType)
       }
     }
-    toFixedSize(res)
+    foldInteger(res)
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(div(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
@@ -143,7 +143,7 @@ trait RelationalBaseIntegerOps
 //    }
 
   override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    toFixedSize(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(32, shift._type)))))
+    foldInteger(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(32, shift._type)))))
 
   override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intDiv(v, intPow(intLit(2, v._type), modulo(shift, intLit(32, shift._type))))
@@ -193,50 +193,64 @@ trait RelationalBaseIntegerOps
   override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
 
-  private def signedMinValue(tpe: Type): BigInt =
+  def signedMinValue(tpe: Type): BigInt =
     -BigInt(2).pow(tpe.byteSize * 8 - 1)
 
-  private def signedMaxValue(tpe: Type): BigInt =
+  def signedMaxValue(tpe: Type): BigInt =
     BigInt(2).pow(tpe.byteSize * 8 - 1) - 1
 
-  private def unsignedMinValue(tpe: Type): BigInt =
+  def unsignedMinValue(tpe: Type): BigInt =
     0
 
-  private def unsignedMaxValue(tpe: Type): BigInt =
+  def unsignedMaxValue(tpe: Type): BigInt =
     BigInt(2).pow(tpe.byteSize * 8)
 
-  private def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intSub(v, bigIntLit(signedMinValue(v._type), v._type))
 
-  private def toSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def toSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intAdd(v, bigIntLit(signedMinValue(v._type), v._type))
 
   val infty = new MpqScalar();
   infty.setInfty(1)
 
+  def castTo(v: ApronExpr[Addr,Type], toType: Type): ApronExpr[Addr, Type] =
+    val fromType = v._type
+    if(fromType == toType)
+      v
+    else
+      cast(v, RoundingType.Int, RoundingDir.Zero, toType)
+
   /**
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
-  def toFixedSize(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def foldInteger(v: ApronExpr[Addr, Type]) =
+    foldIntegerTo[L](v, v._type)(using this)
+
+  /**
+   * Maps a whole number to a fixed-size integer by folding over- and underflows.
+   */
+  def foldIntegerTo[To](v: ApronExpr[Addr, Type], toType: Type)(using toIntegerOps: RelationalBaseIntegerOps[To,Addr,Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
+    val fromType = v._type
 
     // Interval within range of the fixed-size integer
-    if (iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
-      v
+    if (iv.isLeq(Interval(signedMinValue(toType).bigInteger, signedMaxValue(toType).bigInteger))) {
+      castTo(v, toType)
 
       // No underflow
-    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
-      toSigned(intMod(toUnsigned(v), uMax))
+    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(toType).bigInteger), infty))) {
+      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
+      toIntegerOps.toSigned(castTo(intMod(this.toUnsigned(v), uMax), toType))
 
       // Over and underflow
     } else {
       // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
       // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
-      val foldFirstRound = intMod(toUnsigned(v), uMax)
+      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
+      val foldFirstRound = intMod(this.toUnsigned(v), uMax)
       val foldSecondRound = intMod(intAdd(foldFirstRound, uMax), uMax)
-      toSigned(foldSecondRound)
+      toIntegerOps.toSigned(castTo(foldSecondRound, toType))
     }
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -316,8 +330,11 @@ given RelationalLongOps
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
 
-given RelationalConvertIntLong[Addr: Ordering: ClassTag, Type: ApronType: Join](using convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+given RelationalConvertIntLong[Addr: Ordering: ClassTag, Type: ApronType: Join](using intOps: RelationalIntOps[Addr,Type], convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
   case (from, conf@Bits.Signed)   => cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
-  case (from, conf@Bits.Unsigned) => ???
+  case (from, conf@Bits.Unsigned) => cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
   case (_,    conf@Bits.Raw)      => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 }
+
+given RelationalConvertLongInt[Addr: Ordering: ClassTag, Type: ApronType: Join](using intOps: RelationalIntOps[Addr,Type], longOps: RelationalLongOps[Addr,Type], convertType: ConvertLongInt[Type, Type]): ConvertLongInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
+  (from, conf) => cast(intOps.foldInteger(from), RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))

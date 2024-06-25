@@ -20,17 +20,11 @@ given NumericIntervalTestIntervalOps[I: Ordering]: TestIntervalOps[I, NumericInt
 
   override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low, high)
 
-  override def shouldContain(n: NumericInterval[I], m: I): Assertion =
-    if(n.low <= m && m <= n.high)
-      succeed
-    else
-      fail(s"$n did not contain $m")
+  override def contains(n: NumericInterval[I], m: I): Boolean =
+    n.low <= m && m <= n.high
 
-  override def shouldEqual(n: NumericInterval[I], l: I, u: I): Assertion =
-    if (n.low == l && n.high == u)
-      succeed
-    else
-      fail(s"$n did not equal [$l,$u]")
+  override def equals(n: NumericInterval[I], l: I, u: I): Boolean =
+    n.low == l && n.high == u
 
 class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
   (NumericIntervalTestIntervalOps[Int], new NumericIntervalIntegerOps[Int](20))

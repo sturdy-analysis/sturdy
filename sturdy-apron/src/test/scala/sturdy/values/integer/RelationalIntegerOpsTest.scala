@@ -32,39 +32,27 @@ given RelationalIntTestIntervalOps(using apronState: ApronState[VirtAddr, Type])
   override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
   override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
 
-  override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Int): Assertion =
+  override def contains(expr: ApronExpr[VirtAddr, Type], m: Int): Boolean =
     val iv = apronState.getInterval(expr)
-    if (Interval(m, m).isLeq(iv))
-      succeed
-    else
-      fail(s"$iv does not include $m")
+    Interval(m, m).isLeq(iv)
 
-  override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Assertion =
+  override def equals(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Boolean =
     val iv = apronState.getInterval(expr)
-    if (Interval(l, u).isEqual(iv))
-      succeed
-    else
-      fail(s"$iv does not include [$l,$u]")
+    Interval(l, u).isEqual(iv)
 
 given RelationalLongTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Long, ApronExpr[VirtAddr, Type]] with
   val longType: Type = Type.LongType(BaseType[Long])
   override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
   override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
-  override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Long): Assertion =
+  override def contains(expr: ApronExpr[VirtAddr, Type], m: Long): Boolean =
     val iv = apronState.getInterval(expr)
     val bm = BigInt(m).bigInteger
-    if (Interval(bm, bm).isLeq(iv))
-      succeed
-    else
-      fail(s"$iv does not include $m")
-  override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Assertion =
+    Interval(bm, bm).isLeq(iv)
+  override def equals(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Boolean =
     val iv = apronState.getInterval(expr)
     val bl = BigInt(l).bigInteger
     val bu = BigInt(u).bigInteger
-    if (Interval(bl, bu).isEqual(iv))
-      succeed
-    else
-      fail(s"$iv does not include [$l,$u]")
+    Interval(bl, bu).isEqual(iv)
 
 def withApronState[T](f: (Manager, EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
   given apronManager: Manager = new apron.Polka(true)
@@ -79,12 +67,6 @@ def withApronState[T](f: (Manager, EffectStack, ApronState[VirtAddr,Type]) ?=> T
 class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
   withApronState(
     (RelationalIntTestIntervalOps, new RelationalIntOps[VirtAddr, Type])
-  )
-)
-
-class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
-  withApronState(
-    (new RelationalIntTestIntervalOps {}, new RelationalLongTestIntervalOps {}, RelationalConvertIntLong[VirtAddr,Type])
   )
 )
 

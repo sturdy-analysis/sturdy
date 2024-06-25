@@ -2,6 +2,7 @@ package sturdy.values.floating
 
 import org.scalacheck.Gen.Choose
 import org.scalacheck.{Arbitrary, Gen, Shrink}
+import org.scalactic.Equality
 import org.scalatest.Assertion
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
@@ -9,7 +10,7 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.utils.GenInterval.{*, given}
-import sturdy.utils.TestIntervalOps
+import sturdy.utils.{*, given}
 
 import math.Ordering.Implicits.infixOrderingOps
 
@@ -32,8 +33,9 @@ class FloatOpsTest
 
   test("Float literal") {
     forAll("n") { (n: L) =>
-      val floatOps = makeFloatOps
-      floatOps.shouldEqual(floatOps.constant(n), n, n)
+      implicit val floatOps: TestIntervalOps[L, N] & FloatOps[L, N] = makeFloatOps
+      given Equality[N] = implicitly
+      floatOps.floatingLit(n) should equal((n,n))
     }
 
   }
@@ -141,11 +143,8 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            val floatOps = makeFloatOps
-            floatOps.shouldContain(
-              testFun(floatOps, floatOps.constant(x), floatOps.constant(y)),
-              expectedFun(x, y)
-            )
+            implicit val floatOps = makeFloatOps
+            testFun(floatOps, floatOps.constant(x), floatOps.constant(y)) should contain (expectedFun(x, y))
           }
       }
     }
@@ -154,11 +153,8 @@ class FloatOpsTest
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            val floatOps = makeFloatOps
-            floatOps.shouldContain(
-              testFun(floatOps, floatOps.interval(x1, x2), floatOps.interval(y1, y2)),
-              expectedFun(x, y)
-            )
+            implicit val floatOps = makeFloatOps
+            testFun(floatOps, floatOps.interval(x1, x2), floatOps.interval(y1, y2)) should contain (expectedFun(x, y))
           }
       }
     }
@@ -168,12 +164,8 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            val floatOps = makeFloatOps
-            val expected = expectedFun(x)
-            floatOps.shouldContain(
-              testFun(floatOps, floatOps.constant(x)),
-              expected
-            )
+            implicit val floatOps = makeFloatOps
+            testFun(floatOps, floatOps.constant(x)) should contain (expectedFun(x))
           }
       }
     }
@@ -182,22 +174,8 @@ class FloatOpsTest
       forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            val floatOps = makeFloatOps
-            floatOps.shouldContain(
-              testFun(floatOps, floatOps.interval(x1, x2)),
-              expectedFun(x)
-            )
+            implicit val floatOps = makeFloatOps
+            testFun(floatOps, floatOps.interval(x1, x2)) should contain (expectedFun(x))
           }
       }
     }
-
-  def contain(expected: L): Matcher[(L,L)] =
-    contain(expected,expected)
-
-  def contain(expected_low: L, expected_high: L): Matcher[(L, L)] =
-    (actual: (L, L)) =>
-      MatchResult(
-        ord.lteq(actual._1, expected_low) && ord.lteq(expected_high, actual._2),
-        s"interval $actual does not contain ${(expected_low,expected_high)}",
-        s"interval $actual contains ${(expected_low,expected_high)}"
-      )

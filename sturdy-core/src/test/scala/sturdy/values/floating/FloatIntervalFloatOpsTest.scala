@@ -17,17 +17,11 @@ class FloatTestIntervalOps extends TestIntervalOps[Float, FloatInterval]:
   override def constant(i: Float): FloatInterval = FloatInterval(i,i)
   override def interval(low: Float, high: Float) = FloatInterval(low,high)
 
-  override def shouldContain(n: FloatInterval, m: Float): Assertion =
-    if(n.l <= m && m <= n.h)
-      succeed
-    else
-      fail(s"$n does not contain $m")
+  override def contains(n: FloatInterval, m: Float): Boolean =
+    n.l <= m && m <= n.h
 
-  override def shouldEqual(n: FloatInterval, l: Float, u: Float): Assertion =
-    if (n.l == l && n.h == u)
-      succeed
-    else
-      fail(s"$n does not equal [$l,$u]")
+  override def equals(n: FloatInterval, l: Float, u: Float): Boolean =
+    n.l == l && n.h == u
 
 
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
