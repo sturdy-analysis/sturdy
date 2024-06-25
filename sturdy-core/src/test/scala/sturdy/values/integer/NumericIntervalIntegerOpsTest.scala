@@ -1,5 +1,6 @@
 package sturdy.values.integer
 
+import org.scalatest.Assertion
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
@@ -21,8 +22,8 @@ class NumericIntervalTestingIntegerOps[I]
   override def integerLit(i: I): NumericInterval[I] = NumericInterval(i, i)
 
   override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low, high)
-
-  override def getBounds(n: NumericInterval[I]): (I, I) = (n.low, n.high)
+  override def shouldContain(n: NumericInterval[I], m: I): Assertion = ???
+  override def shouldEqual(n: NumericInterval[I], l: I, u: I): Assertion = ???
 
 class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
   minValue = Integer.MIN_VALUE,

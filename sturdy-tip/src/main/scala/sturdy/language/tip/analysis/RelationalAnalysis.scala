@@ -17,7 +17,7 @@ import sturdy.effect.print.{PrintBound, PrintBoundSerializable, Serializer, give
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix
-import sturdy.fix.{Logger, StackConfig, State, context}
+import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
@@ -112,7 +112,11 @@ object RelationalAnalysis extends Interpreter,
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
 
 
-    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(_ => RelationalVar.Temp(domLogger.currentDom))
+    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(
+      _ => RelationalVar.Temp(
+        domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))
+      )
+    )
     implicit val localRelationaAlloc: AAllocatorFromContext[String, RelationalVar] = AAllocatorFromContext(RelationalVar.Local.apply)
 
     given Manager = apronManager
@@ -232,16 +236,7 @@ object RelationalAnalysis extends Interpreter,
 
     val cfg = controlFlow[CallString](CfgConfig.AllNodes(sensitive = false))
 
-    final class DomLogger extends Logger[FixIn, FixOut[Value]]:
-      private var doms: List[FixIn] = List()
-      override def enter(dom: FixIn): Unit = doms = dom :: doms
-      override def exit(dom: FixIn, codom: TrySturdy[FixOut[RelationalAnalysis.Value]]): Unit =
-        doms = doms.drop(1)
-
-      def currentDom: FixIn =
-        doms.headOption.getOrElse(FixIn.EnterFunction(functions("main")))
-
-    val domLogger: DomLogger = new DomLogger
+    val domLogger: DomLogger[FixIn, FixOut[Value]] = new DomLogger
 
     final override val fixpoint =
       callSiteSensitive(callSites,

@@ -83,6 +83,7 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
 
 lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
+  .dependsOn(sturdy_apron % "compile->compile;test->test")
   .settings(
     name := "sturdy_pcf",
     libraryDependencies ++= Seq(

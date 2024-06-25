@@ -1,6 +1,6 @@
 package sturdy.values
 
-import sturdy.data.{MakeJoined, mapJoin}
+import sturdy.data.{MakeJoined, WithJoin, mapJoin}
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.EffectStack
@@ -11,7 +11,10 @@ case class Powerset[A](set: Set[A]) extends AnyVal {
   def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
   def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
   def mapJoin[B](f: A => B)(using EffectStack): Powerset[B] =
-    sturdy.data.mapJoin(set, b => Powerset(f(b)))
+    sturdy.data.mapJoin(set, a => Powerset(f(a)))
+  def foreachJoin[B:WithJoin](f: A => B)(using EffectStack): B =
+    sturdy.data.mapJoin(set, a => f(a))
+
   def foreach(f: A => Unit): Unit = set.foreach(f)
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }

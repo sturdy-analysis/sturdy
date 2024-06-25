@@ -40,3 +40,14 @@ final class Log[Dom, Codom](logger: Logger[Dom, Codom], val phi: Combinator[Dom,
     logger.exit(dom, codom)
     codom.getOrThrow
 }
+
+final class DomLogger[Dom, Codom] extends Logger[Dom, Codom]:
+  private var doms: List[Dom] = List()
+
+  override def enter(dom: Dom): Unit = doms = dom :: doms
+
+  override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
+    doms = doms.drop(1)
+
+  def currentDom: Option[Dom] =
+    doms.headOption

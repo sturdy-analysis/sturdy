@@ -76,13 +76,10 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
       closureOps.closureValue(x, body, env)
     case Exp.App(fun, arg) =>
       val cl = eval(fun)
-      closureOps.invokeClosure(cl) {
-        case (x, body, env) => environment.scoped {
-          val a = eval(arg)
-          environment.loadClosedEnvironment(env)
-          environment.bind(x, a)
+      val a = eval(arg)
+      closureOps.invokeClosure(cl, a) {
+        (body) =>
           eval(body)
-        }
       }
     case Exp.Rec(f, body) =>
       lazy val rec: V = {

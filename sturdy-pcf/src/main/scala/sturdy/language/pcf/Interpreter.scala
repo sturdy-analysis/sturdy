@@ -2,6 +2,7 @@ package sturdy.language.pcf
 
 import sturdy.data.MayJoin
 import sturdy.effect.failure.Failure
+import sturdy.values.{Combine, Widening}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.booleans.LiftedBooleanBranching
 import sturdy.values.closures.ClosureOps
@@ -34,6 +35,11 @@ trait Interpreter:
     def asClosure(using Failure): VClosure = this match
       case Closure(closure) => closure
       case _ => Failure(TypeError, s"Expected Closure but got $this")
+
+  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VClosure, W]): Combine[Value, W] = {
+    case (Value.Int(i1), Value.Int(i2)) => Combine(i1,i2).map(Value.Int(_))
+    case (Value.Closure(cls1), Value.Closure(cls2)) => Combine(cls1, cls2).map(Value.Closure(_))
+  }
 
   given ValueIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps(_.asInt, Value.Int.apply)
