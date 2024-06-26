@@ -179,3 +179,46 @@ object Parser:
 
   val program: P0[Program] =
     whitespaces0 *> function.rep0.map(Program.apply) <* P.end
+
+
+  def unparse(p: Program): String = p.funs.map(unparseFun).mkString("\n\n")
+  def unparseFun(f: Function): String = {
+    val params = f.params.mkString(", ")
+    val locals = f.locals.mkString(", ")
+    val body = unparseStm(f.body)
+    val ret = unparseExp(f.ret)
+    s"fun ${f.name}($params) {\n  var $locals;\n  $body\n  return $ret;\n}"
+  }
+  def unparseStm(s: Stm): String = s match {
+    case Stm.Assign(a, e) => s"${unparseAssignable(a)} = ${unparseExp(e)};"
+    case Stm.Block(ss) => ss.map("  "+unparseStm(_)).mkString("\n")
+    case Stm.If(c, t, e) => s"if (${unparseExp(c)}) ${unparseStm(t)} ${e.map(x => {" else " + unparseStm(x)}).getOrElse("")}"
+    case Stm.While(c, b) => s"while (${unparseExp(c)}) ${unparseStm(b)}"
+    case Stm.Output(e) => s"output ${unparseExp(e)};"
+    case Stm.Assert(e) => s"assert(${unparseExp(e)});"
+    case Stm.Error(e) => s"error ${unparseExp(e)};"
+  }
+  def unparseExp(e: Exp): String = e match {
+    case Exp.Var(x) => x
+    case Exp.VarRef(x) => s"&$x"
+    case Exp.Deref(e) => s"*${unparseExp(e)}"
+    case Exp.Call(f, args) => s"${unparseExp(f)}(${args.map(unparseExp).mkString(", ")})"
+    case Exp.Alloc(e) => s"alloc(${unparseExp(e)})"
+    case Exp.Input() => "input"
+    case Exp.NullRef() => "null"
+    case Exp.NumLit(n) => n.toString
+    case Exp.Add(e1, e2) => s"${unparseExp(e1)} + ${unparseExp(e2)}"
+    case Exp.Sub(e1, e2) => s"${unparseExp(e1)} - ${unparseExp(e2)}"
+    case Exp.Mul(e1, e2) => s"${unparseExp(e1)} * ${unparseExp(e2)}"
+    case Exp.Div(e1, e2) => s"${unparseExp(e1)} / ${unparseExp(e2)}"
+    case Exp.Gt(e1, e2) => s"${unparseExp(e1)} > ${unparseExp(e2)}"
+    case Exp.Eq(e1, e2) => s"${unparseExp(e1)} == ${unparseExp(e2)}"
+    case Exp.FieldAccess(e, f) => s"${unparseExp(e)}.${f}"
+    case Exp.Record(fs) => s"{${fs.map { case (f, e) => s"$f: ${unparseExp(e)}" }.mkString(", ")}}"
+  }
+  def unparseAssignable(assignable: Assignable): String = assignable match {
+    case Assignable.AVar(x) => x
+    case Assignable.AField(x, f) => s"$x.$f"
+    case Assignable.ADeref(e) => s"*${unparseExp(e)}"
+    case Assignable.ADerefField(e, f) => s"*${unparseExp(e)}.${f}"
+  }
