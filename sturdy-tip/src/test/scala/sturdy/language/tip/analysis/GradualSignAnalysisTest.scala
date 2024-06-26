@@ -112,6 +112,10 @@ main(){
       main(){
         var x;
         x = 1;
+        assert(x>1);
+        x = 1+2;
+        x = x + (x + (1+2));
+        x = x - 1;
         return x+1;
       }
       """.stripMargin
@@ -120,8 +124,12 @@ main(){
       val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
-      println(analysis.elaboration)
+      println(s"result ${aresult}")
+      println(analysis.gl.m)
+
+      println(Parser.unparse(new Elaboration(analysis.gl, analysis.eo).elaborate(program)))
       //println(s"Effect Stack: ${analysis.effectStack}")
+      //println(program.funs(0).body.)
 
       1 should be(1)
 

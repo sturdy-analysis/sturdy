@@ -105,8 +105,6 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val input: UserInput[V]
   implicit val failure: Failure
 
-  class ElaborationEffect() extends sturdy.effect.Monotone
-  val elaboration = new ElaborationEffect()
 
   // Factory method for effect stacks
   def newEffectStack(effects: => Effect,
@@ -114,12 +112,12 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
                      outEffects: PartialFunction[Any, Effect]): EffectStack =
     new EffectStack(effects, inEffects, outEffects)
 
-  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure, elaboration), {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, elaboration)
-    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure, elaboration)
+  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure), {
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
+    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure)
   }, {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, elaboration)
-    case _: FixIn.Eval => EffectList(callFrame, alloc, failure, elaboration)
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
+    case _: FixIn.Eval => EffectList(callFrame, alloc, failure)
   })
 
   given EffectStack = effectStack
@@ -127,6 +125,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   // analysis state
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
+
+  case class CheckFailure[Context](exp: Context) extends FailureKind
 
   def eval_open(e: Exp)(using Fixed): V = e match {
     case Exp.NumLit(n) => integerLit(n)
@@ -167,6 +167,10 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val addr = deref(eval(rec))
       val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
+    /*case c@Exp.Check(e,r) =>
+      val b = eval(e)
+      branchOps.boolBranch(b, {}, {failure.fail(CheckFailure(c), s"check($b, $c) failed")})
+      r*/
   }
 
   def run_open(s: Stm)(using Fixed): Unit = s match

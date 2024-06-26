@@ -28,7 +28,6 @@ import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 import sturdy.language.tip.analysis.IntervalAnalysis.controlEventLogger
 
-
 import sturdy.values.integer.SignIntegerOps
 
 object SignAnalysis extends Interpreter,
@@ -38,10 +37,17 @@ object SignAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
+  class SignElaborationOps extends ElaborationOps[IntSign]{
+    override def getCheck(x: Exp.Var, uv: IntSign): Exp = uv match {
+      case IntSign.Pos => Exp.Gt(x, Exp.NumLit(0))
+      case IntSign.Neg => Exp.Gt(Exp.NumLit(0), x)
+      case IntSign.Zero => Exp.Eq(x, Exp.NumLit(0))
+      case IntSign.TopSign => Exp.NumLit(1)
+    }
+  }
+
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
-    println("jv")
-    println(jv)
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
@@ -50,6 +56,8 @@ object SignAnalysis extends Interpreter,
 
     val gl = gradualLogger[IntSign]()
     given GradualOps[IntSign, Value] with { val logger = gl}
+    val eo = new SignElaborationOps();
+
 
     override val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, VInt](_.asInt, Value.IntValue.apply)(using new UnsafeSignIntegerOps[Int, Value]())
     override val compareOps: OrderingOps[Value, Value] = implicitly
@@ -81,3 +89,5 @@ object SignAnalysis extends Interpreter,
   class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
     override val fixpoint = new fix.DAIFixpoint((dom: FixIn) => isFunOrWhile(dom))
     override def newInstance: sturdy.Executor = new DAIInstance(initEnvironment, initStore)
+
+

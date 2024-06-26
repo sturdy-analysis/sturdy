@@ -12,27 +12,7 @@ import sturdy.values.PartialOrder
 import sturdy.values.integer.given PartialOrder[IntSign]
 
 
-object Foo{
 
-  trait Showable[A]:
-    extension (a: A) def show: String
-
-  given X: Showable[IntSign] with
-    extension (a: IntSign) def show: String = a match
-      case Neg => "Neg"
-      case NegOrZero => "NegOrZero"
-      case Zero => "Zero"
-      case ZeroOrPos => "ZeroOrPos"
-      case Pos => "Pos"
-      case TopSign => "TopSign"
-
-  def showAll[A: Showable](as: List[A]): Unit =
-    as.foreach(a => println(a.show))
-
-
-  showAll(List(Neg, Zero))
-
-}
 trait GradualOps[T, V]:
   def logger: GradualLogger[T,V]
   def insertCheck(uv: T, sv: T)(using po: PartialOrder[T]): T =
