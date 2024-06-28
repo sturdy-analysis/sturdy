@@ -66,27 +66,7 @@ object ConcreteInterpreter extends Interpreter:
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
-    override val instanceOfOps: InstanceOfOps[ConcreteInterpreter.Value, TypeAnno] = new InstanceOfOps:
-      override def isInstanceOf(v: Value, ta: TypeAnno): Value = (ta, v) match
-        case (TypeAnno.Int, Value.IntValue(_)) => v
-        case (TypeAnno.Bool, Value.BoolValue(_)) => v
-        case (TypeAnno.Unknown, _) => v
-        case _ => failure.fail(TipFailure.RuntimeTypeError, s"$v not instance of $ta")
 
-    // C = {0, true}
-    // ta = Int
-    // C' = {conc.isInstanceOf(c, ta) | c in C} = {0, fail}
-    // alpha(C') = MaybeFailing(IntType)
-    
-    // alpha(C) = Top
-    // abs.isInstanceOf(alpha(C), ta) = MaybeFailing(IntType)
-    
-    // forall C, ta. 
-    //    alpha({conc.isInstanceOf(c, ta) | c in C}) <= 
-    //      abs.isInstanceOf(alpha(C), ta)
-    
-    // RuntimeTypeError <= TypeError
-    
     override val callFrame: ConcreteCallFrame[String, String, Value, Exp.Call] = new ConcreteCallFrame("$main", Iterable.empty)
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement

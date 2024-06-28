@@ -33,13 +33,6 @@ object TypeAnalysis extends Interpreter,
   given Lazy[Join[Value]] = lazily(CombineValue)
   given Lazy[Widen[Value]] = lazily(CombineValue)
 
-  def typeAnnoToValue(ta: TypeAnno): Value = ta match
-    case TypeAnno.Int => Value.IntValue(BaseType[Int])
-    case TypeAnno.Bool => Value.BoolValue(BaseType[Boolean])
-    case TypeAnno.Unknown => Value.TopValue
-
-  def valueToTypeAnno(v: Value): TypeAnno = ???
-
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
 
@@ -59,28 +52,6 @@ object TypeAnalysis extends Interpreter,
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
-    override val instanceOfOps = new InstanceOfOps:
-      // V <~ TypeAnno
-      // Concrete:  RuntimeValue <~ TypeAnno
-      // TypeCheck: RuntimeTypes <~ TypeAnno
-      override def isInstanceOf(v: Value, ta: TypeAnno): Value =
-        println(s"Casting $v to $ta")
-        (ta, v) match
-        case (TypeAnno.Int, Value.IntValue(_)) => v
-        case (TypeAnno.Bool, Value.BoolValue(_)) => v
-        case (TypeAnno.Fun(fromAnno, toAnno), Value.FunValue(VFun(from, to))) =>
-          val newFrom = isInstanceOf(typeAnnoToValue(fromAnno), valueToTypeAnno(from))
-          val newTo = isInstanceOf(to, toAnno)
-          Value.FunValue(VFun(newFrom, newTo))
-        case (TypeAnno.Unknown, _) => v
-        case (_, Value.TopValue) =>
-          effectStack.joinWithFailure(
-            typeAnnoToValue(ta)
-          ) (
-            failure.fail(TipFailure.RuntimeTypeError, s"$v not instance of $ta")
-          )
-        case _ =>
-          failure.fail(TipFailure.TypeError, s"$v not instance of $ta")
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
