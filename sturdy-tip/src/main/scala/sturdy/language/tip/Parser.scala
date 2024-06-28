@@ -40,6 +40,8 @@ object Parser:
     val KOUTPUT = "output"
     val KERROR = "error"
     val KASSERT = "assert"
+    val KTRUE = "true"
+    val KFALSE = "false"
   }
   import LanguageKeywords.*
 
@@ -95,6 +97,11 @@ object Parser:
 
   /* STRUCTURAL */
 
+  private val typeAnno =
+    op("Int").map(_ => TypeAnno.Int) |
+      op("Bool").map(_ => TypeAnno.Bool) |
+      op('?').map(_ => TypeAnno.Unknown)
+
   private val maybeBinOp: ((Exp, Option[Exp => Exp])) => Exp = {
     case (e1, None) => e1
     case (e1, Some(f)) => f(e1)
@@ -113,6 +120,8 @@ object Parser:
     (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) |
     keyword(KINPUT).map(_ => Exp.Input()) |
     keyword(KNULL).map(_ => Exp.NullRef()) |
+    keyword(KTRUE).map(_ => Exp.BoolLit(true)) |
+    keyword(KFALSE).map(_ => Exp.BoolLit(false)) |
     (op('&') *> identifier).map(Exp.VarRef.apply) |
     deref |
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
@@ -141,7 +150,8 @@ object Parser:
   lazy val expression: P[Exp] =
     (operation ~ (
       (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
-      (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
+      (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2)) |
+      (op(':') *> typeAnno).map(ta => Exp.Ascribe(_, ta))
     ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =

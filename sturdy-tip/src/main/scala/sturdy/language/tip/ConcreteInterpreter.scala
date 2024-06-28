@@ -37,13 +37,11 @@ object ConcreteInterpreter extends Interpreter:
 
   override def asBoolean(v: Value)(using inst: Instance): Boolean = v match
     case Value.BoolValue(b) => b
-    case Value.IntValue(i) => i != 0
-    case _ => inst.failure(TipFailure.TypeError, s"Expected Boolean but got $this")
+    case _ => inst.failure(TipFailure.RuntimeTypeError, s"Expected Boolean but got $v")
 
   override def asInt(v: Value)(using inst: Instance): Int = v match
-    case Value.BoolValue(b) => if b then 1 else 0
     case Value.IntValue(i) => i
-    case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
+    case _ => inst.failure(TipFailure.RuntimeTypeError, s"Expected Int but got $v")
 
   given Structural[VRecord] with {}
   given Structural[Addr] with {}
@@ -61,13 +59,34 @@ object ConcreteInterpreter extends Interpreter:
     given Failure = failure
 
     override val intOps: IntegerOps[Int, Value] = implicitly
+    override val boolOps: BooleanOps[Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
+    override val instanceOfOps: InstanceOfOps[ConcreteInterpreter.Value, TypeAnno] = new InstanceOfOps:
+      override def isInstanceOf(v: Value, ta: TypeAnno): Value = (ta, v) match
+        case (TypeAnno.Int, Value.IntValue(_)) => v
+        case (TypeAnno.Bool, Value.BoolValue(_)) => v
+        case (TypeAnno.Unknown, _) => v
+        case _ => failure.fail(TipFailure.RuntimeTypeError, s"$v not instance of $ta")
 
+    // C = {0, true}
+    // ta = Int
+    // C' = {conc.isInstanceOf(c, ta) | c in C} = {0, fail}
+    // alpha(C') = MaybeFailing(IntType)
+    
+    // alpha(C) = Top
+    // abs.isInstanceOf(alpha(C), ta) = MaybeFailing(IntType)
+    
+    // forall C, ta. 
+    //    alpha({conc.isInstanceOf(c, ta) | c in C}) <= 
+    //      abs.isInstanceOf(alpha(C), ta)
+    
+    // RuntimeTypeError <= TypeError
+    
     override val callFrame: ConcreteCallFrame[String, String, Value, Exp.Call] = new ConcreteCallFrame("$main", Iterable.empty)
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement

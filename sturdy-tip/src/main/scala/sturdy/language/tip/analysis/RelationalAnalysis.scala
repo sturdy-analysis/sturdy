@@ -72,6 +72,9 @@ object RelationalAnalysis extends Interpreter,
   override final type VInt = ApronExpr[RelAddr, RelType]
   override final type VBool = ApronCons[RelAddr, RelType]
   override final type VRef = AbstractReference[Addr]
+  
+  given CombineVBool[W <: Widening]: Combine[VBool, W] with
+    override def apply(v1: ApronCons[RelAddr, RelType], v2: ApronCons[RelAddr, RelType]): MaybeChanged[ApronCons[RelAddr, RelType]] = ???
 
   final type Addr = PowVirtualAddress[RelationalVar]
   final type PAddr = PowersetAddr[PhysicalAddress[RelationalVar],PhysicalAddress[RelationalVar]]
@@ -216,12 +219,14 @@ object RelationalAnalysis extends Interpreter,
     given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from)
 
     override val intOps: IntegerOps[Int, Value] = implicitly
+    override val boolOps: BooleanOps[Value] = ???
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
+    override val instanceOfOps = ???
 
     override def execute(p: Program): Value =
       super.execute(p)

@@ -1,15 +1,21 @@
 package sturdy.values.integer
 
-import sturdy.ir.{IR, IROperator}
+import sturdy.ir.{IR, IROperator, IRValue}
 
-enum IntegerIROperator extends IROperator:
+enum IRIntegerOperator extends IROperator:
   case ADD
   case SUB
   case MUL
   case DIV
 
+  override def eval(args: Seq[IRValue]): IRValue = this match
+    case ADD => IRValue(args(0).c.asInstanceOf[Int] + args(1).c.asInstanceOf[Int])
+    case SUB => IRValue(args(0).c.asInstanceOf[Int] - args(1).c.asInstanceOf[Int])
+    case MUL => IRValue(args(0).c.asInstanceOf[Int] * args(1).c.asInstanceOf[Int])
+    case DIV => IRValue(args(0).c.asInstanceOf[Int] / args(1).c.asInstanceOf[Int])
+
 given IRIntegerOps[B]: IntegerOps[B, IR] with
-  import IntegerIROperator.*
+  import IRIntegerOperator.*
 
   override def integerLit(i: B): IR = IR.Const(i)
   override def randomInteger(): IR = ???

@@ -2,11 +2,11 @@ package sturdy.language.tip.abstractions
 
 import sturdy.effect.failure.Failure
 import sturdy.ir.IR
-import sturdy.language.tip.TipFailure
+import sturdy.language.tip.{Interpreter, TipFailure, TypeAnno}
 import sturdy.values.ordering.EqOps
 import sturdy.values.{Join, Topped}
 import sturdy.values.integer.{AbstractBitVector, IntSign, NumericInterval, given}
-import sturdy.language.tip.Interpreter
+import sturdy.values.types.BaseType
 
 object Ints:
   trait Interval extends Interpreter :
@@ -100,3 +100,19 @@ object Ints:
       case Value.IntValue(i) => i
       case Value.TopValue => topInt
       case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
+
+  trait Types extends Interpreter:
+    final type VBool = BaseType[Boolean]
+    final type VInt = BaseType[Int]
+
+    final def topInt(using Instance): VInt = BaseType[Int]
+
+    final def topBool(using Instance): VBool = BaseType[Boolean]
+
+    final def asBoolean(v: Value)(using inst: Instance): VBool =
+      inst.instanceOfOps.isInstanceOf(v, TypeAnno.Bool)
+      BaseType[Boolean]
+
+    final def asInt(v: Value)(using inst: Instance): VInt =
+      inst.instanceOfOps.isInstanceOf(v, TypeAnno.Int)
+      BaseType[Int]

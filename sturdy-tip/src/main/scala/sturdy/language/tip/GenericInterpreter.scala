@@ -24,6 +24,9 @@ import sturdy.values.references.ReferenceOps
 import scala.collection.mutable.ListBuffer
 import TipFailure.*
 
+trait InstanceOfOps[V, TA]:
+  def isInstanceOf(v: V, ta: TA): V
+
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
   case Record(r: Exp.Record)
@@ -38,6 +41,7 @@ enum TipFailure extends FailureKind:
   case TypeError
   case VariableReferencesNotSupported
   case StackOverflow
+  case RuntimeTypeError
 
 given Finite[TipFailure] with {}
 
@@ -90,11 +94,13 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // value components
   val intOps: IntegerOps[Int, V]; import intOps.*
+  val boolOps: BooleanOps[V]; import boolOps.*
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
+  val instanceOfOps: InstanceOfOps[V, TypeAnno]; import instanceOfOps.*;
   implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
@@ -127,6 +133,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   def eval_open(e: Exp)(using Fixed): V = e match {
     case Exp.NumLit(n) => integerLit(n)
+    case Exp.BoolLit(b) => boolLit(b)
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
@@ -164,6 +171,9 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       val addr = deref(eval(rec))
       val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
+
+    case Exp.Ascribe(e, ta) =>
+      instanceOfOps.isInstanceOf(eval(e), ta)
   }
 
   def run_open(s: Stm)(using Fixed): Unit = s match

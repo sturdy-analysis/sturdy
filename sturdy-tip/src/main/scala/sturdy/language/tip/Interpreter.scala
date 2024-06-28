@@ -70,10 +70,11 @@ trait Interpreter:
 
   type Addr
 
-  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
+  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VBool, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => Combine[VInt, W](i1, i2).map(IntValue.apply)
+      case (BoolValue(i1), BoolValue(i2)) => Combine[VBool, W](i1, i2).map(BoolValue.apply)
       case (FunValue(funs1), FunValue(funs2)) => Combine[VFun, W](funs1, funs2).map(FunValue.apply)
       case (RefValue(addrs1), RefValue(addrs2)) => Combine[VRef, W](addrs1, addrs2).map(RefValue.apply)
       case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
@@ -84,6 +85,8 @@ trait Interpreter:
   import Value.*
   given ValueIntegerOps(using Instance, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
+  given ValueBooleanOps(using Instance, BooleanOps[VBool]): BooleanOps[Value] =
+    new LiftedBooleanOps[Value, VBool](_.asBoolean, BoolValue.apply)
   given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
     new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
   given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Instance): EqOps[Value, Value] with
