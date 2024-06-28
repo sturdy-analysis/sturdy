@@ -24,7 +24,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.*
 import sturdy.effect.failure
-import sturdy.ir.Export
+import sturdy.ir.{Export, IRInterpreter, IRValue}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
@@ -38,7 +38,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[IRAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("rec_inc.tip")
+    p.toString.endsWith("7x7.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       println(s"analyze ${p.getFileName}")
@@ -69,7 +69,12 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       println(aresult)
       println()
       aresult.get.foreach(v => println(Export.toGraphViz(IRAnalysis.valueToIR(v))))
-      
+
+//      val ir = IRAnalysis.valueToIR(aresult.get.get)
+//      val irInterp = new IRInterpreter(Map("n" -> IRValue(5)))
+//      val v = irInterp.interpret(ir)
+//      println(v)
+
       (aresult, analysis)
     } else {
       null

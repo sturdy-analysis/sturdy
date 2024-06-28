@@ -39,6 +39,7 @@ object IRAnalysis extends Interpreter,
 
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private var currentCond: Option[IR] = None
+    private var currentCondWiden: Option[(IR, Boolean)] = None
 
     given IRBooleanBranching[R](using Join[R]): BooleanBranching[IR, R] with
       override def boolBranch(cond: IR, thn: => R, els: => R): R =
@@ -46,26 +47,31 @@ object IRAnalysis extends Interpreter,
         var fvars: Option[List[Value]] = None
         var gvars: Option[List[Value]] = None
         val r = joinComputations {
+          currentCondWiden = Some(cond -> true)
           val rThn = thn
           fvars = Some(callFrame.getState)
           rThn
         } {
+          currentCondWiden = Some(cond -> false)
           val rEls = els
           currentCond = Some(cond)
           gvars = Some(callFrame.getState)
           rEls
         }
         currentCond = None
+        currentCondWiden = None
         println(s"boolBranch($cond)")
         println(s"  vars before = $vars")
+        println(s"       cond   = $cond")
         println(s"  vars then   = $fvars")
         println(s"  vars else   = $gvars")
         println(s"  vars after  = ${callFrame.getState}")
+        println(s"     result   = $r")
 
         r
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
-      case Some(cond) => Changed(IR.Select(cond, v1, v2))
+      case Some(cond) => Changed(IR.Select(cond, v2, v1))
 
     override def jv: WithJoin[Value] = implicitly
     given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
@@ -76,6 +82,7 @@ object IRAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: IntegerOps[Int, Value] = implicitly
+    override val boolOps: BooleanOps[Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
@@ -90,6 +97,7 @@ object IRAnalysis extends Interpreter,
       override def updateRecordField(rec: IRAnalysis.Value, field: Field, newval: IRAnalysis.Value): IRAnalysis.Value = ???
 
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
+    override val instanceOfOps = ???
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
@@ -103,11 +111,13 @@ object IRAnalysis extends Interpreter,
     given Widen[IR] = new Combine[VInt, Widening.Yes]:
       var count = 0
       override def apply(v1: IR, v2: IR): MaybeChanged[IR] = (v1, v2) match
-        case (feedback@IR.Feedback(init, Some(IR.Join(feedback2, other2))), other) if feedback == feedback2 =>
+        case (feedback@IR.Feedback(init, cond, Some(other2)), other) =>
           println(s"Widening, stable feedback loop ?")
           println(s"  v1 = $v1")
           println(s"  v2 = $other")
           println(s"  other2 = $other2")
+          println(s"  cond = $currentCond")
+
           println(sturdy.ir.Export.toGraphViz(feedback))
           println(sturdy.ir.Export.toGraphViz(other))
 
@@ -115,12 +125,18 @@ object IRAnalysis extends Interpreter,
             Unchanged(feedback)
           } else
             ???
-        case (feedback@IR.Feedback(init, None), other) =>
+        case (feedback@IR.Feedback(init, None, None), other) =>
           println(s"Widening, make feedback loop")
           println(s"  v1 = $v1")
           println(s"  v2 = $v2")
+          println(s"  cond = $currentCond")
 
-          feedback.loop = Some(IR.Join(feedback, other))
+
+          feedback.loop = Some(other)
+          feedback.cond = currentCondWiden match
+            case Some((c, true)) => Some(c)
+            case Some((c, false)) => Some(IR.Op(???, c))
+            case None => None
 
           println(sturdy.ir.Export.toGraphViz(feedback))
           Changed(feedback)
@@ -128,7 +144,12 @@ object IRAnalysis extends Interpreter,
           println(s"Widening, prepare feedback loop ?")
           println(s"  v1 = $v1")
           println(s"  v2 = $v2")
-          val feedback = IR.Feedback(IR.Join(v1, v2), None)
+          println(s"  cond = $currentCondWiden")
+          val select = currentCondWiden match
+            case Some((c, true)) => IR.Select(c, v2, v1)
+            case Some((c, false)) => IR.Select(c, v1, v2)
+            case None => IR.Select(IR.Unknonwn(), v1, v2)
+          val feedback = IR.Feedback(select, None, None)
           println(sturdy.ir.Export.toGraphViz(feedback))
           if (count > 3)
             ???

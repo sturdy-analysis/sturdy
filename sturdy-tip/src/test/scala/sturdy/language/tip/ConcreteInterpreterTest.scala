@@ -19,7 +19,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => 
-    p.toString.endsWith("_assert.tip")).sorted.foreach { p =>
+    p.toString.endsWith("gradual.tip")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       runFile(p)
     }
@@ -31,9 +31,11 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     file.close()
     val program = Parser.parse(sourceCode)
     if (program.funs.exists(_.name == "main")) {
-//      print(s"${p.getFileName}")
+      print(s"${p.getFileName}")
       val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
-      interp.failure.fallible(interp.execute(program))
+      val v = interp.failure.fallible(interp.execute(program))
+      println(v)
+      v
 //      Try(interp.execute(program)) match
 //        case Success(_) => println(" prints: " + interp.effectOps.getPrinted)
 //        case Failure(e) => println(" errors: " + e)

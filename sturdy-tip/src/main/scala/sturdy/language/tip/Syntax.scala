@@ -5,8 +5,15 @@ import sturdy.values.{Structural, Finite}
 
 import cats.Monoid
 
+enum TypeAnno:
+  case Int
+  case Unknown
+  case Bool
+  case Fun(from: TypeAnno, to: TypeAnno)
+
 enum Exp extends Labeled:
   case NumLit(n: Int)
+  case BoolLit(b: Boolean)
   case Input()
   case Var(name: String)
   case Add(e1: Exp, e2: Exp)
@@ -22,6 +29,7 @@ enum Exp extends Labeled:
   case NullRef()
   case Record(fields: Seq[(String, Exp)])
   case FieldAccess(rec: Exp, field: String)
+  case Ascribe(e: Exp, ta: TypeAnno)
 
   def fold[A](using f: Exp => A)(using m: Monoid[A]): A = this match
     case NumLit(_) => f(this)

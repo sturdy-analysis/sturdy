@@ -46,12 +46,14 @@ object IntervalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: IntegerOps[Int, Value] = implicitly
+    override val boolOps: BooleanOps[Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
+    override val instanceOfOps = ???
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)

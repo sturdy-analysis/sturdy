@@ -1,18 +1,31 @@
 package sturdy.ir
 
-import sturdy.values.{Join, MaybeChanged}
+import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder}
 
-trait IROperator
+trait IROperator:
+  def eval(args: Seq[IRValue]): IRValue = ???
+trait IRCheck[C]:
+  def assert(c: C): C
+
+case class SoundnessCheck[C,A](abs: Abstractly[C,A], unsafe: A, po: PartialOrder[A]) extends IRCheck[C]:
+  override def assert(c: C): C =
+    val a = abs(c)
+    if (po.lteq(a, unsafe)) {
+      c
+    } else {
+      throw new AssertionError(s"Unsound assumption $unsafe for run-time value $c, which abstracts to $a")
+    }
 
 enum IR:
-  private val uid = new IR_UID
+  val uid = new IR_UID
   case Unknonwn()
   case External(name: String)
   case Const[C](c: C)
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
-  case Feedback(init: IR, var loop: Option[IR])
+  case Feedback(init: IR, var cond: Option[IR], var loop: Option[IR])
+  case Cast[C](ir: IR, check: IRCheck[C])
 
   override def hashCode(): Int = uid.hashCode()
   override def equals(obj: Any): Boolean = obj match
@@ -26,7 +39,7 @@ enum IR:
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
-    case IR.Feedback(init, loop) => Seq(init -> "init") ++ loop.map(_ -> "loop")
+    case IR.Feedback(init, cond, loop) => Seq(init -> "init") ++ cond.map(_ -> "cond") ++ loop.map(_ -> "loop")
 
   override def toString: String = this match
     case IR.Unknonwn() => s"Unknown@$uid"
@@ -35,7 +48,7 @@ enum IR:
     case IR.Op(op, args) => s"Op($op)@$uid"
     case IR.Select(cond, left, right) => s"Select@$uid"
     case IR.Join(left, right) => s"Join@$uid"
-    case IR.Feedback(init, loop) => s"Feedback@$uid"
+    case IR.Feedback(init, cond, loop) => s"Feedback@$uid"
 
 
 object IR:
