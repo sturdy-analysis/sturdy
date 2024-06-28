@@ -97,7 +97,6 @@ object IRAnalysis extends Interpreter,
       override def updateRecordField(rec: IRAnalysis.Value, field: Field, newval: IRAnalysis.Value): IRAnalysis.Value = ???
 
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
-    override val instanceOfOps = ???
 
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)

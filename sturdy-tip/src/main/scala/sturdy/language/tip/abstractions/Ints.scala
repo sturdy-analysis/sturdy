@@ -110,9 +110,9 @@ object Ints:
     final def topBool(using Instance): VBool = BaseType[Boolean]
 
     final def asBoolean(v: Value)(using inst: Instance): VBool =
-      inst.instanceOfOps.isInstanceOf(v, TypeAnno.Bool)
+      // inst.instanceOfOps.isInstanceOf(v, TypeAnno.Bool)
       BaseType[Boolean]
 
     final def asInt(v: Value)(using inst: Instance): VInt =
-      inst.instanceOfOps.isInstanceOf(v, TypeAnno.Int)
+      // inst.instanceOfOps.isInstanceOf(v, TypeAnno.Int)
       BaseType[Int]

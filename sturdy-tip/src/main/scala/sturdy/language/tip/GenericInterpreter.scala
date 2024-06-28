@@ -24,9 +24,6 @@ import sturdy.values.references.ReferenceOps
 import scala.collection.mutable.ListBuffer
 import TipFailure.*
 
-trait InstanceOfOps[V, TA]:
-  def isInstanceOf(v: V, ta: TA): V
-
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
   case Record(r: Exp.Record)
@@ -100,7 +97,6 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
-  val instanceOfOps: InstanceOfOps[V, TypeAnno]; import instanceOfOps.*;
   implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
@@ -173,7 +169,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       lookupRecordField(recVal, Field(field))
 
     case Exp.Ascribe(e, ta) =>
-      instanceOfOps.isInstanceOf(eval(e), ta)
+      ???
   }
 
   def run_open(s: Stm)(using Fixed): Unit = s match

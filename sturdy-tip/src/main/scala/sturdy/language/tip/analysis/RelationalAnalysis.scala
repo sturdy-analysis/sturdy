@@ -226,7 +226,6 @@ object RelationalAnalysis extends Interpreter,
     override val refOps: ReferenceOps[Addr, Value] = implicitly
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
-    override val instanceOfOps = ???
 
     override def execute(p: Program): Value =
       super.execute(p)
