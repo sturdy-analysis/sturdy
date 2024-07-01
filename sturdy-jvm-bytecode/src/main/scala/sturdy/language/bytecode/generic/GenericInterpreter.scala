@@ -493,7 +493,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
                 staticInitialized += objCF
                 val source = javaLibClassFileWrapper(objCF)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-                invoke(cfs.staticInitializer.get, Seq(), true)
+                invoke(cfs.staticInitializer.get, Seq())
               }
               else{
                 staticInitialized += objCF
@@ -502,7 +502,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
                   process(new DataInputStream(new FileInputStream(source))) { in =>
                     org.opalj.br.reader.Java8Framework.ClassFile(in)
                   }
-                invoke(cfs.head.staticInitializer.get, Seq(), true)
+                invoke(cfs.head.staticInitializer.get, Seq())
               }
             }
 
@@ -516,7 +516,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
                 staticInitialized += objCF
                 val source = javaLibClassFileWrapper(objCF)
                 val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-                invoke(cfs.staticInitializer.get, Seq(), true)
+                invoke(cfs.staticInitializer.get, Seq())
               }
               else {
                 staticInitialized += objCF
@@ -527,7 +527,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
                   process(new DataInputStream(new FileInputStream(source))) { in =>
                     org.opalj.br.reader.Java8Framework.ClassFile(in)
                   }
-                invoke(cfs.head.staticInitializer.get, Seq(), true)
+                invoke(cfs.head.staticInitializer.get, Seq())
               }
             }
             val v = stack.popOrAbort()
@@ -556,7 +556,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
               val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
               val numArgs = inst.methodDescriptor.parametersCount
               val args = stack.popNOrAbort(numArgs)
-              val ret = invoke(mth, args, true)
+              val ret = invoke(mth, args)
               if(!inst.methodDescriptor.returnType.isVoidType){
                 stack.push(ret)
               }
@@ -566,7 +566,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
               val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
               val numArgs = inst.methodDescriptor.parametersCount
               val args = stack.popNOrAbort(numArgs)
-              val ret = invoke(mth, args, true)
+              val ret = invoke(mth, args)
               if (!inst.methodDescriptor.returnType.isVoidType) {
                 stack.push(ret)
               }
@@ -581,7 +581,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             stack.push(obj)
             //val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
             //val ret = objectOps.invokeFunction(obj, mth, args)(invokeMethodOnObject)
-            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
+            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
             if (!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
             }
@@ -594,7 +594,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
               val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
               val numArgs = inst.methodDescriptor.parametersCount
               val args = stack.popNOrAbort(numArgs)
-              val ret = invoke(mth, args, false)
+              val obj = stack.popOrAbort()
+              val ret = invoke(mth, obj +: args)
               if (!inst.methodDescriptor.returnType.isVoidType) {
                 stack.push(ret)
               }
@@ -604,7 +605,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
               val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
               val numArgs = inst.methodDescriptor.parametersCount
               val args = stack.popNOrAbort(numArgs)
-              val ret = invoke(mth, args, false)
+              val obj = stack.popOrAbort()
+              val ret = invoke(mth, obj +: args)
               if (!inst.methodDescriptor.returnType.isVoidType) {
                 stack.push(ret)
               }
@@ -615,7 +617,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
             val obj = stack.peekOrAbort()
-            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeMethodOnObject)
+            val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
             if(!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
             }
@@ -878,12 +880,17 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       }
     }*/
 
+  def invokeWrapper(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
+    val objVal = stack.popOrAbort()
+    invoke(mth, objVal +: args)
+  
+  /*
   def invokeMethodOnObject(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     val objVal = stack.popOrAbort()
 
     if (native.nativeFunList.contains(mth.name)) {
-      native.evalNative(objVal, mth, args)
+      native.evalNative(mth, args)
     }
     else{
       var locals: ArraySeq[ValType] = ArraySeq()
@@ -918,16 +925,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       stack.pushN(remainingOperands)
 
       returnValue
-    }
+    }*/
 
-  def invoke(mth: Method, args: Seq[V], isStatic: Boolean)(using Fixed): V =
+  def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     //val numArgs = mth.descriptor.parametersCount
     //val args = stack.popNOrAbort(numArgs)
 
-    if (native.nativeFunList.contains(mth.name) && !isStatic) {
-      val obj = stack.popOrAbort()
-      val ret = native.evalNative(obj, mth, args)
+    if (native.nativeFunList.contains(mth.name)) {
+      val ret = native.evalNative(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
         //stack.push(ret)
         ret
@@ -936,6 +942,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         i32ops.integerLit(-1)
       }
     }
+    /*
     else if (native.nativeFunList.contains(mth.name) && isStatic) {
       val ret = native.evalNativeStatic(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
@@ -945,28 +952,20 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       else{
         i32ops.integerLit(-1)
       }
-    }
+    }*/
     else{
-      var locals: ArraySeq[ValType] = ArraySeq()
-      if (!mth.body.get.localVariableTable.isEmpty) {
-        val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-        locals = localstemp
+      val locals = if (!mth.body.get.localVariableTable.isEmpty) {
+        mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
       }
       else {
-        if (isStatic) {
-          val localstemp = ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
-          locals = localstemp
-        }
-        else {
-          val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
-          locals = localstemp
-        }
+        ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
       }
 
       val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
 
-      var argsAndLocals: View[V] = View()
+      val argsAndLocals = args.view ++ locals.map(defaultValue)
 
+      /*
       if (isStatic) {
         argsAndLocals = args.view ++ locals.map(defaultValue)
       }
@@ -974,7 +973,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         val obj = stack.popOrAbort()
         val thisAndArgs = List(obj) ++ args
         argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
-      }
+      }*/
 
       val remainingOperands = stack.popNOrAbort(stack.size)
 
@@ -1009,11 +1008,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         objectOps.setField(stringObj, "value", stringArray)
         stack.push(stringObj)
       case _ =>
-        native.evalNativeStatic(mth, args)
+        native.evalNative(mth, args)
 
   def invokeExternal(mth: Method, isStatic: Boolean) = external {
     val args = stack.popNOrAbort(stack.size)
-    invoke(mth, args, isStatic)
+    invoke(mth, args)
   }
   def evalExternal(inst: Instruction) = external {
     eval(inst, null, 0)

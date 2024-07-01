@@ -20,14 +20,23 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
     "makeConcatWithConstants"
   )
 
-  def evalNative(obj: V, mth: Method, args: Seq[V]): V =
+  def evalNative(mth: Method, args: Seq[V]): V =
     mth.name match
       case "desiredAssertionStatus" =>
         bytecodeOps.i32ops.integerLit(1)
       case "fillInStackTrace" =>
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
-
+      case "arraycopy" =>
+        val src = args(0)
+        val srcPos = args(1)
+        val dest = args(2)
+        val destPos = args(3)
+        val length = args(4)
+        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
+        //temporary
+        bytecodeOps.i32ops.integerLit(-1)
+/*
   def evalNativeStatic(mth: Method, args: Seq[V]): V =
     mth.name match
       case "arraycopy" =>
@@ -39,6 +48,6 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
         arrayOps.arraycopy(src, srcPos, dest, destPos, length)
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
-
+*/
 
 

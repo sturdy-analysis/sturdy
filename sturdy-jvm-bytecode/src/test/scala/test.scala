@@ -22,8 +22,8 @@ object test extends App{
     case _ => ValType.I32
 
   //edit this
-  val projectPath = "C:\\Users\\Stefan Marx\\IdeaProjects\\jvm-bytecode-in-sturdy-scala\\jvm-bytecode-testSources"
-  val simpleMathName = "C:\\Users\\Stefan Marx\\IdeaProjects\\jvm-bytecode-in-sturdy-scala\\jvm-bytecode-testSources\\SimpleMath.class"
+  val projectPath = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources"
+  val simpleMathName = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources/SimpleMath.class"
 
   val pWithLibrary = Project(
     new java.io.File(projectPath), // path to the JAR files/directories containing the project
