@@ -469,7 +469,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             except.throws(JvmExcept.Ret(index))
           case inst: TABLESWITCH =>
             val index = stack.popOrAbort()
-            val transformedIndices = Iterator.from(0).zip(inst.jumpOffsets).map(pairs => (i32ops.integerLit(pairs._1), pairs._2)).toMap
+            val transformedIndices = inst.jumpOffsets.zipWithIndex.map(pairs => (i32ops.integerLit(pairs._2), pairs._1)).toMap
             val offset = transformedIndices.getOrElse(index, inst.defaultOffset)
             except.throws(JvmExcept.Jump(pc + offset))
           case inst: LOOKUPSWITCH =>
@@ -621,10 +621,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             if(!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
             }
-            /*val mth = objectOps.findFunction(obj, inst.name, inst.methodDescriptor)(findMethodOfObj)
-            stack.push(obj)
-            stack.pushN(args)
-            invoke(mth, false)*/
 
           case inst: INVOKEDYNAMIC =>
             val test = inst.bootstrapMethod
@@ -805,27 +801,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
 
-  /*
-  def evalLocalLoad(inst: Instruction): V = inst match
-    case inst: LoadLocalVariableInstruction =>
-      frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-
-  def evalLocalStore(inst: Instruction, v: V): Unit = inst match
-    case inst: StoreLocalVariableInstruction =>
-      frame.setLocalOrElse(inst.lvIndex, v, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-
-  def evalArrayLoad(inst: Instruction, array: V, idx: V): V = inst match
-    case inst: ArrayLoadInstruction =>
-      arrayOps.getVal(array, idx).getOrElse(
-        except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException")))
-      )
-
-  def evalArrayStore(inst: Instruction, array: V, idx: V, v: V): Unit = inst match
-    case inst: ArrayStoreInstruction =>
-      arrayOps.setVal(array, idx, v).getOrElse(
-        except.throws(JvmExcept.Throw(ObjectType("java/lang/IndexOutOfBoundsException")))
-      )*/
-
   def createArray(size: V, compType: ArrayType, site: InstructionSite): V =
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
@@ -846,113 +821,23 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
       array
     }
-
-  /*def findMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor): Method =
-    if (obj.cls.thisType != ObjectType("java/lang/Object")) {
-      val nextInherit = project.classHierarchy.supertypeInformation(obj.cls.thisType).get.classTypes.last
-      obj.cls.findMethod(name, sig)
-        .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
-    }
-    else {
-      obj.cls.findMethod(name, sig).getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
-    }
-
-  def findInheritedMethodOfObj(obj: Object[ObjAddr, ClassFile, FieldAddr, String], name: String, sig: MethodDescriptor, inheritedObj: ObjectType): Method =
-    if(inheritedObj == ObjectType("java/lang/Object")){
-      objectCF.findMethod(name, sig).getOrElse(
-          obj.cls.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
-            .getOrElse(fail(MethodNotFound, s"Method $name, $sig not found"))
-      )
-    }
-    else{
-      if (project.isLibraryType(inheritedObj)) {
-        val source = javaLibClassFileWrapper(inheritedObj)
-        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
-          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
-      }
-      else {
-        val cfs = project.classFile(inheritedObj).get
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
-          .getOrElse(findInheritedMethodOfObj(obj, name, sig, nextInherit))
-      }
-    }*/
-
+  
   def invokeWrapper(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
     val objVal = stack.popOrAbort()
     invoke(mth, objVal +: args)
   
-  /*
-  def invokeMethodOnObject(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
-    val newFrameData = 0
-    val objVal = stack.popOrAbort()
-
-    if (native.nativeFunList.contains(mth.name)) {
-      native.evalNative(mth, args)
-    }
-    else{
-      var locals: ArraySeq[ValType] = ArraySeq()
-      if (!mth.body.get.localVariableTable.isEmpty) {
-        val localstemp = mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-        locals = localstemp
-      }
-      else {
-        val localstemp = ArraySeq.fill(mth.body.get.maxLocals - 1)(0).map(_ => ValType.I32)
-        locals = localstemp
-      }
-
-      val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-      val thisAndArgs = List(objVal) ++ args
-      val argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
-
-      val remainingOperands = stack.popNOrAbort(stack.size)
-
-      stack.withNewFrame(0) {
-        frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-          run(0, instructionMap, mth)
-        }
-      }
-
-      //Temporary stuff
-      val returnValue = if(!mth.returnType.isVoidType){
-        stack.popOrAbort()
-      } else {
-        i32ops.integerLit(-1)
-      }
-      stack.pushN(remainingOperands)
-
-      returnValue
-    }*/
-
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
-    //val numArgs = mth.descriptor.parametersCount
-    //val args = stack.popNOrAbort(numArgs)
 
     if (native.nativeFunList.contains(mth.name)) {
       val ret = native.evalNative(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
-        //stack.push(ret)
         ret
       }
       else{
         i32ops.integerLit(-1)
       }
     }
-    /*
-    else if (native.nativeFunList.contains(mth.name) && isStatic) {
-      val ret = native.evalNativeStatic(mth, args)
-      if (!mth.descriptor.returnType.isVoidType) {
-        //stack.push(ret)
-        ret
-      }
-      else{
-        i32ops.integerLit(-1)
-      }
-    }*/
     else{
       val locals = if (!mth.body.get.localVariableTable.isEmpty) {
         mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
@@ -965,16 +850,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
       val argsAndLocals = args.view ++ locals.map(defaultValue)
 
-      /*
-      if (isStatic) {
-        argsAndLocals = args.view ++ locals.map(defaultValue)
-      }
-      else {
-        val obj = stack.popOrAbort()
-        val thisAndArgs = List(obj) ++ args
-        argsAndLocals = thisAndArgs.view ++ locals.map(defaultValue)
-      }*/
-
       val remainingOperands = stack.popNOrAbort(stack.size)
 
       stack.withNewFrame(0) {
@@ -985,7 +860,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       if(!mth.descriptor.returnType.isVoidType){
         val ret = stack.popOrAbort()
         stack.pushN(remainingOperands)
-        //stack.push(ret)
         ret
       }
       else{
@@ -1072,12 +946,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     case opalTypes: CharType => ValType.I32
     case opalTypes: ObjectType => ValType.Obj
     case opalTypes: ArrayType => ValType.Array
-
-  //val defaultObj = objectOps.makeObject(objAlloc(AllocationSite.classFile(objectCF)), objectCF, Seq())
+  
   def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => num.evalNumericOp(ICONST_0)
-    case ValType.I64 => num.evalNumericOp(LCONST_0)
-    case ValType.F32 => num.evalNumericOp(FCONST_0)
-    case ValType.F64 => num.evalNumericOp(DCONST_0)
+    case ValType.I32 => i32ops.integerLit(0)
+    case ValType.I64 => i64ops.integerLit(0)
+    case ValType.F32 => f32ops.floatingLit(0)
+    case ValType.F64 => f64ops.floatingLit(0)
     case ValType.Obj => objectOps.makeNull()
     case ValType.Array => objectOps.makeNull()

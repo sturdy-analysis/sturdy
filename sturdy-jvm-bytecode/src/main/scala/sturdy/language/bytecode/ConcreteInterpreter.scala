@@ -136,14 +136,6 @@ object ConcreteInterpreter extends Interpreter:
       val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
       invoke(obj, mth, args)
 
-    override def invokeFunction(obj: Object[OID, ClassFile, FieldAddr, FieldName], mth: Method, args: Seq[V])
-                               (invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Method, Seq[V]) => V): V =
-      invoke(obj, mth, args)
-
-    override def findFunction(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: MthName, sig: MthSig)
-                             (find: (Object[OID, ClassFile, FieldAddr, FieldName], MthName, MthSig) => Mth): Method =
-      find(obj, name, sig)
-
     override def makeNull(): Null = null
 
 

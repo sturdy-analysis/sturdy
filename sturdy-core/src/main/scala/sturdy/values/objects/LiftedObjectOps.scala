@@ -13,11 +13,5 @@ class LiftedObjectOps[FieldName, OID, V, CF, O, OV, Site, Mth, MthName, MthSig, 
 
   override def invokeFunctionCorrect(obj: OV, mthName: MthName, sig: MthSig, args: Seq[V])(invoke: (O, Mth, Seq[V]) => V): V =
     ops.invokeFunctionCorrect(extractO(obj), mthName, sig, args)(invoke)
-  override def invokeFunction(obj: OV, mth: Mth, args: Seq[V])(invoke: (O, Mth, Seq[V]) => V): V=
-    ops.invokeFunction(extractO(obj), mth, args)(invoke)
-  override def findFunction(obj: OV, name: MthName, sig: MthSig)(find: (O, MthName, MthSig) => Mth): Mth =
-    ops.findFunction(extractO(obj), name, sig)(find)
   override def makeNull(): NV = injectNull(ops.makeNull())
-  //override def isNull(nullVal: NV): Boolean =
-  //  ops.isNull(extractNull(nullVal))
 

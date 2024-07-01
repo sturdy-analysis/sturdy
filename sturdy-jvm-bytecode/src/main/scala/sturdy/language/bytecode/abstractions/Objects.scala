@@ -88,12 +88,9 @@ trait TypeObjects extends Interpreter:
       val supMth = findMethodOfSuperclass(obj, mthName, sig, project)
       ???
       //sturdy.data.mapJoin(supMth +: allSubMths, invoke(obj, _, args))
-
-    override def invokeFunction(obj: ClassFile, mth: Method, args: Seq[Value])(invoke: (ClassFile, Method, Seq[Value]) => Value): Value = ???
-
-    override def findFunction(obj: ClassFile, name: String, sig: MethodDescriptor)(find: (ClassFile, String, MethodDescriptor) => Method): Method = ???
-
+    
     override def makeNull(): Null = null
+    
   /*
   val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] {
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
