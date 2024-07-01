@@ -109,7 +109,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: Array[AID, Addr, ArrayType]): Boolean = true
 
   given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
-  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
+  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
     override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): Object[OID, ClassFile, FieldAddr, FieldName] =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -168,8 +168,8 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
-    val objectOps: ObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
-      new LiftedObjectOps[FieldName, ObjAddr, Value, ObjType, ObjRep, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
+    val objectOps: ObjectOps[FieldName, ObjAddr, Value, ObjType, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[FieldName, ObjAddr, Value, ObjType, Value, FieldInitSite, Mth, MthName, MthSig, Value, MayJoin.NoJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
         using new TestConcObjectOps(using objFieldAlloc, objFieldStore, project)
       )
     val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin] =

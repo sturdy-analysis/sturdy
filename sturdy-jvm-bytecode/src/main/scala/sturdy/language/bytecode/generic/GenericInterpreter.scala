@@ -54,7 +54,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, ObjRep, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[ArrayAddr, V, V, V, ArrayType, ArrayElemInitSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -502,7 +502,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val objectType = inst.declaringClass.mostPreciseObjectType
             val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
-            val obj = stack.peekOrAbort()
+            val obj = stack.popOrAbort()
             val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
             if (!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
@@ -522,7 +522,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           case inst: INVOKEINTERFACE =>
             val numArgs = inst.methodDescriptor.parametersCount
             val args = stack.popNOrAbort(numArgs)
-            val obj = stack.peekOrAbort()
+            val obj = stack.popOrAbort()
             val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
             if(!inst.methodDescriptor.returnType.isVoidType){
               stack.push(ret)
@@ -754,9 +754,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       array
     }
 
-  def invokeWrapper(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
-    val objVal = stack.popOrAbort()
-    invoke(mth, objVal +: args)
+  def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
+
+    invoke(mth, obj +: args)
 
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0

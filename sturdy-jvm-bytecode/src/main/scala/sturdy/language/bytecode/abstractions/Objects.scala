@@ -57,7 +57,7 @@ trait TypeObjects extends Interpreter:
       val lcSuperType = project.classHierarchy.joinObjectTypes(v1.thisType, v2.thisType, true).head
       MaybeChanged.Changed(project.classFile(lcSuperType).get)
 
-  given typeObjects(using project: Project[URL], f: Failure): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+  given typeObjects(using project: Project[URL], f: Failure): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
       cfs
 
