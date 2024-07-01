@@ -38,6 +38,9 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
+
 //  it must s"execute most general client for simple with stacked states" in {
 //    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
 //  }
@@ -129,6 +132,11 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
 
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+
+
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 
@@ -217,7 +225,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   testCfgDifference(cfg, graphFromEvents)
 
 //  println(cfg.toGraphViz)
-//  println(graphFromEvents.toGraphViz)
+  println(graphFromEvents.toGraphViz)
 
 
 //  println(tree.toGraphViz)

@@ -42,6 +42,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
+
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
@@ -120,6 +123,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(top64), List(top64))
   testFunction(fact, "fac-opt", List(top64), List(top64))
 
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(0,1))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(1,5))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(top32), List(Value.Int32(NumericInterval(42,42))))
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
@@ -192,4 +198,6 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
   println(s"${LinearStateOperationCounter.toString} in the last tests")
   println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
   Profiler.printLastMeasured()
+
+  println(graphBuilder.get.toGraphViz)
   result

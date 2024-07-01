@@ -23,6 +23,9 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
+  
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
 
   testFunction(simple, "noop", List.empty, List(Value.Int32(0)))
   testFunction(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
@@ -63,6 +66,10 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
   testFunction(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
   testFunction(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+
+  testFunction(simpleTest, "main", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simpleTest, "main", List(Value.Int32(1)), List(Value.Int32(42)))
+  testFunction(simpleTest, "main", List(Value.Int32(1000)), List(Value.Int32(42)))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {
