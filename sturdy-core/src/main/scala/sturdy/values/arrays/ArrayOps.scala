@@ -43,8 +43,10 @@ given ConcreteArrayOps[Addr, AID, V, AType, Site]
       store.write(array.vals(idx), v)
       JOptionC.some(())
     }
+    
   override def arrayLength(array: Array[AID, Addr, AType]): Int =
     array.vals.size
+    
   override def initArray(size: Int): Seq[Any] =
     Seq.fill(size){}
 

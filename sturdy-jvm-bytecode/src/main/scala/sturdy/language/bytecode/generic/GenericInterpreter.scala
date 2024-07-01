@@ -680,8 +680,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
               stack.push(obj)
             }
 
-
-
       // Arrays
       case x if (188 <= x && x <= 190) =>
         inst match
@@ -821,11 +819,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
       array
     }
-  
+
   def invokeWrapper(obj: ObjRep, mth: Method, args: Seq[V])(using Fixed): V =
     val objVal = stack.popOrAbort()
     invoke(mth, objVal +: args)
-  
+
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
 
@@ -946,7 +944,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     case opalTypes: CharType => ValType.I32
     case opalTypes: ObjectType => ValType.Obj
     case opalTypes: ArrayType => ValType.Array
-  
+
   def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => i32ops.integerLit(0)
     case ValType.I64 => i64ops.integerLit(0)

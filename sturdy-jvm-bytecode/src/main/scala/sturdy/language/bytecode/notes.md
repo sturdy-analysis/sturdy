@@ -6,5 +6,5 @@ manage void returns differently
 
 null values?
 
-
+review arrayops 
 
