@@ -7,8 +7,9 @@
     call $f
     br_if 0
     local.get 0
-    call $g
-    return
+    i32.const 5
+    call $f
+    i32.add
   )
   (func $f (param i32 i32) (result i32)
     local.get 0
@@ -19,7 +20,4 @@
     end
   )
 
-  (func $g (param i32) (result i32)
-    local.get 0
-  )
 )

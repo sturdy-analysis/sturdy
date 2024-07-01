@@ -49,7 +49,7 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val logpath = p.getParent.resolve(p.getFileName.toString + ".types.new.log")
+    val logpath = p.getParent.resolve(p.getFileName.toString + ".constant.new.log")
     Files.deleteIfExists(logpath)
     val f = Files.createFile(logpath)
     val buf = BufferedOutputStream(new FileOutputStream(f.toFile))
