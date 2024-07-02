@@ -22,13 +22,13 @@ import sturdy.utils.{*, given}
 import sturdy.utils.TestTypes.{*, given}
 import sturdy.utils.TestContexts.{*, given}
 import sturdy.utils.TestIntervalOps
-import sturdy.values.convert.ConvertTest
+import sturdy.values.convert.{*, given}
 
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
 given RelationalIntTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Int, ApronExpr[VirtAddr, Type]] with
-  val intType: Type = Type.IntType(BaseType[Int])
+  val intType: Type = Type.IntType
   override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
   override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
 
@@ -41,7 +41,7 @@ given RelationalIntTestIntervalOps(using apronState: ApronState[VirtAddr, Type])
     Interval(l, u).isEqual(iv)
 
 given RelationalLongTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Long, ApronExpr[VirtAddr, Type]] with
-  val longType: Type = Type.LongType(BaseType[Long])
+  val longType: Type = Type.LongType
   override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
   override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
   override def contains(expr: ApronExpr[VirtAddr, Type], m: Long): Boolean =
@@ -194,4 +194,10 @@ class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChec
     def shiftRight(n: BigInt, shift: Int): BigInt =
       n / BigInt(2).pow(modulo(shift, 32))
 
+
+class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
+  withApronState(
+    (RelationalIntTestIntervalOps, RelationalLongTestIntervalOps, RelationalConvertIntLong)
+  )
+)
 

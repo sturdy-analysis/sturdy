@@ -27,7 +27,7 @@ class FloatTestIntervalOps extends TestIntervalOps[Float, FloatInterval]:
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
   minValue = Float.MinValue,
   maxValue = Float.MaxValue,
-  makeFloatOps = new FloatTestIntervalOps with IntervalFloatOps {}
+  makeFloatOps = (new FloatTestIntervalOps, FloatIntervalFloatOps)
 )(using
   org.scalacheck.Arbitrary.arbFloat,
   org.scalacheck.Gen.Choose.chooseFloat,

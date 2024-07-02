@@ -2,7 +2,7 @@ package sturdy.values.integer
 
 import apron.{Interval, MpqScalar}
 import sturdy.data.given
-import sturdy.apron.{*, given}
+import sturdy.apron.{ApronExpr, *, given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
@@ -241,15 +241,15 @@ trait RelationalBaseIntegerOps
       // No underflow
     } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(toType).bigInteger), infty))) {
       val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
-      toIntegerOps.toSigned(castTo(intMod(this.toUnsigned(v), uMax), toType))
+      toIntegerOps.toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax), toType))
 
       // Over and underflow
     } else {
       // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
       // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
       val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
-      val foldFirstRound = intMod(this.toUnsigned(v), uMax)
-      val foldSecondRound = intMod(intAdd(foldFirstRound, uMax), uMax)
+      val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax)
+      val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax), uMax)
       toIntegerOps.toSigned(castTo(foldSecondRound, toType))
     }
 
@@ -329,12 +329,3 @@ given RelationalLongOps
 
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
-
-given RelationalConvertIntLong[Addr: Ordering: ClassTag, Type: ApronType: Join](using intOps: RelationalIntOps[Addr,Type], convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
-  case (from, conf@Bits.Signed)   => cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
-  case (from, conf@Bits.Unsigned) => cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
-  case (_,    conf@Bits.Raw)      => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-}
-
-given RelationalConvertLongInt[Addr: Ordering: ClassTag, Type: ApronType: Join](using intOps: RelationalIntOps[Addr,Type], longOps: RelationalLongOps[Addr,Type], convertType: ConvertLongInt[Type, Type]): ConvertLongInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
-  (from, conf) => cast(intOps.foldInteger(from), RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))

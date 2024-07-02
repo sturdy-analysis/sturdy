@@ -36,6 +36,8 @@ given TryContaining[A](using containing: Containing[A]): Containing[Try[A]] with
         containing.contains(cont, elem)
       case (Failure(ex1), Failure(ex2)) =>
         ex1.getClass == ex2.getClass
+      case (Success(ex1), Failure(ex2)) =>
+        ex1.getClass == ex2.getClass
       case (_,_) =>
         false
 

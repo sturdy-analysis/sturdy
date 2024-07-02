@@ -23,7 +23,7 @@ class FloatOpsTest
   (
     minValue: L,
     maxValue: L,
-    makeFloatOps: => TestIntervalOps[L,N] & FloatOps[L, N]
+    makeFloatOps: => (TestIntervalOps[L,N], FloatOps[L, N])
   )
   (using
    ord: Ordering[L],
@@ -33,8 +33,8 @@ class FloatOpsTest
 
   test("Float literal") {
     forAll("n") { (n: L) =>
-      implicit val floatOps: TestIntervalOps[L, N] & FloatOps[L, N] = makeFloatOps
-      given Equality[N] = implicitly
+      implicit val (ivOps, floatOps) = makeFloatOps
+//      given Equality[N] = implicitly
       floatOps.floatingLit(n) should equal((n,n))
     }
 
@@ -143,8 +143,8 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            implicit val floatOps = makeFloatOps
-            testFun(floatOps, floatOps.constant(x), floatOps.constant(y)) should contain (expectedFun(x, y))
+            implicit val (ivOps,floatOps) = makeFloatOps
+            testFun(floatOps, ivOps.constant(x), ivOps.constant(y)) should contain (expectedFun(x, y))
           }
       }
     }
@@ -153,8 +153,8 @@ class FloatOpsTest
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            implicit val floatOps = makeFloatOps
-            testFun(floatOps, floatOps.interval(x1, x2), floatOps.interval(y1, y2)) should contain (expectedFun(x, y))
+            implicit val (ivOps,floatOps) = makeFloatOps
+            testFun(floatOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)) should contain (expectedFun(x, y))
           }
       }
     }
@@ -164,8 +164,8 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            implicit val floatOps = makeFloatOps
-            testFun(floatOps, floatOps.constant(x)) should contain (expectedFun(x))
+            implicit val (ivOps,floatOps) = makeFloatOps
+            testFun(floatOps, ivOps.constant(x)) should contain (expectedFun(x))
           }
       }
     }
@@ -174,8 +174,8 @@ class FloatOpsTest
       forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            implicit val floatOps = makeFloatOps
-            testFun(floatOps, floatOps.interval(x1, x2)) should contain (expectedFun(x))
+            implicit val (ivOps,floatOps) = makeFloatOps
+            testFun(floatOps, ivOps.interval(x1, x2)) should contain (expectedFun(x))
           }
       }
     }

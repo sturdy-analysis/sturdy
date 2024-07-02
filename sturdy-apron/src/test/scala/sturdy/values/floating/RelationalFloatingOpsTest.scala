@@ -23,8 +23,8 @@ import sturdy.values.types.{BaseType, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-trait RelationalFloatTestIntervalOps(using apronState: ApronState[VirtAddr, Type]) extends TestIntervalOps[Float, ApronExpr[VirtAddr, Type]]:
-  val floatType: Type = Type.FloatType(BaseType[Float])
+given RelationalFloatTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Float, ApronExpr[VirtAddr, Type]] with
+  val floatType: Type = Type.FloatType
   override def constant(i: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
   override def interval(low: Float, high: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
   override def contains(expr: ApronExpr[VirtAddr, Type], m: Float): Boolean =
@@ -35,8 +35,8 @@ trait RelationalFloatTestIntervalOps(using apronState: ApronState[VirtAddr, Type
     val iv = this.apronState.getInterval(expr)
     Interval(DoubleScalar(l), DoubleScalar(u)).isEqual(iv)
 
-trait RelationalDoubleTestIntervalOps(using apronState: ApronState[VirtAddr, Type]) extends TestIntervalOps[Double, ApronExpr[VirtAddr, Type]]:
-  val floatType: Type = Type.DoubleType(BaseType[Double])
+given RelationalDoubleTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Double, ApronExpr[VirtAddr, Type]] with
+  val floatType: Type = Type.DoubleType
   override def constant(i: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
 
   override def interval(low: Double, high: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
@@ -61,7 +61,7 @@ trait RelationalDoubleTestIntervalOps(using apronState: ApronState[VirtAddr, Typ
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = apronState
     val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    new RelationalFloatOps[Float, VirtAddr, Type] with RelationalFloatTestIntervalOps {}
+    (RelationalFloatTestIntervalOps, RelationalFloatOps[Float, VirtAddr, Type])
   }
 )
 
@@ -77,6 +77,6 @@ class RelationalDoubleOpsTest extends FloatOpsTest[Double, ApronExpr[VirtAddr, T
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = apronState
     val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    new RelationalFloatOps[Double, VirtAddr, Type] with RelationalDoubleTestIntervalOps {}
+    (RelationalDoubleTestIntervalOps, RelationalFloatOps[Double, VirtAddr, Type])
   }
 )

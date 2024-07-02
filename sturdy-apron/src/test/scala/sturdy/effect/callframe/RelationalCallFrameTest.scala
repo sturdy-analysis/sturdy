@@ -25,7 +25,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   type CallSite = String
   type Val = ApronExpr[VirtualAddress[Ctx], Type]
   type ValIntern = ApronExpr[PhysicalAddress[Ctx], Type]
-  val intType: Type = Type.IntType(BaseType[Int])
+  val intType: Type = Type.IntType
 
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)

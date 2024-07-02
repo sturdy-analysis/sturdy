@@ -3,9 +3,9 @@ package sturdy.utils
 import sturdy.apron.{*, given}
 import sturdy.effect.failure.{*, given}
 import sturdy.values.booleans.{BooleanOps, LiftedBooleanOps}
-import sturdy.values.config.Bits
-import sturdy.values.convert.{*,given}
-import sturdy.values.floating.{*,given}
+import sturdy.values.config.{Bits, Overflow}
+import sturdy.values.convert.{*, given}
+import sturdy.values.floating.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
@@ -20,130 +20,132 @@ object TestTypes:
   import Error.*
 
   enum Type:
-    case IntType(baseType: BaseType[Int])
-    case LongType(baseType: BaseType[Long])
-    case FloatType(baseType: BaseType[Float])
-    case DoubleType(baseType: BaseType[Double])
-    case BoolType(baseType: BaseType[Boolean])
+    case IntType
+    case LongType
+    case FloatType
+    case DoubleType
+    case BoolType
 
     def asInt(using f: Failure): BaseType[Int] =
       this match
-        case IntType(tpe) => tpe
+        case IntType => BaseType[Int]
         case _ => f.fail(TypeError, s"Expected int, but got $this")
     def asLong(using f: Failure): BaseType[Long] =
       this match
-        case LongType(tpe) => tpe
+        case LongType => BaseType[Long]
         case _ => f.fail(TypeError, s"Expected int, but got $this")
     def asFloat(using f: Failure): BaseType[Float] =
       this match
-        case FloatType(tpe) => tpe
+        case FloatType => BaseType[Float]
         case _ => f.fail(TypeError, s"Expected float, but got $this")
 
     def asDouble(using f: Failure): BaseType[Double] =
       this match
-        case DoubleType(tpe) => tpe
+        case DoubleType => BaseType[Double]
         case _ => f.fail(TypeError, s"Expected float, but got $this")
 
     def asBool(using f: Failure): BaseType[Boolean] =
       this match
-        case BoolType(tpe) => tpe
+        case BoolType => BaseType[Boolean]
         case _ => f.fail(TypeError, s"Expected bool, but got $this")
 
     override def toString: String =
       this match
-        case IntType(_) => "int"
-        case LongType(_) => "long"
-        case FloatType(_) => "float"
-        case DoubleType(_) => "doulbe"
-        case BoolType(_) => "boolean"
+        case IntType => "int"
+        case LongType => "long"
+        case FloatType => "float"
+        case DoubleType => "doulbe"
+        case BoolType => "boolean"
 
   given Ordering[Type] = {
-    case (Type.IntType(_), Type.IntType(_)) |
-         (Type.LongType(_), Type.LongType(_)) |
-         (Type.FloatType(_), Type.FloatType(_)) |
-         (Type.DoubleType(_), Type.DoubleType(_)) |
-         (Type.BoolType(_), Type.BoolType(_)) => 0
+    case (Type.IntType, Type.IntType) |
+         (Type.LongType, Type.LongType) |
+         (Type.FloatType, Type.FloatType) |
+         (Type.DoubleType, Type.DoubleType) |
+         (Type.BoolType, Type.BoolType) => 0
 
-    case (Type.IntType(_), Type.LongType(_)) |
-         (Type.IntType(_), Type.FloatType(_)) |
-         (Type.IntType(_), Type.DoubleType(_)) |
-         (Type.IntType(_), Type.BoolType(_)) |
+    case (Type.IntType, Type.LongType) |
+         (Type.IntType, Type.FloatType) |
+         (Type.IntType, Type.DoubleType) |
+         (Type.IntType, Type.BoolType) |
 
-         (Type.LongType(_), Type.FloatType(_)) |
-         (Type.LongType(_), Type.DoubleType(_)) |
-         (Type.LongType(_), Type.BoolType(_)) |
+         (Type.LongType, Type.FloatType) |
+         (Type.LongType, Type.DoubleType) |
+         (Type.LongType, Type.BoolType) |
 
-         (Type.FloatType(_), Type.DoubleType(_)) |
-         (Type.FloatType(_), Type.BoolType(_)) |
+         (Type.FloatType, Type.DoubleType) |
+         (Type.FloatType, Type.BoolType) |
 
-         (Type.DoubleType(_), Type.BoolType(_))
+         (Type.DoubleType, Type.BoolType)
            => 1
     case
-         (Type.BoolType(_), Type.DoubleType(_)) |
-         (Type.BoolType(_), Type.FloatType(_)) |
-         (Type.BoolType(_), Type.LongType(_)) |
-         (Type.BoolType(_), Type.IntType(_)) |
+         (Type.BoolType, Type.DoubleType) |
+         (Type.BoolType, Type.FloatType) |
+         (Type.BoolType, Type.LongType) |
+         (Type.BoolType, Type.IntType) |
 
-         (Type.DoubleType(_), Type.FloatType(_)) |
-         (Type.DoubleType(_), Type.LongType(_)) |
-         (Type.DoubleType(_), Type.IntType(_)) |
+         (Type.DoubleType, Type.FloatType) |
+         (Type.DoubleType, Type.LongType) |
+         (Type.DoubleType, Type.IntType) |
 
-         (Type.FloatType(_), Type.LongType(_)) |
-         (Type.FloatType(_), Type.IntType(_)) |
+         (Type.FloatType, Type.LongType) |
+         (Type.FloatType, Type.IntType) |
 
-         (Type.LongType(_), Type.IntType(_))
+         (Type.LongType, Type.IntType)
             => -1
   }
 
-  given IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = Type.IntType(_))
-  given IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = Type.LongType(_))
-  given FloatOps[Float, Type] = LiftedFloatOps[Float, Type, BaseType[Float]](extract = _.asFloat, inject = Type.FloatType(_))
-  given FloatOps[Double, Type] = LiftedFloatOps[Double, Type, BaseType[Double]](extract = _.asDouble, inject = Type.DoubleType(_))
-  given OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
-  given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = Type.BoolType(_))
-  given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = Type.BoolType(_))
-  given ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = Type.LongType(_))
-  given ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = Type.IntType(_))
+  given IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = _ => Type.IntType)
+  given IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = _ => Type.LongType)
+  given FloatOps[Float, Type] = LiftedFloatOps[Float, Type, BaseType[Float]](extract = _.asFloat, inject = _ => Type.FloatType)
+  given FloatOps[Double, Type] = LiftedFloatOps[Double, Type, BaseType[Double]](extract = _.asDouble, inject = _ => Type.DoubleType)
+  given OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
+  given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
+  given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = _ => Type.BoolType)
+  given ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = _ => Type.LongType)
+  given ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = _ => Type.IntType)
+  given ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asFloat, inject = _ => Type.LongType)
+
 
   given ApronType[Type] with
     extension (tpe: Type)
       override def apronRepresentation: ApronRepresentation =
         tpe match
-          case Type.IntType(baseType) => baseType.apronRepresentation
-          case Type.LongType(baseType) => baseType.apronRepresentation
-          case Type.BoolType(baseType) => baseType.apronRepresentation
-          case Type.FloatType(baseType) => baseType.apronRepresentation
-          case Type.DoubleType(baseType) => baseType.apronRepresentation
+          case Type.IntType => BaseType[Int].apronRepresentation
+          case Type.LongType => BaseType[Long].apronRepresentation
+          case Type.BoolType => BaseType[Boolean].apronRepresentation
+          case Type.FloatType => BaseType[Float].apronRepresentation
+          case Type.DoubleType => BaseType[Double].apronRepresentation
 
       override def roundingDir: RoundingDir =
         tpe match
-          case Type.IntType(baseType) => baseType.roundingDir
-          case Type.LongType(baseType) => baseType.roundingDir
-          case Type.FloatType(baseType) => baseType.roundingDir
-          case Type.DoubleType(baseType) => baseType.roundingDir
-          case Type.BoolType(baseType) => baseType.roundingDir
+          case Type.IntType => BaseType[Int].roundingDir
+          case Type.LongType => BaseType[Long].roundingDir
+          case Type.BoolType => BaseType[Boolean].roundingDir
+          case Type.FloatType => BaseType[Float].roundingDir
+          case Type.DoubleType => BaseType[Double].roundingDir
 
       override def roundingType: RoundingType =
         tpe match
-          case Type.IntType(baseType) => baseType.roundingType
-          case Type.LongType(baseType) => baseType.roundingType
-          case Type.FloatType(baseType) => baseType.roundingType
-          case Type.DoubleType(baseType) => baseType.roundingType
-          case Type.BoolType(baseType) => baseType.roundingType
+          case Type.IntType => BaseType[Int].roundingType
+          case Type.LongType => BaseType[Long].roundingType
+          case Type.BoolType => BaseType[Boolean].roundingType
+          case Type.FloatType => BaseType[Float].roundingType
+          case Type.DoubleType => BaseType[Double].roundingType
 
       override def byteSize: Int =
         tpe match
-          case Type.IntType(baseType) => baseType.byteSize
-          case Type.LongType(baseType) => baseType.byteSize
-          case Type.FloatType(baseType) => baseType.byteSize
-          case Type.DoubleType(baseType) => baseType.byteSize
-          case Type.BoolType(baseType) => baseType.byteSize
+          case Type.IntType => BaseType[Int].byteSize
+          case Type.LongType => BaseType[Long].byteSize
+          case Type.BoolType => BaseType[Boolean].byteSize
+          case Type.FloatType => BaseType[Float].byteSize
+          case Type.DoubleType => BaseType[Double].byteSize
 
   given[W <: Widening]: Combine[Type, W] = {
-    case (t@Type.IntType(_), Type.IntType(_)) => MaybeChanged.Unchanged(t)
-    case (t@Type.LongType(_), Type.LongType(_)) => MaybeChanged.Unchanged(t)
-    case (t@Type.FloatType(_), Type.FloatType(_)) => MaybeChanged.Unchanged(t)
-    case (t@Type.DoubleType(_), Type.DoubleType(_)) => MaybeChanged.Unchanged(t)
-    case (t@Type.BoolType(_), Type.BoolType(_)) => MaybeChanged.Unchanged(t)
+    case (t@Type.IntType, Type.IntType) => MaybeChanged.Unchanged(t)
+    case (t@Type.LongType, Type.LongType) => MaybeChanged.Unchanged(t)
+    case (t@Type.FloatType, Type.FloatType) => MaybeChanged.Unchanged(t)
+    case (t@Type.DoubleType, Type.DoubleType) => MaybeChanged.Unchanged(t)
+    case (t@Type.BoolType, Type.BoolType) => MaybeChanged.Unchanged(t)
     case (t1, t2) => throw new IllegalStateException(s"Cannot join type $t1 with type $t2")
   }
