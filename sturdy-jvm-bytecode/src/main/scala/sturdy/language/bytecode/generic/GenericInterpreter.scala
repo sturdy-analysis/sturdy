@@ -54,7 +54,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[String, ObjAddr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[(ObjectType, String), ObjAddr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[ArrayAddr, V, V, V, ArrayType, ArrayElemInitSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -135,7 +135,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
             val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
             val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
-            objectOps.setField(stringObj, "value", stringArray)
+            objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
             stack.push(stringObj)
 
           case inst: LoadMethodHandle =>
@@ -157,7 +157,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
             val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
             val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
-            objectOps.setField(stringObj, "value", stringArray)
+            objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
             stack.push(stringObj)
           case inst: LoadMethodHandle_W =>
             ???
@@ -477,12 +477,12 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         inst match
           case inst: GETFIELD =>
             val obj = stack.popOrAbort()
-            val field = objectOps.getField(obj, inst.name).getOrElse(fail(UnboundField, inst.name))
+            val field = objectOps.getField(obj, (inst.declaringClass, inst.name)).getOrElse(fail(UnboundField, inst.name))
             stack.push(field)
           case inst: PUTFIELD =>
             val value = stack.popOrAbort()
             val obj = stack.popOrAbort()
-            objectOps.setField(obj, inst.name, value)
+            objectOps.setField(obj, (inst.declaringClass, inst.name), value)
 
 
       // Invoke Functions
@@ -580,8 +580,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             }
             else{
               val cfs = project.classFile(inst.objectType).get
-              val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq.distinct
-              val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), field.name)))
+              val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq
+              val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), (field.classFile.thisType, field.name))))
               val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
               stack.push(obj)
             }
@@ -729,7 +729,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def createLibraryObj(toLoad: ObjectType, site: InstructionSite): V =
     val cfs = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
-    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), field.name)))
+    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), (field.classFile.thisType, field.name))))
     val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
 
@@ -803,14 +803,14 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def evalNativeStatic(mth: Method, args: Seq[V]) =
     mth.name match
       case "makeConcatWithConstants" =>
-        val baseString = arrayOps.getArray(objectOps.getField(args(0), "value").get).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(args(1), "value").get).map(vals => vals.get)
+        val baseString = arrayOps.getArray(objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = InstructionSite(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
           concattedString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), InstructionSite(mth, 0))
-        objectOps.setField(stringObj, "value", stringArray)
+        objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)

@@ -1,5 +1,7 @@
 public class AbsurdMath extends ComplicatedMath {
 
+    int x = 0;
+    int y = 0;
     public AbsurdMath(int x, int y, int z){
         super(x,y,z);
     }

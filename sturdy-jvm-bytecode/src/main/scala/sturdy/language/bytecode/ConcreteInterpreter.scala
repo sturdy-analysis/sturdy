@@ -44,7 +44,7 @@ object ConcreteInterpreter extends Interpreter:
   override type TypeRep = ReferenceType
   override type NullVal = Null
   override type ObjAddr = Int
-  override type FieldName = String
+  override type FieldName = (ObjectType, String)
   override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
   override type ArrayAddr = Int
   override type AType = ArrayType

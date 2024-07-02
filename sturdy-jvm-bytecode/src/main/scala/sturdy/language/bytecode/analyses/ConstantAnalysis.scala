@@ -108,7 +108,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
 
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
-    override val objectOps: ObjectOps[String, ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
+    override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
 //      new LiftedObjectOps[FieldAddr, FieldName, ObjAddr, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
 //        using new ConcreteObjectOpsWithJoin(using objFieldAlloc, objFieldStore)
 //      )
