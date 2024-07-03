@@ -8,6 +8,8 @@ import sturdy.values.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+import apron.{DoubleScalar, Interval}
+import sturdy.{IsSound, Soundness}
 
 given RelationalFloatOps
   [
@@ -124,3 +126,19 @@ given RelationalFloatOps
         addr(result, resultType)
       }
     }
+
+  given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
+    override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
+      val iv = this.apronState.getInterval(expr)
+      if (Interval(DoubleScalar(c), DoubleScalar(c)).isLeq(iv))
+        IsSound.Sound
+      else
+        IsSound.NotSound(s"$expr with interval $iv does not contain $c")
+
+given SoundnessDoubleApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Double, ApronExpr[Addr, Type]] with
+  override def isSound(c: Double, expr: ApronExpr[Addr, Type]): IsSound =
+    val iv = this.apronState.getInterval(expr)
+    if(Interval(DoubleScalar(c),DoubleScalar(c)).isLeq(iv))
+      IsSound.Sound
+    else
+      IsSound.NotSound(s"$expr with interval $iv does not contain $c")

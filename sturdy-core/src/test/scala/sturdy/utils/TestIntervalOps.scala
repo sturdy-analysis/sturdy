@@ -4,6 +4,7 @@ import org.scalactic.Equality
 import org.scalatest.enablers.Containing
 import org.scalatest.matchers.should.Matchers.{fail, should}
 import org.scalatest.matchers.{MatchResult, Matcher}
+import sturdy.effect.failure.AFallible
 
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
@@ -28,24 +29,6 @@ given IntervalContaining[L, IV](using ivOps: TestIntervalOps[L, IV]): Containing
 
   override def containsOneOf(interval: IV, elements: collection.Seq[Any]): Boolean =
     elements.exists(contains(interval, _))
-
-given TryContaining[A](using containing: Containing[A]): Containing[Try[A]] with
-  override def contains(container: Try[A], element: Any): Boolean =
-    (container, element) match
-      case (Success(cont), Success(elem)) =>
-        containing.contains(cont, elem)
-      case (Failure(ex1), Failure(ex2)) =>
-        ex1.getClass == ex2.getClass
-      case (Success(ex1), Failure(ex2)) =>
-        ex1.getClass == ex2.getClass
-      case (_,_) =>
-        false
-
-  override def containsNoneOf(container: Try[A], elements: collection.Seq[Any]): Boolean =
-    elements.forall(!contains(container, _))
-
-  override def containsOneOf(container: Try[A], elements: collection.Seq[Any]): Boolean =
-    elements.exists(contains(container, _))
 
 given IntervalEquality[L, IV](using ivOps: TestIntervalOps[L, IV]): Equality[IV] with
   override def areEqual(iv: IV, other: Any): Boolean =

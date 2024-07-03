@@ -10,6 +10,7 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+import sturdy.{IsSound, Soundness}
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
 
 trait RelationalBaseIntegerOps
@@ -312,6 +313,13 @@ given RelationalIntOps
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
 
+given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Int, ApronExpr[Addr, Type]] with
+  override def isSound(c: Int, expr: ApronExpr[Addr, Type]): IsSound =
+    val iv = apronState.getInterval(expr)
+    if (Interval(c, c).isLeq(iv))
+      IsSound.Sound
+    else
+      IsSound.NotSound(s"$expr with interval $iv does not contain $c")
 
 given RelationalLongOps
   [
@@ -329,3 +337,12 @@ given RelationalLongOps
 
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
+
+given SoundnessLongApronExpr[Addr, Type](using apronState: ApronState[Addr,Type]): Soundness[Long, ApronExpr[Addr,Type]] with
+  override def isSound(c: Long, expr: ApronExpr[Addr, Type]): IsSound =
+    val iv = apronState.getInterval(expr)
+    val bc = BigInt(c).bigInteger
+    if(Interval(bc, bc).isLeq(iv))
+      IsSound.Sound
+    else
+      IsSound.NotSound(s"$expr with interval $iv does not contain $c")

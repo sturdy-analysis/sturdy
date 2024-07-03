@@ -193,11 +193,3 @@ class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChec
 
     def shiftRight(n: BigInt, shift: Int): BigInt =
       n / BigInt(2).pow(modulo(shift, 32))
-
-
-class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
-  withApronState(
-    (RelationalIntTestIntervalOps, RelationalLongTestIntervalOps, RelationalConvertIntLong)
-  )
-)
-
