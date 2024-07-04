@@ -10,11 +10,6 @@ import sturdy.values.{Finite, Top}
 
 import math.Ordered.orderingToOrdered
 
-
-given failure: Failure = new CollectedFailures[FailureKind]
-given Finite[FailureKind] with {}
-given effectState: EffectStack = EffectStack(failure)
-
 given NumericIntervalTestIntervalOps[I: Ordering]: TestIntervalOps[I, NumericInterval[I]] with
   override def constant(i: I): NumericInterval[I] = NumericInterval(i, i)
 
@@ -26,10 +21,19 @@ given NumericIntervalTestIntervalOps[I: Ordering]: TestIntervalOps[I, NumericInt
   override def equals(n: NumericInterval[I], l: I, u: I): Boolean =
     n.low == l && n.high == u
 
-class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
-  (NumericIntervalTestIntervalOps[Int], new NumericIntervalIntegerOps[Int](20))
-)
+given IntegerOps[Int, Int] = ConcreteIntegerOps(using new ConcreteFailure())
+given IntegerOps[Long, Long] = ConcreteLongOps(using new ConcreteFailure())
 
-class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]](
+class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]]({
+  given failure: Failure = new CollectedFailures[FailureKind]
+  given Finite[FailureKind] with {}
+  given effectState: EffectStack = EffectStack(failure)
+  (NumericIntervalTestIntervalOps[Int], new NumericIntervalIntegerOps[Int](20))
+})
+
+class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]]({
+  given failure: Failure = new CollectedFailures[FailureKind]
+  given Finite[FailureKind] with {}
+  given effectState: EffectStack = EffectStack(failure)
   (NumericIntervalTestIntervalOps[Long], new NumericIntervalIntegerOps[Long](20))
-)
+})

@@ -1,6 +1,8 @@
 package sturdy.values.config
 
-import sturdy.effect.failure.FailureKind
+import sturdy.effect.failure.{Failure, FailureKind}
 
+case object UnsupportedConfiguration extends FailureKind
 
-case class UnsupportedConfiguration[Config](conf: Config, msg: String) extends Exception(conf.toString + ": " + msg)
+inline def unsupportedConfiguration[Config](using failure: Failure)(conf: Config, klass: Any) =
+  failure(UnsupportedConfiguration, s"$conf, ${klass.getClass.getSimpleName}")

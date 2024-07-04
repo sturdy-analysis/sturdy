@@ -27,20 +27,42 @@ import sturdy.values.types.{BaseType, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
+given ConcreteConvertIntLong = ConcreteConvertIntLong(using new ConcreteFailure)
+given ConcreteConvertFloatLong = ConcreteConvertFloatLong(using new ConcreteFailure)
+
+
 class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
   withApronState(
-    (RelationalIntTestIntervalOps, RelationalLongTestIntervalOps, RelationalConvertIntLong, soundnessAFallible(using SoundnessLongApronExpr))
+    (
+      RelationalIntTestIntervalOps,
+      RelationalLongTestIntervalOps,
+      RelationalConvertIntLong,
+      soundnessAFallible(using SoundnessLongApronExpr),
+      implicitly
+    )
   )
 )
 
 class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], NilCC.type](
   withApronState(
-    (RelationalLongTestIntervalOps, RelationalIntTestIntervalOps , RelationalConvertLongInt, soundnessAFallible(using sturdy.values.integer.SoundnessIntApronExpr))
+    (
+      RelationalLongTestIntervalOps,
+      RelationalIntTestIntervalOps,
+      RelationalConvertLongInt,
+      soundnessAFallible(using sturdy.values.integer.SoundnessIntApronExpr),
+      implicitly
+    )
   )
 )
 
 class RelationalConvertFloatLongTest extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   withApronState(
-    (RelationalFloatTestIntervalOps, RelationalLongTestIntervalOps , RelationalConvertFloatLong, soundnessAFallible(using SoundnessLongApronExpr))
+    (
+      RelationalFloatTestIntervalOps,
+      RelationalLongTestIntervalOps ,
+      RelationalConvertFloatLong,
+      soundnessAFallible(using SoundnessLongApronExpr),
+      implicitly
+    )
   )
 )

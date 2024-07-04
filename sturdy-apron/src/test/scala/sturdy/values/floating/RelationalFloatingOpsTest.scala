@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.apron.{*, given}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.util.{Lazy, lazily}
@@ -53,10 +53,12 @@ given RelationalDoubleTestIntervalOps(using apronState: ApronState[VirtAddr, Typ
   minValue = Float.MinValue,
   maxValue = Float.MaxValue,
   makeFloatOps = {
+    given Finite[FailureKind] with {}
+    given failure: Failure = new CollectedFailures[FailureKind]()
     given apronManager: Manager = new Octagon
     var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
+    given effectStack: EffectStack = EffectStack(
+      RecencyClosure(apronState.recencyStore), failure
     )
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = apronState
@@ -69,10 +71,12 @@ class RelationalDoubleOpsTest extends FloatOpsTest[Double, ApronExpr[VirtAddr, T
   minValue = Double.MinValue,
   maxValue = Double.MaxValue,
   makeFloatOps = {
+    given Finite[FailureKind] with {}
+    given failure: Failure = new CollectedFailures[FailureKind]()
     given apronManager: Manager = new Octagon
     var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
+    given effectStack: EffectStack = EffectStack(
+      RecencyClosure(apronState.recencyStore), failure
     )
     apronState = RecencyRelationalStore[Ctx, Type]
     given ApronState[VirtAddr, Type] = apronState

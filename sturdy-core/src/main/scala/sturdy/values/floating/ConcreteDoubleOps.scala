@@ -4,7 +4,7 @@ import sturdy.values.convert.*
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 
@@ -91,7 +91,8 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         0
       else
         d.toLong.toInt
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ =>
+      unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Long] with
@@ -139,7 +140,8 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         (d - 9223372036854775808.0d).toLong | Long.MinValue
       else
         d.toLong
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ =>
+      unsupportedConfiguration(conf, this)
 
 given ConcreteConvertDoubleFloat: ConvertDoubleFloat[Double, Float] with
   /*

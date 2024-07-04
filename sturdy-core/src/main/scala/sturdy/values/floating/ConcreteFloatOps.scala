@@ -3,7 +3,7 @@ package sturdy.values.floating
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
@@ -91,7 +91,8 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
         0
       else
         f.toLong.toInt
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ =>
+      unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long] with
@@ -105,17 +106,17 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
     case (config.Overflow.Fail && config.Bits.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (f >= -Long.MinValue.toFloat || f < Long.MinValue.toFloat)
+      else if (BigDecimal(f).toBigInt.compare(Long.MinValue) < 0 || BigDecimal(f).toBigInt.compare(Long.MaxValue) > 0)
         fa.fail(ConversionFailure, s"float $f out of long range")
       else
         f.toLong
     case (config.Overflow.Fail && config.Bits.Unsigned) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (f >= -Long.MinValue.toFloat * 2.0d || f <= -1.0d)
+      else if (BigDecimal(f).toBigInt.compare(-BigInt(Long.MinValue) * 2) > 0 || f <= -1.0d)
         fa.fail(ConversionFailure, s"float $f out of long range")
       else if (f >= -Long.MinValue.toFloat)
-        (f - 9223372036854775808.0d).toLong | Long.MinValue
+        (f - Long.MaxValue.toDouble).toLong | Long.MinValue
       else
         f.toLong
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
@@ -138,7 +139,8 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         (f - 9223372036854775808.0d).toLong | Long.MinValue
       else
         f.toLong
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ =>
+      fa.fail(UnsupportedConfiguration, s"conf = $conf, class = ${this.getClass.getSimpleName}")
 
 
 given ConcreteConvertFloatDouble: ConvertFloatDouble[Float, Double] with

@@ -9,7 +9,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.apron.{*, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.*
@@ -54,26 +54,16 @@ given RelationalLongTestIntervalOps(using apronState: ApronState[VirtAddr, Type]
     val bu = BigInt(u).bigInteger
     Interval(bl, bu).isEqual(iv)
 
-def withApronState[T](f: (Manager, EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
-  given apronManager: Manager = new apron.Polka(true)
-  var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-  given effectStack: EffectStack = new EffectStack(
-    RecencyClosure(apronState.recencyStore)
-  )
-  apronState = RecencyRelationalStore[Ctx, Type]
-  given ApronState[VirtAddr, Type] = apronState
-  f
-
 class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
-  withApronState(
+  withApronState{
     (RelationalIntTestIntervalOps, new RelationalIntOps[VirtAddr, Type])
-  )
+  }
 )
 
 class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
-  withApronState(
+  withApronState{
     (RelationalLongTestIntervalOps, new RelationalLongOps[VirtAddr, Type])
-  )
+  }
 )
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:

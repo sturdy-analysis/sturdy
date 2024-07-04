@@ -9,6 +9,7 @@ import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore
 import sturdy.util.{Lazy, lazily}
 import sturdy.utils.TestContexts.{*, given}
 import sturdy.utils.TestTypes.{*, given}
+import sturdy.utils.{VirtAddr, withApronState}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}
@@ -17,15 +18,7 @@ import sturdy.values.types.{BaseType, given}
 class RelationalOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]](
   minValue = Integer.MIN_VALUE,
   maxValue = Integer.MAX_VALUE,
-  makeOrderingOps = {
-    given apronManager: Manager = new apron.Polka(true)
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = apronState
-    given lazyApronState: Lazy[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]] = lazily(apronState)
+  makeOrderingOps = withApronState {
     val intType: Type = Type.IntType
     new RelationalOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)

@@ -6,7 +6,7 @@ import sturdy.language.wasm.generic.*
 import sturdy.values.*
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.booleans.LiftedBooleanBranching
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
@@ -18,7 +18,7 @@ import swam.syntax.LoadNInst
 import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
-import swam.syntax.{f32, f64, i64, i32}
+import swam.syntax.{f32, f64, i32, i64}
 import swam.FuncType
 import swam.ValType
 
@@ -235,7 +235,7 @@ trait Interpreter:
         case (Value.Int64(l), _: i64.Store) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
         case (Value.Float32(f), _: f32.Store) => encodeF32(f, config.BytesSize.Float && LITTLE_ENDIAN)
         case (Value.Float64(d), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
-        case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+        case _ => unsupportedConfiguration(conf, this)
 
     override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst]]:
       override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst]): Value = conf.t match

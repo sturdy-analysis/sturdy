@@ -9,9 +9,6 @@ import sturdy.utils.TestIntervalOps
 import sturdy.values.floating.{FloatInterval, IntervalFloatOps}
 import sturdy.values.{Finite, Top}
 given Ordering[Float] = scala.math.Ordering.Float.TotalOrdering
-given failure: Failure = new CollectedFailures[FailureKind]
-given Finite[FailureKind] with {}
-given effectState: EffectStack = EffectStack(failure)
 
 class FloatTestIntervalOps extends TestIntervalOps[Float, FloatInterval]:
   override def constant(i: Float): FloatInterval = FloatInterval(i,i)

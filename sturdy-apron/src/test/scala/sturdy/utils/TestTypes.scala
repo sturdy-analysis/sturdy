@@ -1,6 +1,7 @@
 package sturdy.utils
 
 import sturdy.apron.{*, given}
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
 import sturdy.values.booleans.{BooleanOps, LiftedBooleanOps}
 import sturdy.values.config.{Bits, Overflow}
@@ -95,16 +96,16 @@ object TestTypes:
             => -1
   }
 
-  given IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = _ => Type.IntType)
-  given IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = _ => Type.LongType)
-  given FloatOps[Float, Type] = LiftedFloatOps[Float, Type, BaseType[Float]](extract = _.asFloat, inject = _ => Type.FloatType)
-  given FloatOps[Double, Type] = LiftedFloatOps[Double, Type, BaseType[Double]](extract = _.asDouble, inject = _ => Type.DoubleType)
-  given OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
-  given EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
-  given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = _ => Type.BoolType)
-  given ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = _ => Type.LongType)
-  given ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = _ => Type.IntType)
-  given ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asFloat, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): FloatOps[Float, Type] = LiftedFloatOps[Float, Type, BaseType[Float]](extract = _.asFloat, inject = _ => Type.FloatType)
+  given (using failure: Failure, effectStack: EffectStack): FloatOps[Double, Type] = LiftedFloatOps[Double, Type, BaseType[Double]](extract = _.asDouble, inject = _ => Type.DoubleType)
+  given (using failure: Failure, effectStack: EffectStack): OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
+  given (using failure: Failure, effectStack: EffectStack): EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
+  given (using failure: Failure, effectStack: EffectStack): BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = _ => Type.BoolType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asFloat, inject = _ => Type.LongType)
 
 
   given ApronType[Type] with
