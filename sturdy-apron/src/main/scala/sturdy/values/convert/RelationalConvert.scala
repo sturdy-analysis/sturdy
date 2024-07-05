@@ -37,15 +37,14 @@ given RelationalConvertFloatLong[Addr: Ordering: ClassTag, Type: ApronType: Join
     case (from, conf@(_ && Bits.Raw)) => ???
     case (from, conf@(Overflow.Allow && Bits.Signed)) =>
       val toType = convertType(from._type, conf)
-      val expr = cast(from, RoundingType.Int, RoundingDir.Zero, toType)
-      val iv = apronState.getInterval(expr)
+      val iv = apronState.getInterval(from)
       if(iv.isLeq(Interval(Long.MinValue, Long.MaxValue))) {
-        expr
+        cast(from, RoundingType.Int, RoundingDir.Zero, toType)
       } else {
         apronState.withTempVars(toType) {
           (res, _) =>
             val resExpr = addr(res, toType)
-            apronState.assign(res, expr)
+            apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
             apronState.ifThenElse(le(resExpr, longLit(Long.MaxValue, toType))) {
             } {
               apronState.assign(res, longLit(Long.MaxValue, toType))

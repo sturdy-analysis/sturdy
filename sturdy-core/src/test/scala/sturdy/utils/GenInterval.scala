@@ -9,11 +9,11 @@ import math.Ordering.Implicits.infixOrderingOps
 object GenInterval:
   case class Interval[N](low: N, included: N, high: N)
 
-  def genInterval[N: Numeric: Choose](minValue: N, maxValue: N): Gen[Interval[N]] =
+  def genInterval[N: Numeric: Choose](minValue: N, maxValue: N, specials: N*): Gen[Interval[N]] =
     for {
-      low <- Gen.chooseNum(minValue, maxValue)
-      high <- Gen.chooseNum(low, maxValue)
-      included <- Gen.chooseNum(low, high)
+      low <- Gen.chooseNum(minValue, maxValue, specials*)
+      high <- Gen.chooseNum(low, maxValue, specials*)
+      included <- Gen.chooseNum(low, high, specials*)
     }
     yield Interval(low, included, high)
 

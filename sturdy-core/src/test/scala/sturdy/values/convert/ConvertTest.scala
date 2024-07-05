@@ -29,6 +29,7 @@ class ConvertTest
     Config <: ConvertConfig[_]: AllConfigs
   ]
   (
+    specials: Seq[From],
     makeConvert: => (TestIntervalOps[From, VFrom], TestIntervalOps[To, VTo], Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind])
   )
   (using
@@ -40,7 +41,7 @@ class ConvertTest
 
   for(conf <- AllConfigs[Config]) {
     test(s"convert[$conf] constant") {
-      forAll((Gen.chooseNum[From](Bounded[From].minValue, Bounded[From].maxValue), "x")) {
+      forAll((Gen.chooseNum[From](Bounded[From].minValue, Bounded[From].maxValue, specials*), "x")) {
         case (x: From) =>
           implicit val (fromIVOps, toIVOps, convertOps, soundness, afailure) = makeConvert
           val actual = afailure.fallible(convertOps(fromIVOps.constant(x), conf))
@@ -50,7 +51,7 @@ class ConvertTest
     }
 
     test(s"convert[$conf] interval") {
-      forAll((genInterval(Bounded[From].minValue, Bounded[From].maxValue), "x ∈ [x1,x2]")) {
+      forAll((genInterval(Bounded[From].minValue, Bounded[From].maxValue, specials*), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           implicit val (fromIVOps, toIVOps, convertOps, soundness, afailure) = makeConvert
           val actual = afailure.fallible(convertOps(fromIVOps.interval(x1, x2), conf))

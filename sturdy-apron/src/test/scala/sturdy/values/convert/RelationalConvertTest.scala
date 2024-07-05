@@ -32,7 +32,8 @@ given ConcreteConvertFloatLong = ConcreteConvertFloatLong(using new ConcreteFail
 
 
 class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
-  withApronState(
+  specials = List(),
+  makeConvert = withApronState(
     (
       RelationalIntTestIntervalOps,
       RelationalLongTestIntervalOps,
@@ -44,7 +45,11 @@ class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[Virt
 )
 
 class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], NilCC.type](
-  withApronState(
+  specials = List(
+    Int.MinValue.toLong - 1, Int.MinValue.toLong + 0, Int.MinValue.toLong + 1,
+    Int.MaxValue.toLong - 1, Int.MaxValue.toLong + 0, Int.MaxValue.toLong + 1
+  ),
+  makeConvert = withApronState(
     (
       RelationalLongTestIntervalOps,
       RelationalIntTestIntervalOps,
@@ -56,7 +61,12 @@ class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[Virt
 )
 
 class RelationalConvertFloatLongTest extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
-  withApronState(
+  specials = List(
+    Math.nextDown(Long.MinValue.toFloat), Long.MinValue.toFloat, Math.nextUp(Long.MinValue.toFloat),
+    Math.nextDown(Long.MaxValue.toFloat), Long.MaxValue.toFloat, Math.nextUp(Long.MaxValue.toFloat),
+    Float.NaN
+  ),
+  makeConvert = withApronState(
     (
       RelationalFloatTestIntervalOps,
       RelationalLongTestIntervalOps ,
