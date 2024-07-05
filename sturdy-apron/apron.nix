@@ -7,8 +7,8 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "antoinemine";
     repo = "apron";
-    rev = "3e9c221bb48b9edfbe20b95463498e8c475d32f6";
-    sha256 = "sha256-+FDo4f+bXp8b8wQEtTYwdy1PWsYKNpKYJ8KVglZ1yjI=";
+    rev = "4bb90a48fac10e64a72bfad2875ecae848584cc0";
+    sha256 = "sha256-9WBKWxGvuUJNYu21QfHYZuJL+FUXGKm38lFdFsvkS2E=";
   };
 
   configurePhase = ''
