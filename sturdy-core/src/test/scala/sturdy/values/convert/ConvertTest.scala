@@ -12,8 +12,9 @@ import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.{IsSound, Soundness}
 import sturdy.effect.failure.{*, given}
-import sturdy.utils.GenInterval.{*, given}
-import sturdy.utils.{*, given}
+import sturdy.util.Bounded
+import sturdy.util.GenInterval.{*, given}
+import sturdy.util.{*, given}
 import sturdy.values.Finite
 import sturdy.values.config.{AllConfigs, Bits, Overflow, UnsupportedConfiguration}
 

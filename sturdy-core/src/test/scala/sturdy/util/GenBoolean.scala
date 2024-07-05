@@ -1,4 +1,4 @@
-package sturdy.utils
+package sturdy.util
 
 import org.scalacheck.Gen.Choose
 import org.scalacheck.{Gen, Shrink}

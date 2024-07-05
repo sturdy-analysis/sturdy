@@ -83,7 +83,7 @@ enum ApronExpr[Addr, +Type]:
 object ApronExpr:
   def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
 
-  def constant[Addr, Type](iv: Interval, _type: Type): Constant[Addr, Type] =
+  def constant[Addr, Type](iv: Coeff, _type: Type): Constant[Addr, Type] =
     Constant(iv, _type)
 
   def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =

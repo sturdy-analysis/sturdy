@@ -5,7 +5,7 @@ import org.scalatest.Assertions.{fail, succeed}
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
-import sturdy.utils.{*, given}
+import sturdy.util.{*, given}
 import sturdy.values.{Finite, Top}
 
 import math.Ordered.orderingToOrdered

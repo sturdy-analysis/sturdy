@@ -18,10 +18,10 @@ import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
 import sturdy.values.integer.{*, given}
-import sturdy.utils.{*, given}
-import sturdy.utils.TestTypes.{*, given}
-import sturdy.utils.TestContexts.{*, given}
-import sturdy.utils.TestIntervalOps
+import sturdy.util.{*, given}
+import sturdy.util.TestTypes.{*, given}
+import sturdy.util.TestContexts.{*, given}
+import sturdy.util.TestIntervalOps
 import sturdy.values.convert.{*, given}
 
 type VirtAddr = VirtualAddress[Ctx]

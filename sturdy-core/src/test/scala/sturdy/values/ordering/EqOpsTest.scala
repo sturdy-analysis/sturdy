@@ -8,7 +8,7 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.values.{Structural, Topped}
-import sturdy.utils.GenInterval.{*, given}
+import sturdy.util.GenInterval.{*, given}
 import sturdy.values.integer.IntegerOps
 
 trait IntervalEqOps[L,V,B] extends EqOps[V,B]:

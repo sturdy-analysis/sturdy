@@ -7,9 +7,9 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
-import sturdy.utils.TestContexts.{*, given}
-import sturdy.utils.TestTypes.{*, given}
-import sturdy.utils.{VirtAddr, withApronState}
+import sturdy.util.TestContexts.{*, given}
+import sturdy.util.TestTypes.{*, given}
+import sturdy.util.{VirtAddr, withApronState}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}

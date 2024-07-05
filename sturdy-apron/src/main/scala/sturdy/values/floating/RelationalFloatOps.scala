@@ -4,6 +4,7 @@ import sturdy.apron.{ApronCons, ApronExpr, ApronState, ApronType, RoundingDir, R
 import sturdy.data.given
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
+import sturdy.util.Bounded
 
 import scala.reflect.ClassTag
 import ApronExpr.*
@@ -13,7 +14,7 @@ import sturdy.{IsSound, Soundness}
 
 given RelationalFloatOps
   [
-    L: Numeric,
+    L: Numeric: Bounded,
     Addr: Ordering: ClassTag,
     Type : ApronType : Join
   ]
@@ -31,13 +32,13 @@ given RelationalFloatOps
       typeFloatOps.randomFloat())
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatAdd(v1, v2)
+    handleOverflow(floatAdd(v1, v2))
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatSub(v1, v2)
+    handleOverflow(floatSub(v1, v2))
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatMul(v1, v2)
+    handleOverflow(floatMul(v1, v2))
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     floatDiv(v1, v2)
@@ -119,21 +120,47 @@ given RelationalFloatOps
       val resultType = typeFloatOps.copysign(v._type, sign._type)
       apronState.withTempVars(resultType, sign) { case (result, List(s)) =>
         apronState.ifThenElse(le(doubleLit(0, s._type), s)) {
-          apronState.assign(result, absolute(v))
+          apronState.assign(result, absolute(s))
         } {
-          apronState.assign(result, negated(absolute(v)))
+          apronState.assign(result, negated(absolute(s)))
         }
         addr(result, resultType)
       }
     }
 
-  given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
-    override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
-      val iv = this.apronState.getInterval(expr)
-      if (Interval(DoubleScalar(c), DoubleScalar(c)).isLeq(iv))
-        IsSound.Sound
-      else
-        IsSound.NotSound(s"$expr with interval $iv does not contain $c")
+  def handleOverflow(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
+    val iv = apronState.getInterval(v)
+    val minVal = DoubleScalar(Numeric[L].toDouble(Bounded[L].minValue))
+    val maxVal = DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue))
+    if(iv.isLeq(Interval(minVal, maxVal))) {
+      v
+    } else {
+      val resultType = v._type
+      apronState.withTempVars(resultType) { case (result, List()) =>
+        val resultExpr = addr(result, resultType)
+        apronState.assign(result, v)
+
+        apronState.ifThenElse(le(resultExpr, constant(maxVal, resultType))) {
+        } {
+          apronState.assign(result, doubleLit(Double.PositiveInfinity, resultType))
+        }
+
+        apronState.ifThenElse(le(constant(minVal, resultType), resultExpr)) {
+        } {
+          apronState.assign(result, doubleLit(Double.NegativeInfinity, resultType))
+        }
+
+        addr(result, resultType)
+      }
+    }
+
+given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
+  override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
+    val iv = this.apronState.getInterval(expr)
+    if (Interval(DoubleScalar(c), DoubleScalar(c)).isLeq(iv))
+      IsSound.Sound
+    else
+      IsSound.NotSound(s"$expr with interval $iv does not contain $c")
 
 given SoundnessDoubleApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Double, ApronExpr[Addr, Type]] with
   override def isSound(c: Double, expr: ApronExpr[Addr, Type]): IsSound =

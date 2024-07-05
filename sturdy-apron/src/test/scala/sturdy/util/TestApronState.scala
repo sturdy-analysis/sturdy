@@ -1,12 +1,12 @@
-package sturdy.utils
+package sturdy.util
 
-import apron.Manager
+import apron.*
 import sturdy.apron.{ApronExpr, ApronRecencyState, ApronState}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore}
-import sturdy.utils.TestContexts.*
-import sturdy.utils.TestTypes.*
+import sturdy.util.TestContexts.*
+import sturdy.util.TestTypes.*
 import sturdy.values.Finite
 import sturdy.values.references.VirtualAddress
 
@@ -15,7 +15,7 @@ type VirtAddr = VirtualAddress[Ctx]
 def withApronState[T](f: (Manager, CollectedFailures[FailureKind], EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
   given Finite[FailureKind] with {}
   given failure: CollectedFailures[FailureKind] = new CollectedFailures[FailureKind]()
-  given apronManager: Manager = new apron.Polka(true)
+  given apronManager: Manager = new Polka(true);
   var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
   given effectStack: EffectStack = new EffectStack(EffectList(
     RecencyClosure(apronState.recencyStore), failure

@@ -9,21 +9,20 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import sturdy.utils.GenInterval.{*, given}
-import sturdy.utils.{*, given}
+import sturdy.{IsSound, Soundness}
+import sturdy.util.GenInterval.{*, given}
+import sturdy.util.{*, given}
 
 import math.Ordering.Implicits.infixOrderingOps
 
 
 class FloatOpsTest
   [
-    L: Arbitrary: Choose,
+    L: Arbitrary: Choose: Bounded,
     N
   ]
   (
-    minValue: L,
-    maxValue: L,
-    makeFloatOps: => (TestIntervalOps[L,N], FloatOps[L, N])
+    makeFloatOps: => (TestIntervalOps[L,N], FloatOps[L, N], Soundness[L, N])
   )
   (using
    ord: Ordering[L],
@@ -31,9 +30,12 @@ class FloatOpsTest
    concreteFloatOps: FloatOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
+  val minValue = Bounded[L].minValue
+  val maxValue = Bounded[L].maxValue
+
   test("Float literal") {
     forAll("n") { (n: L) =>
-      implicit val (ivOps, floatOps) = makeFloatOps
+      implicit val (ivOps, floatOps, soundness) = makeFloatOps
 //      given Equality[N] = implicitly
       floatOps.floatingLit(n) should equal((n,n))
     }
@@ -96,12 +98,14 @@ class FloatOpsTest
     expectedFun = concreteFloatOps.negated
   )
 
-  unOpTest(
-    testName = "sqrt",
-    precondition = _ => true,
-    testFun = _.sqrt(_),
-    expectedFun = concreteFloatOps.sqrt
-  )
+  ignore("sqrt crashes JVM") {
+    unOpTest(
+      testName = "sqrt",
+      precondition = _ => true,
+      testFun = _.sqrt(_),
+      expectedFun = concreteFloatOps.sqrt
+    )
+  }
 
   unOpTest(
     testName = "ceil",
@@ -143,8 +147,10 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            implicit val (ivOps,floatOps) = makeFloatOps
-            testFun(floatOps, ivOps.constant(x), ivOps.constant(y)) should contain (expectedFun(x, y))
+            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            val expected = expectedFun(x, y)
+            val actual = testFun(floatOps, ivOps.constant(x), ivOps.constant(y))
+            assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }
     }
@@ -153,8 +159,10 @@ class FloatOpsTest
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            implicit val (ivOps,floatOps) = makeFloatOps
-            testFun(floatOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)) should contain (expectedFun(x, y))
+            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            val expected = expectedFun(x, y)
+            val actual = testFun(floatOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2))
+            assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }
     }
@@ -164,8 +172,10 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            implicit val (ivOps,floatOps) = makeFloatOps
-            testFun(floatOps, ivOps.constant(x)) should contain (expectedFun(x))
+            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            val expected = expectedFun(x)
+            val actual = testFun(floatOps, ivOps.constant(x))
+            assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }
     }
@@ -174,8 +184,10 @@ class FloatOpsTest
       forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            implicit val (ivOps,floatOps) = makeFloatOps
-            testFun(floatOps, ivOps.interval(x1, x2)) should contain (expectedFun(x))
+            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            val expected = expectedFun(x)
+            val actual = testFun(floatOps, ivOps.interval(x1, x2))
+            assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }
     }

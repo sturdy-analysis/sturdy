@@ -8,8 +8,9 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import sturdy.utils.GenInterval.{*, given}
-import sturdy.utils.{*,given}
+import sturdy.util.Bounded
+import sturdy.util.GenInterval.{*, given}
+import sturdy.util.{*, given}
 
 import math.Ordering.Implicits.infixOrderingOps
 import scala.util.Try

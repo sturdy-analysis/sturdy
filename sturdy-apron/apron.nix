@@ -17,6 +17,10 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ gmp mpfr ppl openjdk ];
 
+  postInstall = ''
+    install japron/apron/japron.h japron/gmp/jgmp.h $out/include/
+  '';
+
   meta = with lib; {
     homepage = "https://antoinemine.github.io/Apron/doc/";
     description = "Numerical Abstract Domain Library";

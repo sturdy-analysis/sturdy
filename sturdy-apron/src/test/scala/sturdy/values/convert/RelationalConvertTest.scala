@@ -12,9 +12,9 @@ import sturdy.effect.failure.{*,given}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.util.{Lazy, lazily}
-import sturdy.utils.TestContexts.{*, given}
-import sturdy.utils.TestTypes.{*, given}
-import sturdy.utils.{*, given}
+import sturdy.util.TestContexts.{*, given}
+import sturdy.util.TestTypes.{*, given}
+import sturdy.util.{*, given}
 import sturdy.values.*
 import sturdy.values.config.{*, given}
 import sturdy.values.convert.ConvertTest

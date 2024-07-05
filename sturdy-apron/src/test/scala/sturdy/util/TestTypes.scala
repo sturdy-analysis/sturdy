@@ -1,4 +1,4 @@
-package sturdy.utils
+package sturdy.util
 
 import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack

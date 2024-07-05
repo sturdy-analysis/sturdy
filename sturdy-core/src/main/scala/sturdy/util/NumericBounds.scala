@@ -1,4 +1,4 @@
-package sturdy.utils
+package sturdy.util
 
 trait Bounded[N]:
   def minValue: N

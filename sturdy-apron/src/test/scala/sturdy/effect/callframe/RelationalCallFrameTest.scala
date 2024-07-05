@@ -17,8 +17,8 @@ import sturdy.values.types.{BaseType, given}
 
 class RelationalCallFrameTest extends AnyFunSuite:
 
-  import sturdy.utils.TestTypes.*
-  import sturdy.utils.TestContexts.*
+  import sturdy.util.TestTypes.*
+  import sturdy.util.TestContexts.*
 
   type Data = Unit
   type Var = String

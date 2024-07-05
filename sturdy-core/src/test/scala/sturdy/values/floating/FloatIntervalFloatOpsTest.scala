@@ -5,7 +5,7 @@ import org.scalatest.Assertions.{fail, succeed}
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
-import sturdy.utils.TestIntervalOps
+import sturdy.util.{*,given}
 import sturdy.values.floating.{FloatInterval, IntervalFloatOps}
 import sturdy.values.{Finite, Top}
 given Ordering[Float] = scala.math.Ordering.Float.TotalOrdering
@@ -22,12 +22,11 @@ class FloatTestIntervalOps extends TestIntervalOps[Float, FloatInterval]:
 
 
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
-  minValue = Float.MinValue,
-  maxValue = Float.MaxValue,
-  makeFloatOps = (new FloatTestIntervalOps, FloatIntervalFloatOps)
+  makeFloatOps = (new FloatTestIntervalOps, FloatIntervalFloatOps, SoundnessFloatInterval)
 )(using
   org.scalacheck.Arbitrary.arbFloat,
   org.scalacheck.Gen.Choose.chooseFloat,
+  FloatBounds,
   scala.math.Ordering.Float.TotalOrdering,
   scala.math.Numeric.FloatIsFractional,
   ConcreteFloatOps

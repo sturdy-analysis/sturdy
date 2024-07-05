@@ -1,4 +1,4 @@
-package sturdy.utils
+package sturdy.util
 
 import org.scalactic.Equality
 import org.scalatest.enablers.Containing

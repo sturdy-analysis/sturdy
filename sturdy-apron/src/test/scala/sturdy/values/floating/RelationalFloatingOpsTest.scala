@@ -10,11 +10,10 @@ import sturdy.apron.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
-import sturdy.effect.{EffectStack, Stateless}
-import sturdy.util.{Lazy, lazily}
-import sturdy.utils.TestContexts.{*, given}
-import sturdy.utils.TestIntervalOps
-import sturdy.utils.TestTypes.{*, given}
+import sturdy.effect.{EffectList, EffectStack, Stateless}
+import sturdy.util.{*,given}
+import sturdy.util.TestContexts.{*, given}
+import sturdy.util.TestTypes.{*, given}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}
@@ -49,38 +48,14 @@ given RelationalDoubleTestIntervalOps(using apronState: ApronState[VirtAddr, Typ
     val iv = this.apronState.getInterval(expr)
     Interval(DoubleScalar(l), DoubleScalar(u)).isEqual(iv)
 
-  class RelationalFloatOpsTest extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
-  minValue = Float.MinValue,
-  maxValue = Float.MaxValue,
-  makeFloatOps = {
-    given Finite[FailureKind] with {}
-    given failure: Failure = new CollectedFailures[FailureKind]()
-    given apronManager: Manager = new Octagon
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = EffectStack(
-      RecencyClosure(apronState.recencyStore), failure
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    (RelationalFloatTestIntervalOps, RelationalFloatOps[Float, VirtAddr, Type])
+class RelationalFloatOpsTest extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
+  makeFloatOps = withApronState {
+    (RelationalFloatTestIntervalOps, RelationalFloatOps[Float, VirtAddr, Type], SoundnessFloatApronExpr[VirtAddr,Type])
   }
 )
 
 class RelationalDoubleOpsTest extends FloatOpsTest[Double, ApronExpr[VirtAddr, Type]](
-  minValue = Double.MinValue,
-  maxValue = Double.MaxValue,
-  makeFloatOps = {
-    given Finite[FailureKind] with {}
-    given failure: Failure = new CollectedFailures[FailureKind]()
-    given apronManager: Manager = new Octagon
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = EffectStack(
-      RecencyClosure(apronState.recencyStore), failure
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    (RelationalDoubleTestIntervalOps, RelationalFloatOps[Double, VirtAddr, Type])
+  makeFloatOps = withApronState {
+    (RelationalDoubleTestIntervalOps, RelationalFloatOps[Double, VirtAddr, Type], SoundnessDoubleApronExpr[VirtAddr,Type])
   }
 )

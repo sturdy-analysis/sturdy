@@ -1,5 +1,6 @@
 package sturdy.values.floating
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.Effect
 import sturdy.effect.failure.Failure
 import sturdy.values.Abstractly
@@ -98,3 +99,11 @@ given FloatIntervalEqOps: EqOps[FloatInterval, Topped[Boolean]] with
     if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Topped.Actual(false)
     else if iv1.h < iv2.l || iv2.h < iv1.l then Topped.Actual(true)
     else Topped.Top
+
+given SoundnessFloatInterval: Soundness[Float, FloatInterval] with
+  override def isSound(f: Float, iv: FloatInterval): IsSound =
+    if(iv.l <= f && f <= iv.h) {
+      IsSound.Sound
+    } else {
+      IsSound.NotSound(s"Float $f not in interval $iv")
+    }

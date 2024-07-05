@@ -1,4 +1,4 @@
-package sturdy.utils
+package sturdy.util
 
 import scala.math.Ordered.orderingToOrdered
 import sturdy.values.Finite
