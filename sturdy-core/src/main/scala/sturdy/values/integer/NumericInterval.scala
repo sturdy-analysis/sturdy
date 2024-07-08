@@ -1,6 +1,7 @@
 package sturdy.values.integer
 
-import sturdy.data.{JOptionC, joinWithFailure, JOptionPowerset, noJoin, JOptionA, SomeJOption, joinComputations, NoJoin, given}
+import sturdy.{IsSound, Soundness}
+import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
@@ -9,12 +10,12 @@ import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 
-import java.nio.{ByteOrder, ByteBuffer}
-import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}
+import java.nio.{ByteBuffer, ByteOrder}
+import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
-import scala.collection.mutable.{ListBuffer, ArrayBuffer}
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.control.Breaks.{break, breakable}
 
 
@@ -1311,3 +1312,10 @@ given ConvertBytesToNumericInterval[From, To, I]
     println(s"$bytes => $byteIntervals => ($lowBytes, $highBytes) => ${(low, high)}   ($conf)")
     val value = NumericInterval.safe(low, high)
     value
+
+given SoundnessNumericInterval[L: Ordering]: Soundness[L, NumericInterval[L]] with
+  override def isSound(l: L, n: NumericInterval[L]): IsSound =
+      if(n.low <= l && l <= n.high)
+        IsSound.Sound
+      else
+        IsSound.NotSound(s"$n does not contain $l")

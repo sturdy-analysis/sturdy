@@ -35,8 +35,6 @@ class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[Virt
   specials = List(),
   makeConvert = withApronState(
     (
-      RelationalIntTestIntervalOps,
-      RelationalLongTestIntervalOps,
       RelationalConvertIntLong,
       soundnessAFallible(using SoundnessLongApronExpr),
       implicitly
@@ -51,8 +49,6 @@ class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[Virt
   ),
   makeConvert = withApronState(
     (
-      RelationalLongTestIntervalOps,
-      RelationalIntTestIntervalOps,
       RelationalConvertLongInt,
       soundnessAFallible(using sturdy.values.integer.SoundnessIntApronExpr),
       implicitly
@@ -68,8 +64,6 @@ class RelationalConvertFloatLongTest extends ConvertTest[Float, Long, ApronExpr[
   ),
   makeConvert = withApronState(
     (
-      RelationalFloatTestIntervalOps,
-      RelationalLongTestIntervalOps ,
       RelationalConvertFloatLong,
       soundnessAFallible(using SoundnessLongApronExpr),
       implicitly

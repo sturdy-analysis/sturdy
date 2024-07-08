@@ -8,6 +8,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import sturdy.{IsSound, Soundness}
 import sturdy.util.Bounded
 import sturdy.util.GenInterval.{*, given}
 import sturdy.util.{*, given}
@@ -21,17 +22,18 @@ class IntegerOpsTest
     N
   ]
   (
-    makeIntegerOps: => (TestIntervalOps[L, N], IntegerOps[L, N])
+    makeIntegerOps: => (IntegerOps[L, N], Soundness[L, N])
   )
   (using
-   integral: Integral[L],
-   concreteIntegerOps: IntegerOps[L, L])
+    ivOps: IsInterval[L, N],
+    integral: Integral[L],
+    concreteIntegerOps: IntegerOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   test("integer literal") {
     forAll("n") { (n: L) =>
-      implicit val (ivOps, integerOps) = makeIntegerOps
-      integerOps.integerLit(n) should contain(n)
+      implicit val (integerOps, soundness) = makeIntegerOps
+      assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.integerLit(n), integerOps.integerLit(n)))
     }
   }
 
@@ -85,23 +87,23 @@ class IntegerOpsTest
   )
 
   test("div([1,1],[-1,1])") {
-    implicit val (ivOps,integerOps) = makeIntegerOps
-    integerOps.div(
+    implicit val (integerOps,soundness) = makeIntegerOps
+    val actual = integerOps.div(
       ivOps.interval(integral.fromInt(1), integral.fromInt(1)),
-      ivOps.interval(integral.fromInt(-1), integral.fromInt(1))) should equal(
-        (concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(-1)),
-         concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1)))
-      )
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(1))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(-1)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(1)), actual))
   }
 
   test("div([-1,1],[-1,-1])") {
-    implicit val (ivOps,integerOps) = makeIntegerOps
-    integerOps.div(
+    implicit val (integerOps,soundness) = makeIntegerOps
+    val actual = integerOps.div(
       ivOps.interval(integral.fromInt(-1), integral.fromInt(1)),
-      ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))) should equal(
-      (integral.fromInt(-1),integral.fromInt(1))
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))
     )
-
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1),integral.fromInt(-1)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(-1),integral.fromInt(-1)), actual))
   }
 
   binOpTest(
@@ -140,13 +142,13 @@ class IntegerOpsTest
   )
 
   test("shiftLeft([1,1], [-1,-1])") {
-    val (ivOps,integerOps) = makeIntegerOps
-    val result = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
-    integerOps.shiftLeft(
+    val (integerOps,soundness) = makeIntegerOps
+    val actual = integerOps.shiftLeft(
       ivOps.constant(integral.fromInt(1)),
-      ivOps.constant(integral.fromInt(-1))) should equal(
-      (result, result)
+      ivOps.constant(integral.fromInt(-1))
     )
+    val expected = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
+    assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
   }
 
 
@@ -172,13 +174,10 @@ class IntegerOpsTest
   )
 
   test("countLeadingZeros([1,4])") {
-    implicit val (ivOps,integerOps) = makeIntegerOps
-    integerOps.countLeadingZeros(ivOps.interval(integral.fromInt(2), integral.fromInt(4))) should equal(
-      (
-        concreteIntegerOps.countLeadingZeros(integral.fromInt(4)),
-        concreteIntegerOps.countLeadingZeros(integral.fromInt(2))
-      )
-    )
+    implicit val (integerOps, soundness) = makeIntegerOps
+    val actual = integerOps.countLeadingZeros(ivOps.interval(integral.fromInt(1), integral.fromInt(4)))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(4)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(1)), actual))
   }
 
   def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (L,L) => L) = {
@@ -189,8 +188,11 @@ class IntegerOpsTest
       ) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            implicit val (ivOps,integerOps) = makeIntegerOps
-            testFun(integerOps, ivOps.constant(x), ivOps.constant(y)) should contain(expectedFun(x, y))
+            implicit val (integerOps, soundness) = makeIntegerOps
+            assertResult(IsSound.Sound)(soundness.isSound(
+              expectedFun(x, y),
+              testFun(integerOps, ivOps.constant(x), ivOps.constant(y))
+            ))
           }
       }
     }
@@ -199,8 +201,11 @@ class IntegerOpsTest
       forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            implicit val (ivOps,integerOps) = makeIntegerOps
-            testFun(integerOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)) should contain (expectedFun(x, y))
+            implicit val (integerOps, soundness) = makeIntegerOps
+            assertResult(IsSound.Sound)(soundness.isSound(
+              expectedFun(x, y),
+              testFun(integerOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2))
+            ))
           }
       }
     }
@@ -211,8 +216,11 @@ class IntegerOpsTest
       forAll((Gen.chooseNum[L](Bounded[L].minValue,Bounded[L].maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            implicit val (ivOps,integerOps) = makeIntegerOps
-            testFun(integerOps, ivOps.constant(x)) should equal(expectedFun(x))
+            implicit val (integerOps, soundness) = makeIntegerOps
+            assertResult(IsSound.Sound)(soundness.isSound(
+              expectedFun(x),
+              testFun(integerOps, ivOps.constant(x))
+            ))
           }
       }
     }
@@ -221,8 +229,11 @@ class IntegerOpsTest
       forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            implicit val (ivOps,integerOps) = makeIntegerOps
-            testFun(integerOps, ivOps.interval(x1, x2)) should contain (expectedFun(x))
+            implicit val (integerOps, soundness) = makeIntegerOps
+            assertResult(IsSound.Sound)(soundness.isSound(
+              expectedFun(x),
+              testFun(integerOps, ivOps.interval(x1, x2))
+            ))
           }
       }
     }

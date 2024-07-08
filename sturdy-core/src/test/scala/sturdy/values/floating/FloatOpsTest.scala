@@ -22,12 +22,14 @@ class FloatOpsTest
     N
   ]
   (
-    makeFloatOps: => (TestIntervalOps[L,N], FloatOps[L, N], Soundness[L, N])
+    makeFloatOps: => (FloatOps[L, N], Soundness[L, N])
   )
   (using
-   ord: Ordering[L],
-   fractional: Fractional[L],
-   concreteFloatOps: FloatOps[L, L])
+     ivOps: IsInterval[L,N],
+     ord: Ordering[L],
+     fractional: Fractional[L],
+     concreteFloatOps: FloatOps[L, L]
+  )
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   val minValue = Bounded[L].minValue
@@ -35,9 +37,8 @@ class FloatOpsTest
 
   test("Float literal") {
     forAll("n") { (n: L) =>
-      implicit val (ivOps, floatOps, soundness) = makeFloatOps
-//      given Equality[N] = implicitly
-      floatOps.floatingLit(n) should equal((n,n))
+      implicit val (floatOps, soundness) = makeFloatOps
+      assertResult(IsSound.Sound)(soundness.isSound(concreteFloatOps.floatingLit(n), floatOps.floatingLit(n)))
     }
 
   }
@@ -147,7 +148,7 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue, maxValue), "x"), (Gen.chooseNum[L](minValue, maxValue), "y")) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x, y)
             val actual = testFun(floatOps, ivOps.constant(x), ivOps.constant(y))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -159,7 +160,7 @@ class FloatOpsTest
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
           whenever(precondition(x,y)) {
-            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x, y)
             val actual = testFun(floatOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -172,7 +173,7 @@ class FloatOpsTest
       forAll((Gen.chooseNum[L](minValue,maxValue), "x")) {
         case x =>
           whenever(precondition(x)) {
-            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x)
             val actual = testFun(floatOps, ivOps.constant(x))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -184,7 +185,7 @@ class FloatOpsTest
       forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2) =>
           whenever(precondition(x)) {
-            implicit val (ivOps,floatOps,soundness) = makeFloatOps
+            implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x)
             val actual = testFun(floatOps, ivOps.interval(x1, x2))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))

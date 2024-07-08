@@ -21,48 +21,31 @@ import sturdy.values.integer.{*, given}
 import sturdy.util.{*, given}
 import sturdy.util.TestTypes.{*, given}
 import sturdy.util.TestContexts.{*, given}
-import sturdy.util.TestIntervalOps
+import sturdy.util.IsInterval
 import sturdy.values.convert.{*, given}
 
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-given RelationalIntTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Int, ApronExpr[VirtAddr, Type]] with
+given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with
   val intType: Type = Type.IntType
   override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
   override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
 
-  override def contains(expr: ApronExpr[VirtAddr, Type], m: Int): Boolean =
-    val iv = apronState.getInterval(expr)
-    Interval(m, m).isLeq(iv)
-
-  override def equals(expr: ApronExpr[VirtAddr, Type], l: Int, u: Int): Boolean =
-    val iv = apronState.getInterval(expr)
-    Interval(l, u).isEqual(iv)
-
-given RelationalLongTestIntervalOps(using apronState: ApronState[VirtAddr, Type]): TestIntervalOps[Long, ApronExpr[VirtAddr, Type]] with
+given RelationalLongInterval: IsInterval[Long, ApronExpr[VirtAddr, Type]] with
   val longType: Type = Type.LongType
   override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
   override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
-  override def contains(expr: ApronExpr[VirtAddr, Type], m: Long): Boolean =
-    val iv = apronState.getInterval(expr)
-    val bm = BigInt(m).bigInteger
-    Interval(bm, bm).isLeq(iv)
-  override def equals(expr: ApronExpr[VirtAddr, Type], l: Long, u: Long): Boolean =
-    val iv = apronState.getInterval(expr)
-    val bl = BigInt(l).bigInteger
-    val bu = BigInt(u).bigInteger
-    Interval(bl, bu).isEqual(iv)
 
 class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
   withApronState{
-    (RelationalIntTestIntervalOps, new RelationalIntOps[VirtAddr, Type])
+    (new RelationalIntOps[VirtAddr, Type], implicitly)
   }
 )
 
 class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
   withApronState{
-    (RelationalLongTestIntervalOps, new RelationalLongOps[VirtAddr, Type])
+    (new RelationalLongOps[VirtAddr, Type], implicitly)
   }
 )
 
