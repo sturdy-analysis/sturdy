@@ -12,6 +12,7 @@ import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 
 import scala.util.Random
 import java.lang.Float as JFloat
+import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -118,7 +119,7 @@ given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
         ((i >>> 1) | (i & 1)).toFloat * 2.0f
     case config.Bits.Raw => JFloat.intBitsToFloat(i)
 
-given ConcreteConvertIntDouble(using failure: Failure): ConvertIntDouble[Int, Double] with
+given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
   /*
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
@@ -126,7 +127,7 @@ given ConcreteConvertIntDouble(using failure: Failure): ConvertIntDouble[Int, Do
   def apply(i: Int, conf: config.Bits): Double = conf match
     case config.Bits.Signed => i.toDouble
     case config.Bits.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
-    case _ => unsupportedConfiguration(conf, this)
+    case config.Bits.Raw => JDouble.longBitsToDouble(i)
 
 given ConcreteConvertIntBytes(using failure: Failure): ConvertIntBytes[Int, Seq[Byte]] with
   override def apply(from: Int, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =

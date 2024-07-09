@@ -8,6 +8,7 @@ import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.util.{*, given}
 import sturdy.values.{*, given}
 import sturdy.values.config.{Bits, *, given}
 import sturdy.values.integer.{*, given}
@@ -170,17 +171,50 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
       case (_, conf@(Overflow.Allow && _)) =>
         unsupportedConfiguration(config,this)
 
-given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, convertType: ConvertDoubleFloat[Type, Type], apronState: ApronState[Addr, Type]):
+given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
   case (from, conf) =>
-      cast(from, RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
-
-}
-
-given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using failure: Failure, floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertFloatDouble[Type, Type]):
-  ConvertFloatDouble[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
-  (from, conf) =>
     floatOps.handleOverflow(
-      cast(from, RoundingType.Double, RoundingDir.Nearest, convertType(from._type, conf))
+      cast(from, RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
     )
 }
+
+given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using convertType: ConvertFloatDouble[Type, Type]):
+  ConvertFloatDouble[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+  (from, conf) =>
+    cast(from, RoundingType.Double, RoundingDir.Nearest, convertType(from._type, conf))
+}
+
+given RelationalConvertIntFloat[Addr: Ordering: ClassTag, Type: ApronType]
+  (using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[Int, Addr, Type], convertType: Convert[Int, Float, Type, Type, Bits]):
+  ConvertIntFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
+    RelationalConvertIntegerFloating[Int,Float,Addr,Type]
+
+given RelationalConvertIntDouble[Addr: Ordering : ClassTag, Type: ApronType]
+  (using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[Int, Addr, Type], convertType: Convert[Int, Double, Type, Type, Bits]):
+  ConvertIntDouble[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertIntegerFloating[Int, Double, Addr, Type]
+
+given RelationalConvertLongFloat[Addr: Ordering : ClassTag, Type: ApronType]
+  (using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[Long, Addr, Type], convertType: Convert[Long, Float, Type, Type, Bits]):
+  ConvertLongFloat[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertIntegerFloating[Long, Float, Addr, Type]
+
+given RelationalConvertLongDouble[Addr: Ordering : ClassTag, Type: ApronType]
+  (using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[Long, Addr, Type], convertType: Convert[Long, Double, Type, Type, Bits]):
+  ConvertLongDouble[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertIntegerFloating[Long, Double, Addr, Type]
+
+private final class RelationalConvertIntegerFloating[From, To: Bounded: Numeric, Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[From, Addr, Type], convertType: Convert[From, To, Type, Type, Bits])
+  extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Bits]:
+  def apply(from: ApronExpr[Addr,Type], conf: Bits) = conf match
+    case conf@Bits.Signed =>
+      cast(from, RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
+    case conf@Bits.Unsigned =>
+      cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
+    case conf@Bits.Raw =>
+      joinWithFailure(
+        constant(Interval(Numeric[To].toDouble(Bounded[To].minValue), Numeric[To].toDouble(Bounded[To].maxValue)), convertType(from._type, conf))
+      ) (
+        unsupportedConfiguration(conf, this)
+      )

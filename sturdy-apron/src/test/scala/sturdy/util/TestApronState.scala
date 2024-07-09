@@ -15,7 +15,7 @@ type VirtAddr = VirtualAddress[Ctx]
 def withApronState[T](f: (Manager, CollectedFailures[FailureKind], EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
   given Finite[FailureKind] with {}
   given failure: CollectedFailures[FailureKind] = new CollectedFailures[FailureKind]()
-  given apronManager: Manager = new Polka(true);
+  given apronManager: Manager = new Octagon
   var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
   given effectStack: EffectStack = new EffectStack(EffectList(
     RecencyClosure(apronState.recencyStore), failure

@@ -3,6 +3,7 @@ package sturdy.apron
 import apron.{Interval, Var}
 import gmp.{Mpfr, Mpq}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
+import sturdy.apron.Strictness.Strict
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
@@ -144,7 +145,7 @@ final class ApronRecencyState
       addConstraint(condition)
       f
     } {
-      addConstraint(condition.negated)
+      addConstraint(condition.negated(Strictness.Strict))
       g
     }
 
@@ -179,7 +180,8 @@ final class ApronRecencyState
     val state3 = recencyStore.getState
     val joinedState = combineStore(state2, state3)
     recencyStore.setState(joinedState.get)
-    if(joinedState.hasChanged)
-      println("Changed")
     joinedState.map(_ => ApronExpr.addr(result, resultType))
 
+
+  override def toString: String =
+    relationalStore.abstract1.toString

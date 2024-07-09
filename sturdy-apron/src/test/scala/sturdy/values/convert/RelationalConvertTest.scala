@@ -34,6 +34,8 @@ given ConcreteConvertFloatLong = ConcreteConvertFloatLong(using new ConcreteFail
 given ConcreteConvertFloatInt = ConcreteConvertFloatInt(using new ConcreteFailure)
 given ConcreteConvertDoubleLong = ConcreteConvertDoubleLong(using new ConcreteFailure)
 given ConcreteConvertDoubleInt = ConcreteConvertDoubleInt(using new ConcreteFailure)
+given ConcreteConvertLongFloat = ConcreteConvertLongFloat(using new ConcreteFailure)
+
 
 
 class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
@@ -125,6 +127,51 @@ class RelationalConvertFloatDoubleTest extends ConvertTest[Float, Double, ApronE
   makeConvert = withApronState(
     (
       RelationalConvertFloatDouble,
+      soundnessAFallible(using SoundnessDoubleApronExpr),
+      implicitly
+    )
+  )
+)
+
+
+class RelationalConvertIntFloatTest extends ConvertTest[Int, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+  specials = List(),
+  makeConvert = withApronState(
+    (
+      RelationalConvertIntFloat,
+      soundnessAFallible(using SoundnessFloatApronExpr),
+      implicitly
+    )
+  )
+)
+
+class RelationalConvertIntDoubleTest extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+  specials = List(),
+  makeConvert = withApronState(
+    (
+      RelationalConvertIntDouble,
+      soundnessAFallible(using SoundnessDoubleApronExpr),
+      implicitly
+    )
+  )
+)
+
+class RelationalConvertLongFloatTest extends ConvertTest[Long, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+  specials = List(),
+  makeConvert = withApronState(
+    (
+      RelationalConvertLongFloat,
+      soundnessAFallible(using SoundnessFloatApronExpr),
+      implicitly
+    )
+  )
+)
+
+class RelationalConvertLongDoubleTest extends ConvertTest[Long, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+  specials = List(),
+  makeConvert = withApronState(
+    (
+      RelationalConvertLongDouble,
       soundnessAFallible(using SoundnessDoubleApronExpr),
       implicitly
     )

@@ -216,10 +216,12 @@ enum BinOp:
     case Pow => Texpr1BinNode.OP_POW
 
 enum ApronCons[Addr, Type]:
+  import CompareOp.*
+  import Strictness.*
+
   case Constant(b: Boolean, tpe: Type)
   case Compare(op: CompareOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type)
 
-  import CompareOp.*
 
   override def toString: String = this match
     case Constant(b, _) => b.toString
@@ -243,14 +245,20 @@ enum ApronCons[Addr, Type]:
     case Compare(Gt, e1, e2, tpe)  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
 
 
-  def negated: ApronCons[Addr, Type] = this match
-    case Constant(b, tpe) => Constant(!b, tpe)
-    case Compare(Eq, e1, e2, tpe) => Compare(Neq, e1, e2, tpe)
-    case Compare(Neq, e1, e2, tpe) => Compare(Eq, e1, e2, tpe)
-    case Compare(Lt, e1, e2, tpe) => Compare(Ge, e1, e2, tpe)
-    case Compare(Le, e1, e2, tpe) => Compare(Gt, e1, e2, tpe)
-    case Compare(Ge, e1, e2, tpe) => Compare(Lt, e1, e2, tpe)
-    case Compare(Gt, e1, e2, tpe) => Compare(Le, e1, e2, tpe)
+  def negated(strictness: Strictness): ApronCons[Addr, Type] = (this, strictness) match
+    case (Constant(b, tpe),_) => Constant(!b, tpe)
+    case (Compare(Eq, e1, e2, tpe),_) => Compare(Neq, e1, e2, tpe)
+    case (Compare(Neq, e1, e2, tpe),_) => Compare(Eq, e1, e2, tpe)
+    case (Compare(Lt, e1, e2, tpe),_) => Compare(Ge, e1, e2, tpe)
+    case (Compare(Gt, e1, e2, tpe),_) => Compare(Le, e1, e2, tpe)
+    case (Compare(Le, e1, e2, tpe),Strict) => Compare(Gt, e1, e2, tpe)
+    case (Compare(Le, e1, e2, tpe),NotStrict) => Compare(Ge, e1, e2, tpe)
+    case (Compare(Ge, e1, e2, tpe),Strict) => Compare(Lt, e1, e2, tpe)
+    case (Compare(Ge, e1, e2, tpe),NotStrict) => Compare(Le, e1, e2, tpe)
+
+enum Strictness:
+  case Strict
+  case NotStrict
 
 object ApronCons:
   import CompareOp.*

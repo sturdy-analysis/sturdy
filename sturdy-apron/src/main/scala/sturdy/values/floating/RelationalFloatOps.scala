@@ -14,7 +14,7 @@ import sturdy.{IsSound, Soundness}
 
 given RelationalFloatOps
   [
-    L: Numeric: Bounded: Enumerable,
+    L: Numeric: Bounded,
     Addr: Ordering: ClassTag,
     Type : ApronType : Join
   ]
@@ -130,23 +130,21 @@ given RelationalFloatOps
 
   def handleOverflow(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val minVal = Bounded[L].minValue
-    val maxVal = Bounded[L].maxValue
-    if(iv.isLeq(Interval(Numeric[L].toDouble(minVal), Numeric[L].toDouble(maxVal)))) {
+    val minVal = Numeric[L].toDouble(Bounded[L].minValue)
+    val maxVal = Numeric[L].toDouble(Bounded[L].maxValue)
+    if(iv.isLeq(Interval(minVal, maxVal))) {
       v
     } else {
       val resultType = v._type
       apronState.withTempVars(resultType) { case (result, List()) =>
         val resultExpr = addr(result, resultType)
         apronState.assign(result, v)
-
-        apronState.ifThenElse(le(doubleLit(Numeric[L].toDouble(Enumerable[L].nextUp(maxVal)), resultType), resultExpr)) {
-          apronState.assign(result, doubleLit(Double.PositiveInfinity, resultType))
+        apronState.ifThenElse(le(doubleLit(maxVal, resultType), resultExpr)) {
+          apronState.assign(result, constant(Interval(DoubleScalar(maxVal), DoubleScalar(Double.PositiveInfinity)), resultType))
         } {
         }
-
-        apronState.ifThenElse(le(resultExpr, doubleLit(Numeric[L].toDouble(Enumerable[L].nextDown(minVal)), resultType))) {
-          apronState.assign(result, doubleLit(Double.NegativeInfinity, resultType))
+        apronState.ifThenElse(le(resultExpr, doubleLit(minVal, resultType))) {
+          apronState.assign(result, constant(Interval(DoubleScalar(Double.NegativeInfinity), DoubleScalar(maxVal)), resultType))
         } {
         }
 
