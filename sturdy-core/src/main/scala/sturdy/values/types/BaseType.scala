@@ -54,7 +54,7 @@ given BaseTypeBooleanOps: BooleanOps[BaseType[Boolean]] with
 
 given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, EffectStack): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =
-    joinWithFailure(BaseType[B2])(Failure(ConversionFailure, "Potential conversion failure from $from to $to"))
+    joinWithFailure(BaseType[B2])(Failure(ConversionFailure, s"Potential conversion failure from $from to ${BaseType[B2]}"))
 
 given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =

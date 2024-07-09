@@ -34,7 +34,7 @@ object TestTypes:
     def asLong(using f: Failure): BaseType[Long] =
       this match
         case LongType => BaseType[Long]
-        case _ => f.fail(TypeError, s"Expected int, but got $this")
+        case _ => f.fail(TypeError, s"Expected long, but got $this")
     def asFloat(using f: Failure): BaseType[Float] =
       this match
         case FloatType => BaseType[Float]
@@ -106,6 +106,11 @@ object TestTypes:
   given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = _ => Type.LongType)
   given (using failure: Failure, effectStack: EffectStack): ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = _ => Type.IntType)
   given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asFloat, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatInt[Type, Type] = LiftedConvert[Float, Int, Type, Type, BaseType[Float], BaseType[Int], Overflow && Bits](extract = _.asFloat, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && Bits](extract = _.asDouble, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && Bits](extract = _.asDouble, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleFloat[Type, Type] = LiftedConvert[Double, Float, Type, Type, BaseType[Double], BaseType[Float], NilCC.type](extract = _.asDouble, inject = _ => Type.FloatType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatDouble[Type, Type] = LiftedConvert[Float, Double, Type, Type, BaseType[Float], BaseType[Double], NilCC.type](extract = _.asFloat, inject = _ => Type.DoubleType)
 
 
   given ApronType[Type] with

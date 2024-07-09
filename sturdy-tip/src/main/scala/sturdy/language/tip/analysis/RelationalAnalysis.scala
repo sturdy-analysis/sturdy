@@ -35,7 +35,6 @@ import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.values.types.{BaseType, given}
-import sturdy.values.utils.{ConvertInterval, given}
 
 import scala.collection.immutable.BitSet
 

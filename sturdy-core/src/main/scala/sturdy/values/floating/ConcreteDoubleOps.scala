@@ -1,10 +1,10 @@
 package sturdy.values.floating
 
-import sturdy.values.convert.*
+import sturdy.values.convert.{&&, *}
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
-import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 
@@ -57,40 +57,45 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
   def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
-    case (config.Overflow.Allow && config.Bits.Signed) => d.toInt
-    case (config.Overflow.Allow && config.Bits.Unsigned) => d.toLong.toInt
-    case (config.Overflow.Fail && config.Bits.Signed) =>
+//    case (config.Overflow.Allow && config.Bits.Signed) => d.toInt
+//    case (config.Overflow.Allow && config.Bits.Unsigned) => d.toLong.toInt
+
+    case (Overflow.Fail && Bits.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Int.MinValue.toDouble || d <= Int.MinValue.toDouble - 1)
+      else if (BigDecimal(d) < BigDecimal(Int.MinValue) || BigDecimal(d) > BigDecimal(Int.MaxValue))
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
-        d.toInt
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (d.isNaN)
-        f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Int.MinValue.toDouble * 2.0d || d <= -1.0)
-        f.fail(ConversionFailure, s"double $d out of integer range")
-      else
-        d.toLong.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+        apply(d, Overflow.JumpToBounds && Bits.Signed)
+
+    case (Overflow.JumpToBounds && Bits.Signed) =>
       if (d.isNaN)
         0
-      else if (d >= -Int.MinValue.toDouble)
+      else if (BigDecimal(d) > BigDecimal(Int.MaxValue))
         Int.MaxValue
-      else if (d < Int.MinValue)
+      else if (BigDecimal(d) < BigDecimal(Int.MinValue))
         Int.MinValue
       else
         d.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+
+    case (Overflow.Fail && Bits.Unsigned) =>
+      if (d.isNaN)
+        f.fail(ConversionFailure, s"double $d cannot be converted")
+      else if (BigDecimal(d) >= -BigDecimal(Int.MinValue) * 2 || BigDecimal(d) <= BigDecimal(-1.0))
+        f.fail(ConversionFailure, s"double $d out of integer range")
+      else
+        apply(d, Overflow.JumpToBounds && Bits.Unsigned)
+
+    case (Overflow.JumpToBounds && Bits.Unsigned) =>
       if (d.isNaN)
         0
-      else if (d >= -Int.MinValue.toDouble * 2.0d)
+      else if (BigDecimal(d) >= -BigDecimal(Int.MinValue) * 2)
         -1
       else if (d < 0.0)
         0
       else
         d.toLong.toInt
+
     case _ =>
       unsupportedConfiguration(conf, this)
 
@@ -102,42 +107,44 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
    */
   def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
     case (_ && config.Bits.Raw) => JDouble.doubleToRawLongBits(d)
-    case (config.Overflow.Allow && config.Bits.Signed) => d.toLong
+//    case (config.Overflow.Allow && config.Bits.Signed) => d.toLong
 //    case (config.Overflow.Allow, config.Bits.Unsigned) => ???
     case (config.Overflow.Fail && config.Bits.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Long.MinValue.toDouble || d < Long.MinValue.toDouble)
+      else if (d < BigDecimal(Long.MinValue) || d > BigDecimal(Long.MaxValue) )
         f.fail(ConversionFailure, s"double $d out of long range")
       else
-        d.toLong
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (d.isNaN)
-        f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Long.MinValue.toDouble * 2.0d || d <= -1.0d)
-        f.fail(ConversionFailure, s"double $d out of long range")
-      else if (d >= -Long.MinValue.toDouble)
-        (d - 9223372036854775808.0d).toLong | Long.MinValue
-      else
-        d.toLong
+        apply(d, Overflow.JumpToBounds && Bits.Signed)
+
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (d.isNaN)
         0
-      else if (d >= -Long.MinValue.toDouble)
+      else if (BigDecimal(d) > BigDecimal(Long.MaxValue))
         Long.MaxValue
-      else if (d < Long.MinValue.toDouble)
+      else if (BigDecimal(d) < BigDecimal(Long.MinValue))
         Long.MinValue
       else
         d.toLong
+
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+      if (d.isNaN)
+        f.fail(ConversionFailure, s"double $d cannot be converted")
+      else if (BigDecimal(d) >= -BigDecimal(Long.MinValue) * 2 || BigDecimal(d) <= -BigDecimal(1))
+        f.fail(ConversionFailure, s"double $d out of long range")
+      else
+        apply(d, Overflow.JumpToBounds && Bits.Unsigned)
+
+
     case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
       if (d.isNaN)
         0
-      else if (d >= -Long.MinValue.toDouble * 2.0d)
+      else if (BigDecimal(d) >= -BigDecimal(Long.MinValue) * 2)
         -1
       else if (d < 0.0d)
         0
-      else if (d >= -Long.MinValue.toDouble)
-        (d - 9223372036854775808.0d).toLong | Long.MinValue
+      else if (BigDecimal(d) >= -BigDecimal(Long.MinValue))
+        (d - (-Long.MinValue.toDouble * 2.0d)).toLong
       else
         d.toLong
     case _ =>

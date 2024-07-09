@@ -9,109 +9,178 @@ import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
-import sturdy.values.config.{*, given}
+import sturdy.values.config.{Bits, *, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
 
+import scala.math.BigInt.javaBigInteger2bigInt
+import java.math.BigInteger
 import scala.reflect.ClassTag
 
-given RelationalConvertIntLong[Addr: Ordering: ClassTag, Type: ApronType: Join](using failure: Failure, intOps: RelationalIntOps[Addr,Type], convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+given RelationalConvertIntLong[Addr, Type: ApronType](using failure: Failure, intOps: RelationalIntOps[Addr,Type], convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
   case (from, conf@Bits.Signed)   => cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
   case (from, conf@Bits.Unsigned) => cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
   case (_,    conf@Bits.Raw)      => unsupportedConfiguration(conf, this)
 }
 
-given RelationalConvertLongInt[Addr: Ordering: ClassTag, Type: ApronType: Join](using intOps: RelationalIntOps[Addr,Type], convertType: ConvertLongInt[Type, Type]): ConvertLongInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
+given RelationalConvertLongInt[Addr, Type: ApronType](using intOps: RelationalIntOps[Addr,Type], convertType: ConvertLongInt[Type, Type]): ConvertLongInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
   (from, conf) =>
     intOps.foldInteger(cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf)))
 
-given RelationalConvertFloatLong[Addr: Ordering: ClassTag, Type: ApronType: Join]
-    (using
+given RelationalConvertFloatInt[Addr: Ordering: ClassTag, Type: ApronType]
+  (using
       failure: Failure,
       effectStack: EffectStack,
       apronState: ApronState[Addr,Type],
-      longOps: RelationalLongOps[Addr,Type],
-      convertType: ConvertFloatLong[Type, Type]
-    ): ConvertFloatLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] with
-  def apply(from: ApronExpr[Addr,Type], config: Overflow && Bits) = (from,config) match
-    case (from, conf@(_ && Bits.Raw)) => ???
-    case (from, conf@(Overflow.Allow && Bits.Signed)) =>
-      val toType = convertType(from._type, conf)
-      val iv = apronState.getInterval(from)
-      if(iv.isLeq(Interval(Long.MinValue, Long.MaxValue))) {
-        cast(from, RoundingType.Int, RoundingDir.Zero, toType)
-      } else {
-        apronState.withTempVars(toType) {
-          (res, _) =>
-            val resExpr = addr(res, toType)
-            apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-            apronState.ifThenElse(le(resExpr, longLit(Long.MaxValue, toType))) {
-            } {
-              apronState.assign(res, longLit(Long.MaxValue, toType))
-            }
-            apronState.ifThenElse(le(longLit(Long.MinValue, toType), resExpr)) {
-            } {
-              apronState.assign(res, longLit(Long.MinValue, toType))
-            }
-            resExpr
-        }
-      }
-    case (from, conf@(Overflow.Allow && Bits.Unsigned)) =>
-      unsupportedConfiguration(conf, this)
-    case (from, conf@(Overflow.Fail && Bits.Signed)) =>
-      val iv = apronState.getInterval(from)
-      val minVal = DoubleScalar(Long.MinValue.toFloat)
-      val maxVal = DoubleScalar(-Long.MinValue.toFloat)
-      if(maxVal.cmp(iv.inf()) <= 0 || iv.sup().cmp(minVal) < 0) {
-        failure.fail(ConversionFailure, s"float $iv out of long range")
-      } else if(iv.isLeq(Interval(minVal, maxVal))) {
-        cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
-      } else {
-        joinWithFailure {
-          apply(from, (Overflow.Allow && Bits.Signed))
-        } {
-          Failure(ConversionFailure, s"float $iv out of long range")
-        }
-      }
-    case (from, conf@(Overflow.Fail && Bits.Unsigned)) =>
-      val iv = apronState.getInterval(from)
-      val minVal = DoubleScalar(-1.0d)
-      val maxVal = DoubleScalar(-Long.MinValue.toFloat * 2.0d)
-      if (maxVal.cmp(iv.inf()) <= 0 || iv.sup().cmp(minVal) < 0) {
-        failure.fail(ConversionFailure, s"float $iv out of long range")
-      } else if (iv.isLeq(Interval(minVal, maxVal))) {
-        longOps.interpretSignedAsUnsigned(
-          cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf)))
-      } else {
-        joinWithFailure {
-          longOps.foldInteger(
-            longOps.interpretSignedAsUnsigned(
-              cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf)))
-          )
-        } {
-          Failure(ConversionFailure, s"float $iv out of long range")
-        }
-      }
-    case (from, conf@(Overflow.JumpToBounds && Bits.Signed)) =>
-      val iv = apronState.getInterval(from)
-      val minVal = DoubleScalar(Long.MinValue.toFloat)
-      val maxVal = DoubleScalar(-Long.MinValue.toFloat)
-      if(maxVal.cmp(iv.inf()) <= 0) {
-        longLit(Long.MaxValue, convertType(from._type, conf))
-      } else if(iv.sup().cmp(minVal) < 0) {
-        longLit(Long.MinValue, convertType(from._type, conf))
-      } else if(iv.isLeq(Interval(minVal, maxVal))) {
-        cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf))
-      } else {
-        val toType = convertType(from._type, conf)
-        apronState.withTempVars(toType) {
-          case (res, List()) =>
-            val resExpr = addr(res, toType)
-            apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-            apronState.addConstraint(le(resExpr, longLit(Long.MaxValue, toType)))
-            apronState.addConstraint(le(longLit(Long.MinValue, toType), resExpr))
-            resExpr
-        }
-      }
+      integerOps: RelationalBaseIntegerOps[Int, Addr,Type],
+      typeOps: IntegerOps[Int, Type],
+      convertType: Convert[Float, Int, Type, Type, Overflow && Bits]): ConvertFloatInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
+  RelationalConvertFloatingInteger[Float,Int,Addr,Type]
 
-    case (from, conf@(Overflow.JumpToBounds && Bits.Unsigned)) => ???
+given RelationalConvertFloatLong[Addr: Ordering: ClassTag, Type: ApronType]
+  (using
+   failure: Failure,
+   effectStack: EffectStack,
+   apronState: ApronState[Addr, Type],
+   integerOps: RelationalBaseIntegerOps[Long, Addr, Type],
+   typeOps: IntegerOps[Long, Type],
+   convertType: Convert[Float, Long, Type, Type, Overflow && Bits]): ConvertFloatLong[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertFloatingInteger[Float, Long, Addr, Type]
+
+
+given RelationalConvertDoubleInt[Addr: Ordering: ClassTag, Type: ApronType]
+  (using
+   failure: Failure,
+   effectStack: EffectStack,
+   apronState: ApronState[Addr, Type],
+   integerOps: RelationalBaseIntegerOps[Int, Addr, Type],
+   typeOps: IntegerOps[Int, Type],
+   convertType: Convert[Double, Int, Type, Type, Overflow && Bits]): ConvertDoubleInt[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertFloatingInteger[Double, Int, Addr, Type]
+
+given RelationalConvertDoubleLong[Addr: Ordering: ClassTag, Type: ApronType]
+  (using
+   failure: Failure,
+   effectStack: EffectStack,
+   apronState: ApronState[Addr, Type],
+   integerOps: RelationalBaseIntegerOps[Long, Addr, Type],
+   typeOps: IntegerOps[Long, Type],
+   convertType: Convert[Double, Long, Type, Type, Overflow && Bits]): ConvertDoubleLong[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
+    RelationalConvertFloatingInteger[Double, Long, Addr, Type]
+
+private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: ClassTag, Type: ApronType]
+    (using
+     failure: Failure,
+     effectStack: EffectStack,
+     apronState: ApronState[Addr,Type],
+     integerOps: RelationalBaseIntegerOps[To, Addr,Type],
+     typeOps: IntegerOps[To, Type],
+     convertType: Convert[From, To, Type, Type, Overflow && Bits]
+    ) extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Overflow && Bits]:
+
+  def apply(from: ApronExpr[Addr,Type], config: Overflow && Bits) =
+    val fromType = from._type
+    val toType = convertType(fromType, config)
+    val signedMinVal = integerOps.signedMinValue(toType).bigInteger
+    val signedMaxVal = integerOps.signedMaxValue(toType).bigInteger
+    val unsignedMinVal = integerOps.unsignedMinValue(toType).bigInteger
+    val unsignedMaxVal = integerOps.unsignedMaxValue(toType).bigInteger
+
+    (from,config) match
+      case (from, conf@(_ && Bits.Raw)) =>
+        joinWithFailure {
+          constant(Interval(signedMinVal, signedMaxVal), toType)
+        } {
+          unsupportedConfiguration(config,this)
+        }
+
+      case (from, conf@(Overflow.Fail && Bits.Signed)) =>
+        val iv = apronState.getInterval(from)
+        if(iv.sup().cmp(MpqScalar(signedMinVal)) < 0 || MpqScalar(signedMaxVal).cmp(iv.inf()) < 0) {
+          failure.fail(ConversionFailure, s"float $iv out of range")
+        } else if(iv.isLeq(Interval(signedMinVal, signedMaxVal))) {
+          apply(from, Overflow.JumpToBounds && Bits.Signed)
+        } else {
+          joinWithFailure {
+            apply(from, (Overflow.JumpToBounds && Bits.Signed))
+          } {
+            Failure(ConversionFailure, s"float $iv out of range")
+          }
+        }
+      case (from, conf@(Overflow.JumpToBounds && Bits.Signed)) =>
+        val toType = convertType(from._type, conf)
+        val iv = apronState.getInterval(from)
+        if(iv.isLeq(Interval(signedMinVal, signedMaxVal))) {
+          cast(from, RoundingType.Int, RoundingDir.Zero, toType)
+        } else {
+          apronState.withTempVars(toType) {
+            (res, _) =>
+              val resExpr = addr(res, toType)
+              apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
+              apronState.ifThenElse(le(resExpr, bigIntLit(signedMinVal, toType))) {
+                apronState.assign(res, bigIntLit(signedMinVal, toType))
+              } {
+                apronState.ifThenElse(le(bigIntLit(signedMaxVal, toType), resExpr)) {
+                  apronState.assign(res, bigIntLit(signedMaxVal, toType))
+                } {
+                }
+              }
+              resExpr
+          }
+        }
+
+      case (from, conf@(Overflow.Fail && Bits.Unsigned)) =>
+        val iv = apronState.getInterval(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
+        if (iv.sup().cmp(MpqScalar(unsignedMinVal)) < 0 || MpqScalar(unsignedMaxVal).cmp(iv.inf()) < 0) {
+          failure.fail(ConversionFailure, s"float $iv out of range")
+        } else if (iv.isLeq(Interval(unsignedMinVal, unsignedMaxVal))) {
+          apply(from, (Overflow.JumpToBounds && Bits.Unsigned))
+        } else {
+          joinWithFailure {
+            apply(from, (Overflow.JumpToBounds && Bits.Unsigned))
+          } {
+            Failure(ConversionFailure, s"float $iv out of range")
+          }
+        }
+
+
+      case (from, conf@(Overflow.JumpToBounds && Bits.Unsigned)) =>
+        val iv = apronState.getInterval(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
+        if(MpqScalar(unsignedMinVal).cmp(iv.inf()) <= 0 && iv.sup().cmp(MpqScalar(unsignedMaxVal)) < 0)
+          integerOps.interpretUnsignedAsSigned(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
+        else
+          apronState.withTempVars(toType, cast(from, RoundingType.Int, RoundingDir.Zero, toType)) {
+            case (res, List(x)) =>
+              apronState.ifThenElse(le(x, bigIntLit(unsignedMinVal, toType))) {
+                apronState.assign(res, intLit(0, toType))
+              } {
+                apronState.ifThenElse(le(bigIntLit(unsignedMaxVal, toType), x)) {
+                  apronState.assign(res, intLit(-1, toType))
+                } {
+                  apronState.ifThenElse(lt(bigIntLit(signedMaxVal, toType), x)) {
+                    apronState.assign(res, intSub[To, Addr, Type](x, bigIntLit(unsignedMaxVal, toType)))
+                  } {
+                    apronState.assign(res, x)
+                  }
+                }
+              }
+              addr(res, toType)
+          }
+
+      case (_, conf@(Overflow.Allow && _)) =>
+        unsupportedConfiguration(config,this)
+
+given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, convertType: ConvertDoubleFloat[Type, Type], apronState: ApronState[Addr, Type]):
+  ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+  case (from, conf) =>
+      cast(from, RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
+
+}
+
+given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using failure: Failure, floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertFloatDouble[Type, Type]):
+  ConvertFloatDouble[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
+  (from, conf) =>
+    floatOps.handleOverflow(
+      cast(from, RoundingType.Double, RoundingDir.Nearest, convertType(from._type, conf))
+    )
+}

@@ -4,7 +4,7 @@ import sturdy.apron.{ApronCons, ApronExpr, ApronState, ApronType, RoundingDir, R
 import sturdy.data.given
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
-import sturdy.util.Bounded
+import sturdy.util.{Bounded, Enumerable}
 
 import scala.reflect.ClassTag
 import ApronExpr.*
@@ -14,7 +14,7 @@ import sturdy.{IsSound, Soundness}
 
 given RelationalFloatOps
   [
-    L: Numeric: Bounded,
+    L: Numeric: Bounded: Enumerable,
     Addr: Ordering: ClassTag,
     Type : ApronType : Join
   ]
@@ -130,9 +130,9 @@ given RelationalFloatOps
 
   def handleOverflow(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val minVal = DoubleScalar(Numeric[L].toDouble(Bounded[L].minValue))
-    val maxVal = DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue))
-    if(iv.isLeq(Interval(minVal, maxVal))) {
+    val minVal = Bounded[L].minValue
+    val maxVal = Bounded[L].maxValue
+    if(iv.isLeq(Interval(Numeric[L].toDouble(minVal), Numeric[L].toDouble(maxVal)))) {
       v
     } else {
       val resultType = v._type
@@ -140,14 +140,14 @@ given RelationalFloatOps
         val resultExpr = addr(result, resultType)
         apronState.assign(result, v)
 
-        apronState.ifThenElse(le(resultExpr, constant(maxVal, resultType))) {
-        } {
+        apronState.ifThenElse(le(doubleLit(Numeric[L].toDouble(Enumerable[L].nextUp(maxVal)), resultType), resultExpr)) {
           apronState.assign(result, doubleLit(Double.PositiveInfinity, resultType))
+        } {
         }
 
-        apronState.ifThenElse(le(constant(minVal, resultType), resultExpr)) {
-        } {
+        apronState.ifThenElse(le(resultExpr, doubleLit(Numeric[L].toDouble(Enumerable[L].nextDown(minVal)), resultType))) {
           apronState.assign(result, doubleLit(Double.NegativeInfinity, resultType))
+        } {
         }
 
         addr(result, resultType)
