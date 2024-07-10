@@ -16,6 +16,9 @@ object Profiler:
     result
   }
 
+  def get(name: String): Option[Long] =
+    measuredTimes.get(name)
+
   def printLastMeasured(): Unit =
     println("Elapsed times:")
     measuredTimes.keys.foreach(printByName)

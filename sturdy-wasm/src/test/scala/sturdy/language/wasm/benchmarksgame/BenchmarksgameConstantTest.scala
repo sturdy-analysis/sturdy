@@ -73,10 +73,9 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     
     val newCfg = graphBuilder.get
 
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".constant.dot")
     Files.writeString(dotPath, oldCfg.toGraphViz)
-
-    val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".types.new.dot")
+    val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".constant.new.dot")
     Files.writeString(dotPath2, newCfg.toGraphViz)
 
     testCfgDifference(oldCfg, newCfg)

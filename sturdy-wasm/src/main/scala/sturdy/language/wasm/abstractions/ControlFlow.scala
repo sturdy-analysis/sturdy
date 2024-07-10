@@ -53,8 +53,10 @@ trait Control extends Interpreter:
           observable.triggerControlEvent(BasicControlEvent.EndSection())
         case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
           observable.triggerControlEvent(BasicControlEvent.EndSection())
+        //case MostGeneralClientLoop(_) => observable.triggerControlEvent(FixpointControlEvent.Restart())
         case _ => // nothing
 
+// TODO : Fix the MostGeneralClientLoop iteration that breaks the CFG construction (sometimes?)
 
 enum CfgNode extends ControlFlowGraph.Node:
   case Start
