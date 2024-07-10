@@ -41,48 +41,55 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
   private val graph_nodes: mutable.ListBuffer[Int] = mutable.ListBuffer.empty
   private val graph_edges: mutable.ListBuffer[Int] = mutable.ListBuffer.empty
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.headOption.foreach { p =>
-    it must s"warm-up interval analysis on benchmark ${p.getFileName}" in {
-      run(p, binary = true, StackConfig.StackedStates(), true)
-      LinearStateOperationCounter.clearAll()
-      Profiler.reset()
+  measure(10)
+
+
+  def measure(runs: Int): Unit =
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.headOption.foreach { p =>
+      it must s"warm-up interval analysis on benchmark ${p.getFileName}" in {
+        run(p, binary = true, StackConfig.StackedStates(), true)
+        LinearStateOperationCounter.clearAll()
+        Profiler.reset()
+      }
     }
-  }
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName}" in {
-      tests_names.addOne(p.getFileName.toString)
-      run(p, binary = true, StackConfig.StackedStates(), false)
+    List.range(0, runs).foreach(i => {
+      Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
+        it must s"iteration $i : execute interval analysis with stacked states on benchmark ${p.getFileName}" in {
+          tests_names.addOne(p.getFileName.toString)
+          run(p, binary = true, StackConfig.StackedStates(), false)
+        }
+      }
+    })
+
+    it must s"Final result" in {
+
+      println("tests_names : " + tests_names)
+      println("n_events : " + n_events)
+      println("control : " + control)
+      println("baseline : " + baseline)
+      println("event_run : " + event_run)
+      println("event_get : " + event_get)
+      println("tree_run : " + tree_run)
+      println("tree_get : " + tree_get)
+      println("graph_nodes : " + graph_nodes)
+      println("graph_edges : " + graph_edges)
+
+      val tree_time = tree_run.zip(tree_get).map(_ + _)
+      val tree_slowdown = tree_time.zip(baseline).map(_.toDouble / _)
+      val event_slowdown = event_run.zip(baseline).map(_.toDouble / _)
+
+      println(tree_slowdown)
+      println(event_slowdown)
+
+      println("control : " + (control.sum.toDouble / control.size.toDouble) * 1e-9)
+      println("baseline : " + (baseline.sum.toDouble / baseline.size.toDouble) * 1e-9)
+      println("event_run : " + (event_run.sum.toDouble / event_run.size.toDouble) * 1e-9)
+      println("event_get : " + (event_get.sum.toDouble / event_get.size.toDouble) * 1e-9)
+      println("tree_run : " + (tree_run.sum.toDouble / tree_run.size.toDouble) * 1e-9)
+      println("tree_get : " + (tree_get.sum.toDouble / tree_get.size.toDouble) * 1e-9)
+      true
     }
-  }
-
-  it must s"Final result" in {
-    println("tests_names : " + tests_names)
-    println("n_events : " + n_events)
-    println("control : " + control)
-    println("baseline : " + baseline)
-    println("event_run : " + event_run)
-    println("event_get : " + event_get)
-    println("tree_run : " + tree_run)
-    println("tree_get : " + tree_get)
-    println("graph_nodes : " + graph_nodes)
-    println("graph_edges : " + graph_edges)
-
-    val tree_time = tree_run.zip(tree_get).map(_ + _)
-    val tree_slowdown = tree_time.zip(baseline).map(_.toDouble / _)
-    val event_slowdown = event_run.zip(baseline).map(_.toDouble / _)
-
-    println(tree_slowdown)
-    println(event_slowdown)
-
-    println("control : " + (control.sum.toDouble / control.size.toDouble) * 1e-9)
-    println("baseline : " + (baseline.sum.toDouble / baseline.size.toDouble) * 1e-9)
-    println("event_run : " + (event_run.sum.toDouble / event_run.size.toDouble) * 1e-9)
-    println("event_get : " + (event_get.sum.toDouble / event_get.size.toDouble) * 1e-9)
-    println("tree_run : " + (tree_run.sum.toDouble / tree_run.size.toDouble) * 1e-9)
-    println("tree_get : " + (tree_get.sum.toDouble / tree_get.size.toDouble) * 1e-9)
-    true
-  }
 
   private def run(p: Path, binary: Boolean, stackConfig: StackConfig, ignore: Boolean) =
     Fixpoint.DEBUG = false
@@ -136,6 +143,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     val cfg_event = Profiler.addTime("event_get") {
       graphBuilder.get
     }
+
     val cfg_tree = Profiler.addTime("tree_get") {
       parser.getFinalTree.toGraph
     }
