@@ -48,7 +48,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
   override type ArrayAddr = Int
   override type AType = ArrayType
-  override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType]
+  override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
   override type ArrayElemAddr = Int
 
   override type ExcV = JvmExcept[Value]
@@ -60,7 +60,7 @@ object ConcreteInterpreter extends Interpreter:
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
   override def topObj: Object[ConcreteInterpreter.ObjAddr, ClassFile, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.FieldName] = throw new UnsupportedOperationException
-  override def topArray: Array[ConcreteInterpreter.ArrayAddr, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.AType] = throw new UnsupportedOperationException
+  override def topArray: Array[ConcreteInterpreter.ArrayAddr, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.AType, ConcreteInterpreter.Value] = throw new UnsupportedOperationException
   override def topNull: Null = throw new UnsupportedOperationException
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
 
@@ -78,7 +78,7 @@ object ConcreteInterpreter extends Interpreter:
         cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
     })
 
-  given arrayTypeOps[AID, Addr]: TypeOps[Array[AID, Addr, AType], ReferenceType, Boolean] =
+  given arrayTypeOps[AID, Addr]: TypeOps[Array[AID, Addr, AType, Value], ReferenceType, Boolean] =
     new ConcreteArrayTypeOps((atype, target) => target != null && atype == target.asArrayType)
 
   given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
@@ -105,8 +105,8 @@ object ConcreteInterpreter extends Interpreter:
   given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
     override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
 
-  given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType], Boolean] with
-    override def is32Bit(v: Array[AID, Addr, ArrayType]): Boolean = true
+  given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType, Value], Boolean] with
+    override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true
 
   given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
   (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with

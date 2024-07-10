@@ -133,7 +133,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           case inst: LoadString =>
             val string = inst.value.toCharArray.map(l => l.toInt).toSeq
             val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.size))
             val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
             objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
             stack.push(stringObj)
@@ -155,7 +155,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           case inst: LoadString_W =>
             val string = inst.value.toCharArray.map(l => l.toInt).toSeq
             val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+            val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.size))
             val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
             objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
             stack.push(stringObj)
@@ -458,17 +458,13 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         inst match
           case inst: GETSTATIC =>
             val objCF = inst.declaringClass
-            if(!staticInitialized.contains(objCF)){
-              initStatics(objCF)
-            }
+            ensureInitialization(objCF)
             val v = staticVarStore.readOrElse((objCF, inst.name), fail(UnboundStaticVar, inst.name))
             stack.push(v)
 
           case inst: PUTSTATIC =>
             val objCF = inst.declaringClass
-            if (!staticInitialized.contains(objCF)) {
-              initStatics(objCF)
-            }
+            ensureInitialization(objCF)
             val v = stack.popOrAbort()
             staticVarStore.write((objCF, inst.name), v)
 
@@ -577,8 +573,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             if (project.isLibraryType(inst.objectType)){
               val obj = createLibraryObj(inst.objectType, site)
               stack.push(obj)
-            }
-            else{
+            } else {
               val cfs = project.classFile(inst.objectType).get
               val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq
               val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), (field.classFile.thisType, field.name))))
@@ -599,8 +594,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
             stack.push(array)
           case inst: ARRAYLENGTH.type =>
             val array = stack.popOrAbort()
-            val length = arrayOps.arrayLength(array)
-            stack.push(i32ops.integerLit(length))
+            stack.push(arrayOps.arrayLength(array))
 
 
       // athrow
@@ -707,22 +701,24 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       project.classFile(objType).get
     }
 
-  def initStatics(objType: ObjectType)(using Fixed): Unit =
-    if (!staticInitialized.contains(objType)) {
-      if (project.isLibraryType(objType)) {
-        staticInitialized += objType
-        val source = javaLibClassFileWrapper(objType)
-        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-        val void = invoke(cfs.staticInitializer.get, Seq())
-      }
-      else {
-        staticInitialized += objType
-        val source = nonJavaLibClassFileWrapper(objType)
-        val cfs: List[ClassFile] =
-          process(new DataInputStream(new FileInputStream(source))) { in =>
-            org.opalj.br.reader.Java8Framework.ClassFile(in)
-          }
-        val void = invoke(cfs.head.staticInitializer.get, Seq())
+  def ensureInitialization(objType: ObjectType)(using Fixed): Unit =
+    if(!staticInitialized.contains(objType)) {
+      if (!staticInitialized.contains(objType)) {
+        if (project.isLibraryType(objType)) {
+          staticInitialized += objType
+          val source = javaLibClassFileWrapper(objType)
+          val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
+          val void = invoke(cfs.staticInitializer.get, Seq())
+        }
+        else {
+          staticInitialized += objType
+          val source = nonJavaLibClassFileWrapper(objType)
+          val cfs: List[ClassFile] =
+            process(new DataInputStream(new FileInputStream(source))) { in =>
+              org.opalj.br.reader.Java8Framework.ClassFile(in)
+            }
+          val void = invoke(cfs.head.staticInitializer.get, Seq())
+        }
       }
     }
 
@@ -737,20 +733,20 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
       .zipWithIndex.map(vals => (vals._1, ArrayElemInitSite(site, vals._2)))
-    val array = arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, compType)
+    val array = arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, compType, size)
     array
 
   def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: InstructionSite): V =
     if (numDims == 2) {
       val temp = arrayOps.initArray(dims(1))
       val temp2 = temp.zipWithIndex.map(vals => (createArray(dims.head, compType, site), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
+      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType, dims(1))
       array
     }
     else{
       val temp = arrayOps.initArray(dims(numDims-1))
       val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType)
+      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType, dims(numDims-1))
       array
     }
 
@@ -808,7 +804,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = InstructionSite(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
-          concattedString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType))
+          concattedString.map(vals => (vals._1, ArrayElemInitSite(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), InstructionSite(mth, 0))
         objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)

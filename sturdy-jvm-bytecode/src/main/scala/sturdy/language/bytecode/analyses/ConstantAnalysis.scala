@@ -81,7 +81,6 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     import ConcreteInterpreter.given
 
     given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool] with
-
       override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] = v match
         case Topped.Top => Topped.Top
         case Topped.Actual(o) =>
@@ -94,7 +93,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match
         case Topped.Top => Topped.Top
         case Topped.Actual(o) =>
-          if (ConcreteInterpreter.arrayTypeOps.instanceOf(o, target))
+          if (o.arrayType == target.asArrayType)
             Topped.Top // because `null <= o` and `instanceOf(null, target) == false`
           else
             Topped.Actual(false)
@@ -107,7 +106,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
           Topped.Actual(false)
 
 
-    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
+    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = ???
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
 //      new LiftedObjectOps[FieldAddr, FieldName, ObjAddr, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
 //        using new ConcreteObjectOpsWithJoin(using objFieldAlloc, objFieldStore)

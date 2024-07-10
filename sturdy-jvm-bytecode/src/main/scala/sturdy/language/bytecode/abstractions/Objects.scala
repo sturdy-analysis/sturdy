@@ -7,6 +7,8 @@ import org.opalj.constraints.NullValue
 import sturdy.data
 import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
 import sturdy.data.MayJoin.WithJoin
+import sturdy.data.MakeJoined
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.ManageableAddr
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
@@ -19,6 +21,7 @@ import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
 import sturdy.language.bytecode.AuxillaryFunctions.*
 
+
 import java.net.URL
 
 trait ConstantObjects extends Interpreter:
@@ -30,7 +33,7 @@ trait ConstantObjects extends Interpreter:
   type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
   final def topObj: ObjRep = Topped.Top
 
-  final type ArrayRep = Topped[Array[ArrayAddr, FieldAddr, ArrayType]]
+  final type ArrayRep = Topped[Array[ArrayAddr, FieldAddr, ArrayType, Value]]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
   type TypeRep = ReferenceType
@@ -46,6 +49,7 @@ trait ConstantObjects extends Interpreter:
 trait TypeObjects extends Interpreter:
   final type NullVal = Null
   final def topNull: NullVal = null
+  
 
   given combineNull[W <: Widening]: Combine[Null, W] with
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
@@ -57,7 +61,7 @@ trait TypeObjects extends Interpreter:
       val lcSuperType = project.classHierarchy.joinObjectTypes(v1.thisType, v2.thisType, true).head
       MaybeChanged.Changed(project.classFile(lcSuperType).get)
 
-  given typeObjects(using project: Project[URL], f: Failure): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+  given typeObjects(using project: Project[URL], f: Failure, effects: EffectStack): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
       cfs
 
@@ -82,7 +86,7 @@ trait TypeObjects extends Interpreter:
 
     type ArrayRep = ArrayType
     given typeArrays: ArrayOps[InstructionSite, Int, Value, ArrayRep, ArrayType, InstructionSite, WithJoin] with
-      override def makeArray(aid: InstructionSite, vals: Seq[(Value, InstructionSite)], arrayType: ArrayRep): ArrayRep =
+      override def makeArray(aid: InstructionSite, vals: Seq[(Value, InstructionSite)], arrayType: ArrayRep, arraySize: Value): ArrayRep =
         arrayType
 
       override def getVal(array: ArrayRep, idx: Int): JOption[MayJoin.WithJoin, Value] =
@@ -92,14 +96,17 @@ trait TypeObjects extends Interpreter:
       override def setVal(array: ArrayRep, idx: Int, v: Value): JOption[MayJoin.WithJoin, Unit] =
         JOptionA.noneSome(())
 
-      override def arrayLength(array: ArrayRep): Int =
-        ???//Value.Int32(topI32)
+      override def arrayLength(array: ArrayRep): Value =
+        Value.Int32(topI32)
 
-      override def initArray(size: Int): Seq[Any] = ???
+      override def initArray(size: Int): Seq[Any] =
+        Seq()
 
-      override def arraycopy(src: ArrayRep, srcPos: Int, dest: ArrayRep, destPos: Int, length: Int): JOption[MayJoin.WithJoin, Unit] = ???
+      override def arraycopy(src: ArrayRep, srcPos: Int, dest: ArrayRep, destPos: Int, length: Int): JOption[MayJoin.WithJoin, Unit] =
+        JOptionA.noneSome(())
 
-      override def getArray(array: ArrayRep): Seq[JOption[MayJoin.WithJoin, Value]] = ???
+      override def getArray(array: ArrayRep): Seq[JOption[MayJoin.WithJoin, Value]] =
+        Seq(JOptionA.noneSome(topOpalVal(array.elementType)))
 
   def topOpalVal(ty: FieldType): Value =
     ty match
