@@ -20,8 +20,8 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
   def build(ct: CT): ControlGraph[Atom, Sec] =
     val init_state = TreeBuilderState(preds = Set(Node.Start()), aes = Map.empty, fixpoints = Map.empty, curg = Set.empty)
     val builded_state = _build(ct, init_state)
-    val helper_edges_state = addBlockPairEdges(builded_state)
-    ControlGraph(helper_edges_state.curg)
+//    val helper_edges_state = addBlockPairEdges(builded_state)
+    ControlGraph(builded_state.curg)
 
   private def addNode(state: TreeBuilderState, n: Node[Atom, Sec]): TreeBuilderState =
     state.copy(

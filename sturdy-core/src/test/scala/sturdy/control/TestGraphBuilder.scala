@@ -46,6 +46,7 @@ class TestGraphBuilder extends AnyFunSuite {
       atomic("output z"),
     ),
     linearPath(List(
+      Node.Start(),
       Node.atomic("x = input"),
       Node.atomic("y = x + 1"),
       Node.atomic("z = input"),
@@ -67,15 +68,16 @@ class TestGraphBuilder extends AnyFunSuite {
       EndSection(),
     ),
     linearPath(List(
+      Node.Start(),
       Node.blockStart("Call(main)"),
       Node.blockStart("main"),
       Node.atomic("output 3"),
       Node.blockEnd("main"),
       Node.blockEnd("Call(main)")))
-      ++ Set(
-      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
-    )
+//      ++ Set(
+//      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
+//    )
   )
 
   testGraph("Nested blocks (call)",
@@ -106,6 +108,7 @@ class TestGraphBuilder extends AnyFunSuite {
       EndSection(),
     ),
     linearPath(List(
+      Node.Start(),
       Node.blockStart("Call(main)"),
       Node.blockStart("main"),
       Node.atomic("output 3"),
@@ -117,12 +120,12 @@ class TestGraphBuilder extends AnyFunSuite {
       Node.atomic("output x"),
       Node.blockEnd("main"),
       Node.blockEnd("Call(main)")))
-      ++ Set(
-      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
-      // Edge(Node.blockStart("foo"), Node.blockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
-      Edge(Node.blockStart("Call(foo)"), Node.blockEnd("Call(foo)"), EdgeType.BlockPair),
-    )
+//      ++ Set(
+//      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
+//      // Edge(Node.blockStart("foo"), Node.blockEnd("foo"), EdgeType.BlockPair), No BlockPair edge if there is a direct CF edge between the two
+//      Edge(Node.blockStart("Call(foo)"), Node.blockEnd("Call(foo)"), EdgeType.BlockPair),
+//    )
   )
 
   testGraph("Fork",
@@ -153,6 +156,7 @@ class TestGraphBuilder extends AnyFunSuite {
       EndSection(),
     ),
     linearPath(List(
+      Node.Start(),
       Node.blockStart("Call(main)"),
       Node.blockStart("main"),
       Node.atomic("x = input"),
@@ -164,8 +168,8 @@ class TestGraphBuilder extends AnyFunSuite {
       ++ Set(
       Edge(Node.atomic("if(x)"), Node.atomic("output 1"), EdgeType.CF), // Second part of the Fork
       Edge(Node.atomic("output 1"), Node.blockEnd("main"), EdgeType.CF), // Second part of the Fork
-      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 
@@ -205,6 +209,7 @@ class TestGraphBuilder extends AnyFunSuite {
       EndSection(),
     ),
     linearPath(List(
+      Node.Start(),
       Node.blockStart("Call(main)"),
       Node.blockStart("main"),
       Node.atomic("x = input"),
@@ -219,8 +224,8 @@ class TestGraphBuilder extends AnyFunSuite {
       Edge(Node.atomic("if(x)"), Node.atomic("output 1"), EdgeType.CF), // Second part of the Fork
       Edge(Node.atomic("output 1"), Node.blockEnd("main"), EdgeType.CF), // Second part of the Fork
       Edge(Node.atomic("if(x>10)"), Node.blockEnd("main"), EdgeType.CF), // Second part of the nested Fork
-      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
-      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("main"), Node.blockEnd("main"), EdgeType.BlockPair),
+//      Edge(Node.blockStart("Call(main)"), Node.blockEnd("Call(main)"), EdgeType.BlockPair),
     )
   )
 

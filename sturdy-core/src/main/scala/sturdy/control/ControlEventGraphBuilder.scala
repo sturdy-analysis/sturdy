@@ -1,10 +1,18 @@
 package sturdy.control
 
+import org.eclipse.collections.api.factory.Maps
+import org.eclipse.collections.api.map.MutableMap
+import org.eclipse.collections.api.multimap.MutableMultimap
+import org.eclipse.collections.api.multimap.set.{ImmutableSetMultimap, MutableSetMultimap}
+import org.eclipse.collections.api.set.{ImmutableSet, MutableSet}
+import org.eclipse.collections.impl.factory.{Multimaps, Sets}
 import sturdy.control.FixpointControlEvent.BeginFixpoint
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
+import scala.jdk.CollectionConverters.*
+import scala.jdk.FunctionConverters.*
 
 class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
   import ControlEventGraphBuilder.*
@@ -13,23 +21,43 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
   private implicit def cnode[A <: Atom,S <: Section](n: Node[A, S]): CNode = CNode(n, false)
   private type CEdge = Edge[Atom, Section]
 
-  private type CNodes = Set[CNode]
-  private type ActiveExc = Map[Exc, CNodes]
-  private type Fixpoints = mutable.Map[Fx, (CNodes, ActiveExc)]
-  private type Graph = mutable.Set[CEdge]
-  private val curg: Graph = mutable.Set.empty
+  private type CNodes = ImmutableSet[CNode]
+  private type ActiveExc = ImmutableSetMultimap[Exc, CNode]
+  private type Fixpoints = MutableMap[Fx, (CNodes, ActiveExc)]
+
+  /** A multimap of _backward_ edges */
+  private type Graph = MutableSetMultimap[CNode, CNode]
+
+  private val emptyPredecessors: CNodes = Sets.immutable.empty()
+  private val emptyActiveExc: ActiveExc = Multimaps.immutable.set.empty()
 
   private var stack: List[Entry] = List()
-  private val fixpoints: Fixpoints = mutable.Map.empty
-  private var predecessors: CNodes = Set(Node.Start())
-  private var activeExc: ActiveExc = Map()
+  private val curg: Graph = Multimaps.mutable.set.empty()
+  private val fixpoints: Fixpoints = Maps.mutable.empty()
+  private var predecessors: CNodes = Sets.immutable.of(Node.Start())
+  private var activeExc: ActiveExc = emptyActiveExc
 
   private def mergeAes(aes1: ActiveExc, aes2: ActiveExc): ActiveExc =
-    aes1 ++ aes2.map { case (k, v) => k -> (aes1.getOrElse(k, Set.empty) ++ v) }
+    if (aes1.isEmpty)
+      aes2
+    else if (aes2.isEmpty)
+      aes1
+    else if (aes1.size >= aes2.size) {
+      val map = aes1.toMutable
+      map.putAll(aes2)
+      map.toImmutable
+    } else {
+      val map = aes2.toMutable
+      map.putAll(aes1)
+      map.toImmutable
+    }
 
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
-    ControlGraph(addBlockPairEdges(curg.toSet))
+    val edges = curg.keyValuePairsView().asScala.map { p =>
+      Edge(p.getTwo.n, p.getOne.n, if (p.getTwo.exc) EdgeType.Exceptional else EdgeType.CF)
+    }
+    ControlGraph(edges.toSet)
 
   override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*
@@ -39,7 +67,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
         addNode(Node.Atomic(a)(at.label))
       case BasicControlEvent.Failed() =>
         addNode(Node.Failure())
-        predecessors = Set.empty
+        predecessors = emptyPredecessors
       case s@BasicControlEvent.BeginSection(sec: Section) =>
         addNode(Node.BlockStart(sec)(s.label))
         stack = Entry.Sec(sec)(s.label) :: stack
@@ -58,10 +86,8 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     case _ => false
 
   private def addNode(node: CNode): Unit =
-    predecessors.foreach(predecessor =>
-      curg += Edge(predecessor.n, node.n, if predecessor.exc then EdgeType.Exceptional else EdgeType.CF)
-    )
-    predecessors = Set(node)
+    curg.putAll(node, predecessors)
+    predecessors = Sets.immutable.of(node)
 
   def assertNoCatching(): Unit =
     if (isCatching) {
@@ -77,17 +103,17 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
     ev match
       case Fork() =>
         stack = Entry.ForkFirst(predecessors, activeExc) :: stack
-        activeExc = Map.empty
+        activeExc = emptyActiveExc
       case Switch() => stack match
         case Entry.ForkFirst(originTails, originExc) :: stack_ =>
           stack = Entry.ForkSecond(predecessors, mergeAes(originExc, activeExc)) :: stack_
           predecessors = originTails
-          activeExc = originExc
+          activeExc = emptyActiveExc
         case _ => error(s"Entry mismatch, expected ForkFirst for $ev: $stack")
       case BranchingControlEvent.Join() => stack match
         case Entry.ForkSecond(firstTails, firstOriginExc) :: stack_ =>
           stack = stack_
-          predecessors = firstTails ++ predecessors
+          predecessors = firstTails.newWithAll(predecessors)
           activeExc = mergeAes(firstOriginExc, activeExc)
         case _ => error(s"Entry mismatch, expected ForkSecond for $ev: $stack")
 
@@ -97,29 +123,30 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case BeginTry() =>
         assertNoCatching()
         stack = Entry.Try(outside = activeExc) :: stack
-        activeExc = Map.empty
+        activeExc = emptyActiveExc
       case Throw(exc: Exc) =>
         assertNoCatching()
-        activeExc = mergeAes(activeExc, Map(exc -> predecessors.map(_.copy(exc = true))))
-        predecessors = Set.empty
+        val predsExc = predecessors.collect(_.copy(exc = true))
+        activeExc = activeExc.newWithAll(exc, predsExc)
+        predecessors = emptyPredecessors
       case Catching() => stack match
         case Entry.Try(outside) :: stack_ =>
           stack = Entry.Catching(
             bodyExc = activeExc,
             outside = outside,
           ) :: stack_
-          activeExc = Map.empty
+          activeExc = emptyActiveExc
         case _ => error(s"Entry mismatch, expected Try for $ev: $stack")
       case BeginHandle(exc: Exc) => stack match
         case Entry.Catching(bodyExc, outside) :: stack_ =>
           stack = Entry.Handler(exc, predecessors, bodyExc, outside, activeExc) :: stack_
-          predecessors = bodyExc.getOrElse(exc, Set.empty)
-          activeExc = Map.empty
+          predecessors = bodyExc.get(exc)
+          activeExc = emptyActiveExc
         case _ => error(s"Entry mismatch, expected Catching for $ev: $stack")
       case EndHandle() => stack match
         case Entry.Handler(hx, tails, bodyExc, outside, resultExc) :: stack_ =>
           stack = Entry.Catching(bodyExc, outside) :: stack_
-          predecessors = tails ++ predecessors
+          predecessors = tails.newWithAll(predecessors)
           activeExc = mergeAes(resultExc, activeExc)
         case _ => error(s"Entry mismatch, expected Handler for $ev: $stack")
       case EndTry() => stack match
@@ -138,20 +165,19 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case BeginFixpoint(fx) =>
         stack = Entry.Fixpoint(fx) :: stack
       case Recurrent(fx) =>
-        val (tails, xs) = fixpoints.getOrElse(fx, (Set.empty, Map.empty))
+        val (tails, xs) = fixpoints.getOrDefault(fx, (emptyPredecessors, emptyActiveExc))
         predecessors = tails
         activeExc = xs
       case EndFixpoint() => stack match
         case Entry.Fixpoint(fx) :: stack_ =>
           stack = stack_
-          fixpoints += fx -> (
-            predecessors ++ fixpoints.getOrElse(fx, (Set.empty, Map.empty))._1,
-            mergeAes(activeExc, fixpoints.getOrElse(fx, (Set.empty, Map.empty))._2))
+          val (tails, xs) = fixpoints.getOrDefault(fx, (emptyPredecessors, emptyActiveExc))
+          fixpoints.put(fx, (predecessors.newWithAll(tails), mergeAes(activeExc, xs)))
         case _ =>
           error(s"Entry mismatch, expected Fixpoint for $ev: $stack")
       case Restart() =>
-        predecessors = Set.empty
-        activeExc = Map.empty
+        predecessors = emptyPredecessors
+        activeExc = emptyActiveExc
 
   private enum Entry:
     case Sec(s: Section)(val label: String)

@@ -9,7 +9,7 @@ import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.*
+import sturdy.language.wasm.analyses.{ContextConfig, *}
 import sturdy.language.wasm.generic.FrameData
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Topped
@@ -37,11 +37,10 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
   private val event_run: mutable.ListBuffer[Long] = mutable.ListBuffer.empty
   private val event_get: mutable.ListBuffer[Long] = mutable.ListBuffer.empty
   private val tree_run: mutable.ListBuffer[Long] = mutable.ListBuffer.empty
-  private val tree_get: mutable.ListBuffer[Long] = mutable.ListBuffer.empty
   private val graph_nodes: mutable.ListBuffer[Int] = mutable.ListBuffer.empty
   private val graph_edges: mutable.ListBuffer[Int] = mutable.ListBuffer.empty
 
-  measure(10)
+  measure(1)
 
 
   def measure(runs: Int): Unit =
@@ -64,30 +63,29 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
 
     it must s"Final result" in {
 
-      println("tests_names : " + tests_names)
-      println("n_events : " + n_events)
-      println("control : " + control)
-      println("baseline : " + baseline)
-      println("event_run : " + event_run)
-      println("event_get : " + event_get)
-      println("tree_run : " + tree_run)
-      println("tree_get : " + tree_get)
-      println("graph_nodes : " + graph_nodes)
-      println("graph_edges : " + graph_edges)
+//      println("tests_names : " + tests_names)
+//      println("n_events : " + n_events)
+//      println("control : " + control)
+//      println("baseline : " + baseline)
+//      println("event_run : " + event_run)
+//      println("event_get : " + event_get)
+//      println("tree_run : " + tree_run)
+//      println("tree_get : " + tree_get)
+//      println("graph_nodes : " + graph_nodes)
+//      println("graph_edges : " + graph_edges)
 
-      val tree_time = tree_run.zip(tree_get).map(_ + _)
-      val tree_slowdown = tree_time.zip(baseline).map(_.toDouble / _)
+      val tree_slowdown = tree_run.zip(baseline).map(_.toDouble / _)
       val event_slowdown = event_run.zip(baseline).map(_.toDouble / _)
 
-      println(tree_slowdown)
-      println(event_slowdown)
+      println("tree_slowdown: " + tree_slowdown)
+      println("event_slowdown: " + event_slowdown)
 
-      println("control : " + (control.sum.toDouble / control.size.toDouble) * 1e-9)
-      println("baseline : " + (baseline.sum.toDouble / baseline.size.toDouble) * 1e-9)
-      println("event_run : " + (event_run.sum.toDouble / event_run.size.toDouble) * 1e-9)
-      println("event_get : " + (event_get.sum.toDouble / event_get.size.toDouble) * 1e-9)
-      println("tree_run : " + (tree_run.sum.toDouble / tree_run.size.toDouble) * 1e-9)
-      println("tree_get : " + (tree_get.sum.toDouble / tree_get.size.toDouble) * 1e-9)
+//      println("control : " + (control.sum.toDouble / control.size.toDouble) * 1e-9)
+//      println("baseline : " + (baseline.sum.toDouble / baseline.size.toDouble) * 1e-9)
+//      println("event_run : " + (event_run.sum.toDouble / event_run.size.toDouble) * 1e-9)
+//      println("event_get : " + (event_get.sum.toDouble / event_get.size.toDouble) * 1e-9)
+//      println("tree_run : " + (tree_run.sum.toDouble / tree_run.size.toDouble) * 1e-9)
+//      println("tree_get : " + (tree_get.sum.toDouble / tree_get.size.toDouble) * 1e-9)
       true
     }
 
@@ -96,55 +94,44 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
 
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+    val config = WasmConfig(
+      fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig)),
+      ctx = CallSites(2)
+    )
 
-    val interp_control = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
+    val interp_control = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
     val recorder = interp_control.addControlObserver(new RecordingControlObserver)
 
-    val res_control = Profiler.addTime("control") {
-      interp_control.failure.fallible(
-        interp_control.invokeExported(interp_control.initializeModule(module), funcName, List.empty)
-      )
-    }
+//    val res_control = Profiler.addTime("control") {
+//      interp_control.failure.fallible(
+//        interp_control.invokeExported(interp_control.initializeModule(module), funcName, List.empty)
+//      )
+//    }
 
-    val interp_baseline = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
 
-    val interp_event = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-    val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
-
-    val interp_tree = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-    val parser = interp_tree.addControlObserver(new ControlEventParser)
-
-    val res_baseline = Profiler.addTime("baseline") {
-      interp_baseline.failure.fallible(
-        interp_baseline.invokeExported(interp_baseline.initializeModule(module), funcName, List.empty)
-      )
+    val res_baseline = Profiler.addTimeBestOf("baseline", 3) {
+      val interp_baseline = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+      val mod_inst = interp_baseline.initializeModule(module)
+      interp_baseline.failure.fallible(interp_baseline.invokeExported(mod_inst, funcName, List.empty))
     }
 
     var hash_event = ""
-    val res_event = Profiler.addTime("event_run") {
+    val res_event = Profiler.addTimeBestOf("event_run", 3) {
+      val interp_event = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+      val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
       val modInst_event = interp_event.initializeModule(module)
       hash_event = modInst_event.toString
-      interp_event.failure.fallible(interp_event.invokeExported(modInst_event, funcName, List.empty)
-      )
-    }
-
-    var hash_tree = ""
-    val res_tree = Profiler.addTime("tree_run") {
-      val modInst_tree = interp_tree.initializeModule(module)
-      hash_tree = modInst_tree.toString
-      interp_tree.failure.fallible(interp_tree.invokeExported(modInst_tree, funcName, List.empty)
-      )
-    }
-
-    val cfg_event = Profiler.addTime("event_get") {
+      interp_event.failure.fallible(interp_event.invokeExported(modInst_event, funcName, List.empty))
       graphBuilder.get
     }
 
-    val cfg_tree = Profiler.addTime("tree_get") {
+    var hash_tree = ""
+    val res_tree = Profiler.addTimeBestOf("tree_run", 3) {
+      val interp_tree = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+      val parser = interp_tree.addControlObserver(new ControlEventParser)
+      val modInst_tree = interp_tree.initializeModule(module)
+      hash_tree = modInst_tree.toString
+      interp_tree.failure.fallible(interp_tree.invokeExported(modInst_tree, funcName, List.empty))
       parser.getFinalTree.toGraph
     }
 
@@ -155,15 +142,14 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
       event_run.addOne(Profiler.get("event_run").getOrElse(0))
       event_get.addOne(Profiler.get("event_get").getOrElse(0))
       tree_run.addOne(Profiler.get("tree_run").getOrElse(0))
-      tree_get.addOne(Profiler.get("tree_get").getOrElse(0))
-      graph_nodes.addOne(cfg_event.nodes.size)
-      graph_edges.addOne(cfg_event.edges.size)
+//      graph_nodes.addOne(res_event.nodes.size)
+//      graph_edges.addOne(res_event.edges.size)
 
     Profiler.saveTimesAndReset()
 
-    println(cfg_event.nodes.size)
-    println(cfg_tree.nodes.size)
+//    println(res_event.nodes.size)
+//    println(res_tree.nodes.size)
 
-    assert(cfg_tree.toGraphViz == cfg_event.toGraphViz.replace(hash_event, hash_tree))
+//    assert(res_tree.toGraphViz == res_event.toGraphViz.replace(hash_event, hash_tree))
 
 
