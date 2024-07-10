@@ -1,15 +1,18 @@
+package sturdy.language.bytecode
+
+import org.opalj.br.*
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
-import org.opalj.br.*
 import org.opalj.io.process
+import sturdy.fix
+import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.ConcreteInterpreter
 import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
 import sturdy.values.integer.IntegerOps
-import sturdy.fix
-import sturdy.fix.ConcreteFixpoint
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
+import java.nio.file.Paths
 import scala.Float.NaN
 import scala.collection.mutable
 
@@ -22,8 +25,13 @@ object test extends App{
     case _ => ValType.I32
 
   //edit this
-  val projectPath = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources"
-  val simpleMathName = "/Users/stmarx/IdeaProjects/jvm-bytecode-in-sturdy-scala/jvm-bytecode-testSources/SimpleMath.class"
+  val projectUri = this.getClass.getResource("/sturdy/language/bytecode/simple").toURI
+  val simpleMathUri = this.getClass.getResource("/sturdy/language/bytecode/simple/SimpleMath.class").toURI
+
+  val projectPath = Paths.get(projectUri).toString
+  val simpleMathName = Paths.get(simpleMathUri).toString
+  println(projectPath)
+  println(simpleMathName)
 
   val pWithLibrary = Project(
     new java.io.File(projectPath), // path to the JAR files/directories containing the project

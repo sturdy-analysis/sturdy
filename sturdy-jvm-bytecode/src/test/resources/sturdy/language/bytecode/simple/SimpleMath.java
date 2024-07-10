@@ -1,5 +1,3 @@
-import java.net.URLClassLoader;
-
 public class SimpleMath {
     int x = 0;
     int y = 0;
