@@ -25,7 +25,7 @@ import scala.collection.mutable
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame performance test for control event with constant analysis"
+  behavior of "Benchmarksgame performance test for control event with interval analysis"
 
   private val funcName = "_start"
   private val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI
@@ -42,7 +42,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
   private val graph_edges: mutable.ListBuffer[Int] = mutable.ListBuffer.empty
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.headOption.foreach { p =>
-    it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
+    it must s"warm-up interval analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true, StackConfig.StackedStates(), true)
       LinearStateOperationCounter.clearAll()
       Profiler.reset()
@@ -50,7 +50,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
   }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis with stacked states on benchmark ${p.getFileName}" in {
+    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName}" in {
       tests_names.addOne(p.getFileName.toString)
       run(p, binary = true, StackConfig.StackedStates(), false)
     }
@@ -90,7 +90,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp_control = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    val interp_control = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
     val recorder = interp_control.addControlObserver(new RecordingControlObserver)
 
@@ -100,14 +100,14 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
       )
     }
 
-    val interp_baseline = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    val interp_baseline = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
 
-    val interp_event = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    val interp_event = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
     val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
 
-    val interp_tree = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    val interp_tree = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
     val parser = interp_tree.addControlObserver(new ControlEventParser)
 
