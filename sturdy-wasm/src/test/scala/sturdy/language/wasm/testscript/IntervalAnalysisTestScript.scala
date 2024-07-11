@@ -84,8 +84,8 @@ class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
-  val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cImports: Map[String, ModuleInstance] = Map()
+  var aImports: Map[String, ModuleInstance] = Map()
   val convertVals: unresolved.Expr => List[IntervalAnalysis.Value] =
     if (useTop)
       constExprToTops

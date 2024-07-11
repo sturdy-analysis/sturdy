@@ -96,12 +96,16 @@ given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
 enum FunctionInstance:
-  case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
-  case Host(hf: HostFunction)
+  case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
+  case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
 
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
-    case Host(hf) => hf.funcType
+    case Host(_, _, hf) => hf.funcType
+
+  def module: ModuleInstance = this match
+    case Wasm(mod, _, _, _) => mod
+    case Host(mod, _, _) => mod
 
 enum ExternalValue:
   case Function(addr: Int)
@@ -142,7 +146,7 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
       val fIsSound = summon[Soundness[Func,Func]].isSound(cFunc, aFunc)
       val tIsSound = summon[Soundness[FuncType,FuncType]].isSound(cFt, aFt)
       fIsSound && tIsSound
-    case (FunctionInstance.Host(chf), FunctionInstance.Host(ahf)) => summon[Soundness[HostFunction, HostFunction]].isSound(chf, ahf)
+    case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) => summon[Soundness[HostFunction, HostFunction]].isSound(chf, ahf)
     case _ => IsSound.NotSound(s"Concrete function instance $c not approximated by $a.")
 }
 

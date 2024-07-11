@@ -37,6 +37,8 @@ trait Control extends Interpreter:
       override def enter(dom: FixIn): Unit = dom match
         case FixIn.EnterWasmFunction(id, _, _) =>
           observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter"))
+        case FixIn.EnterHostFunction(id, _) =>
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter host"))
         case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
           val label = c match
             case Block(_, _) => "Block"
@@ -49,7 +51,7 @@ trait Control extends Interpreter:
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterWasmFunction(_, _, _) =>
+        case FixIn.EnterWasmFunction(_, _, _) | FixIn.EnterHostFunction(_, _) =>
           observable.triggerControlEvent(BasicControlEvent.EndSection())
         case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
           observable.triggerControlEvent(BasicControlEvent.EndSection())
@@ -176,7 +178,7 @@ object ControlFlow:
         nodes += CfgNode.Exit(FuncId(modInst, funcIx))
         val (_,body) = withLocations(func.body, InstLoc.InFunction(FuncId(modInst, funcIx), 0))
         nodes ++= body.flatMap(instToCfgNode)
-      case FunctionInstance.Host(hostF) =>
+      case FunctionInstance.Host(_, _, hostF) =>
     }
     for (exp <- mod.exports) exp._2 match {
       case ExternalValue.Function(funcIx) =>
