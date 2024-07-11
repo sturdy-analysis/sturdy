@@ -89,35 +89,36 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
       true
     }
 
-  private def run(p: Path, binary: Boolean, stackConfig: StackConfig, ignore: Boolean) =
+  private def run(p: Path, binary: Boolean, stackConfig: StackConfig, ignore: Boolean): Unit =
     Fixpoint.DEBUG = false
 
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
     val config = WasmConfig(
       fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig)),
-      ctx = CallSites(2)
+      ctx = Insensitive
     )
+    val bestOf = 5
 
-    val interp_control = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
-    val recorder = interp_control.addControlObserver(new RecordingControlObserver)
 
 //    val res_control = Profiler.addTime("control") {
+//      val interp_control = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+//      val recorder = interp_control.addControlObserver(new RecordingControlObserver)
 //      interp_control.failure.fallible(
 //        interp_control.invokeExported(interp_control.initializeModule(module), funcName, List.empty)
 //      )
 //    }
 
 
-    val res_baseline = Profiler.addTimeBestOf("baseline", 3) {
-      val interp_baseline = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val res_baseline = Profiler.addTimeBestOf("baseline", bestOf) {
+      val interp_baseline = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
       val mod_inst = interp_baseline.initializeModule(module)
       interp_baseline.failure.fallible(interp_baseline.invokeExported(mod_inst, funcName, List.empty))
     }
 
     var hash_event = ""
-    val res_event = Profiler.addTimeBestOf("event_run", 3) {
-      val interp_event = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val res_event = Profiler.addTimeBestOf("event_run", bestOf) {
+      val interp_event = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
       val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
       val modInst_event = interp_event.initializeModule(module)
       hash_event = modInst_event.toString
@@ -126,8 +127,8 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     }
 
     var hash_tree = ""
-    val res_tree = Profiler.addTimeBestOf("tree_run", 3) {
-      val interp_tree = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val res_tree = Profiler.addTimeBestOf("tree_run", bestOf) {
+      val interp_tree = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
       val parser = interp_tree.addControlObserver(new ControlEventParser)
       val modInst_tree = interp_tree.initializeModule(module)
       hash_tree = modInst_tree.toString
@@ -136,7 +137,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     }
 
     if !ignore then
-      n_events.addOne(recorder.events.size)
+//      n_events.addOne(recorder.events.size)
       control.addOne(Profiler.get("control").getOrElse(0))
       baseline.addOne(Profiler.get("baseline").getOrElse(0))
       event_run.addOne(Profiler.get("event_run").getOrElse(0))
