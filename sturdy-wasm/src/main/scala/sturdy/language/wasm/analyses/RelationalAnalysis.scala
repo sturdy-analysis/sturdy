@@ -11,7 +11,7 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
+import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
@@ -313,6 +313,35 @@ object RelationalAnalysis extends Interpreter, ExceptionByTarget, ControlFlow, C
     given ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && Bits](extract = _.asF64, inject = _ => Type.I32Type)
     given ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && Bits](extract = _.asF64, inject = _ => Type.I64Type)
     given ConvertDoubleFloat[Type, Type] = LiftedConvert[Double, Float, Type, Type, BaseType[Double], BaseType[Float], NilCC.type](extract = _.asF64, inject = _ => Type.F32Type)
+
+    def constantInstructions: ConstantInstructionsLogger =
+      val constants = new ConstantInstructionsLogger
+      this.fixpoint.addContextFreeLogger(constants)
+      constants
+
+    extension(expr: ApronExpr[VirtAddr,Type])
+      def isConstant: Boolean =
+        val iv = apronState.getInterval(expr)
+        iv.inf().isEqual(iv.sup())
+
+    class ConstantInstructionsLogger extends InstructionResultLogger[Value](stack):
+      override def boolValue(v: Value): Value = boolean(asBoolean(v))
+
+      override def dummyValue: Value = Value.Int32(ApronExpr.constant(Interval(0, 0), I32Type))
+
+      def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
+        case Value.TopValue => false
+        case Value.Int32(v) => v.isConstant
+        case Value.Int64(v) => v.isConstant
+        case Value.Float32(v) => v.isConstant
+        case Value.Float64(v) => v.isConstant
+      })
+
+      def grouped: Map[String, Map[InstLoc, List[Value]]] =
+        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
+
+      def groupedCount: Map[String, Int] =
+        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
 
     override def newEffectStack: EffectStack = super.newEffectStack
       new EffectStack(
