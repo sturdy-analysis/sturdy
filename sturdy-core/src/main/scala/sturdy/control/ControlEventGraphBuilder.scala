@@ -6,6 +6,7 @@ import org.eclipse.collections.api.multimap.MutableMultimap
 import org.eclipse.collections.api.multimap.set.{ImmutableSetMultimap, MutableSetMultimap}
 import org.eclipse.collections.api.set.{ImmutableSet, MutableSet}
 import org.eclipse.collections.impl.factory.{Multimaps, Sets}
+import sturdy.control.EdgeType.Exceptional
 import sturdy.control.FixpointControlEvent.BeginFixpoint
 
 import scala.collection.mutable
@@ -54,10 +55,14 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
 
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
-    val edges = curg.keyValuePairsView().asScala.map { p =>
-      Edge(p.getTwo.n, p.getOne.n, if (p.getTwo.exc) EdgeType.Exceptional else EdgeType.CF)
-    }
-    ControlGraph(edges.toSet)
+    val set = mutable.Set.empty[CEdge]
+    curg.forEachKeyValue((to, from) =>
+      set += Edge(from.n, to.n, if (from.exc) EdgeType.Exceptional else EdgeType.CF)
+      to.n match
+        case n@Node.BlockEnd(sec) => set += Edge(Node.BlockStart(sec)(n.label), n, EdgeType.BlockPair)
+        case _ => // nothing
+    )
+    ControlGraph(set.toSet)
 
   override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*

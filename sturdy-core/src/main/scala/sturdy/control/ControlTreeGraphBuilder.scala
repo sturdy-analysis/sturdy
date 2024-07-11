@@ -60,8 +60,10 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       val body_state = _build(body, addNode(state, Node.BlockStart(section)(st.label)))
       if (body_state.preds.isEmpty)
         body_state
-      else
-        addNode(body_state, Node.BlockEnd(section)(st.label))
+      else {
+        val s = addNode(body_state, Node.BlockEnd(section)(st.label))
+        s.copy(curg = s.curg + Edge(Node.BlockStart(section)(st.label), Node.BlockEnd(section)(st.label), EdgeType.BlockPair))
+      }
 
     case ControlTree.Seq(t1, t2) =>
       _build(t2, _build(t1, state))
