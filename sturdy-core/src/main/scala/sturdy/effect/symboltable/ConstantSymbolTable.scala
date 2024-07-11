@@ -17,6 +17,12 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
+  def symbols(key: Key): Set[Symbol] =
+    tables(key) match
+      case Right(entry) => Set()
+      case Left(table) => table.symbols
+
+
   override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
     tables(key) match
       case Right(entry) => JOptionA.NoneSome(entry)
@@ -184,6 +190,7 @@ object ConstantSymbolTable:
 
   case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], dirtySymbols: Set[Symbol]):
     def entries: Set[Entry] = underlying.values.map(_.get).toSet
+    def symbols: Set[Symbol] = underlying.keySet
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
       Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
     inline def updated(symbol: Symbol, entry: MayMust[Entry]): Table[Symbol, Entry] =
