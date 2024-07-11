@@ -1,10 +1,8 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
-import sturdy.data.CombineUnit
+import sturdy.data.{CombineUnit, MayJoin, NoJoin, noJoin, EitherOrdering}
 import sturdy.effect.{ComputationJoiner, EffectList, EffectStack}
-import sturdy.effect.callframe.DecidableMutableCallFrame
+import sturdy.effect.callframe.{DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.{IsSound, Soundness, fix}
@@ -35,16 +33,20 @@ import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 import WasmFailure.*
 
-case class FrameData(returnArity: Int, module: ModuleInstance):
+case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
   override def toString: String =
     if (module == null)
-      s"null:$returnArity"
-    else
-      s"$module:$returnArity"
+      s"Function $funcIx"
+    else funcIx match
+      case Some(ix) => s"${module.functions(ix)}"
+      case None => s"Unknown Function"
 given FiniteFrameData: Finite[FrameData] with {}
+given Ordering[FrameData] = Ordering.by(data => (data.funcIx, data.returnArity, data.module.hashCode))
 
 given frameDataIsSound: Soundness[FrameData, FrameData] with
   override def isSound(c: FrameData, a: FrameData): IsSound =
+    if (c.funcIx != a.funcIx)
+      return IsSound.NotSound(s"Function index do not match: $c $a.")
     if (c.returnArity != a.returnArity)
       return IsSound.NotSound(s"Return arities do not match: $c $a.")
     if (c.module == null && a.module == null)
@@ -54,7 +56,7 @@ given frameDataIsSound: Soundness[FrameData, FrameData] with
     summon[Soundness[ModuleInstance, ModuleInstance]].isSound(c.module, a.module)
 
 object FrameData:
-  val empty: FrameData = FrameData(0, null)
+  val empty: FrameData = FrameData(None, 0, null)
 
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
@@ -96,6 +98,12 @@ enum InstLoc:
     case (InInit(mod1, pc1), InInit(mod2, pc2)) if mod1 == mod2 => pc2 - pc1
     case _ => throw new MatchError((this, that))
 
+given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,Int), (Int,String)]]] {
+  case InstLoc.InFunction(fid,pc) => Left((fid,pc))
+  case InstLoc.InInit(mod, pc) => Right(Left((mod.hashCode(),pc)))
+  case InstLoc.InvokeExported(mod, funName) => Right(Right((mod.hashCode(),funName)))
+}
+
 enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
@@ -109,6 +117,12 @@ enum FixIn:
       case _ => s"$i @$loc"
     case EnterWasmFunction(id, _, _) => s"Enter $id"
     case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
+
+given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Int]]] {
+  case FixIn.Eval(inst, loc) => Left(loc)
+  case FixIn.EnterWasmFunction(fid, fun, tpe) => Right(Left(fun.hashCode()))
+  case FixIn.MostGeneralClientLoop(mod) => Right(Right(mod.hashCode()))
+}
 
 enum FixOut[V]:
   case Eval()
@@ -139,20 +153,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
   val funTable: SymbolTable[TableAddr, FuncIx, FunV, J]
-  val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
+  val callFrame: MutableCallFrame[FrameData, Int, V, InstLoc, MayJoin.NoJoin]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
 
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, funTable, callFrame, except, failure), {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(memory, globals, callFrame)
-    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame)
-  }, {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(stack, memory, globals, failure)
-    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame, except)
-  })
+  def newEffectStack: EffectStack =
+    new EffectStack(EffectList(stack, memory, globals, funTable, callFrame, except, failure), {
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(memory, globals, callFrame)
+      case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame)
+    }, {
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(stack, memory, globals, failure)
+      case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame, except)
+    })
+
+  val effectStack: EffectStack = newEffectStack
   given EffectStack = effectStack
 
   private given Failure = failure
@@ -363,7 +380,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popNOrAbort(funcType.params.size)
-        val frameData = FrameData(funcType.t.size, mod)
+        val frameData = FrameData(Some(ix), funcType.t.size, mod)
         val vars = args.view.map(Some.apply) ++ func.locals.map(ty => Some(num.defaultValue(ty)))
         labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterFunction(FuncId(mod, ix), func, funcType)
@@ -452,7 +469,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           val rtLength = fun.funcType.t.length
           stack.pushN(args)
           val loc = InstLoc.InvokeExported(modInst, funcName)
-          callFrame.withNew(FrameData(0, modInst), Iterable.empty, loc) {
+          callFrame.withNew(FrameData(Some(funcIx), 0, modInst), Iterable.empty, loc) {
             eval(Call(funcIx), loc)
           }
           stack.popNOrAbort(rtLength)
@@ -490,7 +507,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 //    ???
 
   def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance, loc: InstLoc)(using Fixed): V =
-    val frameData = FrameData(1,mod)
+    val idx: Option[Int] = loc match
+      case InstLoc.InFunction(idx,pc) => Some(idx.funcIx)
+      case InstLoc.InvokeExported(mod,name) => mod.exportedFunctions.get(name) match
+        case Some(ExternalValue.Function(funcIx)) => Some(funcIx)
+        case None => None
+      case InstLoc.InInit(_,_) => None
+    val frameData = FrameData(idx, 1, mod)
     labelStack.withNew(stack.withNewStack(callFrame.withNew(frameData, Iterable.empty, loc) {
       for ((inst, ix) <- insts.zipWithIndex) {
         val loc = mod.blockInstLocs((block, ix))
@@ -655,7 +678,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         loc = modInst.registerBlockSizes(id, loc, off)
         val base = evalInstructionSequence(id, off, modInst, loc)
         val bytes = init.toByteVector.toIterable
-        callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
+        callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
           bytes.zipWithIndex.foreach { (byte, byteIdx) =>
             stack.push(base)
             stack.push(num.evalNumeric(i32.Const(byte.toInt)))
@@ -691,7 +714,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val func = modInst.functions(funcIdx)
         func match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-            val frameData = FrameData(funcType.t.size, mod)
+            val frameData = FrameData(Some(mod.exportedFunctions("$start").addr), funcType.t.size, mod)
             val vars = func.locals.map(ty => Some(num.defaultValue(ty)))
             val loc = InstLoc.InvokeExported(mod, "$start")
             labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap), loc) {

@@ -1,8 +1,8 @@
 package sturdy.apron
 
-import apron.{Abstract1, Coeff, Environment, Manager, StringVar}
+import apron.{Abstract1, Coeff, Environment, Interval, Manager, StringVar}
 import sturdy.util.Lazy
-import sturdy.values.{Combine, Widen, Widening}
+import sturdy.values.{Combine, Top, Widen, Widening}
 
 import scala.reflect.ClassTag
 // import sturdy.apron.Apron.debugJoinWiden
@@ -78,24 +78,3 @@ given WidenApronExpr[Addr: Ordering : ClassTag, Type: Join](using lazyApronState
   (e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]) =>
     val apronState = lazyApronState.value
     apronState.widen(e1,e2)
-
-given Join[Coeff] = (c1,c2) =>
-  val inf1 = c1.inf()
-  val inf2 = c2.inf()
-  val newInf =
-    if(inf1.cmp(inf2) <= 0)
-      inf1
-    else
-      inf2
-
-  val sup1 = c1.sup()
-  val sup2 = c2.sup()
-  val newSup =
-    if(sup1.cmp(sup2) <= 0)
-      sup2
-    else
-      sup1
-
-  val upperBound = apron.Interval(newInf, newSup)
-
-  MaybeChanged(upperBound, ! (upperBound.isEqual(c1) || upperBound.isEqual(c2)))

@@ -14,6 +14,7 @@ trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Sit
 
 abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
   protected var _data: Data = initData
+  protected var _callSite: Option[Site] = None
   protected var vars: Array[V] = _
   protected var names: Map[Var, Int] = _
 
@@ -33,6 +34,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
   def getVars: Array[V] = vars.clone()
 
   def data: Data = _data
+  def callSite: Option[Site] = _callSite
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
@@ -67,6 +69,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
     val snapNames = this.names
     val snapVars = this.vars
     this._data = d
+    this._callSite = Some(site)
     setVars(vars)
     try f finally {
       this._data = snapData

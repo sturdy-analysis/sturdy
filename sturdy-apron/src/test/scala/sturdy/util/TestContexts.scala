@@ -24,8 +24,8 @@ object TestContexts:
     case _ => -1
   }
 
-  given variableAllocator: Allocator[Ctx, String] =
-    AAllocatorFromContext(ctx => Ctx.Var(ctx))
+  given variableAllocator: Allocator[Ctx, (String, Any, Option[Any])] =
+    AAllocatorFromContext((v,_,_) => Ctx.Var(v))
 
   given tempVariableAllocator: Allocator[Ctx, Type] = new Allocator[Ctx, Type] with Stateless:
     var n = 0

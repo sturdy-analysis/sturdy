@@ -49,50 +49,50 @@ enum RoundingDir:
 
 given ByteApronType: ApronType[BaseType[Byte]] with
   extension(t: BaseType[Byte])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
-    override def roundingDir: RoundingDir = RoundingDir.Zero
-    override def roundingType: RoundingType = RoundingType.Int
-    override def byteSize: Int = java.lang.Byte.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
+    override inline def roundingDir: RoundingDir = RoundingDir.Zero
+    override inline def roundingType: RoundingType = RoundingType.Int
+    override inline def byteSize: Int = java.lang.Byte.BYTES
 
 given ShortApronType: ApronType[BaseType[Short]] with
   extension(t: BaseType[Short])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
-    override def roundingDir: RoundingDir = RoundingDir.Zero
-    override def roundingType: RoundingType = RoundingType.Int
-    override def byteSize: Int = java.lang.Short.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
+    override inline def roundingDir: RoundingDir = RoundingDir.Zero
+    override inline def roundingType: RoundingType = RoundingType.Int
+    override inline def byteSize: Int = java.lang.Short.BYTES
 
 given IntApronType: ApronType[BaseType[Int]] with
   extension(t: BaseType[Int])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
-    override def roundingDir: RoundingDir = RoundingDir.Zero
-    override def roundingType: RoundingType = RoundingType.Int
-    override def byteSize: Int = java.lang.Integer.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
+    override inline def roundingDir: RoundingDir = RoundingDir.Zero
+    override inline def roundingType: RoundingType = RoundingType.Int
+    override inline def byteSize: Int = java.lang.Integer.BYTES
 
 
 given LongApronType: ApronType[BaseType[Long]] with
   extension(t: BaseType[Long])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
-    override def roundingDir: RoundingDir = RoundingDir.Zero
-    override def roundingType: RoundingType = RoundingType.Int
-    override def byteSize: Int = java.lang.Long.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
+    override inline def roundingDir: RoundingDir = RoundingDir.Zero
+    override inline def roundingType: RoundingType = RoundingType.Int
+    override inline def byteSize: Int = java.lang.Long.BYTES
 
 given BooleanApronType: ApronType[BaseType[Boolean]] with
   extension (t: BaseType[Boolean])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
-    override def roundingDir: RoundingDir = RoundingDir.Zero
-    override def roundingType: RoundingType = RoundingType.Int
-    override def byteSize: Int = java.lang.Byte.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Int
+    override inline def roundingDir: RoundingDir = RoundingDir.Zero
+    override inline def roundingType: RoundingType = RoundingType.Int
+    override inline def byteSize: Int = java.lang.Byte.BYTES
 
 given FloatApronType: ApronType[BaseType[Float]] with
   extension (t: BaseType[Float])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
-    override def roundingDir: RoundingDir = RoundingDir.Rnd
-    override def roundingType: RoundingType = RoundingType.Single
-    override def byteSize: Int = java.lang.Float.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
+    override inline def roundingDir: RoundingDir = RoundingDir.Rnd
+    override inline def roundingType: RoundingType = RoundingType.Single
+    override inline def byteSize: Int = java.lang.Float.BYTES
 
 given DoubleApronType: ApronType[BaseType[Double]] with
   extension (t: BaseType[Double])
-    override def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
-    override def roundingDir: RoundingDir = RoundingDir.Rnd
-    override def roundingType: RoundingType = RoundingType.Double
-    override def byteSize: Int = java.lang.Double.BYTES
+    override inline def apronRepresentation: ApronRepresentation = ApronRepresentation.Real
+    override inline def roundingDir: RoundingDir = RoundingDir.Rnd
+    override inline def roundingType: RoundingType = RoundingType.Double
+    override inline def byteSize: Int = java.lang.Double.BYTES

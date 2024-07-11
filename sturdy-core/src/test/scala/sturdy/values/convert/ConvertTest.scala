@@ -41,9 +41,6 @@ class ConvertTest
 
   val cfailure = ConcreteFailure()
 
-  def _makeConvert: (Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind]) =
-    makeConvert
-
   for(conf <- AllConfigs[Config]) {
     test(s"convert[$conf] constant") {
       forAll((Gen.chooseNum[From](Bounded[From].minValue, Bounded[From].maxValue, specials*), "x")) {

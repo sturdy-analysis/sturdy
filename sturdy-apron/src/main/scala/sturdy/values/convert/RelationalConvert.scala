@@ -9,13 +9,15 @@ import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.util.{*, given}
-import sturdy.values.{*, given}
+import sturdy.values.{config, *, given}
 import sturdy.values.config.{Bits, *, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
 
 import scala.math.BigInt.javaBigInteger2bigInt
 import java.math.BigInteger
+import java.nio.ByteOrder
+import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 
 given RelationalConvertIntLong[Addr, Type: ApronType](using failure: Failure, intOps: RelationalIntOps[Addr,Type], convertType: ConvertIntLong[Type, Type]): ConvertIntLong[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
@@ -218,3 +220,18 @@ private final class RelationalConvertIntegerFloating[From, To: Bounded: Numeric,
       ) (
         unsupportedConfiguration(conf, this)
       )
+
+given RelationalConvertToBytes[From, Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]]: Convert[From, Seq[Byte], ApronExpr[Addr,Type], Interval, Config] with
+  def apply(from: ApronExpr[Addr,Type], config: Config) = topInterval
+
+given RelationalConvertBytesInt[Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]](using typeIntegerOps: IntegerOps[Int,Type]): Convert[Seq[Byte], Int, Interval, ApronExpr[Addr,Type], Config] with
+  def apply(_from: Interval, config: Config) = constant(Interval(Int.MinValue, Int.MaxValue), typeIntegerOps.integerLit(0))
+
+given RelationalConvertBytesLong[Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]](using typeIntegerOps: IntegerOps[Long,Type]): Convert[Seq[Byte], Long, Interval, ApronExpr[Addr,Type], Config] with
+  def apply(_from: Interval, config: Config) = constant(Interval(BigInt(Long.MinValue).bigInteger, BigInt(Long.MaxValue).bigInteger), typeIntegerOps.integerLit(0))
+
+given RelationalConvertBytesFloat[Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]](using typeFloatOps: FloatOps[Float,Type]): Convert[Seq[Byte], Float, Interval, ApronExpr[Addr,Type], Config] with
+  def apply(_from: Interval, config: Config) = ApronExpr.top(typeFloatOps.floatingLit(0))
+
+given RelationalConvertBytesDouble[Addr: Ordering : ClassTag, Type: ApronType, Config <: ConvertConfig[_]] (using typeFloatOps: FloatOps[Double, Type]): Convert[Seq[Byte], Double, Interval, ApronExpr[Addr, Type], Config] with
+  def apply(_from: Interval, config: Config) = ApronExpr.top(typeFloatOps.floatingLit(0))

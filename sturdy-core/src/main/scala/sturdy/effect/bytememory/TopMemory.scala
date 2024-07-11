@@ -4,7 +4,7 @@ import sturdy.data.*
 import sturdy.effect.Stateless
 import sturdy.values.Top
 
-class TopMemory[Key, Addr, Bytes, Size](using Top[Size], Top[Bytes]) extends Memory[Key, Addr, Bytes, Size, WithJoin], Stateless:
+class TopMemory[Key, Addr, Bytes: Top, Size: Top] extends Memory[Key, Addr, Bytes, Size, WithJoin], Stateless:
   override def read(key: Key, addr: Addr, length: Int): JOptionA[Bytes] =
     JOptionA.noneSome(Top.top[Bytes])
 

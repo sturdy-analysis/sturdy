@@ -26,3 +26,9 @@ enum JEitherA[A, B] extends JEither[WithJoin, A, B]:
     case Right(b) => g(b)
     case LeftRight(a, b) => joinComputations(f(a))(g(b))
 
+given EitherOrdering[A: Ordering, B: Ordering]: Ordering[Either[A, B]] = {
+  case (Left(l1), Left(l2)) => Ordering[A].compare(l1, l2)
+  case (Right(r1), Right(r2)) => Ordering[B].compare(r1, r2)
+  case (Left(_), Right(_)) => 1
+  case (Right(_), Left(_)) => -1
+}

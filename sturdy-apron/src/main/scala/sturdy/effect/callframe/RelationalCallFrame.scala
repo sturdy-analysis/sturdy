@@ -18,15 +18,15 @@ trait RelationalCallFrame
   [
     Data,
     Var: Ordering,
+    Val: Join: Widen,
     CallSite,
-    Ctx: Ordering: Finite,
-    Type: ApronType: Join: Widen,
-    Val: Join: Widen
+    Ctx: Ordering : Finite,
+    Type: ApronType : Join : Widen,
   ]
   (
     initData: Data,
     initVars: Iterable[(Var, Option[Val])],
-    val localVariableAllocator: Allocator[Ctx, Var],
+    val localVariableAllocator: Allocator[Ctx, (Var,Data,Option[CallSite])],
     val apronState: ApronRecencyState[Ctx, Type, Val]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
@@ -54,7 +54,7 @@ trait RelationalCallFrame
   def setVars(newVars: Iterable[(Var, Option[Val])]) =
     addressCallFrame.setVars(
       newVars.map((variable, _) =>
-        val ctx = localVariableAllocator.alloc(variable)
+        val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data, addressCallFrame.callSite))
         (variable, Some(apronState.recencyStore.alloc(ctx)))
       )
     )
@@ -98,7 +98,7 @@ trait RelationalCallFrame
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
-      val ctx = localVariableAllocator.alloc(variable)
+      val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data, addressCallFrame.callSite))
       (variable, Some(apronState.recencyStore.alloc(ctx)))
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
@@ -148,13 +148,13 @@ object RelationalCallFrame:
      initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx], Type]])]
    )(using
      temporaryVariableAllocator: Allocator[Ctx, Type],
-     localVariableAllocator: Allocator[Ctx, Var],
+     localVariableAllocator: Allocator[Ctx, (Var, Data, Option[CallSite])],
      apronManager: Manager,
      effectStack: EffectStack
-   ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
+   ): (RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val state = RecencyRelationalStore[Ctx,Type]
     given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)
-    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](initData, initVars, localVariableAllocator, state):
+    val callFrame = new RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type](initData, initVars, localVariableAllocator, state):
       override def makeRelationalVal(expr: ApronExprVirtAddr): ApronExpr[VirtualAddress[Ctx], Type] = expr
 
     (callFrame, state)

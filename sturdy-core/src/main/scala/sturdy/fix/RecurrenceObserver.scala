@@ -15,3 +15,15 @@ trait ObservableRecurrence[In, Out]:
     observers.foreach(_.recurrent(in, out))
   def notifyRepeating(in: In, out: TrySturdy[Out]): Unit =
     observers.foreach(_.repeating(in, out))
+
+
+final class DomLogger[Dom] extends Logger[Dom, Any]:
+  private var doms: List[Dom] = List()
+
+  override def enter(dom: Dom): Unit = doms = dom :: doms
+
+  override def exit(dom: Dom, codom: TrySturdy[Any]): Unit =
+    doms = doms.drop(1)
+
+  def currentDom: Option[Dom] =
+    doms.headOption

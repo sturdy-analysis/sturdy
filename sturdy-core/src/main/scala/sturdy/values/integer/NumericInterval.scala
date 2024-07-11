@@ -1319,3 +1319,7 @@ given SoundnessNumericInterval[L: Ordering]: Soundness[L, NumericInterval[L]] wi
         IsSound.Sound
       else
         IsSound.NotSound(s"$n does not contain $l")
+
+given NumericIntervalRange: IntervalRange[NumericInterval[Int]] with
+  override def range(iv: NumericInterval[Int]): Option[Range] =
+    Some(Range.inclusive(iv.low, iv.high))
