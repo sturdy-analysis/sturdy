@@ -1,6 +1,8 @@
 package sturdy.values.integer
 
-import apron.{Interval, MpqScalar}
+import gmp.*
+import apron.*
+
 import sturdy.data.given
 import sturdy.apron.{ApronExpr, *, given}
 import sturdy.effect.failure.Failure
@@ -225,7 +227,7 @@ trait RelationalBaseIntegerOps
   /**
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
-  def foldInteger(v: ApronExpr[Addr, Type]) =
+  inline def foldInteger(v: ApronExpr[Addr, Type]) =
     foldIntegerTo[L](v, v._type)(using this)
 
   /**
@@ -239,59 +241,39 @@ trait RelationalBaseIntegerOps
     if (iv.isLeq(Interval(signedMinValue(toType).bigInteger, signedMaxValue(toType).bigInteger))) {
       castTo(v, toType)
 
-      // No underflow
-    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(toType).bigInteger), infty))) {
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
-      toIntegerOps.toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax), toType))
-
-      // Over and underflow
+      // Overflow or Underflow
     } else {
-      // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
-      // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
-      val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax)
-      val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax), uMax)
-      toIntegerOps.toSigned(castTo(foldSecondRound, toType))
+      constant(Interval(signedMinValue(toType).bigInteger, signedMaxValue(toType).bigInteger), toType)
     }
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
+    val uMax = unsignedMaxValue(v._type).bigInteger
     if(iv.inf.sgn() >= 0) {
       v
     } else if(iv.sup.sgn() < 0) {
-      intAdd(v, uMax)
-    } else {
-      val resultType = typeIntOps.divUnsigned(v._type, v._type)
-      apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-        apronState.ifThenElse(lt(x, intLit(0, x._type))) {
-          apronState.assign(result, intAdd(x, uMax))
-        } {
-          apronState.assign(result, x)
-        }
-        addr(result, resultType)
-      }
+      intAdd(v, bigIntLit(uMax, v._type))
+    } else { // iv.inf < 0 =< iv.sup
+      constant(Interval(BigInt(0).bigInteger, uMax), typeIntOps.divUnsigned(v._type, v._type))
     }
 
 
   def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val sMax = signedMaxValue(v._type)
-    val uMax = unsignedMaxValue(v._type)
-    if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) {
+    val sMax = signedMaxValue(v._type).bigInteger
+    val uMax = unsignedMaxValue(v._type).bigInteger
+
+    if(iv.sup.cmp(MpqScalar(sMax)) <= 0) {
       v
-    } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) {
+
+    } else if(MpqScalar(sMax).cmp(iv.inf) < 0) {
       intSub(v, bigIntLit(uMax, v._type))
-    } else {
-      val resultType = typeIntOps.divUnsigned(v._type, v._type)
-      apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-        apronState.ifThenElse(lt(bigIntLit(sMax, x._type), x)) {
-          apronState.assign(result, intSub(x, bigIntLit(uMax, x._type)))
-        } {
-          apronState.assign(result, x)
-        }
-        addr(result, resultType)
-      }
+
+    } else { // iv.inf =< smax =< iv.sup
+      val resultInf = Mpq()
+      iv.sup.toMpq(resultInf, Mpfr.RNDZ)
+      resultInf.sub(Mpq(uMax))
+      constant(Interval(resultInf, Mpq(sMax)), typeIntOps.divUnsigned(v._type, v._type))
     }
 
 

@@ -194,7 +194,7 @@ trait RelationalStore
         typeEnv += addr -> Join(typeEnv(addr), tpe).get
       } else {
         throw new IllegalStateException(
-          s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.apronRepresentation}" +
+          s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.apronRepresentation} " +
             s"to address ${addr} of type ${typeEnv(addr)} represented by ${typeEnv(addr).apronRepresentation}")
       }
     }

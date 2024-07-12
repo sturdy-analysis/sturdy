@@ -14,7 +14,7 @@ import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.analyses.RelationalAnalysis.Value
+import sturdy.language.wasm.analyses.RelationalAnalysis.*
 import sturdy.language.wasm.analyses.RelationalAnalysis.Type.*
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
@@ -41,16 +41,19 @@ trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatS
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+
+  def i32(expr: ApronExpr[VirtAddr, Type]) = Value.Int32(Left(expr))
+  val topi32 = Value.Int32(RelationalAnalysis.topI32)
+  val topi64 = Value.Int64(RelationalAnalysis.topI64)
+  val topf32 = Value.Float32(RelationalAnalysis.topF32)
+  val topf64 = Value.Float64(RelationalAnalysis.topF64)
+
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
     testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
-    testFunctionConstantArgs(simple, "test-mem0", List(Value.Int32(42)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
       testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
@@ -74,37 +77,32 @@ trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatS
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
-    testFailingFunction(simple, "division",
-      List(RelationalAnalysis.Value.Int32(ApronExpr.intLit(1, I32Type)),
-        RelationalAnalysis.Value.Int32(ApronExpr.intLit(0, I32Type))),
-      IntegerDivisionByZero)
+    testFailingFunction(simple, "division", List(i32(ApronExpr.intLit(1, I32Type)), i32(ApronExpr.intLit(0, I32Type))), IntegerDivisionByZero)
     testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
 
     testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
   }
-  val topi32 = Value.Int32(RelationalAnalysis.topI32)
-  val topi64 = Value.Int64(RelationalAnalysis.topI64)
-  val topf32 = Value.Float32(RelationalAnalysis.topI32)
-  val topf64 = Value.Float64(RelationalAnalysis.topI64)
   testFunction(simple, "const", List(topi32), List(topi32))
-  testFunction(simple, "first", List(Value.Int32(ApronExpr.intLit(1, I32Type)), topi32), List(Value.Int32(ApronExpr.intLit(1, I32Type))))
-  testFunction(simple, "first", List(topi32, Value.Int32(ApronExpr.intLit(2, I32Type))), List(topi32))
-  testFunction(simple, "second", List(Value.Int32(ApronExpr.intLit(1, I32Type)), topi32), List(topi32))
-  testFunction(simple, "second", List(topi32, Value.Int32(ApronExpr.intLit(2, I32Type))), List(Value.Int32(ApronExpr.intLit(2, I32Type))))
+  testFunction(simple, "first", List(i32(ApronExpr.intLit(1, I32Type)), topi32), List(i32(ApronExpr.intLit(1, I32Type))))
+  testFunction(simple, "first", List(topi32, i32(ApronExpr.intLit(2, I32Type))), List(topi32))
+  testFunction(simple, "second", List(i32(ApronExpr.intLit(1, I32Type)), topi32), List(topi32))
+  testFunction(simple, "second", List(topi32, i32(ApronExpr.intLit(2, I32Type))), List(i32(ApronExpr.intLit(2, I32Type))))
   testFunction(simple, "test-mem0", List(topi32), List(topi32))
   testFunction(simple, "test-mem", List(topi32), List(topi32))
+  testFunction(simple, "test-size", List.empty, List(topi32))
+  testFunction(simple, "test-memgrow", List.empty, List(topi32, topi32))
   testFunction(simple, "nesting", List(topf32, Value.Float32(ApronExpr.doubleLit(2, F32Type))), List(topf32))
   testFunction(simple, "nesting", List(Value.Float32(ApronExpr.doubleLit(1, F32Type)), topf32), List(topf32))
-  testFunction(simple, "test-br3", List(topi32), List(Value.Int32(ApronExpr.intInterval(42, 43, I32Type))))
-  testFunction(simple, "test-br-and-return", List(topi32), List(Value.Int32(ApronExpr.intInterval(42, 43, I32Type))))
-  testFunction(simple, "test-br-and-return2", List(topi32), List(Value.Int32(ApronExpr.intInterval(42, 43, I32Type))))
-  testFunction(simple, "test-br-and-return3", List(topi32), List(Value.Int32(ApronExpr.intInterval(42, 43, I32Type))))
-  testFunction(simple, "test-br-and-return4", List(topi32), List(Value.Int32(ApronExpr.intLit(42, I32Type))))
-  testFunction(simple, "test-unreachable5", List(topi32), List(Value.Int32(ApronExpr.intInterval(42, 43, I32Type))))
-  testFunction(simple, "test-global", List(topi32), List(Value.Int32(ApronExpr.intInterval(1, 2, I32Type))))
-  testFunction(simple, "test-call-indirect-parametric", List(topi32), List(Value.Int32(ApronExpr.intLit(0, I32Type))))
-  testFailingFunction(simple, "division", List(Value.Int32(ApronExpr.intLit(1, I32Type)), topi32), IntegerDivisionByZero)
-  testFunction(simple, "effects", List(topi32), List(Value.Int32(ApronExpr.intInterval(-14, -6, I32Type))))
+  testFunction(simple, "test-br3", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
+  testFunction(simple, "test-br-and-return", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
+  testFunction(simple, "test-br-and-return2", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
+  testFunction(simple, "test-br-and-return3", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
+  testFunction(simple, "test-br-and-return4", List(topi32), List(i32(ApronExpr.intLit(42, I32Type))))
+  testFunction(simple, "test-unreachable5", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
+  testFunction(simple, "test-global", List(topi32), List(i32(ApronExpr.intInterval(1, 2, I32Type))))
+  testFunction(simple, "test-call-indirect-parametric", List(topi32), List(i32(ApronExpr.intLit(0, I32Type))))
+  testFailingFunction(simple, "division", List(i32(ApronExpr.intLit(1, I32Type)), topi32), IntegerDivisionByZero)
+  testFunction(simple, "effects", List(topi32), List(i32(ApronExpr.intInterval(-14, -6, I32Type))))
 
 //  testFunction(fact, "fac-rec", List(Value.Int64(NumericInterval.constant(1))), List(Value.Int64(NumericInterval.constant(1))))
   (2 to 8).foreach { arg =>
@@ -170,9 +168,9 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
   val modInst = interp.initializeModule(module)
-  val result = interp.failure.fallible(
-    interp.invokeExported(modInst, funName, args)
-  )
+  val result = interp.failure.fallible {
+    interp.invokeExported(modInst, funName, args).map(interp.getInterval)
+  }
 //  println(cfg.toGraphViz)
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))

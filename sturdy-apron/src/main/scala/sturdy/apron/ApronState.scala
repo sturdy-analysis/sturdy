@@ -14,7 +14,7 @@ import sturdy.data.{*, given}
 
 import scala.reflect.ClassTag
 
-trait ApronState[Addr,Type]:
+trait ApronState[Addr: Ordering: ClassTag,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
@@ -60,25 +60,25 @@ trait ApronState[Addr,Type]:
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
 
-object ApronState:
-  def comparison[Addr: Ordering : ClassTag, Type]
-    (op: (ApronExpr[Addr, Type], ApronExpr[Addr, Type]) => ApronCons[Addr, Type],
-     v1: ApronExpr[Addr, Type],
-     v2: ApronExpr[Addr, Type],
-     resultType: Type)
-    (using
-     apronState: ApronState[Addr, Type],
-     typeBooleanOps: BooleanOps[Type]
-    ): ApronExpr[Addr, Type] =
-      apronState.withTempVars(resultType, v1, v2) {
-        case (result, List(x, y)) =>
-          apronState.ifThenElse(op(x, y)) {
-            apronState.assign(result, booleanLit(true))
-          } {
-            apronState.assign(result, booleanLit(false))
-          }
-          addr(result, resultType)
-      }
+  def comparison(
+      op: (ApronExpr[Addr, Type], ApronExpr[Addr, Type]) => ApronCons[Addr, Type],
+      v1: ApronExpr[Addr, Type],
+      v2: ApronExpr[Addr, Type],
+      resultType: Type
+  )(using typeBooleanOps: BooleanOps[Type]): ApronExpr[Addr, Type] =
+    toBoolExpr(op(v1,v2))
+  def toBoolExpr(cons: ApronCons[Addr,Type])(using typeBooleanOps: BooleanOps[Type]): ApronExpr[Addr,Type] =
+    val resultType = typeBooleanOps.boolLit(true)
+    withTempVars(resultType) {
+      case (result, _) =>
+        ifThenElse(cons) {
+          assign(result, booleanLit(true))
+        } {
+          assign(result, booleanLit(false))
+        }
+        addr(result, resultType)
+    }
+
 
 final class ApronRecencyState
   [

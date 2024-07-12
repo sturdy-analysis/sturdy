@@ -106,6 +106,14 @@ enum FunctionInstance:
     case Wasm(_, _, _, ft) => ft
     case Host(hf) => hf.funcType
 
+  override def toString: String =
+    this match
+      case Wasm(_, funcIx,_, tpe) => s"f$funcIx: ${toString(tpe)}"
+      case Host(hostFun) => s"${hostFun.name}: ${toString(hostFun.funcType)}"
+
+  private def toString(tpe: FuncType): String =
+    s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"
+
 enum ExternalValue:
   case Function(addr: Int)
   case Table(addr: Int)

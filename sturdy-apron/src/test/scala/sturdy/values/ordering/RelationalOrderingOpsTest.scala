@@ -20,7 +20,7 @@ class RelationalOrderingOpsTest extends OrderingOpsTest[Int, ApronExpr[VirtAddr,
   maxValue = Integer.MAX_VALUE,
   makeOrderingOps = withApronState {
     val intType: Type = Type.IntType
-    new RelationalOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
+    new ApronExprOrderingOps[VirtAddr, Type] with TestingOrderingOps[Int, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type]] {
       override def integerLit(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
       override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
       override def getBool(b: ApronExpr[VirtAddr, Type]): Topped[Boolean] =

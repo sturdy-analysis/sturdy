@@ -118,10 +118,14 @@ enum FixIn:
     case EnterWasmFunction(id, _, _) => s"Enter $id"
     case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
 
-given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Int]]] {
+given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Option[Int]]]] {
   case FixIn.Eval(inst, loc) => Left(loc)
   case FixIn.EnterWasmFunction(fid, fun, tpe) => Right(Left(fun.hashCode()))
-  case FixIn.MostGeneralClientLoop(mod) => Right(Right(mod.hashCode()))
+  case FixIn.MostGeneralClientLoop(mod) =>
+    if (mod == null)
+      Right(Right(None))
+    else
+      Right(Right(Some(mod.hashCode())))
 }
 
 enum FixOut[V]:

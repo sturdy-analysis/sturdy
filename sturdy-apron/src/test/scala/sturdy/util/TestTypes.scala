@@ -116,7 +116,6 @@ object TestTypes:
   given (using failure: Failure, effectStack: EffectStack): ConvertLongFloat[Type, Type] = LiftedConvert[Long, Float, Type, Type, BaseType[Long], BaseType[Float], Bits](extract = _.asLong, inject = _ => Type.FloatType)
   given (using failure: Failure, effectStack: EffectStack): ConvertLongDouble[Type, Type] = LiftedConvert[Long, Double, Type, Type, BaseType[Long], BaseType[Double], Bits](extract = _.asLong, inject = _ => Type.DoubleType)
 
-
   given ApronType[Type] with
     extension (tpe: Type)
       override def apronRepresentation: ApronRepresentation =

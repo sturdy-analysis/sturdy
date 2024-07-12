@@ -62,6 +62,9 @@ trait Interpreter:
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
+  def asBoolean(v: Value)(using Failure): Bool
+  def boolean(b: Bool): Value
+
   def topI32: I32
   def topI64: I64
   def topF32: F32
@@ -72,9 +75,6 @@ trait Interpreter:
     case ValType.I64 => Value.Int64(topI64)
     case ValType.F32 => Value.Float32(topF32)
     case ValType.F64 => Value.Float64(topF64)
-  
-  def asBoolean(v: Value)(using Failure): Bool
-  def boolean(b: Bool): Value
 
   given Top[Value] with
     def top = Value.TopValue

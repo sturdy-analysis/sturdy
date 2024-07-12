@@ -81,98 +81,99 @@ enum ApronExpr[Addr, +Type]:
 
 
 object ApronExpr:
-  def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
+  inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), _type)
 
-  def constant[Addr, Type](iv: Coeff, _type: Type): Constant[Addr, Type] =
+  inline def constant[Addr, Type](iv: Coeff, _type: Type): Constant[Addr, Type] =
     Constant(iv, _type)
 
-  def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
+  inline def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i)), tpe)
-  def longLit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] =
+  inline def longLit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), tpe)
-  def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i.bigInteger)), tpe)
-  def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
+  inline def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
+    bigIntLit(i.bigInteger, tpe)
+  inline def bigIntLit[Addr, Type](i: BigInteger, tpe: Type): Constant[Addr, Type] =
+    Constant(new MpqScalar(new Mpz(i)), tpe)
+  inline def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
     Constant(new DoubleScalar(d), tpe)
-
-  def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
+  inline def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(lower, upper), tpe)
-  def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
+  inline def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), tpe)
-  def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
+  inline def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), tpe)
 
-  def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
+  inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, tpe)
 
-  def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
+  inline def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
     val n = if (b) 1 else 0
     Constant(new MpqScalar(new Mpz(n)), booleanOps.boolLit(b))
 
-  def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
+  inline def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Unary(op, e1, resultType.roundingType, resultType.roundingDir, resultType)
 
-  def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
+  inline def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Binary(op, e1, e2, resultType.roundingType, resultType.roundingDir, resultType)
 
-  def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     unary(UnOp.Negate, e1, e1._type)
 
-  def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     unary(UnOp.Negate, e1, floatOps.negated(e1._type))
 
-  def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     unary(UnOp.Sqrt, e1, floatOps.sqrt(e1._type))
 
-  def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+  inline def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, intOps.add(e1._type, e2._type))
 
-  def floatAdd[L,Addr,Type:ApronType](using floatOps: FloatOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+  inline def floatAdd[L,Addr,Type:ApronType](using floatOps: FloatOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, floatOps.add(e1._type, e2._type))
 
-  def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Sub, e1, e2, intOps.sub(e1._type, e2._type))
 
-  def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Sub, e1, e2, floatOps.sub(e1._type, e2._type))
 
-  def intMul[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intMul[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, intOps.mul(e1._type, e2._type))
 
-  def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))
 
-  def intDiv[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intDiv[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
 
-  def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))
 
-  def intMod[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intMod[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mod, e1, e2, intOps.remainder(e1._type, e2._type))
 
-  def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
 
-  def floatPow[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatPow[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, floatOps.mul(e1._type, e2._type))
 
-  def cast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, tpe: Type): ApronExpr[Addr, Type] =
+  inline def cast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, tpe: Type): ApronExpr[Addr, Type] =
     Unary(UnOp.Cast, e, roundingType, roundingDir, tpe)
 
-  def topInterval: Interval =
+  inline def topInterval: Interval =
     val topItv = new Interval()
     topItv.setTop()
     topItv
 
-  def topConstant[Type](_type: Type): Constant[_, Type] =
+  inline def topConstant[Type](_type: Type): Constant[_, Type] =
     Constant(topInterval, _type)
 
-  def bottomInterval: Interval =
+  inline def bottomInterval: Interval =
     val itv = new Interval()
     itv.setBottom()
     itv
-  def bottomConstant[Type](_type: Type): Constant[_, Type] =
+  inline def bottomConstant[Type](_type: Type): Constant[_, Type] =
     Constant(bottomInterval, _type)
 
 

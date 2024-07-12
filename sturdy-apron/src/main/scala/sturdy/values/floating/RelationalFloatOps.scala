@@ -142,22 +142,13 @@ given RelationalFloatOps
     if(iv.isLeq(Interval(minVal, maxVal))) {
       v
     } else {
-      val resultType = v._type
-      apronState.withTempVars(resultType) { case (result, List()) =>
-        val resultExpr = addr(result, resultType)
-        apronState.assign(result, v)
-        apronState.ifThenElse(le(doubleLit(maxVal, resultType), resultExpr)) {
-          apronState.assign(result, constant(Interval(DoubleScalar(maxVal), DoubleScalar(Double.PositiveInfinity)), resultType))
-        } {
-        }
-        apronState.ifThenElse(le(resultExpr, doubleLit(minVal, resultType))) {
-          apronState.assign(result, constant(Interval(DoubleScalar(Double.NegativeInfinity), DoubleScalar(maxVal)), resultType))
-        } {
-        }
-
-        addr(result, resultType)
-      }
+      if (iv.inf.cmp(DoubleScalar(minVal)) < 0 || DoubleScalar(maxVal).cmp(iv.inf) < 0)
+        iv.setInf(DoubleScalar(Double.NegativeInfinity))
+      if (iv.sup.cmp(DoubleScalar(minVal)) < 0 || DoubleScalar(maxVal).cmp(iv.sup) < 0)
+        iv.setSup(DoubleScalar(Double.PositiveInfinity))
+      constant(iv, v._type)
     }
+
 
 given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
   override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
