@@ -111,10 +111,12 @@ case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, end
       case OnlyControl if inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect => Some(CfgNode.Instruction(inst, loc))
       case _ => None
     case FixIn.EnterWasmFunction(id, _, _) =>  Some(CfgNode.Enter(id))
+    case FixIn.EnterHostFunction(id, _) =>  Some(CfgNode.Enter(id))
     case _ => None
 
   def getOutNode[V](in: FixIn, out: FixOut[V]): Option[CfgNode] = (in, out) match
     case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
+    case (FixIn.EnterHostFunction(id, _), FixOut.ExitHostFunction(_)) => Some(CfgNode.Exit(id))
     case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
     case (FixIn.Eval(c: (Block | Loop | If), loc), _) if endNodes && granularity != OnlyCalls => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
     case _ => None

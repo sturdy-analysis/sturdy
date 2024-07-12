@@ -7,7 +7,7 @@ import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver, Record
 import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, newEdgesTotal, newNodesTotal, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.*
 import sturdy.language.wasm.generic.FrameData
@@ -29,17 +29,21 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
   val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
-    it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
-      run(p, binary = true, StackConfig.StackedStates())
-      LinearStateOperationCounter.clearAll()
-      Profiler.reset()
-    }
-  }
+//  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
+//    it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
+//      run(p, binary = true, StackConfig.StackedStates())
+//      LinearStateOperationCounter.clearAll()
+//      Profiler.reset()
+//    }
+//  }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
     it must s"execute constant analysis with stacked states on benchmark ${p.getFileName}" in {
-      run(p, binary = true, StackConfig.StackedStates())
+      try run(p, binary = true, StackConfig.StackedStates())
+      finally {
+        println(s"Total nodes: $newNodesTotal")
+        println(s"Total edges: $newEdgesTotal")
+      }
     }
   }
 

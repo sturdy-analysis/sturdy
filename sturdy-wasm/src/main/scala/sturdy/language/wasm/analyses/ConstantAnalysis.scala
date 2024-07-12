@@ -70,7 +70,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
-        println(s"HOST $result")
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with

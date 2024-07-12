@@ -6,6 +6,9 @@ import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.generic.*
 import swam.syntax.{Block, If, Loop}
 
+var newNodesTotal = 0
+var newEdgesTotal = 0
+
 def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph[InstLoc, FuncId | InstLoc]): Unit = {
   type OldNode = CfgNode
   val oldNodes: Set[OldNode] = oldCfg.getNodes.map(_.node).toSet
@@ -38,6 +41,8 @@ def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph
 
   println(s"Old graph:   ${oldNodes.size} nodes, ${oldEdges.size} edges")
   println(s"New graph:   ${newNodes.size} nodes, ${newEdgesToSuccess.size} edges, ${newEdgesToFailure.size} failure edges")
+  newNodesTotal += newNodes.size
+  newEdgesTotal += newEdges.size
 
   val oldNodesC = oldNodes.map(convert)
   val oldEdgesC = oldEdges.map(kv => convert(kv._1) -> convert(kv._2))
