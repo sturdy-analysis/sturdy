@@ -21,11 +21,16 @@ package sturdy.control
 trait ControlEvent[+Atom, +Section, +Exc, +Fx]
 
 enum BasicControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
-  case Atomic(a: Atom)
+  case Atomic(a: Atom)(val label: String)
   case Failed()
-
-  case BeginSection(sec: Section)
+  case BeginSection(sec: Section)(val label: String)
   case EndSection()
+
+  override def toString: String = this match
+    case ev@BasicControlEvent.Atomic(a) => s"Atomic($a, ${ev.label})"
+    case BasicControlEvent.Failed() => "Failed()"
+    case ev@BasicControlEvent.BeginSection(sec) => s"BeginSection($sec, ${ev.label})"
+    case ev@BasicControlEvent.EndSection() => s"EndSection()"
 
 enum ExceptionControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case BeginTry()
@@ -45,6 +50,13 @@ enum FixpointControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Sec
   case Recurrent(fx: Fx)
   case EndFixpoint()
   case Restart()
+
+object BasicControlEvent:
+  def atomic[Section, Exc, Fx](label: String): BasicControlEvent[String, Section, Exc, Fx] =
+    Atomic(label)(label)
+  def beginSection[Atom, Exc, Fx](label: String): BasicControlEvent[Atom, String, Exc, Fx] =
+    BeginSection(label)(label)
+
 
 /*
 

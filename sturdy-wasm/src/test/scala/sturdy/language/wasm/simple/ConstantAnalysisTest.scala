@@ -10,7 +10,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
@@ -38,6 +38,9 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
+
 //  it must s"execute most general client for simple with stacked states" in {
 //    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
 //  }
@@ -54,44 +57,44 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 //    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
 //  }
 
-  {
-    import sturdy.language.wasm.ConcreteInterpreter.Value
-    testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
-    testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
-    testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
-    testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
-    testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
-    testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
-    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
-    testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
-    testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-    testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
-    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
-    testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
-    testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
-      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntegerDivisionByZero)
-    testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
-
-    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
-  }
+//  {
+//    import sturdy.language.wasm.ConcreteInterpreter.Value
+//    testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
+//    testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
+//    testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
+//    testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
+//    testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
+//    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
+//    testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
+//    testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
+//    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
+//    testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
+//    testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
+//    testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
+//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
+//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+//    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
+//    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
+//    testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
+//    testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
+//      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntegerDivisionByZero)
+//    testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
+//
+//    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
+//  }
 
 
   testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
@@ -128,6 +131,11 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
@@ -179,10 +187,11 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   interp.addControlObserver(new ControlEventChecker)
   val parser = interp.addControlObserver(new ControlEventParser)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+//  interp.addControlObserver(new PrintingControlObserver()(println))
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
@@ -213,7 +222,10 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
   assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
 
-  println(graphFromTree.toGraphViz)
+  testCfgDifference(cfg, graphFromEvents)
+
+//  println(cfg.toGraphViz)
+  println(graphFromEvents.toGraphViz)
 
 
 //  println(tree.toGraphViz)

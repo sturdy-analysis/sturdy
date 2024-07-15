@@ -72,30 +72,30 @@ object ConcreteInterpreter extends Interpreter with Control:
         JOptionC.none
 
 
-    val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
-      HostFunction.proc_exit -> { args =>
+    val runtime: Map[String, List[Value] => List[Value]] = Map(
+      "proc_exit" -> { args =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       },
-      HostFunction.fd_close -> { args => f.fail(FileError, s"Mock implementation of fd_close") },
-      HostFunction.fd_read -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
-      HostFunction.fd_seek -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
-      HostFunction.fd_write -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
-      HostFunction.fd_fdstat_get -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") },
+      "fd_close" -> { args => f.fail(FileError, s"Mock implementation of fd_close") },
+      "fd_read" -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
+      "fd_seek" -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
+      "fd_write" -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
+      "fd_fdstat_get" -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") },
       // TODO: Implement hostfunctions with help of WASI libc headers:
       //  https://github.com/WebAssembly/wasi-libc/blob/main/libc-bottom-half/headers/public/wasi/api.h
-      HostFunction.args_sizes_get -> { args => f.fail(MockError, s"Mock implementation of args_sizes_get") },
-      HostFunction.args_get -> { args => f.fail(MockError, s"Mock implementation of") },
-      HostFunction.environ_sizes_get -> { args => f.fail(MockError, s"Mock implementation of") },
-      HostFunction.environ_get -> { args => f.fail(MockError, s"Mock implementation of") },
-      HostFunction.fd_prestat_get -> { args => f.fail(FileError, s"Mock implementation of") },
-      HostFunction.random_get -> { args => f.fail(MockError, s"Mock implementation of") },
-      HostFunction.path_open -> { args => f.fail(MockError, s"Mock implementation of") },
-      HostFunction.fd_prestat_dir_name -> { args => f.fail(FileError, s"Mock implementation of") }
+      "args_sizes_get" -> { args => f.fail(MockError, s"Mock implementation of args_sizes_get") },
+      "args_get" -> { args => f.fail(MockError, s"Mock implementation of") },
+      "environ_sizes_get" -> { args => f.fail(MockError, s"Mock implementation of") },
+      "environ_get" -> { args => f.fail(MockError, s"Mock implementation of") },
+      "fd_prestat_get" -> { args => f.fail(FileError, s"Mock implementation of") },
+      "random_get" -> { args => f.fail(MockError, s"Mock implementation of") },
+      "path_open" -> { args => f.fail(MockError, s"Mock implementation of") },
+      "fd_prestat_dir_name" -> { args => f.fail(FileError, s"Mock implementation of") }
     )
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
-      runtime(hostFunc)(args)
+      runtime(hostFunc.name)(args)
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:

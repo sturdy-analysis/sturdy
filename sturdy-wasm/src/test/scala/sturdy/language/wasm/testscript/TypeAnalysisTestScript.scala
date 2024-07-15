@@ -76,8 +76,8 @@ class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop:
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
-  val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cImports: Map[String, ModuleInstance] = Map()
+  var aImports: Map[String, ModuleInstance] = Map()
   val convertVals: unresolved.Expr => List[TypeAnalysis.Value] =
     if (useTop)
       constExprToTops

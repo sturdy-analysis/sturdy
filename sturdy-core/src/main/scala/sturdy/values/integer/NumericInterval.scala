@@ -32,7 +32,8 @@ object NumericInterval:
 case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
-  override def toString: String = s"[$low, $high]"
+  override def toString: String =
+    s"[$low, $high]"
 
   def toHexString(using Numeric[I]): String =
     s"[${java.lang.Long.toHexString(low.toLong)}, ${java.lang.Long.toHexString(high.toLong)}]"
@@ -1271,7 +1272,7 @@ given ConvertNumericIntervalToBytes[From, To, I, B]
       byteIntervals.toSeq
     else
       byteIntervals.view.reverse.toSeq
-    println(s"$i => $res")
+//    println(s"$i => $res")
     res
 
 
@@ -1308,6 +1309,6 @@ given ConvertBytesToNumericInterval[From, To, I]
     val bigEndianConf = conf.c1.c1 && SomeCC(ByteOrder.BIG_ENDIAN, false) && conf.c2
     val low = convert(lowBytes.toSeq, bigEndianConf)
     val high = convert(highBytes.toSeq, bigEndianConf)
-    println(s"$bytes => $byteIntervals => ($lowBytes, $highBytes) => ${(low, high)}   ($conf)")
+//    println(s"$bytes => $byteIntervals => ($lowBytes, $highBytes) => ${(low, high)}   ($conf)")
     val value = NumericInterval.safe(low, high)
     value

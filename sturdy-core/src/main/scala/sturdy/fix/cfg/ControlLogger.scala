@@ -146,6 +146,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
 
   def getNodes: List[CNode[N, Ctx]] = nodes.toList.sortBy(_.toString)
   def getEdges: Map[CNode[N, Ctx], Map[CNode[N, Ctx], EdgeAttrib]] = edges.toMap
+  def getEdgeCount: Int = getEdges.map(kv => kv._2.size).sum
 
   def logger(using contextual: Contextual[Ctx, Dom, Codom]): Logger[Dom, Codom] = new Logger {
     private def getContext: Ctx =

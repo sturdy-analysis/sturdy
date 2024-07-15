@@ -25,13 +25,13 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
     import BasicControlEvent.*
     assertNoCatching()
     ev match
-      case BasicControlEvent.Atomic(a) => addTree(CT.Atomic(a))
+      case at@BasicControlEvent.Atomic(a) => addTree(CT.Atomic(a)(at.label))
       case BasicControlEvent.Failed() => addTree(CT.Failed())
-      case BasicControlEvent.BeginSection(sec: Section) =>
-        stack = Entry.Sec(sec, CT.Empty()) :: stack
+      case s@BasicControlEvent.BeginSection(sec: Section) =>
+        stack = Entry.Sec(sec, CT.Empty())(s.label) :: stack
       case BasicControlEvent.EndSection() => stack match
-        case Entry.Sec(sec, t) :: stack_ =>
-          stack = addTree(CT.Section(sec, t), stack_)
+        case (s@Entry.Sec(sec, t)) :: stack_ =>
+          stack = addTree(CT.Section(sec, t)(s.label), stack_)
         case _ => error(s"Entry mismatch, expected end of $ev: $stack")
 
   override def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit =
@@ -87,7 +87,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
 
   private def addTree(t: CT, st: List[Entry]): List[Entry] = st match
     case Entry.BaseTree(t0) :: st_ => Entry.BaseTree(CT.Seq(t0, t)) :: st_
-    case Entry.Sec(s, t0) :: st_ => Entry.Sec(s, CT.Seq(t0, t)) :: st_
+    case (es@Entry.Sec(s, t0)) :: st_ => Entry.Sec(s, CT.Seq(t0, t))(es.label) :: st_
     case Entry.Try(t0) :: st_ => Entry.Try(CT.Seq(t0, t)) :: st_
     case Entry.Handler(exc, t0, body, handlers) :: st_ => Entry.Handler(exc, CT.Seq(t0, t), body, handlers) :: st_
     case Entry.ForkFirst(t0) :: st_ => Entry.ForkFirst(CT.Seq(t0, t)) :: st_
@@ -115,7 +115,7 @@ class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Secti
 
   enum Entry:
     case BaseTree(t: CT)
-    case Sec(s: Section, t: CT)
+    case Sec(s: Section, t: CT)(val label: String)
     case Try(t: CT)
     case Catching(body: CT, handlers: List[(Exc, CT)])
     case Handler(exc: Exc, t: CT, body: CT, handlers: List[(Exc, CT)])

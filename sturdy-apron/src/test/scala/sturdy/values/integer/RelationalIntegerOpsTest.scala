@@ -83,7 +83,7 @@ class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Typ
         if(Interval(bl,bu).isEqual(iv))
           succeed
         else
-          fail(s"$iv does not include [$l,$u]")
+          fail(s"$iv does not equal [$l,$u]")
     }
   }
 )
