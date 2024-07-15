@@ -99,14 +99,13 @@ class FloatOpsTest
     expectedFun = concreteFloatOps.negated
   )
 
-  ignore("sqrt crashes JVM") {
-    unOpTest(
-      testName = "sqrt",
-      precondition = _ => true,
-      testFun = _.sqrt(_),
-      expectedFun = concreteFloatOps.sqrt
-    )
-  }
+  unOpTest(
+    testName = "sqrt",
+    precondition = _ => true,
+    testFun = _.sqrt(_),
+    expectedFun = concreteFloatOps.sqrt
+  )
+
 
   unOpTest(
     testName = "ceil",

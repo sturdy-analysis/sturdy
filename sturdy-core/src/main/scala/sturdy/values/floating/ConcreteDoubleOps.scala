@@ -87,12 +87,10 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         apply(d, Overflow.JumpToBounds && Bits.Unsigned)
 
     case (Overflow.JumpToBounds && Bits.Unsigned) =>
-      if (d.isNaN)
+      if (d.isNaN | d < 0.0)
         0
       else if (BigDecimal(d) >= -BigDecimal(Int.MinValue) * 2)
         -1
-      else if (d < 0.0)
-        0
       else
         d.toLong.toInt
 

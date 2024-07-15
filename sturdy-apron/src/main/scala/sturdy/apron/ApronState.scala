@@ -7,22 +7,40 @@ import sturdy.apron.Strictness.Strict
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore}
-import sturdy.values.{Combine, Join, MaybeChanged, Unchanged, Widen, Widening}
+import sturdy.values.{Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
 import sturdy.data.{*, given}
 
+import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 trait ApronState[Addr: Ordering: ClassTag,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
-  def addConstraint(constraint: ApronCons[Addr,Type]): Unit
+  def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
+  def satisfies(constraints: ApronCons[Addr,Type]*): Boolean
   def join[A: Join](f: => A)(g: => A): A
   def join: Join[ApronExpr[Addr,Type]]
   def widen: Widen[ApronExpr[Addr,Type]]
-  def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A
+  def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A =
+    getBoolean(condition) match
+      case Topped.Actual(true) =>
+        addConstraints(condition)
+        f
+      case Topped.Actual(false) =>
+        addConstraints(condition.negated)
+        g
+      case Topped.Top =>
+        join {
+          addConstraints(condition)
+          f
+        } {
+          addConstraints(condition.negated)
+          g
+        }
+
   def getInterval(expr: ApronExpr[Addr, Type]): Interval
   def getIntInterval(expr: ApronExpr[Addr, Type]): (Int,Int) =
     val (lower,upper) = getBigIntInterval(expr)
@@ -60,24 +78,59 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
 
-  def comparison(
-      op: (ApronExpr[Addr, Type], ApronExpr[Addr, Type]) => ApronCons[Addr, Type],
-      v1: ApronExpr[Addr, Type],
-      v2: ApronExpr[Addr, Type],
-      resultType: Type
-  )(using typeBooleanOps: BooleanOps[Type]): ApronExpr[Addr, Type] =
-    toBoolExpr(op(v1,v2))
-  def toBoolExpr(cons: ApronCons[Addr,Type])(using typeBooleanOps: BooleanOps[Type]): ApronExpr[Addr,Type] =
-    val resultType = typeBooleanOps.boolLit(true)
-    withTempVars(resultType) {
-      case (result, _) =>
-        ifThenElse(cons) {
-          assign(result, booleanLit(true))
-        } {
-          assign(result, booleanLit(false))
-        }
-        addr(result, resultType)
-    }
+  def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
+    getBoolean(v, getInterval(v.e1), getInterval(v.e2))
+
+  @tailrec
+  private def getBoolean(v: ApronCons[Addr, Type], iv1: Interval, iv2: Interval): Topped[Boolean] =
+    v.op match
+      case CompareOp.Eq =>
+        if (iv1.isEqual(iv2))
+          Topped.Actual(true)
+        else if (meet(iv1, iv2).isBottom) // no overlap
+          Topped.Actual(false)
+        else // overlap
+          Topped.Top
+      case CompareOp.Neq =>
+        if (iv1.isEqual(iv2))
+          Topped.Actual(false)
+        else if (meet(iv1, iv2).isBottom) // no overlap
+          Topped.Actual(true)
+        else // overlap
+          Topped.Top
+      case CompareOp.Lt =>
+        if (iv1.sup.cmp(iv2.inf) < 0) // iv1 < iv2
+          Topped.Actual(true)
+        else if (iv2.sup.cmp(iv1.inf) <= 0) // iv2 <= iv2
+          Topped.Actual(false)
+        else // overlap
+          Topped.Top
+      case CompareOp.Le =>
+        if (iv1.sup.cmp(iv2.inf) <= 0) // iv1 <= iv2
+          Topped.Actual(true)
+        else if (iv2.sup.cmp(iv1.inf) < 0) // iv2 < iv2
+          Topped.Actual(false)
+        else
+          Topped.Top
+      case CompareOp.Gt =>
+        getBoolean(ApronCons(CompareOp.Lt, v.e2, v.e1, v.tpe), iv2, iv1)
+      case CompareOp.Ge =>
+        getBoolean(ApronCons(CompareOp.Le, v.e2, v.e1, v.tpe), iv2, iv1)
+
+  private def meet(iv1: Interval, iv2: Interval): Interval =
+    val res = Interval()
+    if (iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0) // no overlap
+      res.setBottom()
+    else
+      if (iv1.inf.cmp(iv2.inf) >= 0)
+        res.setInf(iv1.inf)
+      else
+        res.setInf(iv2.inf)
+      if (iv1.sup.cmp(iv2.sup) <= 0)
+        res.setInf(iv1.sup)
+      else
+        res.setInf(iv2.sup)
+    res
 
 
 final class ApronRecencyState
@@ -127,8 +180,11 @@ final class ApronRecencyState
         e.printStackTrace()
     }
 
-  override def addConstraint(constraint: ApronCons[VirtualAddress[Ctx], Type]): Unit =
-    relationalStore.addConstraint(convertExpr.virtToPhys(constraint))
+  override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
+    relationalStore.addConstraints(constraints.map(convertExpr.virtToPhys)*)
+
+  override def satisfies(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Boolean =
+    relationalStore.satisfies(constraints.map(convertExpr.virtToPhys)*)
 
   override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     relationalStore.getBound(convertExpr.virtToPhys(expr))
@@ -140,14 +196,6 @@ final class ApronRecencyState
       g
     }
 
-  override def ifThenElse[A: Join](condition: ApronCons[VirtualAddress[Ctx], Type])(f: => A)(g: => A): A =
-    join {
-      addConstraint(condition)
-      f
-    } {
-      addConstraint(condition.negated(Strictness.Strict))
-      g
-    }
 
   override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = {
     // The first two special cases avoid allocating a new temporary address

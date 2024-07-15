@@ -22,7 +22,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final type Bool = ApronCons[VirtAddr, Type]
 
   extension (i32: I32)
-    def asApronExpr(using apronState: ApronState[VirtAddr, Type]): ApronExpr[VirtAddr, Type] =
+    inline def asApronExpr(using apronState: ApronState[VirtAddr, Type]): ApronExpr[VirtAddr, Type] =
       i32 match
         case Left(expr) => expr
         case Right(cons) => apronState.toBoolExpr(cons)
@@ -41,8 +41,54 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOps[Int, I32] =
     LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asApronExpr, inject = Left(_))
 
-  given I32EqOps(using ApronState[VirtAddr, Type], Failure, EffectStack): EqOps[I32, Bool] =
-    LiftedEqOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = x => x)
+  given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] = new EqOps[I32, Bool]:
+    override def equ(v1: I32, v2: I32): Bool =
+      (v1,v2) match
+        case (Right(c1), Left(i2@ApronExpr.Constant(coeff, tpe))) =>
+          if(coeff.isEqual(0))
+            c1.negated
+          else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
+            c1
+          else
+            EqOps.equ(apronState.toBoolExpr(c1), i2)
+        case (Left(_), Right(_)) =>
+          equ(v2, v1)
+        case (Right(c1), Right(c2)) =>
+          apronState.join {
+            apronState.addConstraints(c1, c2)
+            Topped.Actual(true)
+          } {
+            apronState.addConstraints(c1.negated, c2.negated)
+            Topped.Actual(false)
+          } match
+            case Topped.Actual(false) => ApronCons.eq(ApronExpr.intLit(0, I32Type), ApronExpr.intLit(1, I32Type))
+            case _ => ApronCons.top(I32Type)
+        case (Left(_),Left(_)) | (Right(_),Left(_)) => EqOps.equ(v1.asApronExpr, v2.asApronExpr)
+
+
+    override def neq(v1: I32, v2: I32): Bool =
+      (v1, v2) match
+        case (Right(i1), Left(i2@ApronExpr.Constant(coeff, tpe))) =>
+          if(coeff.isEqual(0))
+            i1
+          else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
+            i1.negated
+          else
+            EqOps.neq(apronState.toBoolExpr(i1), i2)
+        case (Left(_), Right(_)) =>
+          neq(v2, v1)
+        case (Right(c1), Right(c2)) =>
+          apronState.join {
+            apronState.addConstraints(c1, c2.negated)
+            Topped.Actual(true)
+          } {
+            apronState.addConstraints(c1.negated, c2)
+            Topped.Actual(false)
+          } match
+            case Topped.Actual(false) => ApronCons.eq(ApronExpr.intLit(0, I32Type), ApronExpr.intLit(1, I32Type))
+            case _ => ApronCons.top(I32Type)
+        case (Left(_), Left(_)) | (Right(_), Left(_)) => EqOps.neq(v1.asApronExpr, v2.asApronExpr)
+
 
   given I32OrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): OrderingOps[I32, Bool] =
     LiftedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = x => x)

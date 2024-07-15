@@ -34,7 +34,7 @@ class ProductLogger[-Dom, -Codom](l1: Logger[Dom, Codom], l2: Logger[Dom, Codom]
 
 def log[Dom, Codom](logger: Logger[Dom, Codom], phi: Combinator[Dom, Codom]): Log[Dom, Codom] = new Log(logger, phi)
 final class Log[Dom, Codom](logger: Logger[Dom, Codom], val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
-  override def apply(f: Dom => Codom): Dom => Codom = dom =>
+  inline override def apply(f: Dom => Codom): Dom => Codom = dom =>
     logger.enter(dom)
     val codom = TrySturdy(phi(f)(dom))
     logger.exit(dom, codom)

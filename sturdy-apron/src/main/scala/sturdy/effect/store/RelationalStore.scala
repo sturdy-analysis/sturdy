@@ -168,17 +168,22 @@ trait RelationalStore
 
   class BottomFailure extends SturdyFailure
 
-  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
-    val constraints: Array[Tcons1] = Array(constraint.toApron(_abstract1.getEnvironment))
-    this._abstract1.meet(manager, constraints)
+  def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
+    val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
+    this._abstract1.meet(manager, cons)
     if (this._abstract1.isBottom(manager))
       throw new BottomFailure
+
+  def satisfies(constraints: ApronCons[PhysicalAddress[Context], Type]*): Boolean =
+    constraints.forall(cons =>
+      _abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment))
+    )
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
     _abstract1.getBound(_abstract1.getCreationManager, expr.toIntern(_abstract1.getEnvironment))
 
-  private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]) =
-    var env = _abstract1.getEnvironment()
+  private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
+    var env = _abstract1.getEnvironment
     val variable = ApronVar(addr)
     val tpe = expr._type
     if (!env.hasVar(variable)) {
@@ -217,7 +222,7 @@ trait RelationalStore
   // RelationalStore mutates abstract1
   override def getState: State =
     RelationalStoreState(typeEnv, copyAbstract1(_abstract1), nonRelationalStore.getState)
-  override def setState(s: State) =
+  override def setState(s: State): Unit =
     typeEnv = s.tenv
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)

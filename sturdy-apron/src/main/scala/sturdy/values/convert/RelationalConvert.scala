@@ -92,7 +92,7 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
     (from,config) match
       case (from, conf@(_ && Bits.Raw)) =>
         joinWithFailure {
-          constant(Interval(signedMinVal, signedMaxVal), toType)
+          constant(Interval(Mpq(signedMinVal), Mpq(signedMaxVal)), toType)
         } {
           unsupportedConfiguration(config,this)
         }
@@ -160,11 +160,12 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
                 apronState.ifThenElse(le(bigIntLit(unsignedMaxVal, toType), x)) {
                   apronState.assign(res, intLit(-1, toType))
                 } {
-                  apronState.ifThenElse(lt(bigIntLit(signedMaxVal, toType), x)) {
-                    apronState.assign(res, intSub[To, Addr, Type](x, bigIntLit(unsignedMaxVal, toType)))
-                  } {
-                    apronState.assign(res, x)
-                  }
+                  apronState.assign(res, integerOps.foldInteger(x))
+//                  apronState.ifThenElse(lt(bigIntLit(signedMaxVal, toType), x)) {
+//                    apronState.assign(res, intSub[To, Addr, Type](x, bigIntLit(unsignedMaxVal, toType)))
+//                  } {
+//                    apronState.assign(res, x)
+//                  }
                 }
               }
               addr(res, toType)

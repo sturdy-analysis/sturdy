@@ -127,9 +127,9 @@ given RelationalFloatOps
       val resultType = typeFloatOps.copysign(v._type, sign._type)
       apronState.withTempVars(resultType, sign) { case (result, List(s)) =>
         apronState.ifThenElse(le(doubleLit(0, s._type), s)) {
-          apronState.assign(result, absolute(s))
+          apronState.assign(result, absolute(v))
         } {
-          apronState.assign(result, negated(absolute(s)))
+          apronState.assign(result, negated(absolute(v)))
         }
         addr(result, resultType)
       }
@@ -153,7 +153,7 @@ given RelationalFloatOps
 given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
   override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
     val iv = this.apronState.getInterval(expr)
-    if (Interval(DoubleScalar(c), DoubleScalar(c)).isLeq(iv))
+    if (c.isNaN || Interval(DoubleScalar(c), DoubleScalar(c)).isLeq(iv))
       IsSound.Sound
     else
       IsSound.NotSound(s"$expr with interval $iv does not contain $c")
@@ -161,7 +161,7 @@ given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Typ
 given SoundnessDoubleApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Double, ApronExpr[Addr, Type]] with
   override def isSound(c: Double, expr: ApronExpr[Addr, Type]): IsSound =
     val iv = this.apronState.getInterval(expr)
-    if(Interval(DoubleScalar(c),DoubleScalar(c)).isLeq(iv))
+    if(c.isNaN || Interval(DoubleScalar(c),DoubleScalar(c)).isLeq(iv))
       IsSound.Sound
     else
       IsSound.NotSound(s"$expr with interval $iv does not contain $c")

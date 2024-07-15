@@ -2,7 +2,7 @@ package sturdy.values.convert
 
 import apron.*
 import org.scalacheck.Gen
-import org.scalatest.Assertion
+import org.scalatest.{Assertion, Suites}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -36,11 +36,27 @@ given ConcreteConvertDoubleLong = ConcreteConvertDoubleLong(using new ConcreteFa
 given ConcreteConvertDoubleInt = ConcreteConvertDoubleInt(using new ConcreteFailure)
 given ConcreteConvertLongFloat = ConcreteConvertLongFloat(using new ConcreteFailure)
 
+class PolyhedraConvertTests extends RelationalConvertTests(Polka(true))
+class OctagonConvertTests extends RelationalConvertTests(Octagon())
 
+class RelationalConvertTests(manager: Manager) extends Suites(
+  RelationalConvertIntLongTest(using manager),
+  RelationalConvertIntFloatTest(using manager),
+  RelationalConvertIntDoubleTest(using manager),
+  RelationalConvertLongIntTest(using manager),
+  RelationalConvertLongFloatTest(using manager),
+  RelationalConvertLongDoubleTest(using manager),
+  RelationalConvertFloatIntTest(using manager),
+  RelationalConvertFloatLongTest(using manager),
+  RelationalConvertFloatDoubleTest(using manager),
+  RelationalConvertDoubleIntTest(using manager),
+  RelationalConvertDoubleLongTest(using manager),
+  RelationalConvertDoubleFloatTest(using manager)
+)
 
-class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
+class RelationalConvertIntLongTest(using manager: Manager) extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
   specials = List(),
-  makeConvert = withApronState(
+  makeConvert = withApronState(using manager) (
     (
       RelationalConvertIntLong,
       soundnessAFallible(using SoundnessLongApronExpr),
@@ -49,12 +65,12 @@ class RelationalConvertIntLongTest extends ConvertTest[Int, Long, ApronExpr[Virt
   )
 )
 
-class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], NilCC.type](
+class RelationalConvertLongIntTest(using manager: Manager) extends ConvertTest[Long, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], NilCC.type](
   specials = List(
     Int.MinValue.toLong - 1, Int.MinValue.toLong + 0, Int.MinValue.toLong + 1,
     Int.MaxValue.toLong - 1, Int.MaxValue.toLong + 0, Int.MaxValue.toLong + 1
   ),
-  makeConvert = withApronState(
+  makeConvert = withApronState (
     (
       RelationalConvertLongInt,
       soundnessAFallible(using sturdy.values.integer.SoundnessIntApronExpr),
@@ -63,7 +79,7 @@ class RelationalConvertLongIntTest extends ConvertTest[Long, Int, ApronExpr[Virt
   )
 )
 
-class RelationalConvertFloatLongTest extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertFloatLongTest(using manager: Manager) extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   specials = specialFloatingIntegerNumbers[Float,Long](_.toFloat),
   makeConvert = withApronState(
     (
@@ -74,7 +90,7 @@ class RelationalConvertFloatLongTest extends ConvertTest[Float, Long, ApronExpr[
   )
 )
 
-class RelationalConvertFloatIntTest extends ConvertTest[Float, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[Float, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   specials = specialFloatingIntegerNumbers[Float,Int](_.toFloat),
   makeConvert = withApronState(
     (
@@ -85,7 +101,7 @@ class RelationalConvertFloatIntTest extends ConvertTest[Float, Int, ApronExpr[Vi
   )
 )
 
-class RelationalConvertDoubleLongTest extends ConvertTest[Double, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTest[Double, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   specials = specialFloatingIntegerNumbers[Double,Long](_.toDouble),
   makeConvert = withApronState(
     (
@@ -96,7 +112,7 @@ class RelationalConvertDoubleLongTest extends ConvertTest[Double, Long, ApronExp
   )
 )
 
-class RelationalConvertDoubleIntTest extends ConvertTest[Double, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertDoubleIntTest(using manager: Manager) extends ConvertTest[Double, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   specials = specialFloatingIntegerNumbers[Double,Int](_.toDouble),
   makeConvert = withApronState(
     (
@@ -107,7 +123,7 @@ class RelationalConvertDoubleIntTest extends ConvertTest[Double, Int, ApronExpr[
   )
 )
 
-class RelationalConvertDoubleFloatTest extends ConvertTest[Double, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], NilCC.type](
+class RelationalConvertDoubleFloatTest(using manager: Manager) extends ConvertTest[Double, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], NilCC.type](
   specials = List(
     Math.nextDown(Float.MinValue.toDouble), Float.MinValue.toDouble, Math.nextUp(Float.MinValue.toDouble),
     Math.nextDown(Float.MaxValue.toDouble), Float.MaxValue.toDouble, Math.nextUp(Float.MaxValue.toDouble),
@@ -122,7 +138,7 @@ class RelationalConvertDoubleFloatTest extends ConvertTest[Double, Float, ApronE
   )
 )
 
-class RelationalConvertFloatDoubleTest extends ConvertTest[Float, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], NilCC.type](
+class RelationalConvertFloatDoubleTest(using manager: Manager) extends ConvertTest[Float, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], NilCC.type](
   specials = List(Float.NaN),
   makeConvert = withApronState(
     (
@@ -134,7 +150,7 @@ class RelationalConvertFloatDoubleTest extends ConvertTest[Float, Double, ApronE
 )
 
 
-class RelationalConvertIntFloatTest extends ConvertTest[Int, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[Int, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -145,7 +161,7 @@ class RelationalConvertIntFloatTest extends ConvertTest[Int, Float, ApronExpr[Vi
   )
 )
 
-class RelationalConvertIntDoubleTest extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -156,7 +172,7 @@ class RelationalConvertIntDoubleTest extends ConvertTest[Int, Double, ApronExpr[
   )
 )
 
-class RelationalConvertLongFloatTest extends ConvertTest[Long, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertLongFloatTest(using manager: Manager) extends ConvertTest[Long, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -167,7 +183,7 @@ class RelationalConvertLongFloatTest extends ConvertTest[Long, Float, ApronExpr[
   )
 )
 
-class RelationalConvertLongDoubleTest extends ConvertTest[Long, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertLongDoubleTest(using manager: Manager) extends ConvertTest[Long, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
   specials = List(),
   makeConvert = withApronState(
     (

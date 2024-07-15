@@ -2,7 +2,7 @@ package sturdy.values.integer
 
 import apron.*
 import org.scalacheck.Gen
-import org.scalatest.Assertion
+import org.scalatest.{Assertion, Suites}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -27,27 +27,39 @@ import sturdy.values.convert.{*, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with
-  val intType: Type = Type.IntType
-  override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
-  override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
+class PolyhedraIntegerOpsTest extends RelationalIntegerOpsTests(Polka(true))
+class OctagonIntegerOpsTest extends RelationalIntegerOpsTests(Octagon())
 
-given RelationalLongInterval: IsInterval[Long, ApronExpr[VirtAddr, Type]] with
-  val longType: Type = Type.LongType
-  override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
-  override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
+class RelationalIntegerOpsTests(manager: Manager) extends Suites(
+  RelationalIntOpsTest(using manager),
+  RelationalLongOpsTest(using manager)
+)
 
-class RelationalIntOpsTest extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
-  withApronState{
+class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
+  withApronState {
     (new RelationalIntOps[VirtAddr, Type], implicitly)
   }
 )
 
-class RelationalLongOpsTest extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
-  withApronState{
+class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
+  withApronState {
     (new RelationalLongOps[VirtAddr, Type], implicitly)
   }
 )
+
+given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with
+  val intType: Type = Type.IntType
+
+  override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
+
+  override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
+
+given RelationalLongInterval: IsInterval[Long, ApronExpr[VirtAddr, Type]] with
+  val longType: Type = Type.LongType
+
+  override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
+
+  override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
   def chooseInt: Gen[Int] = Gen.chooseNum(Integer.MIN_VALUE, Integer.MAX_VALUE)

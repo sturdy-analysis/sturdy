@@ -24,7 +24,7 @@ final class ContextSensitive
   [Ctx, Dom, Codom]
   (contextual: Contextual[Ctx, Dom, Codom], phi : Combinator[Dom, Codom])
   extends Combinator[Dom, Codom]:
-  override def apply(f: Dom => Codom): Dom => Codom = dom =>
+  inline override def apply(f: Dom => Codom): Dom => Codom = dom =>
     contextual.withContext(phi(f), dom)
 
 final class Contextual[Ctx, Dom, Codom](sensitivity: Sensitivity[Dom, Ctx]):
