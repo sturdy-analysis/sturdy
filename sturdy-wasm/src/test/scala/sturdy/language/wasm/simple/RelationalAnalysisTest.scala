@@ -3,9 +3,8 @@ package sturdy.language.wasm.simple
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
 import sturdy.apron.*
-import sturdy.control.PrintingControlObserver
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
@@ -20,11 +19,9 @@ import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnaly
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.{Abstractly, Topped}
-import sturdy.values.integer.{IntegerDivisionByZero}
-
+import sturdy.values.integer.IntegerDivisionByZero
 import swam.syntax.Module
 import swam.text.*
-
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
@@ -163,22 +160,23 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
 
   val module = wasm.Parsing.fromText(path)
   val interp = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val cfg = RelationalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = interp.constantInstructions
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  // interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val cfg = interp.addControlObserver(new ControlEventGraphBuilder)
+
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible {
     interp.invokeExported(modInst, funName, args).map(interp.getInterval)
   }
 //  println(cfg.toGraphViz)
 
-  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-  val deadLabels = ControlFlow.deadLabels(cfg)
+//  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
+//  val deadLabels = ControlFlow.deadLabels(cfg)
   val constantInstructions = constants.get
-  println(s"Found ${deadInstructions.size} dead instructions")
-  println(s"Found ${deadLabels.size} dead labels")
+//  println(s"Found ${deadInstructions.size} dead instructions")
+//  println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.withBlocks(shortLabels = false).toGraphViz)
+  println(cfg.get.toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
