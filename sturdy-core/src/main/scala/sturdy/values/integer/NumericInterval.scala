@@ -1,20 +1,20 @@
 package sturdy.values.integer
 
-import sturdy.data.{JOptionC, joinWithFailure, JOptionPowerset, noJoin, JOptionA, SomeJOption, joinComputations, NoJoin, given}
+import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
-import sturdy.values.*
+import sturdy.values.{Topped, *}
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 
-import java.nio.{ByteOrder, ByteBuffer}
-import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}
+import java.nio.{ByteBuffer, ByteOrder}
+import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
-import scala.collection.mutable.{ListBuffer, ArrayBuffer}
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.control.Breaks.{break, breakable}
 
 
@@ -76,6 +76,12 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
 
   def isConstant: Boolean = low == high
 
+  def toConstant: Topped[I] =
+    if (isConstant)
+      Topped.Actual(low)
+    else
+      Topped.Top
+    
   def isTop(using Top[NumericInterval[I]]): Boolean =
     this == summon[Top[NumericInterval[I]]].top
 

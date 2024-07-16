@@ -73,7 +73,7 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
   ) */
 
   private def makeHostModule(funs: HostFunction*): (ModuleInstance, GlobalInit) =
-    val inst = new ModuleInstance()
+    val inst = new ModuleInstance(Some("host"))
     funs.zipWithIndex.foreach { case (fun, ix) =>
       inst.exports :+= fun.name -> ExternalValue.Function(ix)
       inst.functionTypes :+= fun.funcType

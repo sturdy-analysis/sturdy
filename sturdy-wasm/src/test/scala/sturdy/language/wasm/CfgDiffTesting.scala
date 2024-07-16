@@ -1,6 +1,6 @@
 package sturdy.language.wasm
 
-import sturdy.control.{ControlGraph, EdgeType, Node}
+import sturdy.control.{ControlGraph, Edge, EdgeType, Node}
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.generic.*
@@ -73,4 +73,26 @@ def testCfgDifference(oldCfg: ControlFlowGraph[CfgNode, _], newCfg: ControlGraph
 
   assert(diffEdges1.isEmpty, s"Old graph, ${diffEdges1.size} missing edges: ${diffEdges1.mkString(", ")} \n" + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
   assert(diffEdges2.isEmpty, s"Old graph, ${diffEdges2.size} extra edges: ${diffEdges2.mkString(", ")} \n" + oldCfg.toGraphViz + "\n\n\n" + newCfg.toGraphViz)
+}
+
+
+def compareControlGraphs(g1: ControlGraph[InstLoc, FuncId | InstLoc], g2: ControlGraph[InstLoc, FuncId | InstLoc]): Unit = {
+  type N = Node[InstLoc, FuncId | InstLoc]
+  type E = Edge[InstLoc, FuncId | InstLoc]
+
+  println(s"${g1.name}:   ${g1.nodes.size} nodes, ${g1.edges.size} edges")
+  println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
+  compareControlGraphsDirected(g2, g1)
+  compareControlGraphsDirected(g1, g2)
+}
+
+private def compareControlGraphsDirected(base: ControlGraph[InstLoc, FuncId | InstLoc], g: ControlGraph[InstLoc, FuncId | InstLoc]): Unit = {
+  val extraNodes = g.nodes.removedAll(base.nodes)
+  val extraEdges = g.edges.removedAll(base.edges)
+  val n1 = base.nodes.toList.sortBy(_.toString)
+  val n2 = g.nodes.toList.sortBy(_.toString)
+  if (extraNodes.nonEmpty)
+    println(s"${g.name} has extra nodes:\n${extraNodes.mkString("  ", ",\n  ", "")}")
+  if (extraEdges.nonEmpty)
+    println(s"${g.name} has extra edges:\n${extraEdges.mkString("  ", ",\n  ", "")}")
 }

@@ -1,40 +1,34 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.Blocker
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
-import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureKind
+import sturdy.control.{ControlEventGraphBuilder, ControlGraph, PrintingControlObserver}
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
-import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.abstractions.Control.{Atom, Section}
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference, compareControlGraphs}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Abstractly
-import sturdy.values.Topped
+import sturdy.values.Topped.Top
+import sturdy.values.{Abstractly, Topped}
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
-import scala.reflect.ClassTag
-import scala.reflect.TypeTest
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
-class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
+class IntervalAnalysisCFGTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm interval analysis"
 
   val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
@@ -133,7 +127,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
+      val res = runIntervalAnalysisCFG(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
@@ -141,7 +135,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
 //    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
-//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      val res = runIntervalAnalysisCFG(path, funcName, args, StackConfig.StackedCfgNodes())
 //      res match
 //        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
 //        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
@@ -151,7 +145,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedStates())
+      val res = runIntervalAnalysisCFG(path, funcName, args, StackConfig.StackedStates())
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
@@ -159,7 +153,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
 //    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
-//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      val res = runIntervalAnalysisCFG(path, funcName, args, StackConfig.StackedCfgNodes())
 //      res match
 //        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
 //        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
@@ -168,26 +162,42 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //    }
 
 
-def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
+def runIntervalAnalysisCFG(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
   val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val constants = IntervalAnalysis.constantInstructions(interp)
+  val oldCfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.initializeModule(module, moduleId = Some("mod"))
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
 
-  val constantInstructions = constants.get
-  println(s"Found ${constantInstructions.size} constant instructions")
+  val intervalCfg = graphBuilder.get.withName(s"intervalCFG-$funName")
 
-  LinearStateOperationCounter.addToListAndReset()
-  println(s"${LinearStateOperationCounter.toString} in the last tests")
-  println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-  Profiler.printLastMeasured()
-
-  println(graphBuilder.get.toGraphViz)
+  // compares old (unsound) CFG construction to new (sound) CFG construction 
+  testCfgDifference(oldCfg, intervalCfg)
+  
+  // compares interval-based CFG to constant-based CFG
+  val (constantRes, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)
+  compareControlGraphs(intervalCfg, constantCfg)
   result
+
+def runConstantAnalysisForIntervalArgs(module: Module, funName: String, args: List[Value], stackConfig: StackConfig): (AFallible[List[ConstantAnalysis.Value]], ControlGraph[Atom, Section]) =
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
+    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+  val modInst = interp.initializeModule(module, moduleId = Some("mod"))
+  val constArgs: List[ConstantAnalysis.Value] = args.map {
+    case Value.TopValue => ConstantAnalysis.Value.TopValue
+    case Value.Int32(iv) => ConstantAnalysis.Value.Int32(iv.toConstant)
+    case Value.Int64(iv) => ConstantAnalysis.Value.Int64(iv.toConstant)
+    case Value.Float32(v) => ConstantAnalysis.Value.Float32(v)
+    case Value.Float64(v) => ConstantAnalysis.Value.Float64(v)
+  }
+  val result = interp.failure.fallible(
+    interp.invokeExported(modInst, funName, constArgs)
+  )
+  (result, graphBuilder.get.withName(s"constantCFG-$funName"))

@@ -587,10 +587,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     }
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports = Map.empty): ModuleInstance = external {
+  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None): ModuleInstance = external {
     initializeThis()
 
-    val modInst = new ModuleInstance
+    val modInst = new ModuleInstance(moduleId)
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)

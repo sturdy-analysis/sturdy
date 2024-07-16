@@ -29,6 +29,9 @@ case class Edge[Atom, Section](from: Node[Atom, Section], to: Node[Atom, Section
 
 
 case class ControlGraph[Atom,Sec](edges: Set[Edge[Atom, Sec]]):
+  var name: String = s"ControlGraph_${Integer.toHexString(this.hashCode())}"
+  def withName(name: String): this.type = { this.name = name; this }
+  
   lazy val nodes: Set[Node[Atom, Sec]] =
     edges.flatMap(e => Set(e.from, e.to))
   

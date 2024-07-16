@@ -15,7 +15,7 @@ object HostFunction:
 given Structural[HostFunction] with {}
 
 object wasi:
-  val module: ModuleInstance = new ModuleInstance
+  val module: ModuleInstance = new ModuleInstance(Some("wasi"))
 
   def get(name: String): (Int, HostFunction) =
     functions.getOrElse(name, throw IllegalArgumentException(s"No host function with name $name.")).swap
