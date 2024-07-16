@@ -195,8 +195,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     def getInterval(v: Value): Value =
       v match
-        case Value.Int32(i32) => val expr = i32.asApronExpr; Value.Int32(Left(ApronExpr.constant(apronState.getInterval(expr), expr._type)))
-        case Value.Int64(expr) => Value.Int64(ApronExpr.constant(apronState.getInterval(expr), expr._type))
+        case Value.Int32(i32) =>
+          val expr = i32.asApronExpr
+          Value.Int32(Left(ApronExpr.constant(IntervalLattice.meet(apronState.getInterval(expr), Interval(Int.MinValue, Int.MaxValue)), expr._type)))
+        case Value.Int64(expr) => Value.Int64(ApronExpr.constant(IntervalLattice.meet(apronState.getInterval(expr), Interval(BigInt(Long.MinValue).bigInteger, BigInt(Long.MaxValue).bigInteger)), expr._type))
         case Value.Float32(expr) => Value.Float32(ApronExpr.constant(apronState.getInterval(expr), expr._type))
         case Value.Float64(expr) => Value.Float64(ApronExpr.constant(apronState.getInterval(expr), expr._type))
         case Value.TopValue => Value.TopValue
