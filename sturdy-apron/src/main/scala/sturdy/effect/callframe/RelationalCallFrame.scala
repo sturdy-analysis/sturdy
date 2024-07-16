@@ -98,9 +98,9 @@ trait RelationalCallFrame
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
-      val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data, addressCallFrame.callSite))
+      val ctx = localVariableAllocator.alloc((variable, d, Some(site)))
       (variable, Some(apronState.recencyStore.alloc(ctx)))
-    )
+    ).toMap
     addressCallFrame.withNew(d, virtAddrs, site) {
       for ((variable, exprOption) <- vars; expr <- exprOption)
         setLocalByName(variable, expr)

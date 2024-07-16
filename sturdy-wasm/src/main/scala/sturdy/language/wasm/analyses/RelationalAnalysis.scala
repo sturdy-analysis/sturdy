@@ -34,7 +34,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.util.{*, given}
 import swam.syntax.*
-import swam.FuncType
+import swam.{FuncType, OpCode, syntax}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -43,6 +43,8 @@ import WasmFailure.*
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.DomLogger
+
+import scala.collection.immutable.List
 
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, ControlFlow, Control:
   final type J[A] = WithJoin[A]
@@ -210,24 +212,34 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         iv.inf().isEqual(iv.sup())
 
 
-    class ConstantInstructionsLogger extends InstructionResultLogger[Value](stack):
+    class ConstantInstructionsLogger extends InstructionResultLogger[Interval, Value](stack):
       override def boolValue(v: Value): Value = boolean(asBoolean(v))
 
       override def dummyValue: Value = Value.Int32(Left(ApronExpr.constant(Interval(0, 0), I32Type)))
+      
+      def getInfo(value: Value): Interval = value match
+        case Value.TopValue => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
+        case Value.Int32(Left(v)) => apronState.getInterval(v)
+        case Value.Int32(Right(v)) =>
+          apronState.getBoolean(v) match
+            case Topped.Actual(true)  => Interval(1,1)
+            case Topped.Actual(false) => Interval(0,0)
+            case Topped.Top           => Interval(0,1)
+        case Value.Int64(v) => apronState.getInterval(v)
+        case Value.Float32(v) => apronState.getInterval(v)
+        case Value.Float64(v) => apronState.getInterval(v)
 
-      def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
-        case Value.TopValue => false
-        case Value.Int32(v) => v.asApronExpr.isConstant
-        case Value.Int64(v) => v.isConstant
-        case Value.Float32(v) => v.isConstant
-        case Value.Float64(v) => v.isConstant
-      })
 
-      def grouped: Map[String, Map[InstLoc, List[Value]]] =
+      def get: Map[InstLoc, List[Interval]] = instructionInfo.filter(_._2.forall (
+        iv => iv.inf.isEqual(iv.sup)
+      ))
+
+      def grouped: Map[String, Map[InstLoc, List[Interval]]] =
         get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
 
       def groupedCount: Map[String, Int] =
         get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
+
 
     override def newEffectStack: EffectStack =
       new EffectStack(

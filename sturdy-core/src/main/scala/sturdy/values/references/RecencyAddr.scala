@@ -100,7 +100,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
           VirtualAddress(ctx, old.head, this)
       case None =>
         val freshId = this.fresh.getOrElse(ctx, 0)
-        this.fresh += (ctx) -> (freshId + 1)
+        this.fresh += ctx -> (freshId + 1)
         mapping += ctx -> RecencyRegion(BitSet(), BitSet(freshId))
         VirtualAddress(ctx, freshId, this)
 

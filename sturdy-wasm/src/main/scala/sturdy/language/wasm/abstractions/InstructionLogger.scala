@@ -42,35 +42,36 @@ trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, Fix
     case _ => // nothing
 
 
-trait InstructionResultLogger[V](stack: DecidableOperandStack[V])(using Top[V], Join[V]) extends InstructionLogger[List[V], V]:
+trait InstructionResultLogger[Info, V](stack: DecidableOperandStack[V])(using Top[V], Join[V]) extends InstructionLogger[List[Info], V]:
   def boolValue(v: V): V
   def dummyValue: V
+  def getInfo(v: V): Info
 
-  override def enterInfo(inst: Inst): Option[List[V]] =
+  override def enterInfo(inst: Inst): Option[List[Info]] =
     if (readsSingleValueFromStack(inst)) {
       val value = stack.peekOrAbort()
-      Some(List(value))
+      Some(List(getInfo(value)))
     } else if (readsSingleBooleanFromStack(inst)) {
       val v = boolValue(stack.peekOrAbort())
-      Some(List(v))
+      Some(List(getInfo(v)))
     } else inst match {
       case _: syntax.StoreInst | _: syntax.StoreNInst =>
         val values = stack.peekNOrAbort(2)
-        Some(values)
+        Some(values.map(getInfo))
       case _ => None
     }
 
-  override def exitInfo(inst: Inst, success: Boolean): Option[List[V]] =
+  override def exitInfo(inst: Inst, success: Boolean): Option[List[Info]] =
     if (inst == syntax.Nop || inst == syntax.Unreachable) {
-      Some(List(dummyValue))
+      Some(List(getInfo(dummyValue)))
     } else if (writesSingleValueToStack(inst)) {
       val result = if (success) stack.peekOrAbort() else Top.top[V]
-      Some(List(result))
+      Some(List(getInfo(result)))
     } else inst match {
       case _: syntax.LoadInst | _: syntax.LoadNInst =>
         val loaded = stack.peekOrAbort()
         val values = List(loaded)
-        Some(values)
+        Some(values.map(getInfo))
       case _ => None
     }
 

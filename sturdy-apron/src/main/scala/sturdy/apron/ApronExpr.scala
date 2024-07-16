@@ -51,6 +51,8 @@ enum ApronExpr[Addr, +Type]:
         Unary(op, expr.mapAddrSame(f), roundingType, roundingDir, _type)
       case Binary(op, expr1, expr2, roundingType, roundingDir, _type) =>
         Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, _type)
+        
+  def isConstant: Boolean = addrs.isEmpty
 
   def addrs: Set[Addr] = this match
     case Addr(v, _) => Set(v.addr)
@@ -216,36 +218,31 @@ enum BinOp:
     case Mod => Texpr1BinNode.OP_MOD
     case Pow => Texpr1BinNode.OP_POW
 
-case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type):
+case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]):
   import CompareOp.*
-  import Strictness.*
 
   override def toString: String = s"($e1 $op $e2)"
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
-    ApronCons(op, e1.mapAddr(f), e2.mapAddr(f), tpe)
+    ApronCons(op, e1.mapAddr(f), e2.mapAddr(f))
 
   def addrs: Set[Addr] = e1.addrs ++ e2.addrs
 
   def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
-    case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
-    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
-    case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
-    case Le  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, tpe).toApron)
-    case Ge  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
-    case Gt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, tpe).toApron)
+    case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
+    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
+    case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
+    case Le  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
+    case Ge  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
+    case Gt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
 
   def negated: ApronCons[Addr, Type] = op match
-    case Eq  => ApronCons(Neq, e1, e2, tpe)
-    case Neq => ApronCons(Eq, e1, e2, tpe)
-    case Lt  => ApronCons(Ge, e1, e2, tpe)
-    case Gt  => ApronCons(Le, e1, e2, tpe)
-    case Le  => ApronCons(Gt, e1, e2, tpe)
-    case Ge  => ApronCons(Lt, e1, e2, tpe)
-
-enum Strictness:
-  case Strict
-  case NotStrict
+    case Eq  => ApronCons(Neq, e1, e2)
+    case Neq => ApronCons(Eq, e1, e2)
+    case Lt  => ApronCons(Ge, e1, e2)
+    case Gt  => ApronCons(Le, e1, e2)
+    case Le  => ApronCons(Gt, e1, e2)
+    case Ge  => ApronCons(Lt, e1, e2)
 
 object ApronCons:
   import CompareOp.*
@@ -253,27 +250,30 @@ object ApronCons:
   // issue below, make CompareOp[Addr]?
   def eq[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Eq, e1, e2, e1._type)
+    ApronCons(Eq, e1, e2)
   def neq[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Neq, e1, e2, e1._type)
+    ApronCons(Neq, e1, e2)
   def lt[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Lt, e1, e2, e1._type)
+    ApronCons(Lt, e1, e2)
   def le[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Le, e1, e2, e1._type)
+    ApronCons(Le, e1, e2)
   def ge[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Ge, e1, e2, e1._type)
+    ApronCons(Ge, e1, e2)
   def gt[Addr, Type](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
     assert(e1._type == e2._type)
-    ApronCons(Gt, e1, e2, e1._type)
-  def top[Addr, Type](tpe: Type): ApronCons[Addr, Type] = {
+    ApronCons(Gt, e1, e2)
+  def top[Addr, Type](tpe: Type): ApronCons[Addr, Type] =
     val itop = ApronExpr.constant[Addr,Type](ApronExpr.topInterval, tpe)
-    ApronCons(Eq, itop, itop, tpe)
-  }
+    ApronCons(Eq, itop, itop)
 
+  def from[Addr,Type](tpe: Type)(boolean: Topped[Boolean]): ApronCons[Addr,Type] =
+    boolean match
+      case Topped.Actual(true) => ApronCons.top(tpe)
+      case Topped.Actual(false) => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(1, tpe))
 
 enum CompareOp:
   case Eq
@@ -290,3 +290,4 @@ enum CompareOp:
     case Le => "<="
     case Ge => ">="
     case Gt => ">"
+

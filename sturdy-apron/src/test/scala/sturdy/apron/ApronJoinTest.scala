@@ -20,7 +20,7 @@ class ApronJoinTest extends AnyFunSuite:
   val env_y = env.add(Array[Var](y), Array[Var]())
   val env_xy = env.add(Array[Var](x,y), Array[Var]())
   val env_xz = env.add(Array[Var](x,z), Array[Var]())
-  val manager: Manager = new Polka(false)
+  val manager: Manager = new Polka(true)
   val state1 = new Abstract1(manager, env)
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)

@@ -2,8 +2,7 @@ package sturdy.values.integer
 
 import gmp.*
 import apron.*
-
-import sturdy.data.given
+import sturdy.data.{joinWithFailure, given}
 import sturdy.apron.{ApronExpr, *, given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
@@ -12,6 +11,7 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+import sturdy.effect.EffectStack
 import sturdy.{IsSound, Soundness}
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
 
@@ -23,6 +23,7 @@ trait RelationalBaseIntegerOps
     ]
     (using
        apronState: ApronState[Addr,Type],
+       effectStack: EffectStack,
        f: Failure,
        typeIntOps: IntegerOps[L,Type]
     ) extends IntegerOps[L, ApronExpr[Addr,Type]]:
@@ -91,17 +92,22 @@ trait RelationalBaseIntegerOps
     val res = if(! Interval(0,0).isLeq(iv)) {
       intDiv(v1, v2)
     } else {
-      val resultType = typeIntOps.div(v1._type, v2._type)
-      apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-        apronState.join {
-          apronState.addConstraints(lt(intLit(0, y._type), y))
-          apronState.assign(result, intDiv(x, y))
-        } {
-          apronState.addConstraints(lt(y, intLit(0, y._type)))
-          apronState.assign(result, intDiv(x, y))
+      joinWithFailure {
+        val resultType = typeIntOps.div(v1._type, v2._type)
+        apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
+          apronState.join {
+            apronState.addConstraints(le(intLit(1, y._type), y))
+            apronState.assign(result, intDiv(x, y))
+          } {
+            apronState.addConstraints(le(y, intLit(-1, y._type)))
+            apronState.assign(result, intDiv(x, y))
+          }
+          addr(result, resultType)
         }
-        addr(result, resultType)
+      } {
+        Failure(IntegerDivisionByZero, s"divisor $v2 could be zero")
       }
+
     }
     foldInteger(res)
 
@@ -227,33 +233,26 @@ trait RelationalBaseIntegerOps
   /**
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
-  inline def foldInteger(v: ApronExpr[Addr, Type]) =
-    foldIntegerTo[L](v, v._type)(using this)
-
-  /**
-   * Maps a whole number to a fixed-size integer by folding over- and underflows.
-   */
-  def foldIntegerTo[To](v: ApronExpr[Addr, Type], toType: Type)(using toIntegerOps: RelationalBaseIntegerOps[To,Addr,Type]): ApronExpr[Addr, Type] =
+  def foldInteger(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     val fromType = v._type
 
     // Interval within range of the fixed-size integer
-    if (iv.isLeq(Interval(signedMinValue(toType).bigInteger, signedMaxValue(toType).bigInteger))) {
-      castTo(v, toType)
-
+    if (iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
+      v
       // No underflow
-    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(toType).bigInteger), infty))) {
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
-      toIntegerOps.toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax), toType))
+    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
+      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
+      toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax), v._type))
 
       // Over and underflow
     } else {
       // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
       // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(toType), fromType)
+      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
       val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax)
       val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax), uMax)
-      toIntegerOps.toSigned(castTo(foldSecondRound, toType))
+      toSigned(foldSecondRound)
     }
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -264,7 +263,7 @@ trait RelationalBaseIntegerOps
     } else if(iv.sup.sgn() < 0) {
       intAdd(v, uMax)
     } else {
-      val resultType = typeIntOps.divUnsigned(v._type, v._type)
+      val resultType = v._type
       apronState.withTempVars(resultType, v) { case (result, List(x)) =>
         apronState.ifThenElse(lt(x, intLit(0, x._type))) {
           apronState.assign(result, intAdd(x, uMax))
@@ -304,9 +303,10 @@ given RelationalIntOps
     Type : ApronType : Join
   ]
   (using
-    apronState: ApronState[Addr,Type],
-    f: Failure,
-    typeIntOps: IntegerOps[Int,Type]
+     apronState: ApronState[Addr,Type],
+     effectStack: EffectStack,
+     f: Failure,
+     typeIntOps: IntegerOps[Int,Type]
   ): RelationalBaseIntegerOps[Int, Addr, Type] with
 
   override def integerLit(i: Int): ApronExpr[Addr, Type] =
@@ -329,9 +329,10 @@ given RelationalLongOps
     Type : ApronType : Join
   ]
   (using
-   apronState: ApronState[Addr,Type],
-   f: Failure,
-   typeIntOps: IntegerOps[Long,Type]
+    apronState: ApronState[Addr,Type],
+    effectStack: EffectStack,
+    f: Failure,
+    typeIntOps: IntegerOps[Long,Type]
   ): RelationalBaseIntegerOps[Long, Addr, Type] with
 
   override def integerLit(i: Long): ApronExpr[Addr, Type] =

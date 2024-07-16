@@ -6,9 +6,10 @@ import sturdy.values.MaybeChanged
 import sturdy.values.Widening
 
 import java.security.cert.TrustAnchor
+import scala.util.control.NoStackTrace
 
 /** Throwables of a Sturdy program. */
-trait SturdyThrowable extends Throwable
+trait SturdyThrowable extends NoStackTrace
 
 /** Fatal error in interpreted program. */
 trait SturdyFailure extends SturdyThrowable

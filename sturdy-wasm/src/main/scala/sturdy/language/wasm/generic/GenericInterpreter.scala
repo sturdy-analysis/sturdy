@@ -305,10 +305,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       val ars = labelArities(bt, isLoop = false)
       branchOpsUnit.boolBranch(isZero) {
         // v == 0: else branch
-        println("else branch: " + elsInsts)
         label(BlockId(ifInst -> false), ars, elsInsts, None)
       } {
-        println("if branch: " + thnInsts)
         label(BlockId(ifInst -> true), ars, thnInsts, None)
       }
     case Br(labelIndex) =>

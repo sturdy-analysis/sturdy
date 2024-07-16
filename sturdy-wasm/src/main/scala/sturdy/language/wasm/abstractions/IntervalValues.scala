@@ -42,9 +42,10 @@ trait IntervalValues extends Interpreter:
     analysis.fixpoint.addContextFreeLogger(constants)
     constants
 
-  class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
+  class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value,Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(NumericInterval(0, 0))
+    override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
       case Value.TopValue => false

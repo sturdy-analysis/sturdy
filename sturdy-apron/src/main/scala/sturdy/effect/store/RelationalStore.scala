@@ -69,26 +69,26 @@ trait RelationalStore
         if(powAddr.isEmpty) {
           // nothing
         } else if (powAddr.isStrong) {
-          powAddr.reduce(toAddr =>
+          for(toAddr <- powAddr.iterator) {
             addAddrToEnvs(toAddr, exp)
             val to = ApronVar(toAddr)
             val env = _abstract1.getEnvironment
             assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
-            val aexp : apron.Texpr1Intern = exp.toIntern(_abstract1.getEnvironment)
+            val aexp: apron.Texpr1Intern = exp.toIntern(_abstract1.getEnvironment)
             _abstract1.assign(manager, to, aexp, null)
-          )
+          }
         } else /* if(powAddr.isWeak) */ {
           // weak update implemented as join
-          powAddr.reduce(toAddr =>
+          for (toAddr <- powAddr.iterator) {
             addAddrToEnvs(toAddr, exp)
             val to = ApronVar(toAddr)
-            if (! _abstract1.getEnvironment.hasVar(to)) {
+            if (!_abstract1.getEnvironment.hasVar(to)) {
               _abstract1.assign(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
             } else {
-              _abstract1.join(manager,
-                _abstract1.assignCopy(manager, to, exp.toIntern(_abstract1.getEnvironment), null))
+              val assigned = _abstract1.assignCopy(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
+              _abstract1.join(manager, assigned)
             }
-          )
+          }
         }
       case None =>
         nonRelationalStore.write(powAddr, v)
@@ -135,8 +135,8 @@ trait RelationalStore
         case (Some(fromType), Some(toType)) =>
           if(fromType.apronRepresentation == toType.apronRepresentation) {
             typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
-            _abstract1.join(manager,
-              _abstract1.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
+            val assigned = _abstract1.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null)
+            _abstract1.join(manager, assigned)
           } else {
             throw new IllegalStateException(
               s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.apronRepresentation}" +
@@ -166,7 +166,7 @@ trait RelationalStore
       )
     }
 
-  class BottomFailure extends SturdyFailure
+  private final class BottomFailure extends SturdyFailure
 
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
     val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]

@@ -1,7 +1,7 @@
 package sturdy.apron
 
 import apron.{Abstract1, Coeff, Environment, Interval, Manager, StringVar}
-import sturdy.util.Lazy
+import sturdy.util.{Lazy, Profiler}
 import sturdy.values.{Combine, Top, Widen, Widening}
 
 import scala.reflect.ClassTag
@@ -59,7 +59,9 @@ object ApronJoins:
       else
         combinable1.joinCopy(manager, combinable2)
 
-    MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+    val res = MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+    
+    res
 
   def minus[A](env1: Environment, env2: Environment): Environment =
     var env = env1

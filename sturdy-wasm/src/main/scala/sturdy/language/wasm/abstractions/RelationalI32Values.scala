@@ -5,6 +5,7 @@ import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.wasm.Interpreter
+import sturdy.data.{*,given}
 import sturdy.util.Lazy
 import sturdy.values.config.{Bits, BytesSize, Overflow}
 import sturdy.values.convert.{&&, Convert, LiftedConvert, NilCC, SomeCC}
@@ -25,7 +26,10 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     inline def asApronExpr(using apronState: ApronState[VirtAddr, Type]): ApronExpr[VirtAddr, Type] =
       i32 match
         case Left(expr) => expr
-        case Right(cons) => apronState.toBoolExpr(cons)
+        case Right(cons) => apronState.getBoolean(cons) match
+          case Topped.Actual(true) => ApronExpr.intLit(1, I32Type)
+          case Topped.Actual(false) => ApronExpr.intLit(0, I32Type)
+          case Topped.Top => ApronExpr.intInterval(0, 1, I32Type)
 
     def asApronExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]]): ApronExpr[VirtAddr, Type] =
       given ApronState[VirtAddr, Type] = lazyApronState.value
@@ -36,7 +40,10 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronState: Lazy[ApronState[VirtAddr,Type]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
-      combineApronExpr(v1.asApronExprLazy, v2.asApronExprLazy).map(Left.apply)
+      if(v1 == v2)
+        Unchanged(v1)
+      else
+        combineApronExpr(v1.asApronExprLazy, v2.asApronExprLazy).map(Left.apply)
 
   given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOps[Int, I32] =
     LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asApronExpr, inject = Left(_))
@@ -50,7 +57,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
             c1
           else
-            EqOps.equ(apronState.toBoolExpr(c1), i2)
+            EqOps.equ(v1.asApronExpr, i2)
         case (Left(_), Right(_)) =>
           equ(v2, v1)
         case (Right(c1), Right(c2)) =>
@@ -74,7 +81,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
             i1.negated
           else
-            EqOps.neq(apronState.toBoolExpr(i1), i2)
+            EqOps.neq(v1.asApronExpr, i2)
         case (Left(_), Right(_)) =>
           neq(v2, v1)
         case (Right(c1), Right(c2)) =>

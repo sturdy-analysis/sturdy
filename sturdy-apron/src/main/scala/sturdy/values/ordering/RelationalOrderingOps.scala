@@ -29,9 +29,7 @@ given RelationalUnsignedOrderingOps
   ]
   (using
    apronState: ApronState[Addr, Type],
-   integerOps: RelationalIntOps[Addr,Type],
-   typeOrderingOps: OrderingOps[Type, Type],
-   typeBooleanOps: BooleanOps[Type]
+   integerOps: RelationalIntOps[Addr,Type]
   ): UnsignedOrderingOps[ApronExpr[Addr, Type], ApronCons[Addr, Type]] with
     override def ltUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronCons[Addr, Type] =
       ApronCons.lt(integerOps.interpretSignedAsUnsigned(v1), integerOps.interpretSignedAsUnsigned(v2))

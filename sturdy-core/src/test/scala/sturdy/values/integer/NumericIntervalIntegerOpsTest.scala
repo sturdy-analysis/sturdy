@@ -18,14 +18,14 @@ given NumericIntervalIsInterval[I: Ordering]: IsInterval[I, NumericInterval[I]] 
 given IntegerOps[Int, Int] = ConcreteIntegerOps(using new ConcreteFailure())
 given IntegerOps[Long, Long] = ConcreteLongOps(using new ConcreteFailure())
 
-class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]]({
+class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](() => {
   given failure: Failure = new CollectedFailures[FailureKind]
   given Finite[FailureKind] with {}
   given effectState: EffectStack = EffectStack(failure)
   (new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
 })
 
-class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]]({
+class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]](() => {
   given failure: Failure = new CollectedFailures[FailureKind]
   given Finite[FailureKind] with {}
   given effectState: EffectStack = EffectStack(failure)

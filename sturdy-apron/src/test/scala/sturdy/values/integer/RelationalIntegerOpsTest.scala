@@ -6,6 +6,7 @@ import org.scalatest.{Assertion, Suites}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import sturdy.IsSound
 import sturdy.apron.{*, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
@@ -27,6 +28,7 @@ import sturdy.values.convert.{*, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
+//class ElinaPolyhedraIntegerOpsTest extends RelationalIntegerOpsTests(elina.OptPoly(false))
 class PolyhedraIntegerOpsTest extends RelationalIntegerOpsTests(Polka(true))
 class OctagonIntegerOpsTest extends RelationalIntegerOpsTests(Octagon())
 
@@ -35,13 +37,49 @@ class RelationalIntegerOpsTests(manager: Manager) extends Suites(
   RelationalLongOpsTest(using manager)
 )
 
-class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
+class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](() =>
   withApronState {
     (new RelationalIntOps[VirtAddr, Type], implicitly)
   }
-)
+):
+  test("div([1,1],[-1,1])") {
+    implicit val (integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.div(
+      ivOps.interval(integral.fromInt(1), integral.fromInt(1)),
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(1))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1), integral.fromInt(-1)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1), integral.fromInt(1)), actual))
+  }
 
-class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
+  test("div([-1,1],[-1,-1])") {
+    implicit val (integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.div(
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(1)),
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(1), integral.fromInt(-1)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(-1), integral.fromInt(-1)), actual))
+  }
+
+  test("shiftLeft([1,1], [-1,-1])") {
+    val (integerOps,soundness) = makeIntegerOps()
+    val actual = integerOps.shiftLeft(
+      ivOps.constant(integral.fromInt(1)),
+      ivOps.constant(integral.fromInt(-1))
+    )
+    val expected = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
+    assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
+  }
+
+  test("countLeadingZeros([1,4])") {
+    implicit val (integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.countLeadingZeros(ivOps.interval(integral.fromInt(1), integral.fromInt(4)))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(4)), actual))
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(1)), actual))
+  }
+
+class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](() =>
   withApronState {
     (new RelationalLongOps[VirtAddr, Type], implicitly)
   }
