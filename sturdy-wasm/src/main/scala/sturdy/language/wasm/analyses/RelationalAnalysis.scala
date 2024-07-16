@@ -46,7 +46,7 @@ import sturdy.fix.DomLogger
 
 import scala.collection.immutable.List
 
-object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, ControlFlow, Control:
+object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
   final type Addr = BaseType[Int]
   final type Size = I32
@@ -129,9 +129,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(doubleLit(d, F64Type))
 
   class Instance(apronManager: apron.Manager, rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
-    //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
-    :
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
 
     var dummy: List[Value] = List()

@@ -19,10 +19,19 @@ class IntervalSymbolTable[Key: Finite, IV: IntervalRange, Entry: Join] extends S
         if(symbols.isEmpty)
           constantSymbolTable.get(key, Topped.Top)
         else
-          range.intersect(Range.inclusive(symbols.min,symbols.max)).foldLeft(JOptionA.none)(
+          intersect(range,Range.inclusive(symbols.min,symbols.max)).foldLeft(JOptionA.none)(
             (res, i) => Join(res, constantSymbolTable.get(key, Topped.Actual(i))).get
           )
       case None => constantSymbolTable.get(key, Topped.Top)
+
+  def intersect(range1: Range, range2: Range): Range =
+    val inc1 = range1.inclusive
+    val inc2 = range2.inclusive
+    assert(inc1.step == 1 && inc2.step == 1)
+    val start = if(inc1.start <= inc2.start) inc2.start else inc1.start
+    val end = if(inc1.end <= inc2.end) inc1.end else inc2.end
+    Range.inclusive(start, end)
+
 
   def set(key: Key, symbol: IV, newEntry: Entry): Unit =
     IntervalRange(symbol) match

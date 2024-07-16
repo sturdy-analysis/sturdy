@@ -90,14 +90,14 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   private def getBoolean(v: ApronCons[Addr, Type], iv1: Interval, iv2: Interval): Topped[Boolean] =
     v.op match
       case CompareOp.Eq =>
-        if (iv1.isEqual(iv2))
+        if (iv1.isEqual(iv2) && iv1.inf.isEqual(iv1.sup))
           Topped.Actual(true)
         else if (IntervalLattice.meet(iv1, iv2).isBottom) // no overlap
           Topped.Actual(false)
         else // overlap
           Topped.Top
       case CompareOp.Neq =>
-        if (iv1.isEqual(iv2))
+        if (iv1.isEqual(iv2) && iv1.inf.isEqual(iv1.sup))
           Topped.Actual(false)
         else if (IntervalLattice.meet(iv1, iv2).isBottom) // no overlap
           Topped.Actual(true)

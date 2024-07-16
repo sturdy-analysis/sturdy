@@ -70,7 +70,7 @@ given IntervalRange[Interval] =
         None
       else
         val mpq = gmp.Mpq()
-        iv.inf().toMpq(mpq, Mpfr.RNDU)
+        iv.sup().toMpq(mpq, Mpfr.RNDU)
         try {
           Some(mpq.getNum.bigIntegerValue().intValueExact())
         } catch {
