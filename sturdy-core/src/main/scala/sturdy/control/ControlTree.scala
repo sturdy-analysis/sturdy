@@ -6,6 +6,12 @@ import scala.annotation.targetName
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
+/**
+ * Alternative representation of the control trace of an interpreter.
+ * Has to be parsed from control events using ControlEventParser.
+ * Can be used to build a tree using ControlTreeGraphBuilder via the toGraph method, but prefer direct building with ControlEventGraphBuilder, which is more efficient.
+ * Storing traces as trees can take a lot of space in memory.
+ */
 enum ControlTree[Atom, Sec, Exc, Fx]:
   case Empty()
 

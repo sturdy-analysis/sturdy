@@ -2,6 +2,11 @@ package sturdy.control
 
 import sturdy.control.FixpointControlEvent.BeginFixpoint
 
+/**
+ * Observes an interpreter and builds a control tree from the control events it sends.
+ * Control trees are an alternative representation for control events, taking a lot of space in memory for large programs.
+ * No practical utility over ControlEventGraphBuilder.
+ */
 class ControlEventParser[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
   import ControlEventParser.*
 

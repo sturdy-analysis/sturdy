@@ -1,23 +1,30 @@
 package sturdy.control
 
 /** 
-  * Represents a program's control flow through a sequence of 
-  * control events. Control events can be triggered by an (abstract)
-  * interpreter, and control events can be observed to construct
-  * a control-flow graph.
-  * 
-  * Invariants: A valid sequence of control events must adhere to the
-  * following data-dependent grammar.
-  * 
-  * ES ::= Start E*                  // complete event sequence
-  * E ::= Atomic(a:Atom) | Failed    // event
-  *     | Begin(s:Section) E* End(s)
-  *     | BeginTry E* Throws(exc:Exc)? E* Catches(exc)? E* EndTry
-  *     | Fork E* Switch E* Join
-  *     
-  */
-
-
+ * Represents a program's control flow through a sequence of
+ * control events. Control events can be triggered by an (abstract)
+ * interpreter, and control events can be observed to construct
+ * a control-flow graph.
+ *
+ * Invariants: A valid sequence of control events must adhere to the
+ * following data-dependent grammar.
+ *
+ * S ::= empty | S S | Atomic(a) | Failed
+ *        | BeginSection(sec) S EndSection
+ *        | Fork S Switch S Join
+ *        | Throw(exc)
+ *        | BeginTry S (Catching C)? EndTry
+ *        | BeginFix(fix) S EndFix
+ *        | Recurrent(fix) | Restart
+ *
+ * C ::= empty | C C | Fork C Switch C Join
+ *        | BeginHandle(exc) C EndHandle
+ *
+ * @tparam Atom Indivisible program fragment appearing as node in the ICFG
+ * @tparam Section Compound program fragments such as loops, conditionals, functions and function calls
+ * @tparam Exc Exceptional control flow labels, doesn't appear in the final graph
+ * @tparam Fx Labels used for fixed-point computations, doesn't appear in the final graph
+ */
 trait ControlEvent[+Atom, +Section, +Exc, +Fx]
 
 enum BasicControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:

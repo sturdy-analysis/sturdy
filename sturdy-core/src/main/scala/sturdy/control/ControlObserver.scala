@@ -5,6 +5,10 @@ import sturdy.control.BasicControlEvent.BeginSection
 
 import scala.collection.mutable.ListBuffer
 
+/**
+ * Observer pattern.
+ * Used to receive and process control events online.
+*/
 trait ControlObserver[Atom, Section, Exc,Fx]:
   final def handle(ev: ControlEvent[Atom,Section,Exc,Fx]): Unit = ev match
     case e: BasicControlEvent[Atom,Section,Exc,Fx] => handle(e)

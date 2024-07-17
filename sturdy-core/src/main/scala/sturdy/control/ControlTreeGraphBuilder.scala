@@ -5,6 +5,12 @@ import sturdy.data.combineMaps
 import scala.annotation.tailrec
 import scala.language.implicitConversions
 
+
+/**
+ * Used by ControlTree to build a ICFG.
+ * The algorithm is more simple ControlEventGraphBuilder but is also less efficient.
+ * Only used for theoretical purposes (see Control Event paper).
+ */
 class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
 
   private type CT = ControlTree[Atom, Sec, Exc, Fx]

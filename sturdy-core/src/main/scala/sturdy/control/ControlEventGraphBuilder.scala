@@ -15,6 +15,10 @@ import scala.language.implicitConversions
 import scala.jdk.CollectionConverters.*
 import scala.jdk.FunctionConverters.*
 
+/**
+ * Observes an interpreter and the control event it sends to build a ICFG graph.
+ * Only observer needed for this purpose.
+ */
 class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
   import ControlEventGraphBuilder.*
 
