@@ -3,7 +3,7 @@ package sturdy.apron
 import apron.{Coeff, Interval}
 import gmp.Mpfr
 import sturdy.values.integer.IntervalRange
-import sturdy.values.{Join, MaybeChanged, Top}
+import sturdy.values.{Join, MaybeChanged, PartialOrder, Top}
 
 object IntervalLattice:
   def meet(iv1: Interval, iv2: Interval): Interval =
@@ -20,6 +20,9 @@ object IntervalLattice:
       else
         res.setSup(iv2.sup)
     res
+
+given intervalOrdering: PartialOrder[Interval] with
+  override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
 
 given joinInterval: Join[Interval] = joinCoeff.apply(_,_)
 

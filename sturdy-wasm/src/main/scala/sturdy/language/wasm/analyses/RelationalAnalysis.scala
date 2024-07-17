@@ -128,7 +128,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case ConcreteInterpreter.Value.Float32(f) => Value.Float32(doubleLit(f, F32Type))
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(doubleLit(d, F64Type))
 
-  class Instance(apronManager: apron.Manager, rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+  class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
 
