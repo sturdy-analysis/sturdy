@@ -9,18 +9,19 @@ import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.data.MakeJoined
 import sturdy.effect.EffectStack
+import sturdy.effect.allocation.Allocation
 import sturdy.effect.failure.Failure
-import sturdy.effect.store.ManageableAddr
+import sturdy.effect.store.{ManageableAddr, Store}
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
-import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
+import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.generic.InstructionSite
 import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
 import sturdy.language.bytecode.AuxillaryFunctions.*
-
+import sturdy.values.Topped.Actual
 
 import java.net.URL
 
@@ -29,11 +30,11 @@ trait ConstantObjects extends Interpreter:
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = String
-  case class FieldAddr(site: InstructionSite, name: String) extends ManageableAddr(true)
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
   type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
   final def topObj: ObjRep = Topped.Top
 
-  final type ArrayRep = Topped[Array[ArrayAddr, FieldAddr, ArrayType, Value]]
+  final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
   type TypeRep = ReferenceType
@@ -46,10 +47,122 @@ trait ConstantObjects extends Interpreter:
   given combineNull[W <: Widening]: Combine[Null, W] with
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
 
+  given constObjOps(using alloc: Allocation[FieldAddr, InstructionSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+    override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ObjRep =
+      val fieldAddrs = vals.map { (v, site, name) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        (name, addr)
+      }.toVector.toMap
+      Topped.Actual(Object(ObjAddr(oid), cfs, fieldAddrs))
+
+    override def getField(obj: ObjRep, name: String): JOption[MayJoin.WithJoin, Value] = 
+      if(obj.isActual){
+        if (!obj.get.fields.contains(name))
+          JOptionA.none
+        else
+          store.read(obj.get.fields(name))
+      }
+      else{
+        ???
+      }
+
+    override def setField(obj: Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], name: String, v: Value): JOption[MayJoin.WithJoin, Unit] = 
+      if(obj.isActual){
+        if (!obj.get.fields.contains(name))
+          JOptionA.none
+        else {
+          store.write(obj.get.fields(name), v)
+          JOptionA.some(())
+        }
+      }
+      else {
+        ???
+      }
+
+    override def invokeFunctionCorrect(obj: Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], Method, Seq[Value]) => Value): Value =
+      if(obj.isActual){
+        val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.get.cls, mthName, sig, project)
+        invoke(obj, mth, args)
+      }
+      else{
+        ???
+      }
+
+    override def makeNull(): Null = null
+
+  given constArrayOps(using alloc: Allocation[ArrayElemAddr, InstructionSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[InstructionSite, Int, Value, ArrayRep, ArrayType, InstructionSite, WithJoin] with
+    override def makeArray(aid: InstructionSite, vals: Seq[(Value, InstructionSite)], arrayType: AType, arraySize: Value): ArrayRep =
+      val valAddrs = vals.map { (v, site) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        addr
+      }.toVector
+      Topped.Actual(Array(ArrayAddr(aid), valAddrs, arrayType, arraySize))
+  
+    override def getVal(array: ArrayRep, idx: Int): JOption[WithJoin, Value] =
+      if(array.isActual){
+        if (idx >= array.get.vals.size)
+          JOptionA.none
+        else
+          store.read(array.get.vals(idx))
+      }
+      else{
+        ???
+      }
+      
+  
+    override def setVal(array: ArrayRep, idx: Int, v: Value): JOption[WithJoin, Unit] =
+      if(array.isActual){
+        if (idx >= array.get.vals.size)
+          JOptionA.none
+        else {
+          store.write(array.get.vals(idx), v)
+          JOptionA.some(())
+        }
+      }
+      else{
+        ???
+      }
+      
+  
+    override def arrayLength(array: ArrayRep): Value =
+      if(array.isActual){
+        array.get.arraySize
+      }
+      else{
+        ???
+      }
+  
+    override def initArray(size: Int): Seq[Any] =
+      Seq.fill(size) {}
+  
+    override def arraycopy(src: ArrayRep, srcPos: Int, dest: ArrayRep, destPos: Int, length: Int): JOption[WithJoin, Unit] =
+      if(src.isActual && dest.isActual){
+        for (i <- 0 until length) {
+          if (srcPos + i >= src.get.vals.size || destPos + i >= dest.get.vals.size) {
+            return JOptionA.none
+          }
+          else {
+            val toCopy = store.read(src.get.vals(srcPos + i)).get
+            store.write(dest.get.vals(destPos + i), toCopy)
+          }
+        }
+        JOptionA.some(())
+      }
+      else{
+        ???
+      }
+      
+  
+    override def getArray(array: ArrayRep): Seq[JOption[WithJoin, Value]] =
+      val arrayVals = array.get.vals.map(addr => getVal(array, array.get.vals.indexOf(addr)))
+      arrayVals
+
 trait TypeObjects extends Interpreter:
   final type NullVal = Null
   final def topNull: NullVal = null
-  
+
 
   given combineNull[W <: Widening]: Combine[Null, W] with
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
@@ -61,7 +174,7 @@ trait TypeObjects extends Interpreter:
       val lcSuperType = project.classHierarchy.joinObjectTypes(v1.thisType, v2.thisType, true).head
       MaybeChanged.Changed(project.classFile(lcSuperType).get)
 
-  given typeObjects(using project: Project[URL], f: Failure, effects: EffectStack): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+  given typeObjects(using project: Project[URL], f: Failure, effects: EffectStack, jvV: WithJoin[Value]): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
     override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
       cfs
 
@@ -79,8 +192,8 @@ trait TypeObjects extends Interpreter:
         .map(cfs => cfs.get.findMethod(mthName, sig).get).toSeq
       // search method and superClasses for first occurence of method
       val supMth = findMethodOfSuperclass(obj, mthName, sig, project)
-      ???
-      //sturdy.data.mapJoin(supMth +: allSubMths, invoke(obj, _, args))
+
+      sturdy.data.mapJoin(supMth +: allSubMths, invoke(obj, _, args))
 
     override def makeNull(): Null = null
 

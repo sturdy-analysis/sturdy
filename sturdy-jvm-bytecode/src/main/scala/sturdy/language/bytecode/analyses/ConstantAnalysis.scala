@@ -26,7 +26,7 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.values.arrays.{Array, ArrayOps, given}
+import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps, given}
 import sturdy.values.references.{AllocationSiteAddr, given}
 
 import java.net.URL
@@ -66,7 +66,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
     override val objAlloc = new AAllocationFromContext(site => ObjAddr(site))
-    override val objFieldAlloc = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name))
+    override val objFieldAlloc = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
     override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
     override val objFieldStore = new TopStore()
@@ -107,13 +107,16 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
 
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = ???
+
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
-//      new LiftedObjectOps[FieldAddr, FieldName, ObjAddr, Value, ObjType, ObjRep, Value, AllocationSite, Mth, MthName, MthSig, Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
-//        using new ConcreteObjectOpsWithJoin(using objFieldAlloc, objFieldStore)
+//      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
+//        using new constObjOps
 //      )
       ???
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
+//      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, ArrayRep, I32](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
+//        using new constArrayOps
+//      )
       ???
-
 
 

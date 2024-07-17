@@ -36,7 +36,7 @@ enum JvmExcept[V]:
 
 case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
 case class ArrayElemInitSite(s: InstructionSite, ix: Int)
-case class FieldInitSite(s: InstructionSite, name: String)
+case class FieldInitSite(s: InstructionSite, name: String, cls: ObjectType)
 
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
@@ -111,7 +111,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       case inst: ACONST_NULL.type =>
         stack.push(objectOps.makeNull())
 
-      // Lit Ops
+      // Lit Ops opcode 2 - 17
       case _ if (2 <= inst.opcode && inst.opcode <= 17) =>
         stack.push(num.evalNumericOp(inst))
 
@@ -549,7 +549,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         } else {
           val cfs = project.classFile(inst.objectType).get
           val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq
-          val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), (field.classFile.thisType, field.name))))
+          val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
           val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
           stack.push(obj)
         }
@@ -680,7 +680,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def createLibraryObj(toLoad: ObjectType, site: InstructionSite): V =
     val cfs = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
-    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name), (field.classFile.thisType, field.name))))
+    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
     val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
 

@@ -173,7 +173,7 @@ object ConcreteInterpreter extends Interpreter:
         using new TestConcObjectOps(using objFieldAlloc, objFieldStore, project)
       )
     val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin, ArrayRep, Int](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, AType, ArrayElemInitSite, MayJoin.NoJoin, ArrayRep, I32](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
         using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
       )
 
