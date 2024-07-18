@@ -1,31 +1,43 @@
 package sturdy.control
 
 /** 
-  * Represents a program's control flow through a sequence of 
-  * control events. Control events can be triggered by an (abstract)
-  * interpreter, and control events can be observed to construct
-  * a control-flow graph.
-  * 
-  * Invariants: A valid sequence of control events must adhere to the
-  * following data-dependent grammar.
-  * 
-  * ES ::= Start E*                  // complete event sequence
-  * E ::= Atomic(a:Atom) | Failed    // event
-  *     | Begin(s:Section) E* End(s)
-  *     | BeginTry E* Throws(exc:Exc)? E* Catches(exc)? E* EndTry
-  *     | Fork E* Switch E* Join
-  *     
-  */
-
-
+ * Represents a program's control flow through a sequence of
+ * control events. Control events can be triggered by an (abstract)
+ * interpreter, and control events can be observed to construct
+ * a control-flow graph.
+ *
+ * Invariants: A valid sequence of control events must adhere to the
+ * following data-dependent grammar.
+ *
+ * S ::= empty | S S | Atomic(a) | Failed
+ *        | BeginSection(sec) S EndSection
+ *        | Fork S Switch S Join
+ *        | Throw(exc)
+ *        | BeginTry S (Catching C)? EndTry
+ *        | BeginFix(fix) S EndFix
+ *        | Recurrent(fix) | Restart
+ *
+ * C ::= empty | C C | Fork C Switch C Join
+ *        | BeginHandle(exc) C EndHandle
+ *
+ * @tparam Atom Indivisible program fragment appearing as node in the ICFG
+ * @tparam Section Compound program fragments such as loops, conditionals, functions and function calls
+ * @tparam Exc Exceptional control flow labels, doesn't appear in the final graph
+ * @tparam Fx Labels used for fixed-point computations, doesn't appear in the final graph
+ */
 trait ControlEvent[+Atom, +Section, +Exc, +Fx]
 
 enum BasicControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
-  case Atomic(a: Atom)
+  case Atomic(a: Atom)(val label: String)
   case Failed()
-
-  case BeginSection(sec: Section)
+  case BeginSection(sec: Section)(val label: String)
   case EndSection()
+
+  override def toString: String = this match
+    case ev@BasicControlEvent.Atomic(a) => s"Atomic($a, ${ev.label})"
+    case BasicControlEvent.Failed() => "Failed()"
+    case ev@BasicControlEvent.BeginSection(sec) => s"BeginSection($sec, ${ev.label})"
+    case ev@BasicControlEvent.EndSection() => s"EndSection()"
 
 enum ExceptionControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Section, Exc, Fx]:
   case BeginTry()
@@ -45,6 +57,13 @@ enum FixpointControlEvent[Atom, Section, Exc, Fx] extends ControlEvent[Atom, Sec
   case Recurrent(fx: Fx)
   case EndFixpoint()
   case Restart()
+
+object BasicControlEvent:
+  def atomic[Section, Exc, Fx](label: String): BasicControlEvent[String, Section, Exc, Fx] =
+    Atomic(label)(label)
+  def beginSection[Atom, Exc, Fx](label: String): BasicControlEvent[Atom, String, Exc, Fx] =
+    BeginSection(label)(label)
+
 
 /*
 

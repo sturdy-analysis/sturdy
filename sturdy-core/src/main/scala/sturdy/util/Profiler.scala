@@ -14,6 +14,27 @@ object Profiler:
     try block    // call-by-name
     finally end(name)
   }
+  
+  def addTimeBestOf[R](name: String, repeat: Int)(block: => R): R = {
+    if (measuredTimes.contains(name))
+      throw new IllegalArgumentException()
+    
+    var previous: Long = 0
+    val times = ListBuffer.empty[Long]
+    val res = for (i <- 1 to repeat) yield {
+      val r = addTime(name)(block)
+      val t = measuredTimes(name) - previous
+      previous += t
+      times += t
+      r
+    }
+    val best = times.min
+    measuredTimes += name -> best
+    res.head
+  }
+
+  def get(name: String): Option[Long] =
+    measuredTimes.get(name)
 
   def printLastMeasured(): Unit =
     println("Elapsed times:")

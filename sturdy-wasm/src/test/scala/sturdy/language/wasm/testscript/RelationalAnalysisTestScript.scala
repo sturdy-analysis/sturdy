@@ -83,8 +83,8 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
-  val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cImports: Map[String, ModuleInstance] = Map()
+  var aImports: Map[String, ModuleInstance] = Map()
   val convertVals: unresolved.Expr => List[RelationalAnalysis.Value] =
     if (useTop)
       constExprToTops
@@ -100,6 +100,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     aCurrent = amodInst
     aImports += "spectest" -> amodInst
   }
+
 
   type CResult = CFallible[List[CValue]]
   type AResult = AFallible[List[AValue]]

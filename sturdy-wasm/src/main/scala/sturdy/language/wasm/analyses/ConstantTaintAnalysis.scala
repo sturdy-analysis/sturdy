@@ -65,8 +65,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc match
-      case HostFunction.proc_exit =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>

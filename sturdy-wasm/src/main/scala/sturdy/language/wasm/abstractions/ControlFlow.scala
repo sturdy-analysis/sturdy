@@ -35,16 +35,30 @@ trait Control extends Interpreter:
     obsExc.addExceptObserver(new LiftedExceptObserver(_.target, observable))
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
-        case FixIn.EnterWasmFunction(id, _, _) => observable.triggerControlEvent(BasicControlEvent.BeginSection(id))
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.BeginSection(loc))
-        case FixIn.Eval(inst, loc) => observable.triggerControlEvent(BasicControlEvent.Atomic(loc))
+        case FixIn.EnterWasmFunction(id, _, _) =>
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter"))
+        case FixIn.EnterHostFunction(id, _) =>
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter host"))
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
+          val label = c match
+            case Block(_, _) => "Block"
+            case Loop(_, _) => "Loop"
+            case If(_, _, _) => "If"
+            case _ => c.toString
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(loc)(label))
+        case FixIn.Eval(inst, loc) =>
+          observable.triggerControlEvent(BasicControlEvent.Atomic(loc)(inst.toString))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
-        case FixIn.EnterWasmFunction(_, _, _) => observable.triggerControlEvent(BasicControlEvent.EndSection())
-        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) => observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.EnterWasmFunction(_, _, _) | FixIn.EnterHostFunction(_, _) =>
+          observable.triggerControlEvent(BasicControlEvent.EndSection())
+        case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
+          observable.triggerControlEvent(BasicControlEvent.EndSection())
+        //case MostGeneralClientLoop(_) => observable.triggerControlEvent(FixpointControlEvent.Restart())
         case _ => // nothing
 
+// TODO : Fix the MostGeneralClientLoop iteration that breaks the CFG construction (sometimes?)
 
 enum CfgNode extends ControlFlowGraph.Node:
   case Start
@@ -97,10 +111,12 @@ case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, end
       case OnlyControl if inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect => Some(CfgNode.Instruction(inst, loc))
       case _ => None
     case FixIn.EnterWasmFunction(id, _, _) =>  Some(CfgNode.Enter(id))
+    case FixIn.EnterHostFunction(id, _) =>  Some(CfgNode.Enter(id))
     case _ => None
 
   def getOutNode[V](in: FixIn, out: FixOut[V]): Option[CfgNode] = (in, out) match
     case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
+    case (FixIn.EnterHostFunction(id, _), FixOut.ExitHostFunction(_)) => Some(CfgNode.Exit(id))
     case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
     case (FixIn.Eval(c: (Block | Loop | If), loc), _) if endNodes && granularity != OnlyCalls => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
     case _ => None
@@ -164,7 +180,7 @@ object ControlFlow:
         nodes += CfgNode.Exit(FuncId(modInst, funcIx))
         val (_,body) = withLocations(func.body, InstLoc.InFunction(FuncId(modInst, funcIx), 0))
         nodes ++= body.flatMap(instToCfgNode)
-      case FunctionInstance.Host(hostF) =>
+      case FunctionInstance.Host(_, _, hostF) =>
     }
     for (exp <- mod.exports) exp._2 match {
       case ExternalValue.Function(funcIx) =>

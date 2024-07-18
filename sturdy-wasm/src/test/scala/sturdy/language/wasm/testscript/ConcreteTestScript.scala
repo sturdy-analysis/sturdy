@@ -58,7 +58,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
   interp.addControlObserver(new ControlEventChecker)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
-  val imports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var imports: Map[String, ModuleInstance] = Map()
   
   spectest.foreach{ mod => 
     val modInst = interp.initializeModule(mod)

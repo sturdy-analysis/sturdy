@@ -67,8 +67,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc match
-      case HostFunction.proc_exit =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
@@ -154,10 +154,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
       override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
     }
-    override def initializeModule(module: Module, imports: Imports): ModuleInstance = {
+    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any]): ModuleInstance = {
       module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-      super.initializeModule(module, imports)
+      super.initializeModule(module, imports, moduleId)
     }
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))

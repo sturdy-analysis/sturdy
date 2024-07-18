@@ -5,6 +5,10 @@ import sturdy.effect.except.ExceptObserver
 
 import scala.collection.mutable.ListBuffer
 
+/**
+ * Observer pattern.
+ * Implemented by interpreters to sen events to observers.
+ */
 trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObserver[Exc]:
   private val observers: ListBuffer[ControlObserver[Atom, Section, Exc, Fx]] = ListBuffer.empty
   def addControlObserver(obs: ControlObserver[Atom, Section, Exc, Fx]): obs.type =

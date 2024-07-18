@@ -112,8 +112,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc match
-      case HostFunction.proc_exit =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>

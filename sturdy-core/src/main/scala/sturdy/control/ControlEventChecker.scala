@@ -2,6 +2,22 @@ package sturdy.control
 
 import sturdy.control.FixpointControlEvent.BeginFixpoint
 
+
+/**
+  * Observes an interpreter and checks if the control events it sends form a valid sequence.
+  * Validate according to the following grammar :
+  *
+  * S ::= empty | S S | Atomic(a) | Failed
+  *        | BeginSection(sec) S EndSection
+  *        | Fork S Switch S Join
+  *        | Throw(exc)
+  *        | BeginTry S (Catching C)? EndTry
+  *        | BeginFix(fix) S EndFix
+  *        | Recurrent(fix) | Restart
+  * C ::= empty | C C | Fork C Switch C Join
+  *        | BeginHandle(exc) C EndHandle
+  *
+ */
 class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Section,Exc,Fx]:
   import ControlEventChecker.*
 

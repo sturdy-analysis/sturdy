@@ -10,7 +10,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
@@ -37,6 +37,9 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
+
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
 
 //  it must s"execute most general client for simple with stacked states" in {
 //    runConstantAnalysis(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
@@ -129,6 +132,11 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
 
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+
+
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 
@@ -176,12 +184,8 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-  interp.addControlObserver(new ControlEventChecker)
-  val parser = interp.addControlObserver(new ControlEventParser)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
@@ -193,43 +197,15 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
       List()
     }
   )
-//  println(cfg.toGraphViz)
-//  println(interp.controlRecorder)
 
+  val cfg = graphBuilder.get
+  println(cfg.toGraphViz)
 
-  val tree = parser.getFinalTree
-  val treeSequence = tree.print
-  val tree2 = ControlEventParser.parse(treeSequence)
-  val treeSequence2 = tree2.print
-
-  assert(treeSequence == treeSequence2)
-  assert(tree == tree2)
-
-  val graphFromTree = tree.toGraph
-  val graphFromEvents = graphBuilder.get
-
-  val edgesMissing = graphFromTree.edges.diff(graphFromEvents.edges)
-  val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
-  assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
-  assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
-
-  println(graphFromTree.toGraphViz)
-
-
-//  println(tree.toGraphViz)
-
-
-  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-  val deadLabels = ControlFlow.deadLabels(cfg)
   val constantInstructions = constants.get
-  println(s"Found ${deadInstructions.size} dead instructions")
-  println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-//  println(cfg.withBlocks(shortLabels = false).toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
   println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
   Profiler.printLastMeasured()
-//  println(recorder)
   result

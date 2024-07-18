@@ -272,7 +272,7 @@ object ApronCons:
 
   def from[Addr,Type](tpe: Type)(boolean: Topped[Boolean]): ApronCons[Addr,Type] =
     boolean match
-      case Topped.Actual(true) => ApronCons.top(tpe)
+      case Topped.Actual(true) | Topped.Top => ApronCons.top(tpe)
       case Topped.Actual(false) => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(1, tpe))
 
 enum CompareOp:

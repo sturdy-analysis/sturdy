@@ -10,12 +10,12 @@ import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 
-import java.nio.{ByteBuffer, ByteOrder}
-import scala.collection.immutable.{AbstractSeq, LinearSeq, TreeSet}
+import java.nio.{ByteOrder, ByteBuffer}
+import scala.collection.immutable.{LinearSeq, TreeSet, AbstractSeq}
 import Ordering.Implicits.infixOrderingOps
 import Numeric.Implicits.infixNumericOps
 import Integral.Implicits.infixIntegralOps
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 import scala.util.control.Breaks.{break, breakable}
 
 
@@ -33,7 +33,8 @@ object NumericInterval:
 case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
   import NumericInterval.*
 
-  override def toString: String = s"[$low, $high]"
+  override def toString: String =
+    s"[$low, $high]"
 
   def toHexString(using Numeric[I]): String =
     s"[${java.lang.Long.toHexString(low.toLong)}, ${java.lang.Long.toHexString(high.toLong)}]"
@@ -75,6 +76,12 @@ case class NumericInterval[I](low: I, high: I)://, overflow: Topped[Boolean])
       NumericInterval(f(low), f(high))
 
   def isConstant: Boolean = low == high
+
+  def toConstant: Topped[I] =
+    if (isConstant)
+      Topped.Actual(low)
+    else
+      Topped.Top
 
   def isTop(using Top[NumericInterval[I]]): Boolean =
     this == summon[Top[NumericInterval[I]]].top

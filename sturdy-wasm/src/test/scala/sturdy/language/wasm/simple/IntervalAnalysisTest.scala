@@ -4,14 +4,14 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.PrintingControlObserver
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
@@ -41,6 +41,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
+
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
 
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
@@ -120,6 +123,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(top64), List(top64))
   testFunction(fact, "fac-opt", List(top64), List(top64))
 
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(0,1))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(1,5))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(top32), List(Value.Int32(NumericInterval(42,42))))
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
@@ -167,26 +173,21 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = IntervalAnalysis.constantInstructions(interp)
-  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-//  println(cfg.toGraphViz)
 
-  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-  val deadLabels = ControlFlow.deadLabels(cfg)
   val constantInstructions = constants.get
-  println(s"Found ${deadInstructions.size} dead instructions")
-  println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.withBlocks(shortLabels = false).toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
   println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
   Profiler.printLastMeasured()
+
+  println(graphBuilder.get.toGraphViz)
   result

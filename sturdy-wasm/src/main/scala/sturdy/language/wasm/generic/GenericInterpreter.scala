@@ -1,6 +1,6 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{CombineUnit, MayJoin, NoJoin, noJoin, EitherOrdering}
+import sturdy.data.{*,given}
 import sturdy.effect.{ComputationJoiner, EffectList, EffectStack}
 import sturdy.effect.callframe.{DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.except.Except
@@ -15,10 +15,7 @@ import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.effect.symboltable.JoinableDecidableSymbolTable
-import sturdy.values.Combine
-import sturdy.values.Finite
-import sturdy.values.MaybeChanged
-import sturdy.values.Widening
+import sturdy.values.{*,given}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
@@ -66,7 +63,7 @@ given Finite[JumpTarget] with {}
 
 case class WasmException[V](target: JumpTarget, operands: List[V])
 
-type Imports = mutable.Map[String, ModuleInstance]
+type Imports = Map[String, ModuleInstance]
 
 case class FuncId(mod: ModuleInstance, funcIx: Int):
   override def toString: String = s"$mod.$funcIx"
@@ -107,6 +104,7 @@ given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,
 enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
+  case EnterHostFunction(id: FuncId, hostFfunc: HostFunction)
   case MostGeneralClientLoop(modInst: ModuleInstance)
 
   override def toString: String = this match
@@ -121,6 +119,7 @@ enum FixIn:
 given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Option[Int]]]] {
   case FixIn.Eval(inst, loc) => Left(loc)
   case FixIn.EnterWasmFunction(fid, fun, tpe) => Right(Left(fun.hashCode()))
+  case FixIn.EnterHostFunction(fid, fun) => Right(Left(fun.hashCode()))
   case FixIn.MostGeneralClientLoop(mod) =>
     if (mod == null)
       Right(Right(None))
@@ -131,6 +130,7 @@ given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Option[In
 enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
+  case ExitHostFunction(vals: List[V])
   case MostGeneralClient()
 
 given finiteFixIn: Finite[FixIn] with {}
@@ -381,22 +381,21 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     }
 
   def invoke(fun: FunctionInstance, loc: InstLoc)(using Fixed): Unit =
+    val funcType = fun.funcType
+    val frameData = FrameData(Some(fun.funcIdx), funcType.t.size, fun.module)
+    val args = stack.popNOrAbort(funcType.params.size)
+
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-        val args = stack.popNOrAbort(funcType.params.size)
-        val frameData = FrameData(Some(ix), funcType.t.size, mod)
         val vars = args.view.map(Some.apply) ++ func.locals.map(ty => Some(num.defaultValue(ty)))
         labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
-      case FunctionInstance.Host(hostFunc) =>
-        val args = stack.popNOrAbort(hostFunc.funcType.params.size)
-        val res = invokeHostFunction(hostFunc, args)
-        val expectedSize = hostFunc.funcType.t.size
-        if (res.length != expectedSize) {
-          throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
-        }
-        stack.pushN(res)
+      case FunctionInstance.Host(mod, ix, hostFunc) =>
+        val vars = args.view.map(Some.apply)
+        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
+          enterHostFunction(FuncId(mod, ix), hostFunc)
+        }))
 
   private def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
@@ -427,6 +426,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     rec(FixIn.Eval(inst, loc))
   inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: Fixed): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
+  inline def enterHostFunction(id: FuncId, hostFunc: HostFunction)(using rec: Fixed): FixOut[V] =
+    rec(FixIn.EnterHostFunction(id, hostFunc))
+
 
   private def fixed: Fixed = fixpoint {
     case FixIn.Eval(inst, loc) =>
@@ -434,6 +436,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       FixOut.Eval()
     case FixIn.EnterWasmFunction(id, func, funcType) =>
       FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
+    case FixIn.EnterHostFunction(id, hostFunc) =>
+      FixOut.ExitHostFunction({
+        val args = hostFunc.funcType.params.zipWithIndex.map(p => callFrame.getLocal(p._2).getOrElse(fail(UnboundLocal, s"Host arg $p")))
+        val res = invokeHostFunction(hostFunc, args.toList)
+        stack.pushN(res)
+        res
+      })
     case FixIn.MostGeneralClientLoop(modInst) =>
       runMostGeneralClient_open(modInst)
       FixOut.Eval()
@@ -447,13 +456,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   }
 
   private def runMostGeneralClient_open(modInst: ModuleInstance)(using rec: Fixed): Unit = {
-    effectStack.joinFold(modInst.exportedFunctions, { case (funcName, ExternalValue.Function(funcIx)) =>
-      val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-      val paramTys = fun.funcType.params
-      val args = paramTys.map(typedTop).toList
-      invokeExported_open(modInst, funcName, args)
-      ()
-    })
+    if (modInst.exportedFunctions.nonEmpty)
+      effectStack.joinFold(modInst.exportedFunctions, { case (funcName, ExternalValue.Function(funcIx)) =>
+        val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+        val paramTys = fun.funcType.params
+        val args = paramTys.map(typedTop).toList
+        invokeExported_open(modInst, funcName, args)
+        ()
+      })
     rec(FixIn.MostGeneralClientLoop(modInst))
   }
 
@@ -511,13 +521,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 //    ???
 
   def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance, loc: InstLoc)(using Fixed): V =
-    val idx: Option[Int] = loc match
-      case InstLoc.InFunction(idx,pc) => Some(idx.funcIx)
-      case InstLoc.InvokeExported(mod,name) => mod.exportedFunctions.get(name) match
-        case Some(ExternalValue.Function(funcIx)) => Some(funcIx)
-        case None => None
-      case InstLoc.InInit(_,_) => None
-    val frameData = FrameData(idx, 1, mod)
+    val frameData = FrameData(None, 1, mod)
     labelStack.withNew(stack.withNewStack(callFrame.withNew(frameData, Iterable.empty, loc) {
       for ((inst, ix) <- insts.zipWithIndex) {
         val loc = mod.blockInstLocs((block, ix))
@@ -547,10 +551,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       if (imp.moduleName == "wasi_snapshot_preview1" || imp.moduleName == "wasi_unstable") {
         imp match
           case Import.Function(_,funcName, funcType) =>
-            val hf = HostFunction.nameToHostFunction(funcName)
+            val (ix, hf) = wasi.get(funcName)
             if (hf.funcType != module.types(funcType))
               throw new Error(s"Importing host function $funcName with wrong type: expected ${hf.funcType}, but imported with ${module.types(funcType)}")
-            funcs += FunctionInstance.Host(hf)
+            funcs += FunctionInstance.Host(wasi.module, ix, hf)
           case _ => throw new Error(s"Import from runtime: expected a function, but got $imp.")
       } else {
         // get the module to import from
@@ -604,10 +608,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     }
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports = mutable.Map.empty): ModuleInstance = external {
+  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None): ModuleInstance = external {
     initializeThis()
 
-    val modInst = new ModuleInstance
+    val modInst = new ModuleInstance(moduleId)
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
@@ -718,7 +722,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val func = modInst.functions(funcIdx)
         func match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-            val frameData = FrameData(Some(mod.exportedFunctions("$start").addr), funcType.t.size, mod)
+            val frameData = FrameData(None, funcType.t.size, mod)
             val vars = func.locals.map(ty => Some(num.defaultValue(ty)))
             val loc = InstLoc.InvokeExported(mod, "$start")
             labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap), loc) {
