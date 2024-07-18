@@ -1,18 +1,15 @@
 package sturdy.language.wasm.testscript
 
 import apron.*
-
 import cats.effect.{Blocker, IO}
 
 import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import sturdy.control.ControlEventChecker
+import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
@@ -23,8 +20,7 @@ import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, W
 import sturdy.values.integer.given
 import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
-import sturdy.{*,given}
-
+import sturdy.{*, given}
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -33,6 +29,14 @@ import swam.text.unresolved.{FreshId, NoId, SomeId}
 import swam.validation.Validator
 
 import java.nio.file.{Files, Path, Paths}
+import scala.util.CommandLineParser
+
+given CommandLineParser.FromString[Array[String]] with
+  def fromString(s: String): Array[String] = Array()
+
+object Main:
+  @main
+  def main(args: Array[String]): Unit = org.scalatest.run(new RelationalAnalysisTestScript)
 
 class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript relational analysis"
@@ -78,7 +82,8 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
   type AValue = RelationalAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  aInterp.addControlObserver(new ControlEventChecker)
+  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
@@ -115,7 +120,10 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     }
 
   def run(commands: Seq[Command]): Unit =
-    commands.map(eval)
+    commands.map{ command =>
+      eval(command)
+      aInterp.recencyStore.garabageCollect()
+    }
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

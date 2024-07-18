@@ -64,7 +64,7 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
         java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
+//    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
   )
 
 

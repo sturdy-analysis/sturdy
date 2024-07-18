@@ -39,9 +39,9 @@ trait RelationalStore
   private var typeEnv: TypeEnv = initialTypeEnv
   val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(Map())
 
-  def abstract1: Abstract1 = _abstract1
+  inline def abstract1: Abstract1 = _abstract1
 
-  def getType(powAddr: PowAddr): JOptionA[Type] =
+  inline def getType(powAddr: PowAddr): JOptionA[Type] =
     powAddr.reduce(addr => JOptionA(typeEnv.get(addr)))
 
   override def read(powAddr: PowAddr): JOptionA[Val] =
@@ -154,17 +154,17 @@ trait RelationalStore
   override def free(powAddr: PowAddr): Unit =
     nonRelationalStore.free(powAddr)
 
-    if (powAddr.isStrong) {
-      powAddr.reduce(addr =>
-        val dest = ApronVar(addr)
-        val env = _abstract1.getEnvironment()
-        if(env.hasVar(dest)) {
-          typeEnv -= dest.addr
-//          _abstract1.forget(manager, dest, false)
-          _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
-        }
-      )
+//    if (powAddr.isStrong) {
+    for(addr <- powAddr.iterator) {
+      val dest = ApronVar(addr)
+      val env = _abstract1.getEnvironment()
+      if (env.hasVar(dest)) {
+        typeEnv -= dest.addr
+        _abstract1.forget(manager, dest, false)
+        _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
+      }
     }
+//    }
 
   private final class BottomFailure extends SturdyFailure
 
@@ -227,7 +227,7 @@ trait RelationalStore
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
-  def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
+  inline def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
 
   override def join: Join[State] = combineRelationalStoreState
   override def widen: Widen[State] = combineRelationalStoreState

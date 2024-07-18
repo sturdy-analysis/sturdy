@@ -50,7 +50,7 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
       PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
     addressTranslation.alloc(ctx)
 
-  def joinRecentIntoOld(virt: Virt) =
+  def joinRecentIntoOld(virt: Virt): Unit =
     virt.iterator.foreach(
       v =>
         if(v.recency == PowRecency.Recent || v.recency == PowRecency.RecentOld) {
@@ -179,24 +179,7 @@ object RecencyClosure:
 
 final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V, EffectState](val recencyStore: RecencyStore[Context, Virt, V], val recencyStoreState: recencyStore.State, val effectState: EffectState):
   val addrTrans = recencyStore.addressTranslation
-
-  override def equals(obj: Any): Boolean =
-    obj match
-      case other: RecencyClosureState[Context @unchecked, Virt @unchecked, V @unchecked, EffectState @unchecked] =>
-        val snapshotMapping = addrTrans.mapping
-        val snapshotOtherMapping = addrTrans.otherMapping
-        try {
-          addrTrans.mapping = this.recencyStoreState.addrTrans
-          addrTrans.otherMapping = Some(other.recencyStoreState.addrTrans)
-          this.recencyStoreState.equals(other.recencyStoreState)
-          this.effectState.equals(other.effectState)
-        } finally {
-          addrTrans.mapping = snapshotMapping
-          addrTrans.otherMapping = snapshotOtherMapping
-        }
-      case _ => false
-
-  override def hashCode(): Int =
+  lazy val hash = {
     val snapshotMapping = addrTrans.mapping
     try {
       addrTrans.mapping = this.recencyStoreState.addrTrans
@@ -204,6 +187,26 @@ final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualA
     } finally {
       addrTrans.mapping = snapshotMapping
     }
+  }
+
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: RecencyClosureState[Context @unchecked, Virt @unchecked, V @unchecked, EffectState @unchecked]
+        if this.hash == other.hash =>
+          val snapshotMapping = addrTrans.mapping
+          val snapshotOtherMapping = addrTrans.otherMapping
+          try {
+            addrTrans.mapping = this.recencyStoreState.addrTrans
+            addrTrans.otherMapping = Some(other.recencyStoreState.addrTrans)
+            this.recencyStoreState.equals(other.recencyStoreState)
+            this.effectState.equals(other.effectState)
+          } finally {
+            addrTrans.mapping = snapshotMapping
+            addrTrans.otherMapping = snapshotOtherMapping
+          }
+      case _ => false
+
+  override def hashCode(): Int = hash
 
   override def toString: String =
     f"RecencyClosureState(${hashCode()}, ${recencyStoreState}, ${effectState})"

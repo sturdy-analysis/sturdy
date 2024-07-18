@@ -161,7 +161,7 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
   val module = wasm.Parsing.fromText(path)
   val interp = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
   val constants = interp.constantInstructions
-  // interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val cfg = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
