@@ -38,7 +38,8 @@ given ConcreteDoubleOps: FloatOps[Double, Double] with
     if (v.isInfinite || v.isNaN || v.isWhole)
       v
     else
-      Math.copySign((Math.round(v / 2) * 2).toDouble, v)
+      Math.round(v)
+//      Math.copySign((Math.round(v / 2) * 2).toDouble, v)
   def copysign(v: Double, sign: Double): Double = Math.copySign(v, sign)
 
   def logNatural(v: Double): Double = Math.log(v)

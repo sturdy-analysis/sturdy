@@ -38,7 +38,8 @@ given ConcreteFloatOps: FloatOps[Float, Float] with
     if (v.isInfinite || v.isNaN || v.isWhole)
       v
     else
-      Math.copySign((Math.round(v / 2) * 2).toFloat, v)
+      Math.round(v)
+      // Math.copySign((Math.round(v / 2) * 2).toFloat, v)
   def copysign(v: Float, sign: Float): Float = Math.copySign(v, sign)
 
 

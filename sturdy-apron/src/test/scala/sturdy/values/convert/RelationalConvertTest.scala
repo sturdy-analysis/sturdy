@@ -29,12 +29,18 @@ import sturdy.values.types.{BaseType, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-given ConcreteConvertIntLong = ConcreteConvertIntLong(using new ConcreteFailure)
-given ConcreteConvertFloatLong = ConcreteConvertFloatLong(using new ConcreteFailure)
-given ConcreteConvertFloatInt = ConcreteConvertFloatInt(using new ConcreteFailure)
-given ConcreteConvertDoubleLong = ConcreteConvertDoubleLong(using new ConcreteFailure)
-given ConcreteConvertDoubleInt = ConcreteConvertDoubleInt(using new ConcreteFailure)
-given ConcreteConvertLongFloat = ConcreteConvertLongFloat(using new ConcreteFailure)
+final class WithNearestRoundingMode[From, To, VFrom, VTo, Config <: ConvertConfig[_]](convert: Convert[From, To, VFrom, VTo, Config]) extends Convert[From, To, VFrom, VTo, Config]:
+  override def apply(from: VFrom, conf: Config): VTo =
+    RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+      convert(from,conf)
+    }
+
+given ConvertIntLong[Int,Long] = WithNearestRoundingMode(ConcreteConvertIntLong(using new ConcreteFailure))
+given ConvertFloatLong[Float,Long] = WithNearestRoundingMode(ConcreteConvertFloatLong(using new ConcreteFailure))
+given ConvertFloatInt[Float,Int] = WithNearestRoundingMode(ConcreteConvertFloatInt(using new ConcreteFailure))
+given ConvertDoubleLong[Double,Long] = WithNearestRoundingMode(ConcreteConvertDoubleLong(using new ConcreteFailure))
+given ConvertDoubleInt[Double,Int] = WithNearestRoundingMode(ConcreteConvertDoubleInt(using new ConcreteFailure))
+given ConvertLongFloat[Long,Float] = WithNearestRoundingMode(ConcreteConvertLongFloat(using new ConcreteFailure))
 
 class PolyhedraConvertTests extends RelationalConvertTests(Polka(true))
 class OctagonConvertTests extends RelationalConvertTests(Octagon())

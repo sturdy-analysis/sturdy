@@ -240,7 +240,7 @@ given RelationalConvertLongDouble[Addr: Ordering : ClassTag, Type: ApronType]
   ConvertLongDouble[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
     RelationalConvertIntegerFloating[Long, Double, Addr, Type]
 
-private final class RelationalConvertIntegerFloating[From, To: Bounded: Numeric, Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[From, Addr, Type], convertType: Convert[From, To, Type, Type, Bits])
+private final class RelationalConvertIntegerFloating[From, To: Numeric, Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[From, Addr, Type], convertType: Convert[From, To, Type, Type, Bits])
   extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Bits]:
   def apply(from: ApronExpr[Addr,Type], conf: Bits) = conf match
     case conf@Bits.Signed =>
@@ -249,7 +249,7 @@ private final class RelationalConvertIntegerFloating[From, To: Bounded: Numeric,
       cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
     case conf@Bits.Raw =>
       joinWithFailure(
-        constant(Interval(Numeric[To].toDouble(Bounded[To].minValue), Numeric[To].toDouble(Bounded[To].maxValue)), convertType(from._type, conf))
+        constant(Interval(Double.NegativeInfinity, Double.PositiveInfinity), convertType(from._type, conf))
       ) (
         unsupportedConfiguration(conf, this)
       )

@@ -10,6 +10,7 @@ import org.scalatest.Assertions.*
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.apron.{RoundingDir, RoundingMode}
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
 import sturdy.fix.{Fixpoint, StackConfig}
@@ -132,7 +133,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     }
 
   def run(commands: Seq[Command]): Unit =
-    commands.map{ command =>
+    commands.foreach { command =>
       eval(command)
       aInterp.garbageCollect()
     }
@@ -204,11 +205,13 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =
-    val cModInst = cInterp.initializeModule(mod, cImports)
-    id match
-      case None => // nothing
-      case Some(name) => cModules += name -> cModInst
-    cCurrent = cModInst
+    RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+      val cModInst = cInterp.initializeModule(mod, cImports)
+      id match
+        case None => // nothing
+        case Some(name) => cModules += name -> cModInst
+      cCurrent = cModInst
+    }
     val aModInst = aInterp.initializeModule(mod, aImports)
     id match
       case None => // nothing
@@ -221,8 +224,10 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     t match
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
-        cInterp.failure.fallible {
-          cInterp.initializeModule(mod, cImports)
+        RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+          cInterp.failure.fallible {
+            cInterp.initializeModule(mod, cImports)
+          }
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
@@ -237,9 +242,11 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
 
-  def runCAction(a: Action): CResult = a match {
-    case Invoke(modName, fun, expr) => evalCInvoke(modName, fun, constExprToVals(expr))
-    case Get(modName, name) => evalCGet(modName, name)
+  def runCAction(a: Action): CResult = RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+    a match {
+      case Invoke(modName, fun, expr) => evalCInvoke(modName, fun, constExprToVals(expr))
+      case Get(modName, name) => evalCGet(modName, name)
+    }
   }
 
   def runAAction(a: Action, convertVals: unresolved.Expr => List[RelationalAnalysis.Value]): AResult = a match {
