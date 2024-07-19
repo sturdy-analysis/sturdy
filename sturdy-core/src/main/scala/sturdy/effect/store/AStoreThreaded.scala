@@ -9,6 +9,7 @@ import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
 import reflect.Selectable.reflectiveSelectable
+import scala.reflect.ClassTag
 
 /** An abstract threaded store. */
 class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V], Widen[V], Finite[A])
@@ -43,6 +44,9 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
   override def setState(s: State): Unit = this.store = s
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    store.keysIterator.flatMap(valueIterator) ++ store.valuesIterator.flatMap(valueIterator)
 
   def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, AA], vSoundness: Soundness[cV, V]): IsSound =
     c.entries.foreachEntry { case (a, v) =>

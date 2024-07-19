@@ -56,47 +56,42 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
   def apply(f: Float, conf: config.Overflow && config.Bits) = conf match
-    case (_ && Bits.Raw) => JFloat.floatToRawIntBits(f)
-
-//    case (config.Overflow.Allow && config.Bits.Signed) => f.toInt
-//    case (config.Overflow.Allow && config.Bits.Unsigned) => f.toLong.toInt
-    case (Overflow.Fail && Bits.Signed) =>
+    case (_ && config.Bits.Raw) => JFloat.floatToRawIntBits(f)
+    case (config.Overflow.Allow && config.Bits.Signed) => f.toInt
+    case (config.Overflow.Allow && config.Bits.Unsigned) => f.toLong.toInt
+    case (config.Overflow.Fail && config.Bits.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (BigDecimal(f) < BigDecimal(Int.MinValue) || BigDecimal(f) > BigDecimal(Int.MaxValue))
+      else if (f >= -Int.MinValue.toFloat || f < Int.MinValue.toFloat)
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
-        apply(f, Overflow.JumpToBounds && Bits.Signed)
-
-    case (Overflow.JumpToBounds && Bits.Signed) =>
+        f.toInt
+    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (f.isNaN)
         0
-      else if (BigDecimal(f) > BigDecimal(Int.MaxValue))
+      else if (f >= -Int.MinValue.toFloat)
         Int.MaxValue
-      else if (BigDecimal(f) < BigDecimal(Int.MinValue))
+      else if (f < Int.MinValue.toFloat)
         Int.MinValue
       else
         f.toInt
-
-
-    case (Overflow.Fail && Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (BigDecimal(f) >= -BigDecimal(Int.MinValue) * 2 || BigDecimal(f) <= BigDecimal(-1))
+      else if (f >= -Int.MinValue.toDouble * 2.0d || f <= -1.0f)
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
-        apply(f, Overflow.JumpToBounds && Bits.Unsigned)
-
-    case (Overflow.JumpToBounds && Bits.Unsigned) =>
-      if (f.isNaN || f < 0.0f)
+        f.toLong.toInt
+    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+      if (f.isNaN)
         0
-      else if (BigDecimal(f) >= -BigDecimal(Int.MinValue) * 2)
+      else if (f >= -Int.MinValue.toFloat * 2.0f)
         -1
+      else if (f < 0.0f)
+        0
       else
         f.toLong.toInt
-
-    case _ =>
-      unsupportedConfiguration(conf, this)
+    case _ => unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long] with
@@ -105,47 +100,45 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
   def apply(f: Float, conf: config.Overflow && config.Bits) = conf match
-    case (_ && config.Bits.Raw) =>
-      JFloat.floatToRawIntBits(f).toLong
-
-    case (Overflow.Fail && Bits.Signed) =>
+    case (config.Overflow.Allow && config.Bits.Signed) => f.toLong
+//    case (config.Overflow.Allow, config.Bits.Unsigned) => ???
+    case (config.Overflow.Fail && config.Bits.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (BigDecimal(f) < BigDecimal(Long.MinValue) || BigDecimal(f) > BigDecimal(Long.MaxValue))
+      else if (f >= -Long.MinValue.toFloat || f < Long.MinValue.toFloat)
         fa.fail(ConversionFailure, s"float $f out of long range")
       else
-        apply(f, Overflow.JumpToBounds && Bits.Signed)
-
-    case (Overflow.JumpToBounds && Bits.Signed) =>
+        f.toLong
+    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (f.isNaN)
         0
-      else if(BigDecimal(f) < BigDecimal(Long.MinValue))
-        Long.MinValue
-      else if(BigDecimal(f) > BigDecimal(Long.MaxValue))
+      else if (f >= -Long.MinValue.toFloat)
         Long.MaxValue
+      else if (f < Long.MinValue.toFloat)
+        Long.MinValue
       else
         f.toLong
-
-    case (Overflow.Fail && Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (BigDecimal(f) <= BigDecimal(-1) || BigDecimal(f) >= -BigDecimal(Long.MinValue) * 2)
+      else if (f >= -Long.MinValue.toFloat * 2.0d || f <= -1.0d)
         fa.fail(ConversionFailure, s"float $f out of long range")
-      else apply(f, Overflow.JumpToBounds && Bits.Unsigned)
-
-    case (Overflow.JumpToBounds && Bits.Unsigned) =>
-      if(f.isNaN || f < 0.0f)
-        0
-      else if (BigDecimal(f) >= -BigDecimal(Long.MinValue) * 2)
-        -1
-      else if (BigDecimal(f) >= -BigDecimal(Long.MinValue))
-        (f - (-Long.MinValue.toFloat * 2.0f)).toLong
-//        (f - (-Long.MinValue.toFloat)).toLong | Long.MinValue
+      else if (f >= -Long.MinValue.toFloat)
+        (f - 9223372036854775808.0d).toLong | Long.MinValue
       else
         f.toLong
-
-    case _ =>
-      unsupportedConfiguration(conf, this)
+    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+      if (f.isNaN)
+        0
+      else if (f >= -Long.MinValue.toFloat * 2.0d)
+        -1
+      else if (f < 0.0d)
+        0
+      else if (f >= -Long.MinValue.toFloat)
+        (f - 9223372036854775808.0d).toLong | Long.MinValue
+      else
+        f.toLong
+    case _ => unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertFloatDouble: ConvertFloatDouble[Float, Double] with

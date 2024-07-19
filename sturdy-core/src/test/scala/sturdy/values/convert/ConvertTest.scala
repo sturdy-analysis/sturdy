@@ -5,6 +5,7 @@ import org.scalacheck.{Arbitrary, Gen, Shrink}
 import org.scalactic.Fail
 import org.scalatest.Assertion
 import org.scalatest.enablers.Containing
+import org.scalatest.events.TestFailed
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
@@ -40,6 +41,8 @@ class ConvertTest
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   val cfailure = ConcreteFailure()
+
+  def _makeConvert: (Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind]) = makeConvert
 
   for(conf <- AllConfigs[Config]) {
     test(s"convert[$conf] constant") {

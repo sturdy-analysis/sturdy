@@ -17,6 +17,9 @@ case class RecencyRegion(recent: BitSet = BitSet.empty, old: BitSet = BitSet.emp
     else
       PowRecency.RecentOld
 
+  def contains(n: Int): Boolean =
+    recent.contains(n) || old.contains(n)
+
   override def toString: String =
     s"[" + (if(recent.isEmpty) "" else s"recent: ${recent.mkString(" ")}") + (if(old.isEmpty) "" else s", old: ${old.mkString(" ")}") + "]"
 
@@ -114,6 +117,33 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
       mapping += virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n)
     }
 
+  def deadPhysicalAddresses(alive: PowVirtualAddress[Context]): PowPhysicalAddress[Context] =
+    var dead = mapping
+    for((ctx,ns) <- alive.addrs.keys.groupMap(_._1)(_._2))
+      dead.get(ctx) match
+        case Some(region) =>
+          if(ns.exists(region.contains))
+            dead -= ctx
+        case None => {}
+    PowersetAddr(physicalAddressesByContext(dead).values.flatMap(_.addrs).toSet)
+
+  def removePhysicalAddresses(physicalAddresses: PowPhysicalAddress[Context]): Unit =
+    for(phys <- physicalAddresses.iterator)
+      mapping.get(phys.ctx) match
+        case Some(RecencyRegion(recent, old)) =>
+          phys.recency match
+            case Recency.Recent =>
+              if(old.isEmpty)
+                mapping -= phys.ctx
+              else
+                mapping += phys.ctx -> RecencyRegion(BitSet.empty, old)
+            case Recency.Old =>
+              if(recent.isEmpty)
+                mapping -= phys.ctx
+              else
+                mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty)
+        case None => {}
+
   override type State = Map[Context,RecencyRegion]
 
   override def getState: State =
@@ -164,7 +194,8 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         PowVirtualAddress((region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this)))
       case None => PowVirtualAddress.empty
 
-  def physicalAddressesByContext: Map[Context, PowPhysicalAddress[Context]] =
+  inline def physicalAddressesByContext: Map[Context,PowPhysicalAddress[Context]] = physicalAddressesByContext(this.mapping)
+  def physicalAddressesByContext(mapping: Map[Context,RecencyRegion]): Map[Context, PowPhysicalAddress[Context]] =
     mapping.map((ctx,region) =>
       if(region.recent.isEmpty)
         (ctx, PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
@@ -336,8 +367,8 @@ object PowVirtualAddress:
   def empty[Context]: PowVirtualAddress[Context] = new PowVirtualAddress[Context](Map.empty)
   def apply[Context](virtualAddresses: VirtualAddress[Context]*): PowVirtualAddress[Context] =
     apply(virtualAddresses)
-  def apply[Context](virtualAddresses: Iterable[VirtualAddress[Context]]): PowVirtualAddress[Context] =
-    new PowVirtualAddress(virtualAddresses.map(virt => ((virt.ctx,virt.n), virt)).toMap)
+  def apply[Context](virtualAddresses: IterableOnce[VirtualAddress[Context]]): PowVirtualAddress[Context] =
+    new PowVirtualAddress(virtualAddresses.iterator.map(virt => ((virt.ctx,virt.n), virt)).toMap)
 
 given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddress[Context], W] with
   override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =

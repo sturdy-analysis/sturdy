@@ -13,6 +13,7 @@ import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
 import scala.collection.immutable.{ArraySeq, HashMap}
+import scala.reflect.ClassTag
 
 trait RelationalCallFrame
   [
@@ -124,6 +125,9 @@ trait RelationalCallFrame
         Unchanged(call)
       else
         Changed(call)
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    addressCallFrame.getState.iterator.flatMap(valueIterator)
 
   def isSound[cData, cVal](c: ConcreteCallFrame[cData, Var, cVal, CallSite])(using vSoundness: Soundness[cVal, Val], dSoundness: Soundness[cData, Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.data, data)

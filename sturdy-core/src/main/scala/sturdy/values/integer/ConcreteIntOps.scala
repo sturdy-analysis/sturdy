@@ -104,7 +104,6 @@ given ConcreteConvertIntLong(using failure: Failure): ConvertIntLong[Int, Long] 
     case config.Bits.Unsigned => i & 0X00000000FFFFFFFFL
     case _ =>
       unsupportedConfiguration(conf, this)
-
 given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
   /*
    * Most conversion rules have been copied from:

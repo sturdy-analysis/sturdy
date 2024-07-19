@@ -3,6 +3,7 @@ package sturdy.effect
 import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen, Widening}
 
 import scala.collection.immutable.ArraySeq
+import scala.reflect.ClassTag
 
 object EffectList:
   def apply(effects: Effect*): EffectList = new EffectList(ArraySeq.from(effects))
@@ -46,3 +47,8 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
 
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](effects))
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    for(effect <- effects.iterator;
+        addr <- effect.addressIterator[Addr](valueIterator))
+      yield(addr)

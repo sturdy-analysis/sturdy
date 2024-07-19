@@ -182,6 +182,32 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case F32Type => Value.Float32(expr)
           case F64Type => Value.Float64(expr)
 
+    def addressIterator: Iterator[VirtAddr] =
+      def valueIterator(value: Any): Iterator[VirtAddr] = value match
+        case Value.Int32(Left(expr)) => expr.addrs.iterator
+        case Value.Int32(Right(cons)) => cons.addrs.iterator
+        case Value.Int64(expr) => expr.addrs.iterator
+        case Value.Float32(expr) => expr.addrs.iterator
+        case Value.Float64(expr) => expr.addrs.iterator
+        case excV: ExcV =>
+          for(listVals <- excV.values.iterator;
+              value <- listVals.iterator;
+              addr <- valueIterator(value))
+            yield(addr)
+        case _ =>
+          println("Unknown Value "+value)
+          Iterator()
+
+      effectStack.addressIterator[VirtAddr](valueIterator)
+
+    def garbageCollect(): Unit =
+      val alive = PowVirtualAddress(this.addressIterator)
+      val dead = recencyStore.addressTranslation.deadPhysicalAddresses(alive)
+      val dimBefore = relationalStore.abstract1.getEnvironment.getSize
+      recencyStore.collectGarbage(alive)
+      val dimAfter = relationalStore.abstract1.getEnvironment.getSize
+      println(s"Alive: $alive\nDead: $dead\nDim Before: $dimBefore\nDim After: $dimAfter")
+
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable

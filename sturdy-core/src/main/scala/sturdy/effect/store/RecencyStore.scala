@@ -62,6 +62,14 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
         }
     )
 
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    store.addressIterator(valueIterator)
+
+  def collectGarbage(alive: PowVirtualAddress[Context]): Unit =
+    val deadPhysicals = addressTranslation.deadPhysicalAddresses(alive)
+    store.free(deadPhysicals)
+    addressTranslation.removePhysicalAddresses(deadPhysicals)
+
   override type State = RecencyStoreState
 
   case class RecencyStoreState(addrTrans: addressTranslation.State, store: initStore.State):
@@ -133,6 +141,9 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def setState(st: State): Unit =
     recencyStore.setState(st.recencyStoreState.asInstanceOf)
     effect.setState(st.effectState)
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    recencyStore.addressIterator(valueIterator) ++ effect.addressIterator(valueIterator)
 
   override def join: Join[State] = combine(recencyStore.join, effect.join)
   override def widen: Widen[State] = combine(recencyStore.widen, effect.widen)

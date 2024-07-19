@@ -3,6 +3,8 @@ package sturdy.effect
 import sturdy.data.CombineUnit
 import sturdy.values.{Changed, Join, StackWidening, Widen}
 
+import scala.reflect.ClassTag
+
 /**
  * [[Effect]] is an interface for effectful computations, such as computations mutating variables or causing exceptions.
  *
@@ -20,6 +22,9 @@ trait Effect:
 
   /** Overwrite the current internal state of the effect with the given state. */
   def setState(st: State): Unit
+
+  /** Iterates over all addresses in the current effect. Used for abstract garbage collection */
+  def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] = Iterator()
 
   /** Joins two internal states of the effect. */
   def join: Join[State]

@@ -242,3 +242,6 @@ trait RelationalStore
         joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
       )
       res
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    nonRelationalStore.addressIterator(valueIterator)

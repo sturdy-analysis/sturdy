@@ -1,11 +1,13 @@
 package sturdy.effect.operandstack
 
-import sturdy.data.{NoJoin, unit, JOptionC, CombineEquiList}
+import sturdy.data.{CombineEquiList, JOptionC, NoJoin, unit}
 import sturdy.effect.Concrete
 import sturdy.values.*
 import sturdy.*
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
+
+import scala.reflect.ClassTag
 
 trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   protected var stack: List[V] = Nil
@@ -76,6 +78,9 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
   override def setState(s: State): Unit =
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    stack.iterator.flatMap(valueIterator)
 
   def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false

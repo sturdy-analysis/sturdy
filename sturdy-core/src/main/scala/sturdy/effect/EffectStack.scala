@@ -3,6 +3,8 @@ package sturdy.effect
 import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen}
 import sturdy.fix
 
+import scala.reflect.ClassTag
+
 /**
  * `EffectStack` composes multiple effects.
  *
@@ -75,6 +77,9 @@ class EffectStack(_effects: => Effect,
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) => effects.stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    effects.addressIterator(valueIterator)
 
   private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()

@@ -159,7 +159,16 @@ class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[
       implicitly
     )
   )
-)
+):
+  test("convert(16777217, Bits.Signed) = 1.6777216E7f") {
+    implicit val (convertOps, soundness, afailure) = _makeConvert
+    assertResult(IsSound.Sound)(
+      soundness.isSound(
+        cfailure.fallible(ConcreteConvertIntFloat(16777217, Bits.Unsigned)),
+        afailure.fallible(convertOps(ApronExpr.doubleLit(16777217, Type.IntType), Bits.Unsigned))
+      )
+    )
+  }
 
 class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
   specials = List(),

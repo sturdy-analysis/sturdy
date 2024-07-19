@@ -11,6 +11,8 @@ import sturdy.effect.ComputationJoiner
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.TrySturdy
 
+import scala.reflect.ClassTag
+
 case object AbstractSturdyException extends SturdyException:
   override def toString: String = s"Abstract exception"
 
@@ -83,3 +85,6 @@ class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin])
   override def setState(s: State): Unit = exception = s
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    exception.toOption.iterator.flatMap(valueIterator)

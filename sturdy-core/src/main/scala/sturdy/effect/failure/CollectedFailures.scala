@@ -28,7 +28,7 @@ class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Mono
       else
         AFallible.MaybeFailing(res, Powerset(failures.toSet))
     } catch {
-      case exc: SturdyFailure => AFallible.Failing(Powerset(failures.toSet))
+      case _: SturdyFailure => AFallible.Failing(Powerset(failures.toSet))
       case recur: RecurrentCall => AFallible.Diverging(recur)
       case ex => throw ex
     }

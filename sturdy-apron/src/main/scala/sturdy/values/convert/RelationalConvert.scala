@@ -38,7 +38,14 @@ given RelationalConvertFloatInt[Addr: Ordering: ClassTag, Type: ApronType]
       integerOps: RelationalBaseIntegerOps[Int, Addr,Type],
       typeOps: IntegerOps[Int, Type],
       convertType: Convert[Float, Int, Type, Type, Overflow && Bits]): ConvertFloatInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
-  RelationalConvertFloatingInteger[Float,Int,Addr,Type]
+  RelationalConvertFloatingInteger[Float,Int,Addr,Type](
+    signedMinFail = Math.nextDown(Int.MinValue.toFloat),
+    signedMaxFail = -Int.MinValue.toFloat,
+    unsignedMinFail = -1.0f,
+    unsignedMaxFail = -Int.MinValue.toDouble * 2.0d,
+    unsignedMinJump = Math.nextDown(0.0f),
+    unsignedMaxJump = -Int.MinValue.toFloat * 2.0f
+  )
 
 given RelationalConvertFloatLong[Addr: Ordering: ClassTag, Type: ApronType]
   (using
@@ -48,7 +55,14 @@ given RelationalConvertFloatLong[Addr: Ordering: ClassTag, Type: ApronType]
    integerOps: RelationalBaseIntegerOps[Long, Addr, Type],
    typeOps: IntegerOps[Long, Type],
    convertType: Convert[Float, Long, Type, Type, Overflow && Bits]): ConvertFloatLong[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
-    RelationalConvertFloatingInteger[Float, Long, Addr, Type]
+    RelationalConvertFloatingInteger[Float, Long, Addr, Type](
+      signedMinFail = Math.nextDown(Long.MinValue.toFloat),
+      signedMaxFail = -Long.MinValue.toFloat,
+      unsignedMinFail = -1.0d,
+      unsignedMaxFail = -Long.MinValue.toFloat * 2.0d,
+      unsignedMinJump = Math.nextDown(0.0d),
+      unsignedMaxJump = -Long.MinValue.toFloat * 2.0d
+    )
 
 
 given RelationalConvertDoubleInt[Addr: Ordering: ClassTag, Type: ApronType]
@@ -59,7 +73,14 @@ given RelationalConvertDoubleInt[Addr: Ordering: ClassTag, Type: ApronType]
    integerOps: RelationalBaseIntegerOps[Int, Addr, Type],
    typeOps: IntegerOps[Int, Type],
    convertType: Convert[Double, Int, Type, Type, Overflow && Bits]): ConvertDoubleInt[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
-    RelationalConvertFloatingInteger[Double, Int, Addr, Type]
+    RelationalConvertFloatingInteger[Double, Int, Addr, Type](
+      signedMinFail = Int.MinValue.toDouble - 1,
+      signedMaxFail = -Int.MinValue.toDouble,
+      unsignedMinFail = -1.0d,
+      unsignedMaxFail = -Int.MinValue.toDouble * 2.0d,
+      unsignedMinJump = Math.nextDown(0.0d),
+      unsignedMaxJump = -Int.MinValue.toDouble * 2.0d
+    )
 
 given RelationalConvertDoubleLong[Addr: Ordering: ClassTag, Type: ApronType]
   (using
@@ -69,17 +90,32 @@ given RelationalConvertDoubleLong[Addr: Ordering: ClassTag, Type: ApronType]
    integerOps: RelationalBaseIntegerOps[Long, Addr, Type],
    typeOps: IntegerOps[Long, Type],
    convertType: Convert[Double, Long, Type, Type, Overflow && Bits]): ConvertDoubleLong[ApronExpr[Addr, Type], ApronExpr[Addr, Type]] =
-    RelationalConvertFloatingInteger[Double, Long, Addr, Type]
+    RelationalConvertFloatingInteger[Double, Long, Addr, Type](
+      signedMinFail = Math.nextDown(Long.MinValue.toDouble),
+      signedMaxFail = -Long.MinValue.toDouble,
+      unsignedMinFail = -1.0d,
+      unsignedMaxFail = -Long.MinValue.toDouble * 2.0d,
+      unsignedMinJump = Math.nextDown(0.0d),
+      unsignedMaxJump = -Long.MinValue.toDouble * 2.0d
+    )
 
 private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: ClassTag, Type: ApronType]
-    (using
-     failure: Failure,
-     effectStack: EffectStack,
-     apronState: ApronState[Addr,Type],
-     integerOps: RelationalBaseIntegerOps[To, Addr,Type],
-     typeOps: IntegerOps[To, Type],
-     convertType: Convert[From, To, Type, Type, Overflow && Bits]
-    ) extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Overflow && Bits]:
+  (
+    signedMinFail: Double,
+    signedMaxFail: Double,
+    unsignedMinFail: Double,
+    unsignedMaxFail: Double,
+    unsignedMinJump: Double,
+    unsignedMaxJump: Double
+  )
+  (using
+   failure: Failure,
+   effectStack: EffectStack,
+   apronState: ApronState[Addr,Type],
+   integerOps: RelationalBaseIntegerOps[To, Addr,Type],
+   typeOps: IntegerOps[To, Type],
+   convertType: Convert[From, To, Type, Type, Overflow && Bits]
+  ) extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Overflow && Bits]:
 
   def apply(from: ApronExpr[Addr,Type], config: Overflow && Bits) =
     val fromType = from._type
@@ -89,19 +125,19 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
     val unsignedMinVal = integerOps.unsignedMinValue(toType).bigInteger
     val unsignedMaxVal = integerOps.unsignedMaxValue(toType).bigInteger
 
-    (from,config) match
-      case (from, conf@(_ && Bits.Raw)) =>
+    config match
+      case (_ && Bits.Raw) | (Overflow.Allow && Bits.Unsigned) =>
         joinWithFailure {
           constant(Interval(Mpq(signedMinVal), Mpq(signedMaxVal)), toType)
         } {
           unsupportedConfiguration(config,this)
         }
 
-      case (from, conf@(Overflow.Fail && Bits.Signed)) =>
+      case (Overflow.Fail && Bits.Signed) =>
         val iv = apronState.getInterval(from)
-        if(iv.sup().cmp(MpqScalar(signedMinVal)) < 0 || MpqScalar(signedMaxVal).cmp(iv.inf()) < 0) {
+        if(iv.sup().cmp(DoubleScalar(signedMinFail)) <= 0 || DoubleScalar(signedMaxFail).cmp(iv.inf()) <= 0) {
           failure.fail(ConversionFailure, s"float $iv out of range")
-        } else if(iv.isLeq(Interval(signedMinVal, signedMaxVal))) {
+        } else if(iv.isLeq(Interval(signedMinFail, signedMaxFail))) {
           apply(from, Overflow.JumpToBounds && Bits.Signed)
         } else {
           joinWithFailure {
@@ -110,20 +146,19 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
             Failure(ConversionFailure, s"float $iv out of range")
           }
         }
-      case (from, conf@(Overflow.JumpToBounds && Bits.Signed)) =>
-        val toType = convertType(from._type, conf)
+      case (Overflow.JumpToBounds && Bits.Signed) | (Overflow.Allow && Bits.Signed) =>
         val iv = apronState.getInterval(from)
-        if(iv.isLeq(Interval(signedMinVal, signedMaxVal))) {
+        if(iv.isLeq(Interval(Math.nextUp(signedMinFail), Math.nextDown(signedMaxFail)))) {
           cast(from, RoundingType.Int, RoundingDir.Zero, toType)
         } else {
           apronState.withTempVars(toType) {
             (res, _) =>
               val resExpr = addr(res, toType)
               apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-              apronState.ifThenElse(le(resExpr, bigIntLit(signedMinVal, toType))) {
+              apronState.ifThenElse(le(resExpr, doubleLit(signedMinFail, toType))) {
                 apronState.assign(res, bigIntLit(signedMinVal, toType))
               } {
-                apronState.ifThenElse(le(bigIntLit(signedMaxVal, toType), resExpr)) {
+                apronState.ifThenElse(le(doubleLit(signedMaxFail, toType), resExpr)) {
                   apronState.assign(res, bigIntLit(signedMaxVal, toType))
                 } {
                 }
@@ -132,11 +167,11 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
           }
         }
 
-      case (from, conf@(Overflow.Fail && Bits.Unsigned)) =>
-        val iv = apronState.getInterval(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-        if (iv.sup().cmp(MpqScalar(unsignedMinVal)) < 0 || MpqScalar(unsignedMaxVal).cmp(iv.inf()) < 0) {
+      case (Overflow.Fail && Bits.Unsigned) =>
+        val iv = apronState.getInterval(from)
+        if (iv.sup().cmp(DoubleScalar(unsignedMinFail)) <= 0 || DoubleScalar(unsignedMaxFail).cmp(iv.inf()) <= 0) {
           failure.fail(ConversionFailure, s"float $iv out of range")
-        } else if (iv.isLeq(Interval(unsignedMinVal, unsignedMaxVal))) {
+        } else if (iv.isLeq(Interval(unsignedMinFail, unsignedMaxFail))) {
           apply(from, (Overflow.JumpToBounds && Bits.Unsigned))
         } else {
           joinWithFailure {
@@ -147,17 +182,17 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
         }
 
 
-      case (from, conf@(Overflow.JumpToBounds && Bits.Unsigned)) =>
-        val iv = apronState.getInterval(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-        if(MpqScalar(unsignedMinVal).cmp(iv.inf()) <= 0 && iv.sup().cmp(MpqScalar(unsignedMaxVal)) < 0)
+      case (Overflow.JumpToBounds && Bits.Unsigned) =>
+        val iv = apronState.getInterval(from)
+        if(iv.isLeq(Interval(Math.nextUp(unsignedMinJump), Math.nextDown(unsignedMaxJump))))
           integerOps.interpretUnsignedAsSigned(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
         else
           apronState.withTempVars(toType, cast(from, RoundingType.Int, RoundingDir.Zero, toType)) {
             case (res, List(x)) =>
-              apronState.ifThenElse(le(x, bigIntLit(unsignedMinVal, toType))) {
+              apronState.ifThenElse(le(x, doubleLit(unsignedMinJump, toType))) {
                 apronState.assign(res, intLit(0, toType))
               } {
-                apronState.ifThenElse(le(bigIntLit(unsignedMaxVal, toType), x)) {
+                apronState.ifThenElse(le(doubleLit(unsignedMaxJump, toType), x)) {
                   apronState.assign(res, intLit(-1, toType))
                 } {
                   apronState.assign(res, integerOps.foldInteger(x))
@@ -170,9 +205,6 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
               }
               addr(res, toType)
           }
-
-      case (_, conf@(Overflow.Allow && _)) =>
-        unsupportedConfiguration(config,this)
 
 given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
