@@ -30,7 +30,9 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   var otherMapping: Option[Map[Context,RecencyRegion]] = None
   var fresh: mutable.Map[Context,Int] = mutable.Map()
 
-  def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] =
+  inline def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] = physicalAddresses(this.mapping, ctx, n)
+
+  def physicalAddresses(mapping: Map[Context,RecencyRegion], ctx: Context, n: Int): PowPhysicalAddress[Context] =
     recency(mapping, ctx, n) match
       case PowRecency.RecentOld =>
         PowersetAddr(PhysicalAddress(ctx, Recency.Recent), PhysicalAddress(ctx, Recency.Old))
@@ -39,7 +41,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
       case PowRecency.Old =>
         PowersetAddr(PhysicalAddress(ctx, Recency.Old))
 
-  def recency(ctx: Context, n: Int): PowRecency =
+  inline def recency(ctx: Context, n: Int): PowRecency =
     recency(mapping, ctx, n)
 
   def recency(mapping: Map[Context, RecencyRegion], ctx: Context, n: Int): PowRecency =
@@ -54,7 +56,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         else throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
       case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
-  def region(ctx: Context): Option[RecencyRegion] =
+  inline def region(ctx: Context): Option[RecencyRegion] =
     region(mapping, ctx)
 
   def region(mapping: Map[Context, RecencyRegion], ctx: Context): Option[RecencyRegion] =
@@ -284,8 +286,12 @@ type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], Physic
  */
 class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Context]]) extends AbstractAddr[VirtualAddress[Context]]:
   def virtualAddresses: Iterable[VirtualAddress[Context]] = addrs.values
-
   def physicalAddresses: Set[PhysicalAddress[Context]] = virtualAddresses.flatMap(_.physical.addrs).toSet
+  def physicalAddresses(mapping: Map[Context,RecencyRegion]): Map[Context,PowRecency] =
+    addressTranslation match
+      case Some(addrTrans) =>
+        addrs.keys.groupMapReduce(_._1)((ctx, idx) => addrTrans.recency(mapping, ctx, idx))(Join[PowRecency](_,_).get)
+      case None => Map.empty
 
   override def isEmpty: Boolean = addrs.isEmpty
 
@@ -308,19 +314,23 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
 
   override def equals(obj: Any): Boolean =
     obj match
-      case other: PowVirtualAddress[?] =>
+      case other: PowVirtualAddress[Context] =>
         addressTranslation match
           case Some(addrMap) =>
             val mapping = addrMap.mapping
             val otherMapping = addrMap.otherMapping.getOrElse(mapping)
-            val phys1 = addrs.keys.map((ctx, idx) => (ctx, addrMap.recency(mapping, ctx, idx)))
-            val phys2 = other.addrs.keys.map((ctx, idx) => (ctx, addrMap.recency(otherMapping, ctx.asInstanceOf, idx)))
+            val phys1 = this.physicalAddresses(mapping)
+            val phys2 = other.physicalAddresses(otherMapping)
             phys1.equals(phys2)
           case None => other.isEmpty
       case _ => false
 
   override def hashCode(): Int =
-    addrs.values.map( _.recency ).hashCode()
+    addressTranslation match
+      case Some(addrTrans) =>
+        physicalAddresses(addrTrans.mapping).hashCode()
+      case None =>
+        Map.empty.hashCode()
 
 object PowVirtualAddress:
   def empty[Context]: PowVirtualAddress[Context] = new PowVirtualAddress[Context](Map.empty)
@@ -334,8 +344,17 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
     combinePowVirtualAddress(v1,v2)
 
 def combinePowVirtualAddress[Context](v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
-  val joined = new PowVirtualAddress(v1.addrs ++ v2.addrs)
-  MaybeChanged(joined, ! joined.physicalAddresses.subsetOf(v1.physicalAddresses))
+  v1.addressTranslation match
+    case Some(addrTrans) =>
+      val joined = new PowVirtualAddress(v1.addrs ++ v2.addrs)
+      val phys1 = v1.physicalAddresses(addrTrans.mapping)
+      val phys2 = v2.physicalAddresses(addrTrans.otherMapping.getOrElse(addrTrans.mapping))
+      MaybeChanged(joined, Join(phys1,phys2).hasChanged)
+    case None =>
+      if(v2.isEmpty)
+        Unchanged(v1)
+      else
+        Changed(v2)
 
 given PowVirtAddrOrdering[Context]: PartialOrder[PowVirtualAddress[Context]] with
   override def lteq(x: PowVirtualAddress[Context], y: PowVirtualAddress[Context]): Boolean =

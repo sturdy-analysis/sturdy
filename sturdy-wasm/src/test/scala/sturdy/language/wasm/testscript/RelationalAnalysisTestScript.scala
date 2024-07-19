@@ -122,7 +122,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
   def run(commands: Seq[Command]): Unit =
     commands.map{ command =>
       eval(command)
-      aInterp.recencyStore.garabageCollect()
+//      aInterp.recencyStore.garabageCollect()
     }
 
   def getCModule(module: Option[String]): ModuleInstance = module match

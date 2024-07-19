@@ -162,9 +162,12 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
       val snapshotOtherMapping = addrTrans.otherMapping
       val snapshotStore = recencyStore.store.getState
       try {
-        val j1 = combineRecencyStore(recencyStore.getState, v2.recencyStoreState.asInstanceOf)
-        val j2 = combineState(v1.effectState, v2.effectState)
-        MaybeChanged(RecencyClosureState(recencyStore, j1.get, j2.get), j1.hasChanged || j2.hasChanged)
+        addrTrans.mapping = v1.recencyStoreState.addrTrans
+        addrTrans.otherMapping = Some(v2.recencyStoreState.addrTrans)
+        recencyStore.store.setState(v1.recencyStoreState.store.asInstanceOf)
+        val j1 = combineState(v1.effectState, v2.effectState)
+        val j2 = combineRecencyStore(recencyStore.getState, v2.recencyStoreState.asInstanceOf)
+        MaybeChanged(RecencyClosureState(recencyStore, j2.get, j1.get), j1.hasChanged || j2.hasChanged)
       } finally {
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping

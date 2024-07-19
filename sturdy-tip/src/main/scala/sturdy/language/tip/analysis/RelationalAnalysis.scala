@@ -1,11 +1,9 @@
 package sturdy.language.tip.analysis
 
-import apron.Manager
-import apron.Tcons1
-import apron.Texpr1CstNode
-import apron.Interval
+import apron.*
 import sturdy.Executor
 import sturdy.apron.{*, given}
+import sturdy.control.ControlObservable
 import sturdy.data.{*, given}
 import sturdy.effect.{Effect, EffectList, EffectStack, TrySturdy, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -21,7 +19,7 @@ import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
-import sturdy.language.tip.abstractions.{CfgConfig, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
+import sturdy.language.tip.abstractions.{CfgConfig, Control, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
 import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelType, RelationalVar}
 import sturdy.util.Lazy
 import sturdy.util.lazily
@@ -40,7 +38,7 @@ import scala.collection.immutable.BitSet
 
 
 object RelationalAnalysis extends Interpreter,
-  Functions.Powerset, Records.PreciseFieldsOrTop, ControlFlow, Fix:
+  Functions.Powerset, Records.PreciseFieldsOrTop, Control, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -108,8 +106,7 @@ object RelationalAnalysis extends Interpreter,
     val addrs = self.store.virtualAddresses
     AbstractReference.NullAddr(addrs, false)
 
-  class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance:
-
+  class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
     implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(_ => RelationalVar.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
     implicit val localRelationaAlloc: AAllocatorFromContext[(String, Any, Option[Any]), RelationalVar] = AAllocatorFromContext((v,_,_) => RelationalVar.Local(v))
@@ -229,15 +226,16 @@ object RelationalAnalysis extends Interpreter,
       super.copyState(from)
     }
 
-    val cfg = controlFlow[CallString](CfgConfig.AllNodes(sensitive = false))
-
     val domLogger: DomLogger[FixIn] = new DomLogger
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
 
     final override val fixpoint =
-      callSiteSensitive(callSites,
-        fix.log(fix.manyLogger(List(domLogger, cfg.logger)),
-          fix.dispatch(isFunOrWhile, Seq(
-            fix.iter.topmost(stackConfig), fix.iter.topmost(stackConfig))
+      fix.log(controlEventLogger(this),
+        callSiteSensitive(callSites,
+          fix.log(fix.manyLogger(List(domLogger)),
+            fix.dispatch(isFunOrWhile, Seq(
+              fix.iter.topmost(observedStackConfig), fix.iter.topmost(observedStackConfig))
+            )
           )
         )
       ).fixpoint
