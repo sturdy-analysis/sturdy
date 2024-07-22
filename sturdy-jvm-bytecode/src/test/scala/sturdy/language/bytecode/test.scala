@@ -7,6 +7,7 @@ import org.opalj.io.process
 import sturdy.fix
 import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.ConcreteInterpreter
+import sturdy.language.bytecode.analyses.ConstantAnalysis
 import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
 import sturdy.values.integer.IntegerOps
 
@@ -56,6 +57,8 @@ object test extends App{
   val sourceFile = projectPath
 
   val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+
+  //val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath)
 
   val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   

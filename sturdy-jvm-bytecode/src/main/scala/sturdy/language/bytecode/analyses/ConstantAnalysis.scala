@@ -66,7 +66,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
     override val objAlloc = new AAllocationFromContext(site => ObjAddr(site))
-    override val objFieldAlloc = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
+    override val objFieldAlloc: Allocation[FieldAddr, FieldInitSite] = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
     override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
     override val objFieldStore = new TopStore()
@@ -105,18 +105,36 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
         else
           Topped.Actual(false)
 
+    given intSizeOps: SizeOps[I32, Boolean] with
+      override def is32Bit(v: I32): Boolean = true
 
-    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = ???
+    given floatSizeOps: SizeOps[F32, Boolean] with
+      override def is32Bit(v: F32): Boolean = true
+
+    given longSizeOps: SizeOps[I64, Boolean] with
+      override def is32Bit(v: I64): Boolean = false
+
+    given doubleSizeOps: SizeOps[F64, Boolean] with
+      override def is32Bit(v: F64): Boolean = false
+
+    given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
+      override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
+
+    given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType, Value], Boolean] with
+      override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true
+
+
+    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
 
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
-//      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
-//        using new constObjOps
-//      )
-      ???
+      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
+        using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
+      )
+      //???
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
-//      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, ArrayRep, I32](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
-//        using new constArrayOps
-//      )
-      ???
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, ArrayRep, I32](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
+        using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
+      )
+      //???
 
 

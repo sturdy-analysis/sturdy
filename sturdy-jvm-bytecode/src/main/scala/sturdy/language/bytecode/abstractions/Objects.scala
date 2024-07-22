@@ -15,7 +15,7 @@ import sturdy.effect.store.{ManageableAddr, Store}
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
 import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.generic.InstructionSite
+import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, InstructionSite}
 import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
@@ -25,11 +25,11 @@ import sturdy.values.Topped.Actual
 
 import java.net.URL
 
-trait ConstantObjects extends Interpreter:
+trait ConstantObjects extends Interpreter, Numbers:
 
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
-  type FieldName = String
+  type FieldName = (ObjectType, String)
   case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
   type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
   final def topObj: ObjRep = Topped.Top
@@ -47,16 +47,16 @@ trait ConstantObjects extends Interpreter:
   given combineNull[W <: Widening]: Combine[Null, W] with
     override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
 
-  given constObjOps(using alloc: Allocation[FieldAddr, InstructionSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
-    override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ObjRep =
+  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, ObjRep, FieldInitSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+    override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): ObjRep =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
       }.toVector.toMap
-      Topped.Actual(Object(ObjAddr(oid), cfs, fieldAddrs))
+      Topped.Actual(Object(oid, cfs, fieldAddrs))
 
-    override def getField(obj: ObjRep, name: String): JOption[MayJoin.WithJoin, Value] = 
+    override def getField(obj: ObjRep, name: FieldName): JOption[MayJoin.WithJoin, Value] =
       if(obj.isActual){
         if (!obj.get.fields.contains(name))
           JOptionA.none
@@ -67,7 +67,7 @@ trait ConstantObjects extends Interpreter:
         ???
       }
 
-    override def setField(obj: Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], name: String, v: Value): JOption[MayJoin.WithJoin, Unit] = 
+    override def setField(obj: ObjRep, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
       if(obj.isActual){
         if (!obj.get.fields.contains(name))
           JOptionA.none
@@ -80,7 +80,7 @@ trait ConstantObjects extends Interpreter:
         ???
       }
 
-    override def invokeFunctionCorrect(obj: Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (Topped[Object[ObjAddr, ClassFile, FieldAddr, String]], Method, Seq[Value]) => Value): Value =
+    override def invokeFunctionCorrect(obj: ObjRep, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ObjRep, Method, Seq[Value]) => Value): Value =
       if(obj.isActual){
         val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.get.cls, mthName, sig, project)
         invoke(obj, mth, args)
@@ -91,33 +91,33 @@ trait ConstantObjects extends Interpreter:
 
     override def makeNull(): Null = null
 
-  given constArrayOps(using alloc: Allocation[ArrayElemAddr, InstructionSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[InstructionSite, Int, Value, ArrayRep, ArrayType, InstructionSite, WithJoin] with
-    override def makeArray(aid: InstructionSite, vals: Seq[(Value, InstructionSite)], arrayType: AType, arraySize: Value): ArrayRep =
+  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, ArrayRep, ArrayType, ArrayElemInitSite, WithJoin] with
+    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): ArrayRep =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
         addr
       }.toVector
-      Topped.Actual(Array(ArrayAddr(aid), valAddrs, arrayType, arraySize))
+      Topped.Actual(Array(aid, valAddrs, arrayType, arraySize))
   
-    override def getVal(array: ArrayRep, idx: Int): JOption[WithJoin, Value] =
+    override def getVal(array: ArrayRep, idx: I32): JOption[WithJoin, Value] =
       if(array.isActual){
-        if (idx >= array.get.vals.size)
+        if (idx.get >= array.get.vals.size)
           JOptionA.none
         else
-          store.read(array.get.vals(idx))
+          store.read(array.get.vals(idx.get))
       }
       else{
         ???
       }
       
   
-    override def setVal(array: ArrayRep, idx: Int, v: Value): JOption[WithJoin, Unit] =
+    override def setVal(array: ArrayRep, idx: I32, v: Value): JOption[WithJoin, Unit] =
       if(array.isActual){
-        if (idx >= array.get.vals.size)
+        if (idx.get >= array.get.vals.size)
           JOptionA.none
         else {
-          store.write(array.get.vals(idx), v)
+          store.write(array.get.vals(idx.get), v)
           JOptionA.some(())
         }
       }
@@ -134,18 +134,18 @@ trait ConstantObjects extends Interpreter:
         ???
       }
   
-    override def initArray(size: Int): Seq[Any] =
-      Seq.fill(size) {}
+    override def initArray(size: I32): Seq[Any] =
+      Seq.fill(size.get) {}
   
-    override def arraycopy(src: ArrayRep, srcPos: Int, dest: ArrayRep, destPos: Int, length: Int): JOption[WithJoin, Unit] =
+    override def arraycopy(src: ArrayRep, srcPos: I32, dest: ArrayRep, destPos: I32, length: I32): JOption[WithJoin, Unit] =
       if(src.isActual && dest.isActual){
-        for (i <- 0 until length) {
-          if (srcPos + i >= src.get.vals.size || destPos + i >= dest.get.vals.size) {
+        for (i <- 0 until length.get) {
+          if (srcPos.get + i >= src.get.vals.size || destPos.get + i >= dest.get.vals.size) {
             return JOptionA.none
           }
           else {
-            val toCopy = store.read(src.get.vals(srcPos + i)).get
-            store.write(dest.get.vals(destPos + i), toCopy)
+            val toCopy = store.read(src.get.vals(srcPos.get + i)).get
+            store.write(dest.get.vals(destPos.get + i), toCopy)
           }
         }
         JOptionA.some(())
@@ -153,10 +153,9 @@ trait ConstantObjects extends Interpreter:
       else{
         ???
       }
-      
-  
+
     override def getArray(array: ArrayRep): Seq[JOption[WithJoin, Value]] =
-      val arrayVals = array.get.vals.map(addr => getVal(array, array.get.vals.indexOf(addr)))
+      val arrayVals = array.get.vals.map(addr => getVal(array, Topped.Actual(array.get.vals.indexOf(addr))))
       arrayVals
 
 trait TypeObjects extends Interpreter:
