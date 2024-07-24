@@ -105,7 +105,14 @@ class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[
       implicitly
     )
   )
-)
+):
+  test(s"convert(0.0,Overflow.Fail && Bits.Unsigned) = 0") {
+    implicit val (convertOps, soundness, afailure) = _makeConvert
+    val actual = afailure.fallible(convertOps(RelationalFloatIsInterval.constant(0.0f), Overflow.Fail && Bits.Unsigned))
+    val expected = cfailure.fallible(ConcreteConvertFloatInt(0.0f, Overflow.Fail && Bits.Unsigned))
+    assertResult(IsSound.Sound, s"$actual does not overapproximate $expected")(soundness.isSound(expected, actual))
+  }
+
 
 class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTest[Double, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
   specials = specialFloatingIntegerNumbers[Double,Long](_.toDouble),

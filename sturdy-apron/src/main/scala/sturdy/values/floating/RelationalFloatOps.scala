@@ -12,6 +12,17 @@ import ApronCons.*
 import apron.{DoubleScalar, Interval}
 import sturdy.{IsSound, Soundness}
 
+object FloatingLit:
+  def apply[L: Numeric: Bounded, Addr, Type](f: L, tpe: Type): ApronExpr[Addr,Type] =
+    val d = Numeric[L].toDouble(f)
+    if (d.isPosInfinity)
+      constant(Interval(DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue)), DoubleScalar(Double.PositiveInfinity)), tpe)
+    else if (d.isNegInfinity)
+      constant(Interval(DoubleScalar(Double.NegativeInfinity), DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue))), tpe)
+    else
+      ApronExpr.doubleLit(Numeric[L].toDouble(f), tpe)
+
+
 given RelationalFloatOps
   [
     L: Numeric: Bounded,
@@ -23,14 +34,7 @@ given RelationalFloatOps
    f: Failure,
    typeFloatOps: FloatOps[L,Type]
   ): FloatOps[L, ApronExpr[Addr,Type]] with
-  override def floatingLit(f: L): ApronExpr[Addr, Type] =
-    val d = Numeric[L].toDouble(f)
-    if(d.isPosInfinity)
-      constant(Interval(DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue)), DoubleScalar(Double.PositiveInfinity)), typeFloatOps.floatingLit(f))
-    else if(d.isNegInfinity)
-      constant(Interval(DoubleScalar(Double.NegativeInfinity), DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue))), typeFloatOps.floatingLit(f))
-    else
-      ApronExpr.doubleLit(Numeric[L].toDouble(f), typeFloatOps.floatingLit(f))
+  override def floatingLit(f: L): ApronExpr[Addr, Type] = FloatingLit(f, typeFloatOps.floatingLit(f))
 
   override def randomFloat(): ApronExpr[Addr, Type] =
     ApronExpr.doubleInterval(
