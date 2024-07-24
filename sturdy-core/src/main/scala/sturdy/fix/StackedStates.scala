@@ -113,22 +113,31 @@ final class StackedStates[Dom, Codom](val state: State)
    * If the frame recurred, updates the cache to store the result of this frame.
    */
   def pop(dom: Dom, in: state.In, result: TrySturdy[Codom], out: state.Out): PopResult =
-    val stateFrame = (dom, in)
-    inStateWidening.pop(dom, in)
-    val newStackHeight = stackHeight - 1
-    val updatedResult = if (corecurrentCalls.remove(newStackHeight)) {
-      storeCorecurrentOutput(stateFrame, result, out)
-    } else {
-      if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
-      PopResult.Stable
+    try {
+      val stateFrame = (dom, in)
+      inStateWidening.pop(dom, in)
+      val newStackHeight = stackHeight - 1
+      val updatedResult = if (corecurrentCalls.remove(newStackHeight)) {
+        storeCorecurrentOutput(stateFrame, result, out)
+      } else {
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
+        PopResult.Stable
+      }
+      val previousInfo = stack.remove(stateFrame)
+      if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
+        throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
+      stackHeight = newStackHeight
+      updatedResult
+    } catch {
+      case th: Throwable =>
+        println(th.getMessage)
+        th.printStackTrace()
+        throw th
+    } finally {
+      fire(FixpointControlEvent.EndFixpoint())
     }
-    val previousInfo = stack.remove(stateFrame)
-    if (Fixpoint.DEBUG_INVARIANTS && previousInfo == null)
-      throw new IllegalStateException(s"Pop must delete a previously pushed frame but did not $stateFrame")
-    stackHeight = newStackHeight
-    fire(FixpointControlEvent.EndFixpoint())
-    updatedResult
+
 
 
   inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match

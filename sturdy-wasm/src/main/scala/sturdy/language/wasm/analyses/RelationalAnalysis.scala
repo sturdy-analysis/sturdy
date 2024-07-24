@@ -139,6 +139,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def jvFunV: WithJoin[FunV] = implicitly
     //    override def widenState: Widen[State] = implicitly
 
+    val addressTranslation: AddressTranslation[RelAddr] = AddressTranslation.empty
     var exprConverter: ApronExprConverter[RelAddr, Type, Value] = null
     var apronState: ApronRecencyState[RelAddr, Type, Value] = null
     given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
@@ -151,20 +152,27 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialTypeEnv = Map()
     ):
-      override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
+      override def getRelationalVal(mapping: Map[RelAddr, RecencyRegion], v: Value): Option[ApronExpr[PhysAddr, Type]] =
         v match
-          case Value.Int32(i32: I32) => Some(exprConverter.virtToPhys(i32.asApronExprLazy))
-          case Value.Int64(expr) => Some(exprConverter.virtToPhys(expr))
-          case Value.Float32(expr) => Some(exprConverter.virtToPhys(expr))
-          case Value.Float64(expr) => Some(exprConverter.virtToPhys(expr))
+          case Value.Int32(i32: I32) => Some(exprConverter.virtToPhys(mapping, i32.asApronExprLazy))
+          case Value.Int64(expr) => Some(exprConverter.virtToPhys(mapping, expr))
+          case Value.Float32(expr) => Some(exprConverter.virtToPhys(mapping, expr))
+          case Value.Float64(expr) => Some(exprConverter.virtToPhys(mapping, expr))
           case Value.TopValue => None
 
-      override def makeRelationalVal(expr: ApronExpr[PhysAddr, Type]): Value =
-        callFrame.makeRelationalVal(exprConverter.physToVirt(expr))
+      inline override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
+        getRelationalVal(addressTranslation.mapping, v)
+
+      inline override def makeRelationalVal(mapping: Map[RelAddr, RecencyRegion], expr: ApronExpr[PhysAddr, Type]): Value =
+        callFrame.makeRelationalVal(exprConverter.physToVirt(mapping, expr))
+
+      inline override def makeRelationalVal(expr: ApronExpr[PhysAddr, Type]): Value =
+        makeRelationalVal(addressTranslation.mapping, expr)
+
     given domLogger: DomLogger[FixIn] = new DomLogger
 
     val relationalStore: RelationalStore[RelAddr, Type, PowPhysAddr, Value] = new WasmRelationalStore
-    val recencyStore: RecencyStore[RelAddr, PowVirtAddr, Value] = new RecencyStore(relationalStore)
+    val recencyStore: RecencyStore[RelAddr, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[RelAddr, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
     given apState: ApronState[VirtAddr, Type] = if(apronState != null) apronState else throw new IllegalArgumentException("this.apronState is null")
@@ -203,10 +211,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     def garbageCollect(): Unit =
       val alive = PowVirtualAddress(this.addressIterator)
       val dead = recencyStore.addressTranslation.deadPhysicalAddresses(alive)
-      val dimBefore = relationalStore.abstract1.getEnvironment.getSize
+      val stateBefore = recencyStore.getState
       recencyStore.collectGarbage(alive)
-      val dimAfter = relationalStore.abstract1.getEnvironment.getSize
-      println(s"Alive: $alive\nDead: $dead\nDim Before: $dimBefore\nDim After: $dimAfter")
+      val stateAfter = recencyStore.getState
+      println(s"Alive: $alive\nDead: $dead\nState Before: $stateBefore\nState After: $stateAfter")
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)

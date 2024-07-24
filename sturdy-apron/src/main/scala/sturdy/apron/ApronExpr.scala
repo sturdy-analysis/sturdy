@@ -128,13 +128,19 @@ object ApronExpr:
     unary(UnOp.Sqrt, e1, floatOps.sqrt(e1._type))
 
   inline def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
-    binary(BinOp.Add, e1, e2, intOps.add(e1._type, e2._type))
+    intAdd(e1, e2, intOps.add(e1._type, e2._type))
+
+  inline def intAdd[L,Addr,Type: ApronType](e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type], tpe: Type): ApronExpr[Addr,Type] =
+    binary(BinOp.Add, e1, e2, tpe)
 
   inline def floatAdd[L,Addr,Type:ApronType](using floatOps: FloatOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, floatOps.add(e1._type, e2._type))
 
   inline def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Sub, e1, e2, intOps.sub(e1._type, e2._type))
+    intSub(e1, e2, intOps.sub(e1._type, e2._type))
+
+  inline def intSub[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    binary(BinOp.Sub, e1, e2, tpe)
 
   inline def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Sub, e1, e2, floatOps.sub(e1._type, e2._type))
@@ -272,7 +278,8 @@ object ApronCons:
 
   def from[Addr,Type](tpe: Type)(boolean: Topped[Boolean]): ApronCons[Addr,Type] =
     boolean match
-      case Topped.Actual(true) | Topped.Top => ApronCons.top(tpe)
+      case Topped.Top           => ApronCons.top(tpe)
+      case Topped.Actual(true)  => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(0, tpe))
       case Topped.Actual(false) => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(1, tpe))
 
 enum CompareOp:

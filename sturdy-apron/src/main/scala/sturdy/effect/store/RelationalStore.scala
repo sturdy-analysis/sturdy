@@ -30,8 +30,11 @@ trait RelationalStore
    initialTypeEnv: Map[PhysicalAddress[Context], Type])
   extends Store[PowAddr, Val, WithJoin]:
 
+  def getRelationalVal(mapping: Map[Context, RecencyRegion], v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
   def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
+  def makeRelationalVal(mapping: Map[Context, RecencyRegion], expr: ApronExpr[PhysicalAddress[Context], Type]): Val
   def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Context], Type]): Val
+
 
   type TypeEnv = Map[PhysicalAddress[Context], Type]
 
@@ -63,35 +66,41 @@ trait RelationalStore
         case (_,_) => Join(v1,v2).get
     }
 
-  override def write(powAddr: PowAddr, v : Val): Unit =
+  inline def write(mapping: Map[Context, RecencyRegion], powAddr: PowAddr, v : Val): Unit =
+    getRelationalVal(mapping, v) match
+      case Some(exp) => write(powAddr, exp)
+      case None => nonRelationalStore.write(powAddr, v)
+
+  override def write(powAddr: PowAddr, v: Val): Unit =
     getRelationalVal(v) match
-      case Some(exp) =>
-        if(powAddr.isEmpty) {
-          // nothing
-        } else if (powAddr.isStrong) {
-          for(toAddr <- powAddr.iterator) {
-            addAddrToEnvs(toAddr, exp)
-            val to = ApronVar(toAddr)
-            val env = _abstract1.getEnvironment
-            assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
-            val aexp: apron.Texpr1Intern = exp.toIntern(_abstract1.getEnvironment)
-            _abstract1.assign(manager, to, aexp, null)
-          }
-        } else /* if(powAddr.isWeak) */ {
-          // weak update implemented as join
-          for (toAddr <- powAddr.iterator) {
-            addAddrToEnvs(toAddr, exp)
-            val to = ApronVar(toAddr)
-            if (!_abstract1.getEnvironment.hasVar(to)) {
-              _abstract1.assign(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
-            } else {
-              val assigned = _abstract1.assignCopy(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
-              _abstract1.join(manager, assigned)
-            }
-          }
+      case Some(exp) => write(powAddr, exp)
+      case None => nonRelationalStore.write(powAddr, v)
+
+  private def write(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
+    if (powAddr.isEmpty) {
+      // nothing
+    } else if (powAddr.isStrong) {
+      for (toAddr <- powAddr.iterator) {
+        addAddrToEnvs(toAddr, physExpr)
+        val to = ApronVar(toAddr)
+        val env = _abstract1.getEnvironment
+        assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
+        val aexp: apron.Texpr1Intern = physExpr.toIntern(_abstract1.getEnvironment)
+        _abstract1.assign(manager, to, aexp, null)
+      }
+    } else /* if(powAddr.isWeak) */ {
+      // weak update implemented as join
+      for (toAddr <- powAddr.iterator) {
+        addAddrToEnvs(toAddr, physExpr)
+        val to = ApronVar(toAddr)
+        if (!_abstract1.getEnvironment.hasVar(to)) {
+          _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+        } else {
+          val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+          _abstract1.join(manager, assigned)
         }
-      case None =>
-        nonRelationalStore.write(powAddr, v)
+      }
+    }
 
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
     nonRelationalStore.move(fromPow, toPow)
@@ -154,17 +163,16 @@ trait RelationalStore
   override def free(powAddr: PowAddr): Unit =
     nonRelationalStore.free(powAddr)
 
-//    if (powAddr.isStrong) {
-    for(addr <- powAddr.iterator) {
-      val dest = ApronVar(addr)
-      val env = _abstract1.getEnvironment()
-      if (env.hasVar(dest)) {
+    if (powAddr.isStrong)
+      for(addr <- powAddr.iterator) {
+        val dest = ApronVar(addr)
+        val env = _abstract1.getEnvironment()
         typeEnv -= dest.addr
-        _abstract1.forget(manager, dest, false)
-        _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
+        if (env.hasVar(dest)) {
+//          _abstract1.forget(manager, dest, false)
+          _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
+        }
       }
-    }
-//    }
 
   private final class BottomFailure extends SturdyFailure
 

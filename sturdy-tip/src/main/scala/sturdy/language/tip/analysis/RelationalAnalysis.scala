@@ -119,6 +119,7 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
+    val addressTranslation: AddressTranslation[RelationalVar] = AddressTranslation.empty
     var exprConverter: ApronExprConverter[RelationalVar, RelType, Value] = null
     var apronState: ApronRecencyState[RelationalVar, RelType, Value] = null
     given lazyApronState: Lazy[ApronState[VirtualAddress[RelationalVar], RelType]] = lazily(apronState)
@@ -127,15 +128,21 @@ object RelationalAnalysis extends Interpreter,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialTypeEnv = Map()
     ):
-      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
+      override def getRelationalVal(mapping: Map[RelationalVar, RecencyRegion], v: Value): Option[ApronExprPhysAddr] =
         v match
           case Value.IntValue(iv) => Some(exprConverter.virtToPhys(iv))
           case _ => None
 
-      override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
-        Value.IntValue(exprConverter.physToVirt(expr))
+      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
+        getRelationalVal(addressTranslation.mapping, v)
 
-    val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore)
+      override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
+        makeRelationalVal(addressTranslation.mapping, expr)
+
+      override def makeRelationalVal(mapping: Map[RelationalVar, RecencyRegion], expr: ApronExprPhysAddr): Value =
+        Value.IntValue(exprConverter.physToVirt(mapping, expr))
+
+    val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[RelationalVar], RelType] = apronState

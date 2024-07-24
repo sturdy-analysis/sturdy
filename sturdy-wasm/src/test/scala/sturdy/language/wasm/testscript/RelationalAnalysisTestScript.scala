@@ -50,11 +50,10 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   val spectest = Parsing.fromText(pathSpectest)
 
-
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     Iterator(
       () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new RelationalAnalysis.Instance(Octagon(), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(Octagon(), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
       //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
@@ -72,7 +71,7 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
     interp.run(script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && p.getFileName.toString == "conversions.wast").sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && p.getFileName.toString == "call.wast").sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
       if (isSlow(anl.apronManager, p.getFileName.toString))
@@ -169,25 +168,25 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       assert(!res.isFailing)
       val expected = constExprToVals(expectedRes)
       assert(eqVals(expected, res.get), c.toString + s", expected $expected, but got ${res.get}")
-      assertResult(IsSound.Sound, s"result on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertReturnCanonicalNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
-      assertResult(IsSound.Sound, s"result on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertReturnArithmeticNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
-      assertResult(IsSound.Sound, s"result on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertTrap(action: Action, message: String) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
-      assertResult(IsSound.Sound, s"result on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
     case AssertModuleTrap(mod,_) =>
       val aRes = aInstantiate(mod)

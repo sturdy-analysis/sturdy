@@ -7,7 +7,7 @@ import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
-import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
@@ -42,7 +42,7 @@ trait RelationalCallFrame
 
   def makeRelationalVal(expr: ApronExprVirtAddr): Val
 
-  val addressCallFrame: JoinableDecidableCallFrame[Data, Var, VirtAddr, CallSite] =
+  val addressCallFrame: JoinableDecidableCallFrame[Data, Var, PowVirtAddr, CallSite] =
     JoinableDecidableCallFrame(
       initData,
       Iterable.empty
@@ -56,7 +56,7 @@ trait RelationalCallFrame
     addressCallFrame.setVars(
       newVars.map((variable, _) =>
         val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data, addressCallFrame.callSite))
-        (variable, Some(apronState.recencyStore.alloc(ctx)))
+        (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
       )
     )
 
@@ -76,7 +76,7 @@ trait RelationalCallFrame
 
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
     addressCallFrame.getLocal(idx).map(virt =>
-      apronState.recencyStore.write(PowVirtualAddress(virt), v)
+      apronState.recencyStore.write(virt, v)
     )
 
   override def setLocalByName(x: Var, v: Val): JOptionC[Unit] =
@@ -90,17 +90,18 @@ trait RelationalCallFrame
   override def getLocalByName(x: Var): JOptionC[Val] =
     addressCallFrame.getLocalByName(x).flatMap(getByVirt).asInstanceOf
 
-  private def getByVirt(virt: VirtAddr): JOptionC[Val] =
-    val v1 = for {
-      tpe <- apronState.relationalStore.getType(virt.physical)
-    } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
-    val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
-    Join(v1, v2).get.toJOptionC
+  private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
+    virts.reduce {
+      virt =>
+        val v1 = apronState.relationalStore.getType(virt.physical).map(tpe => makeRelationalVal(ApronExpr.addr(virt, tpe)))
+        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
+        Join(v1, v2).get
+    }.toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
       val ctx = localVariableAllocator.alloc((variable, d, Some(site)))
-      (variable, Some(apronState.recencyStore.alloc(ctx)))
+      (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
     ).toMap
     addressCallFrame.withNew(d, virtAddrs, site) {
       for ((variable, exprOption) <- vars; expr <- exprOption)
@@ -121,6 +122,7 @@ trait RelationalCallFrame
   override def widen: Widen[State] = implicitly[Widen[State]]
   override def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
+//      Unchanged(call)
       if(stack.contains(call))
         Unchanged(call)
       else

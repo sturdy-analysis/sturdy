@@ -16,9 +16,7 @@ def withApronState[T](using apronManager: Manager)(f: (Manager, CollectedFailure
   given Finite[FailureKind] with {}
   given failure: CollectedFailures[FailureKind] = new CollectedFailures[FailureKind]()
   var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-  given effectStack: EffectStack = new EffectStack(EffectList(
-    RecencyClosure(apronState.recencyStore), failure
-  ))
+  given effectStack: EffectStack = new EffectStack(RecencyClosure(apronState.recencyStore, failure))
   apronState = RecencyRelationalStore[Ctx, Type]
   given ApronState[VirtAddr, Type] = apronState
   f

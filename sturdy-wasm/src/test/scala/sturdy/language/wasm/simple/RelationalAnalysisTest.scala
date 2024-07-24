@@ -100,8 +100,7 @@ trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatS
   testFailingFunction(simple, "division", List(i32(ApronExpr.intLit(1, I32Type)), topi32), IntegerDivisionByZero)
   testFunction(simple, "effects", List(topi32), List(i32(ApronExpr.intInterval(-14, -6, I32Type))))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(1, I64Type))), List(Value.Int64(ApronExpr.intLit(1, I64Type))))
-  (2 to 8).foreach { arg =>
+  (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(arg, I64Type))), List(topi64))
   }
   testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(25, I64Type))), List(topi64))

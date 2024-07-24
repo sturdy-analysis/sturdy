@@ -195,7 +195,7 @@ trait RelationalBaseIntegerOps
       resultExpr
     }
 
-  override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ApronExpr.top(typeIntOps.countTrailingZeros(v._type))
 
   override def nonzeroBitCount(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
 
@@ -266,7 +266,7 @@ trait RelationalBaseIntegerOps
       val resultType = v._type
       apronState.withTempVars(resultType, v) { case (result, List(x)) =>
         apronState.ifThenElse(lt(x, intLit(0, x._type))) {
-          apronState.assign(result, intAdd(x, uMax))
+          apronState.assign(result, intAdd(x, uMax, resultType))
         } {
           apronState.assign(result, x)
         }
@@ -287,7 +287,7 @@ trait RelationalBaseIntegerOps
       val resultType = typeIntOps.divUnsigned(v._type, v._type)
       apronState.withTempVars(resultType, v) { case (result, List(x)) =>
         apronState.ifThenElse(lt(bigIntLit(sMax, x._type), x)) {
-          apronState.assign(result, intSub(x, bigIntLit(uMax, x._type)))
+          apronState.assign(result, intSub(x, bigIntLit(uMax, x._type), resultType))
         } {
           apronState.assign(result, x)
         }

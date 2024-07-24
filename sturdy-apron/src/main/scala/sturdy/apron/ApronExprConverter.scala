@@ -17,8 +17,11 @@ case class ApronExprConverter
     recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   ):
-  def virtToPhys(virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
-    virtAddr.recency match
+
+  val addrTrans = recencyStore.addressTranslation
+
+  def virtToPhys(mapping: Map[Ctx, RecencyRegion], virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
+    virtAddr.addressTrans.recency(mapping, virtAddr.ctx, virtAddr.n) match
       case PowRecency.Recent =>
         PhysicalAddress(virtAddr.ctx, Recency.Recent)
       case PowRecency.Old =>
@@ -26,16 +29,21 @@ case class ApronExprConverter
       case PowRecency.RecentOld =>
         recencyStore.joinRecentIntoOld(PowVirtualAddress(virtAddr))
         PhysicalAddress(virtAddr.ctx, Recency.Old)
+  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
+    exprVirtAddr.mapAddr(virtToPhys(mapping,_))
 
-  def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
-    exprVirtAddr.mapAddr(virtToPhys)
+  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx], Type] =
+    constrVirtAddr.mapAddr(virtToPhys(mapping,_))
+  inline def virtToPhys(virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
+    virtToPhys(addrTrans.mapping, virtAddr)
+  inline def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
+    virtToPhys(addrTrans.mapping, exprVirtAddr)
+  inline def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx], Type] =
+    virtToPhys(addrTrans.mapping, constrVirtAddr)
 
-  def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx], Type] =
-    constrVirtAddr.mapAddr(virtToPhys)
-
-  def physToVirt(phys: PhysicalAddress[Ctx]): VirtualAddress[Ctx] =
-    val region = recencyStore.addressTranslation.region(phys.ctx).getOrElse(
-      RecencyRegion()
+  def physToVirt(mapping: Map[Ctx, RecencyRegion], phys: PhysicalAddress[Ctx]): VirtualAddress[Ctx] =
+    val region = mapping.getOrElse(phys.ctx,
+      throw new IllegalStateException(s"$phys not found in ${recencyStore.addressTranslation.getState}")
     )
     phys.recency match
       case Recency.Recent =>
@@ -51,8 +59,17 @@ case class ApronExprConverter
         else
           VirtualAddress(phys.ctx, region.old.max, recencyStore.addressTranslation)
 
-  def physToVirt(physExpr: ApronExpr[PhysicalAddress[Ctx], Type]): ApronExpr[VirtualAddress[Ctx], Type] =
-    physExpr.mapAddr(physToVirt)
+  inline def physToVirt(mapping: Map[Ctx, RecencyRegion], physExpr: ApronExpr[PhysicalAddress[Ctx], Type]): ApronExpr[VirtualAddress[Ctx], Type] =
+    physExpr.mapAddr(physToVirt(mapping,_))
 
-  def physToVirt(physCons: ApronCons[PhysicalAddress[Ctx], Type]): ApronCons[VirtualAddress[Ctx], Type] =
-    physCons.mapAddr(physToVirt)
+  inline def physToVirt(mapping: Map[Ctx, RecencyRegion], physCons: ApronCons[PhysicalAddress[Ctx], Type]): ApronCons[VirtualAddress[Ctx], Type] =
+    physCons.mapAddr(physToVirt(mapping,_))
+
+  inline def physToVirt(phys: PhysicalAddress[Ctx]): VirtualAddress[Ctx] =
+    physToVirt(addrTrans.mapping, phys)
+
+  inline def physToVirt(physExpr: ApronExpr[PhysicalAddress[Ctx], Type]): ApronExpr[VirtualAddress[Ctx], Type] =
+    physToVirt(addrTrans.mapping, physExpr)
+
+  inline def physToVirt(physCons: ApronCons[PhysicalAddress[Ctx], Type]): ApronCons[VirtualAddress[Ctx], Type] =
+    physToVirt(addrTrans.mapping, physCons)

@@ -144,13 +144,12 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
                 mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty)
         case None => {}
 
-  override type State = Map[Context,RecencyRegion]
+  override type State = AddressTranslationState
 
-  override def getState: State =
-    mapping
+  override def getState: State = AddressTranslationState(mapping)
 
   override def setState(st: State): Unit =
-    for((ctx, regionState) <- st) {
+    for((ctx, regionState) <- st.mapping) {
       mapping.get(ctx) match
         case None =>
           mapping += (ctx) -> regionState
@@ -159,30 +158,45 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     }
 
   given finiteVirt: Finite[Context] with {}
-  override def join: Join[State] = implicitly[Join[State]]
-  override def widen: Widen[State] = implicitly[Widen[State]]
+  override def join: Join[State] = (s1: State, s2: State) =>
+    Join[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState)
+  override def widen: Widen[State] = (s1: State, s2: State) =>
+    Widen[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState)
+
+  case class AddressTranslationState(mapping: Map[Context, RecencyRegion]):
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: AddressTranslationState =>
+          this.mapping.view.mapValues(_.recency).toMap.equals(other.mapping.view.mapValues(_.recency).toMap)
+        case _ => false
+
+    override def hashCode(): Int =
+      this.mapping.view.mapValues(_.recency).toMap.hashCode()
+
+    override def toString: String =
+      s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
     val snapshotMapping = mapping
     private var afterFirst: State = _
 
     override def inbetween(fFailed: Boolean): Unit =
-      afterFirst = mapping
+      afterFirst = AddressTranslationState(mapping)
       mapping = snapshotMapping
 
     override def retainNone(): Unit =
       mapping = snapshotMapping
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      mapping = afterFirst
+      mapping = afterFirst.mapping
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       () // do nothing
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      val afterSecond = mapping
+      val afterSecond = AddressTranslationState(mapping)
       val joined = join(afterFirst, afterSecond)
-      mapping = joined.get
+      mapping = joined.get.mapping
   )
 
   def virtualAddresses: PowVirtualAddress[Context] =
@@ -335,7 +349,7 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
     virtualAddresses.iterator
 
   override def toString: String =
-    s"PowVirtualAddresses(${addrs})"
+    s"PowVirtualAddresses(${addrs.keySet.map((ctx,n) => s"$ctx@$n").mkString(",")})"
 
   def addressTranslation: Option[AddressTranslation[Context]] =
     if(addrs.isEmpty)

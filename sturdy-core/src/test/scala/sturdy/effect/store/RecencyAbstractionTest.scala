@@ -279,9 +279,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.write(a3, NumericInterval(3, 4))
     val state2 = (store.getState, store.getAddressTranslation.getState)
     val joinStore = store.join(state1._1, state2._1)
-    val joinAddrTrans = store.getAddressTranslation.join(state1._2, state2._2)
+    val joinAddrTrans = store.getAddressTranslation.join(state1._2.asInstanceOf, state2._2.asInstanceOf)
     store.setState(joinStore.get)
-    store.getAddressTranslation.setState(joinAddrTrans.get)
+    store.getAddressTranslation.setState(joinAddrTrans.get.asInstanceOf)
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent), PhysicalAddress(ctx1, Old))
