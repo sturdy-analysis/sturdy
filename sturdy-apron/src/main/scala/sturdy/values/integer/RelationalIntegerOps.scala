@@ -160,17 +160,23 @@ trait RelationalBaseIntegerOps
   override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
 
-  override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.rotateRight(v._type, shift._type))
 
-  override def rotateRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def rotateRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.rotateRight(v._type, shift._type))
 
-  override def gcd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def gcd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.gcd(v1._type, v2._type))
 
-  override def bitAnd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def bitAnd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
 
-  override def bitOr(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def bitOr(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.bitOr(v1._type, v2._type))
 
-  override def bitXor(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def bitXor(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.bitXor(v1._type, v2._type))
 
   override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeIntOps.countLeadingZeros(v._type)
@@ -195,11 +201,14 @@ trait RelationalBaseIntegerOps
       resultExpr
     }
 
-  override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ApronExpr.top(typeIntOps.countTrailingZeros(v._type))
+  override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.countTrailingZeros(v._type))
 
-  override def nonzeroBitCount(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def nonzeroBitCount(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.nonzeroBitCount(v._type))
 
-  override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ???
+  override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    ApronExpr.top(typeIntOps.invertBits(v._type))
 
 
   def signedMinValue(tpe: Type): BigInt =
@@ -243,15 +252,15 @@ trait RelationalBaseIntegerOps
       // No underflow
     } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
       val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-      toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax), v._type))
+      toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax, v._type), v._type))
 
       // Over and underflow
     } else {
       // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
       // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
       val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-      val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax)
-      val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax), uMax)
+      val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax, v._type)
+      val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax, v._type), uMax, v._type)
       toSigned(foldSecondRound)
     }
 

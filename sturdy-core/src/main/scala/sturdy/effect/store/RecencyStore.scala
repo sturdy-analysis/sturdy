@@ -128,31 +128,27 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def widen: Widen[State] = combine(recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen)
   def combine[W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W]): Combine[State, W] =
     (v1: State, v2: State) =>
-      if(v1 == v2) {
-        Unchanged(v1)
-      } else {
-        val addrTrans = recencyStore.addressTranslation
-        val snapshotMapping = addrTrans.mapping
-        val snapshotOtherMapping = addrTrans.otherMapping
-        val snapshotStore = recencyStore.store.getState
-        try {
-          addrTrans.mapping = v1.addrTransState.mapping
-          addrTrans.otherMapping = Some(v2.addrTransState.mapping)
-          val joinedEffectState = combineState(v1.effectState, v2.effectState)
-          val joinedRecencyStore = combineRecencyStore(v1.recencyStoreState.asInstanceOf, v2.recencyStoreState.asInstanceOf)
-          // Joining the effect states v1.effectState and v2.effectState has the side effect of
-          // allocating new virtual addresses. Hence, we need to join the current state of the address
-          // translation afterwards to avoid forgetting these addresses.
-          val joinedAddrTrans = combineAddrTrans(v1.addrTransState.asInstanceOf, v2.addrTransState.asInstanceOf).flatmap(combineAddrTrans(_, recencyStore.addressTranslation.getState))
-          MaybeChanged(
-            RecencyClosureState(recencyStore, joinedAddrTrans.get, joinedRecencyStore.get, joinedEffectState.get),
-            joinedAddrTrans.hasChanged || joinedRecencyStore.hasChanged || joinedEffectState.hasChanged
-          )
-        } finally {
-          addrTrans.mapping = snapshotMapping
-          addrTrans.otherMapping = snapshotOtherMapping
-          recencyStore.store.setState(snapshotStore)
-        }
+      val addrTrans = recencyStore.addressTranslation
+      val snapshotMapping = addrTrans.mapping
+      val snapshotOtherMapping = addrTrans.otherMapping
+      val snapshotStore = recencyStore.store.getState
+      try {
+        addrTrans.mapping = v1.addrTransState.mapping
+        addrTrans.otherMapping = Some(v2.addrTransState.mapping)
+        val joinedEffectState = combineState(v1.effectState, v2.effectState)
+        val joinedRecencyStore = combineRecencyStore(v1.recencyStoreState.asInstanceOf, v2.recencyStoreState.asInstanceOf)
+        // Joining the effect states v1.effectState and v2.effectState has the side effect of
+        // allocating new virtual addresses. Hence, we need to join the current state of the address
+        // translation afterwards to avoid forgetting these addresses.
+        val joinedAddrTrans = combineAddrTrans(v1.addrTransState.asInstanceOf, v2.addrTransState.asInstanceOf).flatmap(combineAddrTrans(_, recencyStore.addressTranslation.getState))
+        MaybeChanged(
+          RecencyClosureState(recencyStore, joinedAddrTrans.get, joinedRecencyStore.get, joinedEffectState.get),
+          joinedAddrTrans.hasChanged || joinedRecencyStore.hasChanged || joinedEffectState.hasChanged
+        )
+      } finally {
+        addrTrans.mapping = snapshotMapping
+        addrTrans.otherMapping = snapshotOtherMapping
+        recencyStore.store.setState(snapshotStore)
       }
 
 

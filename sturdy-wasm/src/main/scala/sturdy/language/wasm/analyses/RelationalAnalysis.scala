@@ -5,7 +5,7 @@ import sturdy.apron.{*, given}
 import sturdy.apron.ApronExpr.*
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
-import sturdy.effect.{EffectList, EffectStack}
+import sturdy.effect.{EffectList, EffectStack, TrySturdy}
 import sturdy.effect.bytememory.{ConstantAddressMemory, TopMemory}
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
@@ -38,11 +38,11 @@ import swam.{FuncType, OpCode, syntax}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import scala.collection.IndexedSeqView
+import scala.collection.{IndexedSeqView, mutable}
 import WasmFailure.*
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
-import sturdy.fix.DomLogger
+import sturdy.fix.{DomLogger, Logger}
 
 import scala.collection.immutable.List
 
@@ -211,9 +211,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     def garbageCollect(): Unit =
       val alive = PowVirtualAddress(this.addressIterator)
       val dead = recencyStore.addressTranslation.deadPhysicalAddresses(alive)
-      val stateBefore = recencyStore.getState
+      val stateBefore = effectStack.getState
       recencyStore.collectGarbage(alive)
-      val stateAfter = recencyStore.getState
+      val stateAfter = effectStack.getState
       println(s"Alive: $alive\nDead: $dead\nState Before: $stateBefore\nState After: $stateAfter")
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
@@ -244,6 +244,40 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       def isConstant: Boolean =
         val iv = apronState.getInterval(expr)
         iv.inf().isEqual(iv.sup())
+
+
+    class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
+      val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
+
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.EnterWasmFunction(id,_,FuncType(params,_)) =>
+            val args = params.indices.map {
+              i =>
+                val v = callFrame.getLocal(i).get
+                (v, getInterval(v))
+            }
+            val state = effectStack.getState
+            print("  ".repeat(stack.size))
+            println(s"CALL   f${id.funcIx}(${args.mkString(",")} @ ${state.hashCode()}")
+            stack.push((dom,args,state))
+          case _ => {}
+
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
+        dom match
+          case FixIn.EnterWasmFunction(id, _, ft) =>
+            val (_,args,inState) = stack.pop
+            val result =
+              codom.map{
+                case FixOut.ExitWasmFunction(returns) =>  FixOut.ExitWasmFunction(returns.map(v => (v, getInterval(v))))
+                case FixOut.ExitHostFunction(returns) =>  FixOut.ExitHostFunction(returns.map(v => (v, getInterval(v))))
+                case FixOut.Eval() =>  FixOut.Eval()
+                case FixOut.MostGeneralClient() => FixOut.MostGeneralClient()
+              }
+            val outState = effectStack.getState
+            print("  ".repeat(stack.size))
+            println(s"RETURN f${id.funcIx}(${args.mkString(",")} @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+          case _ => {}
 
 
     class ConstantInstructionsLogger extends InstructionResultLogger[Interval, Value](stack):
@@ -300,6 +334,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = observedConfig.fix.get
       addContextFreeLogger(domLogger)
+      addContextFreeLogger(new FunctionCallLogger)
     }
 
     override def toString: String = s"constant $config"

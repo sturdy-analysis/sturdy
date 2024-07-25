@@ -158,7 +158,11 @@ object ApronExpr:
     binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))
 
   inline def intMod[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Mod, e1, e2, intOps.remainder(e1._type, e2._type))
+    intMod(e1, e2, intOps.modulo(e1._type, e2._type))
+
+  inline def intMod[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    binary(BinOp.Mod, e1, e2, tpe)
+
 
   inline def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))

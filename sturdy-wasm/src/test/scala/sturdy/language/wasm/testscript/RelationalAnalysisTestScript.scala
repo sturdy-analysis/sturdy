@@ -71,7 +71,7 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
     interp.run(script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && p.getFileName.toString == "call.wast").sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && p.toString.endsWith("call.wast")).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
       if (isSlow(anl.apronManager, p.getFileName.toString))
@@ -134,7 +134,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
   def run(commands: Seq[Command]): Unit =
     commands.foreach { command =>
       eval(command)
-      aInterp.garbageCollect()
+//      aInterp.garbageCollect()
     }
 
   def getCModule(module: Option[String]): ModuleInstance = module match

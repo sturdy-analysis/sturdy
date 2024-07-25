@@ -91,9 +91,9 @@ trait RelationalStore
     } else /* if(powAddr.isWeak) */ {
       // weak update implemented as join
       for (toAddr <- powAddr.iterator) {
-        addAddrToEnvs(toAddr, physExpr)
         val to = ApronVar(toAddr)
         if (!_abstract1.getEnvironment.hasVar(to)) {
+          addAddrToEnvs(toAddr, physExpr)
           _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
         } else {
           val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
@@ -163,16 +163,15 @@ trait RelationalStore
   override def free(powAddr: PowAddr): Unit =
     nonRelationalStore.free(powAddr)
 
-    if (powAddr.isStrong)
-      for(addr <- powAddr.iterator) {
-        val dest = ApronVar(addr)
-        val env = _abstract1.getEnvironment()
-        typeEnv -= dest.addr
-        if (env.hasVar(dest)) {
-//          _abstract1.forget(manager, dest, false)
-          _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
-        }
+    for(addr <- powAddr.iterator) {
+      val dest = ApronVar(addr)
+      val env = _abstract1.getEnvironment()
+      typeEnv -= dest.addr
+      if (env.hasVar(dest)) {
+        _abstract1.forget(manager, dest, false)
+        _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
       }
+    }
 
   private final class BottomFailure extends SturdyFailure
 

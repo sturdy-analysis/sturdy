@@ -12,11 +12,11 @@ import sturdy.values.references.VirtualAddress
 
 type VirtAddr = VirtualAddress[Ctx]
 
-def withApronState[T](using apronManager: Manager)(f: (Manager, CollectedFailures[FailureKind], EffectStack, ApronState[VirtAddr,Type]) ?=> T): T =
+def withApronState[T](using apronManager: Manager)(f: (Manager, CollectedFailures[FailureKind], EffectStack, ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]) ?=> T): T =
   given Finite[FailureKind] with {}
   given failure: CollectedFailures[FailureKind] = new CollectedFailures[FailureKind]()
   var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
   given effectStack: EffectStack = new EffectStack(RecencyClosure(apronState.recencyStore, failure))
   apronState = RecencyRelationalStore[Ctx, Type]
-  given ApronState[VirtAddr, Type] = apronState
+  given ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = apronState
   f

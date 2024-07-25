@@ -238,7 +238,7 @@ case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTr
   override def isStrong: Boolean = physical.isStrong
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A = f(this)
   override def iterator: Iterator[VirtualAddress[Context]] = Iterator(this)
-  override def toString: String = s"VirtualAddr($ctx, $n)"
+  override def toString: String = s"${ctx}_$n"
 
   final override def equals(obj: Any): Boolean =
     obj match

@@ -159,12 +159,12 @@ final class ApronRecencyState
 
     f(resultAddr, tempVars)
 
-  inline def assign(mapping: Map[Ctx,RecencyRegion])(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
+  def assign(mapping: Map[Ctx,RecencyRegion])(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     relationalStore.write(mapping, v.physical,
       relationalStore.makeRelationalVal(mapping,
         convertExpr.virtToPhys(mapping.asInstanceOf, expr)))
 
-  inline override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
+  override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     assign(recencyStore.addressTranslation.mapping)(v, expr)
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
