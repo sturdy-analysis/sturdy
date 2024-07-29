@@ -3,7 +3,7 @@ package sturdy.language.wasm.generic
 import sturdy.data.MayJoin
 import sturdy.data.noJoin
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.effect.operandstack.{DecidableOperandStack, OperandStack}
 import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.floating.*
@@ -13,7 +13,7 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
-  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
+  (stack: OperandStack[V,MayJoin.NoJoin], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
   (using Failure):
 
   import wasmOps.*

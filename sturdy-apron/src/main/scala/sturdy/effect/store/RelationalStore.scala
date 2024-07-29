@@ -30,9 +30,7 @@ trait RelationalStore
    initialTypeEnv: Map[PhysicalAddress[Context], Type])
   extends Store[PowAddr, Val, WithJoin]:
 
-  def getRelationalVal(mapping: Map[Context, RecencyRegion], v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
   def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
-  def makeRelationalVal(mapping: Map[Context, RecencyRegion], expr: ApronExpr[PhysicalAddress[Context], Type]): Val
   def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Context], Type]): Val
 
 
@@ -65,11 +63,6 @@ trait RelationalStore
         case (_, JOptionA.None()) => v1
         case (_,_) => Join(v1,v2).get
     }
-
-  inline def write(mapping: Map[Context, RecencyRegion], powAddr: PowAddr, v : Val): Unit =
-    getRelationalVal(mapping, v) match
-      case Some(exp) => write(powAddr, exp)
-      case None => nonRelationalStore.write(powAddr, v)
 
   override def write(powAddr: PowAddr, v: Val): Unit =
     getRelationalVal(v) match
@@ -221,7 +214,9 @@ trait RelationalStore
           tenv.equals(tenv2) && abs1.isEqual(manager, abs2) && MapEquals(nonRelationalStoreState,nonRel2)
         case _ =>
           false
-    override def hashCode(): Int = (tenv, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
+    override def hashCode: Int = (tenv, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
+
+    override def toString: String = s"RelationalStoreState($hashCode, $tenv, $abs1, $nonRelationalStoreState)"
 
   override type State = RelationalStoreState
 
@@ -241,14 +236,24 @@ trait RelationalStore
 
   def combineRelationalStoreState[W <: Widening](using combineTypeEnv: Combine[TypeEnv,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
-      val joinedTypeEnv = combineTypeEnv(s1.tenv, s2.tenv)
-      val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
-      val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
-      val res = MaybeChanged(
-        RelationalStoreState(joinedTypeEnv.get, joinedAbs1.get, joinedNonRelationalStore.get),
-        joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
-      )
-      res
+      val state = getState
+      val snapshotTypeEnv = state.tenv
+      val snapshotAbs1 = state.abs1
+      try {
+        val joinedTypeEnv = combineTypeEnv(s1.tenv, s2.tenv)
+        val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
+        typeEnv = joinedTypeEnv.get
+        _abstract1 = copyAbstract1(joinedAbs1.get)
+        val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
+        MaybeChanged(
+          RelationalStoreState(typeEnv, copyAbstract1(_abstract1), joinedNonRelationalStore.get),
+          joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
+        )
+      } finally {
+        typeEnv = snapshotTypeEnv
+        _abstract1 = snapshotAbs1
+      }
+
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)

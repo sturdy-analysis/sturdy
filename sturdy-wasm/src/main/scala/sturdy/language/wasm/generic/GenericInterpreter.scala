@@ -153,7 +153,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   import specialOps.*
 
   // effect components
-  val stack: DecidableOperandStack[V]
+  val stack: OperandStack[V, MayJoin.NoJoin]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
   val funTable: SymbolTable[TableAddr, FuncIx, FunV, J]
@@ -343,9 +343,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
 
-  private inline def assertFrameSize(size: Int): Unit =
-    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
-      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+  private inline def assertFrameSize(size: Int): Unit = {}
+//    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
+//      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
 
   def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
     stack.withNewFrame(arities.params) {

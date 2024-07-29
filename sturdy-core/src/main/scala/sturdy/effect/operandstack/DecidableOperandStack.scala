@@ -13,10 +13,10 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
-  def push(v: V): Unit =
+  override def push(v: V): Unit =
     stack = v :: stack
 
-  def pop(): JOptionC[V] =
+  override def pop(): JOptionC[V] =
     if (stack.isEmpty)
       JOptionC.none
     else
@@ -24,7 +24,7 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
       stack = stack.tail
       JOptionC.some(v)
   
-  def peek(): JOptionC[V] =
+  override def peek(): JOptionC[V] =
     if (stack.isEmpty)
       JOptionC.none
     else
@@ -39,7 +39,7 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   def size: Int = stack.size
   def frameSize: Int = stack.size - framePointer
   
-  def withNewStack[A](f: => A): A =
+  override def withNewStack[A](f: => A): A =
     val snapshot = stack
     val snapshotFramePointer = framePointer
     stack = Nil

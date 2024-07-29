@@ -35,6 +35,7 @@ import sturdy.language.tip.{*, given}
 import sturdy.values.types.{BaseType, given}
 
 import scala.collection.immutable.BitSet
+import scala.collection.mutable
 
 
 object RelationalAnalysis extends Interpreter,
@@ -128,19 +129,13 @@ object RelationalAnalysis extends Interpreter,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialTypeEnv = Map()
     ):
-      override def getRelationalVal(mapping: Map[RelationalVar, RecencyRegion], v: Value): Option[ApronExprPhysAddr] =
+      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
         v match
           case Value.IntValue(iv) => Some(exprConverter.virtToPhys(iv))
           case _ => None
 
-      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
-        getRelationalVal(addressTranslation.mapping, v)
-
       override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
-        makeRelationalVal(addressTranslation.mapping, expr)
-
-      override def makeRelationalVal(mapping: Map[RelationalVar, RecencyRegion], expr: ApronExprPhysAddr): Value =
-        Value.IntValue(exprConverter.physToVirt(mapping, expr))
+        Value.IntValue(exprConverter.physToVirt(expr))
 
     val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
@@ -233,6 +228,44 @@ object RelationalAnalysis extends Interpreter,
       super.copyState(from)
     }
 
+    def getInterval(value: Value): Value =
+      value match
+        case Value.IntValue(expr) => Value.IntValue(ApronExpr.constant(apronState.getInterval(expr), expr._type))
+        case v => v
+
+    class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
+      val stack: mutable.Stack[(FixIn, IndexedSeq[(Value, Value)], effectStack.State)] = mutable.Stack.empty
+
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.EnterFunction(Function(name, params, locals, body, ret)) =>
+            val args = params.indices.map {
+              i =>
+                val v = callFrame.getLocal(i).get
+                (v, getInterval(v))
+            }
+            val state = effectStack.getState
+            Predef.print("  ".repeat(stack.size))
+            println(s"CALL   $name(${args.mkString(",")}) @ ${state.hashCode()}")
+            stack.push((dom, args, state))
+          case _ => {}
+
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
+        dom match
+          case FixIn.EnterFunction(fun) =>
+            val (_, args, inState) = stack.pop
+            val result =
+              codom.map {
+                case FixOut.ExitFunction(v) => FixOut.ExitFunction((v, getInterval(v)))
+                case FixOut.Eval(v) => FixOut.Eval((v,getInterval(v)))
+                case FixOut.Run() => FixOut.Run()
+              }
+            val outState = effectStack.getState
+            Predef.print("  ".repeat(stack.size))
+            println(s"RETURN ${fun.name}(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+          case _ => {}
+
+    val funLogger: FunctionCallLogger = new FunctionCallLogger
     val domLogger: DomLogger[FixIn] = new DomLogger
     val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
 
@@ -241,7 +274,7 @@ object RelationalAnalysis extends Interpreter,
         callSiteSensitive(callSites,
           fix.log(fix.manyLogger(List(domLogger)),
             fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.topmost(observedStackConfig), fix.iter.topmost(observedStackConfig))
+              fix.iter.innermost(observedStackConfig), fix.iter.innermost(observedStackConfig))
             )
           )
         )

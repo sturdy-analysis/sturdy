@@ -78,44 +78,52 @@ class ApronJoinTest(using manager: apron.Manager) extends AnyFunSuite:
           apronState.getIntInterval(ApronExpr.addr(y, Type.IntType)) shouldBe(1, 22)
       }
     }
-
-//    val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
-//                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-//                       .assignCopy(manager, y, ApronExpr.intAdd[Int,String,BaseType[Int]](ApronExpr.Addr(x, BaseType[Int]), ApronExpr.intLit(1, BaseType[Int])).toIntern(env_xy), null)
-//    val state3 = state1.changeEnvironmentCopy(manager, env_xy, false)
-//                       .assignCopy(manager, x, ApronExpr.Constant(Interval(0, 20), BaseType[Int]).toIntern(env_xy), null)
-//                       .assignCopy(manager, y, ApronExpr.intAdd[Int,String,BaseType[Int]](ApronExpr.Addr(x, BaseType[Int]), ApronExpr.intLit(2, BaseType[Int])).toIntern(env_xy), null)
-//    val joined = Join(state2, state3)
-//
-//    joined.hasChanged shouldBe true
-//    joined.get.getBound(manager, x) shouldBe Interval(0, 20)
-//    joined.get.getBound(manager, y) shouldBe Interval(1, 22)
   }
-//
-//
-//  test("{x ∈ [10,20]} ⊔ {y ∈ [10,20]} = {x ∈ [10,20], y ∈ [10,20]}") {
-//    val state2 = state1.changeEnvironmentCopy(manager, env_x, false)
-//                       .assignCopy(manager, x, ApronExpr.Constant(Interval(10, 20), BaseType[Int]).toIntern(env_x), null)
-//    val state3 = state1.changeEnvironmentCopy(manager, env_y, false)
-//                       .assignCopy(manager, y, ApronExpr.Constant(Interval(10, 20), BaseType[Int]).toIntern(env_y), null)
-//    val joined = Join(state2, state3)
-//
-//    joined.hasChanged shouldBe true
-//    joined.get.getBound(manager, x) shouldBe Interval(10, 20)
-//    joined.get.getBound(manager, y) shouldBe Interval(10, 20)
-//  }
-//
-//  test("{x = 1, y = 2} ⊔ {x = 3, z = 4} = {x ∈ [1,3], y = 2, z = 4}") {
-//    val state2 = state1.changeEnvironmentCopy(manager, env_xy, false)
-//      .assignCopy(manager, x, ApronExpr.Constant(Interval(1, 1), BaseType[Int]).toIntern(env_xy), null)
-//      .assignCopy(manager, y, ApronExpr.Constant(Interval(2, 2), BaseType[Int]).toIntern(env_xy), null)
-//    val state3 = state1.changeEnvironmentCopy(manager, env_xz, false)
-//      .assignCopy(manager, x, ApronExpr.Constant(Interval(3, 3), BaseType[Int]).toIntern(env_xz), null)
-//      .assignCopy(manager, z, ApronExpr.Constant(Interval(4, 4), BaseType[Int]).toIntern(env_xz), null)
-//    val joined = Join(state2, state3)
-//
-//    joined.hasChanged shouldBe true
-//    joined.get.getBound(manager, x) shouldBe Interval(1, 3)
-//    joined.get.getBound(manager, y) shouldBe Interval(2, 2)
-//    joined.get.getBound(manager, z) shouldBe Interval(4, 4)
-//  }
+
+
+
+  test("{x ∈ [0,10], y = x} ⊔ {z ∈ [10,20], x = z} = {x ∈ [0,20], y ∈ [0,10], z ∈ [10,20], 0 <= x + y <= 30, 0 <= x - y <= 20, 10 <= z + x <= 40, 0 <= z - x <= 20, 10 <= z + y <= 30, 0 <= z - y <= 20}") {
+    withApronState {
+      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
+
+      val x = apronState.recencyStore.alloc(Ctx.Var("x"))
+      val xAddr = ApronExpr.addr(x, Type.IntType)
+
+      val state0 = apronState.effectStack.getState
+
+      val y = apronState.recencyStore.alloc(Ctx.Var("y"))
+      val yAddr = ApronExpr.addr(y, Type.IntType)
+
+      apronState.assign(x, ApronExpr.intInterval(0, 10, Type.IntType))
+      apronState.assign(y, xAddr)
+
+      val state1 = apronState.effectStack.getState
+
+      apronState.effectStack.setState(state0)
+
+      val z = apronState.recencyStore.alloc(Ctx.Var("z"))
+      val zAddr = ApronExpr.addr(z, Type.IntType)
+
+      apronState.assign(z, ApronExpr.intInterval(10, 20, Type.IntType))
+      apronState.assign(x, zAddr)
+
+      val state2 = apronState.effectStack.getState
+
+      val joinedState = apronState.effectStack.join(state1, state2)
+      joinedState.hasChanged shouldBe true
+      apronState.effectStack.setState(joinedState.get)
+
+      apronState.getIntInterval(xAddr) shouldBe(0, 20)
+      apronState.getIntInterval(yAddr) shouldBe(0, 10)
+      apronState.getIntInterval(zAddr) shouldBe(10, 20)
+
+      apronState.getIntInterval(ApronExpr.intAdd(xAddr, yAddr, Type.IntType)) shouldBe(0, 30)
+      apronState.getIntInterval(ApronExpr.intSub(xAddr, yAddr, Type.IntType)) shouldBe(0, 20)
+
+      apronState.getIntInterval(ApronExpr.intAdd(zAddr, xAddr, Type.IntType)) shouldBe(10, 40)
+      apronState.getIntInterval(ApronExpr.intSub(zAddr, xAddr, Type.IntType)) shouldBe(0, 20)
+
+      apronState.getIntInterval(ApronExpr.intAdd(zAddr, yAddr, Type.IntType)) shouldBe(10, 30)
+      apronState.getIntInterval(ApronExpr.intSub(zAddr, yAddr, Type.IntType)) shouldBe(0, 20)
+    }
+  }

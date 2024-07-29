@@ -152,22 +152,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialTypeEnv = Map()
     ):
-      override def getRelationalVal(mapping: Map[RelAddr, RecencyRegion], v: Value): Option[ApronExpr[PhysAddr, Type]] =
+      override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
         v match
-          case Value.Int32(i32: I32) => Some(exprConverter.virtToPhys(mapping, i32.asApronExprLazy))
-          case Value.Int64(expr) => Some(exprConverter.virtToPhys(mapping, expr))
-          case Value.Float32(expr) => Some(exprConverter.virtToPhys(mapping, expr))
-          case Value.Float64(expr) => Some(exprConverter.virtToPhys(mapping, expr))
+          case Value.Int32(i32: I32) => Some(exprConverter.virtToPhys(i32.asApronExprLazy))
+          case Value.Int64(expr) => Some(exprConverter.virtToPhys(expr))
+          case Value.Float32(expr) => Some(exprConverter.virtToPhys(expr))
+          case Value.Float64(expr) => Some(exprConverter.virtToPhys(expr))
           case Value.TopValue => None
 
-      inline override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
-        getRelationalVal(addressTranslation.mapping, v)
-
-      inline override def makeRelationalVal(mapping: Map[RelAddr, RecencyRegion], expr: ApronExpr[PhysAddr, Type]): Value =
-        callFrame.makeRelationalVal(exprConverter.physToVirt(mapping, expr))
-
       inline override def makeRelationalVal(expr: ApronExpr[PhysAddr, Type]): Value =
-        makeRelationalVal(addressTranslation.mapping, expr)
+        callFrame.makeRelationalVal(exprConverter.physToVirt(expr))
 
     given domLogger: DomLogger[FixIn] = new DomLogger
 
@@ -310,14 +304,19 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
 
     override def newEffectStack: EffectStack =
-      new EffectStack(
-        RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except, failure)),
+      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except, failure))
+      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, callFrame))
+      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame))
+      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, failure))
+      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame, except))
+
+      new EffectStack(allEffects,
         {
-          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => RecencyClosure(recencyStore, EffectList(memory, globals, callFrame))
-          case _: FixIn.Eval => RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame))
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => inEffectsFunction
+          case _: FixIn.Eval => inEffectsEval
         }, {
-          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => RecencyClosure(recencyStore, EffectList(stack, memory, globals, failure))
-          case _: FixIn.Eval => RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame, except))
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => outEffectsFunction
+          case _: FixIn.Eval => outEffectsEval
         }
       )
 

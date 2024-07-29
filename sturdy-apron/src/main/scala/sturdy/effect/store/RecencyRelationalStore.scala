@@ -45,30 +45,11 @@ object RecencyRelationalStore:
       Abstract1(apronManager, new Environment()),
       Map()
     ):
-      override def getRelationalVal(mapping: Map[Ctx, RecencyRegion], v:Val): Option[ApronExpr[PhysicalAddress[Ctx], Type]] =
-        val snapshotMapping = addressTranslation.mapping
-        try {
-          addressTranslation.mapping = mapping
-          _getRelationalVal(convertExpr, v)
-        } finally {
-          addressTranslation.mapping = snapshotMapping
-        }
-
       override def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Ctx], Type]] =
         _getRelationalVal(convertExpr, v)
 
       override def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Ctx], Type]): Val =
         _makeRelationalVal(convertExpr, expr)
-
-      override def makeRelationalVal(mapping: Map[Ctx, RecencyRegion], expr: ApronExpr[PhysicalAddress[Ctx], Type]): Val =
-        val snapshotMapping = addressTranslation.mapping
-        try {
-          addressTranslation.mapping = mapping
-          makeRelationalVal(expr)
-        } finally {
-          addressTranslation.mapping = snapshotMapping
-        }
-
 
     val recencyStore: RecencyStore[Ctx, PowVirtAddr, Val] =
       RecencyStore(

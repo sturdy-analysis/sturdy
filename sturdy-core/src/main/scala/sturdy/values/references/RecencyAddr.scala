@@ -20,6 +20,8 @@ case class RecencyRegion(recent: BitSet = BitSet.empty, old: BitSet = BitSet.emp
   def contains(n: Int): Boolean =
     recent.contains(n) || old.contains(n)
 
+  def isEmpty: Boolean = recent.isEmpty && old.isEmpty
+
   override def toString: String =
     s"[" + (if(recent.isEmpty) "" else s"recent: ${recent.mkString(" ")}") + (if(old.isEmpty) "" else s", old: ${old.mkString(" ")}") + "]"
 
@@ -172,6 +174,22 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
 
     override def hashCode(): Int =
       this.mapping.view.mapValues(_.recency).toMap.hashCode()
+
+    def difference(other: AddressTranslationState): AddressTranslationState =
+      AddressTranslationState(
+        mapping.flatMap {
+          (ctx, region1) =>
+            other.mapping.get(ctx) match
+              case Some(region2) =>
+                val newRegion = RecencyRegion(region1.recent.diff(region2.recent), region1.old.diff(region2.old))
+                if(newRegion.isEmpty)
+                  None
+                else
+                  Some((ctx, newRegion))
+              case None =>
+                Some((ctx, region1))
+        }
+      )
 
     override def toString: String =
       s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"

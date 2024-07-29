@@ -31,9 +31,6 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
     man,
     initialState,
     Map()):
-    override def getRelationalVal(mapping: Map[Ctx, RecencyRegion], v: NumericInterval[Int]): Option[ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]] =
-      getRelationalVal(v)
-
     override def getRelationalVal(v: NumericInterval[Int]): Option[ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]] =
       Option(ApronExpr.intInterval(v.low, v.high, BaseType[Int]))
 
@@ -45,11 +42,6 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
       iv.sup().toDouble(d, 0)
       val upper = d(0).intValue()
       NumericInterval(lower, upper)
-
-    override def makeRelationalVal(mapping: Map[Ctx, RecencyRegion], expr: ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]): NumericInterval[Int] =
-      makeRelationalVal(expr)
-
-
 
   val addressTranslation = AddressTranslation.empty[Ctx]
   new RecencyStore[Ctx, VAddr, NumericInterval[Int]](apronStore, addressTranslation)

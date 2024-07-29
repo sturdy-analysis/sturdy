@@ -52,7 +52,7 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     Iterator(
-      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(StackConfig.StackedStates())), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(Octagon(), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
       //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),

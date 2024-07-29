@@ -18,7 +18,8 @@ trait RelationalAddresses extends RelationalTypes:
   final type PowPhysAddr = PowersetAddr[PhysAddr, PhysAddr]
 
   def tempRelationalAlloc(rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[Type, RelAddr] = AAllocatorFromContext(
-    tpe => RelAddr.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
+    tpe => 
+      RelAddr.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
   )
   given localRelationaAlloc: AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), RelAddr] = AAllocatorFromContext(
     (i, data, _) => RelAddr.Local(i, data)

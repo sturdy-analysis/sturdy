@@ -146,7 +146,10 @@ object ApronExpr:
     binary(BinOp.Sub, e1, e2, floatOps.sub(e1._type, e2._type))
 
   inline def intMul[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Mul, e1, e2, intOps.mul(e1._type, e2._type))
+    intMul(e1, e2, intOps.mul(e1._type, e2._type))
+
+  inline def intMul[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    binary(BinOp.Mul, e1, e2, tpe)
 
   inline def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))

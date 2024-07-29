@@ -19,7 +19,6 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
-  def satisfies(constraints: ApronCons[Addr,Type]*): Boolean
   def effects: EffectStack
   def join[A: Join](f: => A)(g: => A): A =
     effects.joinComputations(f)(g)
@@ -35,7 +34,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
         addConstraints(condition.negated)
         g
       case Topped.Top =>
-        effectStack.joinComputations {
+        effectStack.joinComputations{
           addConstraints(condition)
           f
         } {
@@ -159,64 +158,54 @@ final class ApronRecencyState
 
     f(resultAddr, tempVars)
 
-  def assign(mapping: Map[Ctx,RecencyRegion])(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
-    relationalStore.write(mapping, v.physical,
-      relationalStore.makeRelationalVal(mapping,
-        convertExpr.virtToPhys(mapping.asInstanceOf, expr)))
-
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
-    assign(recencyStore.addressTranslation.mapping)(v, expr)
+    relationalStore.write(v.physical,
+      relationalStore.makeRelationalVal(
+        convertExpr.virtToPhys(expr)))
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
-    relationalStore.addConstraints(constraints.map(convertExpr.virtToPhys(_))*)
-
-  inline override def satisfies(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Boolean =
-    relationalStore.satisfies(constraints.map(convertExpr.virtToPhys(_))*)
+    relationalStore.addConstraints(constraints.flatMap(convertExpr.virtToPhys(_))*)
 
   inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     relationalStore.getBound(convertExpr.virtToPhys(expr))
 
   override def effects: EffectStack = effectStack
 
-  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, recencyStore.join)
-  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, recencyStore.widen)
+  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false)
+  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true)
 
-  private def combineExpr[W <: Widening](widen: Boolean, combineStore: Combine[recencyStore.State, W]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
+  private def combineExpr[W <: Widening](widen: Boolean): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (ApronExpr.Addr(v1, tpe1), ApronExpr.Addr(v2, tpe2)) if v1.ctx == v2.ctx =>
       val addrTrans = v1.addressTrans
-      val mapping = addrTrans.mapping
-      val otherMapping = addrTrans.otherMapping.getOrElse(mapping)
-      val region1 = addrTrans.region(mapping, v1.ctx).get
-      val recency1 = addrTrans.recency(mapping, v1.ctx, v1.n)
-      val recency2 = addrTrans.recency(otherMapping, v2.ctx, v2.n)
+      val region1 = addrTrans.region(v1.ctx).get
+      val recency1 = addrTrans.recency(v1.ctx, v1.n)
+      val recency2 = addrTrans.recency(v2.ctx, v2.n)
       val joined = Join[(PowRecency,Type)]((recency1,tpe1), (recency2,tpe2))
       if (joined.get._1 == PowRecency.RecentOld)
         addrTrans.mapping += v1.ctx -> RecencyRegion(region1.recent + v1.n, region1.old + v1.n)
       joined.map(
         (_, tpe) => ApronExpr.Addr(v1, tpe)
       )
-    case (e1, e2) =>
-      if(e1 == e2)
-        Unchanged(e1)
-      else if(!widen && e1.isConstant && e2.isConstant)
-        val iv1 = getInterval(e1)
-        val iv2 = getInterval(e2)
-        Join[(Coeff,Type)]((iv1,e1._type), (iv2, e2._type)).map(
-          (iv,tpe) => ApronExpr.constant(iv,tpe)
-        )
-      else
-        val joinedType = Join(e1._type, e2._type)
-        val resultType = joinedType.get
-        val ctx = temporaryVariableAllocator(resultType)
-        val result = recencyStore.addressTranslation.allocOld(ctx)
-        val mapping = recencyStore.addressTranslation.mapping
-        val otherMapping = recencyStore.addressTranslation.otherMapping.getOrElse(mapping)
-        assign(mapping)(result, e1)
-        val s1 = relationalStore.getState.abs1
-        assign(otherMapping)(result, e2)
-        val joined = relationalStore.getState.abs1
-        MaybeChanged(ApronExpr.addr(result, resultType),
-          (! joined.isIncluded(relationalStore.manager, s1)) || joinedType.hasChanged)
+    case (e1, e2) if (e1 == e2) =>
+      Unchanged(e1)
+    case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
+      val iv1 = getInterval(e1)
+      val iv2 = getInterval(e2)
+      Join[(Coeff,Type)]((iv1,e1._type), (iv2, e2._type)).map(
+        (iv,tpe) => ApronExpr.constant(iv,tpe)
+      )
+    case (e1,e2) =>
+      val joinedType = Join(e1._type, e2._type)
+      val ctx = temporaryVariableAllocator(joinedType.get)
+      val result = recencyStore.addressTranslation.allocOld(ctx)
+      val resultExpr = ApronExpr.addr(result, joinedType.get)
+      val iv1 = getInterval(e1)
+      assign(result, e1)
+      assign(result, e2)
+      val iv2 = getInterval(resultExpr)
+      // The check if the result has changed, happens on the abstract domain
+      // in the recency closure join
+      MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
   }
 
 

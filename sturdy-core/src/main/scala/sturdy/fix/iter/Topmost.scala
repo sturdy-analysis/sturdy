@@ -42,11 +42,12 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
       if (stack.height == 0) {
         val allState: state.All = state.getAllState
         val result = step(f, dom)
+        if (Fixpoint.DEBUG) {
+          println(s"## END (Iteration $iterationCount) of $dom")
+          iterationCount += 1
+          println(stack)
+        }
         if (someComponentIsLooping) {
-          if (Fixpoint.DEBUG) {
-            iterationCount += 1
-            println(s"## REPEAT (Iteration $iterationCount) of $dom")
-          }
           someComponentIsLooping = false
           state.setAllState(allState)
           apply_(dom)

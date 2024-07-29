@@ -45,7 +45,11 @@ final class StackedStates[Dom, Codom](val state: State)
   private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
   def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
-  override def toString: String = stack.keys.map(k => k.hashCode()).toString()
+  override def toString: String =
+    s"Stack: ${stack.keys.map(k => k.hashCode()).toString()}\n"+
+    s"Cache: ${outCache.toList.map(k => s"${k._1._1} @ ${k._1._2.hashCode()} -> ${k._2.result} @ ${k._2.out.hashCode()}, ${k._2.stability}").sorted.mkString("\n       ")}\n" +
+    s"In:    ${outCache.toList.map(k => s"${k._1._2.hashCode()}: ${k._1._2}").sorted.mkString("\n       ")}\n" +
+    s"Out:   ${outCache.toList.map(k => s"${k._2.out.hashCode()}: ${k._2.out}").sorted.mkString("\n       ")}\n"
 
   private def fire(ev: Stack.FixEvent): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
 
@@ -139,8 +143,7 @@ final class StackedStates[Dom, Codom](val state: State)
     }
 
 
-
-  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
+  private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)

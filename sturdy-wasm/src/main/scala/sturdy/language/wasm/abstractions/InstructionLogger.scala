@@ -1,9 +1,9 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{noJoin, CombineEquiList}
+import sturdy.data.{*, given}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.effect.operandstack.OperandStack
 import sturdy.fix
 import sturdy.language.wasm.generic.{FixIn, FixOut}
 import sturdy.language.wasm.generic.InstLoc
@@ -42,7 +42,7 @@ trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, Fix
     case _ => // nothing
 
 
-trait InstructionResultLogger[Info, V](stack: DecidableOperandStack[V])(using Top[V], Join[V]) extends InstructionLogger[List[Info], V]:
+trait InstructionResultLogger[Info, V](stack: OperandStack[V, NoJoin])(using Top[V], Join[V]) extends InstructionLogger[List[Info], V]:
   def boolValue(v: V): V
   def dummyValue: V
   def getInfo(v: V): Info
