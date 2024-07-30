@@ -239,10 +239,9 @@ object RelationalAnalysis extends Interpreter,
       override def enter(dom: FixIn): Unit =
         dom match
           case FixIn.EnterFunction(Function(name, params, locals, body, ret)) =>
-            val args = params.indices.map {
+            val args = params.indices.flatMap {
               i =>
-                val v = callFrame.getLocal(i).get
-                (v, getInterval(v))
+                callFrame.getLocal(i).map(v => (v, getInterval(v))).option(None)(Some(_))
             }
             val state = effectStack.getState
             Predef.print("  ".repeat(stack.size))
@@ -274,7 +273,7 @@ object RelationalAnalysis extends Interpreter,
         callSiteSensitive(callSites,
           fix.log(fix.manyLogger(List(domLogger)),
             fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.innermost(observedStackConfig), fix.iter.innermost(observedStackConfig))
+              fix.iter.topmost(observedStackConfig), fix.iter.topmost(observedStackConfig))
             )
           )
         )

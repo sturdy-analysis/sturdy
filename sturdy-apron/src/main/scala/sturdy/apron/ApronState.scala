@@ -175,19 +175,19 @@ final class ApronRecencyState
   override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true)
 
   private def combineExpr[W <: Widening](widen: Boolean): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
-    case (ApronExpr.Addr(v1, tpe1), ApronExpr.Addr(v2, tpe2)) if v1.ctx == v2.ctx =>
-      val addrTrans = v1.addressTrans
-      val region1 = addrTrans.region(v1.ctx).get
-      val recency1 = addrTrans.recency(v1.ctx, v1.n)
-      val recency2 = addrTrans.recency(v2.ctx, v2.n)
-      val joined = Join[(PowRecency,Type)]((recency1,tpe1), (recency2,tpe2))
-      if (joined.get._1 == PowRecency.RecentOld)
-        addrTrans.mapping += v1.ctx -> RecencyRegion(region1.recent + v1.n, region1.old + v1.n)
-      joined.map(
-        (_, tpe) => ApronExpr.Addr(v1, tpe)
-      )
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
+    case (ApronExpr.Addr(v1, tpe1), ApronExpr.Addr(v2, tpe2)) if v1.ctx == v2.ctx =>
+      val joinedType = Join(tpe1, tpe2)
+      relationalStore.copy(PowersetAddr(PhysicalAddress(v1.ctx, Recency.Recent)), PowersetAddr(PhysicalAddress(v1.ctx, Recency.Old)))
+      (v1.recency, v2.recency) match
+        case (PowRecency.RecentOld,_) | (PowRecency.Old,_) =>
+          recencyStore.addressTranslation.joinRecentIntoOld(v1)
+          MaybeChanged(ApronExpr.Addr(v1, joinedType.get), joinedType.hasChanged)
+        case (_,PowRecency.RecentOld) | (_, PowRecency.Old) =>
+          recencyStore.addressTranslation.joinRecentIntoOld(v2)
+          MaybeChanged(ApronExpr.Addr(v1, joinedType.get), joinedType.hasChanged)
+        case _ => throw IllegalStateException("Impossible state. Covered by [case (e1, e2) if (e1 == e2) => ...]")
     case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
       val iv2 = getInterval(e2)

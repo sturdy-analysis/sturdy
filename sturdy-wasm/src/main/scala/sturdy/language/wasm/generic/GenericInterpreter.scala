@@ -35,7 +35,10 @@ case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstan
     if (module == null)
       s"Function $funcIx"
     else funcIx match
-      case Some(ix) => s"${module.functions(ix)}"
+      case Some(ix) =>
+        module.exports.find{ case (name,ExternalValue.Function(ix2)) => ix == ix2; case _ => false } match
+          case Some((name,_)) => name
+          case None => ix.toString
       case None => s"Unknown Function"
 given FiniteFrameData: Finite[FrameData] with {}
 given Ordering[FrameData] = Ordering.by(data => (data.funcIx, data.returnArity, data.module.hashCode))

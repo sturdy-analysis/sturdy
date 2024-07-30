@@ -155,7 +155,9 @@ object ApronExpr:
     binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))
 
   inline def intDiv[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Div, e1, e2, intOps.div(e1._type, e2._type))
+    intDiv(e1, e2, intOps.div(e1._type, e2._type))
+  inline def intDiv[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    binary(BinOp.Div, e1, e2, tpe)
 
   inline def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))

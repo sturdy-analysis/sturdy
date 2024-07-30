@@ -55,7 +55,10 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
     else {
       val r = v1 % v2
       if (r < 0)
-        r + v2
+        if(v2 >= 0)
+          r + v2
+        else
+          r - v2
       else
         r
     }

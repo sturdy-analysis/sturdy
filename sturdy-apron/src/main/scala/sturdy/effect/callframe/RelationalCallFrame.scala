@@ -102,7 +102,7 @@ trait RelationalCallFrame
     val virtAddrs = vars.map((variable, _) =>
       val ctx = localVariableAllocator.alloc((variable, d, Some(site)))
       (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
-    ).toMap
+    )
     addressCallFrame.withNew(d, virtAddrs, site) {
       for ((variable, exprOption) <- vars; expr <- exprOption)
         setLocalByName(variable, expr)

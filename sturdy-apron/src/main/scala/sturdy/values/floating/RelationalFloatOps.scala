@@ -16,9 +16,15 @@ object FloatingLit:
   def apply[L: Numeric: Bounded, Addr, Type](f: L, tpe: Type): ApronExpr[Addr,Type] =
     val d = Numeric[L].toDouble(f)
     if (d.isPosInfinity)
-      constant(Interval(DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue)), DoubleScalar(Double.PositiveInfinity)), tpe)
+      val iv = Interval() // [MaxValue, Infty]
+      iv.setTop()
+      iv.setInf(DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue)))
+      constant(iv, tpe)
     else if (d.isNegInfinity)
-      constant(Interval(DoubleScalar(Double.NegativeInfinity), DoubleScalar(Numeric[L].toDouble(Bounded[L].maxValue))), tpe)
+      val iv = Interval() // [-Infty, MinValue]
+      iv.setTop()
+      iv.setSup(DoubleScalar(Numeric[L].toDouble(Bounded[L].minValue)))
+      constant(iv, tpe)
     else
       ApronExpr.doubleLit(Numeric[L].toDouble(f), tpe)
 

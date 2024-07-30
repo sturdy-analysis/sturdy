@@ -62,7 +62,7 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
     assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.div(integral.fromInt(-1), integral.fromInt(-1)), actual))
   }
 
-  test("shiftLeft([1,1], [-1,-1])") {
+  test("shiftLeft(1, -1)") {
     val (integerOps,soundness) = makeIntegerOps()
     val actual = integerOps.shiftLeft(
       ivOps.constant(integral.fromInt(1)),
@@ -71,6 +71,17 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
     val expected = concreteIntegerOps.shiftLeft(integral.fromInt(1),integral.fromInt(-1))
     assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
   }
+
+  test("shiftRight(-1, 1) == -1") {
+    val (integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.shiftRight(
+      ivOps.constant(integral.fromInt(-1)),
+      ivOps.constant(integral.fromInt(1))
+    )
+    val expected = concreteIntegerOps.shiftRight(integral.fromInt(-1), integral.fromInt(1))
+    assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
+  }
+
 
   test("countLeadingZeros([1,4])") {
     implicit val (integerOps, soundness) = makeIntegerOps()

@@ -116,46 +116,51 @@ trait RelationalBaseIntegerOps
 
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv = apronState.getInterval(v2)
-    if (!Interval(0, 0).isLeq(iv)) {
-      intMod(v1, v2)
-    } else {
-      val resultType = typeIntOps.remainder(v1._type, v2._type)
-      apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-        apronState.join {
-          apronState.addConstraints(lt(intLit(0, y._type), y))
-          apronState.assign(result, intMod(x, y))
-        } {
-          apronState.addConstraints(lt(y, intLit(0, y._type)))
-          apronState.assign(result, intMod(x, y))
-        }
-        addr(result, resultType)
-      }
-    }
-
+    intMod(v1, v2)
 
   override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val absV2 = absolute(v2)
-    intMod(intAdd(intMod(v1, absV2), absV2), absV2)
-//
-//
-//    apronState.withTempVars(resultType, remainder(v1, v2)) { case (result, List(x)) =>
-//      apronState.ifThenElse(lt(x, intLit(0, x._type))) {
-//        apronState.assign(result, intAdd(x, v2))
-//      } {
-//        apronState.assign(result, x)
-//      }
-//      addr(result, resultType)
-//    }
+    val iv1 = apronState.getInterval(v1)
+    if(iv1.inf().sgn() >= 0)
+      intMod(v1, v2)
+    else
+      val iv2 = apronState.getInterval(v2)
+      // We need an absolute without overflow, hence we cannot use this.absolute
+      val absV2 = if(iv2.inf.sgn() >= 0) {
+        v2
+      } else if(iv2.sup.sgn() < 0) {
+        intNegate(v2)
+      } else {
+        unary(UnOp.Sqrt, intPow(v2, intLit(2, v2._type)), typeIntOps.absolute(v2._type))
+      }
+      intMod(intAdd(intMod(v1, absV2), absV2), absV2)
 
   override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    foldInteger(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(32, shift._type)))))
+    val numBits = v._type.byteSize * 8
+    foldInteger(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(numBits, shift._type)))))
 
   override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intDiv(v, intPow(intLit(2, v._type), modulo(shift, intLit(32, shift._type))))
+    val ivV = apronState.getInterval(v)
+    val modShift = modulo(shift, intLit(v._type.byteSize * 8, shift._type))
+    val ivShift = apronState.getInterval(modShift)
+    val resultType = typeIntOps.shiftRight(v._type, shift._type)
+    if(ivV.inf().sgn() >= 0)
+      intDiv(v, intPow(intLit(2, v._type), modShift), resultType)
+    else if(ivV.sup().sgn() < 0)
+      intSub(intDiv(intAdd(v,intLit(1,v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
+    else
+      apronState.withTempVars(resultType) {
+        case (result,List()) =>
+          apronState.ifThenElse(ApronCons.le(intLit(0, v._type), v)) {
+            apronState.assign(result, intDiv(v, intPow(intLit(2, v._type), modShift), resultType))
+          } {
+            apronState.assign(result, intSub(intDiv(intAdd(v,intLit(1,v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType)))
+          }
+          ApronExpr.addr(result, resultType)
+      }
+
 
   override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
@@ -167,7 +172,23 @@ trait RelationalBaseIntegerOps
     ApronExpr.top(typeIntOps.rotateRight(v._type, shift._type))
 
   override def gcd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.gcd(v1._type, v2._type))
+    val absMax1 = absoluteMax(apronState.getInterval(v1))
+    val absMax2 = absoluteMax(apronState.getInterval(v2))
+    val sup = max(absMax1, absMax2)
+    foldInteger(ApronExpr.constant(Interval(DoubleScalar(0.0), sup), typeIntOps.gcd(v1._type, v2._type)))
+
+  private def absoluteMax(iv: Interval): Scalar =
+    max(abs(iv.inf), abs(iv.sup))
+
+  def abs(v: Scalar): Scalar =
+    if(v.sgn() < 0) {
+      v.neg(); v
+    } else {
+      v
+    }
+
+  def max(v1: Scalar, v2: Scalar): Scalar =
+    if(v1.cmp(v2) <= 0) v2 else v1
 
   override def bitAnd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
@@ -179,33 +200,19 @@ trait RelationalBaseIntegerOps
     ApronExpr.top(typeIntOps.bitXor(v1._type, v2._type))
 
   override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.countLeadingZeros(v._type)
-    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-      apronState.ifThenElse(lt(intLit(0, x._type), x)) {
-        apronState.assign(result, intSub(intLit(v._type.byteSize * 8, resultType), mostSignificantBit(x)))
-      } {
-        apronState.assign(result, intLit(0, resultType))
-      }
-      addr(result, resultType)
-    }
-
-  def mostSignificantBit(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intAdd(log(2, v), intLit(1, v._type))
-
-  def log(n: Int, v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val resultType = typeIntOps.countLeadingZeros(v._type)
-    apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-      val resultExpr = addr(result, resultType)
-      apronState.assign(result, ApronExpr.top(resultType))
-      apronState.addConstraints(ApronCons.eq(intPow(intLit(n, resultExpr._type), resultExpr), x))
-      resultExpr
-    }
+    val (low,high) = apronState.getLongInterval(v)
+    val byteSize = v._type.byteSize
+    val leadingZerosHigh = if(byteSize == 4) Integer.numberOfLeadingZeros(high.intValue) else java.lang.Long.numberOfLeadingZeros(high)
+    val leadingZerosLow = if(byteSize == 4) Integer.numberOfLeadingZeros(low.intValue) else java.lang.Long.numberOfLeadingZeros(low)
+    val inf = math.min(leadingZerosLow, leadingZerosHigh)
+    val sup = if(low <= 0 && high >= 0) byteSize * 8 else math.max(leadingZerosLow, leadingZerosHigh)
+    ApronExpr.constant(Interval(inf,sup), typeIntOps.countTrailingZeros(v._type))
 
   override def countTrailingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.countTrailingZeros(v._type))
+    ApronExpr.intInterval(0, v._type.byteSize * 8, typeIntOps.countTrailingZeros(v._type))
 
   override def nonzeroBitCount(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.nonzeroBitCount(v._type))
+    ApronExpr.intInterval(0, v._type.byteSize * 8, typeIntOps.nonzeroBitCount(v._type))
 
   override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.invertBits(v._type))
@@ -267,12 +274,12 @@ trait RelationalBaseIntegerOps
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
+    val resultType = v._type
     if(iv.inf.sgn() >= 0) {
       v
     } else if(iv.sup.sgn() < 0) {
-      intAdd(v, uMax)
+      intAdd(v, uMax, resultType)
     } else {
-      val resultType = v._type
       apronState.withTempVars(resultType, v) { case (result, List(x)) =>
         apronState.ifThenElse(lt(x, intLit(0, x._type))) {
           apronState.assign(result, intAdd(x, uMax, resultType))

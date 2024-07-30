@@ -48,11 +48,12 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
 
-  val spectest = Parsing.fromText(pathSpectest)
+  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     Iterator(
-      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(StackConfig.StackedStates())), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(Octagon(), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
       //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
@@ -66,12 +67,12 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
     manager.toString.contains("Polka") && script == "endianness.wast"
 
   def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
-    val script = Parsing.testscript(scriptPath)
+    val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
     val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis)
     interp.run(script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && p.toString.endsWith("call.wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
       if (isSlow(anl.apronManager, p.getFileName.toString))
@@ -134,7 +135,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
   def run(commands: Seq[Command]): Unit =
     commands.foreach { command =>
       eval(command)
-//      aInterp.garbageCollect()
+      aInterp.garbageCollect()
     }
 
   def getCModule(module: Option[String]): ModuleInstance = module match
