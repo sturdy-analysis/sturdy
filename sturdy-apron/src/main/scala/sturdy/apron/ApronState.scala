@@ -8,7 +8,8 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.values.{Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
 import sturdy.values.booleans.BooleanOps
-import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
+import sturdy.values.references.{*, given}
+import sturdy.values.floating.{*, given}
 import sturdy.data.{*, given}
 
 import scala.annotation.tailrec
@@ -177,16 +178,17 @@ final class ApronRecencyState
   private def combineExpr[W <: Widening](widen: Boolean): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
-    case (ApronExpr.Addr(v1, tpe1), ApronExpr.Addr(v2, tpe2)) if v1.ctx == v2.ctx =>
+    case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) if v1.ctx == v2.ctx =>
       val joinedType = Join(tpe1, tpe2)
+      val joinedSpecials = Join(specials1, specials2)
       relationalStore.copy(PowersetAddr(PhysicalAddress(v1.ctx, Recency.Recent)), PowersetAddr(PhysicalAddress(v1.ctx, Recency.Old)))
       (v1.recency, v2.recency) match
         case (PowRecency.RecentOld,_) | (PowRecency.Old,_) =>
           recencyStore.addressTranslation.joinRecentIntoOld(v1)
-          MaybeChanged(ApronExpr.Addr(v1, joinedType.get), joinedType.hasChanged)
+          MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
         case (_,PowRecency.RecentOld) | (_, PowRecency.Old) =>
           recencyStore.addressTranslation.joinRecentIntoOld(v2)
-          MaybeChanged(ApronExpr.Addr(v1, joinedType.get), joinedType.hasChanged)
+          MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
         case _ => throw IllegalStateException("Impossible state. Covered by [case (e1, e2) if (e1 == e2) => ...]")
     case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
@@ -196,6 +198,7 @@ final class ApronRecencyState
       )
     case (e1,e2) =>
       val joinedType = Join(e1._type, e2._type)
+      val joinedSpecials = Join(e1.floatSpecials, e2.floatSpecials)
       val ctx = temporaryVariableAllocator(joinedType.get)
       val result = recencyStore.addressTranslation.allocOld(ctx)
       val resultExpr = ApronExpr.addr(result, joinedType.get)
