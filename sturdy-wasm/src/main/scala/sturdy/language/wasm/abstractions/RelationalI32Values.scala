@@ -51,7 +51,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] = new EqOps[I32, Bool]:
     override def equ(v1: I32, v2: I32): Bool =
       (v1,v2) match
-        case (Right(c1), Left(i2@ApronExpr.Constant(coeff, tpe))) =>
+        case (Right(c1), Left(i2@ApronExpr.Constant(coeff, _, tpe))) =>
           if(coeff.isEqual(0))
             c1.negated
           else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
@@ -75,7 +75,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
     override def neq(v1: I32, v2: I32): Bool =
       (v1, v2) match
-        case (Right(i1), Left(i2@ApronExpr.Constant(coeff, tpe))) =>
+        case (Right(i1), Left(i2@ApronExpr.Constant(coeff, _, tpe))) =>
           if(coeff.isEqual(0))
             i1
           else if(coeff.isScalar /* && ! coeff.isEqual(0) */)

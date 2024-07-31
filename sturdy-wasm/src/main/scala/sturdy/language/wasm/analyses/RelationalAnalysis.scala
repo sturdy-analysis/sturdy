@@ -150,7 +150,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     final class WasmRelationalStore extends RelationalStore[RelAddr, Type, PowPhysAddr, Value](
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialTypeEnv = Map()
+      initialMetaData = Map()
     ):
       override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
         v match

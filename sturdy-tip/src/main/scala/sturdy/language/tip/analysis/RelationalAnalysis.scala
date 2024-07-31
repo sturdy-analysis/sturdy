@@ -127,7 +127,7 @@ object RelationalAnalysis extends Interpreter,
     val relationalStore: RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialTypeEnv = Map()
+      initialMetaData = Map()
     ):
       override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
         v match

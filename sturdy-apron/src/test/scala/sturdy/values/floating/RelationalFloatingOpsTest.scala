@@ -64,12 +64,12 @@ class RelationalDoubleOpsTest(using Manager) extends FloatOpsTest[Double, ApronE
 
 given RelationalFloatIsInterval: IsInterval[Float, ApronExpr[VirtAddr, Type]] with
   val floatType: Type = Type.FloatType
-  override def constant(i: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
+  override def constant(i: Float): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
   override def interval(low: Float, high: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
 
 given RelationalDoubleIsInterval: IsInterval[Double, ApronExpr[VirtAddr, Type]] with
   val floatType: Type = Type.DoubleType
-  override def constant(i: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
+  override def constant(i: Double): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
 
   override def interval(low: Double, high: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
 

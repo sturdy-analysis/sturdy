@@ -58,9 +58,9 @@ class ApronLibraryTest extends AnyFunSuite:
     val manager: Manager = new Polka(false)
     val aState = new Abstract1(manager, env)
 
-    aState.assign(manager, x, ApronExpr.Constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
-    aState.assign(manager, y, ApronExpr.Constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
-    aState.assign(manager, z, ApronExpr.Constant(Interval(6, 7), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, y, ApronExpr.constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, z, ApronExpr.constant(Interval(6, 7), BaseType[Int]).toIntern(env), null)
     aState.fold(manager, Array(x,y,z))
 
     aState.getBound(manager, x) shouldBe Interval(1,7)
@@ -88,30 +88,30 @@ class ApronLibraryTest extends AnyFunSuite:
       val a2 = new Abstract1(manager, env)
       compare(manager, a1, a2)
 
-      a1.assign(manager, x, ApronExpr.Constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
+      a1.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
       val a1_v1 = new Abstract1(manager, a1)
       val a1_v1_hashcode = a1.hashCode(manager)
       compare(manager, a1, a1_v1)
 
-      a1.assign(manager, y, ApronExpr.Constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
+      a1.assign(manager, y, ApronExpr.constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
       val a1_v2 = new Abstract1(manager, a1)
       val a1_v2_hashcode = a1.hashCode(manager)
       compare(manager, a1, a1_v2)
 
-      a1.assign(manager, z, ApronExpr.Constant(Interval(5, 6), BaseType[Int]).toIntern(env), null)
+      a1.assign(manager, z, ApronExpr.constant(Interval(5, 6), BaseType[Int]).toIntern(env), null)
       val a1_v3 = new Abstract1(manager, a1)
       val a1_v3_hashcode = a1.hashCode(manager)
       compare(manager, a1, a1_v3)
 
-      a2.assign(manager, z, ApronExpr.Constant(Interval(5, 6), BaseType[Int]).toIntern(env), null)
+      a2.assign(manager, z, ApronExpr.constant(Interval(5, 6), BaseType[Int]).toIntern(env), null)
       val a2_v1 = new Abstract1(manager, a2)
       val a2_v1_hashcode = a2.hashCode(manager)
 
-      a2.assign(manager, y, ApronExpr.Constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
+      a2.assign(manager, y, ApronExpr.constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
       val a2_v2 = new Abstract1(manager, a2)
       val a2_v2_hashcode = a2.hashCode(manager)
 
-      a2.assign(manager, x, ApronExpr.Constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
+      a2.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
       val a2_v3 = new Abstract1(manager, a2)
       val a2_v3_hashcode = a2.hashCode(manager)
 

@@ -1,7 +1,8 @@
 package sturdy.apron
 
-import apron.{Coeff, Interval}
+import apron.*
 import gmp.Mpfr
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.integer.IntervalRange
 import sturdy.values.{Join, MaybeChanged, PartialOrder, Top}
 

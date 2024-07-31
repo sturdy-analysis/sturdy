@@ -2,6 +2,7 @@ package sturdy.apron
 
 import apron.{Coeff, Interval, Var}
 import gmp.{Mpfr, Mpq}
+import sturdy.apron
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
@@ -47,6 +48,9 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def widen: Widen[ApronExpr[Addr, Type]]
 
   def getInterval(expr: ApronExpr[Addr, Type]): Interval
+
+  def getFloatInterval(expr: ApronExpr[Addr, Type]): sturdy.apron.FloatInterval
+
   def getIntInterval(expr: ApronExpr[Addr, Type]): (Int,Int) =
     val (lower,upper) = getBigIntInterval(expr)
     (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
@@ -169,6 +173,10 @@ final class ApronRecencyState
 
   inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     relationalStore.getBound(convertExpr.virtToPhys(expr))
+
+  inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
+    relationalStore.getFloatBound(convertExpr.virtToPhys(expr))
+
 
   override def effects: EffectStack = effectStack
 

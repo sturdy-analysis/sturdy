@@ -226,4 +226,7 @@ class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChec
       toIntegerRange(n * BigInt(2).pow(modulo(shift, 32)))
 
     def shiftRight(n: BigInt, shift: Int): BigInt =
-      n / BigInt(2).pow(modulo(shift, 32))
+      if(n >= 0)
+        n / BigInt(2).pow(modulo(shift, 32))
+      else
+        ((n + 1) / BigInt(2).pow(modulo(shift, 32)) - 1)

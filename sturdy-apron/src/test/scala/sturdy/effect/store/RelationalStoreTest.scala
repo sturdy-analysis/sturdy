@@ -46,18 +46,18 @@ class RelationalStoreTest extends AnyFunSuite:
     val xOld = PhysicalAddress("x", Recency.Old)
 
     apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(0, 10, intType))
-    apronStore.getBound(ApronExpr.Addr(xRecent, intType)) shouldBe Interval(0,10)
+    apronStore.getBound(ApronExpr.addr(xRecent, intType)) shouldBe Interval(0,10)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.getBound(ApronExpr.Addr(xOld, intType)) shouldBe Interval(0,10)
+    apronStore.getBound(ApronExpr.addr(xOld, intType)) shouldBe Interval(0,10)
 
     apronStore.write(PowersetAddr(xRecent), ApronExpr.intInterval(15, 20, intType))
-    apronStore.getBound(ApronExpr.Addr(xRecent, intType)) shouldBe Interval(15,20)
+    apronStore.getBound(ApronExpr.addr(xRecent, intType)) shouldBe Interval(15,20)
 
     apronStore.move(PowersetAddr(xRecent), PowersetAddr(xOld))
     apronStore.read(PowersetAddr(xRecent)) shouldBe JOptionA.None()
-    apronStore.getBound(ApronExpr.Addr(xOld, intType)) shouldBe Interval(0,20)
+    apronStore.getBound(ApronExpr.addr(xOld, intType)) shouldBe Interval(0,20)
 
 //    apronStore.addConstraint(ApronCons.intLt[PhysicalAddress[Context],BaseType[Int]](ApronExpr.intLit(10), ApronExpr.addr(xOld, BaseType[Int])))
 //    apronStore.read(PowersetAddr(xOld)) shouldBe JOptionA.Some(ApronExpr.intInterval(11, 20))

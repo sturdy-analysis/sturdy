@@ -12,20 +12,20 @@ import java.math.BigInteger
 import scala.reflect.ClassTag
 
 enum ApronExpr[Addr, +Type]:
-  case Addr(v: ApronVar[Addr], floatSpecials: FloatSpecials, tpe: Type)
-  case Constant(coeff: Coeff, floatSpecials: FloatSpecials, tpe: Type)
+  case Addr(v: ApronVar[Addr], specials: FloatSpecials, tpe: Type)
+  case Constant(coeff: Coeff, specials: FloatSpecials, tpe: Type)
   case Unary(op: UnOp,
              e: ApronExpr[Addr, Type],
              roundingType: RoundingType,
              roundingDir: RoundingDir,
-             floatSpecials: FloatSpecials,
+             specials: FloatSpecials,
              tpe: Type)
   case Binary(op: BinOp,
               l: ApronExpr[Addr, Type],
               r: ApronExpr[Addr, Type],
               roundingType: RoundingType,
               roundingDir: RoundingDir,
-              floatSpecials: FloatSpecials,
+              specials: FloatSpecials,
               tpe: Type)
 
   def _type: Type =
@@ -41,6 +41,18 @@ enum ApronExpr[Addr, +Type]:
       case Constant(_, f, _) => f
       case Unary(_, _, _, _, f, _) => f
       case Binary(_, _, _, _, _, f, _) => f
+
+  def mapFloatSpecials(f: FloatSpecials => FloatSpecials): ApronExpr[Addr,Type] =
+    this match
+      case Addr(a, s, t) => Addr(a, f(s), t)
+      case Constant(c, s, t) => Constant(c, f(s), t)
+      case Unary(op, e, rt, rd, s, t) => Unary(op, e, rt, rd, f(s), t)
+      case Binary(op, e1, e2, rt, rd, s, t) => Binary(op, e1, e2, rt, rd, f(s), t)
+
+  inline def setFloatSpecials(floatSpecials: FloatSpecials): ApronExpr[Addr,Type] = mapFloatSpecials(_ => floatSpecials)
+  inline def setNegInfinity(b: Boolean): ApronExpr[Addr, Type] = mapFloatSpecials(_.setNegInfinity(b))
+  inline def setPosInfinity(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setPosInfinity(b))
+  inline def setNaN(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setNaN(b))
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
@@ -91,43 +103,47 @@ enum ApronExpr[Addr, +Type]:
 
 
 object ApronExpr:
-  inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Bottom, _type)
+  inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Integer, _type)
 
   inline def constant[Addr, Type](iv: Coeff, _type: Type): Constant[Addr, Type] =
-    Constant(iv, FloatSpecials.Bottom, _type)
+    Constant(iv, FloatSpecials.Integer, _type)
 
   inline def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Bottom, tpe)
+    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Integer, tpe)
   inline def longLit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), FloatSpecials.Bottom, tpe)
+    Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), FloatSpecials.Integer, tpe)
   inline def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
     bigIntLit(i.bigInteger, tpe)
   inline def bigIntLit[Addr, Type](i: BigInteger, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Bottom, tpe)
+    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Integer, tpe)
   inline def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
-    Constant(new DoubleScalar(d), FloatSpecials.Bottom, tpe)
+    Constant(new DoubleScalar(d), FloatSpecials.Integer, tpe)
+
+  inline def doubleLit[Addr, Type](d: Double, floatSpecials: FloatSpecials, tpe: Type): Constant[Addr, Type] =
+    Constant(new DoubleScalar(d), floatSpecials, tpe)
+
   inline def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(lower, upper), FloatSpecials.Bottom, tpe)
+    Constant(Interval(lower, upper), FloatSpecials.Integer, tpe)
   inline def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), FloatSpecials.Bottom, tpe)
+    Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), FloatSpecials.Integer, tpe)
   inline def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), FloatSpecials.Bottom, tpe)
+    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), FloatSpecials.Integer, tpe)
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
-    Constant(topInterval, FloatSpecials.Bottom, tpe)
+    Constant(topInterval, FloatSpecials.Integer, tpe)
 
   inline def booleanLit[Addr, Type](using booleanOps: BooleanOps[Type])(b: Boolean): Constant[Addr, Type] =
     val n = if (b) 1 else 0
-    Constant(new MpqScalar(new Mpz(n)), FloatSpecials.Bottom, booleanOps.boolLit(b))
+    Constant(new MpqScalar(new Mpz(n)), FloatSpecials.Integer, booleanOps.boolLit(b))
 
   inline def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
-    unary(op, e1, FloatSpecials.Bottom, resultType)
+    unary(op, e1, FloatSpecials.Integer, resultType)
 
   inline def unary[Addr, Type: ApronType](op: UnOp, e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Unary(op, e1, resultType.roundingType, resultType.roundingDir, floatSpecials, resultType)
 
   inline def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], resultType: Type): ApronExpr[Addr, Type] =
-    binary(op, e1, e2, FloatSpecials.Bottom, resultType)
+    binary(op, e1, e2, FloatSpecials.Integer, resultType)
 
   inline def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Binary(op, e1, e2, resultType.roundingType, resultType.roundingDir, floatSpecials, resultType)
@@ -168,28 +184,36 @@ object ApronExpr:
     binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
 
   inline def cast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, tpe: Type): ApronExpr[Addr, Type] =
-    Unary(UnOp.Cast, e, roundingType, roundingDir, FloatSpecials.Bottom, tpe)
+    Unary(UnOp.Cast, e, roundingType, roundingDir, FloatSpecials.Integer, tpe)
 
-  inline def floatAdd[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Add, e1, e2, floatOps.add(e1._type, e2._type))
 
-  inline def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Sub, e1, e2, floatOps.sub(e1._type, e2._type))
+  inline def floatConstant[Addr, Type](coeff: Coeff, floatSpecials: FloatSpecials, _type: Type): Constant[Addr, Type] =
+    Constant(coeff, floatSpecials, _type)
 
-  inline def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatAdd[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
+    binary(BinOp.Add, e1, e2, floatSpecials, floatOps.add(e1._type, e2._type))
+
+  inline def floatSub[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
+    binary(BinOp.Sub, e1, e2, floatSpecials, floatOps.sub(e1._type, e2._type))
+
+  inline def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
     binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))
 
-  inline def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
     binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))
 
-  inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, floatOps.negated(e1._type))
+  inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, floatSpecials, floatOps.negated(e1._type))
 
-  inline def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    unary(UnOp.Sqrt, e1, floatOps.sqrt(e1._type))
+  inline def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
+    unary(UnOp.Sqrt, e1, floatSpecials, floatOps.sqrt(e1._type))
 
-  inline def floatPow[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Pow, e1, e2, floatOps.mul(e1._type, e2._type))
+  inline def floatPow[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
+    binary(BinOp.Pow, e1, e2, floatSpecials, floatOps.mul(e1._type, e2._type))
+
+  inline def floatCast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[Addr, Type] =
+    Unary(UnOp.Cast, e, roundingType, roundingDir, floatSpecials, tpe)
+
 
   inline def topInterval: Interval =
     val topItv = new Interval()
@@ -197,7 +221,7 @@ object ApronExpr:
     topItv
 
   inline def topConstant[Type](_type: Type): Constant[_, Type] =
-    Constant(topInterval, FloatSpecials.Bottom, _type)
+    Constant(topInterval, FloatSpecials.Top, _type)
 
   inline def bottomInterval: Interval =
     val itv = new Interval()
