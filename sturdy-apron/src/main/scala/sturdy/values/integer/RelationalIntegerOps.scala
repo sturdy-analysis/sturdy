@@ -331,14 +331,6 @@ given RelationalIntOps
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
 
-given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Int, ApronExpr[Addr, Type]] with
-  override def isSound(c: Int, expr: ApronExpr[Addr, Type]): IsSound =
-    val iv = apronState.getInterval(expr)
-    if (Interval(c, c).isLeq(iv))
-      IsSound.Sound
-    else
-      IsSound.NotSound(s"$expr with interval $iv does not contain $c")
-
 given RelationalLongOps
   [
     Addr : Ordering: ClassTag,
@@ -356,6 +348,15 @@ given RelationalLongOps
 
   override def randomInteger(): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.randomInteger())
+
+
+given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Int, ApronExpr[Addr, Type]] with
+  override def isSound(c: Int, expr: ApronExpr[Addr, Type]): IsSound =
+    val iv = apronState.getInterval(expr)
+    if (Interval(c, c).isLeq(iv))
+      IsSound.Sound
+    else
+      IsSound.NotSound(s"$expr with interval $iv does not contain $c")
 
 given SoundnessLongApronExpr[Addr, Type](using apronState: ApronState[Addr,Type]): Soundness[Long, ApronExpr[Addr,Type]] with
   override def isSound(c: Long, expr: ApronExpr[Addr, Type]): IsSound =

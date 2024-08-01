@@ -82,7 +82,7 @@ enum ApronExpr[Addr, +Type]:
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
-    case Constant(coeff, _, _) => coeff.toString
+    case Constant(coeff, floatSpecials, _) => new sturdy.apron.FloatInterval(coeff.inf(), coeff.sup(), floatSpecials).toString
     case Unary(op, e, _, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
 

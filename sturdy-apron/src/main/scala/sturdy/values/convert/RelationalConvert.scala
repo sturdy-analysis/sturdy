@@ -151,21 +151,31 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
         val iv = apronState.getFloatInterval(from)
         if(iv.isLeq(FInterval(Math.nextUp(signedMinFail), Math.nextDown(signedMaxFail), FloatSpecials.Bottom))) {
           cast(from, RoundingType.Int, RoundingDir.Zero, toType)
-        } else {
-          apronState.withTempVars(toType) {
-            (res, _) =>
-              val resExpr = addr(res, toType)
-              apronState.assign(res, cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-              apronState.ifThenElse(le(resExpr, doubleLit(signedMinFail, toType))) {
-                apronState.assign(res, bigIntLit(signedMinVal, toType))
-              } {
-                apronState.ifThenElse(le(doubleLit(signedMaxFail, toType), resExpr)) {
-                  apronState.assign(res, bigIntLit(signedMaxVal, toType))
-                } {
-                }
-              }
-              resExpr
+        } else if(iv.onlySpecials) {
+          val specials = iv.floatSpecials
+          var resultIv = Interval()
+          if(specials.negInfinity)
+            resultIv = Join(resultIv, Interval(MpqScalar(signedMinVal),MpqScalar(signedMinVal))).get
+          if(specials.posInfinity)
+            resultIv = Join(resultIv, Interval(MpqScalar(signedMaxVal), MpqScalar(signedMaxVal))).get
+          if(specials.nan)
+            resultIv = Join(resultIv, Interval(0,0)).get
+          constant(resultIv, toType)
+        } else { // iv.onlySpecials == false, i.e., the interval contains regular floating point numbers
+          var resultIv = Interval(iv.nonSpecialInf, iv.nonSpecialSup)
+          if(iv.inf().cmp(DoubleScalar(signedMinFail)) <= 0) {
+            resultIv.setInf(MpqScalar(signedMinVal))
+            if(resultIv.isBottom)
+              resultIv.setSup(MpqScalar(signedMinVal))
           }
+          if (DoubleScalar(signedMaxFail).cmp(iv.sup()) <= 0) {
+            resultIv.setSup(MpqScalar(signedMaxVal))
+            if (resultIv.isBottom)
+              resultIv.setInf(MpqScalar(signedMaxVal))
+          }
+          if(iv.floatSpecials.nan)
+            resultIv = Join(resultIv, Interval(0,0)).get
+          cast(constant(resultIv, fromType), RoundingType.Int, RoundingDir.Zero, toType)
         }
 
       case (Overflow.Fail && Bits.Unsigned) =>
@@ -185,22 +195,47 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
 
       case (Overflow.JumpToBounds && Bits.Unsigned) =>
         val iv = apronState.getFloatInterval(from)
-        if(iv.isLeq(FInterval(Math.nextUp(unsignedMinJump), Math.nextDown(unsignedMaxJump), FloatSpecials.Bottom)))
+        if(iv.isLeq(FInterval(Math.nextUp(unsignedMinJump), Math.nextDown(unsignedMaxJump), FloatSpecials.Bottom))) {
           integerOps.interpretUnsignedAsSigned(cast(from, RoundingType.Int, RoundingDir.Zero, toType))
-        else
-          apronState.withTempVars(toType, cast(from, RoundingType.Int, RoundingDir.Zero, toType)) {
-            case (res, List(x)) =>
-              apronState.ifThenElse(le(x, doubleLit(unsignedMinJump, toType))) {
-                apronState.assign(res, intLit(0, toType))
-              } {
-                apronState.ifThenElse(le(doubleLit(unsignedMaxJump, toType), x)) {
-                  apronState.assign(res, intLit(-1, toType))
-                } {
-                  apronState.assign(res, integerOps.foldInteger(x))
-                }
-              }
-              addr(res, toType)
+        } else if (iv.onlySpecials) {
+          val specials = iv.floatSpecials
+          var resultIv = Interval()
+          resultIv.setBottom()
+          if (specials.negInfinity)
+            resultIv = Join(resultIv, Interval(unsignedMinVal,unsignedMinVal)).get
+          if (specials.posInfinity)
+            resultIv = Join(resultIv, Interval(-1,-1)).get
+          if (specials.nan)
+            resultIv = Join(resultIv, Interval(0, 0)).get
+          constant(resultIv, toType)
+        } else { // iv.onlySpecials == false, i.e., the interval contains regular floating point numbers
+          var resultIv = Interval(iv.nonSpecialInf, iv.nonSpecialSup)
+          if (iv.inf().cmp(DoubleScalar(unsignedMinJump)) <= 0) {
+            resultIv.setInf(MpqScalar(unsignedMinVal))
+            if (resultIv.isBottom)
+              resultIv.setSup(MpqScalar(unsignedMinVal))
           }
+          if (MpqScalar(signedMaxVal).cmp(iv.sup()) <= 0) {
+            resultIv.setInf(MpqScalar(signedMinVal))
+            resultIv.setSup(MpqScalar(signedMaxVal))
+          }
+          if (iv.floatSpecials.nan)
+            resultIv = Join(resultIv, Interval(0, 0)).get
+          cast(constant(resultIv, fromType), RoundingType.Int, RoundingDir.Zero, toType)
+        }
+//          apronState.withTempVars(toType, cast(from, RoundingType.Int, RoundingDir.Zero, toType)) {
+//            case (res, List(x)) =>
+//              apronState.ifThenElse(le(x, doubleLit(unsignedMinJump, toType))) {
+//                apronState.assign(res, intLit(0, toType))
+//              } {
+//                apronState.ifThenElse(le(doubleLit(unsignedMaxJump, toType), x)) {
+//                  apronState.assign(res, intLit(-1, toType))
+//                } {
+//                  apronState.assign(res, integerOps.foldInteger(x))
+//                }
+//              }
+//              addr(res, toType)
+//          }
 
 given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
@@ -261,7 +296,7 @@ given RelationalConvertBytesLong[Addr: Ordering: ClassTag, Type: ApronType, Conf
   def apply(_from: Interval, config: Config) = constant(Interval(BigInt(Long.MinValue).bigInteger, BigInt(Long.MaxValue).bigInteger), typeIntegerOps.integerLit(0))
 
 given RelationalConvertBytesFloat[Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]](using typeFloatOps: FloatOps[Float,Type]): Convert[Seq[Byte], Float, Interval, ApronExpr[Addr,Type], Config] with
-  def apply(_from: Interval, config: Config) = ApronExpr.top(typeFloatOps.floatingLit(0))
+  def apply(_from: Interval, config: Config) = ApronExpr.floatConstant(Interval(Float.MinValue,Float.MaxValue), FloatSpecials.Top, typeFloatOps.floatingLit(0))
 
 given RelationalConvertBytesDouble[Addr: Ordering : ClassTag, Type: ApronType, Config <: ConvertConfig[_]] (using typeFloatOps: FloatOps[Double, Type]): Convert[Seq[Byte], Double, Interval, ApronExpr[Addr, Type], Config] with
-  def apply(_from: Interval, config: Config) = ApronExpr.top(typeFloatOps.floatingLit(0))
+  def apply(_from: Interval, config: Config) = ApronExpr.floatConstant(Interval(Double.MinValue,Double.MaxValue), FloatSpecials.Top, typeFloatOps.floatingLit(0))

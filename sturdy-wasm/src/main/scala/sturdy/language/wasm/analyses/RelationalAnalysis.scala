@@ -61,10 +61,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   import Type.*
 
   final override def topI64: I64 = constant(Interval(BigInt(Long.MinValue).bigInteger, BigInt(Long.MaxValue).bigInteger), I64Type)
-
-  final override def topF32: F32 = ApronExpr.top(F32Type)
-
-  final override def topF64: F64 = ApronExpr.top(F64Type)
+  final override def topF32: F32 = ApronExpr.floatConstant(Interval(Float.MinValue, Float.MaxValue), FloatSpecials.Top, F32Type)
+  final override def topF64: F64 = ApronExpr.floatConstant(Interval(Double.MinValue, Double.MaxValue), FloatSpecials.Top, F64Type)
 
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = topI32

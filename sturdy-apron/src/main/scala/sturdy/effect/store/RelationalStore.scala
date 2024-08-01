@@ -44,7 +44,10 @@ trait RelationalStore
   inline def abstract1: Abstract1 = _abstract1
 
   inline def getType(powAddr: PowAddr): JOptionA[Type] =
-    powAddr.reduce(addr => JOptionA(metaData.get(addr).map(_._2)))
+    getMetaData(powAddr).map(_._2)
+
+  inline def getMetaData(powAddr: PowAddr): JOptionA[(FloatSpecials, Type)] =
+    powAddr.reduce(addr => JOptionA(metaData.get(addr)))
 
   override def read(powAddr: PowAddr): JOptionA[Val] =
     if(powAddr.isEmpty)

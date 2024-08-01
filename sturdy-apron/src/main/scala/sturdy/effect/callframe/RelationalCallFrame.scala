@@ -93,7 +93,7 @@ trait RelationalCallFrame
   private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
     virts.reduce {
       virt =>
-        val v1 = apronState.relationalStore.getType(virt.physical).map(tpe => makeRelationalVal(ApronExpr.addr(virt, tpe)))
+        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => makeRelationalVal(ApronExpr.Addr(virt, floatSpecials, tpe)))
         val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
         Join(v1, v2).get
     }.toJOptionC
