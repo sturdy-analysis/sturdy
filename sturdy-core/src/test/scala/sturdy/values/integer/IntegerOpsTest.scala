@@ -225,12 +225,12 @@ class IntegerOpsTest
 
     test(testName + " intervals") {
       forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
-        case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
+        case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
             implicit val (integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x, y),
-              testFun(integerOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2))
+              testFun(integerOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials))
             ))
           }
       }
@@ -253,12 +253,12 @@ class IntegerOpsTest
 
     test(testName + " interval") {
       forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]")) {
-        case Interval(x1, x, x2) =>
+        case Interval(x1, x, x2, xSpecials) =>
           whenever(precondition(x)) {
             implicit val (integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x),
-              testFun(integerOps, ivOps.interval(x1, x2))
+              testFun(integerOps, ivOps.interval(x1, x2, xSpecials))
             ))
           }
       }

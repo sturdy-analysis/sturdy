@@ -117,6 +117,7 @@ enum FixIn:
       case If(_, _, _) => s"If @$loc"
       case _ => s"$i @$loc"
     case EnterWasmFunction(id, _, _) => s"Enter $id"
+    case EnterHostFunction(id, _) => s"Enter $id"
     case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
 
 given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Option[Int]]]] {

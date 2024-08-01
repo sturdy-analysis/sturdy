@@ -16,13 +16,9 @@ class NumericIntervalIntervalEqOps[I](using ordering: Ordering[I])
 given Structural[Int] with {}
 
 class NumericIntervalIntEqOpsTest extends EqOpsTest[Int, NumericInterval[Int], Topped[Boolean]](
-  minValue = Integer.MIN_VALUE,
-  maxValue = Integer.MAX_VALUE,
   makeEqOps = new NumericIntervalIntervalEqOps
 )
 
 class NumericIntervalLongEqOpsTest extends EqOpsTest[Long, NumericInterval[Long], Topped[Boolean]](
-  minValue = Long.MinValue,
-  maxValue = Long.MaxValue,
   makeEqOps = new NumericIntervalIntervalEqOps
 )

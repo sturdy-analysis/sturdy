@@ -18,13 +18,11 @@ trait IntervalEqOps[L,V,B] extends EqOps[V,B]:
 
 class EqOpsTest
   [
-    L: Integral: Choose: Arbitrary: Ordering: Structural: Bounded,
+    L: Numeric: Choose: Arbitrary: Ordering: Structural: Bounded,
     V,
     B
   ]
   (
-    minValue: L,
-    maxValue: L,
     makeEqOps: => IntervalEqOps[L,V, B]
   )
   (using
@@ -58,8 +56,8 @@ class EqOpsTest
     }
 
     test(testName + " interval") {
-      forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
-        case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
+      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
+        case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           val eqOps = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(
             expectedFun(x, y),
@@ -70,24 +68,24 @@ class EqOpsTest
 
   test("1 == 1") {
     val eqOps = makeEqOps
-    eqOps.getBool(eqOps.equ(ivOps.constant(Integral[L].fromInt(1)), ivOps.constant(Integral[L].fromInt(1)))) shouldBe
+    eqOps.getBool(eqOps.equ(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(1)))) shouldBe
       Topped.Actual(true)
   }
 
   test("1 == 2") {
     val eqOps = makeEqOps
-    eqOps.getBool(eqOps.equ(ivOps.constant(Integral[L].fromInt(1)), ivOps.constant(Integral[L].fromInt(2)))) shouldBe
+    eqOps.getBool(eqOps.equ(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(2)))) shouldBe
       Topped.Actual(false)
   }
 
   test("1 != 1") {
     val eqOps = makeEqOps
-    eqOps.getBool(eqOps.neq(ivOps.constant(Integral[L].fromInt(1)), ivOps.constant(Integral[L].fromInt(1)))) shouldBe
+    eqOps.getBool(eqOps.neq(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(1)))) shouldBe
       Topped.Actual(false)
   }
 
   test("1 != 2") {
     val eqOps = makeEqOps
-    eqOps.getBool(eqOps.neq(ivOps.constant(Integral[L].fromInt(1)), ivOps.constant(Integral[L].fromInt(2)))) shouldBe
+    eqOps.getBool(eqOps.neq(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(2)))) shouldBe
       Topped.Actual(true)
   }

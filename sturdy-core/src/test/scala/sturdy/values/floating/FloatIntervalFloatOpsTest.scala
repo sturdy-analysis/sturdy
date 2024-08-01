@@ -12,7 +12,7 @@ given Ordering[Float] = scala.math.Ordering.Float.TotalOrdering
 
 given FloatIsInterval: IsInterval[Float, FloatInterval] with
   override def constant(i: Float): FloatInterval = FloatInterval(i,i)
-  override def interval(low: Float, high: Float) = FloatInterval(low,high)
+  override def interval(low: Float, high: Float, floatSpecials: FloatSpecials) = FloatInterval(low,high)
 
 
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](

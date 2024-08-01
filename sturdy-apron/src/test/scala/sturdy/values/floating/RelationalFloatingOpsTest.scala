@@ -22,12 +22,14 @@ import sturdy.values.types.{BaseType, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-class ApronFloatingOpsTests extends Suites(
+class RelationalFloatingOpsTest extends Suites(
   new PolyhedraFloatingOpsTests,
-  new OctagonFloatingOpsTests
+  new OctagonFloatingOpsTests,
+  new BoxFloatingOpsTests
 )
 class PolyhedraFloatingOpsTests extends RelationalFloatingOpsTests(Polka(true))
 class OctagonFloatingOpsTests extends RelationalFloatingOpsTests(Octagon())
+class BoxFloatingOpsTests extends RelationalFloatingOpsTests(Box())
 
 class RelationalFloatingOpsTests(manager: Manager) extends Suites(
   RelationalFloatOpsTest(using manager),
@@ -65,13 +67,14 @@ class RelationalDoubleOpsTest(using Manager) extends FloatOpsTest[Double, ApronE
 given RelationalFloatIsInterval: IsInterval[Float, ApronExpr[VirtAddr, Type]] with
   val floatType: Type = Type.FloatType
   override def constant(i: Float): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
-  override def interval(low: Float, high: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
+  override def interval(low: Float, high: Float, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    ApronExpr.floatConstant(Interval(low, high), floatSpecials, floatType)
 
 given RelationalDoubleIsInterval: IsInterval[Double, ApronExpr[VirtAddr, Type]] with
   val floatType: Type = Type.DoubleType
   override def constant(i: Double): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
-
-  override def interval(low: Double, high: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
+  override def interval(low: Double, high: Double, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    ApronExpr.floatConstant(Interval(low, high), floatSpecials, floatType)
 
 final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) extends FloatOps[B,V]:
   override def floatingLit(f: B): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floatingLit(f) }

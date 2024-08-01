@@ -157,11 +157,11 @@ class FloatOpsTest
 
     test(testName + " intervals") {
       forAll((genInterval[L](minValue,maxValue), "x ∈ [x1,x2]"), (genInterval[L](minValue,maxValue), "y ∈ [y1,y2]")) {
-        case (Interval(x1, x, x2), Interval(y1, y, y2)) =>
+        case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
             implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x, y)
-            val actual = testFun(floatOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2))
+            val actual = testFun(floatOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }
@@ -182,11 +182,11 @@ class FloatOpsTest
 
     test(testName + " interval") {
       forAll((genInterval(minValue, maxValue), "x ∈ [x1,x2]")) {
-        case Interval(x1, x, x2) =>
+        case Interval(x1, x, x2, xSpecials) =>
           whenever(precondition(x)) {
             implicit val (floatOps,soundness) = makeFloatOps
             val expected = expectedFun(x)
-            val actual = testFun(floatOps, ivOps.interval(x1, x2))
+            val actual = testFun(floatOps, ivOps.interval(x1, x2, xSpecials))
             assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
           }
       }

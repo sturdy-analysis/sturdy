@@ -18,11 +18,13 @@ import sturdy.values.references.{*, given}
 
 class ApronJoinTests extends Suites(
   PolyhedraJoinTest(),
-  OctagonJoinTest()
+  OctagonJoinTest(),
+  BoxJoinTest()
 )
 
 class PolyhedraJoinTest extends ApronJoinTest(using new Polka(true))
 class OctagonJoinTest extends ApronJoinTest(using new Octagon)
+class BoxJoinTest extends ApronJoinTest(using new Box)
 
 class ApronJoinTest(using manager: apron.Manager) extends AnyFunSuite:
 
@@ -118,10 +120,16 @@ class ApronJoinTest(using manager: apron.Manager) extends AnyFunSuite:
       apronState.getIntInterval(zAddr) shouldBe(10, 20)
 
       apronState.getIntInterval(ApronExpr.intAdd(xAddr, yAddr, Type.IntType)) shouldBe(0, 30)
-      apronState.getIntInterval(ApronExpr.intSub(xAddr, yAddr, Type.IntType)) shouldBe(0, 20)
+      if(manager.isInstanceOf[Box])
+        apronState.getIntInterval(ApronExpr.intSub(xAddr, yAddr, Type.IntType)) shouldBe(-10, 20)
+      else
+        apronState.getIntInterval(ApronExpr.intSub(xAddr, yAddr, Type.IntType)) shouldBe(0, 20)
 
       apronState.getIntInterval(ApronExpr.intAdd(zAddr, xAddr, Type.IntType)) shouldBe(10, 40)
-      apronState.getIntInterval(ApronExpr.intSub(zAddr, xAddr, Type.IntType)) shouldBe(0, 20)
+      if(manager.isInstanceOf[Box])
+        apronState.getIntInterval(ApronExpr.intSub(zAddr, xAddr, Type.IntType)) shouldBe(-10, 20)
+      else
+        apronState.getIntInterval(ApronExpr.intSub(zAddr, xAddr, Type.IntType)) shouldBe(0, 20)
 
       apronState.getIntInterval(ApronExpr.intAdd(zAddr, yAddr, Type.IntType)) shouldBe(10, 30)
       apronState.getIntInterval(ApronExpr.intSub(zAddr, yAddr, Type.IntType)) shouldBe(0, 20)

@@ -6,14 +6,14 @@ import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
 import sturdy.util.{*, given}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.{Finite, Top}
 
 import math.Ordered.orderingToOrdered
 
 given NumericIntervalIsInterval[I: Ordering]: IsInterval[I, NumericInterval[I]] with
   override def constant(i: I): NumericInterval[I] = NumericInterval(i, i)
-
-  override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low, high)
+  override def interval(low: I, high: I, floatSpecials: FloatSpecials): NumericInterval[I] = NumericInterval(low, high)
 
 given IntegerOps[Int, Int] = ConcreteIntegerOps(using new ConcreteFailure())
 given IntegerOps[Long, Long] = ConcreteLongOps(using new ConcreteFailure())

@@ -42,8 +42,15 @@ given ConvertDoubleLong[Double,Long] = WithNearestRoundingMode(ConcreteConvertDo
 given ConvertDoubleInt[Double,Int] = WithNearestRoundingMode(ConcreteConvertDoubleInt(using new ConcreteFailure))
 given ConvertLongFloat[Long,Float] = WithNearestRoundingMode(ConcreteConvertLongFloat(using new ConcreteFailure))
 
-class PolyhedraConvertTests extends RelationalConvertTests(Polka(true))
-class OctagonConvertTests extends RelationalConvertTests(Octagon())
+class RelationalConvertTest extends Suites(
+  new PolyhedraConvertTest,
+  new OctagonConvertTest,
+  new BoxConvertTest,
+)
+
+class PolyhedraConvertTest extends RelationalConvertTests(Polka(true))
+class OctagonConvertTest extends RelationalConvertTests(Octagon())
+class BoxConvertTest extends RelationalConvertTests(Box())
 
 class RelationalConvertTests(manager: Manager) extends Suites(
   RelationalConvertIntLongTest(using manager),

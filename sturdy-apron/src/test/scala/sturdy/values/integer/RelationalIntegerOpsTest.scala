@@ -24,13 +24,21 @@ import sturdy.util.TestTypes.{*, given}
 import sturdy.util.TestContexts.{*, given}
 import sturdy.util.IsInterval
 import sturdy.values.convert.{*, given}
+import sturdy.values.floating.FloatSpecials
 
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
+class RelationalIntegerOpsTest extends Suites(
+  new PolyhedraIntegerOpsTest,
+  new OctagonIntegerOpsTest,
+  new BoxIntegerOpsTest
+)
+
 //class ElinaPolyhedraIntegerOpsTest extends RelationalIntegerOpsTests(elina.OptPoly(false))
 class PolyhedraIntegerOpsTest extends RelationalIntegerOpsTests(Polka(true))
 class OctagonIntegerOpsTest extends RelationalIntegerOpsTests(Octagon())
+class BoxIntegerOpsTest extends RelationalIntegerOpsTests(Box())
 
 class RelationalIntegerOpsTests(manager: Manager) extends Suites(
   RelationalIntOpsTest(using manager),
@@ -101,14 +109,16 @@ given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with
 
   override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
 
-  override def interval(low: Int, high: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intInterval(low, high, intType)
+  override def interval(low: Int, high: Int, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    ApronExpr.intInterval(low, high, intType)
 
 given RelationalLongInterval: IsInterval[Long, ApronExpr[VirtAddr, Type]] with
   val longType: Type = Type.LongType
 
   override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
 
-  override def interval(low: Long, high: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longInterval(low, high, longType)
+  override def interval(low: Long, high: Long, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    ApronExpr.longInterval(low, high, longType)
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
   def chooseInt: Gen[Int] = Gen.chooseNum(Integer.MIN_VALUE, Integer.MAX_VALUE)
