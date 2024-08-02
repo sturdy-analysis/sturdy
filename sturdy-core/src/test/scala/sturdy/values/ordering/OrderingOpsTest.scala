@@ -22,6 +22,7 @@ class OrderingOpsTest
     B
   ]
   (
+    specials: Seq[L],
     makeOrderingOps: => TestingOrderingOps[L,V, B]
   )
   (using
@@ -60,7 +61,7 @@ class OrderingOpsTest
 
   def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (TestingOrderingOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
     test(testName) {
-      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
+      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
             val orderingOps = makeOrderingOps

@@ -18,16 +18,22 @@ given NumericIntervalIsInterval[I: Ordering]: IsInterval[I, NumericInterval[I]] 
 given IntegerOps[Int, Int] = ConcreteIntegerOps(using new ConcreteFailure())
 given IntegerOps[Long, Long] = ConcreteLongOps(using new ConcreteFailure())
 
-class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](() => {
-  given failure: Failure = new CollectedFailures[FailureKind]
-  given Finite[FailureKind] with {}
-  given effectState: EffectStack = EffectStack(failure)
-  (new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
-})
+class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
+  makeIntegerOps = () => {
+    given failure: Failure = new CollectedFailures[FailureKind]
+    given Finite[FailureKind] with {}
+    given effectState: EffectStack = EffectStack(failure)
+    (new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
+  }
+)
 
-class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]](() => {
-  given failure: Failure = new CollectedFailures[FailureKind]
-  given Finite[FailureKind] with {}
-  given effectState: EffectStack = EffectStack(failure)
-  (new NumericIntervalIntegerOps[Long](20), SoundnessNumericInterval)
-})
+class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]](
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  makeIntegerOps = () => {
+    given failure: Failure = new CollectedFailures[FailureKind]
+    given Finite[FailureKind] with {}
+    given effectState: EffectStack = EffectStack(failure)
+    (new NumericIntervalIntegerOps[Long](20), SoundnessNumericInterval)
+  }
+)

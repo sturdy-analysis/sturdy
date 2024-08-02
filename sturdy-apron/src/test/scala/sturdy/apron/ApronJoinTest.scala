@@ -3,30 +3,139 @@ package sturdy.apron
 import org.scalatest.funsuite.AnyFunSuite
 import apron.*
 import gmp.*
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen.Choose
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.Suites
 import org.scalatest.matchers.should.Matchers.*
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
+import sturdy.{IsSound, Soundness}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
+import sturdy.util.GenInterval.{Interval, genConstant, genInterval}
 import sturdy.util.TestContexts.Ctx
 import sturdy.util.TestTypes.Type
 import sturdy.util.{*, given}
-import sturdy.values.{Finite, Join}
+import sturdy.values.{*, given}
 import sturdy.values.types.BaseType
-import sturdy.values.integer.BaseTypeIntegerOps
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.references.{*, given}
 
-class ApronJoinTests extends Suites(
+class ApronJoinTest extends Suites(
   PolyhedraJoinTest(),
   OctagonJoinTest(),
   BoxJoinTest()
 )
 
-class PolyhedraJoinTest extends ApronJoinTest(using new Polka(true))
-class OctagonJoinTest extends ApronJoinTest(using new Octagon)
-class BoxJoinTest extends ApronJoinTest(using new Box)
+class PolyhedraJoinTest extends RelationalJoinTests(using new Polka(true))
+class OctagonJoinTest extends RelationalJoinTests(using new Octagon)
+class BoxJoinTest extends RelationalJoinTests(using new Box)
 
-class ApronJoinTest(using manager: apron.Manager) extends AnyFunSuite:
+class RelationalJoinTests(using manager: apron.Manager) extends Suites(
+  new RelationalIntJoinTest,
+  new RelationalLongJoinTest,
+  new RelationalFloatJoinTest,
+  new RelationalDoubleJoinTest,
+)
+
+class RelationalIntJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Int](
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
+  soundness = SoundnessIntApronExpr[VirtAddr,Type]
+)
+class RelationalLongJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Long](
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  soundness = SoundnessLongApronExpr[VirtAddr,Type]
+)
+class RelationalFloatJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Float](
+  specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
+  soundness = SoundnessFloatApronExpr[VirtAddr,Type]
+)
+class RelationalDoubleJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Double](
+  specials = List(Double.MinValue, -0.5f, 0.0f, 0.5f, Double.MaxValue),
+  soundness = SoundnessDoubleApronExpr[VirtAddr,Type]
+)
+
+class RelationalJoinTest
+  [L: Numeric: Choose: Bounded]
+  (
+    specials: Seq[L],
+    soundness: ApronState[VirtAddr,Type] ?=> Soundness[L, ApronExpr[VirtAddr,Type]]
+  )
+  (using
+   manager: apron.Manager,
+   ivOps: IsInterval[L,ApronExpr[VirtAddr,Type]]
+  ) extends AnyFunSuite:
+
+  val minValue = Bounded[L].minValue
+  val maxValue = Bounded[L].maxValue
+
+  combineTest("Join[ApronExpr]", Join[ApronExpr[VirtAddr,Type]](_,_))
+  combineTest("Widen[ApronExpr]", Widen[ApronExpr[VirtAddr,Type]](_,_))
+  combineTest("ApronState.join", { (e1, e2) =>
+    val apronState = implicitly[ApronState[VirtAddr, Type]]
+    val iv1 = apronState.getFloatInterval(e1)
+    val joinedExpr = apronState.withTempVars(e1._type) {
+      case (result, _) =>
+        apronState.join {
+          apronState.assign(result, e1)
+        } {
+          apronState.assign(result, e2)
+        }
+        ApronExpr.Addr(result, Join(e1.floatSpecials, e2.floatSpecials).get, e1._type)
+    }
+    val joinedIv = apronState.getFloatInterval(joinedExpr)
+    MaybeChanged(joinedExpr, ! joinedIv.isLeq(iv1))
+  })
+
+  def combineTest(combineName: String, combine: (ApronState[VirtAddr, Type],Lazy[ApronState[VirtAddr, Type]]) ?=> (e1: ApronExpr[VirtAddr,Type], e2: ApronExpr[VirtAddr,Type]) => MaybeChanged[ApronExpr[VirtAddr,Type]]) =
+    test(combineName + " constant") {
+      forAll((genConstant[L](minValue, maxValue, specials*), "x"), (genConstant[L](minValue, maxValue, specials*), "y")) {
+        case (x, y) =>
+          withApronState {
+            val apronState = implicitly[ApronState[VirtAddr, Type]]
+            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+
+            val joined = combine(ivOps.constant(x), ivOps.constant(y))
+
+            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
+            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
+
+            val xIv = apronState.getFloatInterval(ivOps.constant(x))
+            val joinedIv = apronState.getFloatInterval(joined.get)
+
+            if(joinedIv.isLeq(xIv))
+              assert(joined.hasChanged == false, s", expression ${ivOps.constant(x)} with interval $xIv is equivalent to expression ${joined.get} with interval ${joinedIv}, but got joined.hasChanged = true")
+            else
+              assert(joined.hasChanged == true, s", expression ${ivOps.constant(x)} with interval $xIv is strictly smaller than expression ${joined.get} with interval ${joinedIv}, but got joined.hasChanged = false")
+          }
+      }
+    }
+
+    test(combineName + " interval") {
+      forAll((genInterval[L](minValue, maxValue, specials *), "x"), (genInterval[L](minValue, maxValue, specials *), "y")) {
+        case (GenInterval.Interval(x1, x, x2, xSpecials), GenInterval.Interval(y1, y, y2, ySpecials)) =>
+          withApronState {
+            val apronState = implicitly[ApronState[VirtAddr, Type]]
+            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+            val xConst = ivOps.interval(x1, x2, xSpecials)
+            val yConst = ivOps.interval(y1, y2, ySpecials)
+            val joined = combine(xConst, yConst)
+
+            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
+            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
+
+            val xIv = apronState.getFloatInterval(xConst)
+            val joinedIv = apronState.getFloatInterval(joined.get)
+
+            if (joinedIv.isLeq(xIv))
+              assert(joined.hasChanged == false, s", expression ${xConst} with interval $xIv is equivalent to expression ${joined.get} with interval ${joinedIv}")
+            else
+              assert(joined.hasChanged == true, s", expression ${xConst} with interval $xIv is strictly smaller than expression ${joined.get} with interval ${joinedIv}")
+          }
+      }
+    }
 
   test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {
     withApronState {
@@ -81,8 +190,6 @@ class ApronJoinTest(using manager: apron.Manager) extends AnyFunSuite:
       }
     }
   }
-
-
 
   test("{x ∈ [0,10], y = x} ⊔ {z ∈ [10,20], x = z} = {x ∈ [0,20], y ∈ [0,10], z ∈ [10,20], 0 <= x + y <= 30, 0 <= x - y <= 20, 10 <= z + x <= 40, 0 <= z - x <= 20, 10 <= z + y <= 30, 0 <= z - y <= 20}") {
     withApronState {

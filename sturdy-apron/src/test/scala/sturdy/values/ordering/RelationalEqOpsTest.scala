@@ -39,6 +39,7 @@ given EqOps[Int,Boolean] = StructuralEqOps[Int]
 given Structural[Boolean] with {}
 
 class RelationalIntEqOpsTest(using Manager) extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
   makeEqOps = withApronState {
     val apronState = summon[ApronState[VirtAddr,Type]]
     new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
@@ -49,6 +50,7 @@ class RelationalIntEqOpsTest(using Manager) extends EqOpsTest[Int, ApronExpr[Vir
 )
 
 class RelationalFloatEqOpsTest(using Manager) extends EqOpsTest[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Float.MinValue, math.nextDown(0.0f), 0.0f, math.nextUp(0.0f), Float.MaxValue),
   makeEqOps = withApronState {
     val apronState = summon[ApronState[VirtAddr,Type]]
     new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
@@ -59,6 +61,7 @@ class RelationalFloatEqOpsTest(using Manager) extends EqOpsTest[Float, ApronExpr
 )
 
 class RelationalDoubleEqOpsTest(using Manager) extends EqOpsTest[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Double.MinValue, math.nextDown(0.0d), 0.0d, math.nextUp(0.0d), Double.MaxValue),
   makeEqOps = withApronState {
     val apronState = summon[ApronState[VirtAddr,Type]]
     new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {

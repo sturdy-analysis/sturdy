@@ -3,6 +3,8 @@ package sturdy.values.floating
 import sturdy.values.{Combine, MaybeChanged, Widening}
 import sturdy.values.floating.FloatSpecials.{NegInfinity, PosInfinity}
 
+import scala.collection.mutable.ArrayBuffer
+
 case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Boolean, nan: Boolean):
   inline def setNegInfinity(b: Boolean): FloatSpecials = copy(negInfinity = b)
 
@@ -11,6 +13,8 @@ case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Bo
   inline def setPosInfinity(b: Boolean): FloatSpecials = copy(posInfinity = b)
 
   inline def setNaN(b: Boolean): FloatSpecials = copy(nan = b)
+
+  inline def isInfinite: Boolean = negInfinity || posInfinity
 
   def isLeq(other: FloatSpecials): Boolean =
     implies(this.negInfinity, other.negInfinity) &&
@@ -30,18 +34,6 @@ case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Bo
 
   private inline def implies(b1: Boolean, b2: Boolean): Boolean = !b1 || b2
 
-  def cmp(other: FloatSpecials): Int =
-    if(this == other)
-      0
-    else if(isLeq(other))
-      -1
-    else if(other.isLeq(this))
-      1
-    else if(this.inf < other.inf)
-      -2
-    else
-      2
-
   def inf: Double =
     if(negInfinity)
       Double.NegativeInfinity
@@ -51,6 +43,18 @@ case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Bo
       Double.PositiveInfinity
     else
       Double.NaN
+
+  override def toString(): String =
+    val result: ArrayBuffer[String] = ArrayBuffer.empty
+    if(negInfinity)
+      result += "-∞"
+    if(negZero)
+      result += "-0.0"
+    if(nan)
+      result += "NaN"
+    if (posInfinity)
+      result += "∞"
+    result.mkString("{", ",", "}")
 
 given combineFloatSpecials[W <: Widening]: Combine[FloatSpecials, W] with
   override def apply(v1: FloatSpecials, v2: FloatSpecials): MaybeChanged[FloatSpecials] =

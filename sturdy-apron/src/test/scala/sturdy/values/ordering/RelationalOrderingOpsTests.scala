@@ -38,6 +38,7 @@ class RelationalOrderingOpsTests(using Manager) extends Suites(
 )
 
 class RelationalIntOrderingOpsTest(using Manager) extends OrderingOpsTest[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
   makeOrderingOps = withApronState {
     val intType: Type = Type.IntType
     val apronState = summon[ApronState[VirtAddr, Type]]
@@ -53,6 +54,7 @@ class RelationalIntOrderingOpsTest(using Manager) extends OrderingOpsTest[Int, A
 )
 
 class RelationalFloatOrderingOpsTest(using Manager) extends OrderingOpsTest[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Float.MinValue, math.nextDown(0.0f), 0.0f, math.nextUp(0.0f), Float.MaxValue),
   makeOrderingOps = withApronState {
     val apronState = summon[ApronState[VirtAddr, Type]]
     new RelationalOrderingOps[VirtAddr, Type] with TestingOrderingOps[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
@@ -67,6 +69,7 @@ class RelationalFloatOrderingOpsTest(using Manager) extends OrderingOpsTest[Floa
 )
 
 class RelationalDoubleOrderingOpsTest(using Manager) extends OrderingOpsTest[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Double.MinValue, math.nextDown(0.0d), 0.0d, math.nextUp(0.0d), Double.MaxValue),
   makeOrderingOps = withApronState {
     val apronState = summon[ApronState[VirtAddr, Type]]
     new RelationalOrderingOps[VirtAddr, Type] with TestingOrderingOps[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {

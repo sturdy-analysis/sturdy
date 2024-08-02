@@ -46,7 +46,7 @@ class ConvertTest
 
   for(conf <- AllConfigs[Config]) {
     test(s"convert[$conf] constant") {
-      forAll((Gen.chooseNum[From](Bounded[From].minValue, Bounded[From].maxValue, specials*), "x")) {
+      forAll((genConstant[From](Bounded[From].minValue, Bounded[From].maxValue, specials*), "x")) {
         case (x: From) =>
           implicit val (convertOps, soundness, afailure) = makeConvert
           val actual = afailure.fallible(convertOps(fromIVOps.constant(x), conf))

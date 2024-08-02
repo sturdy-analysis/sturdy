@@ -45,10 +45,12 @@ class RelationalIntegerOpsTests(manager: Manager) extends Suites(
   RelationalLongOpsTest(using manager)
 )
 
-class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](() =>
-  withApronState {
-    (new RelationalIntOps[VirtAddr, Type], implicitly)
-  }
+class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[VirtAddr, Type]](
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
+  makeIntegerOps = () =>
+    withApronState {
+      (new RelationalIntOps[VirtAddr, Type], implicitly)
+    }
 ):
   test("div([1,1],[-1,1])") {
     implicit val (integerOps, soundness) = makeIntegerOps()
@@ -98,10 +100,12 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
     assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(1)), actual))
   }
 
-class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](() =>
-  withApronState {
-    (new RelationalLongOps[VirtAddr, Type], implicitly)
-  }
+class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExpr[VirtAddr, Type]](
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  makeIntegerOps = () =>
+    withApronState {
+      (new RelationalLongOps[VirtAddr, Type], implicitly)
+    }
 )
 
 given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with

@@ -54,7 +54,7 @@ enum MaybeChanged[+A]:
   case Changed(a: A)
   case Unchanged(a: A)
 
-  inline def hasChanged: Boolean = this match
+  def hasChanged: Boolean = this match
     case Changed(_) => true
     case Unchanged(_) => false
 

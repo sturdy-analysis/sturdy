@@ -201,22 +201,26 @@ final class ApronRecencyState
     case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
       val iv2 = getInterval(e2)
-      Join[(Coeff,Type)]((iv1,e1._type), (iv2, e2._type)).map(
-        (iv,tpe) => ApronExpr.constant(iv,tpe)
+      Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
+        (iv, floatSpecials, tpe) =>
+          ApronExpr.Constant(iv, floatSpecials, tpe)
       )
     case (e1,e2) =>
-      val joinedType = Join(e1._type, e2._type)
-      val joinedSpecials = Join(e1.floatSpecials, e2.floatSpecials)
-      val ctx = temporaryVariableAllocator(joinedType.get)
-      val result = recencyStore.addressTranslation.allocOld(ctx)
-      val resultExpr = ApronExpr.addr(result, joinedType.get)
-      val iv1 = getInterval(e1)
-      assign(result, e1)
-      assign(result, e2)
-      val iv2 = getInterval(resultExpr)
-      // The check if the result has changed, happens on the abstract domain
-      // in the recency closure join
-      MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
+      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatmap(
+        (joinedSpecials, joinedType) =>
+          val ctx = temporaryVariableAllocator(joinedType)
+          val result = recencyStore.addressTranslation.allocOld(ctx)
+          val resultExpr = ApronExpr.Addr(result, joinedSpecials, joinedType)
+          val iv1 = getInterval(e1)
+          assign(result, e1)
+          assign(result, e2)
+          val iv2 = getInterval(resultExpr)
+          // The check if the result has changed, happens on the abstract domain
+          // in the recency closure join
+          MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
+      )
+
+
   }
 
 

@@ -23,19 +23,21 @@ object FloatInterval:
     else if(d.isNaN)
       FloatInterval(FloatSpecials.NaN)
     else if(JDouble.doubleToRawLongBits(d) == JDouble.doubleToRawLongBits(-0.0d))
-      FloatInterval(FloatSpecials.NegZero)
+      new FloatInterval(DoubleScalar(0), DoubleScalar(0), FloatSpecials.NegZero)
     else
       new FloatInterval(DoubleScalar(d), DoubleScalar(d), FloatSpecials.Bottom)
 
 class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatSpecials) extends Interval(infimum, supremum):
-  if(! isNonSpecialBottom && nonSpecialInf.sgn() < 0 && nonSpecialSup.sgn() > 0)
-    setNegZero(true)
+//  if(! isNonSpecialBottom && nonSpecialInf.sgn() < 0 && nonSpecialSup.sgn() > 0)
+//    setNegZero(true)
 
   override def inf(): Scalar =
     if(floatSpecials.negInfinity)
       DoubleScalar(Double.NegativeInfinity)
     else if(! isNonSpecialBottom)
       nonSpecialInf
+    else if(isNonSpecialBottom && floatSpecials.negZero)
+      DoubleScalar(-0.0d)
     else if(floatSpecials.posInfinity)
       DoubleScalar(Double.PositiveInfinity)
     else
@@ -49,6 +51,8 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
       DoubleScalar(Double.PositiveInfinity)
     else if(! isNonSpecialBottom)
       nonSpecialSup
+    else if(isNonSpecialBottom && floatSpecials.negZero)
+      DoubleScalar(-0.0d)
     else if(floatSpecials.negInfinity)
       DoubleScalar(Double.NegativeInfinity)
     else
@@ -102,22 +106,6 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
         )
       case _ => throw IllegalArgumentException(s"Can only compare float intervals, but got $interval")
 
-  override def cmp(interval: Interval): Int =
-    interval match
-      case other: FloatInterval =>
-        val nonSpecialCmp = super.cmp(other)
-        if(nonSpecialCmp == 0 && this.floatSpecials == other.floatSpecials)
-          0
-        else if(nonSpecialCmp == -1 && this.floatSpecials.isLeq(other.floatSpecials))
-          -1
-        else if(nonSpecialCmp == 1 && other.floatSpecials.isLeq(this.floatSpecials))
-          1
-        else if(this.inf().cmp(other.inf()) < 0)
-          -2
-        else
-          2
-      case _ => throw IllegalArgumentException(s"Can only compare float intervals, but got $interval")
-
   override def isEqual(interval: Interval): Boolean =
     interval match
       case other: FloatInterval =>
@@ -139,18 +127,4 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
     )
 
   override def toString: String =
-    val result: ArrayBuffer[String] = ArrayBuffer.empty
-    if(floatSpecials.negInfinity || nonSpecialInf.isInfty < 0)
-      result += "-∞"
-    if(!isNonSpecialBottom && nonSpecialInf.isInfty == 0)
-      result += nonSpecialInf.toString
-    if (floatSpecials.negZero)
-      result += "-0.0"
-    if (!isNonSpecialBottom && nonSpecialSup.isInfty == 0)
-      result += nonSpecialSup.toString
-    if(floatSpecials.nan)
-      result += "NaN"
-    if(floatSpecials.posInfinity || nonSpecialSup.isInfty > 0)
-      result += "∞"
-    result.mkString("[", ",", "]")
-
+    s"${if(isNonSpecialBottom) "⟂" else super.toString} ∪ $floatSpecials"

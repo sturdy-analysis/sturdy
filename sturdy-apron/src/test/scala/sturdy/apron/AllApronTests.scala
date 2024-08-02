@@ -9,7 +9,7 @@ import sturdy.values.integer.*
 import sturdy.values.ordering.*
 
 class AllApronTests extends Suites(
-  new ApronJoinTests,
+  new ApronJoinTest,
   new ApronLibraryTest,
   new RelationalCallFrameTest,
   new RecencyRelationalStoreTest,

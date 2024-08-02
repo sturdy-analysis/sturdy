@@ -37,6 +37,7 @@ class RelationalFloatingOpsTests(manager: Manager) extends Suites(
 )
 
 class RelationalFloatOpsTest(using Manager) extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
+  specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
   makeFloatOps = withApronState {
     (RelationalFloatOps[Float, VirtAddr, Type], SoundnessFloatApronExpr[VirtAddr,Type])
   }
@@ -51,6 +52,7 @@ class RelationalFloatOpsTest(using Manager) extends FloatOpsTest[Float, ApronExp
 )
 
 class RelationalDoubleOpsTest(using Manager) extends FloatOpsTest[Double, ApronExpr[VirtAddr, Type]](
+  specials = List(Double.MinValue, -0.5d, 0.0d, 0.5d, Double.MaxValue),
   makeFloatOps = withApronState {
     (RelationalFloatOps[Double, VirtAddr, Type], SoundnessDoubleApronExpr[VirtAddr,Type])
   }

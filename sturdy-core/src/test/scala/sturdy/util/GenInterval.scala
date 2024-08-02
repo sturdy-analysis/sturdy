@@ -10,23 +10,28 @@ import math.Integral.Implicits.infixIntegralOps
 import math.Ordering.Implicits.infixOrderingOps
 
 object GenInterval:
-  case class Interval[N](low: N, included: N, high: N, floatSpecials: FloatSpecials)
+  case class Interval[N](low: N, included: N, high: N, floatSpecials: FloatSpecials):
+    override def toString: String =
+      s"$included ∈ [$low, $high] ∪ $floatSpecials"
 
-  def genInterval[N: Numeric: Choose](minValue: N, maxValue: N, specials: N*): Gen[Interval[N]] =
+  def genConstant[N: Numeric: Choose](minValue: N, maxValue: N, specials: N*): Gen[N] =
     val negInfinity = Numeric[N].parseString(Double.NegativeInfinity.toString)
     val posInfinity = Numeric[N].parseString(Double.PositiveInfinity.toString)
     val negZero = Numeric[N].parseString((-0.0d).toString)
     val nan = Numeric[N].parseString(Double.NaN.toString)
+    val negNan = Numeric[N].parseString(Double.NaN.toString).map(Numeric[N].negate(_))
     val isFloat = negInfinity.isDefined && posInfinity.isDefined && negZero.isDefined && nan.isDefined
+    if (isFloat)
+      Gen.oneOf(
+        Gen.chooseNum(minValue, maxValue, specials*),
+        Gen.oneOf(negInfinity.get, posInfinity.get, negZero.get, nan.get, negNan.get)
+      )
+    else
+      Gen.chooseNum(minValue, maxValue)
+
+  def genInterval[N: Numeric: Choose](minValue: N, maxValue: N, specials: N*): Gen[Interval[N]] =
     for {
-      included <-
-        if(isFloat)
-          Gen.oneOf(
-            Gen.chooseNum(minValue, maxValue, specials*),
-            Gen.oneOf(negInfinity.get, posInfinity.get, negZero.get, nan.get)
-          )
-        else
-          Gen.chooseNum(minValue, maxValue)
+      included <- genConstant(minValue, maxValue, specials*)
       d = Numeric[N].toDouble(included)
       low <-
         if(d.isInfinity || d.isNaN)

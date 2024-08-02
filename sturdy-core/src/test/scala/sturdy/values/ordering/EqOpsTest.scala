@@ -23,6 +23,7 @@ class EqOpsTest
     B
   ]
   (
+    specials: Seq[L],
     makeEqOps: => IntervalEqOps[L,V, B]
   )
   (using
@@ -45,7 +46,7 @@ class EqOpsTest
 
   def binOpTest(testName: String, testFun: (IntervalEqOps[L,V,B],V,V) => B, expectedFun: (L,L) => Boolean) =
     test(testName + " constant") {
-      forAll((Gen.chooseNum[L](Bounded[L].minValue,Bounded[L].maxValue), "x"), (Gen.chooseNum[L](Bounded[L].minValue,Bounded[L].maxValue), "y")) {
+      forAll((genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x"), (genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y")) {
         case (x, y) =>
           val eqOps = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(
@@ -56,7 +57,7 @@ class EqOpsTest
     }
 
     test(testName + " interval") {
-      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
+      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           val eqOps = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(

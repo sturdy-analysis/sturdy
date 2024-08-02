@@ -25,29 +25,27 @@ object IntervalLattice:
 given intervalOrdering: PartialOrder[Interval] with
   override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
 
-given joinInterval: Join[Interval] = joinCoeff.apply(_,_)
-
-given joinCoeff: Join[Coeff] with
-  def apply(c1: Coeff, c2: Coeff): MaybeChanged[Interval] =
-    val inf1 = c1.inf()
-    val inf2 = c2.inf()
+given joinInterval: Join[Interval] with
+  def apply(iv1: Interval, iv2: Interval): MaybeChanged[Interval] =
+    val inf1 = iv1.inf()
+    val inf2 = iv2.inf()
     val newInf =
       if(inf1.cmp(inf2) <= 0)
         inf1
       else
         inf2
 
-    val sup1 = c1.sup()
-    val sup2 = c2.sup()
+    val sup1 = iv1.sup()
+    val sup2 = iv2.sup()
     val newSup =
       if(sup1.cmp(sup2) <= 0)
         sup2
       else
         sup1
 
-    val upperBound = apron.Interval(newInf, newSup)
+    val joined = apron.Interval(newInf, newSup)
 
-    MaybeChanged(upperBound, ! (upperBound.isEqual(c1) || upperBound.isEqual(c2)))
+    MaybeChanged(joined, ! joined.isLeq(iv1))
 
 given Top[Interval] with
   def top: Interval =

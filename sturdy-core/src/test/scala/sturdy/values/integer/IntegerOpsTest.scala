@@ -22,6 +22,7 @@ class IntegerOpsTest
     N
   ]
   (
+    val specials: Seq[L],
     val makeIntegerOps: () => (IntegerOps[L, N], Soundness[L, N])
   )
   (using
@@ -209,8 +210,8 @@ class IntegerOpsTest
   def binOpTest(testName: String, precondition: (L,L) => Boolean, testFun: (IntegerOps[L,N],N,N) => N, expectedFun: (L,L) => L) = {
     test(testName + " constant") {
       forAll(
-        (Gen.chooseNum[L](Bounded[L].minValue, Bounded[L].maxValue), "x"),
-        (Gen.chooseNum[L](Bounded[L].minValue, Bounded[L].maxValue), "y")
+        (genConstant[L](Bounded[L].minValue, Bounded[L].maxValue, specials*), "x"),
+        (genConstant[L](Bounded[L].minValue, Bounded[L].maxValue, specials*), "y")
       ) {
         case (x, y) =>
           whenever(precondition(x, y)) {
@@ -224,7 +225,7 @@ class IntegerOpsTest
     }
 
     test(testName + " intervals") {
-      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue), "y ∈ [y1,y2]")) {
+      forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
             implicit val (integerOps, soundness) = makeIntegerOps()
@@ -239,7 +240,7 @@ class IntegerOpsTest
 
   def unOpTest(testName: String, precondition: L => Boolean, testFun: (IntegerOps[L,N],N) => N, expectedFun: L => L) = {
     test(testName + " constant") {
-      forAll((Gen.chooseNum[L](Bounded[L].minValue,Bounded[L].maxValue), "x")) {
+      forAll((genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x")) {
         case x =>
           whenever(precondition(x)) {
             implicit val (integerOps, soundness) = makeIntegerOps()
@@ -252,7 +253,7 @@ class IntegerOpsTest
     }
 
     test(testName + " interval") {
-      forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue), "x ∈ [x1,x2]")) {
+      forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue, specials*), "x")) {
         case Interval(x1, x, x2, xSpecials) =>
           whenever(precondition(x)) {
             implicit val (integerOps, soundness) = makeIntegerOps()
