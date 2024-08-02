@@ -15,10 +15,10 @@ class NumericIntervalTestingOrderingOps[I](using ordering: Ordering[I])
 
 class NumericIntervalIntOrderingOpsTest extends OrderingOpsTest[Int, NumericInterval[Int], Topped[Boolean]](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
-  makeOrderingOps = new NumericIntervalTestingOrderingOps
+  makeOrderingOps = (NumericIntervalIsInterval[Int], new NumericIntervalTestingOrderingOps)
 )
 
 class NumericIntervalLongOrderingOpsTest extends OrderingOpsTest[Long, NumericInterval[Long], Topped[Boolean]](
   specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
-  makeOrderingOps = new NumericIntervalTestingOrderingOps
+  makeOrderingOps = (NumericIntervalIsInterval[Long], new NumericIntervalTestingOrderingOps)
 )

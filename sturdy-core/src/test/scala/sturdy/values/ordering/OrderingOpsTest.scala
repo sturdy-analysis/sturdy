@@ -23,10 +23,9 @@ class OrderingOpsTest
   ]
   (
     specials: Seq[L],
-    makeOrderingOps: => TestingOrderingOps[L,V, B]
+    makeOrderingOps: => (IsInterval[L,V], TestingOrderingOps[L,V, B])
   )
   (using
-     ivOps: IsInterval[L,V],
      concreteOrderingOps: OrderingOps[L,Boolean]
   )
     extends AnyFunSuite with ScalaCheckPropertyChecks:
@@ -64,7 +63,7 @@ class OrderingOpsTest
       forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
-            val orderingOps = makeOrderingOps
+            val (ivOps, orderingOps) = makeOrderingOps
             orderingOps.getBool(testFun(orderingOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials))) should contain(expectedFun(x, y))
           }
       }

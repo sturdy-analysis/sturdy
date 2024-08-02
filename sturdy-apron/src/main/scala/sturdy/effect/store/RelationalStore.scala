@@ -77,7 +77,7 @@ trait RelationalStore
       // nothing
     } else if (powAddr.isStrong) {
       for (toAddr <- powAddr.iterator) {
-        addAddrToEnvs(toAddr, physExpr)
+        writeMetaData(toAddr, physExpr)
         val to = ApronVar(toAddr)
         val env = _abstract1.getEnvironment
         if(env.hasVar(to))
@@ -87,8 +87,9 @@ trait RelationalStore
       // weak update implemented as join
       for (toAddr <- powAddr.iterator) {
         val to = ApronVar(toAddr)
-        addAddrToEnvs(toAddr, physExpr)
-        if(_abstract1.getEnvironment.hasVar(to)) {
+        writeMetaData(toAddr, physExpr)
+        val env = _abstract1.getEnvironment
+        if(env.hasVar(to) && physExpr.addrs.forall(env.hasVar(_))) {
           val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
           _abstract1.join(manager, assigned)
         }
@@ -207,7 +208,7 @@ trait RelationalStore
     val iv = getBound(expr)
     new sturdy.apron.FloatInterval(iv.inf, iv.sup, expr.floatSpecials)
 
-  private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
+  private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
     val variable = ApronVar(addr)
 
     val tpe = expr._type

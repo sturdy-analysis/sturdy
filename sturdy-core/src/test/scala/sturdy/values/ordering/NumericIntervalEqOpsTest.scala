@@ -17,10 +17,10 @@ given Structural[Int] with {}
 
 class NumericIntervalIntEqOpsTest extends EqOpsTest[Int, NumericInterval[Int], Topped[Boolean]](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
-  makeEqOps = new NumericIntervalIntervalEqOps
+  makeEqOps = (NumericIntervalIsInterval[Int], new NumericIntervalIntervalEqOps)
 )
 
 class NumericIntervalLongEqOpsTest extends EqOpsTest[Long, NumericInterval[Long], Topped[Boolean]](
   specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
-  makeEqOps = new NumericIntervalIntervalEqOps
+  makeEqOps = (NumericIntervalIsInterval[Long], new NumericIntervalIntervalEqOps)
 )

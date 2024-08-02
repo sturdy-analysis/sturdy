@@ -12,6 +12,7 @@ import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
 import sturdy.effect.EffectStack
+import sturdy.util.Lazy
 import sturdy.{IsSound, Soundness}
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
 
@@ -27,6 +28,7 @@ trait RelationalBaseIntegerOps
        f: Failure,
        typeIntOps: IntegerOps[L,Type]
     ) extends IntegerOps[L, ApronExpr[Addr,Type]]:
+  given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     foldInteger(intAdd(v1, v2))
@@ -41,51 +43,40 @@ trait RelationalBaseIntegerOps
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv1 = apronState.getInterval(v1)
     val iv2 = apronState.getInterval(v2)
-    if(iv1.sup.cmp(iv2.inf) <= 0) {
+    if(iv1.sup.cmp(iv2.inf) <= 0)
       v2
-    } else if(iv2.sup.cmp(iv1.inf) <= 0) {
+    else if(iv2.sup.cmp(iv1.inf) <= 0)
       v1
-    } else {
-      val resultType = typeIntOps.max(v1._type, v2._type)
-      apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-        apronState.ifThenElse(lt(x, y)) {
-          apronState.assign(result, y)
-        } {
-          apronState.assign(result, x)
-        }
-        addr(result, resultType)
+    else
+      apronState.ifThenElse(lt(v1, v2)) {
+        v2
+      } {
+        v1
       }
-    }
 
 
   override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv1 = apronState.getInterval(v1)
     val iv2 = apronState.getInterval(v2)
-    if (iv1.sup.cmp(iv2.inf) <= 0) {
+    if (iv1.sup.cmp(iv2.inf) <= 0)
       v1
-    } else if (iv2.sup.cmp(iv1.inf) <= 0) {
+    else if (iv2.sup.cmp(iv1.inf) <= 0)
       v2
-    } else {
-      val resultType = typeIntOps.min(v1._type, v2._type)
-      apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-        apronState.ifThenElse(lt(x, y)) {
-          apronState.assign(result, x)
-        } {
-          apronState.assign(result, y)
-        }
-        addr(result, resultType)
+    else
+      apronState.ifThenElse(lt(v1, v2)) {
+        v1
+      } {
+        v2
       }
-    }
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    if(iv.inf.sgn() >= 0) {
+    if(iv.inf.sgn() >= 0)
       v
-    } else if(iv.sup.sgn() < 0) {
+    else if(iv.sup.sgn() < 0)
       foldInteger(intNegate(v))
-    } else {
+    else
       foldInteger(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
-    }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v2)
@@ -93,16 +84,12 @@ trait RelationalBaseIntegerOps
       intDiv(v1, v2)
     } else {
       joinWithFailure {
-        val resultType = typeIntOps.div(v1._type, v2._type)
-        apronState.withTempVars(resultType, v1, v2) { case (result, List(x, y)) =>
-          apronState.join {
-            apronState.addConstraints(le(intLit(1, y._type), y))
-            apronState.assign(result, intDiv(x, y))
-          } {
-            apronState.addConstraints(le(y, intLit(-1, y._type)))
-            apronState.assign(result, intDiv(x, y))
-          }
-          addr(result, resultType)
+        apronState.join {
+          apronState.addConstraints(le(intLit(1, v2._type), v2))
+          intDiv(v1, v2)
+        } {
+          apronState.addConstraints(le(v2, intLit(-1, v2._type)))
+          intDiv(v1, v2)
         }
       } {
         Failure(IntegerDivisionByZero, s"divisor $v2 could be zero")
@@ -151,16 +138,11 @@ trait RelationalBaseIntegerOps
     else if(ivV.sup().sgn() < 0)
       intSub(intDiv(intAdd(v,intLit(1,v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
     else
-      apronState.withTempVars(resultType) {
-        case (result,List()) =>
-          apronState.ifThenElse(ApronCons.le(intLit(0, v._type), v)) {
-            apronState.assign(result, intDiv(v, intPow(intLit(2, v._type), modShift), resultType))
-          } {
-            apronState.assign(result, intSub(intDiv(intAdd(v,intLit(1,v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType)))
-          }
-          ApronExpr.addr(result, resultType)
+      apronState.ifThenElse(ApronCons.le(intLit(0, v._type), v)) {
+        intDiv(v, intPow(intLit(2, v._type), modShift), resultType)
+      } {
+        intSub(intDiv(intAdd(v, intLit(1, v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
       }
-
 
   override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))

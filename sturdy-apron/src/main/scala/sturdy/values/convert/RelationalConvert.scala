@@ -223,26 +223,32 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
             resultIv = Join(resultIv, Interval(0, 0)).get
           cast(constant(resultIv, fromType), RoundingType.Int, RoundingDir.Zero, toType)
         }
-//          apronState.withTempVars(toType, cast(from, RoundingType.Int, RoundingDir.Zero, toType)) {
-//            case (res, List(x)) =>
-//              apronState.ifThenElse(le(x, doubleLit(unsignedMinJump, toType))) {
-//                apronState.assign(res, intLit(0, toType))
-//              } {
-//                apronState.ifThenElse(le(doubleLit(unsignedMaxJump, toType), x)) {
-//                  apronState.assign(res, intLit(-1, toType))
-//                } {
-//                  apronState.assign(res, integerOps.foldInteger(x))
-//                }
-//              }
-//              addr(res, toType)
-//          }
 
-given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
+given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using apronState: ApronState[Addr,Type], floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
   case (from, conf) =>
-    floatOps.handleOverflow(
+    val iv = apronState.getInterval(from)
+    var specials = from.floatSpecials
+    val minVal = Float.MinValue.toDouble
+    val maxVal = Float.MaxValue.toDouble
+    if(iv.isBottom)
+      from
+    else if(iv.isLeq(Interval(minVal, maxVal)))
       floatCast(from, RoundingType.Single, RoundingDir.Nearest, from.floatSpecials, convertType(from._type, conf))
-    )
+    else
+      if (iv.inf.cmp(DoubleScalar(minVal)) < 0) {
+        specials = specials.setNegInfinity(true)
+        iv.setInf(DoubleScalar(minVal))
+        if (iv.sup.cmp(DoubleScalar(minVal)) < 0)
+          iv.setSup(DoubleScalar(minVal))
+      }
+      if (DoubleScalar(maxVal).cmp(iv.sup) < 0) {
+        specials = specials.setPosInfinity(true)
+        iv.setSup(DoubleScalar(maxVal))
+        if (DoubleScalar(maxVal).cmp(iv.inf) < 0)
+          iv.setInf(DoubleScalar(maxVal))
+      }
+      floatConstant(iv, specials, from._type)
 }
 
 given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using convertType: ConvertFloatDouble[Type, Type]):

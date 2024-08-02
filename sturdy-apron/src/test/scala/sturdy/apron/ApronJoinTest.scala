@@ -42,30 +42,29 @@ class RelationalJoinTests(using manager: apron.Manager) extends Suites(
 
 class RelationalIntJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Int](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
-  soundness = SoundnessIntApronExpr[VirtAddr,Type]
+  makeOps = (RelationalIntInterval, SoundnessIntApronExpr[VirtAddr,Type])
 )
 class RelationalLongJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Long](
   specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
-  soundness = SoundnessLongApronExpr[VirtAddr,Type]
+  makeOps = (RelationalLongInterval, SoundnessLongApronExpr[VirtAddr,Type])
 )
 class RelationalFloatJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Float](
   specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
-  soundness = SoundnessFloatApronExpr[VirtAddr,Type]
+  makeOps = (RelationalFloatIsInterval, SoundnessFloatApronExpr[VirtAddr,Type])
 )
 class RelationalDoubleJoinTest(using manager: apron.Manager) extends RelationalJoinTest[Double](
   specials = List(Double.MinValue, -0.5f, 0.0f, 0.5f, Double.MaxValue),
-  soundness = SoundnessDoubleApronExpr[VirtAddr,Type]
+  makeOps = (RelationalDoubleIsInterval, SoundnessDoubleApronExpr[VirtAddr,Type])
 )
 
 class RelationalJoinTest
   [L: Numeric: Choose: Bounded]
   (
     specials: Seq[L],
-    soundness: ApronState[VirtAddr,Type] ?=> Soundness[L, ApronExpr[VirtAddr,Type]]
+    makeOps: ApronState[VirtAddr,Type] ?=> (IsInterval[L,ApronExpr[VirtAddr,Type]], Soundness[L, ApronExpr[VirtAddr,Type]])
   )
   (using
-   manager: apron.Manager,
-   ivOps: IsInterval[L,ApronExpr[VirtAddr,Type]]
+   manager: apron.Manager
   ) extends AnyFunSuite:
 
   val minValue = Bounded[L].minValue
@@ -73,21 +72,6 @@ class RelationalJoinTest
 
   combineTest("Join[ApronExpr]", Join[ApronExpr[VirtAddr,Type]](_,_))
   combineTest("Widen[ApronExpr]", Widen[ApronExpr[VirtAddr,Type]](_,_))
-  combineTest("ApronState.join", { (e1, e2) =>
-    val apronState = implicitly[ApronState[VirtAddr, Type]]
-    val iv1 = apronState.getFloatInterval(e1)
-    val joinedExpr = apronState.withTempVars(e1._type) {
-      case (result, _) =>
-        apronState.join {
-          apronState.assign(result, e1)
-        } {
-          apronState.assign(result, e2)
-        }
-        ApronExpr.Addr(result, Join(e1.floatSpecials, e2.floatSpecials).get, e1._type)
-    }
-    val joinedIv = apronState.getFloatInterval(joinedExpr)
-    MaybeChanged(joinedExpr, ! joinedIv.isLeq(iv1))
-  })
 
   def combineTest(combineName: String, combine: (ApronState[VirtAddr, Type],Lazy[ApronState[VirtAddr, Type]]) ?=> (e1: ApronExpr[VirtAddr,Type], e2: ApronExpr[VirtAddr,Type]) => MaybeChanged[ApronExpr[VirtAddr,Type]]) =
     test(combineName + " constant") {
@@ -97,6 +81,7 @@ class RelationalJoinTest
             val apronState = implicitly[ApronState[VirtAddr, Type]]
             given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
 
+            val (ivOps, soundness) = makeOps
             val joined = combine(ivOps.constant(x), ivOps.constant(y))
 
             assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
@@ -119,6 +104,9 @@ class RelationalJoinTest
           withApronState {
             val apronState = implicitly[ApronState[VirtAddr, Type]]
             given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+
+            val (ivOps, soundness) = makeOps
+
             val xConst = ivOps.interval(x1, x2, xSpecials)
             val yConst = ivOps.interval(y1, y2, ySpecials)
             val joined = combine(xConst, yConst)

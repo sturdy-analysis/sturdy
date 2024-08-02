@@ -49,11 +49,11 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
   makeIntegerOps = () =>
     withApronState {
-      (new RelationalIntOps[VirtAddr, Type], implicitly)
+      (RelationalIntInterval, new RelationalIntOps[VirtAddr, Type], implicitly)
     }
 ):
   test("div([1,1],[-1,1])") {
-    implicit val (integerOps, soundness) = makeIntegerOps()
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
     val actual = integerOps.div(
       ivOps.interval(integral.fromInt(1), integral.fromInt(1)),
       ivOps.interval(integral.fromInt(-1), integral.fromInt(1))
@@ -63,7 +63,7 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
   }
 
   test("div([-1,1],[-1,-1])") {
-    implicit val (integerOps, soundness) = makeIntegerOps()
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
     val actual = integerOps.div(
       ivOps.interval(integral.fromInt(-1), integral.fromInt(1)),
       ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))
@@ -73,7 +73,7 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
   }
 
   test("shiftLeft(1, -1)") {
-    val (integerOps,soundness) = makeIntegerOps()
+    val (ivOps, integerOps,soundness) = makeIntegerOps()
     val actual = integerOps.shiftLeft(
       ivOps.constant(integral.fromInt(1)),
       ivOps.constant(integral.fromInt(-1))
@@ -83,7 +83,7 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
   }
 
   test("shiftRight(-1, 1) == -1") {
-    val (integerOps, soundness) = makeIntegerOps()
+    val (ivOps, integerOps, soundness) = makeIntegerOps()
     val actual = integerOps.shiftRight(
       ivOps.constant(integral.fromInt(-1)),
       ivOps.constant(integral.fromInt(1))
@@ -94,7 +94,7 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
 
 
   test("countLeadingZeros([1,4])") {
-    implicit val (integerOps, soundness) = makeIntegerOps()
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
     val actual = integerOps.countLeadingZeros(ivOps.interval(integral.fromInt(1), integral.fromInt(4)))
     assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(4)), actual))
     assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.countLeadingZeros(integral.fromInt(1)), actual))
@@ -104,25 +104,23 @@ class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExp
   specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
   makeIntegerOps = () =>
     withApronState {
-      (new RelationalLongOps[VirtAddr, Type], implicitly)
+      (RelationalLongInterval, new RelationalLongOps[VirtAddr, Type], implicitly)
     }
 )
 
-given RelationalIntInterval: IsInterval[Int, ApronExpr[VirtAddr, Type]] with
-  val intType: Type = Type.IntType
-
-  override def constant(i: Int): ApronExpr[VirtAddr, Type] = ApronExpr.intLit(i, intType)
+given RelationalIntInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Int, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Int): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(ApronExpr.intLit(i, Type.IntType))
 
   override def interval(low: Int, high: Int, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    ApronExpr.intInterval(low, high, intType)
+    apronState.assignTempVar(ApronExpr.intInterval(low, high, Type.IntType))
 
-given RelationalLongInterval: IsInterval[Long, ApronExpr[VirtAddr, Type]] with
-  val longType: Type = Type.LongType
-
-  override def constant(i: Long): ApronExpr[VirtAddr, Type] = ApronExpr.longLit(i, longType)
+given RelationalLongInterval(using apronState: ApronState[VirtAddr, Type]): IsInterval[Long, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Long): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(ApronExpr.longLit(i, Type.LongType))
 
   override def interval(low: Long, high: Long, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    ApronExpr.longInterval(low, high, longType)
+    apronState.assignTempVar(ApronExpr.longInterval(low, high, Type.LongType))
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
   def chooseInt: Gen[Int] = Gen.chooseNum(Integer.MIN_VALUE, Integer.MAX_VALUE)

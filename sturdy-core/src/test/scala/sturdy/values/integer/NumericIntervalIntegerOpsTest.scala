@@ -24,7 +24,7 @@ class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterva
     given failure: Failure = new CollectedFailures[FailureKind]
     given Finite[FailureKind] with {}
     given effectState: EffectStack = EffectStack(failure)
-    (new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
+    (NumericIntervalIsInterval[Int], new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
   }
 )
 
@@ -34,6 +34,6 @@ class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInter
     given failure: Failure = new CollectedFailures[FailureKind]
     given Finite[FailureKind] with {}
     given effectState: EffectStack = EffectStack(failure)
-    (new NumericIntervalIntegerOps[Long](20), SoundnessNumericInterval)
+    (NumericIntervalIsInterval[Long], new NumericIntervalIntegerOps[Long](20), SoundnessNumericInterval)
   }
 )

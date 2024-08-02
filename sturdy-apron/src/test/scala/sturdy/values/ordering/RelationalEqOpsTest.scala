@@ -38,35 +38,21 @@ given Structural[Int] with {}
 given EqOps[Int,Boolean] = StructuralEqOps[Int]
 given Structural[Boolean] with {}
 
+given RelationalIntervalEqOps[L](using apronState: ApronState[VirtAddr,Type]): RelationalEqOps[VirtAddr, Type] with IntervalEqOps[L, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] with
+  override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
+    apronState.getBoolean(b)
+
 class RelationalIntEqOpsTest(using Manager) extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
-  makeEqOps = withApronState {
-    val apronState = summon[ApronState[VirtAddr,Type]]
-    new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
-      override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
-        apronState.getBoolean(b)
-    }
-  }
+  makeEqOps = withApronState (RelationalIntInterval, RelationalIntervalEqOps[Int])
 )
 
 class RelationalFloatEqOpsTest(using Manager) extends EqOpsTest[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Float.MinValue, math.nextDown(0.0f), 0.0f, math.nextUp(0.0f), Float.MaxValue),
-  makeEqOps = withApronState {
-    val apronState = summon[ApronState[VirtAddr,Type]]
-    new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
-      override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
-        apronState.getBoolean(b)
-    }
-  }
+  makeEqOps = withApronState (RelationalFloatIsInterval, RelationalIntervalEqOps[Float])
 )
 
 class RelationalDoubleEqOpsTest(using Manager) extends EqOpsTest[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Double.MinValue, math.nextDown(0.0d), 0.0d, math.nextUp(0.0d), Double.MaxValue),
-  makeEqOps = withApronState {
-    val apronState = summon[ApronState[VirtAddr,Type]]
-    new RelationalEqOps[VirtAddr, Type] with IntervalEqOps[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] {
-      override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
-        apronState.getBoolean(b)
-    }
-  }
+  makeEqOps = withApronState (RelationalDoubleIsInterval, RelationalIntervalEqOps[Double])
 )

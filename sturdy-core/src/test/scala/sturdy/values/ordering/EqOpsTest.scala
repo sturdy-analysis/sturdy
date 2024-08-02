@@ -24,10 +24,9 @@ class EqOpsTest
   ]
   (
     specials: Seq[L],
-    makeEqOps: => IntervalEqOps[L,V, B]
+    makeEqOps: => (IsInterval[L, V], IntervalEqOps[L,V, B])
   )
   (using
-   ivOps: IsInterval[L, V],
    concreteEqOps: EqOps[L,Boolean]
   )
     extends AnyFunSuite with ScalaCheckPropertyChecks:
@@ -48,7 +47,7 @@ class EqOpsTest
     test(testName + " constant") {
       forAll((genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x"), (genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y")) {
         case (x, y) =>
-          val eqOps = makeEqOps
+          val (ivOps, eqOps) = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(
             expectedFun(x, y),
             eqOps.getBool(testFun(eqOps, ivOps.constant(x), ivOps.constant(y)))
@@ -59,7 +58,7 @@ class EqOpsTest
     test(testName + " interval") {
       forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x ∈ [x1,x2]"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y ∈ [y1,y2]")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
-          val eqOps = makeEqOps
+          val (ivOps, eqOps) = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(
             expectedFun(x, y),
             eqOps.getBool(testFun(eqOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)))
@@ -68,25 +67,25 @@ class EqOpsTest
     }
 
   test("1 == 1") {
-    val eqOps = makeEqOps
+    val (ivOps, eqOps) = makeEqOps
     eqOps.getBool(eqOps.equ(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(1)))) shouldBe
       Topped.Actual(true)
   }
 
   test("1 == 2") {
-    val eqOps = makeEqOps
+    val (ivOps, eqOps) = makeEqOps
     eqOps.getBool(eqOps.equ(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(2)))) shouldBe
       Topped.Actual(false)
   }
 
   test("1 != 1") {
-    val eqOps = makeEqOps
+    val (ivOps, eqOps) = makeEqOps
     eqOps.getBool(eqOps.neq(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(1)))) shouldBe
       Topped.Actual(false)
   }
 
   test("1 != 2") {
-    val eqOps = makeEqOps
+    val (ivOps, eqOps) = makeEqOps
     eqOps.getBool(eqOps.neq(ivOps.constant(Numeric[L].fromInt(1)), ivOps.constant(Numeric[L].fromInt(2)))) shouldBe
       Topped.Actual(true)
   }

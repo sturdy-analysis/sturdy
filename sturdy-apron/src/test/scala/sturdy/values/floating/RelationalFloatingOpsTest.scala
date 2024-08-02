@@ -39,13 +39,12 @@ class RelationalFloatingOpsTests(manager: Manager) extends Suites(
 class RelationalFloatOpsTest(using Manager) extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
   specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
   makeFloatOps = withApronState {
-    (RelationalFloatOps[Float, VirtAddr, Type], SoundnessFloatApronExpr[VirtAddr,Type])
+    (RelationalFloatIsInterval, RelationalFloatOps[Float, VirtAddr, Type], SoundnessFloatApronExpr[VirtAddr,Type])
   }
 )(using
   implicitly,
   implicitly,
   implicitly,
-  ivOps = implicitly,
   ord = implicitly,
   fractional = implicitly,
   concreteFloatOps = new WithNearestRoundingModeFloatingOps(ConcreteFloatOps)
@@ -54,29 +53,31 @@ class RelationalFloatOpsTest(using Manager) extends FloatOpsTest[Float, ApronExp
 class RelationalDoubleOpsTest(using Manager) extends FloatOpsTest[Double, ApronExpr[VirtAddr, Type]](
   specials = List(Double.MinValue, -0.5d, 0.0d, 0.5d, Double.MaxValue),
   makeFloatOps = withApronState {
-    (RelationalFloatOps[Double, VirtAddr, Type], SoundnessDoubleApronExpr[VirtAddr,Type])
+    (RelationalDoubleIsInterval, RelationalFloatOps[Double, VirtAddr, Type], SoundnessDoubleApronExpr[VirtAddr,Type])
   }
 )(using
   implicitly,
   implicitly,
   implicitly,
-  ivOps = implicitly,
   ord = implicitly,
   fractional = implicitly,
   concreteFloatOps = new WithNearestRoundingModeFloatingOps(ConcreteDoubleOps)
 )
 
-given RelationalFloatIsInterval: IsInterval[Float, ApronExpr[VirtAddr, Type]] with
-  val floatType: Type = Type.FloatType
-  override def constant(i: Float): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
-  override def interval(low: Float, high: Float, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    ApronExpr.floatConstant(Interval(low, high), floatSpecials, floatType)
+given RelationalFloatIsInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Float, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Float): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(FloatingLit[Float, VirtAddr, Type](i, Type.FloatType))
 
-given RelationalDoubleIsInterval: IsInterval[Double, ApronExpr[VirtAddr, Type]] with
-  val floatType: Type = Type.DoubleType
-  override def constant(i: Double): ApronExpr[VirtAddr, Type] = FloatingLit(i, floatType)
+  override def interval(low: Float, high: Float, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(ApronExpr.floatConstant(Interval(low, high), floatSpecials, Type.FloatType))
+
+
+given RelationalDoubleIsInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Double, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Double): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(FloatingLit[Double, VirtAddr, Type](i, Type.DoubleType))
+
   override def interval(low: Double, high: Double, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    ApronExpr.floatConstant(Interval(low, high), floatSpecials, floatType)
+    apronState.assignTempVar(ApronExpr.floatConstant(Interval(low, high), floatSpecials, Type.DoubleType))
 
 final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) extends FloatOps[B,V]:
   override def floatingLit(f: B): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floatingLit(f) }

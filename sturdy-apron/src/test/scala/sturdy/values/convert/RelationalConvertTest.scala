@@ -71,6 +71,8 @@ class RelationalConvertIntLongTest(using manager: Manager) extends ConvertTest[I
   specials = List(),
   makeConvert = withApronState(using manager) (
     (
+      RelationalIntInterval,
+      RelationalLongInterval,
       RelationalConvertIntLong,
       soundnessAFallible(using SoundnessLongApronExpr),
       implicitly
@@ -85,6 +87,8 @@ class RelationalConvertLongIntTest(using manager: Manager) extends ConvertTest[L
   ),
   makeConvert = withApronState (
     (
+      RelationalLongInterval,
+      RelationalIntInterval,
       RelationalConvertLongInt,
       soundnessAFallible(using sturdy.values.integer.SoundnessIntApronExpr),
       implicitly
@@ -96,6 +100,8 @@ class RelationalConvertFloatLongTest(using manager: Manager) extends ConvertTest
   specials = specialFloatingIntegerNumbers[Float,Long](_.toFloat),
   makeConvert = withApronState(
     (
+      RelationalFloatIsInterval,
+      RelationalLongInterval,
       RelationalConvertFloatLong,
       soundnessAFallible(using SoundnessLongApronExpr),
       implicitly
@@ -107,6 +113,8 @@ class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[
   specials = specialFloatingIntegerNumbers[Float,Int](_.toFloat),
   makeConvert = withApronState(
     (
+      RelationalFloatIsInterval,
+      RelationalIntInterval,
       RelationalConvertFloatInt,
       soundnessAFallible(using SoundnessIntApronExpr),
       implicitly
@@ -114,8 +122,8 @@ class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[
   )
 ):
   test(s"convert(0.0,Overflow.Fail && Bits.Unsigned) = 0") {
-    implicit val (convertOps, soundness, afailure) = _makeConvert
-    val actual = afailure.fallible(convertOps(RelationalFloatIsInterval.constant(0.0f), Overflow.Fail && Bits.Unsigned))
+    implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = _makeConvert
+    val actual = afailure.fallible(convertOps(fromIvOps.constant(0.0f), Overflow.Fail && Bits.Unsigned))
     val expected = cfailure.fallible(ConcreteConvertFloatInt(0.0f, Overflow.Fail && Bits.Unsigned))
     assertResult(IsSound.Sound, s"$actual does not overapproximate $expected")(soundness.isSound(expected, actual))
   }
@@ -125,6 +133,8 @@ class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTes
   specials = specialFloatingIntegerNumbers[Double,Long](_.toDouble),
   makeConvert = withApronState(
     (
+      RelationalDoubleIsInterval,
+      RelationalLongInterval,
       RelationalConvertDoubleLong,
       soundnessAFallible(using SoundnessLongApronExpr),
       implicitly
@@ -136,6 +146,8 @@ class RelationalConvertDoubleIntTest(using manager: Manager) extends ConvertTest
   specials = specialFloatingIntegerNumbers[Double,Int](_.toDouble),
   makeConvert = withApronState(
     (
+      RelationalDoubleIsInterval,
+      RelationalIntInterval,
       RelationalConvertDoubleInt,
       soundnessAFallible(using SoundnessIntApronExpr),
       implicitly
@@ -151,6 +163,8 @@ class RelationalConvertDoubleFloatTest(using manager: Manager) extends ConvertTe
   ),
   makeConvert = withApronState(
     (
+      RelationalDoubleIsInterval,
+      RelationalFloatIsInterval,
       RelationalConvertDoubleFloat,
       soundnessAFallible(using SoundnessFloatApronExpr),
       implicitly
@@ -162,6 +176,8 @@ class RelationalConvertFloatDoubleTest(using manager: Manager) extends ConvertTe
   specials = List(Float.NaN),
   makeConvert = withApronState(
     (
+      RelationalFloatIsInterval,
+      RelationalDoubleIsInterval,
       RelationalConvertFloatDouble,
       soundnessAFallible(using SoundnessDoubleApronExpr),
       implicitly
@@ -174,6 +190,8 @@ class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[
   specials = List(),
   makeConvert = withApronState(
     (
+      RelationalIntInterval,
+      RelationalFloatIsInterval,
       RelationalConvertIntFloat,
       soundnessAFallible(using SoundnessFloatApronExpr),
       implicitly
@@ -181,7 +199,7 @@ class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[
   )
 ):
   test("convert(16777217, Bits.Signed) = 1.6777216E7f") {
-    implicit val (convertOps, soundness, afailure) = _makeConvert
+    implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = _makeConvert
     assertResult(IsSound.Sound)(
       soundness.isSound(
         cfailure.fallible(ConcreteConvertIntFloat(16777217, Bits.Unsigned)),
@@ -194,6 +212,8 @@ class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest
   specials = List(),
   makeConvert = withApronState(
     (
+      RelationalIntInterval,
+      RelationalDoubleIsInterval,
       RelationalConvertIntDouble,
       soundnessAFallible(using SoundnessDoubleApronExpr),
       implicitly
@@ -205,6 +225,8 @@ class RelationalConvertLongFloatTest(using manager: Manager) extends ConvertTest
   specials = List(),
   makeConvert = withApronState(
     (
+      RelationalLongInterval,
+      RelationalFloatIsInterval,
       RelationalConvertLongFloat,
       soundnessAFallible(using SoundnessFloatApronExpr),
       implicitly
@@ -216,6 +238,8 @@ class RelationalConvertLongDoubleTest(using manager: Manager) extends ConvertTes
   specials = List(),
   makeConvert = withApronState(
     (
+      RelationalLongInterval,
+      RelationalDoubleIsInterval,
       RelationalConvertLongDouble,
       soundnessAFallible(using SoundnessDoubleApronExpr),
       implicitly

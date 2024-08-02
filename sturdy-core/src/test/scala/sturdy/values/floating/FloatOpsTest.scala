@@ -23,10 +23,9 @@ class FloatOpsTest
   ]
   (
     specials: Seq[L],
-    makeFloatOps: => (FloatOps[L, N], Soundness[L, N])
+    makeFloatOps: => (IsInterval[L,N], FloatOps[L, N], Soundness[L, N])
   )
   (using
-     ivOps: IsInterval[L,N],
      ord: Ordering[L],
      fractional: Fractional[L],
      concreteFloatOps: FloatOps[L, L]
@@ -38,7 +37,7 @@ class FloatOpsTest
 
   test("Float literal") {
     forAll("n") { (n: L) =>
-      implicit val (floatOps, soundness) = makeFloatOps
+      implicit val (ivOps, floatOps, soundness) = makeFloatOps
       assertResult(IsSound.Sound)(soundness.isSound(concreteFloatOps.floatingLit(n), floatOps.floatingLit(n)))
     }
   }
@@ -132,7 +131,7 @@ class FloatOpsTest
     test(testName + " constant") {
       forAll((genConstant[L](minValue, maxValue, specials*), "x"), (genConstant[L](minValue, maxValue, specials*), "y")) {
         case (x, y) =>
-          implicit val (floatOps,soundness) = makeFloatOps
+          implicit val (ivOps, floatOps,soundness) = makeFloatOps
           val expected = expectedFun(x, y)
           val actual = testFun(floatOps, ivOps.constant(x), ivOps.constant(y))
           assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -142,7 +141,7 @@ class FloatOpsTest
     test(testName + " intervals") {
       forAll((genInterval[L](minValue,maxValue, specials*), "x"), (genInterval[L](minValue,maxValue, specials*), "y")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
-          implicit val (floatOps,soundness) = makeFloatOps
+          implicit val (ivOps, floatOps,soundness) = makeFloatOps
           val expected = expectedFun(x, y)
           val actual = testFun(floatOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials))
           assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -153,7 +152,7 @@ class FloatOpsTest
     test(testName + " constant") {
       forAll((genConstant[L](minValue,maxValue,specials*), "x")) {
         case x =>
-          implicit val (floatOps,soundness) = makeFloatOps
+          implicit val (ivOps, floatOps,soundness) = makeFloatOps
           val expected = expectedFun(x)
           val actual = testFun(floatOps, ivOps.constant(x))
           assertResult(IsSound.Sound)(soundness.isSound(expected, actual))
@@ -163,7 +162,7 @@ class FloatOpsTest
     test(testName + " interval") {
       forAll((genInterval(minValue, maxValue,specials*), "x")) {
         case Interval(x1, x, x2, xSpecials) =>
-          implicit val (floatOps,soundness) = makeFloatOps
+          implicit val (ivOps, floatOps,soundness) = makeFloatOps
           val expected = expectedFun(x)
           val actual = testFun(floatOps, ivOps.interval(x1, x2, xSpecials))
           assertResult(IsSound.Sound)(soundness.isSound(expected, actual))

@@ -31,25 +31,23 @@ class ConvertTest
   ]
   (
     specials: Seq[From],
-    makeConvert: => (Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind])
+    makeConvert: => (IsInterval[From, VFrom], IsInterval[To, VTo], Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind])
   )
   (using
-    fromIVOps: IsInterval[From, VFrom],
-    toIVOps: IsInterval[To, VTo],
     concreteConvert: Convert[From, To, From, To, Config],
   )
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   val cfailure = ConcreteFailure()
 
-  def _makeConvert: (Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind]) = makeConvert
+  def _makeConvert: (IsInterval[From, VFrom], IsInterval[To, VTo], Convert[From, To, VFrom, VTo, Config], Soundness[CFallible[To], AFallible[VTo]], CollectedFailures[FailureKind]) = makeConvert
 
   for(conf <- AllConfigs[Config]) {
     test(s"convert[$conf] constant") {
       forAll((genConstant[From](Bounded[From].minValue, Bounded[From].maxValue, specials*), "x")) {
         case (x: From) =>
-          implicit val (convertOps, soundness, afailure) = makeConvert
-          val actual = afailure.fallible(convertOps(fromIVOps.constant(x), conf))
+          implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = makeConvert
+          val actual = afailure.fallible(convertOps(fromIvOps.constant(x), conf))
           val expected = cfailure.fallible(concreteConvert(x, conf))
           assertResult(IsSound.Sound, s"$actual does not overapproximate $expected")(soundness.isSound(expected, actual))
       }
@@ -58,8 +56,8 @@ class ConvertTest
     test(s"convert[$conf] interval") {
       forAll((genInterval(Bounded[From].minValue, Bounded[From].maxValue, specials*), "x ∈ [x1,x2]")) {
         case Interval(x1, x, x2, xSpecials) =>
-          implicit val (convertOps, soundness, afailure) = makeConvert
-          val actual = afailure.fallible(convertOps(fromIVOps.interval(x1, x2, xSpecials), conf))
+          implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = makeConvert
+          val actual = afailure.fallible(convertOps(fromIvOps.interval(x1, x2, xSpecials), conf))
           val expected = cfailure.fallible(concreteConvert(x, conf))
           assertResult(IsSound.Sound, s"$actual does not overapproximate $expected")(soundness.isSound(expected, actual))
       }

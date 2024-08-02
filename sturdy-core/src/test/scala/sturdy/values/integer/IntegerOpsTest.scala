@@ -23,17 +23,16 @@ class IntegerOpsTest
   ]
   (
     val specials: Seq[L],
-    val makeIntegerOps: () => (IntegerOps[L, N], Soundness[L, N])
+    val makeIntegerOps: () => (IsInterval[L,N], IntegerOps[L, N], Soundness[L, N])
   )
   (using
-   val ivOps: IsInterval[L, N],
    val integral: Integral[L],
    val concreteIntegerOps: IntegerOps[L, L])
   extends AnyFunSuite with ScalaCheckPropertyChecks:
 
   test("integer literal") {
     forAll("n") { (n: L) =>
-      implicit val (integerOps, soundness) = makeIntegerOps()
+      implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
       assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.integerLit(n), integerOps.integerLit(n)))
     }
   }
@@ -215,7 +214,7 @@ class IntegerOpsTest
       ) {
         case (x, y) =>
           whenever(precondition(x, y)) {
-            implicit val (integerOps, soundness) = makeIntegerOps()
+            implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x, y),
               testFun(integerOps, ivOps.constant(x), ivOps.constant(y))
@@ -228,7 +227,7 @@ class IntegerOpsTest
       forAll((genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x"), (genInterval[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "y")) {
         case (Interval(x1, x, x2, xSpecials), Interval(y1, y, y2, ySpecials)) =>
           whenever(precondition(x,y)) {
-            implicit val (integerOps, soundness) = makeIntegerOps()
+            implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x, y),
               testFun(integerOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials))
@@ -243,7 +242,7 @@ class IntegerOpsTest
       forAll((genConstant[L](Bounded[L].minValue,Bounded[L].maxValue, specials*), "x")) {
         case x =>
           whenever(precondition(x)) {
-            implicit val (integerOps, soundness) = makeIntegerOps()
+            implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x),
               testFun(integerOps, ivOps.constant(x))
@@ -256,7 +255,7 @@ class IntegerOpsTest
       forAll((genInterval(Bounded[L].minValue,Bounded[L].maxValue, specials*), "x")) {
         case Interval(x1, x, x2, xSpecials) =>
           whenever(precondition(x)) {
-            implicit val (integerOps, soundness) = makeIntegerOps()
+            implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
             assertResult(IsSound.Sound)(soundness.isSound(
               expectedFun(x),
               testFun(integerOps, ivOps.interval(x1, x2, xSpecials))

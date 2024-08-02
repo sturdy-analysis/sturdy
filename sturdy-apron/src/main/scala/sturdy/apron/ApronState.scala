@@ -19,6 +19,15 @@ import scala.reflect.ClassTag
 trait ApronState[Addr: Ordering: ClassTag,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
+
+  def assignTempVar(expr: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    val tpe = expr._type
+    withTempVars(tpe) {
+      case (result, _) =>
+        assign(result, expr)
+        ApronExpr.Addr(result, expr.floatSpecials, tpe)
+    }
+
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
   def effects: EffectStack

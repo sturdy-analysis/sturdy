@@ -17,5 +17,5 @@ given FloatIsInterval: IsInterval[Float, FloatInterval] with
 
 class FloatIntervalFloatOpsTest extends FloatOpsTest[Float,FloatInterval](
   specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
-  makeFloatOps = (FloatIntervalFloatOps, SoundnessFloatInterval)
+  makeFloatOps = (FloatIsInterval, FloatIntervalFloatOps, SoundnessFloatInterval)
 )
