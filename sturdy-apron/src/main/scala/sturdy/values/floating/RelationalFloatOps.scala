@@ -1,16 +1,20 @@
 package sturdy.values.floating
 
-import sturdy.apron.{ApronCons, ApronExpr, ApronState, ApronType, RoundingDir, RoundingType, UnOp}
+import apron.{DoubleScalar, Interval}
+
+import scala.reflect.ClassTag
+
+import sturdy.{IsSound, Soundness}
+import sturdy.apron.{*}
 import sturdy.data.given
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
 import sturdy.util.{Bounded, Enumerable}
 
-import scala.reflect.ClassTag
+import java.lang.{Double => JDouble}
+
 import ApronExpr.*
 import ApronCons.*
-import apron.{DoubleScalar, Interval}
-import sturdy.{IsSound, Soundness}
 
 object FloatingLit:
   def apply[L: Numeric: Bounded, Addr, Type](f: L, tpe: Type): ApronExpr[Addr,Type] =
@@ -21,6 +25,8 @@ object FloatingLit:
       floatConstant(bottomInterval, FloatSpecials.NegInfinity, tpe)
     else if(d.isNaN)
       floatConstant(bottomInterval, FloatSpecials.NaN, tpe)
+    else if(JDouble.doubleToRawLongBits(d) == JDouble.doubleToRawLongBits(-0.0d))
+      floatConstant(bottomInterval, FloatSpecials.NegZero, tpe)
     else
       floatConstant(DoubleScalar(Numeric[L].toDouble(f)), FloatSpecials.Bottom, tpe)
 
@@ -52,17 +58,20 @@ given RelationalFloatOps
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val v1Specials = v1.floatSpecials
     val v2Specials = v2.floatSpecials
-    handleOverflow(
-      floatAdd(
-        v1,
-        v2,
-        FloatSpecials(
-          negInfinity = v1Specials.negInfinity || v2Specials.negInfinity,
-          posInfinity = v1Specials.posInfinity || v2Specials.posInfinity,
-          nan = v1Specials.nan
-            || v2Specials.nan
-            || (v1Specials.posInfinity && v2Specials.negInfinity)
-            || (v1Specials.negInfinity && v2Specials.posInfinity)
+    handleNegZero(
+      handleOverflow(
+        floatAdd(
+          v1,
+          v2,
+          FloatSpecials(
+            negInfinity = v1Specials.negInfinity || v2Specials.negInfinity,
+            posInfinity = v1Specials.posInfinity || v2Specials.posInfinity,
+            negZero = v1Specials.negZero && v2Specials.negZero,
+            nan = v1Specials.nan
+              || v2Specials.nan
+              || (v1Specials.posInfinity && v2Specials.negInfinity)
+              || (v1Specials.negInfinity && v2Specials.posInfinity)
+          )
         )
       )
     )
@@ -70,23 +79,29 @@ given RelationalFloatOps
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val v1Specials = v1.floatSpecials
     val v2Specials = v2.floatSpecials
-    handleOverflow(
-      floatSub(
-        v1,
-        v2,
-        FloatSpecials(
-          negInfinity = v1Specials.negInfinity || v2Specials.posInfinity,
-          posInfinity = v1Specials.posInfinity || v2Specials.negInfinity,
-          nan = v1Specials.nan
-            || v2Specials.nan
-            || (v1Specials.posInfinity && v2Specials.posInfinity)
-            || (v1Specials.negInfinity && v2Specials.negInfinity)
+    handleNegZero(
+      handleOverflow(
+        floatSub(
+          v1,
+          v2,
+          FloatSpecials(
+            negInfinity = v1Specials.negInfinity || v2Specials.posInfinity,
+            posInfinity = v1Specials.posInfinity || v2Specials.negInfinity,
+            negZero = v1Specials.negZero,
+            nan = v1Specials.nan
+              || v2Specials.nan
+              || (v1Specials.posInfinity && v2Specials.posInfinity)
+              || (v1Specials.negInfinity && v2Specials.negInfinity)
+          )
         )
-      ))
+      )
+    )
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val v1Specials = v1.floatSpecials
-    val v2Specials = v2.floatSpecials
+    val iv1 = apronState.getFloatInterval(v1)
+    val iv2 = apronState.getFloatInterval(v2)
+    val v1Specials = iv1.floatSpecials
+    val v2Specials = iv2.floatSpecials
     handleOverflow(
       floatMul(
         v1,
@@ -94,22 +109,30 @@ given RelationalFloatOps
         FloatSpecials(
           negInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
           posInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
-          nan = v1Specials.nan || v2Specials.nan
+          negZero = v1Specials.negZero || v2Specials.negZero,
+          nan = v1Specials.nan
+            || v2Specials.nan
+            || ((v1Specials.negInfinity || v1Specials.posInfinity) && v2Specials.negZero)
+            || ((v2Specials.negInfinity || v2Specials.posInfinity) && v1Specials.negZero)
         )
-      ))
+      )
+    )
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val v1Specials = v1.floatSpecials
     val v2Specials = v2.floatSpecials
     val iv2 = apronState.getInterval(v2)
-    handleOverflow(
-      floatDiv(
-        v1,
-        v2,
-        FloatSpecials(
-          negInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
-          posInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
-          nan = v1Specials.nan || v2Specials.nan || Interval(0, 0).isLeq(iv2)
+    handleNegZero(
+      handleOverflow(
+        floatDiv(
+          v1,
+          v2,
+          FloatSpecials(
+            negInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
+            posInfinity = v1Specials.negInfinity || v1Specials.posInfinity || v2Specials.negInfinity || v2Specials.posInfinity,
+            negZero = v1Specials.negZero || v2Specials.negZero,
+            nan = v1Specials.nan || v2Specials.nan || v2Specials.negZero || containsZero(iv2)
+          )
         )
       )
     )
@@ -159,6 +182,7 @@ given RelationalFloatOps
     val returnSpecials = FloatSpecials(
       negInfinity = false,
       posInfinity = specials.negInfinity || specials.posInfinity,
+      negZero = false,
       nan = specials.nan
     )
     if (iv.isBottom || iv.inf.sgn() >= 0) {
@@ -171,12 +195,15 @@ given RelationalFloatOps
 
   override def negated(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val specials = v.floatSpecials
-    floatNegate(
-      v,
-      FloatSpecials(
-        negInfinity = specials.posInfinity,
-        posInfinity = specials.negInfinity,
-        nan = specials.nan
+    handleNegZero(
+      floatNegate(
+        v,
+        FloatSpecials(
+          negInfinity = specials.posInfinity,
+          posInfinity = specials.negInfinity,
+          negZero = false,
+          nan = specials.nan
+        )
       )
     )
 
@@ -188,25 +215,27 @@ given RelationalFloatOps
       FloatSpecials(
         negInfinity = false,
         posInfinity = iv.floatSpecials.posInfinity,
+        negZero = false,
         nan = specials.nan || iv.inf().sgn() < 0
       )
     )
 
   override def ceil(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatCast(v, RoundingType.Int, RoundingDir.Up, v.floatSpecials, typeFloatOps.ceil(v._type))
+    floatCast(v, RoundingType.Int, RoundingDir.Up, v.floatSpecials.setNegZero(false), typeFloatOps.ceil(v._type))
 
   override def floor(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatCast(v, RoundingType.Int, RoundingDir.Down, v.floatSpecials, typeFloatOps.floor(v._type))
+    // TODO: handle case floor(-0.0d) = -1
+    floatCast(v, RoundingType.Int, RoundingDir.Down, v.floatSpecials.setNegZero(false), typeFloatOps.floor(v._type))
 
   override def truncate(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatCast(v, RoundingType.Int, RoundingDir.Zero, v.floatSpecials, typeFloatOps.truncate(v._type))
+    floatCast(v, RoundingType.Int, RoundingDir.Zero, v.floatSpecials.setNegZero(false), typeFloatOps.truncate(v._type))
 
   override def nearest(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    floatCast(v, RoundingType.Int, RoundingDir.Nearest, v.floatSpecials, typeFloatOps.nearest(v._type))
+    floatCast(v, RoundingType.Int, RoundingDir.Nearest, v.floatSpecials.setNegZero(false), typeFloatOps.nearest(v._type))
 
   override def copysign(v: ApronExpr[Addr, Type], sign: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getFloatInterval(sign)
-    if(iv.inf().sgn() >= 0) {
+    if(iv.inf().sgn() >= 0 && !sign.floatSpecials.negZero) {
       absolute(v)
     } else if(iv.sup().sgn() < 0) {
       negated(absolute(v))
@@ -246,6 +275,16 @@ given RelationalFloatOps
       }
       floatConstant(iv, specials, v._type)
     }
+
+  private def handleNegZero(v: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    val iv = apronState.getInterval(v)
+    if(! iv.isBottom && iv.inf.sgn() < 0 && iv.sup.sgn() >= 0)
+      v.setNegZero(true)
+    else
+      v
+
+  private inline def containsZero(iv: Interval): Boolean =
+    Interval(0.0d, 0.0d).isLeq(iv)
 
 
 given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with

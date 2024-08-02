@@ -1,9 +1,12 @@
 package sturdy.apron
 
 import apron.*
-import sturdy.values.floating.FloatSpecials
+
+import java.lang.{Double => JDouble}
 
 import scala.collection.mutable.ArrayBuffer
+
+import sturdy.values.floating.FloatSpecials
 
 object FloatInterval:
   def apply(inf: Double, sup: Double, floatSpecials: FloatSpecials) =
@@ -19,13 +22,22 @@ object FloatInterval:
       FloatInterval(FloatSpecials.PosInfinity)
     else if(d.isNaN)
       FloatInterval(FloatSpecials.NaN)
+    else if(JDouble.doubleToRawLongBits(d) == JDouble.doubleToRawLongBits(-0.0d))
+      FloatInterval(FloatSpecials.NegZero)
     else
       new FloatInterval(DoubleScalar(d), DoubleScalar(d), FloatSpecials.Bottom)
 
 class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatSpecials) extends Interval(infimum, supremum):
+  if(! isNonSpecialBottom && nonSpecialInf.sgn() < 0 && nonSpecialSup.sgn() > 0)
+    setNegZero(true)
+
   override def inf(): Scalar =
     if(floatSpecials.negInfinity)
       DoubleScalar(Double.NegativeInfinity)
+    else if(! isNonSpecialBottom)
+      nonSpecialInf
+    else if(floatSpecials.posInfinity)
+      DoubleScalar(Double.PositiveInfinity)
     else
       nonSpecialInf
 
@@ -35,20 +47,27 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
   override def sup(): Scalar =
     if(floatSpecials.posInfinity)
       DoubleScalar(Double.PositiveInfinity)
+    else if(! isNonSpecialBottom)
+      nonSpecialSup
+    else if(floatSpecials.negInfinity)
+      DoubleScalar(Double.NegativeInfinity)
     else
       nonSpecialSup
 
   def nonSpecialSup: Scalar =
     super.sup()
 
-  def setNegInfinity(): Unit =
-    floatSpecials = floatSpecials.copy(negInfinity = true)
+  def setNegInfinity(b: Boolean): Unit =
+    floatSpecials = floatSpecials.setNegInfinity(b)
 
-  def setPosInfinity(): Unit =
-    floatSpecials = floatSpecials.copy(posInfinity = true)
+  def setNegZero(b: Boolean): Unit =
+    floatSpecials = floatSpecials.setNegZero(b)
 
-  def setNaN(): Unit =
-    floatSpecials = floatSpecials.copy(nan = true)
+  def setPosInfinity(b: Boolean): Unit =
+    floatSpecials = floatSpecials.setPosInfinity(b)
+
+  def setNaN(b: Boolean): Unit =
+    floatSpecials = floatSpecials.setNaN(b)
 
   override def clone(): FloatInterval =
     new FloatInterval(super.inf().copy(), super.sup().copy(), floatSpecials)
@@ -112,7 +131,12 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
 
   override def neg(): Unit =
     super.neg()
-    floatSpecials = FloatSpecials(negInfinity = floatSpecials.posInfinity, posInfinity = floatSpecials.negInfinity, nan = floatSpecials.nan)
+    floatSpecials = FloatSpecials(
+      negInfinity = floatSpecials.posInfinity,
+      negZero = ! isNonSpecialBottom && nonSpecialInf.sgn() < 0 && nonSpecialSup.sgn() >= 0,
+      posInfinity = floatSpecials.negInfinity,
+      nan = floatSpecials.nan
+    )
 
   override def toString: String =
     val result: ArrayBuffer[String] = ArrayBuffer.empty
@@ -120,6 +144,8 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
       result += "-∞"
     if(!isNonSpecialBottom && nonSpecialInf.isInfty == 0)
       result += nonSpecialInf.toString
+    if (floatSpecials.negZero)
+      result += "-0.0"
     if (!isNonSpecialBottom && nonSpecialSup.isInfty == 0)
       result += nonSpecialSup.toString
     if(floatSpecials.nan)

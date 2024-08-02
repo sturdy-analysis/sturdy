@@ -51,6 +51,7 @@ enum ApronExpr[Addr, +Type]:
 
   inline def setFloatSpecials(floatSpecials: FloatSpecials): ApronExpr[Addr,Type] = mapFloatSpecials(_ => floatSpecials)
   inline def setNegInfinity(b: Boolean): ApronExpr[Addr, Type] = mapFloatSpecials(_.setNegInfinity(b))
+  inline def setNegZero(b: Boolean): ApronExpr[Addr, Type] = mapFloatSpecials(_.setNegZero(b))
   inline def setPosInfinity(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setPosInfinity(b))
   inline def setNaN(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setNaN(b))
 
@@ -82,7 +83,7 @@ enum ApronExpr[Addr, +Type]:
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
-    case Constant(coeff, floatSpecials, _) => new sturdy.apron.FloatInterval(coeff.inf(), coeff.sup(), floatSpecials).toString
+    case Constant(coeff, floatSpecials, tpe) => new sturdy.apron.FloatInterval(coeff.inf(), coeff.sup(), floatSpecials).toString
     case Unary(op, e, _, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
 
@@ -197,10 +198,10 @@ object ApronExpr:
     binary(BinOp.Sub, e1, e2, floatSpecials, floatOps.sub(e1._type, e2._type))
 
   inline def floatMul[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
-    binary(BinOp.Mul, e1, e2, floatOps.mul(e1._type, e2._type))
+    binary(BinOp.Mul, e1, e2, floatSpecials, floatOps.mul(e1._type, e2._type))
 
   inline def floatDiv[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
-    binary(BinOp.Div, e1, e2, floatOps.div(e1._type, e2._type))
+    binary(BinOp.Div, e1, e2, floatSpecials, floatOps.div(e1._type, e2._type))
 
   inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
     unary(UnOp.Negate, e1, floatSpecials, floatOps.negated(e1._type))
