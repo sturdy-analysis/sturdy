@@ -36,18 +36,5 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
         arrayOps.arraycopy(src, srcPos, dest, destPos, length)
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
-/*
-  def evalNativeStatic(mth: Method, args: Seq[V]): V =
-    mth.name match
-      case "arraycopy" =>
-        val src = args(0)
-        val srcPos = args(1)
-        val dest = args(2)
-        val destPos = args(3)
-        val length = args(4)
-        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
-        //temporary
-        bytecodeOps.i32ops.integerLit(-1)
-*/
 
 

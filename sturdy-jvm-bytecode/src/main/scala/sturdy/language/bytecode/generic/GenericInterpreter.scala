@@ -76,6 +76,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
   given EffectStack = effectStack
 
+  val classStack: scala.collection.mutable.Stack[ClassFile] = scala.collection.mutable.Stack[ClassFile]()
+  val stringStack: scala.collection.mutable.Stack[String] = scala.collection.mutable.Stack[String]()
   val project: Project[URL]
   val projectSource: String
 
@@ -125,6 +127,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
         val test = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
         stack.push(test)
+        val cls = findClassFile(inst.value.mostPreciseObjectType)
+        classStack.push(cls)
+
 
       case inst: LoadString =>
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
@@ -133,6 +138,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
         objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
+        stringStack.push(inst.value)
 
       case inst: LoadMethodHandle =>
         ???
@@ -153,6 +159,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
         objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
+        stringStack.push(inst.value)
       case inst: LoadMethodHandle_W =>
         ???
       case inst: LoadMethodType_W =>
@@ -712,6 +719,16 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
 
+    /*if(mth.classFile.thisType == ObjectType("java/lang/Class"))
+      val ret = invokeClassMethod(mth, args)
+      if(!mth.descriptor.returnType.isVoidType){
+        stack.push(ret)
+      }
+      else{
+        i32ops.integerLit(-1)
+      }
+    */
+
     if (native.nativeFunList.contains(mth.name)) {
       val ret = native.evalNative(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
@@ -836,3 +853,37 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     case ValType.F64 => f64ops.floatingLit(0)
     case ValType.Obj => objectOps.makeNull()
     case ValType.Array => objectOps.makeNull()
+
+  /*def invokeClassMethod(mth: Method, args: Seq[V]): V =
+    mth.name match
+      case "desiredAssertionStatus" =>
+        i32ops.integerLit(1)
+      case "toString" =>
+        ???
+      case "toGenericString" =>
+        ???
+      case "forName" =>
+        ???
+      case "newInstance" =>
+        ???
+      case "isInstance" =>
+        ???
+      case "isAssignableFrom" =>
+        ???
+      case "isInterface" =>
+        val cls = classStack.pop()
+        if(cls.isInterfaceDeclaration)
+          i32ops.integerLit(1)
+        else
+          i32ops.integerLit(0)
+      case "isArray" =>
+        ???
+      case "isPrimitive" =>
+        val string = stringStack.pop()
+        if(string == "int" || string ==  "float" || string == "boolean" || string == "byte" || string == "char" || string == "short" || string == "long" || string == "double")
+          i32ops.integerLit(1)
+        else
+          i32ops.integerLit(0)
+      case "isAnnotgation" =>
+        ???
+*/

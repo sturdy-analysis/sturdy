@@ -240,10 +240,9 @@ object test extends App{
   val stringTest = cfs.findMethod("stringTest").head
   println(interp.invokeExternal(stringTest, true))
   val stringTest2 = cfs.findMethod("stringTest2").head
-  println(interp.invokeExternal(stringTest2, true))
-  val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
-  //interp.invoke(stringBuilderTest, true)
-  //println(interp.stack.pop())
+  println(interp.invokeExternal(stringTest2, true)) 
+  //val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
+  //println(interp.invokeExternal(stringBuilderTest, true))
 
   println("--- POP2Test ---")
   interp.evalExternal(LoadLong(500))

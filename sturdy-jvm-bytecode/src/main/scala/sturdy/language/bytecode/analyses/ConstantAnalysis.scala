@@ -55,7 +55,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     private given Instance = this
 
     override val fixpoint: fix.Fixpoint[FixIn, FixOut] = ???
-//      fix.notContextSensitive(fix.iter.innermost(StackedStates())).fixpoint
+      //fix.notContextSensitive(fix.iter.innermost(StackedStates())).fixpoint
 
     override val fixpointSuper = fixpoint
 
