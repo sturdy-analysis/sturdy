@@ -21,7 +21,8 @@ import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.relational.EqOps
 import sturdy.fix
-import sturdy.values.{Finite, Powerset}
+import sturdy.values.MaybeChanged.Unchanged
+import sturdy.values.{Finite, Join, MaybeChanged, Powerset}
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
@@ -44,7 +45,11 @@ enum FixIn:
 enum FixOut:
   case Eval()
 
-given finiteFixIn: Finite[FixIn] with {}
+given Join[FixOut] with
+  override def apply(v1: FixOut, v2: FixOut): MaybeChanged[FixOut] = Unchanged(v1)
+
+given Finite[FixIn] with {}
+given Finite[FixOut] with {}
 
 trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
 

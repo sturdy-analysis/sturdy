@@ -19,7 +19,7 @@ import sturdy.language.bytecode.ConcreteInterpreter.{Bool, NullVal, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.abstractions.{ConstantObjects, Exceptions, Numbers}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
-import sturdy.values.{Abstractly, Finite, Topped, given}
+import sturdy.values.{Abstractly, Finite, Topped, Widen, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
@@ -54,8 +54,10 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     private given Instance = this
 
-    override val fixpoint: fix.Fixpoint[FixIn, FixOut] = ???
-      //fix.notContextSensitive(fix.iter.innermost(StackedStates())).fixpoint
+    override val fixpoint: fix.Fixpoint[FixIn, FixOut] =
+      fix.notContextSensitive(
+        fix.iter.innermost[FixIn, FixOut, Unit](StackedStates())
+      ).fixpoint
 
     override val fixpointSuper = fixpoint
 
