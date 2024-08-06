@@ -4,8 +4,7 @@ import sturdy.data.{NoJoin, given}
 import sturdy.effect.environment.Box
 import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.ConcreteCyclicEnvironment
-import sturdy.effect.failure.ConcreteFailure
-import sturdy.effect.failure.Failure
+import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
 import sturdy.values.booleans.{BooleanBranching, given}
@@ -23,7 +22,7 @@ object ConcreteInterpreter extends Interpreter:
 
   override def asBoolean(v: Value)(using Failure): Boolean = v match
     case Value.Int(i) => i != 0
-    case _ => Failure(TypeError, s"Expected Boolean but got $v")
+    case _ => Failure(PCFFailure.TypeError, s"Expected Boolean but got $v")
   override def boolean(b: Boolean): Value = Value.Int(if b then 1 else 0)
 
   class Instance(nextInput: () => Value) extends GenericInstance:

@@ -1,6 +1,7 @@
 package sturdy.language.pcf
 
 import sturdy.util.Labeled
+import sturdy.values.Finite
 
 enum Exp extends Labeled:
   case Var(name: String)
@@ -21,3 +22,5 @@ enum BinOp:
 
 case class Program(toplevel: Seq[(String, Exp)]):
   lazy val definitions: Map[String, Exp] = toplevel.toMap
+
+given Finite[Exp] with {}
