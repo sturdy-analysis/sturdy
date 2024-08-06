@@ -50,7 +50,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
   private def restoreFixpoint(state: TreeBuilderState, fx: Fx): TreeBuilderState =
     state.copy(
       preds = state.fixpoints.getOrElse(fx, (Set.empty, Map.empty))._1,
-      aes = state.fixpoints.getOrElse(fx, (Set.empty, Map.empty))._2
+      aes = mergeAes(state.aes, state.fixpoints.getOrElse(fx, (Set.empty, Map.empty))._2)
     )
 
   private def _build(ct: CT, state: TreeBuilderState): TreeBuilderState = ct match

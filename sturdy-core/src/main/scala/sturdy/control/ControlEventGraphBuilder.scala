@@ -176,7 +176,7 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
       case Recurrent(fx) =>
         val (tails, xs) = fixpoints.getOrDefault(fx, (emptyPredecessors, emptyActiveExc))
         predecessors = tails
-        activeExc = xs
+        activeExc = mergeAes(activeExc, xs)
       case EndFixpoint() => stack match
         case Entry.Fixpoint(fx) :: stack_ =>
           stack = stack_
