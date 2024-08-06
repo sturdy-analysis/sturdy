@@ -20,7 +20,7 @@ import sturdy.fix.Fixpoint
 
 class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
 
-  behavior of "Tip constant interpreter"
+  behavior of "PCF constant interpreter"
 
   val uri = classOf[ConstantInterpreterTest].getResource("/sturdy/language/pcf").toURI;
 

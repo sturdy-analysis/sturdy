@@ -40,4 +40,4 @@ object ConcreteInterpreter extends Interpreter:
     override val input: CUserInput[Value] = new CUserInput(nextInput)
     override val environment = new ConcreteCyclicEnvironment[String, Value](Map.empty)
 
-    override val fixpoint = new fix.ConcreteFixpoint[Exp, Value]
+    override val fixpoint = new fix.ConcreteFixpoint[FixIn, Value]

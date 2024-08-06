@@ -44,10 +44,22 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   implicit def jv: J[V]
 
   // fixpoint
-  type Fixed = Exp => V
-  val fixpoint: EffectStack ?=> fix.Fixpoint[Exp, V]
+  enum FixIn:
+    case Eval(e: Exp)
+    case Enter(e: Exp)
+    
+  given finiteFixIn: Finite[FixIn] with {}
 
-  private lazy val fixed = fixpoint(eval_open)
+  type Fixed = FixIn => V
+  val fixpoint: EffectStack ?=> fix.Fixpoint[FixIn, V]
+  
+  private lazy val fixed = {
+    fixpoint {
+      case FixIn.Eval(e) => eval_open(e)
+      case FixIn.Enter(f) => eval_open(f)
+    }
+  }
+
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
 
@@ -87,7 +99,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
           environment.loadClosedEnvironment(env)
           environment.bind(x, a)
           // TODO enter
-          eval(body)
+          enter(body)
         }
       }
     case Exp.Rec(f, body) =>
@@ -97,7 +109,8 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
       }
       rec
 
-  def eval(e: Exp)(using rec: Fixed): V = rec(e)
+  def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e))
+  def enter(f: Exp)(using rec: Fixed): V = rec(FixIn.Enter(f))
 
   def evalProgram(p: Program): V = external {
     p.definitions.get("main") match

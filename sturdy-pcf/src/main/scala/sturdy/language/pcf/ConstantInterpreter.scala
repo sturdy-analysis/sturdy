@@ -60,9 +60,8 @@ object ConstantInterpreter extends Interpreter:
     given Finite[VClosure] with {}
 
     override val fixpoint =
-      fix.filter[Exp, Value](_.isInstanceOf[Exp.App],
+      fix.filter[FixIn, Value](_.isInstanceOf[FixIn.Enter],
         fix.notContextSensitive(
-          fix.iter.innermost[Exp, Value, Unit](StackedStates())
-        )
-      ).fixpoint
+          fix.iter.innermost[FixIn, Value, Unit](StackedStates())
+        )).fixpoint
 
