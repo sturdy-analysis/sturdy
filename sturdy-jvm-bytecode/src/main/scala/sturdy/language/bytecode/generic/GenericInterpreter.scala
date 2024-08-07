@@ -808,6 +808,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     except.tryCatch {
       val currInst = instructionMap(pc)
       frame.setData(pc)
+      println(currInst)
       evalFix(currInst, mth, pc)
       if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
         val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)

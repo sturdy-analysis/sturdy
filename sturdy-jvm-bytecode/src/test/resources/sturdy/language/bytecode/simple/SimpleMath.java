@@ -341,7 +341,31 @@ public class SimpleMath {
         }
     }
 
+    public static int constantTest(){
+        int x = 5;
+        x = 10;
+        return x;
+    }
 
+    public static int constantTest2(boolean flag){
+        int x = 0;
+        if(flag){
+            x = 5;
+        }
+        else{
+            x = 500;
+        }
+        return x;
+    }
+
+    public static int constantLoopTest(int flag){
+        int x = 0;
+        while(flag < 100){
+            x++;
+            flag += x;
+        }
+        return x;
+    }
 
     public static void main(String[] args) {
         int test = 10;

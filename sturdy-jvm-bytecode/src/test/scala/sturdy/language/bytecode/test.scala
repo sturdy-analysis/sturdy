@@ -9,6 +9,7 @@ import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.ConcreteInterpreter
 import sturdy.language.bytecode.analyses.ConstantAnalysis
 import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
+import sturdy.values.Topped
 import sturdy.values.integer.IntegerOps
 
 import java.io.{DataInputStream, File, FileInputStream}
@@ -58,11 +59,11 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
-  //val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath)
+  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath)
 
-  val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
+  //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
-  ///*
+  /*
   interp.evalExternal(BIPUSH(5))
   interp.evalExternal(BIPUSH(10))
   interp.evalExternal(IADD)
@@ -255,9 +256,24 @@ object test extends App{
   interp.evalExternal(POP2)
   println(interp.stack.size)
 
+  println("--- ConstantTest ---")
+  val constTest1 = cfs.findMethod("constantTest").head
+  println(absInterp.invokeExternal(constTest1, true))*/
+  val constTest2 = cfs.findMethod("constantTest2").head
+  absInterp.evalExternal(ICONST_0)
+  println(absInterp.invokeExternal(constTest2, true))
+  println(absInterp.stack.size)
+  absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
+  println(absInterp.invokeExternal(constTest2, true))
+  val constLoopTest = cfs.findMethod("constantLoopTest").head
+  //absInterp.evalExternal(ICONST_0)
+  println(absInterp.stack.size)
+  //absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
+  //println(absInterp.invokeExternal(constLoopTest, true))
   /*
 
   */
-
+  val tmp = constLoopTest.body.get.iterator.map(c => c.pc -> c.instruction).toSeq
+  println(tmp)
 }
 
