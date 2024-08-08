@@ -2,7 +2,7 @@ package sturdy.language.pcf
 
 import sturdy.data.{NoJoin, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.environment.{Box, ClosableEnvironment, ConcreteCyclicEnvironment}
+import sturdy.effect.environment.{Box, ClosableEnvironment, ConcreteCyclicEnvironment, StandardCyclicEnvironment}
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix.StackConfig.StackedStates
@@ -55,9 +55,11 @@ object ConstantInterpreter extends Interpreter:
     override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
     override val input: CUserInput[Value] = new CUserInput(nextInput)
-    override val environment = new ConcreteCyclicEnvironment[String, Value](Map.empty)
+    override val environment = new StandardCyclicEnvironment[String, Value](Map.empty)
 
     given Finite[VClosure] with {}
+    // TODO : Fix (Finite variables for widening Maps using FiniteKeyMapWidening)
+    given Finite[String] with {}
 
     override val fixpoint =
       fix.filter[FixIn, Value](_.isInstanceOf[FixIn.Enter],
