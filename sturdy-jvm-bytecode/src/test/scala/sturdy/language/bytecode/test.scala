@@ -52,8 +52,8 @@ object test extends App{
 
   //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
   val cfs = cfs1.head
-  val cfs2 = pWithLibrary.classFile(ObjectType("ComplicatedMath")).get
-  println(pWithLibrary.classFile(ObjectType("ComplicatedMath")).get.staticInitializer)
+  val cfs2 = pWithLibrary.classFile(ObjectType("sturdy/language/bytecode/simple/ComplicatedMath")).get
+  println(pWithLibrary.classFile(ObjectType("sturdy/language/bytecode/simple/ComplicatedMath")).get.staticInitializer)
 
   val sourceFile = projectPath
 
@@ -260,9 +260,9 @@ object test extends App{
   val constTest1 = cfs.findMethod("constantTest").head
   println(absInterp.invokeExternal(constTest1, true))*/
   val constTest2 = cfs.findMethod("constantTest2").head
-  absInterp.evalExternal(ICONST_0)
-  println(absInterp.invokeExternal(constTest2, true))
-  println(absInterp.stack.size)
+//  absInterp.evalExternal(ICONST_0)
+//  println(absInterp.invokeExternal(constTest2, true))
+//  println(absInterp.stack.size)
   absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
   println(absInterp.invokeExternal(constTest2, true))
   val constLoopTest = cfs.findMethod("constantLoopTest").head

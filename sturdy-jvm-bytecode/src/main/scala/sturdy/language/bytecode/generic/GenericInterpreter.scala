@@ -804,17 +804,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       FixOut.Eval()
   }
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
+
   def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
     except.tryCatch {
-      val currInst = instructionMap(pc)
-      frame.setData(pc)
-      println(currInst)
-      evalFix(currInst, mth, pc)
-      if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
-        val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
-        run(nextPC, instructionMap, mth)
-      }
-    } {
+      runBody(pc, instructionMap, mth)
+    } { 
       case JvmExcept.Jump(targetPC) =>
         run(targetPC, instructionMap, mth)
       case JvmExcept.Ret(currPC) =>
@@ -838,6 +832,17 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
         stack.push(exception)
         run(handler.handlerPC, instructionMap, mth)
+    }
+
+  def runBody(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
+    val currInst = instructionMap(pc)
+    frame.setData(pc)
+    println(currInst)
+    evalFix(currInst, mth, pc)
+    
+    if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
+      val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
+      runBody(nextPC, instructionMap, mth)
     }
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match

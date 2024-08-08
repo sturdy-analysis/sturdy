@@ -26,8 +26,8 @@ trait Exceptions:
         e.returns.map(v => () => f(JvmExcept.Ret(v))) ++
         e.throws.set.map(exception => () => f(JvmExcept.Throw(exception))) ++
         e.throwObjects.map(v => () => f(JvmExcept.ThrowObject(v)))
-
-      mapJoin(computations, f => f())
+      
+      mapJoin(computations, comp => comp())
 
   given CombineJvmExceptAbstract[V, W <: Widening](using Combine[V, W]): Combine[JvmExceptAbstract[V], W] with
     override def apply(v1: JvmExceptAbstract[V], v2: JvmExceptAbstract[V]): MaybeChanged[JvmExceptAbstract[V]] = {
