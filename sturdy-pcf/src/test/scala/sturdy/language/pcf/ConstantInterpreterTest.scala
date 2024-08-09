@@ -11,7 +11,7 @@ import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
-import sturdy.effect.failure.soundnessAFallible
+import sturdy.effect.failure.{AFallible, soundnessAFallible}
 import sturdy.AbstractlySound
 import sturdy.values.given
 import sturdy.values.integer.given
@@ -30,6 +30,8 @@ class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
     }
   }
 
+  val diverging = List("diverging.pcf")
+
   Fixpoint.DEBUG = true
   
   def runFile(p: Path): Unit =
@@ -38,15 +40,20 @@ class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
     file.close()
     val program = Parser.parse(sourceCode)
     if (program.definitions.contains("main")) {
-      val interp = new ConcreteInterpreter.Instance(() => ConcreteInterpreter.Value.Int(5))
-      val result = interp.failure.fallible(interp.evalProgram(program))
-
       val ainterp = new ConstantInterpreter.Instance(() => ConstantInterpreter.Value.Int(Topped.Top))
       val aresult = ainterp.failure.fallible(ainterp.evalProgram(program))
-
-      summon[Abstractly[ConcreteInterpreter.Value, ConstantInterpreter.Value]]
-      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(result, aresult))
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, ainterp))
-
       println(aresult)
+
+      if(diverging.contains(p.getFileName.toString))
+        assert(aresult match
+          case AFallible.Diverging(recur) => true
+          case _ => false)
+      else
+        val interp = new ConcreteInterpreter.Instance(() => ConcreteInterpreter.Value.Int(5))
+        val result = interp.failure.fallible(interp.evalProgram(program))
+        println(result)
+
+        summon[Abstractly[ConcreteInterpreter.Value, ConstantInterpreter.Value]]
+        assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(result, aresult))
+  //    assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, ainterp))
     }

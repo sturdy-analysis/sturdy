@@ -98,7 +98,6 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
           val a = eval(arg)
           environment.loadClosedEnvironment(env)
           environment.bind(x, a)
-          // TODO enter
           enter(body)
         }
       }

@@ -17,9 +17,12 @@ object ConstantInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
   override type VInt = Topped[Int]
   override type VBoolean = Topped[Boolean]
-  override type VClosure = Powerset[Closure[String, Exp, Env]]
+  override type VClosure = Powerset[Closure[Var, Exp, Env]]
   // todo finite closure representation, maybe: Map[Lam, Env]
-  override type Env = Map[String, Box[Value]]
+  override type Env = Map[Var, Box[Value]]
+
+  type Var = String
+  given Finite[Var] with {}
 
   override def asBoolean(v: Value)(using Failure): VBoolean = v match
     case Value.Int(Topped.Actual(i)) => Topped.Actual(i != 0)
@@ -55,11 +58,9 @@ object ConstantInterpreter extends Interpreter:
     override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
     override val input: CUserInput[Value] = new CUserInput(nextInput)
-    override val environment = new StandardCyclicEnvironment[String, Value](Map.empty)
+    override val environment = new StandardCyclicEnvironment[Var, Value](Map.empty)
 
     given Finite[VClosure] with {}
-    // TODO : Fix (Finite variables for widening Maps using FiniteKeyMapWidening)
-    given Finite[String] with {}
 
     override val fixpoint =
       fix.filter[FixIn, Value](_.isInstanceOf[FixIn.Enter],
