@@ -11,13 +11,12 @@ object Export:
     builder ++= "strict digraph {\n"
     builder ++= s"\"$ir\" [fillcolor=red, style=filled, fontcolor=black]\n"
 
-    while (stack.nonEmpty) {
-      val node = stack.pop()
-      visited += node
-      for ((p,l) <- node.predecessors) {
+    ir.foreach { node =>
+      if (node.isInstanceOf[IR.Feedback])
+        builder ++= s"\"$node\" [fillcolor=lightyellow, style=filled, fontcolor=black]\n"
+
+      for ((p, l) <- node.predecessors) {
         builder ++= s"\"$p\" -> \"$node\" [label = \"$l\"]\n"
-        if (!visited(p))
-          stack.push(p)
       }
     }
 

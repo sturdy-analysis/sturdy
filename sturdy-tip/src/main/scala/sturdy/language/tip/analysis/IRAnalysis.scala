@@ -46,20 +46,26 @@ object IRAnalysis extends Interpreter,
         val vars = callFrame.getState
         var fvars: Option[List[Value]] = None
         var gvars: Option[List[Value]] = None
-        val r = joinComputations {
-          currentCondWiden = Some(cond -> true)
-          val rThn = thn
-          fvars = Some(callFrame.getState)
-          rThn
-        } {
-          currentCondWiden = Some(cond -> false)
-          val rEls = els
-          currentCond = Some(cond)
-          gvars = Some(callFrame.getState)
-          rEls
+
+        val condBefore = currentCond
+        val conWidenBefore = currentCondWiden
+        val r = try {
+          joinComputations {
+            currentCondWiden = Some(cond -> true)
+            val rThn = thn
+            fvars = Some(callFrame.getState)
+            rThn
+          } {
+            currentCondWiden = Some(cond -> false)
+            val rEls = els
+            currentCond = Some(cond)
+            gvars = Some(callFrame.getState)
+            rEls
+          }
+        } finally {
+          currentCond = condBefore
+          currentCondWiden = conWidenBefore
         }
-        currentCond = None
-        currentCondWiden = None
         println(s"boolBranch($cond)")
         println(s"  vars before = $vars")
         println(s"       cond   = $cond")
@@ -116,9 +122,10 @@ object IRAnalysis extends Interpreter,
           println(s"  v2 = $other")
           println(s"  other2 = $other2")
           println(s"  cond = $currentCond")
+          println(s"  condWiden = $currentCondWiden")
 
-          println(sturdy.ir.Export.toGraphViz(feedback))
-          println(sturdy.ir.Export.toGraphViz(other))
+//          println(sturdy.ir.Export.toGraphViz(feedback))
+//          println(sturdy.ir.Export.toGraphViz(other))
 
           if (other == other2 || true) {
             Unchanged(feedback)
@@ -129,27 +136,32 @@ object IRAnalysis extends Interpreter,
           println(s"  v1 = $v1")
           println(s"  v2 = $v2")
           println(s"  cond = $currentCond")
+          println(s"  condWiden = $currentCondWiden")
 
 
           feedback.loop = Some(other)
           feedback.cond = currentCondWiden match
             case Some((c, true)) => Some(c)
             case Some((c, false)) => Some(IR.Op(???, c))
-            case None => None
+            case None => throw new IllegalStateException()
 
-          println(sturdy.ir.Export.toGraphViz(feedback))
+//          println(sturdy.ir.Export.toGraphViz(feedback))
           Changed(feedback)
         case _ =>
-          println(s"Widening, prepare feedback loop ?")
+          println(s"Widening, prepare feedback loop")
           println(s"  v1 = $v1")
           println(s"  v2 = $v2")
-          println(s"  cond = $currentCondWiden")
+          println(s"  cond = $currentCond")
+          println(s"  condWiden = $currentCondWiden")
+
           val select = currentCondWiden match
             case Some((c, true)) => IR.Select(c, v2, v1)
             case Some((c, false)) => IR.Select(c, v1, v2)
-            case None => IR.Select(IR.Unknonwn(), v1, v2)
+            case None =>
+              throw new IllegalStateException() // IR.Select(IR.Unknonwn(), v1, v2)
+
           val feedback = IR.Feedback(select, None, None)
-          println(sturdy.ir.Export.toGraphViz(feedback))
+//          println(sturdy.ir.Export.toGraphViz(feedback))
           if (count > 3)
             ???
           count += 1

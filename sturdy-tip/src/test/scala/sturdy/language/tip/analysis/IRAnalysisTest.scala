@@ -8,7 +8,7 @@ import sturdy.data.given
 import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.{AFallible, afallibleAbstractly, falliblePO, given}
 import sturdy.effect.print.given
-import sturdy.fix.StackConfig
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.abstractions.isFunOrWhile
@@ -37,8 +37,10 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
   val uri = classOf[IRAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
+  Fixpoint.DEBUG = true
+
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("_inc.tip")
+    p.toString.endsWith("while_nested_inc.tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       println(s"analyze ${p.getFileName}")
@@ -67,11 +69,14 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
-      println(s"RESULT")
-      aresult.get.foreach(v => println(Export.toGraphViz(IRAnalysis.valueToIR(v))))
 
-//      val ir = IRAnalysis.valueToIR(aresult.get.get)
-//      val irInterp = new IRInterpreter(Map("n" -> IRValue(5)))
+      println(s"RESULT")
+      val ir = IRAnalysis.valueToIR(aresult.get.get)
+      println(Export.toGraphViz(ir))
+
+
+      val externals = ir.externals.map(name => name -> IRValue(5)).toMap
+      val irInterp = new IRInterpreter(externals)
 //      val v = irInterp.interpret(ir)
 //      println(v)
 

@@ -2,6 +2,8 @@ package sturdy.ir
 
 import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder}
 
+import scala.collection.mutable
+
 trait IROperator:
   def eval(args: Seq[IRValue]): IRValue = ???
 trait IRCheck[C]:
@@ -50,6 +52,27 @@ enum IR:
     case IR.Join(left, right) => s"Join@$uid"
     case IR.Feedback(init, cond, loop) => s"Feedback@$uid"
 
+  def foreach(f: IR => Unit): Unit =
+    val visited = mutable.Set[IR]()
+    val stack = mutable.Stack[IR](this)
+
+    while (stack.nonEmpty) {
+      val node = stack.pop()
+      f(node)
+      visited += node
+      for ((p,l) <- node.predecessors) {
+        if (!visited(p))
+          stack.push(p)
+      }
+    }
+
+  def externals: Set[String] =
+    var names = Set.empty[String]
+    foreach {
+      case IR.External(name) => names += name
+      case _ => ()
+    }
+    names
 
 object IR:
   def Op(op: IROperator, arg: IR, args: IR*): IR.Op =
