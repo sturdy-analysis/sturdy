@@ -12,11 +12,11 @@ given Finite[FailureKind] with {}
 given effectState: EffectStack = EffectStack(failure)
 
 class NumericIntervalTestingIntegerOps[I]
-  (using 
-   ordering: Ordering[I], 
+  (using
+   ordering: Ordering[I],
    ops: IntegerOps[I, I],
-   strict: StrictIntegerOps[I, I, NoJoin], 
-   num: Numeric[I], 
+   strict: StrictIntegerOps[I, I, NoJoin],
+   num: Numeric[I],
    t: Top[NumericInterval[I]])
   extends NumericIntervalIntegerOps[I](20)
     with TestingIntegerOps[I, NumericInterval[I]]:
@@ -33,7 +33,7 @@ class NumericIntervalTestingIntegerOps[I]
   override def shouldEqual(n: NumericInterval[I], l: I, u: I): Assertion =
     if (n.low == l && n.high == u)
       succeed
-    else 
+    else
       fail(s"$n does not equal [$l,$u]")
 
 class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
