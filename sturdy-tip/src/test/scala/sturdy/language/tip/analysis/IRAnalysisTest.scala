@@ -23,7 +23,7 @@ import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.*
-import sturdy.effect.failure
+import sturdy.effect.{TrySturdy, failure}
 import sturdy.ir.{Export, IRInterpreter, IRValue}
 
 import java.nio.file.{Files, Path, Paths}
@@ -40,7 +40,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
   Fixpoint.DEBUG = true
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("while_nested_inc.tip")
+    p.toString.endsWith(".tip") && p.toString.contains("/while")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       println(s"analyze ${p.getFileName}")
@@ -63,9 +63,9 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       println(s"${LinearStateOperationCounter.toString} in the last tests")
       println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
 
-      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
-      val cresult = interp.failure.fallible(interp.execute(program))
-      given CAllocatorIntIncrement[AllocationSite] = interp.alloc
+      println(s"Abstract run")
+
+//      given CAllocatorIntIncrement[AllocationSite] = interp.alloc
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
 //      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
@@ -75,10 +75,25 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       println(Export.toGraphViz(ir))
 
 
-      val externals = ir.externals.map(name => name -> IRValue(5)).toMap
+      println(s"IR run")
+      val externals = ir.externals.map(name => name -> IRValue(0)).toMap
       val irInterp = new IRInterpreter(externals)
-//      val v = irInterp.interpret(ir)
-//      println(v)
+      val v = try irInterp.interpret(ir) catch {
+        case e: StackOverflowError =>
+          println(e.getClass.getName)
+          null
+      }
+      println(v)
+
+      println(s"Concrete run")
+      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
+      val cresult = interp.failure.fallible(interp.execute(program))
+      println(cresult)
+
+      if (!cresult.isFailing) {
+        assert(v != null, s": IR interpretation looped while concrete interpreter yielded ${cresult.get}")
+        assertResult(cresult.get.asInt(using interp))(v.c)
+      }
 
       (aresult, analysis)
     } else {

@@ -10,7 +10,6 @@ class IRInterpreter(val externals: Map[String, IRValue]) {
   var feedbackStore: Map[IR_UID, IRValue] = Map()
 
   def interpret(ir: IR): IRValue = ir match
-    case IR.Unknonwn() => throw new IllegalArgumentException()
     case IR.External(name) => externals(name)
     case IR.Const(c) => IRValue(c)
     case IR.Op(op, args) => op.eval(args.map(interpret))
@@ -30,14 +29,16 @@ class IRInterpreter(val externals: Map[String, IRValue]) {
       val v = interpret(ir)
       IRValue(check.asInstanceOf[IRCheck[Any]].assert(v.c))
 
-  @tailrec
+// TODO deactivated tailrecursion to trigger stack overvflows during testing
+//  @tailrec
   private final def interpretFeedback(uid: IR_UID, cond: IR, loop: IR): IRValue = {
     val v = interpret(cond)
     v match
       case IRValue(false | 0) => feedbackStore(uid)
       case _ =>
         feedbackStore += uid -> interpret(loop)
-        interpretFeedback(uid, cond, loop)
+        val v = interpretFeedback(uid, cond, loop)
+        v
   }
 
 }
