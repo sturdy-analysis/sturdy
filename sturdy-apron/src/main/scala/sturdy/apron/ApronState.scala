@@ -66,7 +66,9 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def getLongInterval(expr: ApronExpr[Addr, Type]): (Long, Long) =
     val (lower, upper) = getBigIntInterval(expr)
-    (lower.getOrElse[BigInt](Long.MinValue).toLong, upper.getOrElse[BigInt](Long.MaxValue).toLong)
+    val inf = lower.getOrElse[BigInt](Long.MinValue).max(Long.MinValue).toLong
+    val sup = upper.getOrElse[BigInt](Long.MaxValue).min(Long.MaxValue).toLong
+    (inf,sup)
 
   def getBigIntInterval(expr: ApronExpr[Addr, Type]): (Option[BigInt],Option[BigInt]) =
     val iv = getInterval(expr)
@@ -97,36 +99,42 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     (lower(0), upper(0))
 
   def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
-    getBoolean(v, getInterval(v.e1), getInterval(v.e2))
+    getBoolean(v, getFloatInterval(v.e1), getFloatInterval(v.e2))
 
-  @tailrec
-  private def getBoolean(v: ApronCons[Addr, Type], iv1: Interval, iv2: Interval): Topped[Boolean] =
+  private def getBoolean(v: ApronCons[Addr, Type], iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
     v.op match
       case CompareOp.Eq =>
-        if (iv1.isEqual(iv2) && iv1.inf.isEqual(iv1.sup))
+        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
+          Topped.Actual(false)
+        else if(iv1.floatSpecials.nan || iv2.floatSpecials.nan)
+          Topped.Top
+        else if (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
           Topped.Actual(true)
-        else if (IntervalLattice.meet(iv1, iv2).isBottom) // no overlap
+        else if (iv1.meet(iv2).isBottom) // no overlap
           Topped.Actual(false)
         else // overlap
           Topped.Top
       case CompareOp.Neq =>
-        if (iv1.isEqual(iv2) && iv1.inf.isEqual(iv1.sup))
-          Topped.Actual(false)
-        else if (IntervalLattice.meet(iv1, iv2).isBottom) // no overlap
-          Topped.Actual(true)
-        else // overlap
-          Topped.Top
+        getBoolean(ApronCons(CompareOp.Eq, v.e1, v.e2), iv1, iv2).map(! _)
       case CompareOp.Lt =>
-        if (iv1.sup.cmp(iv2.inf) < 0) // iv1 < iv2
+        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
+          Topped.Actual(false)
+        else if (iv1.floatSpecials.nan || iv2.floatSpecials.nan)
+          Topped.Top
+        else if (iv1.sup().cmp(iv2.inf()) < 0) // iv1 < iv2
           Topped.Actual(true)
-        else if (iv2.sup.cmp(iv1.inf) <= 0) // iv2 <= iv2
+        else if (iv2.sup().cmp(iv1.inf()) <= 0) // iv2 <= iv1
           Topped.Actual(false)
         else // overlap
           Topped.Top
       case CompareOp.Le =>
-        if (iv1.sup.cmp(iv2.inf) <= 0) // iv1 <= iv2
+        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
+          Topped.Actual(false)
+        else if (iv1.floatSpecials.nan || iv2.floatSpecials.nan)
+          Topped.Top
+        else if (iv1.sup().cmp(iv2.inf()) <= 0) // iv1 <= iv2
           Topped.Actual(true)
-        else if (iv2.sup.cmp(iv1.inf) < 0) // iv2 < iv2
+        else if (iv2.sup().cmp(iv1.inf()) < 0) // iv2 < iv1
           Topped.Actual(false)
         else
           Topped.Top

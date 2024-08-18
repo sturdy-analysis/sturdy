@@ -73,6 +73,6 @@ class OrderingOpsTest
     (actual: Topped[Boolean]) =>
       MatchResult(
         actual == Topped.Top || actual == Topped.Actual(expected),
-        s"interval $actual does not contain ${expected}",
-        s"interval $actual contains ${expected}"
+        s"Abstract boolean $actual does not contain ${expected}",
+        s"Abstract boolean $actual contains ${expected}"
       )

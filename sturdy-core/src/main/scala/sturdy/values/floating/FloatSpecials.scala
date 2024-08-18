@@ -16,6 +16,8 @@ case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Bo
 
   inline def isInfinite: Boolean = negInfinity || posInfinity
 
+  inline def isBottom: Boolean = this == FloatSpecials.Bottom
+
   def isLeq(other: FloatSpecials): Boolean =
     implies(this.negInfinity, other.negInfinity) &&
     implies(this.negZero, other.negZero) &&
@@ -43,6 +45,14 @@ case class FloatSpecials(negInfinity: Boolean, negZero: Boolean, posInfinity: Bo
       Double.PositiveInfinity
     else
       Double.NaN
+
+  def meet(other: FloatSpecials): FloatSpecials =
+    FloatSpecials(
+      negInfinity = this.negInfinity && other.negInfinity,
+      negZero = this.negZero && other.negZero,
+      posInfinity = this.posInfinity && other.posInfinity,
+      nan = this.nan && other.nan
+    )
 
   override def toString(): String =
     val result: ArrayBuffer[String] = ArrayBuffer.empty

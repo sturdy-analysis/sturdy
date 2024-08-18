@@ -61,7 +61,7 @@ class EqOpsTest
           val (ivOps, eqOps) = makeEqOps
           assertResult(IsSound.Sound)(Soundness.isSound(
             expectedFun(x, y),
-            eqOps.getBool(testFun(eqOps, ivOps.interval(x1, x2), ivOps.interval(y1, y2)))
+            eqOps.getBool(testFun(eqOps, ivOps.interval(x1, x2, xSpecials), ivOps.interval(y1, y2, ySpecials)))
           ))
       }
     }

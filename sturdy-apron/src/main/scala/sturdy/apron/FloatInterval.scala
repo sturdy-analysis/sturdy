@@ -12,6 +12,9 @@ object FloatInterval:
   def apply(inf: Double, sup: Double, floatSpecials: FloatSpecials) =
     new FloatInterval(DoubleScalar(inf), DoubleScalar(sup), floatSpecials)
 
+  def apply(inf: Scalar, sup: Scalar, floatSpecials: FloatSpecials) =
+    new FloatInterval(inf, sup, floatSpecials)
+
   def apply(floatSpecials: FloatSpecials): FloatInterval =
     FloatInterval(0, -1, floatSpecials)
 
@@ -125,6 +128,23 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
       posInfinity = floatSpecials.negInfinity,
       nan = floatSpecials.nan
     )
+
+  def meet(iv2: FloatInterval): FloatInterval =
+    val iv1 = this
+    val res = FloatInterval(iv1.floatSpecials.meet(iv2.floatSpecials))
+    if (iv1.isNonSpecialBottom || iv2.isNonSpecialBottom || iv1.nonSpecialSup.cmp(iv2.nonSpecialInf) < 0 || iv2.nonSpecialSup.cmp(iv1.nonSpecialInf) < 0) // no overlap
+      res.nonSpecialInf.set(0)
+      res.nonSpecialSup.set(-1)
+    else
+      if (iv1.nonSpecialInf.cmp(iv2.nonSpecialInf) >= 0)
+        res.setInf(iv1.nonSpecialInf)
+      else
+        res.setInf(iv2.nonSpecialInf)
+      if (iv1.nonSpecialSup.cmp(iv2.nonSpecialSup) <= 0)
+        res.setSup(iv1.nonSpecialSup)
+      else
+        res.setSup(iv2.nonSpecialSup)
+    res
 
   override def toString: String =
     s"${if(isNonSpecialBottom) "⟂" else super.toString} ∪ $floatSpecials"

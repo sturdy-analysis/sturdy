@@ -44,6 +44,7 @@ import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.{DomLogger, Logger}
 
+import java.math.BigInteger
 import scala.collection.immutable.List
 
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, Control:
@@ -221,10 +222,34 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       v match
         case Value.Int32(i32) =>
           val expr = i32.asApronExpr
-          Value.Int32(Left(ApronExpr.constant(IntervalLattice.meet(apronState.getInterval(expr), Interval(Int.MinValue, Int.MaxValue)), expr._type)))
-        case Value.Int64(expr) => Value.Int64(ApronExpr.constant(IntervalLattice.meet(apronState.getInterval(expr), Interval(BigInt(Long.MinValue).bigInteger, BigInt(Long.MaxValue).bigInteger)), expr._type))
-        case Value.Float32(expr) => Value.Float32(ApronExpr.constant(apronState.getInterval(expr), expr._type))
-        case Value.Float64(expr) => Value.Float64(ApronExpr.constant(apronState.getInterval(expr), expr._type))
+          Value.Int32(
+            Left(ApronExpr.constant(
+              apronState.getFloatInterval(expr).meet(
+                sturdy.apron.FloatInterval(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom)
+              ),
+              expr._type
+            )
+            )
+          )
+        case Value.Int64(expr) =>
+          Value.Int64(
+            ApronExpr.constant(
+              apronState.getFloatInterval(expr).meet(
+                sturdy.apron.FloatInterval(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom)
+              ),
+              expr._type
+            )
+          )
+        case Value.Float32(expr) =>
+          Value.Float32(ApronExpr.constant(
+            apronState.getFloatInterval(expr).meet(
+              sturdy.apron.FloatInterval(Float.MinValue, Float.MaxValue, FloatSpecials.Top)
+            ), expr._type))
+        case Value.Float64(expr) =>
+          Value.Float64(ApronExpr.constant(
+            apronState.getFloatInterval(expr).meet(
+              sturdy.apron.FloatInterval(Double.MinValue, Double.MaxValue, FloatSpecials.Top)
+            ), expr._type))
         case Value.TopValue => Value.TopValue
 
     def constantInstructions: ConstantInstructionsLogger =

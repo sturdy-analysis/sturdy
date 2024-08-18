@@ -186,7 +186,7 @@ trait RelationalStore
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
     val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
     this._abstract1.meet(manager, cons)
-    if (this._abstract1.isBottom(manager))
+    if (this._abstract1.isBottom(manager) && constraints.forall(cons => cons.e1.floatSpecials.isBottom && cons.e2.floatSpecials.isBottom))
       throw new BottomFailure
 
   def satisfies(constraints: ApronCons[PhysicalAddress[Context], Type]*): Boolean =

@@ -163,7 +163,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   override def join: Join[State] = (s1: State, s2: State) =>
     Join[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
   override def widen: Widen[State] = (s1: State, s2: State) =>
-    Widen[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState)
+    Widen[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
 
   case class AddressTranslationState(mapping: Map[Context, RecencyRegion]):
     override def equals(obj: Any): Boolean =

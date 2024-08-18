@@ -6,22 +6,6 @@ import sturdy.values.floating.FloatSpecials
 import sturdy.values.integer.IntervalRange
 import sturdy.values.{Join, MaybeChanged, PartialOrder, Top}
 
-object IntervalLattice:
-  def meet(iv1: Interval, iv2: Interval): Interval =
-    val res = Interval()
-    if (iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0) // no overlap
-      res.setBottom()
-    else
-      if (iv1.inf.cmp(iv2.inf) >= 0)
-        res.setInf(iv1.inf)
-      else
-        res.setInf(iv2.inf)
-      if (iv1.sup.cmp(iv2.sup) <= 0)
-        res.setSup(iv1.sup)
-      else
-        res.setSup(iv2.sup)
-    res
-
 given intervalOrdering: PartialOrder[Interval] with
   override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
 

@@ -248,7 +248,7 @@ given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](us
         if (DoubleScalar(maxVal).cmp(iv.inf) < 0)
           iv.setInf(DoubleScalar(maxVal))
       }
-      floatConstant(iv, specials, from._type)
+      floatCast(floatConstant(iv, specials, from._type), RoundingType.Single, RoundingDir.Nearest, specials, convertType(from._type, conf))
 }
 
 given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using convertType: ConvertFloatDouble[Type, Type]):

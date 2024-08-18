@@ -247,21 +247,20 @@ given RelationalFloatOps
     )
     if (v1Specials.posInfinity || v2Specials.posInfinity)
       Join(v1, v2).get.setFloatSpecials(resultSpecials)
-    if (iv1.isBottom) {
+    else if (iv1.isBottom)
       v2.setFloatSpecials(resultSpecials)
-    } else if(iv2.isBottom) {
+    else if(iv2.isBottom)
       v1.setFloatSpecials(resultSpecials)
-    } else if (iv1.sup().cmp(iv2.inf()) <= 0) {
+    else if (iv1.sup().cmp(iv2.inf()) <= 0)
       v1.setFloatSpecials(resultSpecials)
-    } else if (iv2.sup().cmp(iv1.inf()) <= 0) {
+    else if (iv2.sup().cmp(iv1.inf()) <= 0)
       v2.setFloatSpecials(resultSpecials)
-    } else {
+    else
       apronState.ifThenElse(lt(v1, v2)) {
         v1
       } {
         v2
       }
-    }
 
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -354,7 +353,8 @@ given RelationalFloatOps
     // truncate( ∞  ) =  ∞
     // truncate(-0.0) = -0.0
     // truncate( NaN) =  NaN
-    floatCast(v, RoundingType.Int, RoundingDir.Nearest, v.floatSpecials, typeFloatOps.nearest(v._type))
+    // truncate(-0.5) = -0.0 !!!
+    floatCast(v, RoundingType.Int, RoundingDir.Nearest, v.floatSpecials.setNegZero(true), typeFloatOps.nearest(v._type))
 
   override def copysign(v: ApronExpr[Addr, Type], sign: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     // copySign(-∞  , pos) =  ∞
