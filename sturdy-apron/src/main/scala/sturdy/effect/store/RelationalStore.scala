@@ -210,7 +210,6 @@ trait RelationalStore
 
   private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
     val variable = ApronVar(addr)
-
     val tpe = expr._type
     val specials = expr.floatSpecials
     if (!metaData.contains(variable)) {
@@ -218,7 +217,10 @@ trait RelationalStore
     } else {
       val addrMetaData@(addrSpecials,addrType) = metaData(addr)
       if (addrType.apronRepresentation == tpe.apronRepresentation) {
-        metaData += addr -> Join(addrMetaData, (specials,tpe)).get
+        if (addr.recency == Recency.Recent)
+          metaData += addr -> addrMetaData
+        else
+          metaData += addr -> Join(addrMetaData, (specials,tpe)).get
       } else {
         throw new IllegalStateException(
           s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.apronRepresentation} " +
@@ -239,6 +241,11 @@ trait RelationalStore
             env = env.add(Array[apron.Var](), Array[apron.Var](variable))
           }
       _abstract1.changeEnvironment(manager, env, false)
+    } else {
+      if (addr.recency == Recency.Recent && tpe.apronRepresentation == ApronRepresentation.Real && specials != FloatSpecials.Bottom && getBound(expr).isBottom) {
+        env = env.remove(Array[apron.Var](variable))
+        _abstract1.changeEnvironment(manager, env, false)
+      }
     }
 
 

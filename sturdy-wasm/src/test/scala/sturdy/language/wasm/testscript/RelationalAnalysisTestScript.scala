@@ -7,6 +7,7 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import org.scalatest.Assertions.*
+import org.scalatest.Suites
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -33,17 +34,23 @@ import swam.validation.Validator
 import java.nio.file.{Files, Path, Paths}
 import scala.util.CommandLineParser
 
-given CommandLineParser.FromString[Array[String]] with
-  def fromString(s: String): Array[String] = Array()
-
-object Main:
-  @main
-  def main(args: Array[String]): Unit = org.scalatest.run(new RelationalAnalysisTestScript)
+//given CommandLineParser.FromString[Array[String]] with
+//  def fromString(s: String): Array[String] = Array()
+//
+//object Main:
+//  @main
+//  def main(args: Array[String]): Unit = org.scalatest.run(new RelationalAnalysisTestScript)
 
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
-class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
-  behavior of "TestScript relational analysis"
+class RelationalAnalysisSoundnessTests extends Suites(
+  new RelationalAnalysisTestScript(Polka(true)),
+  new RelationalAnalysisTestScript(Octagon()),
+  new RelationalAnalysisTestScript(Box()),
+)
+
+class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matchers:
+  behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
@@ -52,19 +59,19 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     Iterator(
-//      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(StackConfig.StackedStates())), ctx = Insensitive)),
-      () => new RelationalAnalysis.Instance(Polka(true), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-//      () => new RelationalAnalysis.Instance(Octagon(), FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
-      //      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
-//      () => new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
-//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
-//      () => new IntervalAnalysisSturdyInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
+//      () => new RelationalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
     )
 
   def isSlow(manager: Manager, script: String): Boolean =
-    manager.toString.contains("Polka") && script == "endianness.wast"
+    manager.isInstanceOf[Polka] && script == "endianness.wast"
 
   def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
     val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
@@ -72,15 +79,15 @@ class RelationalAnalysisTestScript extends AnyFlatSpec, Matchers:
     interp.run(script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("f32.wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
       if (isSlow(anl.apronManager, p.getFileName.toString))
-        it must s"execute ${p.getFileName} with ${anl} and ${anl.apronManager}" taggedAs(SlowTest) in {
+        it must s"execute ${p.getFileName} with ${anl}" taggedAs(SlowTest) in {
           runTest(p, anl)
         }
       else
-        it must s"execute ${p.getFileName} with ${anl} and ${anl.apronManager}" in {
+        it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
         }
     }

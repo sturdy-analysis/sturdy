@@ -132,10 +132,10 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
   def meet(iv2: FloatInterval): FloatInterval =
     val iv1 = this
     val res = FloatInterval(iv1.floatSpecials.meet(iv2.floatSpecials))
-    if (iv1.isNonSpecialBottom || iv2.isNonSpecialBottom || iv1.nonSpecialSup.cmp(iv2.nonSpecialInf) < 0 || iv2.nonSpecialSup.cmp(iv1.nonSpecialInf) < 0) // no overlap
+    if (iv1.isNonSpecialBottom || iv2.isNonSpecialBottom || iv1.nonSpecialSup.cmp(iv2.nonSpecialInf) < 0 || iv2.nonSpecialSup.cmp(iv1.nonSpecialInf) < 0) { // no overlap
       res.nonSpecialInf.set(0)
       res.nonSpecialSup.set(-1)
-    else
+    } else {
       if (iv1.nonSpecialInf.cmp(iv2.nonSpecialInf) >= 0)
         res.setInf(iv1.nonSpecialInf)
       else
@@ -144,6 +144,7 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
         res.setSup(iv1.nonSpecialSup)
       else
         res.setSup(iv2.nonSpecialSup)
+    }
     res
 
   override def toString: String =

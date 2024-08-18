@@ -226,29 +226,11 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
 
 given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using apronState: ApronState[Addr,Type], floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
-  case (from, conf) =>
-    val iv = apronState.getInterval(from)
-    var specials = from.floatSpecials
-    val minVal = Float.MinValue.toDouble
-    val maxVal = Float.MaxValue.toDouble
-    if(iv.isBottom)
-      from
-    else if(iv.isLeq(Interval(minVal, maxVal)))
-      floatCast(from, RoundingType.Single, RoundingDir.Nearest, from.floatSpecials, convertType(from._type, conf))
-    else
-      if (iv.inf.cmp(DoubleScalar(minVal)) < 0) {
-        specials = specials.setNegInfinity(true)
-        iv.setInf(DoubleScalar(minVal))
-        if (iv.sup.cmp(DoubleScalar(minVal)) < 0)
-          iv.setSup(DoubleScalar(minVal))
-      }
-      if (DoubleScalar(maxVal).cmp(iv.sup) < 0) {
-        specials = specials.setPosInfinity(true)
-        iv.setSup(DoubleScalar(maxVal))
-        if (DoubleScalar(maxVal).cmp(iv.inf) < 0)
-          iv.setInf(DoubleScalar(maxVal))
-      }
-      floatCast(floatConstant(iv, specials, from._type), RoundingType.Single, RoundingDir.Nearest, specials, convertType(from._type, conf))
+    case (from, conf) =>
+      val iv = apronState.getInterval(from)
+      floatOps.checkForNewFloatSpecials(
+        floatCast(from, RoundingType.Single, RoundingDir.Nearest, from.floatSpecials, convertType(from._type, conf))
+      )
 }
 
 given RelationalConvertFloatDouble[Addr: ClassTag, Type: ApronType](using convertType: ConvertFloatDouble[Type, Type]):

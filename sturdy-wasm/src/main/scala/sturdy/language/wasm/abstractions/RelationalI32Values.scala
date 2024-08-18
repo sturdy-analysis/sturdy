@@ -52,49 +52,29 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     override def equ(v1: I32, v2: I32): Bool =
       (v1,v2) match
         case (Right(c1), Left(i2@ApronExpr.Constant(coeff, _, tpe))) =>
-          if(coeff.isEqual(0))
+          val c1ContainsNaN = c1.e1.floatSpecials.nan || c1.e2.floatSpecials.nan
+          if(coeff.isEqual(0) && ! c1ContainsNaN)
             c1.negated
-          else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
+          else if(coeff.isScalar && ! c1ContainsNaN /* && ! coeff.isEqual(0) */)
             c1
           else
             EqOps.equ(v1.asApronExpr, i2)
         case (Left(_), Right(_)) =>
           equ(v2, v1)
         case (Right(c1), Right(c2)) =>
-          apronState.join {
-            apronState.addConstraints(c1, c2)
-            Topped.Actual(true)
-          } {
-            apronState.addConstraints(c1.negated, c2.negated)
-            Topped.Actual(false)
-          } match
-            case Topped.Actual(false) => ApronCons.eq(ApronExpr.intLit(0, I32Type), ApronExpr.intLit(1, I32Type))
-            case _ => ApronCons.top(I32Type)
+          ApronCons.from(Type.I32Type) {
+            apronState.join {
+              apronState.addConstraints(c1, c2)
+              Topped.Actual(true)
+            } {
+              apronState.addConstraints(c1.negated, c2.negated)
+              Topped.Actual(false)
+            }
+          }
         case (Left(_),Left(_)) | (Right(_),Left(_)) => EqOps.equ(v1.asApronExpr, v2.asApronExpr)
 
 
-    override def neq(v1: I32, v2: I32): Bool =
-      (v1, v2) match
-        case (Right(i1), Left(i2@ApronExpr.Constant(coeff, _, tpe))) =>
-          if(coeff.isEqual(0))
-            i1
-          else if(coeff.isScalar /* && ! coeff.isEqual(0) */)
-            i1.negated
-          else
-            EqOps.neq(v1.asApronExpr, i2)
-        case (Left(_), Right(_)) =>
-          neq(v2, v1)
-        case (Right(c1), Right(c2)) =>
-          apronState.join {
-            apronState.addConstraints(c1, c2.negated)
-            Topped.Actual(true)
-          } {
-            apronState.addConstraints(c1.negated, c2)
-            Topped.Actual(false)
-          } match
-            case Topped.Actual(false) => ApronCons.eq(ApronExpr.intLit(0, I32Type), ApronExpr.intLit(1, I32Type))
-            case _ => ApronCons.top(I32Type)
-        case (Left(_), Left(_)) | (Right(_), Left(_)) => EqOps.neq(v1.asApronExpr, v2.asApronExpr)
+    override def neq(v1: I32, v2: I32): Bool = equ(v1,v2).negated
 
 
   given I32OrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): OrderingOps[I32, Bool] =
