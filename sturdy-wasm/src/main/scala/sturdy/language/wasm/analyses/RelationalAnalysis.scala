@@ -40,7 +40,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.{IndexedSeqView, mutable}
 import WasmFailure.*
-import sturdy.effect.allocation.AAllocatorFromContext
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
+import sturdy.effect.stack.RelationalStack
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.{DomLogger, Logger}
 
@@ -138,50 +139,41 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def jvFunV: WithJoin[FunV] = implicitly
     //    override def widenState: Widen[State] = implicitly
 
-    val addressTranslation: AddressTranslation[RelAddr] = AddressTranslation.empty
-    var exprConverter: ApronExprConverter[RelAddr, Type, Value] = null
-    var apronState: ApronRecencyState[RelAddr, Type, Value] = null
+    val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
+    var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
+    var apronState: ApronRecencyState[AddrCtx, Type, Value] = null
     given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+    given Lazy[ApronExprConverter[AddrCtx, Type, Value]] = Lazy(exprConverter)
     given Join[ApronExpr[VirtAddr, Type]] = JoinApronExpr[VirtAddr, Type]
     given Widen[ApronExpr[VirtAddr, Type]] = WidenApronExpr[VirtAddr, Type]
 
-
-    final class WasmRelationalStore extends RelationalStore[RelAddr, Type, PowPhysAddr, Value](
-      manager = apronManager,
-      initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialMetaData = Map()
-    ):
-      override def getRelationalVal(v: Value): Option[ApronExpr[PhysAddr, Type]] =
+    given RelationalValue[Value, VirtAddr, Type] with
+      override def getRelationalVal(v: Value): Option[ApronExpr[VirtAddr, Type]] =
         v match
-          case Value.Int32(i32: I32) => Some(exprConverter.virtToPhys(i32.asApronExprLazy))
-          case Value.Int64(expr) => Some(exprConverter.virtToPhys(expr))
-          case Value.Float32(expr) => Some(exprConverter.virtToPhys(expr))
-          case Value.Float64(expr) => Some(exprConverter.virtToPhys(expr))
+          case Value.Int32(i32: I32) => Some(i32.asApronExprLazy)
+          case Value.Int64(expr) => Some(expr)
+          case Value.Float32(expr) => Some(expr)
+          case Value.Float64(expr) => Some(expr)
           case Value.TopValue => None
 
-      inline override def makeRelationalVal(expr: ApronExpr[PhysAddr, Type]): Value =
-        callFrame.makeRelationalVal(exprConverter.physToVirt(expr))
-
-    given domLogger: DomLogger[FixIn] = new DomLogger
-
-    val relationalStore: RelationalStore[RelAddr, Type, PowPhysAddr, Value] = new WasmRelationalStore
-    val recencyStore: RecencyStore[RelAddr, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
-    exprConverter = ApronExprConverter(recencyStore, relationalStore)
-    apronState = new ApronRecencyState[RelAddr, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
-    given apState: ApronState[VirtAddr, Type] = if(apronState != null) apronState else throw new IllegalArgumentException("this.apronState is null")
-
-    final class WasmCallFrame extends RelationalCallFrame[FrameData, Int, Value, InstLoc, RelAddr, Type](
-      initData = rootFrameData,
-      initVars = Iterable.empty,
-      localVariableAllocator = localRelationaAlloc,
-      apronState
-    ):
-      override def makeRelationalVal(expr: ApronExprVirtAddr): Value =
+      override def makeRelationalVal(expr: ApronExpr[VirtAddr, Type]): Value =
         expr._type match
           case I32Type => Value.Int32(Left(expr))
           case I64Type => Value.Int64(expr)
           case F32Type => Value.Float32(expr)
           case F64Type => Value.Float64(expr)
+
+    given domLogger: DomLogger[FixIn] = new DomLogger
+
+    val relationalStore: RelationalStore[AddrCtx, Type, PowPhysAddr, Value] = new RelationalStore[AddrCtx, Type, PowPhysAddr, Value](
+      manager = apronManager,
+      initialState = apron.Abstract1(apronManager, new apron.Environment()),
+      initialMetaData = Map()
+    )
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
+    exprConverter = ApronExprConverter(recencyStore, relationalStore)
+    apronState = new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+    given ApronRecencyState[AddrCtx, Type, Value] = apronState
 
     def addressIterator: Iterator[VirtAddr] =
       def valueIterator(value: Any): Iterator[VirtAddr] = value match
@@ -209,11 +201,21 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       val stateAfter = effectStack.getState
       println(s"Alive: $alive\nDead: $dead\nState Before: $stateBefore\nState After: $stateAfter")
 
-    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
+    val callFrame: RelationalCallFrame[FrameData, Int, Value, InstLoc, AddrCtx, Type] = new RelationalCallFrame(
+      initData = rootFrameData,
+      initVars = Iterable.empty,
+      localVariableAllocator = localRelationaAlloc,
+      apronState
+    )
+
+    val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(new AAllocatorFromContext(
+      (idx: Int, tpe: Type) => AddrCtx.Stack(idx, callFrame.data)
+    ))
+
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: IntervalSymbolTable[TableAddr, FuncIx, Powerset[FunctionInstance]] = new IntervalSymbolTable
-    val callFrame: WasmCallFrame = new WasmCallFrame
+
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure

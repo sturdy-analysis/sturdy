@@ -19,7 +19,7 @@ import scala.reflect.ClassTag
 /**
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
  **/
-trait RelationalStore
+final class RelationalStore
   [
     Context: Ordering: Finite,
     Type : ApronType : Join: Widen,
@@ -29,11 +29,10 @@ trait RelationalStore
   (val manager: Manager,
    initialState: Abstract1,
    initialMetaData: Map[PhysicalAddress[Context], (FloatSpecials,Type)])
+  (using
+    relationalValue: RelationalValue[Val, PhysicalAddress[Context], Type]
+  )
   extends Store[PowAddr, Val, WithJoin]:
-
-  def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
-  def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Context], Type]): Val
-
 
   type MetaData = Map[PhysicalAddress[Context], (FloatSpecials, Type)]
 
@@ -56,7 +55,7 @@ trait RelationalStore
       val v1 = powAddr.reduce(addr =>
         metaData.get(addr) match
           case Some((floatSpecials, tpe)) =>
-            JOptionA.Some(makeRelationalVal(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe)))
+            JOptionA.Some(relationalValue.makeRelationalVal(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe)))
           case None =>
             JOptionA.None()
       )
@@ -68,7 +67,7 @@ trait RelationalStore
     }
 
   override def write(powAddr: PowAddr, v: Val): Unit =
-    getRelationalVal(v) match
+    relationalValue.getRelationalVal(v) match
       case Some(exp) => write(powAddr, exp)
       case None => nonRelationalStore.write(powAddr, v)
 

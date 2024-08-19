@@ -124,33 +124,34 @@ object RelationalAnalysis extends Interpreter,
     var exprConverter: ApronExprConverter[RelationalVar, RelType, Value] = null
     var apronState: ApronRecencyState[RelationalVar, RelType, Value] = null
     given lazyApronState: Lazy[ApronState[VirtualAddress[RelationalVar], RelType]] = lazily(apronState)
+    given lazyExprConverter: Lazy[ApronExprConverter[RelationalVar, RelType, Value]] = lazily(exprConverter)
+
+    given relationalValue: RelationalValue[Value, VirtAddr, RelType] with
+      override def getRelationalVal(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
+        v match
+          case Value.IntValue(expr) => Some(expr)
+          case _ => None
+
+      override def makeRelationalVal(expr: ApronExpr[VirtAddr, RelType]): Value =
+        Value.IntValue(expr)
+
+
     val relationalStore: RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] = new RelationalStore[RelationalVar, RelType, PowPhysAddr,Value] (
       manager = apronManager,
       initialState = apron.Abstract1(apronManager, new apron.Environment()),
       initialMetaData = Map()
-    ):
-      override def getRelationalVal(v: Value): Option[ApronExprPhysAddr] =
-        v match
-          case Value.IntValue(iv) => Some(exprConverter.virtToPhys(iv))
-          case _ => None
-
-      override def makeRelationalVal(expr: ApronExprPhysAddr): Value =
-        Value.IntValue(exprConverter.physToVirt(expr))
-
+    )
     val recencyStore: RecencyStore[RelationalVar, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[RelationalVar], RelType] = apronState
 
-    final class TipCallFrame extends RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType](
+    override val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType] = new RelationalCallFrame(
       initData = "$main",
       initVars = Iterable.empty,
       localVariableAllocator = localRelationaAlloc,
       apronState
-    ):
-      override def makeRelationalVal(expr: ApronExprVirtAddr): Value = Value.IntValue(expr)
-
-    override val callFrame: TipCallFrame = new TipCallFrame
+    )
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 

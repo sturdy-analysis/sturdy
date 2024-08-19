@@ -8,28 +8,30 @@ import sturdy.values.Finite
 import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
-  enum RelAddr:
-    case Local(callFrameAddr: Int, frame: FrameData)
+  enum AddrCtx:
+    case CallFrame(callFrameAddr: Int, frame: FrameData)
+    case Stack(stackAddr: Int, frame: FrameData)
     case Temp(fixin: FixIn, tpe: Type)
 
-  final type VirtAddr = VirtualAddress[RelAddr]
-  final type PhysAddr = PhysicalAddress[RelAddr]
-  final type PowVirtAddr = PowVirtualAddress[RelAddr]
+  final type VirtAddr = VirtualAddress[AddrCtx]
+  final type PhysAddr = PhysicalAddress[AddrCtx]
+  final type PowVirtAddr = PowVirtualAddress[AddrCtx]
   final type PowPhysAddr = PowersetAddr[PhysAddr, PhysAddr]
 
-  def tempRelationalAlloc(rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[Type, RelAddr] = AAllocatorFromContext(
-    tpe => 
-      RelAddr.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
+  def tempRelationalAlloc(rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[Type, AddrCtx] = AAllocatorFromContext(
+    tpe =>
+      AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
   )
-  given localRelationaAlloc: AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), RelAddr] = AAllocatorFromContext(
-    (i, data, _) => RelAddr.Local(i, data)
+  given localRelationaAlloc: AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), AddrCtx] = AAllocatorFromContext(
+    (i, data, _) => AddrCtx.CallFrame(i, data)
   )
 
-  given Ordering[RelAddr] = Ordering.by {
-    case RelAddr.Local(callFrameAddr, data) => Left(callFrameAddr, data)
-    case RelAddr.Temp(fixin, tpe) => Right((fixin, tpe))
+  given Ordering[AddrCtx] = Ordering.by[AddrCtx, Either[(Int,FrameData), Either[(Int,FrameData),(FixIn,Type)]]] {
+    case AddrCtx.CallFrame(callFrameAddr, data) => Left(callFrameAddr, data)
+    case AddrCtx.Stack(stackAddr, data) => Right(Left(stackAddr, data))
+    case AddrCtx.Temp(fixin, tpe) => Right(Right(fixin, tpe))
   }
-  given Finite[RelAddr] with {}
+  given Finite[AddrCtx] with {}
   
   given Ordering[VirtAddr] = VirtualAddressOrdering
 

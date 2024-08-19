@@ -2,7 +2,7 @@ package sturdy.effect.callframe
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalValue, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
@@ -15,7 +15,7 @@ import sturdy.values.references.{*, given}
 import scala.collection.immutable.{ArraySeq, HashMap}
 import scala.reflect.ClassTag
 
-trait RelationalCallFrame
+final class RelationalCallFrame
   [
     Data,
     Var: Ordering,
@@ -29,6 +29,8 @@ trait RelationalCallFrame
     initVars: Iterable[(Var, Option[Val])],
     val localVariableAllocator: Allocator[Ctx, (Var,Data,Option[CallSite])],
     val apronState: ApronRecencyState[Ctx, Type, Val]
+  )(using
+    relationalValue: RelationalValue[Val, VirtualAddress[Ctx], Type]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
      with DecidableCallFrame[Data, Var, Val, CallSite]:
@@ -39,8 +41,6 @@ trait RelationalCallFrame
   final type PowVirtAddr = PowVirtualAddress[Ctx]
   final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Ctx],Type]
   final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx],Type]
-
-  def makeRelationalVal(expr: ApronExprVirtAddr): Val
 
   val addressCallFrame: JoinableDecidableCallFrame[Data, Var, PowVirtAddr, CallSite] =
     JoinableDecidableCallFrame(
@@ -93,7 +93,7 @@ trait RelationalCallFrame
   private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
     virts.reduce {
       virt =>
-        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => makeRelationalVal(ApronExpr.Addr(virt, floatSpecials, tpe)))
+        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => relationalValue.makeRelationalVal(ApronExpr.Addr(virt, floatSpecials, tpe)))
         val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
         Join(v1, v2).get
     }.toJOptionC
@@ -160,7 +160,5 @@ object RelationalCallFrame:
    ): (RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val state = RecencyRelationalStore[Ctx,Type]
     given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)
-    val callFrame = new RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type](initData, initVars, localVariableAllocator, state):
-      override def makeRelationalVal(expr: ApronExprVirtAddr): ApronExpr[VirtualAddress[Ctx], Type] = expr
-
+    val callFrame = new RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type](initData, initVars, localVariableAllocator, state)
     (callFrame, state)

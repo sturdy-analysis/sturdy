@@ -12,6 +12,7 @@ import sturdy.values.booleans.BooleanOps
 import sturdy.values.references.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.data.{*, given}
+import sturdy.util.Lazy
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -153,11 +154,15 @@ final class ApronRecencyState
     temporaryVariableAllocator: Allocator[Ctx, Type],
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
+  )(using
+    RelationalValue[Val, VirtualAddress[Ctx], Type]
   )
   extends ApronState[VirtualAddress[Ctx], Type]:
 
   val effectStack: EffectStack = EffectStack(recencyStore)
   val convertExpr: ApronExprConverter[Ctx, Type, Val] = ApronExprConverter(recencyStore, relationalStore)
+  given Lazy[ApronExprConverter[Ctx, Type, Val]] = Lazy(convertExpr)
+  val relationalValue: RelationalValue[Val, PhysicalAddress[Ctx], Type] = implicitly
 
   inline def unapply: (RecencyStore[Ctx, PowVirtualAddress[Ctx], Val], RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]) =
     (recencyStore, relationalStore)
@@ -182,7 +187,7 @@ final class ApronRecencyState
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     relationalStore.write(v.physical,
-      relationalStore.makeRelationalVal(
+      relationalValue.makeRelationalVal(
         convertExpr.virtToPhys(expr)))
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
@@ -197,10 +202,10 @@ final class ApronRecencyState
 
   override def effects: EffectStack = effectStack
 
-  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false)
-  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true)
+  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, temporaryVariableAllocator)
+  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, temporaryVariableAllocator)
 
-  private def combineExpr[W <: Widening](widen: Boolean): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
+  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
     case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) if v1.ctx == v2.ctx =>
@@ -214,18 +219,17 @@ final class ApronRecencyState
         case (_,PowRecency.RecentOld) | (_, PowRecency.Old) =>
           recencyStore.addressTranslation.joinRecentIntoOld(v2)
           MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
-        case _ => throw IllegalStateException("Impossible state. Covered by [case (e1, e2) if (e1 == e2) => ...]")
+        case _ => throw IllegalStateException("Impossible branch. Covered by [case (e1, e2) if (e1 == e2) => ...]")
     case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
       val iv2 = getInterval(e2)
       Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
-        (iv, floatSpecials, tpe) =>
-          ApronExpr.Constant(iv, floatSpecials, tpe)
+          ApronExpr.Constant(_, _, _)
       )
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatmap(
         (joinedSpecials, joinedType) =>
-          val ctx = temporaryVariableAllocator(joinedType)
+          val ctx = allocator(joinedType)
           val result = recencyStore.addressTranslation.allocOld(ctx)
           val resultExpr = ApronExpr.Addr(result, joinedSpecials, joinedType)
           val iv1 = getInterval(e1)

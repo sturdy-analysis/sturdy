@@ -170,6 +170,12 @@ class RelationalConvertDoubleFloatTest(using manager: Manager) extends ConvertTe
       implicitly
     )
   )
+)(using
+  implicitly,
+  implicitly,
+  implicitly,
+  implicitly,
+  concreteConvert = WithNearestRoundingModeConvert(ConcreteConvertDoubleFloat)
 )
 
 class RelationalConvertFloatDoubleTest(using manager: Manager) extends ConvertTest[Float, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], NilCC.type](
@@ -259,3 +265,11 @@ def specialFloatingIntegerNumbers[F: Enumerable: Fractional, I: Bounded: Integra
     Fractional[F].zero / Fractional[F].zero // NaN
   )
 }
+
+final class WithNearestRoundingModeConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]]
+  (convert: Convert[From, To, VFrom, VTo, Config])
+  extends Convert[From, To, VFrom, VTo, Config]:
+  override def apply(from: VFrom, conf: Config): VTo =
+    RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+      convert(from, conf)
+    }

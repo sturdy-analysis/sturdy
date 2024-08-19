@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronState, ApronType, ApronVar, given}
+import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronState, ApronType, ApronVar, RelationalValue, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore, given}
@@ -18,12 +18,9 @@ object RecencyRelationalStore:
       Type: ApronType: Join: Widen,
       Val: Join: Widen
     ]
-    (
-      _getRelationalVal: (ApronExprConverter[Ctx, Type, Val],Val) => Option[ApronExpr[PhysicalAddress[Ctx], Type]],
-      _makeRelationalVal: (ApronExprConverter[Ctx, Type, Val], ApronExpr[PhysicalAddress[Ctx], Type]) => Val
-    )
     (using
      apronManager: Manager,
+     virtRelationalValue: RelationalValue[Val, VirtualAddress[Ctx], Type]
     ):
     (
       RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
@@ -37,6 +34,7 @@ object RecencyRelationalStore:
     type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx], Type]
 
     var convertExpr: ApronExprConverter[Ctx, Type, Val] = null
+    given Lazy[ApronExprConverter[Ctx, Type, Val]] = Lazy(convertExpr)
 
     val addressTranslation: AddressTranslation[Ctx] = AddressTranslation.empty
 
@@ -44,12 +42,7 @@ object RecencyRelationalStore:
       apronManager,
       Abstract1(apronManager, new Environment()),
       Map()
-    ):
-      override def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Ctx], Type]] =
-        _getRelationalVal(convertExpr, v)
-
-      override def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Ctx], Type]): Val =
-        _makeRelationalVal(convertExpr, expr)
+    )
 
     val recencyStore: RecencyStore[Ctx, PowVirtAddr, Val] =
       RecencyStore(
@@ -73,10 +66,7 @@ object RecencyRelationalStore:
     ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] =
       var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = null
       given Lazy[ApronState[VirtualAddress[Ctx], Type]] = lazily(apronState)
-      val (recencyStore, relationalStore) = apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]](
-        _getRelationalVal = (convertExpr, expr) => Some(convertExpr.virtToPhys(expr)),
-        _makeRelationalVal = (convertExpr, expr) => convertExpr.physToVirt(expr)
-      )
+      val (recencyStore, relationalStore) = apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]]
       apronState = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore)
 
       apronState
