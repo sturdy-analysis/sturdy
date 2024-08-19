@@ -209,7 +209,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     )
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(new AAllocatorFromContext(
-      (idx: Int, tpe: Type) => AddrCtx.Stack(idx, callFrame.data)
+      (idx: Int, tpe: Type) =>
+        val fixIn = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+        AddrCtx.Stack(idx, fixIn, callFrame.data)
     ))
 
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)

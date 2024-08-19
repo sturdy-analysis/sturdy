@@ -10,7 +10,7 @@ import sturdy.values.references.{*, given}
 trait RelationalAddresses extends RelationalTypes:
   enum AddrCtx:
     case CallFrame(callFrameAddr: Int, frame: FrameData)
-    case Stack(stackAddr: Int, frame: FrameData)
+    case Stack(stackAddr: Int, fixIn: FixIn, frame: FrameData)
     case Temp(fixin: FixIn, tpe: Type)
 
   final type VirtAddr = VirtualAddress[AddrCtx]
@@ -26,9 +26,9 @@ trait RelationalAddresses extends RelationalTypes:
     (i, data, _) => AddrCtx.CallFrame(i, data)
   )
 
-  given Ordering[AddrCtx] = Ordering.by[AddrCtx, Either[(Int,FrameData), Either[(Int,FrameData),(FixIn,Type)]]] {
+  given Ordering[AddrCtx] = Ordering.by[AddrCtx, Either[(Int,FrameData), Either[(Int,FixIn,FrameData),(FixIn,Type)]]] {
     case AddrCtx.CallFrame(callFrameAddr, data) => Left(callFrameAddr, data)
-    case AddrCtx.Stack(stackAddr, data) => Right(Left(stackAddr, data))
+    case AddrCtx.Stack(stackAddr, fixin, data) => Right(Left(stackAddr, fixin, data))
     case AddrCtx.Temp(fixin, tpe) => Right(Right(fixin, tpe))
   }
   given Finite[AddrCtx] with {}
