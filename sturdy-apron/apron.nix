@@ -5,10 +5,14 @@ stdenv.mkDerivation rec {
   version = "0.9.13";
 
   src = fetchFromGitHub {
-    owner = "antoinemine";
+    owner = "svenkeidel";
     repo = "apron";
-    rev = "4bb90a48fac10e64a72bfad2875ecae848584cc0";
-    sha256 = "sha256-9WBKWxGvuUJNYu21QfHYZuJL+FUXGKm38lFdFsvkS2E=";
+#    rev = "4bb90a48fac10e64a72bfad2875ecae848584cc0";
+#    sha256 = "sha256-9WBKWxGvuUJNYu21QfHYZuJL+FUXGKm38lFdFsvkS2E=";
+#    rev = "ee3a634637b0caf261b83067b231636d3165babd";
+#    sha256 = "sha256-7pN1VGcPuofNFd5Yse8j8tyRBWEfpmnfV+mNIFEB2kw=";
+    rev = "165dc0ebfa96f378b772e11eca556c47fdc64285";
+    sha256 = "sha256-WyKPh60OegHn/jfL9sdms27nSVm/XVvqlQyajbJH7Ec=";
   };
 
   configurePhase = ''
