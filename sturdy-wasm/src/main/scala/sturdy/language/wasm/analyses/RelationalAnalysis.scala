@@ -12,7 +12,7 @@ import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableD
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -199,7 +199,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       val stateBefore = effectStack.getState
       recencyStore.collectGarbage(alive)
       val stateAfter = effectStack.getState
-      println(s"Alive: $alive\nDead: $dead\nState Before: $stateBefore\nState After: $stateAfter")
+      println(s"Alive: $alive")
+      println(s"Dead: $dead")
+      println(s"State Before: $stateBefore")
+      println(s"State After: $stateAfter")
 
     val callFrame: RelationalCallFrame[FrameData, Int, Value, InstLoc, AddrCtx, Type] = new RelationalCallFrame(
       initData = rootFrameData,
@@ -215,7 +218,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     ))
 
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)
-    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
+
+    val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
+        (key: Unit, sym: GlobalAddr, tpe: Type) =>
+          AddrCtx.Global(sym.addr)
+    ))
+
     val funTable: IntervalSymbolTable[TableAddr, FuncIx, Powerset[FunctionInstance]] = new IntervalSymbolTable
 
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

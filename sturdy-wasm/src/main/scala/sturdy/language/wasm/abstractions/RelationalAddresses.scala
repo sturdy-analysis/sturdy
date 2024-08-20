@@ -9,9 +9,10 @@ import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
   enum AddrCtx:
-    case CallFrame(callFrameAddr: Int, frame: FrameData)
-    case Stack(stackAddr: Int, fixIn: FixIn, frame: FrameData)
-    case Temp(fixin: FixIn, tpe: Type)
+    case CallFrame(callFramePosition: Int, frame: FrameData)
+    case Stack(stackPosition: Int, programPosition: FixIn, frame: FrameData)
+    case Global(addr: Int)
+    case Temp(programPosition: FixIn, tpe: Type)
 
   final type VirtAddr = VirtualAddress[AddrCtx]
   final type PhysAddr = PhysicalAddress[AddrCtx]
@@ -26,11 +27,25 @@ trait RelationalAddresses extends RelationalTypes:
     (i, data, _) => AddrCtx.CallFrame(i, data)
   )
 
-  given Ordering[AddrCtx] = Ordering.by[AddrCtx, Either[(Int,FrameData), Either[(Int,FixIn,FrameData),(FixIn,Type)]]] {
-    case AddrCtx.CallFrame(callFrameAddr, data) => Left(callFrameAddr, data)
-    case AddrCtx.Stack(stackAddr, fixin, data) => Right(Left(stackAddr, fixin, data))
-    case AddrCtx.Temp(fixin, tpe) => Right(Right(fixin, tpe))
+  given Ordering[AddrCtx] = {
+    case (AddrCtx.CallFrame(callFramePos1, data1), AddrCtx.CallFrame(callFramePos2, data2)) => Ordering[(Int,FrameData)].compare((callFramePos1, data1), (callFramePos2, data2))
+    case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(Int,FixIn,FrameData)].compare((stackPos1, programPos1, data1),(stackPos2, programPos2, data2))
+    case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
+    case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
+    case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{
+      case _: AddrCtx.CallFrame => 1
+      case _: AddrCtx.Stack => 2
+      case _: AddrCtx.Global => 3
+      case _: AddrCtx.Temp => 4
+    }.compare(ctx1, ctx2)
+
   }
+//  Ordering.by[AddrCtx, Either[(Int,FrameData), Either[(Int,FixIn,FrameData),Either[Int, (FixIn,Type)]]]] {
+//    case AddrCtx.CallFrame(callFramePos, data) => Left(callFramePos, data)
+//    case AddrCtx.Stack(stackPos, programPos, data) => Right(Left(stackPos, programPos, data))
+//    case AddrCtx.Global(idx) => Right(Right(Left(idx)))
+//    case AddrCtx.Temp(fixin, tpe) => Right(Right(Right(fixin, tpe)))
+//  }
   given Finite[AddrCtx] with {}
   
   given Ordering[VirtAddr] = VirtualAddressOrdering

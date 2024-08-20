@@ -120,15 +120,23 @@ enum FixIn:
     case EnterHostFunction(id, _) => s"Enter $id"
     case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
 
-given Ordering[FixIn] = Ordering.by[FixIn, Either[InstLoc, Either[Int, Option[Int]]]] {
-  case FixIn.Eval(inst, loc) => Left(loc)
-  case FixIn.EnterWasmFunction(fid, fun, tpe) => Right(Left(fun.hashCode()))
-  case FixIn.EnterHostFunction(fid, fun) => Right(Left(fun.hashCode()))
-  case FixIn.MostGeneralClientLoop(mod) =>
-    if (mod == null)
-      Right(Right(None))
-    else
-      Right(Right(Some(mod.hashCode())))
+given Ordering[FixIn] = {
+  case (FixIn.Eval(_, loc1), FixIn.Eval(_, loc2)) => Ordering[InstLoc].compare(loc1, loc2)
+  case (FixIn.EnterWasmFunction(_, fun1, _), FixIn.EnterWasmFunction(_, fun2, _)) => Ordering[Int].compare(fun1.hashCode(), fun2.hashCode())
+  case (FixIn.EnterHostFunction(_, fun1), FixIn.EnterHostFunction(_, fun2)) => Ordering[Int].compare(fun1.hashCode(), fun2.hashCode())
+  case (FixIn.MostGeneralClientLoop(mod1), FixIn.MostGeneralClientLoop(mod2)) => Ordering.by[ModuleInstance, Option[Int]](
+    mod =>
+      if(mod == null)
+        None
+      else
+        Some(mod.hashCode())
+  ).compare(mod1, mod2)
+  case (in1, in2) => Ordering.by[FixIn, Int]{
+    case _: FixIn.Eval => 1
+    case _: FixIn.EnterWasmFunction => 2
+    case _: FixIn.EnterHostFunction => 3
+    case _: FixIn.MostGeneralClientLoop => 4
+  }.compare(in1, in2)
 }
 
 enum FixOut[V]:

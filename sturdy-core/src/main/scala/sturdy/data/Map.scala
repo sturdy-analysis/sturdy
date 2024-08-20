@@ -88,5 +88,11 @@ given CombineFiniteKeyHashMap[K, V, W <: Widening](using j: Combine[V, W], fk: F
     MaybeChanged(result, changed || result.size > v1.size)
 
 object MapEquals:
-  def apply[K,V](m1: Map[K,V], m2: Map[K,V]): Boolean =
-    m1.size == m2.size && m1.forall((k1,v1) => Some(v1) == m2.get(k1))
+  inline def apply[K,V](m1: Map[K,V], m2: Map[K,V], eqVals: (V,V) => Boolean): Boolean =
+    m1.size == m2.size && m1.forall((k1, v1) =>
+      m2.get(k1) match
+        case None => false
+        case Some(v2) => eqVals(v1,v2)
+    )
+  inline def apply[K,V](m1: Map[K,V], m2: Map[K,V]): Boolean =
+    apply(m1, m2, _ == _)

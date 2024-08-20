@@ -22,7 +22,7 @@ final class RelationalStack
     Type: ApronType : Join : Widen
   ]
   (
-    val stackVariableAllocator: Allocator[Ctx, (Int,Type)]
+    val stackAllocator: Allocator[Ctx, (Int,Type)]
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Val],
@@ -49,7 +49,7 @@ final class RelationalStack
     (relationalValue.getRelationalVal(v1), relationalValue.getRelationalVal(v2)) match
       case (Some(e1), Some(e2)) =>
         val allocator = AAllocatorFromContext[Type, Ctx](
-          (tpe: Type) => stackVariableAllocator((idx, tpe))
+          (tpe: Type) => stackAllocator((idx, tpe))
         )
         apronState.combineExpr(widen, allocator)(e1, e2).map(relationalValue.makeRelationalVal)
       case (Some(_), None) | (None, Some(_)) | (None, None) =>
