@@ -113,6 +113,7 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
     interval match
       case other: FloatInterval =>
         super.isEqual(other) && this.floatSpecials == other.floatSpecials
+      case other: Interval => false
 
   override def isScalar: Boolean =
     (super.isScalar && floatSpecials.size == 0) || (super.isBottom && floatSpecials.size == 1)

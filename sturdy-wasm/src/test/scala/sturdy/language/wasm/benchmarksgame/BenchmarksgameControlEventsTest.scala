@@ -3,14 +3,14 @@ package sturdy.language.wasm.benchmarksgame
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{BasicControlEvent, BranchingControlEvent, ControlEventChecker, ControlEventGraphBuilder, ControlEventParser, ControlObserver, ExceptionControlEvent, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
-import sturdy.effect.failure.AFallible
+import sturdy.control.{BasicControlEvent, BranchingControlEvent, ControlEventChecker, ControlEventGraphBuilder, ControlEventParser, ControlObservable, ControlObserver, ExceptionControlEvent, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
+import sturdy.effect.failure.{AFallible, CollectedFailures}
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
+import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, Control, ControlFlow}
 import sturdy.language.wasm.analyses.*
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.generic.{FrameData, WasmFailure}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter, Parsing}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Topped
 import swam.ModuleLoader
@@ -21,23 +21,26 @@ import swam.validation.Validator
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
 
-class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame (recompiled) constant analysis"
+class BenchmarksgameConstantControlEventsTest extends BenchmarksgameControlEventsTest[ConstantAnalysis.type](ConstantAnalysis, ConstantAnalysis.Instance(_,_,_))
+
+class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp, newInstance: (FrameData,Iterable[interp.Value],WasmConfig) => interp.Instance) extends AnyFlatSpec, Matchers:
+  behavior of "Benchmarksgame (recompiled)"
 
   val funcName = "_start"
   val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
-    it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
-      run(p, binary = true, StackConfig.StackedStates())
-      LinearStateOperationCounter.clearAll()
-      Profiler.reset()
-    }
+//    it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
+//      run(p, binary = true, StackConfig.StackedStates())
+//      LinearStateOperationCounter.clearAll()
+//      Profiler.reset()
+//    }
   }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis with stacked states on benchmark ${p.getFileName}" in {
+    it must s"benchmark ${p.getFileName}" in {
       run(p, binary = true, StackConfig.StackedStates())
+      Profiler.reset()
     }
   }
 
@@ -47,33 +50,33 @@ class BenchmarksgameConstantControlEventsTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
-    interp.addControlObserver(new ControlEventChecker)
+    val inst = newInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost(stackConfig))))
+    inst.addControlObserver(new ControlEventChecker)
     var count = 0
     import sturdy.language.wasm.abstractions.Control.*
-    interp.addControlObserver(new ControlObserver {
+    inst.addControlObserver(new ControlObserver {
       override def handle(ev: BasicControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
       override def handle(ev: ExceptionControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
       override def handle(ev: BranchingControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
       override def handle(ev: FixpointControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
     })
-    val parser = interp.addControlObserver(new ControlEventParser)
-    val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+    val parser = inst.addControlObserver(new ControlEventParser)
+    val graphBuilder = inst.addControlObserver(new ControlEventGraphBuilder)
+//    val printingControlObserver = inst.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
-    val modInst = interp.initializeModule(module)
+    val modInst = inst.initializeModule(module)
 
     println(s"Running analysis on ${p.getFileName}")
     val res = Profiler.addTime("analysis") {
-      interp.failure.fallible(
-        interp.invokeExported(modInst, funcName, List.empty)
+      inst.failure.asInstanceOf[CollectedFailures[WasmFailure]].fallible(
+        inst.invokeExported(modInst, funcName, List.empty)
       )
     }
 //    LinearStateOperationCounter.addToListAndReset()
     //    println(interp.effectStack.getAllState)
     //    println(s"${LinearStateOperationCounter.toString} in the last tests")
     //    println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-//    Profiler.printLastMeasured()
+    Profiler.printLastMeasured()
 
 //    val tree = parser.getFinalTree
 //    val treeSequence = tree.print

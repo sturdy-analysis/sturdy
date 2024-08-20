@@ -5,6 +5,7 @@ import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{*, given}
+import sturdy.util.Profiler
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.references.{*, given}
@@ -90,7 +91,9 @@ final class RelationalStore
         val env = _abstract1.getEnvironment
         if(env.hasVar(to) && physExpr.addrs.forall(env.hasVar(_))) {
           val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
-          _abstract1.join(manager, assigned)
+          Profiler.addTime("Abstract1.combine") {
+            _abstract1.join(manager, assigned)
+          }
         }
       }
     }
@@ -252,10 +255,12 @@ final class RelationalStore
     override def equals(obj: Any): Boolean =
       obj match
         case RelationalStoreState(tenv2, abs2, nonRel2) =>
-          metaData.equals(tenv2) && abs1.isEqual(manager, abs2) && MapEquals(nonRelationalStoreState,nonRel2)
+          metaData.equals(tenv2) && MapEquals(nonRelationalStoreState,nonRel2) && Profiler.addTime("Abstract1.equals") { abs1.isEqual(manager, abs2) }
         case _ =>
           false
-    override def hashCode: Int = (metaData, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
+    override def hashCode: Int =
+      val abs1Hash = Profiler.addTime("Abstract1.hashCode") { abs1.hashCode(manager) }
+      (metaData, abs1Hash, nonRelationalStoreState).hashCode()
 
     override def toString: String = s"RelationalStoreState($hashCode, $metaData, $abs1, $nonRelationalStoreState)"
 
@@ -270,7 +275,10 @@ final class RelationalStore
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
-  inline def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
+  inline def copyAbstract1(abstract1: Abstract1): Abstract1 =
+    Profiler.addTime("Abstract1.copy") {
+      new Abstract1(manager, abstract1)
+    }
 
   override def join: Join[State] = combineRelationalStoreState
   override def widen: Widen[State] = combineRelationalStoreState

@@ -24,6 +24,8 @@ import swam.ValType
 
 import java.nio.ByteOrder
 import WasmFailure.*
+import sturdy.control.ControlObservable
+import sturdy.language.wasm.abstractions.Control
 
 trait Interpreter:
   type J[A] <: MayJoin[A]
@@ -257,4 +259,4 @@ trait Interpreter:
   type Instance <: GenericInstance
 
   abstract class GenericInstance
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J], ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

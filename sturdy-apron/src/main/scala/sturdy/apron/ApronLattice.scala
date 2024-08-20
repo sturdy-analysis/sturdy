@@ -20,48 +20,49 @@ given Abstract1Widen: Widen[Abstract1] with
 
 object ApronJoins:
   def combineAbstract1(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] =
-    val manager = s1.getCreationManager
+    Profiler.addTime("Abstract1.combine") {
+      val manager = s1.getCreationManager
 
-    val env1 = s1.getEnvironment
-    val env2 = s2.getEnvironment
-    val lce = env1.lce(env2)
+      val env1 = s1.getEnvironment
+      val env2 = s2.getEnvironment
+      val lce = env1.lce(env2)
 
-    val s1ExtEnv = s1.changeEnvironmentCopy(manager, lce, false)
-    val s2ExtEnv = s2.changeEnvironmentCopy(manager, lce, false)
+      val s1ExtEnv = s1.changeEnvironmentCopy(manager, lce, false)
+      val s2ExtEnv = s2.changeEnvironmentCopy(manager, lce, false)
 
-    val env2_minus_env1 = minus(env2,env1).getVars
-    val combinable1 =
-      if(env2_minus_env1.nonEmpty)
-        s1ExtEnv.assignCopy(
-          manager,
-          env2_minus_env1,
-          env2_minus_env1.map(v => ApronExpr.constant(s2ExtEnv.getBound(manager, v), null).toIntern(lce)),
-          null
-        )
-      else
-        s1ExtEnv
+      val env2_minus_env1 = minus(env2,env1).getVars
+      val combinable1 =
+        if(env2_minus_env1.nonEmpty)
+          s1ExtEnv.assignCopy(
+            manager,
+            env2_minus_env1,
+            env2_minus_env1.map(v => ApronExpr.constant(s2ExtEnv.getBound(manager, v), null).toIntern(lce)),
+            null
+          )
+        else
+          s1ExtEnv
 
-    val env1_minus_env2 = minus(env1,env2).getVars
-    val combinable2 =
-      if(env1_minus_env2.nonEmpty)
-        s2ExtEnv.assignCopy(
-          manager,
-          env1_minus_env2,
-          env1_minus_env2.map(v => ApronExpr.constant(s1ExtEnv.getBound(manager, v), null).toIntern(lce)),
-          null
-        )
-      else
-        s2ExtEnv
+      val env1_minus_env2 = minus(env1,env2).getVars
+      val combinable2 =
+        if(env1_minus_env2.nonEmpty)
+          s2ExtEnv.assignCopy(
+            manager,
+            env1_minus_env2,
+            env1_minus_env2.map(v => ApronExpr.constant(s1ExtEnv.getBound(manager, v), null).toIntern(lce)),
+            null
+          )
+        else
+          s2ExtEnv
 
-    val combined =
-      if (widen)
-        combinable1.widening(manager, combinable2)
-      else
-        combinable1.joinCopy(manager, combinable2)
+      val combined =
+        if (widen)
+          combinable1.widening(manager, combinable2)
+        else
+          combinable1.joinCopy(manager, combinable2)
 
-    val res = MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
-    
-    res
+      MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+
+    }
 
   def minus[A](env1: Environment, env2: Environment): Environment =
     var env = env1

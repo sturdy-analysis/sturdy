@@ -257,19 +257,13 @@ trait RelationalBaseIntegerOps
     val iv = apronState.getInterval(v)
     val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
     val resultType = v._type
-    if(iv.inf.sgn() >= 0) {
+    if(iv.inf.sgn() >= 0) { // v >= 0
       v
-    } else if(iv.sup.sgn() < 0) {
+    } else if(iv.sup.sgn() < 0) { // v < 0
       intAdd(v, uMax, resultType)
-    } else {
-      apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-        apronState.ifThenElse(lt(x, intLit(0, x._type))) {
-          apronState.assign(result, intAdd(x, uMax, resultType))
-        } {
-          apronState.assign(result, x)
-        }
-        addr(result, resultType)
-      }
+    } else { // iv.inf < 0 <= iv.sup
+      val sup = apronState.getInterval(intAdd(v, uMax, resultType)).sup
+      ApronExpr.constant(Interval(DoubleScalar(0), sup), resultType)
     }
 
 
@@ -277,20 +271,14 @@ trait RelationalBaseIntegerOps
     val iv = apronState.getInterval(v)
     val sMax = signedMaxValue(v._type)
     val uMax = unsignedMaxValue(v._type)
-    if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) {
+    val resultType = v._type
+    if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) { // v <= signedMax
       v
-    } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) {
-      intSub(v, bigIntLit(uMax, v._type))
-    } else {
-      val resultType = typeIntOps.divUnsigned(v._type, v._type)
-      apronState.withTempVars(resultType, v) { case (result, List(x)) =>
-        apronState.ifThenElse(lt(bigIntLit(sMax, x._type), x)) {
-          apronState.assign(result, intSub(x, bigIntLit(uMax, x._type), resultType))
-        } {
-          apronState.assign(result, x)
-        }
-        addr(result, resultType)
-      }
+    } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) { // v > signedMax
+      intSub(v, bigIntLit(uMax, resultType))
+    } else { // iv.inf <= signedMax < iv.sup
+      val inf = apronState.getInterval(intSub(v, bigIntLit(uMax, resultType))).inf
+      ApronExpr.constant(Interval(inf, MpqScalar(sMax.bigInteger)), resultType)
     }
 
 

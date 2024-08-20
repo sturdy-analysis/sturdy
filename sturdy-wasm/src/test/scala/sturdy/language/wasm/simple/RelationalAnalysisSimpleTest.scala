@@ -1,6 +1,8 @@
 package sturdy.language.wasm.simple
 
+import apron.*
 import cats.effect.{Blocker, IO}
+import org.scalatest.Suites
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.apron.*
@@ -18,6 +20,7 @@ import sturdy.language.wasm.analyses.RelationalAnalysis.Type.*
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.{Abstractly, Topped}
 import sturdy.values.integer.IntegerDivisionByZero
 import swam.syntax.Module
@@ -28,10 +31,14 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
 
-class PolyhedraAnalysisTest extends RelationalAnalysisTest(using apronManager = new apron.Polka(true))
-class OctagonAnalysisTest extends RelationalAnalysisTest(using apronManager = new apron.Octagon)
-trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatSpec, Matchers:
-  behavior of "Wasm relational analysis"
+final class WasmRelationalAnalysisSimpleTests extends Suites(
+  new RelationalAnalysisSimpleTest(using new Polka(true)),
+  new RelationalAnalysisSimpleTest(using new Octagon),
+  new RelationalAnalysisSimpleTest(using new Box),
+)
+
+final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) extends AnyFlatSpec, Matchers:
+  behavior of "Relational Analysis Simple Tests with " + apronManager.getClass.getSimpleName
 
   val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
   val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
@@ -43,7 +50,9 @@ trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatS
   val topi32 = Value.Int32(RelationalAnalysis.topI32)
   val topi64 = Value.Int64(RelationalAnalysis.topI64)
   val topf32 = Value.Float32(RelationalAnalysis.topF32)
+  val topf32NoSpecials = Value.Float32(RelationalAnalysis.topF32.setFloatSpecials(FloatSpecials.Bottom))
   val topf64 = Value.Float64(RelationalAnalysis.topF64)
+  val topf64NoSpecials = Value.Float64(RelationalAnalysis.topF64.setFloatSpecials(FloatSpecials.Bottom))
 
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
@@ -87,8 +96,8 @@ trait RelationalAnalysisTest(using apronManager: apron.Manager) extends AnyFlatS
   testFunction(simple, "test-mem", List(topi32), List(topi32))
   testFunction(simple, "test-size", List.empty, List(topi32))
   testFunction(simple, "test-memgrow", List.empty, List(topi32, topi32))
-  testFunction(simple, "nesting", List(topf32, Value.Float32(ApronExpr.doubleLit(2, F32Type))), List(topf32))
-  testFunction(simple, "nesting", List(Value.Float32(ApronExpr.doubleLit(1, F32Type)), topf32), List(topf32))
+  testFunction(simple, "nesting", List(topf32NoSpecials, Value.Float32(ApronExpr.floatConstant(DoubleScalar(2), FloatSpecials.Top, F32Type))), List(topf32NoSpecials))
+  testFunction(simple, "nesting", List(Value.Float32(ApronExpr.floatConstant(DoubleScalar(1), FloatSpecials.Top, F32Type)), topf32NoSpecials), List(topf32NoSpecials))
   testFunction(simple, "test-br3", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
   testFunction(simple, "test-br-and-return", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))
   testFunction(simple, "test-br-and-return2", List(topi32), List(i32(ApronExpr.intInterval(42, 43, I32Type))))

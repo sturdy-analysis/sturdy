@@ -131,7 +131,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
         retainNone()
   }
 
-  private def joinWith(other: List[V]): List[V] =
+  protected def joinWith(other: List[V]): List[V] =
     val (frame, rest) = stack.splitAt(stack.size - framePointer)
     val otherFrame = other.take(stack.size - framePointer)
     val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
