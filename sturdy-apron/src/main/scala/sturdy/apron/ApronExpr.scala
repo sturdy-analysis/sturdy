@@ -89,11 +89,7 @@ enum ApronExpr[Addr, +Type]:
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
 
   def toApron(env: apron.Environment): Texpr1Node = this match
-    case Addr(v, _, _) =>
-      if(env.hasVar(v))
-        new Texpr1VarNode(v)
-      else
-        new Texpr1CstNode(topInterval)
+    case Addr(v, _, _) => new Texpr1VarNode(v)
     case Constant(coeff, _, _) => new Texpr1CstNode(coeff)
     case Unary(op, e, rtyp, rdir, _, _) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron(env))
     case Binary(op, l, r, rtyp, rdir, _, _) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron(env), r.toApron(env))
