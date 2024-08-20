@@ -2,9 +2,10 @@ package sturdy.apron
 
 import apron.*
 import gmp.Mpz
+import sturdy.apron.ApronExpr.topInterval
 import sturdy.values.booleans.BooleanOps
-import sturdy.values.floating.{*,given}
-import sturdy.values.integer.{*,given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.types.BaseType
 import sturdy.values.{Join, MaybeChanged, Topped, Widen}
 
@@ -87,14 +88,18 @@ enum ApronExpr[Addr, +Type]:
     case Unary(op, e, _, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
 
-  def toApron: Texpr1Node = this match
-    case Addr(v, _, _) => new Texpr1VarNode(v) // we have v: Addr, but we want an apron.Var. Extend physical and virtual addresses for that case?
+  def toApron(env: apron.Environment): Texpr1Node = this match
+    case Addr(v, _, _) =>
+      if(env.hasVar(v))
+        new Texpr1VarNode(v)
+      else
+        new Texpr1CstNode(topInterval)
     case Constant(coeff, _, _) => new Texpr1CstNode(coeff)
-    case Unary(op, e, rtyp, rdir, _, _) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron)
-    case Binary(op, l, r, rtyp, rdir, _, _) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron, r.toApron)
+    case Unary(op, e, rtyp, rdir, _, _) => new Texpr1UnNode(op.toApron, rtyp.toApron, rdir.toApron, e.toApron(env))
+    case Binary(op, l, r, rtyp, rdir, _, _) => new Texpr1BinNode(op.toApron, rtyp.toApron, rdir.toApron, l.toApron(env), r.toApron(env))
 
   def toIntern(env: apron.Environment): Texpr1Intern =
-    val expr = this.toApron
+    val expr = this.toApron(env)
     try {
       new Texpr1Intern(env, expr)
     } catch {
@@ -282,12 +287,12 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
   def addrs: Set[Addr] = e1.addrs ++ e2.addrs
 
   def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
-    case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
-    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
-    case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
-    case Le  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron)
-    case Ge  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
-    case Gt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron)
+    case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
+    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
+    case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
+    case Le  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
+    case Ge  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
+    case Gt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
 
   def negated: ApronCons[Addr, Type] = op match
     case Eq  => ApronCons(Neq, e1, e2)

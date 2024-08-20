@@ -4,12 +4,12 @@ import apron.*
 import gmp.Mpfr
 import sturdy.values.floating.FloatSpecials
 import sturdy.values.integer.IntervalRange
-import sturdy.values.{Join, MaybeChanged, PartialOrder, Top}
+import sturdy.values.{*,given}
 
 given intervalOrdering: PartialOrder[Interval] with
   override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
 
-given joinInterval: Join[Interval] with
+given JoinInterval: Join[Interval] with
   def apply(iv1: Interval, iv2: Interval): MaybeChanged[Interval] =
     val inf1 = iv1.inf()
     val inf2 = iv2.inf()
@@ -30,6 +30,28 @@ given joinInterval: Join[Interval] with
     val joined = apron.Interval(newInf, newSup)
 
     MaybeChanged(joined, ! joined.isLeq(iv1))
+
+given WidenInterval: Widen[Interval] with
+  def apply(iv1: Interval, iv2: Interval): MaybeChanged[Interval] =
+    val inf1 = iv1.inf()
+    val inf2 = iv2.inf()
+    val newInf =
+      if (inf1.cmp(inf2) <= 0)
+        inf1
+      else
+        DoubleScalar(Double.NegativeInfinity)
+
+    val sup1 = iv1.sup()
+    val sup2 = iv2.sup()
+    val newSup =
+      if (sup2.cmp(sup1) <= 0)
+        sup1
+      else
+        DoubleScalar(Double.PositiveInfinity)
+
+    val joined = apron.Interval(newInf, newSup)
+
+    MaybeChanged(joined, !joined.isLeq(iv1))
 
 given Top[Interval] with
   def top: Interval =

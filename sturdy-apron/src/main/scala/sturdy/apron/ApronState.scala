@@ -2,7 +2,6 @@ package sturdy.apron
 
 import apron.{Coeff, Interval, Var}
 import gmp.{Mpfr, Mpq}
-import sturdy.apron
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
@@ -13,6 +12,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.data.{*, given}
 import sturdy.util.Lazy
+import sturdy.values.integer.NumericInterval
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -147,7 +147,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 final class ApronRecencyState
   [
     Ctx: Ordering,
-    Type: ApronType : Join,
+    Type: ApronType : Join: Widen,
     Val: Join: Widen
   ]
   (
@@ -220,12 +220,17 @@ final class ApronRecencyState
           recencyStore.addressTranslation.joinRecentIntoOld(v2)
           MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
         case _ => throw IllegalStateException("Impossible branch. Covered by [case (e1, e2) if (e1 == e2) => ...]")
-    case (e1, e2) if(!widen && e1.isConstant && e2.isConstant) =>
+    case (e1, e2) if(e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
       val iv2 = getInterval(e2)
-      Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
+      if(widen)
+        Widen[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
           ApronExpr.Constant(_, _, _)
-      )
+        )
+      else
+        Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
+            ApronExpr.Constant(_, _, _)
+        )
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatmap(
         (joinedSpecials, joinedType) =>

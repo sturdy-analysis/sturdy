@@ -35,7 +35,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       given ApronState[VirtAddr, Type] = lazyApronState.value
       i32.asApronExpr
 
-  final override def topI32: I32 = Left(ApronExpr.constant(Interval(Int.MinValue, Int.MaxValue), I32Type))
+  final override def topI32: I32 = Left(ApronExpr.constant(ApronExpr.topInterval, I32Type))
   final override def boolean(b: Bool): Value = Value.Int32(Right(b))
 
   given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronState: Lazy[ApronState[VirtAddr,Type]]): Combine[I32, W] with
