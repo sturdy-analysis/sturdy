@@ -1,9 +1,13 @@
-You must build and install apron.
+You must build and install apron using the nix package manager (https://nixos.org/download/).
 
 ```
-git clone https://github.com/antoinemine/apron
-cd apron
-./configure -gmp-prefix /opt/homebrew -mpfr-prefix /opt/homebrew -ppl-prefix /opt/homebrew -glpk-prefix /opt/homebrew -no-cxx --ext-dll dylib
-make
-make install
+cd sturdy.scala/sturdy-apron
+nix build ..#numerical-analysis-libraries
+```
+
+The result can be found in `sturdy.scala/sturdy-apron/result/lib`.
+
+To run the tests add this path to the java library path:
+```
+java -Djava.library.path=$ProjectFileDir$/sturdy-apron/result/lib ...
 ```
