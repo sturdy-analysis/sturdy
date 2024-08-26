@@ -331,7 +331,7 @@ public class SimpleMath {
             return 0;
         }
     }
-
+    
     public static int stringBuilderTest(){
         StringBuilder test = new StringBuilder("Test");
         test.append(5);

@@ -808,7 +808,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
     except.tryCatch {
       runBody(pc, instructionMap, mth)
-    } { 
+    } {
       case JvmExcept.Jump(targetPC) =>
         run(targetPC, instructionMap, mth)
       case JvmExcept.Ret(currPC) =>
@@ -817,8 +817,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         //val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
         //run(nextPC, instructionMap, mth)
       case JvmExcept.Throw(exception) =>
-        //println(exception)
-        val currPC = pc
+        val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
@@ -826,7 +825,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         stack.push(exceptionObject)
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
-        val currPC = pc
+        val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
@@ -837,7 +836,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def runBody(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
     val currInst = instructionMap(pc)
     frame.setData(pc)
-    println(currInst)
+    //println(currInst)
     evalFix(currInst, mth, pc)
     
     if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {

@@ -205,6 +205,7 @@ object test extends App{
   val lambdaTest = cfs2.findMethod("lambdaTest").head
   println(interp.invokeExternal(lambdaTest, true))
 
+
   println("--- exceptionTest ---")
   val exceptionTest = cfs.findMethod("exceptionTest").head
   println(interp.invokeExternal(exceptionTest, true))
@@ -220,7 +221,8 @@ object test extends App{
   val nullTest = cfs.findMethod("nullTest").head
   interp.evalExternal(ACONST_NULL)
   println(interp.invokeExternal(nullTest, true))
-  interp.evalExternal(NEW(ObjectType("SimpleMath")))
+  interp.evalExternal(NEW(ObjectType("sturdy/language/bytecode/simple/SimpleMath")))
+  println("TEST")
   println(interp.invokeExternal(nullTest, true))
 
   println("--- typeTest ---")
@@ -231,7 +233,7 @@ object test extends App{
   val typeTestArray = cfs2.findMethod("typeTestArray").head
   println(interp.invokeExternal(typeTestArray, true))
   val typeTest2 = cfs.findMethod("typeTest2").head
-  interp.evalExternal(NEW(ObjectType("SimpleMath")))
+  interp.evalExternal(NEW(ObjectType("sturdy/language/bytecode/simple/SimpleMath")))
   println(interp.invokeExternal(typeTest2, true))
   interp.evalExternal(ACONST_NULL)
   println(interp.invokeExternal(typeTest2, true))
@@ -254,26 +256,28 @@ object test extends App{
   interp.evalExternal(BIPUSH(5))
   println(interp.stack.size)
   interp.evalExternal(POP2)
-  println(interp.stack.size)
-
+  println(interp.stack.size)*/
+/*
   println("--- ConstantTest ---")
   val constTest1 = cfs.findMethod("constantTest").head
-  println(absInterp.invokeExternal(constTest1, true))*/
+  println(absInterp.invokeExternal(constTest1, true))
   val constTest2 = cfs.findMethod("constantTest2").head
-//  absInterp.evalExternal(ICONST_0)
-//  println(absInterp.invokeExternal(constTest2, true))
-//  println(absInterp.stack.size)
+  absInterp.evalExternal(ICONST_0)
+  println(absInterp.invokeExternal(constTest2, true))
+  println(absInterp.stack.size)
   absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
   println(absInterp.invokeExternal(constTest2, true))
   val constLoopTest = cfs.findMethod("constantLoopTest").head
   //absInterp.evalExternal(ICONST_0)
-  println(absInterp.stack.size)
   //absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
-  //println(absInterp.invokeExternal(constLoopTest, true))
+  //println(absInterp.invokeExternal(constLoopTest, true))*/
   /*
 
   */
-  val tmp = constLoopTest.body.get.iterator.map(c => c.pc -> c.instruction).toSeq
-  println(tmp)
+  val testMths = cfs.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest").concat(
+    cfs.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest")
+  )
+  //println(testMths.toSeq)
+  testMths.foreach(mth => println(mth.name + "\n" + interp.invokeExternal(mth, true)))
 }
 
