@@ -5,13 +5,17 @@ import sturdy.language.tip.Stm.*
 import sturdy.language.tip.abstractions.GradualLogger
 
 trait ElaborationOps[T] {
-  def getCheck(x: Exp.Var, uv: T): Exp
+  def abstractToRepr(v : T): Exp
+  val abstractionFunction: Function
+  val precisionFunction: Function
+  val checkFunction: Function
 }
 
 class Elaboration[T,V](gl: GradualLogger[T,V], eo: ElaborationOps[T]) {
   //var checkFuns = List
   def elaborate(p: Program): Program = {
-    Program(p.funs.map(elaborateFunction))
+    val preamble = Seq(eo.abstractionFunction, eo.precisionFunction, eo.checkFunction)
+    Program(preamble ++ p.funs.map(elaborateFunction))
   }
   def elaborateFunction(f: Function): Function = {
     Function(f.name, f.params, f.locals, elaborateStm(f.body), elaborateExp(f.ret))
@@ -41,7 +45,7 @@ class Elaboration[T,V](gl: GradualLogger[T,V], eo: ElaborationOps[T]) {
       case Exp.FieldAccess(rec, field) => Exp.FieldAccess(elaborateExp(rec), field)
       case _ => exp
     gl.getCheck(exp.label).map { c =>
-      Exp.Call(Exp.Var(s"check_${c.unsafe}"), List(e))
+      Exp.Call(Exp.Var(eo.checkFunction.name), Seq(e, eo.abstractToRepr(c.unsafe)))
     }.getOrElse{e}
   }
 }

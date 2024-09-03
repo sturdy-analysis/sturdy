@@ -14,6 +14,7 @@ import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
 import sturdy.fix.{StackConfig, given}
+import sturdy.language.tip.Parser.whitespaces0
 import sturdy.language.tip.TipFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -27,7 +28,6 @@ import sturdy.language.tip.{*, given}
 import sturdy.language.tip.{AllocationSite, Field, FixIn, FixOut}
 import sturdy.language.tip.abstractions.*
 import sturdy.language.tip.analysis.IntervalAnalysis.controlEventLogger
-
 import sturdy.values.integer.SignIntegerOps
 
 object SignAnalysis extends Interpreter,
@@ -38,12 +38,46 @@ object SignAnalysis extends Interpreter,
   given Lazy[Join[Value]] = lazily(CombineValue)
 
   class SignElaborationOps extends ElaborationOps[IntSign]{
-    override def getCheck(x: Exp.Var, uv: IntSign): Exp = uv match {
-      case IntSign.Pos => Exp.Gt(x, Exp.NumLit(0))
-      case IntSign.Neg => Exp.Gt(Exp.NumLit(0), x)
-      case IntSign.Zero => Exp.Eq(x, Exp.NumLit(0))
-      case IntSign.TopSign => Exp.NumLit(1)
+    override def abstractToRepr(v: IntSign): Exp = v match {
+      case IntSign.Pos => Exp.NumLit(1)
+      case IntSign.Neg => Exp.NumLit(-1)
+      case IntSign.Zero => Exp.NumLit(0)
+      case IntSign.TopSign => Exp.NumLit(2)
     }
+
+    private def parse(source: String) =
+      (whitespaces0 *> Parser.function)
+        .parse(source)
+        .fold(
+          err =>
+            throw new RuntimeException(s"Parse error at ${source.slice(err.failedAtOffset, err.failedAtOffset + 10)}: $err"),
+          identity)
+        ._2
+
+    override val abstractionFunction: Function =
+      parse("""alpha(x) {
+              |   var r;
+              |   if (0 > x)
+              |     r = -1;
+              |   else {
+              |     if (x == 0)
+              |       r = 0;
+              |     else
+              |       r = 1;
+              |   }
+              |   return r;
+              |}""".stripMargin)
+
+    override val precisionFunction: Function =
+      parse("""prec(x, y) {
+              | return (x == y) + (y == 2);
+              |}""".stripMargin)
+
+    override val checkFunction: Function =
+      parse("""check(val, abs) {
+              | assert(prec(alpha(val), abs));
+              | return val;
+              |}""".stripMargin)
   }
 
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:

@@ -111,8 +111,8 @@ main(){
       """
       main(){
         var x;
-        x = 1;
-        assert(x>1);
+        x = 2;
+        assert(x > 1);
         x = 1+2;
         x = x + (x + (1+2));
         x = x - 1;
@@ -127,9 +127,13 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      println(Parser.unparse(new Elaboration(analysis.gl, analysis.eo).elaborate(program)))
+      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val concreteInterpreter = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
+      val elaborated = elaboration.elaborate(program)
       //println(s"Effect Stack: ${analysis.effectStack}")
       //println(program.funs(0).body.)
+      println(elaborated)
+      println(concreteInterpreter.execute(elaborated))
 
       1 should be(1)
 
