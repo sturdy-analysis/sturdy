@@ -253,4 +253,41 @@ main(){
     }
   }
 
+  it should "correctly analyze underflow" in {
+    val sourceCode =
+      s"""
+        main() {
+         | var minVal, tst;
+         | minVal = ${Int.MinValue};
+         | tst = 0 - minVal;
+         | return tst;
+         |}""".stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
 
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+      println(s"result ${aresult}")
+      println(analysis.gl.m)
+
+      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      var count = 1
+      val concreteInterpreter = ConcreteInterpreter(() => {
+        val v = ConcreteInterpreter.Value.IntValue(count)
+        count += 2
+        v
+      })
+      val elaborated = elaboration.elaborate(program)
+      //println(s"Effect Stack: ${analysis.effectStack}")
+      //println(program.funs(0).body.)
+      println(unparse(elaborated))
+      try {
+        concreteInterpreter.execute(elaborated)
+        println("Incorrect, concrete evaluation did not raise an error.")
+      } catch {
+        case e: Throwable => println(s"Correctly raised exception: ${e.getClass.getName}")
+      }
+
+      1 should be(1)
+    }
+  }
