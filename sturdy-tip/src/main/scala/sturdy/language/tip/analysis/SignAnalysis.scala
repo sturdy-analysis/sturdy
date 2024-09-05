@@ -40,9 +40,11 @@ object SignAnalysis extends Interpreter,
   class SignElaborationOps extends ElaborationOps[IntSign]{
     override def abstractToRepr(v: IntSign): Exp = v match {
       case IntSign.Pos => Exp.NumLit(1)
-      case IntSign.Neg => Exp.NumLit(-1)
+      case IntSign.ZeroOrPos => Exp.NumLit(2)
       case IntSign.Zero => Exp.NumLit(0)
-      case IntSign.TopSign => Exp.NumLit(2)
+      case IntSign.NegOrZero => Exp.NumLit(-2)
+      case IntSign.Neg => Exp.NumLit(-1)
+      case IntSign.TopSign => Exp.NumLit(3)
     }
 
     private def parse(source: String) =
@@ -70,7 +72,7 @@ object SignAnalysis extends Interpreter,
 
     override val precisionFunction: Function =
       parse("""prec(x, y) {
-              | return (x == y) + (y == 2);
+              | return ((y == 3) + (x == y) + (x > -1) * (y > -1) * (y > x) + (1 > x) * (1 > y) * (x > y)) > 0;
               |}""".stripMargin)
 
     override val checkFunction: Function =

@@ -132,11 +132,124 @@ main(){
       val elaborated = elaboration.elaborate(program)
       //println(s"Effect Stack: ${analysis.effectStack}")
       //println(program.funs(0).body.)
-      println(elaborated)
+      println(unparse(elaborated))
       println(concreteInterpreter.execute(elaborated))
 
       1 should be(1)
 
+    }
+  }
+
+
+  it should "correctly analyze sum of ZeroOrPos and Pos" in {
+    val sourceCode =
+      """
+      main() {
+      | var zop, noz;
+      | zop = 2 > 1 + 0;
+      | noz = 0 - zop;
+      | return zop + 1;
+      |}
+      """.stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+      println(s"result ${aresult}")
+      println(analysis.gl.m)
+
+      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      var count = 1
+      val concreteInterpreter = ConcreteInterpreter(() => {
+        val v = ConcreteInterpreter.Value.IntValue(count)
+        count += 2
+        v
+      })
+      val elaborated = elaboration.elaborate(program)
+      //println(s"Effect Stack: ${analysis.effectStack}")
+      //println(program.funs(0).body.)
+      println(unparse(elaborated))
+      println(concreteInterpreter.execute(elaborated))
+
+      1 should be(1)
+    }
+  }
+
+  it should "correctly analyze multiplication between ZeroOrPos" in {
+    val sourceCode =
+      """
+        main() {
+        | var zop0, zop1, tst1, tst2, tst3;
+        | zop0 = 1 > 2 + 0;
+        | zop1 = 2 > 1 + 0;
+        | tst1 = zop0 * zop0;
+        | tst2 = zop1 * zop0;
+        | tst3 = zop1 * zop1;
+        | return tst1 + tst2;
+        |}
+          """.stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+      println(s"result ${aresult}")
+      println(analysis.gl.m)
+
+      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      var count = 1
+      val concreteInterpreter = ConcreteInterpreter(() => {
+        val v = ConcreteInterpreter.Value.IntValue(count)
+        count += 2
+        v
+      })
+      val elaborated = elaboration.elaborate(program)
+      //println(s"Effect Stack: ${analysis.effectStack}")
+      //println(program.funs(0).body.)
+      println(unparse(elaborated))
+      println(concreteInterpreter.execute(elaborated))
+
+      1 should be(1)
+    }
+  }
+
+  it should "correctly fail if assumptions are not met" in {
+    val sourceCode =
+      s"""
+        main() {
+        | var almostOverflown, pos;
+        | almostOverflown = ${Int.MaxValue};
+        | pos = 1;
+        | return almostOverflown + pos;
+        |}""".stripMargin
+    val program = Parser.parse(sourceCode)
+    if (program.funs.exists(_.name == "main")) {
+      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+
+      val aresult = analysis.failure.fallible(analysis.execute(program))
+      println(s"result ${aresult}")
+      println(analysis.gl.m)
+
+      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      var count = 1
+      val concreteInterpreter = ConcreteInterpreter(() => {
+        val v = ConcreteInterpreter.Value.IntValue(count)
+        count += 2
+        v
+      })
+      val elaborated = elaboration.elaborate(program)
+      //println(s"Effect Stack: ${analysis.effectStack}")
+      //println(program.funs(0).body.)
+      println(unparse(elaborated))
+      try {
+        concreteInterpreter.execute(elaborated)
+        println("Incorrect, concrete evaluation did not raise an error.")
+      } catch {
+        case e: Throwable => println(s"Correctly raised exception: ${e.getClass.getName}")
+      }
+
+      1 should be(1)
     }
   }
 
