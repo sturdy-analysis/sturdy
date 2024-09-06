@@ -50,7 +50,10 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 //      //case ConcreteInterpreter.Value.Obj(o) => Value.Obj(Topped.Actual(o))
 //      //case ConcreteInterpreter.Value.Array(a) => Value.Array(Topped.Actual(a))
 
-  class Instance(files: Project[URL], path: String) extends GenericInstance:
+  type arrayVarStore = Map[ArrayElemAddr, Value]
+  type fieldStore = Map[FieldAddr, Value]
+
+  class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore) extends GenericInstance:
 
     private given Instance = this
 
@@ -58,6 +61,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       fix.notContextSensitive(
         fix.iter.innermost[FixIn, FixOut, Unit](StackedStates())
       ).fixpoint
+    
 
     override val fixpointSuper = fixpoint
 
@@ -71,8 +75,8 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val objFieldAlloc: Allocation[FieldAddr, FieldInitSite] = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
     override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val objFieldStore = new TopStore()
-    override val arrayValStore = new TopStore()
+    override val objFieldStore: AStoreSingleAddrThreadded[FieldAddr, Value] = new AStoreSingleAddrThreadded(initFieldStore)
+    override val arrayValStore: AStoreSingleAddrThreadded[ArrayElemAddr, Value] = new AStoreSingleAddrThreadded(initArrayVarStore)
     override val staticVarStore = new TopStore()
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files

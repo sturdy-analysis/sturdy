@@ -59,7 +59,7 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
-  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath)
+  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
 
   //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
@@ -193,9 +193,13 @@ object test extends App{
 
   println("--- d4ArrayTest ---")
   val d4ArrayTest = cfs.findMethod("d4ArrayTest").head
-  println(interp.invokeExternal(d4ArrayTest, true))
+  println(interp.invokeExternal(d4ArrayTest, true))*/
 
-  println("--- interfaceTest ---")
+  println("--- arrayTypeTest ---")
+  val arrayTypeTest = cfs.findMethod("arrayTypeTest").head
+  println(absInterp.invokeExternal(arrayTypeTest, true))
+
+  /*println("--- interfaceTest ---")
   val interfaceTest = cfs2.findMethod("interfaceTest").head
   println(interp.invokeExternal(interfaceTest, true))
   val defaultInterfaceTest = cfs2.findMethod("defaultInterfaceTest").head
@@ -231,7 +235,7 @@ object test extends App{
   val typeTestInterface = cfs2.findMethod("typeTestInterface").head
   println(interp.invokeExternal(typeTestInterface, true))
   val typeTestArray = cfs2.findMethod("typeTestArray").head
-  println(interp.invokeExternal(typeTestArray, true))
+  println(absInterp.invokeExternal(typeTestArray, true))
   val typeTest2 = cfs.findMethod("typeTest2").head
   interp.evalExternal(NEW(ObjectType("sturdy/language/bytecode/simple/SimpleMath")))
   println(interp.invokeExternal(typeTest2, true))
@@ -270,14 +274,14 @@ object test extends App{
   val constLoopTest = cfs.findMethod("constantLoopTest").head
   //absInterp.evalExternal(ICONST_0)
   //absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
-  //println(absInterp.invokeExternal(constLoopTest, true))*/
+  //println(absInterp.invokeExternal(constLoopTest, true)*/
   /*
 
   */
   val testMths = cfs.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest").concat(
-    cfs.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest")
+    cfs2.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest")
   )
   //println(testMths.toSeq)
-  testMths.foreach(mth => println(mth.name + "\n" + interp.invokeExternal(mth, true)))
+  //testMths.foreach(mth => println(mth.name + "\n" + interp.invokeExternal(mth, true)))
 }
 

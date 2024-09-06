@@ -16,7 +16,7 @@ import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
 import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, InstructionSite}
-import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widening}
+import sturdy.values.{Combine, Finite, MaybeChanged, Powerset, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
@@ -31,12 +31,15 @@ trait ConstantObjects extends Interpreter, Numbers:
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = (ObjectType, String)
   case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
+  given FiniteFieldAddr: Finite[FieldAddr] with {}
   type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
   final def topObj: ObjRep = Topped.Top
 
   final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
+  given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
+
   type TypeRep = ReferenceType
   type AType = ArrayType
   final def topArray: ArrayRep = Topped.Top
@@ -110,8 +113,8 @@ trait ConstantObjects extends Interpreter, Numbers:
       else{
         ???
       }
-      
-  
+
+
     override def setVal(array: ArrayRep, idx: I32, v: Value): JOption[WithJoin, Unit] =
       if(array.isActual){
         if (idx.get >= array.get.vals.size)

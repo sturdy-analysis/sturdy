@@ -70,7 +70,7 @@ public class SimpleMath {
     }
 
     public static int returnTest(boolean flag){
-        int x = 10;
+        int x = 12;
 
         if(flag){
             return x;
@@ -238,7 +238,7 @@ public class SimpleMath {
         int[][][][] testArray = new int[2][3][4][5];
         testArray[0][0][0][0] = 3;
         testArray[1][1][1][1] = 3;
-        testArray[0][2][3][4] = 3;
+        testArray[0][2][0][0] = 3;
         return testArray[0][2];
     }
 

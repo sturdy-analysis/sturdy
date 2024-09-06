@@ -706,14 +706,14 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: InstructionSite): V =
     if (numDims == 2) {
       val temp = arrayOps.initArray(dims(1))
-      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims.head, compType, site), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType, dims(1))
+      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims.head, compType, InstructionSite(site.mth, site.pc, numDims-1)), ArrayElemInitSite(site, vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, numDims)), temp2, compType, dims(1))
       array
     }
     else{
       val temp = arrayOps.initArray(dims(numDims-1))
       val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(site), temp2, compType, dims(numDims-1))
+      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, numDims)), temp2, compType, dims(numDims-1))
       array
     }
 

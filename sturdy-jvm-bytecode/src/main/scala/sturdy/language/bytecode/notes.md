@@ -1,10 +1,3 @@
 TODO
 
-fix inherited fields, they are not distinct
-
-manage void returns differently
-
-null values?
-
-review arrayops 
-
+MultiD Arrays in abstract interpreter get joined into a single one D array currently
