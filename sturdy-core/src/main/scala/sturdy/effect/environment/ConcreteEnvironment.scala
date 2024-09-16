@@ -32,7 +32,7 @@ class ConcreteCyclicEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Cycl
   protected var env: Map[Var, Box[V]] = _init.view.mapValues(Box.Eager.apply).toMap
 
   override def lookup(x: Var): JOptionC[V] =
-    JOptionC(env.get(x).map(_.value))
+    JOptionC(env.get(x).map(_.get))
 
   override def bind(x: Var, v: V): Unit = env = env + (x -> Box.Eager(v))
   override def bindLazy(x: Var, v: => V): Unit = env = env + (x -> Box.Lazy(() => v))

@@ -42,7 +42,7 @@ trait Interpreter:
       case (Value.Int(i1), Value.Int(i2)) => Combine(i1, i2).map(Value.Int.apply)
       case (Value.Closure(c1), Value.Closure(c2)) => Combine(c1, c2).map(Value.Closure.apply)
 
-  given PartiaOrderValue(using PartialOrder[VInt], PartialOrder[VClosure]): PartialOrder[Value] with
+  given PartialOrderValue(using PartialOrder[VInt], PartialOrder[VClosure]): PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (Value.Int(i1), Value.Int(i2)) => PartialOrder.lteq(i1, i2)
       case (Value.Closure(c1), Value.Closure(c2)) => PartialOrder.lteq(c1, c2)

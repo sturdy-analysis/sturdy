@@ -37,7 +37,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   val environment: CyclicEnvironment[String, V, J] with ClosableEnvironment[String, V, Env, J]
   val input: UserInput[V]
 
-  val effectStack: EffectStack = new EffectStack(EffectList(failure, environment, input))
+  private val effectStack: EffectStack = new EffectStack(EffectList(failure, environment, input))
   given EffectStack = effectStack
 
   // joins
@@ -45,7 +45,6 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
 
   // fixpoint
   enum FixIn:
-    case Eval(e: Exp)
     case Enter(e: Exp)
     
   given finiteFixIn: Finite[FixIn] with {}
@@ -55,13 +54,11 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   
   private lazy val fixed = {
     fixpoint {
-      case FixIn.Eval(e) => eval_open(e)
       case FixIn.Enter(f) => eval_open(f)
     }
   }
 
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
-
 
   // interpreter
 
@@ -74,7 +71,8 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
           failure(UnboundVariable, name)
         )
       )
-    case Exp.Num(n) => intOps.integerLit(n)
+    case Exp.Num(n) => 
+      intOps.integerLit(n)
     case Exp.BinOpApp(op, e1, e2) =>
       val v1 = eval(e1)
       val v2 = eval(e2)
@@ -84,13 +82,16 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
         case BinOp.Mul => intOps.mul(v1, v2)
         case BinOp.Eq => eqOps.equ(v1, v2)
         case BinOp.Gt => orderingOps.gt(v1, v2)
-    case Exp.Read => input.read()
+    case Exp.Read =>
+      input.read()
     case Exp.If(cond, thn, els) =>
       val c = eval(cond)
       branchOps.boolBranch(c, eval(thn), eval(els))
+
     case Exp.Lam(x, body) =>
       val env = environment.closeEnvironment
       closureOps.closureValue(x, body, env)
+
     case Exp.App(fun, arg) =>
       val cl = eval(fun)
       closureOps.invokeClosure(cl) {
@@ -102,13 +103,16 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
         }
       }
     case Exp.Rec(f, body) =>
-      lazy val rec: V = {
-        environment.bindLazy(f, rec)
-        eval(body)
-      }
-      rec
+      body match
+        case Exp.Lam(_, _) =>
+          lazy val rec: V = {
+            environment.bindLazy(f, rec)
+            eval(body)
+          }
+          rec
+        case _ => failure(TypeError, "")
 
-  def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e))
+  def eval(e: Exp)(using rec: Fixed): V = eval_open(e)
   def enter(f: Exp)(using rec: Fixed): V = rec(FixIn.Enter(f))
 
   def evalProgram(p: Program): V = external {

@@ -35,7 +35,7 @@ class StandardEnvironment[Var, V](using Finite[Var])
 
 
 given CombineBox[V, W <: Widening](using j: Combine[V, W]): Combine[Box[V], W] with
-  override def apply(v1: Box[V], v2: Box[V]): MaybeChanged[Box[V]] = j(v1.value, v2.value) match
+  override def apply(v1: Box[V], v2: Box[V]): MaybeChanged[Box[V]] = j(v1.get, v2.get) match
     case MaybeChanged.Changed(a) => Changed(Box.Eager(a))
     case MaybeChanged.Unchanged(a) => Unchanged(v1)
 
@@ -48,7 +48,7 @@ class StandardCyclicEnvironment[Var, V](using Finite[Var])
   type State = Map[Var, Box[V]]
   protected var env: Map[Var, Box[V]] = _init.view.mapValues(Box.Eager.apply).toMap
 
-  override def lookup(x: Var): JOptionC[V] = JOptionC(env.get(x).map(_.value))
+  override def lookup(x: Var): JOptionC[V] = JOptionC(env.get(x).map(_.get))
   override def bind(x: Var, v: V): Unit = env = env + (x -> Box.Eager(v))
   override def bindLazy(x: Var, v: => V): Unit = env = env + (x -> Box.Lazy(() => v))
 

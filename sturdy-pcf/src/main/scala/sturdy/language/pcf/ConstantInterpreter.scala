@@ -37,10 +37,7 @@ object ConstantInterpreter extends Interpreter:
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.Int(i) => Value.Int(Topped.Actual(i))
       case ConcreteInterpreter.Value.Closure(cl) =>
-        val aenv: Env = cl.env.view.mapValues {
-          case Box.Eager(v) => Box.Eager(this.apply(v))
-          case Box.Lazy(v) => Box.Lazy(() => this.apply(v()))
-        }.toMap
+        val aenv: Env = cl.env.view.mapValues (_.map(this.apply)).toMap
         val acl = Closure(cl.params, cl.body, aenv)
         Value.Closure(Powerset(acl))
 
@@ -60,6 +57,8 @@ object ConstantInterpreter extends Interpreter:
     override val input: CUserInput[Value] = new CUserInput(nextInput)
     override val environment = new StandardCyclicEnvironment[Var, Value](Map.empty)
 
+
+    // TODO : Fix (untrue because of environements)
     given Finite[VClosure] with {}
 
     override val fixpoint =
