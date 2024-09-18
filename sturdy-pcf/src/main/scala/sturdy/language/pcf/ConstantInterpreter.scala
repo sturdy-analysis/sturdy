@@ -2,11 +2,13 @@ package sturdy.language.pcf
 
 import sturdy.data.{NoJoin, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.environment.{Box, ClosableEnvironment, ConcreteCyclicEnvironment, StandardCyclicEnvironment}
+import sturdy.effect.environment.ConcreteEnvironment
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
+import sturdy.effect.store.StandardStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix.StackConfig.StackedStates
-import sturdy.{fix, values}
+import sturdy.fix
+import sturdy.util.Label
 import sturdy.values.{Abstractly, Finite, Join, Powerset, Topped, given}
 import sturdy.values.booleans.{BooleanBranching, given}
 import sturdy.values.closures.{Closure, ClosureOps, given}
@@ -15,14 +17,18 @@ import sturdy.values.ordering.{EqOps, OrderingOps, given}
 
 object ConstantInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
+
+  type Var = String
+  override type Addr = Label
+  override type Env = Map[Var, Addr]
+
   override type VInt = Topped[Int]
   override type VBoolean = Topped[Boolean]
   override type VClosure = Powerset[Closure[Var, Exp, Env]]
-  // todo finite closure representation, maybe: Map[Lam, Env]
-  override type Env = Map[Var, Box[Value]]
 
-  type Var = String
   given Finite[Var] with {}
+  given Finite[Addr] with {}
+  given Finite[VClosure] with {}
 
   override def asBoolean(v: Value)(using Failure): VBoolean = v match
     case Value.Int(Topped.Actual(i)) => Topped.Actual(i != 0)
@@ -37,13 +43,13 @@ object ConstantInterpreter extends Interpreter:
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.Int(i) => Value.Int(Topped.Actual(i))
       case ConcreteInterpreter.Value.Closure(cl) =>
-        val aenv: Env = cl.env.view.mapValues (_.map(this.apply)).toMap
-        val acl = Closure(cl.params, cl.body, aenv)
+        val acl = Closure(cl.params, cl.body, cl.env)
         Value.Closure(Powerset(acl))
-
 
   class Instance(nextInput: () => Value) extends GenericInstance:
     override def jv: NoJoin[Value] = implicitly
+
+    override def newAddr(l: Exp): Addr = l.label
 
     override val failure: CollectedFailures[PCFFailure] = new CollectedFailures[PCFFailure]
     given Failure = failure
@@ -55,11 +61,8 @@ object ConstantInterpreter extends Interpreter:
     override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
     override val input: CUserInput[Value] = new CUserInput(nextInput)
-    override val environment = new StandardCyclicEnvironment[Var, Value](Map.empty)
-
-
-    // TODO : Fix (untrue because of environements)
-    given Finite[VClosure] with {}
+    override val environment = new ConcreteEnvironment[Var, Addr](Map.empty)
+    override val store = new StandardStore[Addr, Value](Map.empty)
 
     override val fixpoint =
       fix.filter[FixIn, Value](_.isInstanceOf[FixIn.Enter],

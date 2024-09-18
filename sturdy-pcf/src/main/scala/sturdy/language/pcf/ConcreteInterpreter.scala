@@ -1,12 +1,12 @@
 package sturdy.language.pcf
 
 import sturdy.data.{NoJoin, given}
-import sturdy.effect.environment.Box
-import sturdy.effect.environment.ClosableEnvironment
-import sturdy.effect.environment.ConcreteCyclicEnvironment
+import sturdy.effect.environment.ConcreteEnvironment
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
+import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
+import sturdy.util.Label
 import sturdy.values.booleans.{BooleanBranching, given}
 import sturdy.values.closures.{Closure, ClosureOps, given}
 import sturdy.values.integer.{IntegerOps, given}
@@ -15,10 +15,13 @@ import sturdy.values.ordering.{OrderingOps, given}
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
+
+  override type Addr = Label
+  override type Env = Map[String, Addr]
+
   override type VInt = Int
   override type VBoolean = Boolean
   override type VClosure = Closure[String, Exp, Env]
-  override type Env = Map[String, Box[Value]]
 
   override def asBoolean(v: Value)(using Failure): Boolean = v match
     case Value.Int(i) => i != 0
@@ -27,6 +30,8 @@ object ConcreteInterpreter extends Interpreter:
 
   class Instance(nextInput: () => Value) extends GenericInstance:
     override def jv: NoJoin[Value] = implicitly
+
+    override def newAddr(e: Exp) : Addr = e.label
 
     override val failure: ConcreteFailure = new ConcreteFailure
     given Failure = failure
@@ -38,6 +43,6 @@ object ConcreteInterpreter extends Interpreter:
     override val closureOps: ClosureOps[String, Exp, Env, Value, Value] = implicitly
 
     override val input: CUserInput[Value] = new CUserInput(nextInput)
-    override val environment = new ConcreteCyclicEnvironment[String, Value](Map.empty)
-
+    override val environment = new ConcreteEnvironment[String, Addr](Map.empty)
+    override val store = new CStore[Addr, Value](Map.empty)
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, Value]

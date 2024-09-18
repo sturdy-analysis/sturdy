@@ -30,9 +30,9 @@ class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
     }
   }
 
-  private val diverging = List("diverging_closure.pcf")
+  private val diverging = List("diverging_closure.pcf", "diverging.pcf")
 
-  Fixpoint.DEBUG = true
+  Fixpoint.DEBUG = false
   
   def runFile(p: Path): Unit =
     val file = Source.fromURI(p.toUri)
@@ -44,10 +44,8 @@ class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
       val aresult = ainterp.failure.fallible(ainterp.evalProgram(program))
       println(aresult)
 
-      if(diverging.contains(p.getFileName.toString))
-        println(aresult)
 
-      else
+      if(!diverging.contains(p.getFileName.toString))
         val interp = new ConcreteInterpreter.Instance(() => ConcreteInterpreter.Value.Int(5))
         val result = interp.failure.fallible(interp.evalProgram(program))
         println(result)

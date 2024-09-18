@@ -3,8 +3,8 @@ package sturdy.language.pcf
 import sturdy.data.MayJoin
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.environment.ClosableEnvironment
-import sturdy.effect.environment.CyclicEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
 import sturdy.fix
 import sturdy.util.{IntLabel, Labeled}
@@ -23,7 +23,7 @@ given Finite[PCFFailure] with {}
 
 import PCFFailure.*
 
-trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]]:
 
   // value operations
   val intOps: IntegerOps[Int, V]
@@ -34,11 +34,14 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
 
   // effect operations
   val failure: Failure
-  val environment: CyclicEnvironment[String, V, J] with ClosableEnvironment[String, V, Env, J]
+  val environment: ClosableEnvironment[String, Addr, Env, J]
+  val store: Store[Addr, V, J]
   val input: UserInput[V]
 
-  private val effectStack: EffectStack = new EffectStack(EffectList(failure, environment, input))
+  private val effectStack: EffectStack = new EffectStack(EffectList(failure, environment, store, input))
   given EffectStack = effectStack
+
+  def newAddr(e: Exp) : Addr
 
   // joins
   implicit def jv: J[V]
@@ -66,7 +69,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
 
   def eval_open(e: Exp)(using Fixed): V = e match
     case Exp.Var(name) =>
-      environment.lookup(name).getOrElse(
+      environment.lookup(name).flatMap(store.read).getOrElse(
         toplevelDefs.get(name).map(eval).getOrElse(
           failure(UnboundVariable, name)
         )
@@ -92,24 +95,26 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
       val env = environment.closeEnvironment
       closureOps.closureValue(x, body, env)
 
-    case Exp.App(fun, arg) =>
+    case l@Exp.App(fun, arg) =>
       val cl = eval(fun)
       closureOps.invokeClosure(cl) {
         case (x, body, env) => environment.scoped {
           val a = eval(arg)
           environment.loadClosedEnvironment(env)
-          environment.bind(x, a)
+          val addr = newAddr(l)
+          environment.bind(x, addr)
+          store.write(addr, a)
           enter(body)
         }
       }
-    case Exp.Rec(f, body) =>
+    case l@Exp.Rec(f, body) =>
       body match
-        case Exp.Lam(_, _) =>
-          lazy val rec: V = {
-            environment.bindLazy(f, rec)
-            eval(body)
-          }
-          rec
+        case Exp.Lam(x, body_r) => environment.scoped {
+          val addr = newAddr(l)
+          environment.bind(f, addr)
+          store.write(addr, closureOps.closureValue(x, body_r, environment.closeEnvironment))
+          eval(body)
+        }
         case _ => failure(TypeError, "")
 
   def eval(e: Exp)(using rec: Fixed): V = eval_open(e)

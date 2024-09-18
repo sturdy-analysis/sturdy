@@ -15,11 +15,14 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip concrete interpreter"
 
-  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/pcf").toURI;
+  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/pcf").toURI
+
+  private val diverging = List("diverging_closure.pcf", "diverging.pcf")
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".pcf")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
-      runFile(p)
+      if(!diverging.contains(p.getFileName.toString))
+        runFile(p)
     }
   }
 

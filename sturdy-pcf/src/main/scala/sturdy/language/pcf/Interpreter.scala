@@ -17,10 +17,12 @@ trait Interpreter:
 
   type J[A] <: MayJoin[A]
 
+  type Env
+  type Addr
+
   type VInt
   type VClosure
   type VBoolean
-  type Env
 
   def boolean(b: VBoolean): Value
   def asBoolean(v: Value)(using Failure): VBoolean
@@ -65,5 +67,5 @@ trait Interpreter:
     new LiftedClosureOps(_.asClosure, Value.Closure.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Env, J]:
+  abstract class GenericInstance extends GenericInterpreter[Value, Env, Addr, J]:
     given Instance = this.asInstanceOf[Instance]
