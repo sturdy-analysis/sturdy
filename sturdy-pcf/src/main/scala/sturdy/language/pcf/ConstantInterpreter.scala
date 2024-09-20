@@ -15,7 +15,7 @@ import sturdy.values.closures.{Closure, ClosureOps, given}
 import sturdy.values.integer.{IntegerOps, given}
 import sturdy.values.ordering.{EqOps, OrderingOps, given}
 
-object ConstantInterpreter extends Interpreter:
+object ConstantInterpreter extends Interpreter, Control:
   override type J[A] = NoJoin[A]
 
   type Var = String
@@ -65,8 +65,9 @@ object ConstantInterpreter extends Interpreter:
     override val store = new StandardStore[Addr, Value](Map.empty)
 
     override val fixpoint =
-      fix.filter[FixIn, Value](_.isInstanceOf[FixIn.Enter],
+      fix.log(controlEventLogger(this),
+        fix.filter(_.isInstanceOf[FixIn.Enter],
         fix.notContextSensitive(
           fix.iter.innermost[FixIn, Value, Unit](StackedStates())
-        )).fixpoint
+        ))).fixpoint
 

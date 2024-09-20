@@ -1,5 +1,6 @@
 package sturdy.language.pcf
 
+import sturdy.control.ControlObservable
 import sturdy.data.MayJoin
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.environment.ClosableEnvironment
@@ -23,7 +24,12 @@ given Finite[PCFFailure] with {}
 
 import PCFFailure.*
 
-trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]]:
+// fixpoint
+enum FixIn:
+  case Eval(e: Exp)
+  case Enter(e: Exp)
+
+trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]] extends ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
   // value operations
   val intOps: IntegerOps[Int, V]
@@ -46,10 +52,6 @@ trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]]:
   // joins
   implicit def jv: J[V]
 
-  // fixpoint
-  enum FixIn:
-    case Enter(e: Exp)
-    
   given finiteFixIn: Finite[FixIn] with {}
 
   type Fixed = FixIn => V
@@ -58,6 +60,7 @@ trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]]:
   private lazy val fixed = {
     fixpoint {
       case FixIn.Enter(f) => eval_open(f)
+      case FixIn.Eval(e) => eval_open(e)
     }
   }
 
@@ -94,30 +97,29 @@ trait GenericInterpreter[V, Env, Addr, J[_] <: MayJoin[_]]:
     case Exp.Lam(x, body) =>
       val env = environment.closeEnvironment
       closureOps.closureValue(x, body, env)
-
-    case l@Exp.App(fun, arg) =>
+    case Exp.App(fun, arg) =>
       val cl = eval(fun)
       closureOps.invokeClosure(cl) {
         case (x, body, env) => environment.scoped {
           val a = eval(arg)
           environment.loadClosedEnvironment(env)
-          val addr = newAddr(l)
+          val addr = newAddr(e)
           environment.bind(x, addr)
           store.write(addr, a)
           enter(body)
         }
       }
-    case l@Exp.Rec(f, body) =>
+    case Exp.Rec(f, body) =>
       body match
         case Exp.Lam(x, body_r) => environment.scoped {
-          val addr = newAddr(l)
+          val addr = newAddr(e)
           environment.bind(f, addr)
           store.write(addr, closureOps.closureValue(x, body_r, environment.closeEnvironment))
           eval(body)
         }
         case _ => failure(TypeError, "")
 
-  def eval(e: Exp)(using rec: Fixed): V = eval_open(e)
+  def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e))
   def enter(f: Exp)(using rec: Fixed): V = rec(FixIn.Enter(f))
 
   def evalProgram(p: Program): V = external {

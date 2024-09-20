@@ -16,6 +16,7 @@ import sturdy.AbstractlySound
 import sturdy.values.given
 import sturdy.values.integer.given
 import ConstantInterpreter.given
+import sturdy.control.ControlEventGraphBuilder
 import sturdy.fix.Fixpoint
 
 class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
@@ -41,7 +42,10 @@ class ConstantInterpreterTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
     if (program.definitions.contains("main")) {
       val ainterp = new ConstantInterpreter.Instance(() => ConstantInterpreter.Value.Int(Topped.Top))
+      val graphBuilder = ainterp.addControlObserver(new ControlEventGraphBuilder)
       val aresult = ainterp.failure.fallible(ainterp.evalProgram(program))
+      println(graphBuilder.get.toGraphViz)
+      println("---")
       println(aresult)
 
 
