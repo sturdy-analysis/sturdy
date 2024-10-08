@@ -72,7 +72,7 @@ object SignAnalysis extends Interpreter,
 
     override val precisionFunction: Function =
       parse("""prec(x, y) {
-              | return ((y == 3) + (x == y) + (x > -1) * (y > -1) * (y > x) + (1 > x) * (1 > y) * (x > y)) > 0;
+              | return ((y == 3) + (x == y) + (x > -1) * (y > 0) * (y > x) + (1 > x) * (0 > y) * (x > y)) > 0;
               |}""".stripMargin)
 
     override val checkFunction: Function =
