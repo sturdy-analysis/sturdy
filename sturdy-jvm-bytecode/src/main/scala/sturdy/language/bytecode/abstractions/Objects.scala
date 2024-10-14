@@ -111,7 +111,7 @@ trait ConstantObjects extends Interpreter, Numbers:
           store.read(array.get.vals(idx.get))
       }
       else{
-        ???
+        JOptionA.Some(Value.Array(topArray))
       }
 
 
@@ -125,7 +125,7 @@ trait ConstantObjects extends Interpreter, Numbers:
         }
       }
       else{
-        ???
+        JOptionA.Some(())
       }
       
   
@@ -134,7 +134,7 @@ trait ConstantObjects extends Interpreter, Numbers:
         array.get.arraySize
       }
       else{
-        ???
+        Value.Int32(topI32)
       }
   
     override def initArray(size: I32): Seq[Any] =

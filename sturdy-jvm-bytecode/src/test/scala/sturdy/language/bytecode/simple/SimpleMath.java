@@ -179,7 +179,7 @@ public class SimpleMath {
 
     public static int arrayTest2(){
         int[] testArray = {5,4,3,2,1,0};
-        int[] testArray2 = {100, 200, 300};
+        int[] testArray2 = {100, 200, 303};
         return testArray[0] + testArray2[2];
     }
 

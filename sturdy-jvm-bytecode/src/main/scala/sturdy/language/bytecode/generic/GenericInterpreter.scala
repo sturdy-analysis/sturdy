@@ -623,6 +623,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       case inst: MULTIANEWARRAY =>
         val dims = stack.popNOrAbort(inst.dimensions)
         stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse, site))
+        counter = 0
 
       // ifnull, ifnonnull opcode 198 - 199
       case inst: IFNULL =>
@@ -703,19 +704,36 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
     val array = arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, compType, size)
     array
 
+  var counter = 0
   def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: InstructionSite): V =
     if (numDims == 2) {
+      val counterSnap = counter
+      //println("ND IF: " + counterSnap)
+      counter += 1
       val temp = arrayOps.initArray(dims(1))
-      val temp2 = temp.zipWithIndex.map(vals => (createArray(dims.head, compType, InstructionSite(site.mth, site.pc, numDims-1)), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, numDims)), temp2, compType, dims(1))
+      val temp2 = temp.zipWithIndex.map(vals => (create2DArray(dims.head, compType, InstructionSite(site.mth, site.pc)), ArrayElemInitSite(InstructionSite(site.mth, site.pc, counterSnap), vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, counterSnap)), temp2, compType, dims(1))
       array
     }
     else{
+      val counterSnap = counter
+      //println("ND Else: " + counterSnap)
+      counter += 1
       val temp = arrayOps.initArray(dims(numDims-1))
-      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), ArrayElemInitSite(site, vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, numDims)), temp2, compType, dims(numDims-1))
+      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), ArrayElemInitSite(InstructionSite(site.mth, site.pc, counterSnap), vals._2)))
+      val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, counterSnap)), temp2, compType, dims(numDims-1))
       array
     }
+
+  def create2DArray(size: V, compType: ArrayType, site: InstructionSite): V =
+    val counterSnap = counter
+    //println("2D: " + counterSnap)
+    counter += 1
+    val arrayVals = arrayOps.initArray(size)
+    val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
+      .zipWithIndex.map(vals => (vals._1, ArrayElemInitSite(InstructionSite(site.mth, site.pc, counterSnap), vals._2)))
+    val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, counterSnap)), convertedArrayVals, compType, size)
+    array
 
   def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
 

@@ -189,17 +189,18 @@ object test extends App{
 
   println("--- d3ArrayTest ---")
   val d3ArrayTest = cfs.findMethod("d3ArrayTest").head
-  println(interp.invokeExternal(d3ArrayTest, true))
+  println(absInterp.invokeExternal(d3ArrayTest, true))
 
   println("--- d4ArrayTest ---")
   val d4ArrayTest = cfs.findMethod("d4ArrayTest").head
-  println(interp.invokeExternal(d4ArrayTest, true))*/
+  println(interp.invokeExternal(d4ArrayTest, true))
 
   println("--- arrayTypeTest ---")
   val arrayTypeTest = cfs.findMethod("arrayTypeTest").head
+  println(interp.invokeExternal(arrayTypeTest, true))
   println(absInterp.invokeExternal(arrayTypeTest, true))
 
-  /*println("--- interfaceTest ---")
+  println("--- interfaceTest ---")
   val interfaceTest = cfs2.findMethod("interfaceTest").head
   println(interp.invokeExternal(interfaceTest, true))
   val defaultInterfaceTest = cfs2.findMethod("defaultInterfaceTest").head
@@ -207,12 +208,13 @@ object test extends App{
 
   println("--- lambdaTest ---")
   val lambdaTest = cfs2.findMethod("lambdaTest").head
-  println(interp.invokeExternal(lambdaTest, true))
+  println(interp.invokeExternal(lambdaTest, true))*/
 
 
   println("--- exceptionTest ---")
   val exceptionTest = cfs.findMethod("exceptionTest").head
-  println(interp.invokeExternal(exceptionTest, true))
+  println(absInterp.invokeExternal(exceptionTest, true))
+  /*
   val nullPointerTest = cfs.findMethod("nullPointerTest").head
   println(interp.invokeExternal(nullPointerTest, true))
   val throwTest = cfs.findMethod("throwTest").head
