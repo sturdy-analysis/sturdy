@@ -127,7 +127,7 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val elaboration = new TipElaboration(analysis.gl, analysis.eo)
       val concreteInterpreter = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val elaborated = elaboration.elaborate(program)
       //println(s"Effect Stack: ${analysis.effectStack}")
@@ -159,7 +159,7 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val elaboration = new TipElaboration(analysis.gl, analysis.eo)
       var count = 1
       val concreteInterpreter = ConcreteInterpreter(() => {
         val v = ConcreteInterpreter.Value.IntValue(count)
@@ -197,7 +197,7 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val elaboration = new TipElaboration(analysis.gl, analysis.eo)
       var count = 1
       val concreteInterpreter = ConcreteInterpreter(() => {
         val v = ConcreteInterpreter.Value.IntValue(count)
@@ -231,7 +231,7 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val elaboration = new TipElaboration(analysis.gl, analysis.eo)
       var count = 1
       val concreteInterpreter = ConcreteInterpreter(() => {
         val v = ConcreteInterpreter.Value.IntValue(count)
@@ -270,7 +270,7 @@ main(){
       println(s"result ${aresult}")
       println(analysis.gl.m)
 
-      val elaboration = new Elaboration(analysis.gl, analysis.eo)
+      val elaboration = new TipElaboration(analysis.gl, analysis.eo)
       var count = 1
       val concreteInterpreter = ConcreteInterpreter(() => {
         val v = ConcreteInterpreter.Value.IntValue(count)

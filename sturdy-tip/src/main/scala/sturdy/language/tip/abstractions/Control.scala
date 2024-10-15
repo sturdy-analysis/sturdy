@@ -1,5 +1,6 @@
 package sturdy.language.tip.abstractions
 
+import sturdy.gradual.fix.{Check, GradualLogger}
 import sturdy.control.{BasicControlEvent, ControlEvent, ControlObservable}
 import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.except.ObservableExcept
@@ -32,9 +33,7 @@ object Control:
     case a: Stm.Assign => Some(TipControlNode.Stm(a))
     case _ => None
 
-
-class Check[T](val unsafe: T, val safe: T)
-class GradualLogger[T,V] extends Logger[FixIn, FixOut[V]]:
+class TipGradualLogger[T,V] extends GradualLogger[T, FixIn, FixOut[V]]:
   var current: ListBuffer[FixIn] = ListBuffer[FixIn]()
   val m = scala.collection.mutable.Map[Label, List[Check[T]]]()
 
@@ -56,7 +55,7 @@ class GradualLogger[T,V] extends Logger[FixIn, FixOut[V]]:
       case FixIn.Run(s) => println(s"Run $s -> $codom")
       case FixIn.EnterFunction(f) => println(s"Enter $f -> $codom")
 
-  def insertCheck(uv: T, v: T): Unit = current.last match
+  override def insertCheck(uv: T, v: T): Unit = current.last match
     case FixIn.Eval(e) =>
       m += (e.label -> (m.getOrElse(e.label, Nil) :+ Check(uv, v)))
       println(s"inserting check at ${e.label}")
@@ -66,14 +65,14 @@ class GradualLogger[T,V] extends Logger[FixIn, FixOut[V]]:
     case FixIn.EnterFunction(f) =>
       println(s"What to do here? $f")
 
-  def getCheck(l: Label): Option[Check[T]] = m.get(l).flatMap(_.headOption)
+  override def getCheck(l: Label): Option[Check[T]] = m.get(l).flatMap(_.headOption)
 
 trait Control extends Interpreter:
   import Control.*
 
   def controlEventLogger(observable: ControlObservable[Atom, Section, Exc, Fx])(using effects: EffectStack): Logger[FixIn, FixOut[Value]] =
     effects.addJoinObserver(observable)
-    new Logger:
+    new Logger[FixIn, FixOut[Value]]:
       //var vurrent = _
 
 
@@ -110,7 +109,7 @@ trait Control extends Interpreter:
 
 
 
-  def gradualLogger[T](): GradualLogger[T, Value] = new GradualLogger()
+  def gradualLogger[T, V](): TipGradualLogger[T, V] = new TipGradualLogger()
 
 
 

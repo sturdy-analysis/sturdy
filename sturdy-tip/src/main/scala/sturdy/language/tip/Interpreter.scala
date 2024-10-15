@@ -2,15 +2,18 @@ package sturdy.language.tip
 
 import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.gradual.values.integer.{GradualIntegerOps, GradualLiftedIntegerOps, IntegerOpsGradualization}
 import sturdy.language.tip.*
+import sturdy.language.tip.abstractions.TipGradualLogger
+import sturdy.language.tip.analysis.SignAnalysis.gradualLogger
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
-import sturdy.values.{Finite, Top, Combine, Widening}
-import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
+import sturdy.values.{Combine, Finite, Top, Widening}
+import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
-import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.ordering.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.values.references.{LiftedReferenceOps, ReferenceOps}
+import sturdy.values.ordering.{EqOps, LiftedOrderingOps, OrderingOps}
 
 /**
  * Trait [[Interpreter]] allows sharing code between concrete and abstract interpreters.
@@ -84,6 +87,8 @@ trait Interpreter:
   import Value.*
   given ValueIntegerOps(using Instance, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
+  given GradualValueIntegerOps[Gradual[X, Y] <: IntegerOpsGradualization[X, Y]](using Instance, GradualIntegerOps[Int, VInt, Gradual]): GradualIntegerOps[Int, Value, Gradual] =
+    new GradualLiftedIntegerOps[Int, Value, VInt, Gradual](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
     new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
   given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Instance): EqOps[Value, Value] with
@@ -120,4 +125,6 @@ trait Interpreter:
    */
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
+    given ConcreteGradualOps[T, V](using TipGradualLogger[T, V]): TipGradualOps[T, V] = new TipGradualOps[T, V]
+
     protected given Instance = this.asInstanceOf[Instance]

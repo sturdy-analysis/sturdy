@@ -3,15 +3,15 @@ package sturdy.language.tip.analysis
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.fix.Logger
-import sturdy.language.tip.abstractions.GradualLogger
-import sturdy.language.tip.{FixIn, FixOut}
+import sturdy.language.tip.abstractions.TipGradualLogger
+import sturdy.language.tip.{FixIn, FixOut, TipGradualOps}
 import sturdy.values.integer.IntSign.{Neg, NegOrZero, Pos, TopSign, Zero, ZeroOrPos}
 import sturdy.values.integer.{IntSign, IntegerDivisionByZero, IntegerOps}
 import sturdy.values.integer.SignIntegerOps
 import sturdy.values.PartialOrder
 import sturdy.values.integer.given PartialOrder[IntSign]
 
-class UnsafeSignIntegerOps[B, V](using f: Failure, j: EffectStack, base: Integral[B], g: GradualOps[IntSign, V]) extends SafeSignIntegerOps[Int]:
+class UnsafeSignIntegerOps[B, V](using f: Failure, j: EffectStack, base: Integral[B], g: TipGradualOps[IntSign, V]) extends SafeSignIntegerOps[Int]:
   private def addUnsafe(v1: IntSign, v2: IntSign): IntSign =
     (v1, v2) match
       case (TopSign, _) => TopSign
