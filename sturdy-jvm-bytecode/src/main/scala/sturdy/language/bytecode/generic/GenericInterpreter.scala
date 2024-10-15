@@ -844,6 +844,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
         val currPC = frame.data
+        val handlerType = mth.body.get.exceptionHandlersFor(currPC).head.catchType.get
+        val test = typeOps.instanceOf(exception, handlerType)
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))

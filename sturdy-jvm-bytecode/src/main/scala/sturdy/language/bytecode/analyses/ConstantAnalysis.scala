@@ -87,13 +87,16 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     import ConcreteInterpreter.given
 
     given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool] with
-      override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] = v match
-        case Topped.Top => Topped.Top
-        case Topped.Actual(o) =>
-          if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
-            Topped.Top // because `null <= o` and `instanceOf(null, target) == false`
-          else
-            Topped.Actual(false)
+      override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] =
+        if(target == null)
+          Topped.Actual(false)
+        v match
+          case Topped.Top => Topped.Top
+          case Topped.Actual(o) =>
+            if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+              Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
+            else
+              Topped.Actual(false)
 
     given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
       override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match

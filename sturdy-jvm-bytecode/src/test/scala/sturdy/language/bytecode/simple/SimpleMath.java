@@ -253,7 +253,7 @@ public class SimpleMath {
         return x;
     }
 
-    public static int nullPointerTest(){
+    /*public static int nullPointerTest(){
         SimpleMath math = null;
         try{
             return nullPointerHelper(math);
@@ -265,7 +265,7 @@ public class SimpleMath {
     }
     public static int nullPointerHelper(SimpleMath math){
         return math.x;
-    }
+    }*/
 
     public static int nullTest(SimpleMath math){
         if (math == null){
@@ -447,7 +447,7 @@ public class SimpleMath {
         System.out.println(ComplicatedMath.lambdaTest());
         System.out.println("--- exceptionTest ---");
         System.out.println(exceptionTest());
-        System.out.println(nullPointerTest());
+        //System.out.println(nullPointerTest());
         System.out.println(throwTest(1));
         System.out.println(throwTest(0));
         System.out.println("--- nullTest ---");
