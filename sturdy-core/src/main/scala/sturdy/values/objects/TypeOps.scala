@@ -1,6 +1,7 @@
 package sturdy.values.objects
 
 import sturdy.values.Topped
+import sturdy.values.integer.NumericInterval
 
 trait TypeOps[V, TypeRep, B] {
   def instanceOf(v: V, target: TypeRep): B
@@ -29,3 +30,8 @@ given ToppedSizeOps[V, B](using ops: SizeOps[V, B]): SizeOps[Topped[V], Topped[B
   override def is32Bit(v: Topped[V]): Topped[B] = v match
     case Topped.Top => Topped.Top
     case Topped.Actual(v) => Topped.Actual(ops.is32Bit(v))
+
+given IntervalSizeOps[V, B](using ops: SizeOps[V, B]): SizeOps[NumericInterval[V], Topped[B]] with
+  override def is32Bit(v: NumericInterval[V]): Topped[B] = ??? //v match
+//    case v: NumericInterval[Int] => Topped.Actual(ops.is32Bit(v.high))
+//    case v: NumericInterval[Long] => ???

@@ -7,7 +7,7 @@ import org.opalj.io.process
 import sturdy.fix
 import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.ConcreteInterpreter
-import sturdy.language.bytecode.analyses.ConstantAnalysis
+import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
 import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
 import sturdy.values.Topped
 import sturdy.values.integer.IntegerOps
@@ -61,6 +61,8 @@ object test extends App{
 
   val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
 
+  val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
+
   //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
   /*
@@ -100,9 +102,9 @@ object test extends App{
 
   println("--- SubTest ---")
   val testMethod = cfs.findMethod("sub2").head
-  interp.evalExternal(BIPUSH(5))
-  interp.evalExternal(BIPUSH(7))
-  println(interp.invokeExternal(testMethod, true))
+  intervalInterp.evalExternal(BIPUSH(5))
+  intervalInterp.evalExternal(BIPUSH(7))
+  println(intervalInterp.invokeExternal(testMethod, true))
 
 
   println("--- BranchTest ---")
@@ -208,13 +210,13 @@ object test extends App{
 
   println("--- lambdaTest ---")
   val lambdaTest = cfs2.findMethod("lambdaTest").head
-  println(interp.invokeExternal(lambdaTest, true))*/
+  println(interp.invokeExternal(lambdaTest, true))
 
 
   println("--- exceptionTest ---")
   val exceptionTest = cfs.findMethod("exceptionTest").head
   println(absInterp.invokeExternal(exceptionTest, true))
-  /*
+
   val nullPointerTest = cfs.findMethod("nullPointerTest").head
   println(interp.invokeExternal(nullPointerTest, true))
   val throwTest = cfs.findMethod("throwTest").head

@@ -111,7 +111,7 @@ trait ConstantObjects extends Interpreter, Numbers:
           store.read(array.get.vals(idx.get))
       }
       else{
-        JOptionA.Some(Value.Array(topArray))
+        JOptionA.Some(Value.TopValue)
       }
 
 
@@ -265,5 +265,162 @@ val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRe
 }*/
 
 
+trait IntervalObjects extends Interpreter, IntervalNumbers:
+
+  type ObjType = ClassFile
+  case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
+  type FieldName = (ObjectType, String)
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
+  given FiniteFieldAddr: Finite[FieldAddr] with {}
+  type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
+  final def topObj: ObjRep = Topped.Top
+
+  final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
+  case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
+  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
+  given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
+
+  type TypeRep = ReferenceType
+  type AType = ArrayType
+  final def topArray: ArrayRep = Topped.Top
+
+  final type NullVal = Null
+  final def topNull: NullVal = null
+
+  given combineNull[W <: Widening]: Combine[Null, W] with
+    override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
+
+  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, ObjRep, FieldInitSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+    override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): ObjRep =
+      val fieldAddrs = vals.map { (v, site, name) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        (name, addr)
+      }.toVector.toMap
+      Topped.Actual(Object(oid, cfs, fieldAddrs))
+
+    override def getField(obj: ObjRep, name: FieldName): JOption[MayJoin.WithJoin, Value] =
+      if(obj.isActual){
+        if (!obj.get.fields.contains(name))
+          JOptionA.none
+        else
+          store.read(obj.get.fields(name))
+      }
+      else{
+        ???
+      }
+
+    override def setField(obj: ObjRep, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
+      if(obj.isActual){
+        if (!obj.get.fields.contains(name))
+          JOptionA.none
+        else {
+          store.write(obj.get.fields(name), v)
+          JOptionA.some(())
+        }
+      }
+      else {
+        ???
+      }
+
+    override def invokeFunctionCorrect(obj: ObjRep, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ObjRep, Method, Seq[Value]) => Value): Value =
+      if(obj.isActual){
+        val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.get.cls, mthName, sig, project)
+        invoke(obj, mth, args)
+      }
+      else{
+        ???
+      }
+
+    override def makeNull(): Null = null
+
+  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, ArrayRep, ArrayType, ArrayElemInitSite, WithJoin] with
+    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): ArrayRep =
+      val valAddrs = vals.map { (v, site) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        addr
+      }.toVector
+      Topped.Actual(Array(aid, valAddrs, arrayType, arraySize))
+
+    override def getVal(array: ArrayRep, idx: I32): JOption[WithJoin, Value] =
+      if(array.isActual){
+        if(idx.isConstant){
+          if (idx.low >= array.get.vals.size)
+            JOptionA.none
+          else
+            store.read(array.get.vals(idx.low))
+        }
+        else
+         JOptionA.Some(topOpalVal(array.get.arrayType))
+      }
+      else
+        JOptionA.Some(Value.TopValue)
 
 
+    override def setVal(array: ArrayRep, idx: I32, v: Value): JOption[WithJoin, Unit] =
+      if(array.isActual){
+        if(idx.isConstant) {
+          if (idx.low >= array.get.vals.size)
+            JOptionA.none
+          else {
+            store.write(array.get.vals(idx.low), v)
+            JOptionA.some(())
+          }
+        }
+        else
+          JOptionA.none
+      }
+      else
+        JOptionA.Some(())
+
+
+    override def arrayLength(array: ArrayRep): Value =
+      if(array.isActual){
+        array.get.arraySize
+      }
+      else{
+        Value.Int32(topI32)
+      }
+
+    override def initArray(size: I32): Seq[Any] =
+      Seq.fill(size.low) {}
+
+    override def arraycopy(src: ArrayRep, srcPos: I32, dest: ArrayRep, destPos: I32, length: I32): JOption[WithJoin, Unit] =
+      if(src.isActual && dest.isActual){
+        if(srcPos.isConstant && destPos.isConstant && length.isConstant){
+          for (i <- 0 until length.low) {
+            if (srcPos.low + i >= src.get.vals.size || destPos.low + i >= dest.get.vals.size) {
+              return JOptionA.none
+            }
+            else {
+              val toCopy = store.read(src.get.vals(srcPos.low + i)).get
+              store.write(dest.get.vals(destPos.low + i), toCopy)
+            }
+          }
+          JOptionA.some(())
+        }
+        else
+          ???
+      }
+      else{
+        ???
+      }
+
+    override def getArray(array: ArrayRep): Seq[JOption[WithJoin, Value]] =
+      ???
+      //val arrayVals = array.get.vals.map(addr => getVal(array, Topped.Actual(array.get.vals.indexOf(addr))))
+      //arrayVals
+
+  def topOpalVal(ty: FieldType): Value =
+    ty match
+      case fieldType: ByteType => Value.Int32(topI32)
+      case fieldType: ShortType => Value.Int32(topI32)
+      case fieldType: IntegerType => Value.Int32(topI32)
+      case fieldType: FloatType => Value.Float32(topF32)
+      case fieldType: LongType => Value.Int64(topI64)
+      case fieldType: DoubleType => Value.Float64(topF64)
+      case fieldType: BooleanType => Value.Int32(topI32)
+      case fieldType: CharType => Value.Int32(topI32)
+      case fieldType: ObjectType => Value.Obj(topObj)
+      case fieldType: ArrayType => Value.Array(topArray)
