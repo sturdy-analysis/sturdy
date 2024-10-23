@@ -36,6 +36,7 @@ trait Interpreter:
   type MthSig
   type FieldAddr
   type ArrayElemAddr
+  type StaticAddr
   type Idx
   
   type TypeRep
@@ -289,5 +290,5 @@ trait Interpreter:
 
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J]
+  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J]
 

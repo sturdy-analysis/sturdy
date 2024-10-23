@@ -38,6 +38,7 @@ enum JvmExcept[V]:
 case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
 case class ArrayElemInitSite(s: InstructionSite, ix: Int)
 case class FieldInitSite(s: InstructionSite, name: String, cls: ObjectType)
+case class StaticInitSite(obj: ObjectType, name: String)
 
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
@@ -51,7 +52,7 @@ given Join[FixOut] with
 given Finite[FixIn] with {}
 given Finite[FixOut] with {}
 
-trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
 
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
@@ -74,9 +75,13 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
   val arrayValAlloc: Allocation[ArrayElemAddr, ArrayElemInitSite]
   val objFieldStore: Store[FieldAddr, V, J]
   val arrayValStore: Store[ArrayElemAddr, V, J]
-  val staticVarStore: Store[(ObjectType, String), V, J]
+  val staticVarStore: Store[StaticAddr, V, J]
+  val staticAlloc: Allocation[StaticAddr, StaticInitSite]
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V]
+
+  val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr]
+
 
   val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
   given EffectStack = effectStack
@@ -450,14 +455,17 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, O
       case inst: GETSTATIC =>
         val objCF = inst.declaringClass
         ensureInitialization(objCF)
-        val v = staticVarStore.readOrElse((objCF, inst.name), fail(UnboundStaticVar, inst.name))
+        val addr = staticAddrMap((objCF, inst.name))
+        val v = staticVarStore.readOrElse(addr, fail(UnboundStaticVar, inst.name))
         stack.push(v)
 
       case inst: PUTSTATIC =>
         val objCF = inst.declaringClass
         ensureInitialization(objCF)
         val v = stack.popOrAbort()
-        staticVarStore.write((objCF, inst.name), v)
+        val addr = staticAlloc(StaticInitSite(objCF, inst.name))
+        staticAddrMap.addOne((objCF, inst.name), addr)
+        staticVarStore.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
       case inst: GETFIELD =>

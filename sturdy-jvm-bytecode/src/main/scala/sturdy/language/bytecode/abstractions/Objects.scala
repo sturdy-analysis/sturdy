@@ -35,6 +35,9 @@ trait ConstantObjects extends Interpreter, Numbers:
   type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
   final def topObj: ObjRep = Topped.Top
 
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
+  given FiniteStaticAddr: Finite[StaticAddr] with {}
+
   final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
@@ -279,6 +282,9 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
+  
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
+  given FiniteStaticAddr: Finite[StaticAddr] with {}
 
   type TypeRep = ReferenceType
   type AType = ArrayType

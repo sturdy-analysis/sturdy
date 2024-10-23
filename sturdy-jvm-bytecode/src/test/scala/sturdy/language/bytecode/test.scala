@@ -61,7 +61,7 @@ object test extends App{
 
   val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
 
-  val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
+  val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
   //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   

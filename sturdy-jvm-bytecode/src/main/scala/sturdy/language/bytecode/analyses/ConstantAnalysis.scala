@@ -30,6 +30,7 @@ import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps, given}
 import sturdy.values.references.{AllocationSiteAddr, given}
 
 import java.net.URL
+import scala.collection.mutable
 
 object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exceptions:
   override type J[A] = WithJoin[A]
@@ -75,12 +76,15 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val objFieldAlloc: Allocation[FieldAddr, FieldInitSite] = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
     override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val staticAlloc = new AAllocationFromContext(site => StaticAddr(site.obj, site.name))
     override val objFieldStore: AStoreSingleAddrThreadded[FieldAddr, Value] = new AStoreSingleAddrThreadded(initFieldStore)
     override val arrayValStore: AStoreSingleAddrThreadded[ArrayElemAddr, Value] = new AStoreSingleAddrThreadded(initArrayVarStore)
     override val staticVarStore = new TopStore()
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
+
+    override val staticAddrMap: mutable.Map[(ObjectType, String), StaticAddr] = mutable.Map()
 
     given Project[URL] = project
     private given Failure = failure

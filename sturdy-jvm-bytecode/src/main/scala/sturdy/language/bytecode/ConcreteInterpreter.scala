@@ -40,6 +40,7 @@ object ConcreteInterpreter extends Interpreter:
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
   override type FieldAddr = Int
+  override type StaticAddr = Int
   override type Idx = Int
   override type TypeRep = ReferenceType
   override type NullVal = Null
@@ -140,7 +141,7 @@ object ConcreteInterpreter extends Interpreter:
 
 
   type varStore = Map[FieldAddr, Value]
-  type StaticStore = Map[(ObjectType, String), Value]
+  type StaticStore = Map[StaticAddr, Value]
 
   class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: varStore, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = 0
@@ -157,9 +158,12 @@ object ConcreteInterpreter extends Interpreter:
     val objFieldAlloc: CAllocationIntIncrement[FieldInitSite] = new CAllocationIntIncrement
     val arrayAlloc: CAllocationIntIncrement[InstructionSite] = new CAllocationIntIncrement
     val arrayValAlloc: CAllocationIntIncrement[ArrayElemInitSite] = new CAllocationIntIncrement
+    val staticAlloc: CAllocationIntIncrement[StaticInitSite] = new CAllocationIntIncrement
     val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
     val arrayValStore: CStore[FieldAddr, Value] = new CStore(initArrayValStore)
-    val staticVarStore: CStore[(ObjectType, String), Value] = new CStore(initStaticStore)
+    val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)
+    
+    val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr] = scala.collection.mutable.Map()
 
     override val project: Project[URL] = files
     given Project[URL] = project
