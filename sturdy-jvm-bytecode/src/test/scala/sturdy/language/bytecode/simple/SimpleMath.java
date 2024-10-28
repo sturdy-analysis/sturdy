@@ -68,7 +68,29 @@ public class SimpleMath {
         }
         return x;
     }
-
+    public static int branchingTrue(){
+        boolean flag = true;
+        int x = 0;
+        if(flag) {
+            x = sub2(100, 5);
+        }
+        else{
+            x = sub2(5, 100);
+        }
+        return x;
+    }
+    public static int branchingFalse(){
+        boolean flag = false;
+        int x = 0;
+        if(flag) {
+            x = sub2(100, 5);
+        }
+        else{
+            x = sub2(5, 100);
+        }
+        return x;
+    }
+    
     public static int returnTest(boolean flag){
         int x = 12;
 
@@ -142,8 +164,92 @@ public class SimpleMath {
         }
         return res;
     }
+    public static int switchTest4(){
+        int flag = 4;
+        int res = 0;
+        switch (flag){
+            case 0:
+                res = 1;
+                break;
+            case 1:
+                res = 2;
+                break;
+            case 2:
+                res = 3;
+                break;
+            case 4:
+                res = 5;
+                break;
+            default:
+                res = 0;
+        }
+        return res;
+    }
+    public static int switchTest10(){
+        int flag = 10;
+        int res = 0;
+        switch (flag){
+            case 0:
+                res = 1;
+                break;
+            case 1:
+                res = 2;
+                break;
+            case 2:
+                res = 3;
+                break;
+            case 4:
+                res = 5;
+                break;
+            default:
+                res = 0;
+        }
+        return res;
+    }
 
     public static int nonCompactSwitchTest(int flag){
+        int res = 0;
+        switch (flag){
+            case 0:
+                res = 10;
+                break;
+            case 10:
+                res = 20;
+                break;
+            case 200:
+                res = 300;
+                break;
+            case 4000:
+                res = 5000;
+                break;
+            default:
+                res = 0;
+        }
+        return res;
+    }
+    public static int nonCompactSwitchTest200(){
+        int flag = 200;
+        int res = 0;
+        switch (flag){
+            case 0:
+                res = 10;
+                break;
+            case 10:
+                res = 20;
+                break;
+            case 200:
+                res = 300;
+                break;
+            case 4000:
+                res = 5000;
+                break;
+            default:
+                res = 0;
+        }
+        return res;
+    }
+    public static int nonCompactSwitchTest4000(){
+        int flag = 4000;
         int res = 0;
         switch (flag){
             case 0:
@@ -276,7 +382,36 @@ public class SimpleMath {
         }
     }
 
-    public static int throwTest(int i){
+    public static int nullTestNull() {
+        SimpleMath math = null;
+        if (math == null){
+            return 21;
+        }
+        else{
+            return 32;
+        }
+    }
+    public static int nullTestObj(){
+        SimpleMath math = new SimpleMath();
+        if (math == null){
+            return 21;
+        }
+        else{
+            return 32;
+        }
+    }
+
+    public static int throwTest0(){
+        int i = 0;
+        try{
+            return cantBeZero(i);
+        }
+        catch (TestExc exception) {
+            return 100;
+        }
+    }
+    public static int throwTest1(){
+        int i = 1;
         try{
             return cantBeZero(i);
         }
@@ -301,6 +436,15 @@ public class SimpleMath {
     }
 
     public static int typeTest2(SimpleMath math){
+        if(math instanceof SimpleMath){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+    public static int typeTest2Null(){
+        SimpleMath math = null;
         if(math instanceof SimpleMath){
             return 1;
         }
@@ -448,8 +592,7 @@ public class SimpleMath {
         System.out.println("--- exceptionTest ---");
         System.out.println(exceptionTest());
         //System.out.println(nullPointerTest());
-        System.out.println(throwTest(1));
-        System.out.println(throwTest(0));
+        System.out.println(throwTest0());
         System.out.println("--- nullTest ---");
         SimpleMath nullMath = new SimpleMath(5,4);
         System.out.println(nullTest(null));

@@ -22,6 +22,7 @@ import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
 import sturdy.language.bytecode.AuxillaryFunctions.*
 import sturdy.values.Topped.Actual
+import sturdy.values.integer.NumericInterval
 
 import java.net.URL
 
@@ -282,7 +283,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
-  
+
   case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
@@ -349,7 +350,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       }.toVector
       Topped.Actual(Array(aid, valAddrs, arrayType, arraySize))
 
-    override def getVal(array: ArrayRep, idx: I32): JOption[WithJoin, Value] =
+    override def getVal(array: ArrayRep, idx: NumericInterval[Int]): JOption[WithJoin, Value] =
       if(array.isActual){
         if(idx.isConstant){
           if (idx.low >= array.get.vals.size)
@@ -364,7 +365,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
         JOptionA.Some(Value.TopValue)
 
 
-    override def setVal(array: ArrayRep, idx: I32, v: Value): JOption[WithJoin, Unit] =
+    override def setVal(array: ArrayRep, idx: NumericInterval[Int], v: Value): JOption[WithJoin, Unit] =
       if(array.isActual){
         if(idx.isConstant) {
           if (idx.low >= array.get.vals.size)
@@ -389,7 +390,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
         Value.Int32(topI32)
       }
 
-    override def initArray(size: I32): Seq[Any] =
+    override def initArray(size: NumericInterval[Int]): Seq[Any] =
       Seq.fill(size.low) {}
 
     override def arraycopy(src: ArrayRep, srcPos: I32, dest: ArrayRep, destPos: I32, length: I32): JOption[WithJoin, Unit] =
@@ -414,9 +415,8 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       }
 
     override def getArray(array: ArrayRep): Seq[JOption[WithJoin, Value]] =
-      ???
-      //val arrayVals = array.get.vals.map(addr => getVal(array, Topped.Actual(array.get.vals.indexOf(addr))))
-      //arrayVals
+      val arrayVals = array.get.vals.map(addr => getVal(array, NumericInterval.constant(array.get.vals.indexOf(addr))))
+      arrayVals
 
   def topOpalVal(ty: FieldType): Value =
     ty match

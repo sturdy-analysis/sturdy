@@ -802,6 +802,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   def evalNativeStatic(mth: Method, args: Seq[V]) =
     mth.name match
       case "makeConcatWithConstants" =>
+        //val testBase = objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get
         val baseString = arrayOps.getArray(objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
         val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
@@ -852,8 +853,6 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         run(handler.handlerPC, instructionMap, mth)
       case JvmExcept.ThrowObject(exception) =>
         val currPC = frame.data
-        val handlerType = mth.body.get.exceptionHandlersFor(currPC).head.catchType.get
-        val test = typeOps.instanceOf(exception, handlerType)
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))

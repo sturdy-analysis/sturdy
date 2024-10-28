@@ -59,7 +59,7 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
-  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map())
+  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
   val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
@@ -245,16 +245,16 @@ object test extends App{
   println(interp.invokeExternal(typeTest2, true))
   interp.evalExternal(ACONST_NULL)
   println(interp.invokeExternal(typeTest2, true))
-
+*/
 
   println("--- stringTest ---")
   val stringTest = cfs.findMethod("stringTest").head
-  println(interp.invokeExternal(stringTest, true))
+  println(absInterp.invokeExternal(stringTest, true))
   val stringTest2 = cfs.findMethod("stringTest2").head
   println(interp.invokeExternal(stringTest2, true)) 
   //val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
   //println(interp.invokeExternal(stringBuilderTest, true))
-
+/*
   println("--- POP2Test ---")
   interp.evalExternal(LoadLong(500))
   println(interp.stack.size)

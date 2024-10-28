@@ -53,8 +53,9 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
   type arrayVarStore = Map[ArrayElemAddr, Value]
   type fieldStore = Map[FieldAddr, Value]
+  type staticStore = Map[StaticAddr, Value]
 
-  class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore, initStaticStore: staticStore) extends GenericInstance:
 
     private given Instance = this
 
@@ -79,7 +80,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val staticAlloc = new AAllocationFromContext(site => StaticAddr(site.obj, site.name))
     override val objFieldStore: AStoreSingleAddrThreadded[FieldAddr, Value] = new AStoreSingleAddrThreadded(initFieldStore)
     override val arrayValStore: AStoreSingleAddrThreadded[ArrayElemAddr, Value] = new AStoreSingleAddrThreadded(initArrayVarStore)
-    override val staticVarStore = new TopStore()
+    override val staticVarStore: AStoreSingleAddrThreadded[StaticAddr, Value] = new AStoreSingleAddrThreadded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
@@ -94,13 +95,16 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] =
         if(target == null)
           Topped.Actual(false)
-        v match
-          case Topped.Top => Topped.Top
-          case Topped.Actual(o) =>
-            if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
-              Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
-            else
-              Topped.Actual(false)
+        else{
+          v match
+            case Topped.Top => Topped.Top
+            case Topped.Actual(o) =>
+              if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+                Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
+              else
+                Topped.Actual(false)
+        }
+     
 
     given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
       override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match

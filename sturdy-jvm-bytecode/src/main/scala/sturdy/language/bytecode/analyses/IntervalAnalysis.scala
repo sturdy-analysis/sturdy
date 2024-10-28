@@ -123,13 +123,16 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
       override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] =
         if(target == null)
           Topped.Actual(false)
-        v match
-          case Topped.Top => Topped.Top
-          case Topped.Actual(o) =>
-            if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
-              Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
-            else
-              Topped.Actual(false)
+        else{
+          v match
+            case Topped.Top => Topped.Top
+            case Topped.Actual(o) =>
+              if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+                Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
+              else
+                Topped.Actual(false)
+        }
+        
 
     given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
       override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match
