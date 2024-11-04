@@ -7,7 +7,7 @@ import org.opalj.io.process
 import sturdy.fix
 import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.ConcreteInterpreter
-import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
+//import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
 import sturdy.language.bytecode.generic.{FixIn, FixOut, ValType}
 import sturdy.values.Topped
 import sturdy.values.integer.IntegerOps
@@ -59,9 +59,9 @@ object test extends App{
 
   val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
-  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+//  val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
-  val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+//  val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 
   //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
   
@@ -249,7 +249,7 @@ object test extends App{
 
   println("--- stringTest ---")
   val stringTest = cfs.findMethod("stringTest").head
-  println(absInterp.invokeExternal(stringTest, true))
+  println(interp.invokeExternal(stringTest, true))
   val stringTest2 = cfs.findMethod("stringTest2").head
   println(interp.invokeExternal(stringTest2, true)) 
   //val stringBuilderTest = cfs.findMethod("stringBuilderTest").head

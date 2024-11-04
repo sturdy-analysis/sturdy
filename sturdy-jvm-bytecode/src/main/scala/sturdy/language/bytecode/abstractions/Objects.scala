@@ -26,6 +26,11 @@ import sturdy.values.integer.NumericInterval
 
 import java.net.URL
 
+enum AbstractReferenceValue[A, O]:
+  case maybeNullObject(obj: O, maybeNull: Boolean)
+  case maybeNullArray(array: A, maybeNull: Boolean)
+  case NullValue()
+
 trait ConstantObjects extends Interpreter, Numbers:
 
   type ObjType = ClassFile
@@ -33,28 +38,30 @@ trait ConstantObjects extends Interpreter, Numbers:
   type FieldName = (ObjectType, String)
   case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
   given FiniteFieldAddr: Finite[FieldAddr] with {}
-  type ObjRep = Topped[Object[ObjAddr, ObjType, FieldAddr, FieldName]]
-  final def topObj: ObjRep = Topped.Top
+  type constantObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
+  override type RefValue = Topped[AbstractReferenceValue[constantObj, constantArray]]
+  final def topRef: RefValue = Topped.Top
 
   case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
-  final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
+  //final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
+  type constantArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
   case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
 
   type TypeRep = ReferenceType
   type AType = ArrayType
-  final def topArray: ArrayRep = Topped.Top
+  //final def topArray: ArrayRep = Topped.Top
 
-  final type NullVal = Null
-  final def topNull: NullVal = null
+  //final type NullVal = Null
+  //final def topNull: NullVal = null
 
-  given combineNull[W <: Widening]: Combine[Null, W] with
-    override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
+  //given combineNull[W <: Widening]: Combine[Null, W] with
+  //  override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
 
-  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, ObjRep, FieldInitSite, Method, String, MethodDescriptor, NullVal, WithJoin] with
+  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): ObjRep =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -237,8 +244,8 @@ trait TypeObjects extends Interpreter:
       case fieldType: DoubleType => Value.Float64(topF64)
       case fieldType: BooleanType => Value.Int32(topI32)
       case fieldType: CharType => Value.Int32(topI32)
-      case fieldType: ObjectType => Value.Obj(topObj)
-      case fieldType: ArrayType => Value.Array(topArray)
+      //case fieldType: ObjectType => Value.Obj(topObj)
+      //case fieldType: ArrayType => Value.Array(topArray)
 
 /*
 val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] {
@@ -268,7 +275,7 @@ val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRe
   override def makeNull(): Null = null
 }*/
 
-
+/*
 trait IntervalObjects extends Interpreter, IntervalNumbers:
 
   type ObjType = ClassFile
@@ -428,5 +435,6 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       case fieldType: DoubleType => Value.Float64(topF64)
       case fieldType: BooleanType => Value.Int32(topI32)
       case fieldType: CharType => Value.Int32(topI32)
-      case fieldType: ObjectType => Value.Obj(topObj)
-      case fieldType: ArrayType => Value.Array(topArray)
+      //case fieldType: ObjectType => Value.Obj(topObj)
+      //case fieldType: ArrayType => Value.Array(topArray)
+*/

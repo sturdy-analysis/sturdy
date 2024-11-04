@@ -1,3 +1,4 @@
+/*
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
@@ -155,3 +156,4 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       //???
 
 
+*/

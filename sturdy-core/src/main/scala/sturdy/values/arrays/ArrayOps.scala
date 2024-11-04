@@ -22,8 +22,8 @@ case class Array[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayE
 
 given structuralArray[AID, Addr, AType, ASize]: Structural[Array[AID, Addr, AType, ASize]] with {}
 
-given ConcreteArrayOps[Addr, AID, V, AType, Site]
-  (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, Array[AID, Addr, AType, V], AType, Site, NoJoin] with
+/*given ConcreteArrayOps[Addr, AID, V, AType, Site]
+  (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, ConcreteRefValue, AType, Site, NoJoin] with
   override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): Array[AID, Addr, AType, V] =
     val valAddrs = vals.map{ (v, site) =>
       val addr = alloc(site)
@@ -64,7 +64,7 @@ given ConcreteArrayOps[Addr, AID, V, AType, Site]
 
   override def getArray(array: Array[AID, Addr, AType, V]): Seq[JOption[NoJoin, V]] =
     val arrayVals = array.vals.map(addr => getVal(array, array.vals.indexOf(addr)))
-    arrayVals
+    arrayVals*/
 
 given ArrayEqOps[AID, Addr, AType, V]: EqOps[Array[AID, Addr, AType, V], Boolean] with
   override def equ(v1: Array[AID, Addr, AType, V], v2: Array[AID, Addr, AType, V]): Boolean = v1.aid == v2.aid

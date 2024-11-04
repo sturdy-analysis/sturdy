@@ -3,9 +3,9 @@ package sturdy.values.objects
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
 
-class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, NV, J[_] <: MayJoin[_], UOV, UNV]
-  (extractO: OV => UOV, injectO: UOV => OV, extractNull: NV => UNV, injectNull: UNV => NV)
-  (using ops: ObjectOps[FieldName, OID, V, CF, UOV, Site, Mth, MthName, MthSig, UNV, J]) extends ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, NV, J]:
+class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, J[_] <: MayJoin[_], UOV, UB]
+  (extractO: OV => UOV, injectO: UOV => OV, extractB: B => UB, injectB: UB => B)
+  (using ops: ObjectOps[FieldName, OID, V, CF, UOV, Site, Mth, MthName, MthSig, UB, J]) extends ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, J]:
 
   override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site, FieldName)]): OV = injectO(ops.makeObject(oid, cfs, vals))
   override def getField(obj: OV, name: FieldName): JOption[J, V] = ops.getField(extractO(obj), name)
@@ -15,6 +15,8 @@ class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, NV,
     def liftedInvoke = (uov: UOV, mth: Mth, vs: Seq[V]) => invoke(injectO(uov), mth, vs)
     ops.invokeFunctionCorrect(extractO(obj), mthName, sig, args)(liftedInvoke)
 
-  override def makeNull(): NV = injectNull(ops.makeNull())
+  override def makeNull(): OV = injectO(ops.makeNull())
+
+  override def isNull(obj: OV): B = injectB(ops.isNull(extractO(obj)))
 
 

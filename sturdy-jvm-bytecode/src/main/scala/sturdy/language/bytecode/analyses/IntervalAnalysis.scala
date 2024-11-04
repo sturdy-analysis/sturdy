@@ -1,3 +1,4 @@
+/*
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
@@ -183,3 +184,4 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 //???
 
 
+*/

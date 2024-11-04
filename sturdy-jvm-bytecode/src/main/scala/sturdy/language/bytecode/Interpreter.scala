@@ -16,7 +16,7 @@ import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.objects.{ObjectOps, SizeOps, TypeOps}
-import sturdy.values.arrays.{ArrayOps, ConcreteArrayOps, LiftedArrayOps}
+import sturdy.values.arrays.{ArrayOps, LiftedArrayOps}
 
 import java.net.URL
 trait Interpreter:
@@ -40,16 +40,18 @@ trait Interpreter:
   type Idx
   
   type TypeRep
-  type NullVal
+  //type NullVal
   type FieldName
   type ObjAddr
   type ObjType
-  type ObjRep
+  //type ObjRep
 
   type ArrayAddr
   type AType
-  type ArrayRep
-  
+  //type ArrayRep
+
+  type RefValue
+
   type ExcV
 
   val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
@@ -61,9 +63,10 @@ trait Interpreter:
     case Int64(l: I64)
     case Float32(f: F32)
     case Float64(d: F64)
-    case Obj(o: ObjRep)
-    case Array(a: ArrayRep)
-    case Null(n: NullVal)
+    case ReferenceValue(r: RefValue)
+    //case Obj(o: ObjRep)
+    //case Array(a: ArrayRep)
+    //case Null(n: NullVal)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
     /*def asInt8: I8 = this match
@@ -93,7 +96,7 @@ trait Interpreter:
       case Float64(d) => d
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
-    def asObj(using f: Failure): ObjRep = this match
+    /*def asObj(using f: Failure): ObjRep = this match
       case Obj(o) => o
       case Null(n) => except.throws(JvmExcept.Throw(ObjectType("java/lang/NullPointerException")))
       case TopValue => topObj
@@ -106,7 +109,11 @@ trait Interpreter:
       case Null(n) => n
       case TopValue => topNull
       case _ => f.fail(TypeError, s"Expected null but got $this")
-
+*/
+    def asRef(using f: Failure): RefValue = this match
+      case ReferenceValue(r) => r
+      case TopValue => topRef
+      case _ => f.fail(TypeError, s"Expected ref but got $this")
 
   //def topI8: I8
   //def topI16: I16
@@ -114,9 +121,10 @@ trait Interpreter:
   def topI64: I64
   def topF32: F32
   def topF64: F64
-  def topObj: ObjRep
+  /*def topObj: ObjRep
   def topArray: ArrayRep
-  def topNull: NullVal
+  def topNull: NullVal*/
+  def topRef: RefValue
 
   given Top[Value] with
     override def top: Value = Value.TopValue  
@@ -135,21 +143,21 @@ trait Interpreter:
 
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], 
                                     Combine[F32, W], Combine[F64, W], 
-                                    Combine[ObjRep, W], Combine[ArrayRep, W],
-                                    Combine[NullVal, W]): Combine[Value, W] with
+                                    //Combine[ObjRep, W], Combine[ArrayRep, W], Combine[NullVal, W]
+                                   ): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
       case (Int32(i1), Int32(i2)) => Combine[I32, W](i1, i2).map(Int32.apply)
       case (Int64(i1), Int64(i2)) => Combine[I64, W](i1, i2).map(Int64.apply)
       case (Float32(i1), Float32(i2)) => Combine[F32, W](i1, i2).map(Float32.apply)
       case (Float64(i1), Float64(i2)) => Combine[F64, W](i1, i2).map(Float64.apply)
-      case (Obj(i1), Obj(i2)) => Combine[ObjRep, W](i1, i2).map(Obj.apply)
-      case (Array(i1), Array(i2)) => Combine[ArrayRep, W](i1, i2).map(Array.apply)
+      //case (Obj(i1), Obj(i2)) => Combine[ObjRep, W](i1, i2).map(Obj.apply)
+      //case (Array(i1), Array(i2)) => Combine[ArrayRep, W](i1, i2).map(Array.apply)
 
-      case (Null(_), _: (Obj | Array)) => MaybeChanged.Changed(v2)
-      case (_: (Obj | Array), Null(_)) => MaybeChanged.Unchanged(v1)
+      //case (Null(_), _: (Obj | Array)) => MaybeChanged.Changed(v2)
+      //case (_: (Obj | Array), Null(_)) => MaybeChanged.Unchanged(v1)
       
-      case (Null(i1), Null(i2)) => Combine[NullVal, W](i1, i2).map(Null.apply)
+      //case (Null(i1), Null(i2)) => Combine[NullVal, W](i1, i2).map(Null.apply)
       case _ => MaybeChanged(TopValue, v1)
   
   given ValueBytecodeOps
@@ -182,18 +190,21 @@ trait Interpreter:
     , i64EqOps: EqOps[I64, Bool]
     , f32EqOps: EqOps[F32, Bool]
     , f64EqOps: EqOps[F64, Bool]
-    , objEqOps: EqOps[ObjRep, Bool]
-    , arrayEqOps: EqOps[ArrayRep, Bool]
-    , objTypeOps: TypeOps[ObjRep, TypeRep, Bool]
-    , arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool]
-    , nullTypeOps: TypeOps[NullVal, TypeRep, Bool]
+    //, objEqOps: EqOps[ObjRep, Bool]
+    //, arrayEqOps: EqOps[ArrayRep, Bool]
+    , refEqOps: EqOps[RefValue, Bool]
+    //, objTypeOps: TypeOps[ObjRep, TypeRep, Bool]
+    //, arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool]
+    //, nullTypeOps: TypeOps[NullVal, TypeRep, Bool]
+    , refTypeOps: TypeOps[RefValue, TypeRep, Bool]
     , i32SizeOps: SizeOps[I32, Bool]
     , i64SizeOps: SizeOps[I64, Bool]
     , f32SizeOps: SizeOps[F32, Bool]
     , f64SizeOps: SizeOps[F64, Bool]
-    , objSizeOps: SizeOps[ObjRep, Bool]
-    , arraySizeOps: SizeOps[ArrayRep, Bool]
+    //, objSizeOps: SizeOps[ObjRep, Bool]
+    //, arraySizeOps: SizeOps[ArrayRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
+    , refSizeOps: SizeOps[RefValue, Bool]
       ): BytecodeOps[Idx, Value, TypeRep] with
 
 
@@ -254,25 +265,33 @@ trait Interpreter:
         case (Int64(l1), Int64(l2)) => boolean(EqOps.equ(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(EqOps.equ(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(EqOps.equ(d1, d2))
-        case (Obj(o1), Obj(o2)) => boolean(EqOps.equ(o1, o2))
-        case (Array(a1), Array(a2)) => boolean(EqOps.equ(a1, a2))
+        //case (Obj(o1), Obj(o2)) => boolean(EqOps.equ(o1, o2))
+        //case (Array(a1), Array(a2)) => boolean(EqOps.equ(a1, a2))
+        case (ReferenceValue(r1), ReferenceValue(r2)) => boolean(EqOps.equ(r1, r2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def neq(v1: Value, v2: Value): Value = (v1, v2) match
         case (Int32(i1), Int32(i2)) => boolean(EqOps.neq(i1, i2))
         case (Int64(l1), Int64(l2)) => boolean(EqOps.neq(l1, l2))
         case (Float32(f1), Float32(f2)) => boolean(EqOps.neq(f1, f2))
         case (Float64(d1), Float64(d2)) => boolean(EqOps.neq(d1, d2))
-        case (Obj(o1), Obj(o2)) => boolean(EqOps.neq(o1, o2))
-        case (Array(a1), Array(a2)) => boolean(EqOps.neq(a1, a2))
+        //case (Obj(o1), Obj(o2)) => boolean(EqOps.neq(o1, o2))
+        //case (Array(a1), Array(a2)) => boolean(EqOps.neq(a1, a2))
+        case (ReferenceValue(r1), ReferenceValue(r2)) => boolean(EqOps.neq(r1, r2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
+/*    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
       import Value.*
       override def instanceOf(v: Value, check: TypeRep): Value = v match
         case Obj(o1) => boolean(TypeOps.instanceOf(o1, check))
         case Array(a1) => boolean(TypeOps.instanceOf(a1, check))
         case Null(n1) => boolean(TypeOps.instanceOf(n1, check))
         case _ => throw new IllegalArgumentException(s"Expected values of type object or array but got $v")
+*/
+    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
+      import Value.*
+      override def instanceOf(v: Value, check: TypeRep): Value = v match
+        case ReferenceValue(r1) => boolean(TypeOps.instanceOf(r1, check))
+
 
     final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
       import Value.*
@@ -282,13 +301,14 @@ trait Interpreter:
         case Int64(v) => boolean(SizeOps.is32Bit(v))
         case Float32(v) => boolean(SizeOps.is32Bit(v))
         case Float64(v) => boolean(SizeOps.is32Bit(v))
-        case Obj(v) => boolean(SizeOps.is32Bit(v))
-        case Array(v) => boolean(SizeOps.is32Bit(v))
+        //case Obj(v) => boolean(SizeOps.is32Bit(v))
+        //case Array(v) => boolean(SizeOps.is32Bit(v))
+        case ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
 
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, ObjRep, TypeRep, ExcV, J]
+  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, RefValue, TypeRep, ExcV, J]
 
