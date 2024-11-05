@@ -114,3 +114,12 @@ object PrintingControlObserver:
     val obs = new PrintingControlObserver[Atom,Section,Exc,Fx](_indent, sep)(_ => ())
     es.foreach(obs.handle)
     obs.getString
+
+class  CountEventsControlObserver[Atom, Section, Exc, Fx]  extends ControlObserver[Atom, Section, Exc, Fx]:
+
+  var count = 0
+
+  override def handle(ev: BasicControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+  override def handle(ev: ExceptionControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+  override def handle(ev: BranchingControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
+  override def handle(ev: FixpointControlEvent[Atom, Section, Exc, Fx]): Unit = count += 1
