@@ -443,27 +443,27 @@ class ConstantControlEventRunnable(set: Either[Throwable, RRecord] => Unit,
     val interp_base = newAn()
     val counter = interp_base.addControlObserver(new CountEventsControlObserver)
     val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp_base)
-    val mod_inst_count = interp_base.initializeModule(module, moduleId = Some("mod"))
-    interp_base.failure.fallible({
-      scope match
-        case AnalysisScope.SingleFunction(id) =>
-          interp_base.invokeExported(mod_inst_count, id, ???)
-        case AnalysisScope.MostGeneralClient =>
-          interp_base.runMostGeneralClient(mod_inst_count, typedTop)
-    })
+//    val mod_inst_count = interp_base.initializeModule(module, moduleId = Some("mod"))
+//    interp_base.failure.fallible({
+//      scope match
+//        case AnalysisScope.SingleFunction(id) =>
+//          interp_base.invokeExported(mod_inst_count, id, ???)
+//        case AnalysisScope.MostGeneralClient =>
+//          interp_base.runMostGeneralClient(mod_inst_count, typedTop)
+//    })
 
 
-      Profiler.addTimeBestOf("baseline", bestOf) {
-        val interp_baseline = newAn()
-        val mod_inst = interp_baseline.initializeModule(module, moduleId = Some("mod"))
-        interp_baseline.failure.fallible({
-          scope match
-            case AnalysisScope.SingleFunction(id) =>
-              interp_baseline.invokeExported(mod_inst, id, ???)
-            case AnalysisScope.MostGeneralClient =>
-              interp_baseline.runMostGeneralClient(mod_inst, typedTop)
-        })
-      }
+//      Profiler.addTimeBestOf("baseline", bestOf) {
+//        val interp_baseline = newAn()
+//        val mod_inst = interp_baseline.initializeModule(module, moduleId = Some("mod"))
+//        interp_baseline.failure.fallible({
+//          scope match
+//            case AnalysisScope.SingleFunction(id) =>
+//              interp_baseline.invokeExported(mod_inst, id, ???)
+//            case AnalysisScope.MostGeneralClient =>
+//              interp_baseline.runMostGeneralClient(mod_inst, typedTop)
+//        })
+//      }
 
       val res_event = Profiler.addTimeBestOf("event", bestOf) {
         val interp_event = newAn()
@@ -479,19 +479,7 @@ class ConstantControlEventRunnable(set: Either[Throwable, RRecord] => Unit,
         graphBuilder.get
       }
 
-      val res_tree = Profiler.addTimeBestOf("tree", bestOf) {
-        val interp_tree = newAn()
-        val parser = interp_tree.addControlObserver(new ControlEventParser)
-        val modInst_tree = interp_tree.initializeModule(module, moduleId = Some("mod"))
-        interp_tree.failure.fallible({
-          scope match
-            case AnalysisScope.SingleFunction(id) =>
-              interp_tree.invokeExported(modInst_tree, id, ???)
-            case AnalysisScope.MostGeneralClient =>
-              interp_tree.runMostGeneralClient(modInst_tree, typedTop)
-        })
-        parser.getFinalTree.toGraph
-      }
+//     btm
 
     println(s"Analyzed $p")
 
@@ -507,7 +495,7 @@ class ConstantControlEventRunnable(set: Either[Throwable, RRecord] => Unit,
       "tree_duration" -> Profiler.get("tree").getOrElse(-1L),
       "events" -> counter.count,
       "event_edges" -> res_event.edges.size,
-      "tree_edges" -> res_tree.edges.size,
+//      "tree_edges" -> res_tree.edges.size,
       "old_edges" -> oldCfg.getEdges.size,
       "removed_from_old" -> removed,
       "added_from_old" -> added,

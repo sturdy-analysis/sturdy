@@ -138,7 +138,7 @@ object RunnerConfig:
   ).asInstanceOf[RunnerConfig]
 
 object AnalysisConfig:
-  val timeout = 600
+  val timeout = 60
   val nocontext: AnalysisConfig = RRecord(
     "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
