@@ -21,12 +21,13 @@ object Profiler:
     
     var previous: Long = 0
     val times = ListBuffer.empty[Long]
-    val res = for (i <- 1 to repeat) yield {
+    var res: Option[R] = None
+    for (i <- 1 to repeat) {
       val r = addTime(name)(block)
       val t = measuredTimes(name) - previous
       previous += t
       times += t
-      r
+      res = Some(r)
     }
     val best = times.min
     measuredTimes += name -> best

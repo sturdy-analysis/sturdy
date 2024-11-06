@@ -36,6 +36,7 @@ enum Analysis:
   case Taint(conf: AnalysisConfig)
   case Type(conf: AnalysisConfig)
   case Binaryen(conf: AnalysisConfig)
+  case ConstantControlEvent(conf: AnalysisConfig)
 
   def config: AnalysisConfig = this match
     case Interval(config) => config
@@ -43,6 +44,7 @@ enum Analysis:
     case Taint(config) => config
     case Type(config) => config
     case Binaryen(config) => config
+    case ConstantControlEvent(config) => config
 
   override def toString: String = this match
     case Interval(config) => s"IntervalAnalysis(config=${config.wasmConfig},scope=${config.scope})"
@@ -50,6 +52,7 @@ enum Analysis:
     case Taint(config) => s"ConstantTaintAnalysis(config=${config.wasmConfig},scope=${config.scope})"
     case Type(config) => s"TypeAnalysis(config=${config.wasmConfig},scope=${config.scope})"
     case Binaryen(config) => s"BinaryenAnalysis()"
+    case ConstantControlEvent(config) => s"ConstantAnalysisControlEvent(config=${config.wasmConfig},scope=${config.scope})"
 
   def csvHeader(): String = this match
     case Interval(_) => IntervalRunnable.getCsvHeadders
@@ -57,6 +60,7 @@ enum Analysis:
     case Taint(_) => TaintRunnable.getCsvHeadders
     case Type(_) => TypeRunnable.getCsvHeadders
     case Binaryen(_) => BinaryenMetricsCollector.getCsvHeadders
+    case ConstantControlEvent(_) => ConstantControlEventRunnable.getCsvHeadders
 
   def apply(set: Either[Throwable, RRecord] => Unit, bin: WASMBenchBinary, config: AnalysisConfig, binary: Boolean = false): AnalysisRunnable =
     val name = bin.md.hash
@@ -85,6 +89,9 @@ enum Analysis:
         new TaintRunnable(set, p, config.scope, args, config.wasmConfig, binary)
       case Analysis.Binaryen(config) =>
         new BinaryenMetricsCollector(set, p, config, binary)
+      case Analysis.ConstantControlEvent(config) =>
+        val args = params.map(WASMType.toConstantAnalysisValue)
+        new ConstantControlEventRunnable(set, p, config.scope, args, config.wasmConfig, binary)
 
 type RunnerConfig = RRecord {
   val filtering: Filtering
@@ -111,12 +118,13 @@ object RunnerConfig:
 
   val rootDir = Path.of(this.getClass.getResource("/sturdy/language/wasm/wasmbench").toURI)
   val default: RunnerConfig = RRecord(
-    "filtering" -> Filtering.Filtered,
+    "filtering" -> Filtering.Filtered60s,
     "analyses" -> List(
-      Analysis.Binaryen(AnalysisConfig.nocontext),
-      Analysis.Constant(AnalysisConfig.callSite1),
-      Analysis.Type(AnalysisConfig.nocontext),
-      Analysis.Taint(AnalysisConfig.callSite1)
+//      Analysis.Binaryen(AnalysisConfig.nocontext),
+//      Analysis.Constant(AnalysisConfig.callSite1),
+//      Analysis.Type(AnalysisConfig.nocontext),
+//      Analysis.Taint(AnalysisConfig.callSite1)
+        Analysis.ConstantControlEvent(AnalysisConfig.nocontext)
     ),
     "rootDir" -> rootDir,
     "datasetFilter" -> ((x: WASMBenchBinary) => true),
@@ -126,11 +134,11 @@ object RunnerConfig:
 //    }),
     "skipTestsIncludingIndex" -> -1, // default = -1
     "takeUntilIndex" -> None, //default = None
-    "onlyBinariesInCSV" -> Some(rootDir.resolve("results/ConstantAnalysis(config=innermost(StackedStates(true))_calls(1),scope=MostGeneralClient).results.csv")),
+    "onlyBinariesInCSV" -> None //Some(Paths.get("/home/armand/temp/wasmbench-mgc/save/successIn10sec.csv")),
   ).asInstanceOf[RunnerConfig]
 
 object AnalysisConfig:
-  val timeout = 120
+  val timeout = 600
   val nocontext: AnalysisConfig = RRecord(
     "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
@@ -148,6 +156,19 @@ object AnalysisConfig:
     "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = CallSites(1),
+      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
+    "scope" -> AnalysisScope.MostGeneralClient,
+    "warmup" -> false, // default: true
+    "saveResultsToDir" -> RunnerConfig.rootDir.resolve("results"),
+    "logOpenOption" -> StandardOpenOption.CREATE_NEW, // default: CREATE_NEW
+    "logErrors" -> true, // default: true
+    "logResults" -> true // default: true
+  ).asInstanceOf[AnalysisConfig]
+
+  val callSite2: AnalysisConfig = RRecord(
+    "timeLimit" -> new GrainOfTime(timeout).seconds,
+    "wasmConfig" -> WasmConfig(
+      ctx = CallSites(2),
       fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
@@ -204,7 +225,7 @@ class WASMBenchRunner extends AnyFunSpec :
         cfg.saveResultsToDir.toFile.mkdirs()
         val (succLogger, excLogger) = FileLogger.succ_excLogger(analysis.toString, cfg)
         if (cfg.logOpenOption == StandardOpenOption.CREATE || cfg.logOpenOption == StandardOpenOption.CREATE_NEW) {
-          excLogger.log("hash;exceptionMsg")
+          excLogger.log("hash;exceptionMsg;timeout")
           succLogger.log(analysis.csvHeader())
         }
         run(binaries, analysis, succLogger, excLogger)
@@ -246,7 +267,7 @@ class WASMBenchRunner extends AnyFunSpec :
         }
       }
 
-      val indexedBinaries = bins.zip((skipTestsIncludingIndex + 1) to allbinaries.length)
+      val indexedBinaries = scala.util.Random.shuffle(bins.zip((skipTestsIncludingIndex + 1) to allbinaries.length))
       if (indexedBinaries.size != bins.size)
         throw new IllegalStateException(s"Indexing error: ${indexedBinaries.size} != ${bins.size}")
       for {
@@ -264,6 +285,7 @@ class WASMBenchRunner extends AnyFunSpec :
 
           var result: Either[Throwable, RRecord] = Left(TimeoutException(s"Test timed out after ${cfg.timeLimit.toSeconds} seconds"))
 
+          val startTimeMillis = System.currentTimeMillis()
           try {
             val t = new Thread(an(v => {
               result = v
@@ -282,10 +304,14 @@ class WASMBenchRunner extends AnyFunSpec :
               result = Left(e)
               System.gc()
           }
+          val endTimeMillis = System.currentTimeMillis()
+
+
+          println((endTimeMillis-startTimeMillis)/10e9)
 
           result match {
             case Left(e) =>
-              eLogger.log(s"$name;${e.toString}")
+              eLogger.log(s"$name;${e.toString};${endTimeMillis-startTimeMillis}")
               throw e
             case Right(v) =>
               sLogger.log(v.toCsv)

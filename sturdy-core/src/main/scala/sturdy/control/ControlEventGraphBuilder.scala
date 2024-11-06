@@ -59,14 +59,11 @@ class ControlEventGraphBuilder[Atom,Section,Exc,Fx] extends ControlObserver[Atom
 
   def get: ControlGraph[Atom, Section] =
     if (stack.nonEmpty) throw new Exception(s"Stack non empty $stack")
-    val set = mutable.Set.empty[CEdge]
-    curg.forEachKeyValue((to, from) =>
-      set += Edge(from.n, to.n, if (from.exc) EdgeType.Exceptional else EdgeType.CF)
-      to.n match
-        case n@Node.BlockEnd(sec) => set += Edge(Node.BlockStart(sec)(n.label), n, EdgeType.BlockPair)
-        case _ => // nothing
-    )
-    ControlGraph(set.toSet)
+    val edgeProvider : EdgeProvider[Atom, Section] = new EdgeProvider[Atom, Section] {
+      lazy val edges = curg.keyValuePairsView().asScala.map(e => Edge(e.getTwo.n, e.getOne.n, if (e.getTwo.exc) EdgeType.Exceptional else EdgeType.CF))
+      // TODO re-add block edges
+    }
+    ControlGraph(edgeProvider)
 
   override def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit =
     import BasicControlEvent.*

@@ -27,7 +27,7 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
     val init_state = TreeBuilderState(preds = Set(Node.Start()), aes = Map.empty, fixpoints = Map.empty, curg = Set.empty)
     val builded_state = _build(ct, init_state)
 //    val helper_edges_state = addBlockPairEdges(builded_state)
-    ControlGraph(builded_state.curg)
+    ControlGraph(new EdgeProvider[Atom, Sec] { lazy val edges = builded_state.curg})
 
   private def addNode(state: TreeBuilderState, n: Node[Atom, Sec]): TreeBuilderState =
     state.copy(
@@ -67,8 +67,8 @@ class ControlTreeGraphBuilder[Atom, Sec, Exc, Fx] {
       if (body_state.preds.isEmpty)
         body_state
       else {
-        val s = addNode(body_state, Node.BlockEnd(section)(st.label))
-        s.copy(curg = s.curg + Edge(Node.BlockStart(section)(st.label), Node.BlockEnd(section)(st.label), EdgeType.BlockPair))
+        addNode(body_state, Node.BlockEnd(section)(st.label))
+        //s.copy(curg = s.curg + Edge(Node.BlockStart(section)(st.label), Node.BlockEnd(section)(st.label), EdgeType.BlockPair))
       }
 
     case ControlTree.Seq(t1, t2) =>

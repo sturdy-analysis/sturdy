@@ -387,10 +387,12 @@ enum OS:
   }
 
 enum Filtering:
+  case Filtered60s
   case Filtered
   case Unfiltered
 
   override def toString: String = this match {
+    case Filtered60s => "filtered60s"
     case Filtered => "filtered"
     case Unfiltered => "unfiltered"
   }

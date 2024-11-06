@@ -27,13 +27,15 @@ enum EdgeType:
 
 case class Edge[Atom, Section](from: Node[Atom, Section], to: Node[Atom, Section], edgeType: EdgeType)
 
+trait EdgeProvider[Atom, Sec]:
+  def edges: Iterable[Edge[Atom, Sec]]
 
-case class ControlGraph[Atom,Sec](edges: Set[Edge[Atom, Sec]]):
+case class ControlGraph[Atom,Sec](edgeProvider: EdgeProvider[Atom, Sec]):
   var name: String = s"ControlGraph_${Integer.toHexString(this.hashCode())}"
   def withName(name: String): this.type = { this.name = name; this }
-  
-  lazy val nodes: Set[Node[Atom, Sec]] =
-    edges.flatMap(e => Set(e.from, e.to))
+
+  lazy val edges: Set[Edge[Atom, Sec]] = edgeProvider.edges.toSet
+  lazy val nodes: Set[Node[Atom, Sec]] = edgeProvider.edges.flatMap(e => Set(e.from, e.to)).toSet
   
   lazy val toGraphViz: String =
     def mayFail(n: Node[Atom,Sec]) = edges.exists { e =>

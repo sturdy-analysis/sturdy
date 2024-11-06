@@ -1,15 +1,17 @@
 package sturdy.language.wasm.wasmbench
 
+import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, ControlEventParser, ControlGraph, CountEventsControlObserver, EdgeType, Node, PrintingControlObserver}
 import sturdy.fix.Fixpoint
 import sturdy.fix.cfg.ControlLogger
 import sturdy.language.wasm
-import sturdy.language.wasm.{Interpreter, Parsing}
+import sturdy.language.wasm.{Interpreter, Parsing, getCfgDifference, testCfgDifference}
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, IntervalAnalysis, TypeAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, InstLoc, ModuleInstance}
 import sturdy.util.Profiler
 import swam.syntax.{CallIndirect, LoadInst, LoadNInst, StoreInst, StoreNInst}
 
+import java.io.FileWriter
 import java.nio.file.{Files, Path}
 
 trait AnalysisRunnable extends Runnable:
@@ -412,4 +414,120 @@ object ConstantRunnable:
       "constantInstructions" -> 0,
       "constantInstructionPercent" -> 0,
       "liveInstructions" -> 0,
+    ).getCsvHeaders
+
+
+class ConstantControlEventRunnable(set: Either[Throwable, RRecord] => Unit,
+                       p: Path, scope: AnalysisScope, funcArgs: List[ConstantAnalysis.Value],
+                       config: WasmConfig,
+                       binary: Boolean = false) extends AnalysisRunnable {
+
+  override def setRes(v: Either[Throwable, RRecord]): Unit = set(v)
+
+  override def start(): RRecord =
+    Fixpoint.DEBUG = false
+
+    val name = p.getFileName.toString
+    val bestOf = 1
+    Profiler.saveTimesAndReset()
+
+    def newAn() = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+    val typedTop = ConstantAnalysis.typedTop
+
+    val startTimeNano = System.nanoTime()
+    val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+
+    println(s"Analyzing $p")
+
+
+    val interp_base = newAn()
+    val counter = interp_base.addControlObserver(new CountEventsControlObserver)
+    val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp_base)
+    val mod_inst_count = interp_base.initializeModule(module, moduleId = Some("mod"))
+    interp_base.failure.fallible({
+      scope match
+        case AnalysisScope.SingleFunction(id) =>
+          interp_base.invokeExported(mod_inst_count, id, ???)
+        case AnalysisScope.MostGeneralClient =>
+          interp_base.runMostGeneralClient(mod_inst_count, typedTop)
+    })
+
+
+      Profiler.addTimeBestOf("baseline", bestOf) {
+        val interp_baseline = newAn()
+        val mod_inst = interp_baseline.initializeModule(module, moduleId = Some("mod"))
+        interp_baseline.failure.fallible({
+          scope match
+            case AnalysisScope.SingleFunction(id) =>
+              interp_baseline.invokeExported(mod_inst, id, ???)
+            case AnalysisScope.MostGeneralClient =>
+              interp_baseline.runMostGeneralClient(mod_inst, typedTop)
+        })
+      }
+
+      val res_event = Profiler.addTimeBestOf("event", bestOf) {
+        val interp_event = newAn()
+        val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
+        val modInst_event = interp_event.initializeModule(module, moduleId = Some("mod"))
+        interp_event.failure.fallible({
+          scope match
+            case AnalysisScope.SingleFunction(id) =>
+              interp_event.invokeExported(modInst_event, id, ???)
+            case AnalysisScope.MostGeneralClient =>
+              interp_event.runMostGeneralClient(modInst_event, typedTop)
+        })
+        graphBuilder.get
+      }
+
+      val res_tree = Profiler.addTimeBestOf("tree", bestOf) {
+        val interp_tree = newAn()
+        val parser = interp_tree.addControlObserver(new ControlEventParser)
+        val modInst_tree = interp_tree.initializeModule(module, moduleId = Some("mod"))
+        interp_tree.failure.fallible({
+          scope match
+            case AnalysisScope.SingleFunction(id) =>
+              interp_tree.invokeExported(modInst_tree, id, ???)
+            case AnalysisScope.MostGeneralClient =>
+              interp_tree.runMostGeneralClient(modInst_tree, typedTop)
+        })
+        parser.getFinalTree.toGraph
+      }
+
+    println(s"Analyzed $p")
+
+    val (added, removed) = Profiler.addTime("conversion_duration") { getCfgDifference(oldCfg, res_event) }
+
+    val endTimeNano = System.nanoTime()
+
+    RRecord(
+      "hash" -> name,
+      "total_duration" -> (endTimeNano - startTimeNano),
+      "baseline_duration" -> Profiler.get("baseline").getOrElse(-1L),
+      "event_duration" -> Profiler.get("event").getOrElse(-1L),
+      "tree_duration" -> Profiler.get("tree").getOrElse(-1L),
+      "events" -> counter.count,
+      "event_edges" -> res_event.edges.size,
+      "tree_edges" -> res_tree.edges.size,
+      "old_edges" -> oldCfg.getEdges.size,
+      "removed_from_old" -> removed,
+      "added_from_old" -> added,
+      "conversion_duration" -> Profiler.get("conversion_duration").getOrElse(-1L)
+  )
+}
+
+object ConstantControlEventRunnable:
+  def getCsvHeadders: String =
+    RRecord(
+      "hash" -> 0,
+      "total_duration" -> 0L,
+      "baseline_duration" -> 0L,
+      "event_duration" -> 0L,
+      "tree_duration" -> 0L,
+      "events" -> 0,
+      "event_edges" -> 0,
+      "tree_edges" -> 0,
+      "old_edges" -> 0,
+      "removed_from_old" -> 0,
+      "added_from_old" -> 0,
+      "conversion_duration" -> 0
     ).getCsvHeaders
