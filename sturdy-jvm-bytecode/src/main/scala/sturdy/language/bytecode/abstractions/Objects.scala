@@ -16,7 +16,7 @@ import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
 import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, InstructionSite}
-import sturdy.values.{Combine, Finite, MaybeChanged, Powerset, Topped, Widening}
+import sturdy.values.{Combine, Finite, MaybeChanged, Powerset, Structural, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
 import sturdy.values.references.AllocationSiteAddr
@@ -39,7 +39,7 @@ trait ConstantObjects extends Interpreter, Numbers:
   case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
   given FiniteFieldAddr: Finite[FieldAddr] with {}
   type constantObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
-  override type RefValue = Topped[AbstractReferenceValue[constantObj, constantArray]]
+  override type RefValue = Topped[AbstractReferenceValue[constantArray, constantObj]]
   final def topRef: RefValue = Topped.Top
 
   case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
@@ -61,117 +61,200 @@ trait ConstantObjects extends Interpreter, Numbers:
   //given combineNull[W <: Widening]: Combine[Null, W] with
   //  override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
 
+  given combineRef[W <: Widening]: Combine[RefValue, W] with
+    override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] =
+      import AbstractReferenceValue.*
+      if(v1.isActual && v2.isActual)
+        val tmp1 = v1.get
+        val tmp2 = v2.get
+        (tmp1, tmp2) match
+          case (tmp1: maybeNullObject[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullObject(tmp1.obj, true)))
+          case (tmp1: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]], tmp2: maybeNullObject[constantArray, constantObj]) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullObject(tmp2.obj, true)))
+          case (tmp1: maybeNullObject[constantArray, constantObj], tmp2: maybeNullObject[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            MaybeChanged.Changed(topRef)
+          case (tmp1: maybeNullArray[constantArray, constantObj], tmp2: maybeNullArray[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            MaybeChanged.Changed(topRef)
+          case (tmp1: maybeNullArray[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullArray(tmp1.array, true)))
+          case (tmp1: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]], tmp2: maybeNullArray[constantArray, constantObj]) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullArray(tmp2.array, true)))
+          case (tmp1: NullValue[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            MaybeChanged.Changed(topRef)
+          case _ => ???
+      else
+        ???
+  given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
   given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
-    override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): ObjRep =
+    override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
       }.toVector.toMap
-      Topped.Actual(Object(oid, cfs, fieldAddrs))
+      Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
 
-    override def getField(obj: ObjRep, name: FieldName): JOption[MayJoin.WithJoin, Value] =
-      if(obj.isActual){
-        if (!obj.get.fields.contains(name))
-          JOptionA.none
-        else
-          store.read(obj.get.fields(name))
-      }
-      else{
+    override def getField(ref: RefValue, name: FieldName): JOption[MayJoin.WithJoin, Value] =
+      if(ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+            if (!obj.fields.contains(name))
+              JOptionA.none
+            else
+              store.read(obj.fields(name))
+          case _ => ???
+      else
         ???
-      }
 
-    override def setField(obj: ObjRep, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
-      if(obj.isActual){
-        if (!obj.get.fields.contains(name))
-          JOptionA.none
-        else {
-          store.write(obj.get.fields(name), v)
-          JOptionA.some(())
-        }
-      }
-      else {
+    override def setField(ref: RefValue, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+            if (!obj.fields.contains(name))
+              JOptionA.none
+            else
+              store.write(obj.fields(name), v)
+              JOptionA.some(())
+          case _ => ???
+      else
         ???
-      }
 
-    override def invokeFunctionCorrect(obj: ObjRep, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (ObjRep, Method, Seq[Value]) => Value): Value =
-      if(obj.isActual){
-        val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.get.cls, mthName, sig, project)
-        invoke(obj, mth, args)
-      }
-      else{
+    override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+            val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
+            invoke(ref, mth, args)
+          case _ => ???
+      else
         ???
-      }
 
-    override def makeNull(): Null = null
+    override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
+    override def isNull(ref: RefValue): I32 =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+            if(tmp.maybeNull)
+              ???
+            else
+              Topped.Actual(0)
+          case tmp: AbstractReferenceValue.NullValue[constantArray, constantObj] =>
+            Topped.Actual(1)
+          case _ => ???
+      else
+        ???
 
-  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, ArrayRep, ArrayType, ArrayElemInitSite, WithJoin] with
-    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): ArrayRep =
+  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
+    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
         addr
       }.toVector
-      Topped.Actual(Array(aid, valAddrs, arrayType, arraySize))
+      Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
   
-    override def getVal(array: ArrayRep, idx: I32): JOption[WithJoin, Value] =
-      if(array.isActual){
-        if (idx.get >= array.get.vals.size)
-          JOptionA.none
-        else
-          store.read(array.get.vals(idx.get))
-      }
-      else{
-        JOptionA.Some(Value.TopValue)
-      }
+    override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
+            val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+            if(idx.get >= array.vals.size)
+              JOptionA.none
+            else
+              store.read(array.vals(idx.get))
+          case _ => ???
+      else
+        ???
 
 
-    override def setVal(array: ArrayRep, idx: I32, v: Value): JOption[WithJoin, Unit] =
-      if(array.isActual){
-        if (idx.get >= array.get.vals.size)
-          JOptionA.none
-        else {
-          store.write(array.get.vals(idx.get), v)
-          JOptionA.some(())
-        }
-      }
-      else{
-        JOptionA.Some(())
-      }
-      
-  
-    override def arrayLength(array: ArrayRep): Value =
-      if(array.isActual){
-        array.get.arraySize
-      }
-      else{
+
+    override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
+            val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+            if (idx.get >= array.vals.size)
+              JOptionA.none
+            else
+              store.write(array.vals(idx.get), v)
+              JOptionA.some(())
+          case _ => ???
+      else
+        ???
+
+
+    override def arrayLength(ref: RefValue): Value =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
+            val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+            array.arraySize
+          case _ => ???
+      else
         Value.Int32(topI32)
-      }
+
+
   
     override def initArray(size: I32): Seq[Any] =
       Seq.fill(size.get) {}
   
-    override def arraycopy(src: ArrayRep, srcPos: I32, dest: ArrayRep, destPos: I32, length: I32): JOption[WithJoin, Unit] =
-      if(src.isActual && dest.isActual){
-        for (i <- 0 until length.get) {
-          if (srcPos.get + i >= src.get.vals.size || destPos.get + i >= dest.get.vals.size) {
-            return JOptionA.none
-          }
-          else {
-            val toCopy = store.read(src.get.vals(srcPos.get + i)).get
-            store.write(dest.get.vals(destPos.get + i), toCopy)
-          }
-        }
-        JOptionA.some(())
-      }
-      else{
+    override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
+      if (src.isActual && dest.isActual)
+        val tmp1 = src.get
+        val tmp2 = dest.get
+        (tmp1, tmp2) match
+          case (tmp1: AbstractReferenceValue.maybeNullArray[constantArray, constantObj], tmp2: AbstractReferenceValue.maybeNullArray[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
+            val srcArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp1.array
+            val destArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp2.array
+            for (i <- 0 until length.get) {
+              if (srcPos.get + i >= srcArray.vals.size || destPos.get + i >= destArray.vals.size)
+                return JOptionA.none
+              else
+                val toCopy = store.read(srcArray.vals(srcPos.get + i)).get
+                store.write(destArray.vals(destPos.get + i), toCopy)
+            }
+            JOptionA.some(())
+          case _ => ???
+      else
         ???
-      }
 
-    override def getArray(array: ArrayRep): Seq[JOption[WithJoin, Value]] =
-      val arrayVals = array.get.vals.map(addr => getVal(array, Topped.Actual(array.get.vals.indexOf(addr))))
-      arrayVals
 
+    override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
+            val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+            val arrayVals = array.vals.map(addr => getVal(ref, Topped.Actual(array.vals.indexOf(addr))))
+            arrayVals
+          case _ => ???
+      else
+        ???
+
+  def topOpalVal(ty: FieldType): Value =
+    ty match
+      case fieldType: ByteType => Value.Int32(topI32)
+      case fieldType: ShortType => Value.Int32(topI32)
+      case fieldType: IntegerType => Value.Int32(topI32)
+      case fieldType: FloatType => Value.Float32(topF32)
+      case fieldType: LongType => Value.Int64(topI64)
+      case fieldType: DoubleType => Value.Float64(topF64)
+      case fieldType: BooleanType => Value.Int32(topI32)
+      case fieldType: CharType => Value.Int32(topI32)
+//case fieldType: ObjectType => Value.Obj(topObj)
+//case fieldType: ArrayType => Value.Array(topArray)
+ /*
 trait TypeObjects extends Interpreter:
   final type NullVal = Null
   final def topNull: NullVal = null
@@ -247,7 +330,7 @@ trait TypeObjects extends Interpreter:
       //case fieldType: ObjectType => Value.Obj(topObj)
       //case fieldType: ArrayType => Value.Array(topArray)
 
-/*
+
 val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRep, ObjRep, InstructionSite, Method, String, MethodDescriptor, NullVal, WithJoin] {
   override def makeObject(oid: InstructionSite, cfs: ClassFile, vals: Seq[(Value, InstructionSite, String)]): ClassFile =
     val pc = oid.pc
@@ -273,9 +356,9 @@ val typeObjects = new ObjectOps[String, InstructionSite, Value, ClassFile, ObjRe
   override def findFunction(obj: ClassFile, name: String, sig: MethodDescriptor)(find: (ClassFile, String, MethodDescriptor) => Method): Method = ???
 
   override def makeNull(): Null = null
-}*/
+}
 
-/*
+
 trait IntervalObjects extends Interpreter, IntervalNumbers:
 
   type ObjType = ClassFile

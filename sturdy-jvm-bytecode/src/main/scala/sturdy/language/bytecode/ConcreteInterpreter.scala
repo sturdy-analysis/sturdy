@@ -292,11 +292,10 @@ object ConcreteInterpreter extends Interpreter:
     override def neq(v1: ConcreteRefValues, v2: ConcreteRefValues): Boolean = (v1, v2) match
       case (v1: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName], v2: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName]) =>
         v1.oid != v2.oid
-        v1.oid == v2.oid
       case (v1: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize], v2: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize]) =>
-        v1.aid == v2.aid
+        v1.aid != v2.aid
       case (v1: ConcreteRefValues.NullValue, v2: ConcreteRefValues.NullValue) =>
-        true
+        false
       case _ =>
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 

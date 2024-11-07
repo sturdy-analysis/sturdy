@@ -1,4 +1,3 @@
-/*
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
@@ -16,9 +15,9 @@ import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.context.Sensitivity
 import sturdy.fix.{ContextualFixpoint, Fixpoint}
-import sturdy.language.bytecode.ConcreteInterpreter.{Bool, NullVal, TypeRep}
+import sturdy.language.bytecode.ConcreteInterpreter.{Bool, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{ConstantObjects, Exceptions, Numbers}
+import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, ConstantObjects, Exceptions, Numbers}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.{Abstractly, Finite, Topped, Widen, given}
 import sturdy.values.booleans.{*, given}
@@ -92,6 +91,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     private given Failure = failure
     import ConcreteInterpreter.given
 
+/*
     given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool] with
       override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] =
         if(target == null)
@@ -122,38 +122,64 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
           Topped.Actual(true)
         else
           Topped.Actual(false)
+*/
+    given constantTypeOps[OID, AID] (using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
+      override def instanceOf(v: RefValue, target: TypeRep): Bool =
+        if (v.isActual)
+          val tmp = v.get
+          tmp match
+            case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+              val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+              if (target == null)
+                Topped.Actual(false)
+              else
+                Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+            case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
+              val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+              if (target == null)
+                Topped.Actual(false)
+              else
+                Topped.Actual(array.arrayType == target.asArrayType)
+            case tmp: AbstractReferenceValue.NullValue[constantArray, constantObj] =>
+              if (target == null)
+                Topped.Actual(true)
+              else
+                Topped.Actual(false)
+        else
+          ???
 
-    given intSizeOps: SizeOps[I32, Boolean] with
-      override def is32Bit(v: I32): Boolean = true
+    given intSizeOps: SizeOps[I32, Bool] with
+      override def is32Bit(v: I32): Bool = Topped.Actual(true)
 
-    given floatSizeOps: SizeOps[F32, Boolean] with
-      override def is32Bit(v: F32): Boolean = true
+    given floatSizeOps: SizeOps[F32, Bool] with
+      override def is32Bit(v: F32): Bool = Topped.Actual(true)
 
-    given longSizeOps: SizeOps[I64, Boolean] with
-      override def is32Bit(v: I64): Boolean = false
+    given longSizeOps: SizeOps[I64, Bool] with
+      override def is32Bit(v: I64): Bool = Topped.Actual(false)
 
-    given doubleSizeOps: SizeOps[F64, Boolean] with
-      override def is32Bit(v: F64): Boolean = false
+    given doubleSizeOps: SizeOps[F64, Bool] with
+      override def is32Bit(v: F64): Bool = Topped.Actual(false)
 
-    given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
+    /*given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
       override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
 
     given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType, Value], Boolean] with
-      override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true
+      override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true*/
+
+    given refSizeOps: SizeOps[RefValue, Bool] with
+      override def is32Bit(v: RefValue): Bool = Topped.Actual(true)
 
 
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
 
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
-      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, ObjRep, NullVal](_.asObj, Value.Obj.apply, _.asNull, Value.Null.apply)(
+      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
       //???
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, ArrayRep, I32](_.asArray, Value.Array.apply, _.asInt32, Value.Int32.apply)(
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
       )
       //???
 
-
-*/
