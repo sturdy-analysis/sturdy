@@ -143,7 +143,8 @@ trait Interpreter:
 
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], 
                                     Combine[F32, W], Combine[F64, W], 
-                                    //Combine[ObjRep, W], Combine[ArrayRep, W], Combine[NullVal, W]
+                                    //Combine[ObjRep, W], Combine[ArrayRep, W], Combine[NullVal, W],
+                                    Combine[RefValue, W]
                                    ): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
@@ -158,6 +159,7 @@ trait Interpreter:
       //case (_: (Obj | Array), Null(_)) => MaybeChanged.Unchanged(v1)
       
       //case (Null(i1), Null(i2)) => Combine[NullVal, W](i1, i2).map(Null.apply)
+      case (ReferenceValue(r1), ReferenceValue(r2)) => Combine[RefValue, W](r1, r2).map(ReferenceValue.apply)
       case _ => MaybeChanged(TopValue, v1)
   
   given ValueBytecodeOps
