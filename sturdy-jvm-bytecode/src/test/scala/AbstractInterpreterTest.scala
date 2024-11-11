@@ -5,7 +5,7 @@ import org.opalj.io.process
 import java.io.{DataInputStream, FileInputStream}
 import java.nio.file.Paths
 import sturdy.language.bytecode.ConcreteInterpreter
-import sturdy.language.bytecode.analyses.{ConstantAnalysis}
+import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
 import sturdy.language.bytecode.test.{pWithLibrary, projectPath}
 
 object AbstractInterpreterTest extends App:
@@ -34,11 +34,11 @@ object AbstractInterpreterTest extends App:
   for(mth <- testMths){
     val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
     val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
-    //val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+    val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
     println("Executing Method: " ++ mth.name)
     println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
     println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
-    //println("Abstract Interpretation Interval Analysis: " ++ intervalInterp.invokeExternal(mth, true).toString)
+    println("Abstract Interpretation Interval Analysis: " ++ intervalInterp.invokeExternal(mth, true).toString)
     println("- - - - - - - - - - - - - - -")
   }
 
