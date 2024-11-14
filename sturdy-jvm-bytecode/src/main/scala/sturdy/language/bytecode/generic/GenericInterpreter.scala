@@ -891,36 +891,89 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     case ValType.Obj => objectOps.makeNull()
     case ValType.Array => objectOps.makeNull()
 
-  /*def invokeClassMethod(mth: Method, args: Seq[V]): V =
+  def invokeClassMethod(mth: Method, args: Seq[V]): V =
     mth.name match
       case "desiredAssertionStatus" =>
         i32ops.integerLit(1)
-      case "toString" =>
+      case "desiredAssertionStatus0" =>
+        i32ops.integerLit(1)
+      case "getPrimitiveClass" =>
+        // not in docs
         ???
-      case "toGenericString" =>
+      case "getComponentType" =>
+        // returns class representing the component type of an array, this class must represent an array class
         ???
-      case "forName" =>
+      case "getConstantPool" =>
+        // not in docs
         ???
-      case "newInstance" =>
+      case "getDeclaredClasses0" =>
+        // returns array of all declared classes in this class
         ???
-      case "isInstance" =>
+      case "getDeclaredConstructors0" =>
+        // returns array of all constructors declared by the class
+        ???
+      case "getDeclaredFields0" =>
+        // creates a field object of a given string name
+        ???
+      case "getDeclaredMethods0" =>
+        // returns an array of method objects of all declared methods
+        ???
+      case "getDeclaringClass0" =>
+        // if this class is member of another class return class object of that class
+        ???
+      case "getEnclosingMethod0" =>
+        // if this class is local or anonymous within a method, return method object of that method
+        ???
+      case "getGenericSignature0" =>
+        // not in docs
+        ???
+      case "getInterfaces0" =>
+        // array of all implemented classes for objects, of all extended interfaces for interfaces
+        ???
+      case "getModifiers" =>
+        // returns java class modifiers encoed as an integer
+        ???
+      case "getName0" =>
+        // returns the name of the object encapsulated by this class
+        ???
+      case "getProtectionDomain" =>
+        // returns protectionDomain of this class
+        ???
+      case "getRawAnnotations" =>
+        // not in docs
+        ???
+      case "getRawTypeAnnotations" =>
+        // not in docs
+        ???
+      case "getSigners" =>
+        // returns signers of this class
+        ???
+      case "getSuperclass" =>
+        // returns class of the superclass of the encapsulated object
+        ???
+      case "isArray" =>
+        // true if this class represents an array
         ???
       case "isAssignableFrom" =>
+        // true if this class is the same, or super of that class
+        ???
+      case "isInstance" =>
+        // true if that object is assignment compatable with the object represented by this class
         ???
       case "isInterface" =>
         val cls = classStack.pop()
-        if(cls.isInterfaceDeclaration)
+        if (cls.isInterfaceDeclaration)
           i32ops.integerLit(1)
         else
           i32ops.integerLit(0)
-      case "isArray" =>
-        ???
       case "isPrimitive" =>
         val string = stringStack.pop()
         if(string == "int" || string ==  "float" || string == "boolean" || string == "byte" || string == "char" || string == "short" || string == "long" || string == "double")
           i32ops.integerLit(1)
         else
           i32ops.integerLit(0)
-      case "isAnnotgation" =>
+      case "setSigners" =>
+        // not in docs
         ???
-*/
+
+
