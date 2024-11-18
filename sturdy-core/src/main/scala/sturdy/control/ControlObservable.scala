@@ -44,12 +44,12 @@ trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObse
 // TODO : Incomplete
 class FileReaderControlObservable(path: Path) extends ControlObservable[String, String, String, String] with ExceptObserver[String]:
 
-
   val regAtomic = "Atomic(.*)(.*).*".r
   val regFork = "Fork.*".r
   val regSwitch = "Switch.*".r
   val regJoin = "Join.*".r
   val regRestart = "Restart.*".r
+  val regFailed = "Failed.*".r
 
   def read(): Unit = {
     val source = Source.fromFile(path.toFile)
@@ -63,6 +63,7 @@ class FileReaderControlObservable(path: Path) extends ControlObservable[String, 
           case regSwitch() => BranchingControlEvent.Switch()
           case regJoin() => BranchingControlEvent.Join()
           case regRestart() => FixpointControlEvent.Restart()
+          case regFailed() => BasicControlEvent.Failed()
           case _ => throw new Exception(s"Couldn't parse '$line''")
       triggerControlEvent(event)
     source.close()
