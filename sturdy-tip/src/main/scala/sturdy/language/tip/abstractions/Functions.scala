@@ -15,7 +15,7 @@ object Functions:
 
   trait IRFun extends Interpreter:
     override final type VFun = IR
-    override def topFun(using Instance): IR = IR.Unknonwn()
+    override def topFun(using Instance): IR = IR.Unknown()
 
   trait Types extends Interpreter:
     case class VFun(from: Value, to: Value)

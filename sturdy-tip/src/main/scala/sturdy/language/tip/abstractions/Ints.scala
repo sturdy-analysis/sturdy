@@ -85,9 +85,9 @@ object Ints:
     final type VBool = IR
     final type VInt = IR
 
-    final def topInt(using Instance): IR = IR.Unknonwn()
+    final def topInt(using Instance): IR = IR.Unknown()
 
-    final def topBool(using Instance): IR = IR.Unknonwn()
+    final def topBool(using Instance): IR = IR.Unknown()
 
     final def asBoolean(v: Value)(using inst: Instance): VBool = v match
       case Value.BoolValue(b) => b

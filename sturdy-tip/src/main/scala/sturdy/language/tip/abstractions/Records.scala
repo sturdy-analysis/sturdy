@@ -15,4 +15,4 @@ object Records:
 
   trait IRRecords extends Interpreter:
     final override type VRecord = IR
-    final override def topRecord: IR = IR.Unknonwn()
+    final override def topRecord: IR = IR.Unknown()

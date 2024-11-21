@@ -20,7 +20,7 @@ case class SoundnessCheck[C,A](abs: Abstractly[C,A], unsafe: A, po: PartialOrder
 
 enum IR:
   val uid = new IR_UID
-  case Unknonwn()
+  case Unknown()
   case External(name: String)
   case Const[C](c: C)
   case Op(op: IROperator, args: Seq[IR])
@@ -35,7 +35,7 @@ enum IR:
     case _ => false
 
   def predecessors: Seq[(IR, String)] = this match
-    case IR.Unknonwn() => Seq.empty
+    case IR.Unknown() => Seq.empty
     case IR.External(name) => Seq.empty
     case IR.Const(c) => Seq.empty
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
@@ -44,7 +44,7 @@ enum IR:
     case IR.Feedback(init, cond, loop) => Seq(init -> "init") ++ cond.map(_ -> "cond") ++ loop.map(_ -> "loop")
 
   override def toString: String = this match
-    case IR.Unknonwn() => s"Unknown@$uid"
+    case IR.Unknown() => s"Unknown@$uid"
     case IR.External(name) => s"External($name)@$uid"
     case IR.Const(c) => s"Const($c)@$uid"
     case IR.Op(op, args) => s"Op($op)@$uid"

@@ -30,7 +30,7 @@ object IRAnalysis extends Interpreter,
   override type J[A] = WithJoin[A]
 
   def valueToIR(v: Value): IR = v match
-    case Value.TopValue => IR.Unknonwn()
+    case Value.TopValue => IR.Unknown()
     case Value.BoolValue(b) => b
     case Value.IntValue(i) => i
     case Value.RefValue(addr) => addr
@@ -110,7 +110,7 @@ object IRAnalysis extends Interpreter,
       PowersetAddr(References.allocationSiteAddr(site))
     )
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInputFun[Value] = new AUserInputFun(Value.IntValue(IR.Unknonwn())) with WithNamedUserInput(name => Value.IntValue(IR.External(name)))
+    override val input: AUserInputFun[Value] = new AUserInputFun(Value.IntValue(IR.Unknown())) with WithNamedUserInput(name => Value.IntValue(IR.External(name)))
 
     var bounds: Set[Int] = Set()
     given Widen[IR] = new Combine[VInt, Widening.Yes]:
@@ -118,7 +118,7 @@ object IRAnalysis extends Interpreter,
       override def apply(v1: IR, v2: IR): MaybeChanged[IR] = (v1, v2) match
         case (feedback@IR.Feedback(init, cond, Some(other2)), other) =>
           println(s"Widening, stable feedback loop ?")
-          println(s"  v1 = $v1")
+          println(s"  v1 = $feedback")
           println(s"  v2 = $other")
           println(s"  other2 = $other2")
           println(s"  cond = $currentCond")
@@ -158,7 +158,7 @@ object IRAnalysis extends Interpreter,
             case Some((c, true)) => IR.Select(c, v2, v1)
             case Some((c, false)) => IR.Select(c, v1, v2)
             case None =>
-              throw new IllegalStateException() // IR.Select(IR.Unknonwn(), v1, v2)
+              throw new IllegalStateException() // IR.Select(IR.Unknown(), v1, v2)
 
           val feedback = IR.Feedback(select, None, None)
 //          println(sturdy.ir.Export.toGraphViz(feedback))

@@ -10,6 +10,7 @@ class IRInterpreter(val externals: Map[String, IRValue]) {
   var feedbackStore: Map[IR_UID, IRValue] = Map()
 
   def interpret(ir: IR): IRValue = ir match
+    case IR.Unknown() => ???
     case IR.External(name) => externals(name)
     case IR.Const(c) => IRValue(c)
     case IR.Op(op, args) => op.eval(args.map(interpret))

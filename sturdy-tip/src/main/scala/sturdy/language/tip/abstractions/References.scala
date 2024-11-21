@@ -48,4 +48,4 @@ object References:
     )
 
     final def topReference(using self: Instance): VRef =
-      IR.Unknonwn()
+      IR.Unknown()
