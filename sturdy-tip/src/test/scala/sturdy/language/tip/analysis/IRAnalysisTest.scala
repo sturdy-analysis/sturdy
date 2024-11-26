@@ -24,7 +24,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.*
 import sturdy.effect.{TrySturdy, failure}
-import sturdy.ir.{Export, IRInterpreter, IRValue}
+import sturdy.ir.{Export, IRInterpreterConcrete, IRValue}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
@@ -77,7 +77,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
       println(s"IR run")
       val externals = ir.externals.map(name => name -> IRValue(0)).toMap
-      val irInterp = new IRInterpreter(externals)
+      val irInterp = new IRInterpreterConcrete(externals)
       val v = try irInterp.interpret(ir) catch {
         case e: StackOverflowError =>
           println(e.getClass.getName)

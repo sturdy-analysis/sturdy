@@ -4,8 +4,7 @@ import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder}
 
 import scala.collection.mutable
 
-trait IROperator:
-  def eval(args: Seq[IRValue]): IRValue = ???
+trait IROperator
 trait IRCheck[C]:
   def assert(c: C): C
 
