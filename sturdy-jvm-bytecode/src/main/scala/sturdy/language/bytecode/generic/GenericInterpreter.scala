@@ -911,7 +911,10 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         ???
       case "getDeclaredConstructors0" =>
         // returns array of all constructors declared by the class
+        val cfs = classStack.pop()
+        val classes = cfs.fields.filter(elem => elem.isClass)
         ???
+
       case "getDeclaredFields0" =>
         // creates a field object of a given string name
         ???
