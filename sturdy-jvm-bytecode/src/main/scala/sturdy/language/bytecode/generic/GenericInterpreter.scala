@@ -893,15 +893,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
   def invokeClassMethod(mth: Method, args: Seq[V]): V =
     mth.name match
-      case "desiredAssertionStatus" =>
-        i32ops.integerLit(1)
       case "desiredAssertionStatus0" =>
         i32ops.integerLit(1)
-      case "getPrimitiveClass" =>
-        // not in docs
-        ???
-      case "getComponentType" =>
-        // returns class representing the component type of an array, this class must represent an array class
+      case "forName0" =>
         ???
       case "getConstantPool" =>
         // not in docs
@@ -911,10 +905,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         ???
       case "getDeclaredConstructors0" =>
         // returns array of all constructors declared by the class
-        val cfs = classStack.pop()
-        val classes = cfs.fields.filter(elem => elem.isClass)
         ???
-
       case "getDeclaredFields0" =>
         // creates a field object of a given string name
         ???
@@ -936,8 +927,14 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case "getModifiers" =>
         // returns java class modifiers encoed as an integer
         ???
-      case "getName0" =>
-        // returns the name of the object encapsulated by this class
+      case "getNestHost0" =>
+        ???
+      case "getNestMembers0" =>
+        ???
+      case "getPermittedSubclasses0" =>
+        ???
+      case "getPrimitiveClass" =>
+        // not in docs
         ???
       case "getProtectionDomain" =>
         // returns protectionDomain of this class
@@ -948,17 +945,25 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case "getRawTypeAnnotations" =>
         // not in docs
         ???
+      case "getRecordComponents0" =>
+        ???
       case "getSigners" =>
         // returns signers of this class
         ???
+      case "getSimpleBinaryName0" =>
+        ???
       case "getSuperclass" =>
         // returns class of the superclass of the encapsulated object
+        ???
+      case "initClassName" =>
         ???
       case "isArray" =>
         // true if this class represents an array
         ???
       case "isAssignableFrom" =>
         // true if this class is the same, or super of that class
+        ???
+      case "isHidden" =>
         ???
       case "isInstance" =>
         // true if that object is assignment compatable with the object represented by this class
@@ -975,8 +980,28 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
           i32ops.integerLit(1)
         else
           i32ops.integerLit(0)
+      case "isRecord0" =>
+        ???
+      case "registerNatives" =>
+        ???
       case "setSigners" =>
         // not in docs
         ???
+
+      /*
+      case "getComponentType" =>
+        // returns class representing the component type of an array, this class must represent an array class
+        ???
+      case "getName" =>
+        // returns the name of the object encapsulated by this class
+        ???
+      case "getName0" =>
+        // returns the name of the object encapsulated by this class
+        ???
+      */
+
+
+
+
 
 
