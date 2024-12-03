@@ -487,6 +487,17 @@ public class SimpleMath {
         }
     }
 
+    public static int stringBuilderTest2(){
+        StringBuilder test = new StringBuilder("Test");
+        test.append(3);
+        if(test.toString().equals("Test5")){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+
     public static int constantTest(){
         int x = 5;
         x = 10;

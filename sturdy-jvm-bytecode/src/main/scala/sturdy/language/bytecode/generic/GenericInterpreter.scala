@@ -761,7 +761,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     */
 
     if (native.nativeFunList.contains(mth.name)) {
-      val ret = native.evalNative(mth, args)
+      val ret = invokeClassMethod(mth, args)
       if (!mth.descriptor.returnType.isVoidType) {
         ret
       }
@@ -935,7 +935,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         ???
       case "getPrimitiveClass" =>
         // not in docs
-        ???
+        val clsObj = createLibraryObj(ObjectType("java/lang/Class"), InstructionSite(mth, 0))
+        clsObj
       case "getProtectionDomain" =>
         // returns protectionDomain of this class
         ???
@@ -999,7 +1000,20 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         // returns the name of the object encapsulated by this class
         ???
       */
-
+      case "desiredAssertionStatus" =>
+        ???
+      case "fillInStackTrace" =>
+        //temporary
+        bytecodeOps.i32ops.integerLit(-1)
+      case "arraycopy" =>
+        val src = args(0)
+        val srcPos = args(1)
+        val dest = args(2)
+        val destPos = args(3)
+        val length = args(4)
+        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
+        //temporary
+        bytecodeOps.i32ops.integerLit(-1)
 
 
 
