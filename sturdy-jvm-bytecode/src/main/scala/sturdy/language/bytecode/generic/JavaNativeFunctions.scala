@@ -14,7 +14,7 @@ class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, Ty
 
 
   val nativeFunList: List[String] = List(
-    "desiredAssertionStatus",
+    //"desiredAssertionStatus",
     "fillInStackTrace",
     "arraycopy",
     "makeConcatWithConstants",

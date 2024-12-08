@@ -253,10 +253,10 @@ object test extends App{
 //  println(interp.invokeExternal(stringTest, true))
 //  val stringTest2 = cfs.findMethod("stringTest2").head
 //  println(interp.invokeExternal(stringTest2, true))
-  val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
-  println(interp.invokeExternal(stringBuilderTest, true))
-  val stringBuilderTest2 = cfs.findMethod("stringBuilderTest2").head
-  println(interp.invokeExternal(stringBuilderTest2, true))
+//  val stringBuilderTest = cfs.findMethod("stringBuilderTest").head
+//  println(interp.invokeExternal(stringBuilderTest, true))
+//  val stringBuilderTest2 = cfs.findMethod("stringBuilderTest2").head
+//  println(interp.invokeExternal(stringBuilderTest2, true))
 /*
   println("--- POP2Test ---")
   interp.evalExternal(LoadLong(500))

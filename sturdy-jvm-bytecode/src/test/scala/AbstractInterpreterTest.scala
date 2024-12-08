@@ -54,6 +54,7 @@ object AbstractInterpreterTest extends App:
   println(cfs.methodsWithBody.size)
   println(cfs.methods.filter(elem => !cfs.methodsWithBody.contains(elem)).map(elem => elem.name))
   println(cfs.methods.filter(elem => cfs.methodsWithBody.contains(elem)).map(elem => elem.name))
+  println(cfs.methods.filter(elem => elem.isNative).map(elem => elem.name))
   println(cfs.methodsWithBody.find(elem => elem.name == "<clinit>").get.body.get.foreach(println))
   println(cfs.methodsWithBody.find(elem => elem.name == "<init>").get.body.get.foreach(println))
   println(cfs.methodsWithBody.find(elem => elem.name == "<init>").get.parameterTypes)
