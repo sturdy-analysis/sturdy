@@ -11,7 +11,7 @@ import sturdy.values.integer.{IntegerOps, NumericInterval, NumericIntervalIntege
 import scala.math.Ordering.Implicits.infixOrderingOps
 
 given OverflowOptimisticNumericIntervalOps[I]
-(using ord: Ordering[I], ops: IntegerOps[I, I], strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]], safeOps: NumericIntervalIntegerOps[I])
+(using strict: StrictIntegerOps[I, I, NoJoin], num: Numeric[I], t: Top[NumericInterval[I]], safeOps: NumericIntervalIntegerOps[I])
 (using f: Failure, j: EffectStack): IntegerOps[I, NumericInterval[I]] with
 
   import NumericInterval.constant

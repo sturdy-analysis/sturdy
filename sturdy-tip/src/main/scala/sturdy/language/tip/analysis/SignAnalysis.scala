@@ -48,7 +48,7 @@ object SignAnalysis extends Interpreter,
     given gl: TipGradualLogger[VInt, Value] = gradualLogger()
     val eo: TipElaborationOps[VInt] = implicitly
 
-    override val intOps: GradualIntegerOps[Int, Value, OverflowGradualization] = implicitly
+    override val intOps: IntegerOps[Int, Value] = gradualIntegerOps[OverflowGradualization]
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
     override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly

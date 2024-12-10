@@ -84,11 +84,13 @@ trait Interpreter:
 
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
+
   import Value.*
+  def gradualIntegerOps[Gradual[X, Y] <: IntegerOpsGradualization[X, Y]](using Instance, GradualIntegerOps[Int, VInt, Gradual]): IntegerOps[Int, Value] =
+    new GradualLiftedIntegerOps[Int, Value, VInt, Gradual](_.asInt, IntValue.apply)
+
   given ValueIntegerOps(using Instance, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
     new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
-  given GradualValueIntegerOps[Gradual[X, Y] <: IntegerOpsGradualization[X, Y]](using Instance, GradualIntegerOps[Int, VInt, Gradual]): GradualIntegerOps[Int, Value, Gradual] =
-    new GradualLiftedIntegerOps[Int, Value, VInt, Gradual](_.asInt, IntValue.apply)
   given ValueOrderingOps(using Instance, OrderingOps[VInt, VBool]): OrderingOps[Value, Value] =
     new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, Value.BoolValue.apply)
   given ValueEqOps(using EqOps[VInt, VBool], /*EqOps[VBool, VBool],*/ EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Instance): EqOps[Value, Value] with
@@ -126,5 +128,6 @@ trait Interpreter:
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
     given ConcreteGradualOps[T, V](using TipGradualLogger[T, V]): TipGradualOps[T, V] = new TipGradualOps[T, V]
-
+    
+    protected given Interpreter = Interpreter.this
     protected given Instance = this.asInstanceOf[Instance]
