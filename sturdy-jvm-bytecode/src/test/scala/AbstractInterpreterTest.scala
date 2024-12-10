@@ -58,6 +58,7 @@ object AbstractInterpreterTest extends App:
   println(cfs.methodsWithBody.find(elem => elem.name == "<clinit>").get.body.get.foreach(println))
   println(cfs.methodsWithBody.find(elem => elem.name == "<init>").get.body.get.foreach(println))
   println(cfs.methodsWithBody.find(elem => elem.name == "<init>").get.parameterTypes)
+  println(cfs.methods.filter(elem => elem.name == "registerNatives"))
 
   def javaLibClassFileWrapper(obj: ObjectType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"

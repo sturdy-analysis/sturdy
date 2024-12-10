@@ -135,10 +135,10 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadClass =>
         //val obj = createLibraryObj(inst.value.mostPreciseObjectType, site)
         //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-        val test = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
-        stack.push(test)
-        val cls = findClassFile(inst.value.mostPreciseObjectType)
-        classStack.push(cls)
+        val cls = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
+        stack.push(cls)
+//        val cls = findClassFile(inst.value.mostPreciseObjectType)
+//        classStack.push(cls)
 
 
       case inst: LoadString =>
@@ -161,7 +161,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadFloat_W =>
         stack.push(num.evalNumericOp(inst))
       case inst: LoadClass_W =>
-        ???
+        val cls = createLibraryObj(ObjectType("java/lang/Class"), site.copy(variant = 1))
+        stack.push(cls)
       case inst: LoadString_W =>
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
         val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
@@ -453,11 +454,14 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // Load and Store Statics opcode 178 - 179
       case inst: GETSTATIC =>
-        val objCF = inst.declaringClass
-        ensureInitialization(objCF)
-        val addr = staticAddrMap((objCF, inst.name))
-        val v = staticVarStore.readOrElse(addr, fail(UnboundStaticVar, inst.name))
-        stack.push(v)
+        if(inst.name == "out")
+          ()
+        else
+          val objCF = inst.declaringClass
+          ensureInitialization(objCF)
+          val addr = staticAddrMap((objCF, inst.name))
+          val v = staticVarStore.readOrElse(addr, fail(UnboundStaticVar, inst.name))
+          stack.push(v)
 
       case inst: PUTSTATIC =>
         val objCF = inst.declaringClass
@@ -492,12 +496,20 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: INVOKEVIRTUAL =>
         val objectType = inst.declaringClass.mostPreciseObjectType
         val numArgs = inst.methodDescriptor.parametersCount
-        val args = stack.popNOrAbort(numArgs)
-        val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
-        if (!inst.methodDescriptor.returnType.isVoidType){
-          stack.push(ret)
-        }
+        if(inst.name == "println")
+          val printString = stack.popOrAbort()
+          val obj = createLibraryObj(ObjectType("java/io/PrintStream"), InstructionSite(mth, pc, variant = 1))
+          val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, Seq(printString))(invokeWrapper)
+          if (!inst.methodDescriptor.returnType.isVoidType) {
+            stack.push(ret)
+          }
+        else
+          val args = stack.popNOrAbort(numArgs)
+          val obj = stack.popOrAbort()
+          val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
+          if (!inst.methodDescriptor.returnType.isVoidType){
+            stack.push(ret)
+          }
 
       case inst: INVOKESPECIAL =>
         val cfs = findClassFile(inst.declaringClass)
@@ -750,54 +762,49 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
 
-    /*if(mth.classFile.thisType == ObjectType("java/lang/Class"))
-      val ret = invokeClassMethod(mth, args)
-      if(!mth.descriptor.returnType.isVoidType){
-        stack.push(ret)
-      }
-      else{
-        i32ops.integerLit(-1)
-      }
-    */
-
-    if (native.nativeFunList.contains(mth.name)) {
-      val ret = invokeClassMethod(mth, args)
-      if (!mth.descriptor.returnType.isVoidType) {
-        ret
-      }
-      else{
-        i32ops.integerLit(-1)
-      }
-    }
-    else{
-      val locals = if (!mth.body.get.localVariableTable.isEmpty) {
-        mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
-      }
-      else {
-        ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
-      }
-
-      val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
-      val argsAndLocals = args.view ++ locals.map(defaultValue)
-
-      val remainingOperands = stack.popNOrAbort(stack.size)
-
-      stack.withNewFrame(0) {
-        frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-          run(0, instructionMap, mth)
+    if(mth.name == "println")
+      val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value")).get).map(vals => vals.get)
+      println(string)
+      i32ops.integerLit(-1)
+    else
+      if (native.nativeFunList.contains(mth.name)) {
+        val ret = invokeClassMethod(mth, args)
+        if (!mth.descriptor.returnType.isVoidType) {
+          ret
+        }
+        else{
+          i32ops.integerLit(-1)
         }
       }
-      if(!mth.descriptor.returnType.isVoidType){
-        val ret = stack.popOrAbort()
-        stack.pushN(remainingOperands)
-        ret
-      }
       else{
-        stack.pushN(remainingOperands)
-        i32ops.integerLit(-1)
+        val locals = if (!mth.body.get.localVariableTable.isEmpty) {
+          mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+        }
+        else {
+          ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+        }
+
+        val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+
+        val argsAndLocals = args.view ++ locals.map(defaultValue)
+
+        val remainingOperands = stack.popNOrAbort(stack.size)
+
+        stack.withNewFrame(0) {
+          frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+            run(0, instructionMap, mth)
+          }
+        }
+        if(!mth.descriptor.returnType.isVoidType){
+          val ret = stack.popOrAbort()
+          stack.pushN(remainingOperands)
+          ret
+        }
+        else{
+          stack.pushN(remainingOperands)
+          i32ops.integerLit(-1)
+        }
       }
-    }
 
   def evalNativeStatic(mth: Method, args: Seq[V]) =
     mth.name match
@@ -984,7 +991,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case "isRecord0" =>
         ???
       case "registerNatives" =>
-        ???
+        i32ops.integerLit(-1)
       case "setSigners" =>
         // not in docs
         ???
