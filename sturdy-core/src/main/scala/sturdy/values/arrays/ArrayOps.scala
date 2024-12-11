@@ -17,6 +17,7 @@ trait ArrayOps[AID, Idx, V, AV, AType, Site, J[_] <: MayJoin[_]]:
   def initArray(size: Idx): Seq[Any]
   def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
   def getArray(array: AV): Seq[JOption[J, V]]
+  def printString(letters: Seq[Idx]): Unit
 
 case class Array[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASize)
 

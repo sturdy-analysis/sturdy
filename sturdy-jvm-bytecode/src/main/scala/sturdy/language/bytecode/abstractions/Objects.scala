@@ -1,8 +1,7 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ClassFile, Method, MethodDescriptor}
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, DoubleType, FieldType, FloatType, IntegerType, LongType, ObjectType, ReferenceType, ShortType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType, Type}
 import org.opalj.constraints.NullValue
 import sturdy.data
 import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
@@ -84,7 +83,7 @@ trait ConstantObjects extends Interpreter, Numbers:
             MaybeChanged.Changed(topRef)
           case _ => ???
       else
-        ???
+        MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
   given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
@@ -107,7 +106,7 @@ trait ConstantObjects extends Interpreter, Numbers:
               store.read(obj.fields(name))
           case _ => ???
       else
-        ???
+        JOptionA.none
 
     override def setField(ref: RefValue, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
       if (ref.isActual)
@@ -122,7 +121,7 @@ trait ConstantObjects extends Interpreter, Numbers:
               JOptionA.some(())
           case _ => ???
       else
-        ???
+        JOptionA.some(Value.TopValue)
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
       if (ref.isActual)
@@ -134,7 +133,7 @@ trait ConstantObjects extends Interpreter, Numbers:
             invoke(ref, mth, args)
           case _ => ???
       else
-        ???
+        topOpalVal(sig.returnType)
 
     override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
     override def isNull(ref: RefValue): I32 =
@@ -150,7 +149,7 @@ trait ConstantObjects extends Interpreter, Numbers:
             Topped.Actual(1)
           case _ => ???
       else
-        ???
+        topI32
 
   given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
@@ -173,7 +172,7 @@ trait ConstantObjects extends Interpreter, Numbers:
               store.read(array.vals(idx.get))
           case _ => ???
       else
-        ???
+        JOptionA.some(Value.TopValue)
 
 
 
@@ -190,7 +189,7 @@ trait ConstantObjects extends Interpreter, Numbers:
               JOptionA.some(())
           case _ => ???
       else
-        ???
+        JOptionA.none
 
 
     override def arrayLength(ref: RefValue): Value =
@@ -227,7 +226,7 @@ trait ConstantObjects extends Interpreter, Numbers:
             JOptionA.some(())
           case _ => ???
       else
-        ???
+        JOptionA.none
 
 
     override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
@@ -242,7 +241,10 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         ???
 
-  def topOpalVal(ty: FieldType): Value =
+    override def printString(letters: Seq[Topped[Int]]): Unit =
+      println(letters.map(l => l.get.toChar))
+
+  def topOpalVal(ty: Type): Value =
     ty match
       case fieldType: ByteType => Value.Int32(topI32)
       case fieldType: ShortType => Value.Int32(topI32)
@@ -413,7 +415,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
             MaybeChanged.Changed(topRef)
           case _ => ???
       else
-        ???
+        MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
   given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
@@ -437,7 +439,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
               store.read(obj.fields(name))
           case _ => ???
       else
-        ???
+        JOptionA.some(Value.TopValue)
 
     override def setField(ref: RefValue, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
       if (ref.isActual)
@@ -452,7 +454,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
               JOptionA.some(())
           case _ => ???
       else
-        ???
+        JOptionA.none
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
       if (ref.isActual)
@@ -464,7 +466,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
             invoke(ref, mth, args)
           case _ => ???
       else
-        ???
+        topOpalVal(sig.returnType)
 
     override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
 
@@ -481,7 +483,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
             NumericInterval.constant(1)
           case _ => ???
       else
-        ???
+        topI32
 
   given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
@@ -505,7 +507,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
                 store.read(array.vals(idx.low))
             case _ => ???
         else
-          ???
+          JOptionA.some(Value.TopValue)
       else
         ???
 
@@ -523,7 +525,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
                 JOptionA.some(())
             case _ => ???
         else
-          ???
+          JOptionA.none
       else
         ???
 
@@ -576,6 +578,9 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           case _ => ???
       else
         ???
+
+    override def printString(letters: Seq[NumericInterval[Int]]): Unit =
+      println(letters.map(l => l.low.toChar))
         
 /*  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, IntervalArray, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): IntervalArray =
@@ -641,7 +646,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       val arrayVals = array.vals.map(addr => getVal(array, NumericInterval.constant(array.vals.indexOf(addr))))
       arrayVals
 */
-  def topOpalVal(ty: FieldType): Value =
+  def topOpalVal(ty: Type): Value =
     ty match
       case fieldType: ByteType => Value.Int32(topI32)
       case fieldType: ShortType => Value.Int32(topI32)

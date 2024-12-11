@@ -50,7 +50,7 @@ class Tree {
     private void inorderRec(Node root) {
         if (root != null) {
             inorderRec(root.left);
-            //System.out.print(root.data + " ");
+            System.out.print(root.data + " ");
             inorderRec(root.right);
         }
     }
@@ -99,8 +99,8 @@ public class BinaryTree {
         tree.insert(80);
 
         // Display the tree in different traversals
-        //System.out.println("Inorder Traversal:");
-        //tree.inorder();
+        System.out.println("Inorder Traversal:");
+        tree.inorder();
         System.out.println("\nPreorder Traversal:");
         tree.preorder();
         System.out.println("\nPostorder Traversal:");

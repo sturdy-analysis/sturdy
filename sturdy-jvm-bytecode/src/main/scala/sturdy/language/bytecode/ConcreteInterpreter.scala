@@ -278,6 +278,9 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $array")
 
+    override def printString(letters: Seq[Int]): Unit =
+      println(letters.map(l => l.toChar))
+
   given RefEqOps[AID, OID, ASize]: EqOps[RefValue, Boolean] with
     override def equ(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
       case (v1: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName], v2: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName]) =>

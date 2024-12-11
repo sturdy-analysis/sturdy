@@ -14,5 +14,7 @@ class LiftedArrayOps[AID, Idx, V, AV, AType, Site, J[_] <: MayJoin[_], UAV, UIdx
     ops.arraycopy(extractA(src), extractIdx(srcPos), extractA(dest), extractIdx(destPos), extractIdx(length))
   override def getArray(array: AV): Seq[JOption[J, V]] = ops.getArray(extractA(array))
 
+  override def printString(letters: Seq[Idx]): Unit = ops.printString(letters.map(elem => extractIdx(elem)))
+
 
 

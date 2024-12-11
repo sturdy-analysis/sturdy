@@ -148,7 +148,9 @@ trait Interpreter:
                                    ): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => Combine[I32, W](i1, i2).map(Int32.apply)
+      case (Int32(i1), Int32(i2)) => 
+        val r = Combine[I32, W](i1, i2).map(Int32.apply)
+        r
       case (Int64(i1), Int64(i2)) => Combine[I64, W](i1, i2).map(Int64.apply)
       case (Float32(i1), Float32(i2)) => Combine[F32, W](i1, i2).map(Float32.apply)
       case (Float64(i1), Float64(i2)) => Combine[F64, W](i1, i2).map(Float64.apply)

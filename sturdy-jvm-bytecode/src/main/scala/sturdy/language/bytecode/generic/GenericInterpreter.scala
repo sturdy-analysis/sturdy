@@ -21,6 +21,7 @@ import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.relational.EqOps
 import sturdy.fix
+import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.{Finite, Join, MaybeChanged, Powerset}
 
@@ -42,9 +43,11 @@ case class StaticInitSite(obj: ObjectType, name: String)
 
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
+  case Jump(pc: Int, mth: Method)
 
 enum FixOut:
   case Eval()
+  case Jump()
 
 given Join[FixOut] with
   override def apply(v1: FixOut, v2: FixOut): MaybeChanged[FixOut] = Unchanged(v1)
@@ -496,7 +499,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: INVOKEVIRTUAL =>
         val objectType = inst.declaringClass.mostPreciseObjectType
         val numArgs = inst.methodDescriptor.parametersCount
-        if(inst.name == "println")
+        if(inst.name == "println" || inst.name == "print")
           val printString = stack.popOrAbort()
           val obj = createLibraryObj(ObjectType("java/io/PrintStream"), InstructionSite(mth, pc, variant = 1))
           val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, Seq(printString))(invokeWrapper)
@@ -762,9 +765,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
 
-    if(mth.name == "println")
+    if(mth.name == "println" || mth.name == "print")
       val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value")).get).map(vals => vals.get)
-      println(string)
+      arrayOps.printString(string)
       i32ops.integerLit(-1)
     else
       if (native.nativeFunList.contains(mth.name)) {
@@ -784,15 +787,13 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
           ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
         }
 
-        val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
-
         val argsAndLocals = args.view ++ locals.map(defaultValue)
 
         val remainingOperands = stack.popNOrAbort(stack.size)
 
         stack.withNewFrame(0) {
           frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
-            run(0, instructionMap, mth)
+            run(0, mth)
           }
         }
         if(!mth.descriptor.returnType.isVoidType){
@@ -836,20 +837,25 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     case FixIn.Eval(inst, mth, pc) =>
       eval(inst, mth, pc)
       FixOut.Eval()
+    case FixIn.Jump(pc, mth) =>
+      run_open(pc, mth)
+      FixOut.Jump()
   }
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
-  def run(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
+  def run(pc: Int, mth: Method)(using fixed: Fixed): Unit =
+    fixed(FixIn.Jump(pc, mth)) match
+      case FixOut.Jump() => ()
+      case out => throw new MatchError(out)
+
+  def run_open(pc: Int, mth: Method)(using Fixed): Unit =
     except.tryCatch {
-      runBody(pc, instructionMap, mth)
+      runBody(pc, mth)
     } {
       case JvmExcept.Jump(targetPC) =>
-        run(targetPC, instructionMap, mth)
+        run(targetPC, mth)
       case JvmExcept.Ret(currPC) =>
-        //TODO transform V to Int
-        //val currInst = instructionMap(currPC)
-        //val nextPC = currInst.indexOfNextInstruction(currPC)(mth.body.get)
-        //run(nextPC, instructionMap, mth)
+        //TODO
       case JvmExcept.Throw(exception) =>
         val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
@@ -857,25 +863,28 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
         val exceptionObject = createLibraryObj(exception, InstructionSite(mth, pc))
         stack.push(exceptionObject)
-        run(handler.handlerPC, instructionMap, mth)
+        run(handler.handlerPC, mth)
       case JvmExcept.ThrowObject(exception) =>
         val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
           .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
         stack.push(exception)
-        run(handler.handlerPC, instructionMap, mth)
+        run(handler.handlerPC, mth)
     }
 
-  def runBody(pc: Int, instructionMap: Map[Int, Instruction], mth: Method)(using Fixed): Unit =
+  def runBody(pc: Int, mth: Method)(using Fixed): Unit =
+    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
     val currInst = instructionMap(pc)
     frame.setData(pc)
     //println(currInst)
+//    if(currInst.isSimpleConditionalBranchInstruction)
+//      println("test")
     evalFix(currInst, mth, pc)
     
     if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
       val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
-      runBody(nextPC, instructionMap, mth)
+      runBody(nextPC, mth)
     }
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match

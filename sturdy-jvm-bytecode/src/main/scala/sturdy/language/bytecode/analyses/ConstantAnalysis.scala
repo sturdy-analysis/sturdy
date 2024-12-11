@@ -4,7 +4,7 @@ import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.allocation.{AAllocationFromContext, Allocation}
 import sturdy.effect.callframe.{DecidableMutableCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.{Except, JoinedExcept}
@@ -14,12 +14,13 @@ import sturdy.effect.store.{AStoreMultiAddrThreadded, AStoreSingleAddrThreadded,
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.context.Sensitivity
-import sturdy.fix.{ContextualFixpoint, Fixpoint}
+import sturdy.fix.{ContextualFixpoint, Fixpoint, Logger}
 import sturdy.language.bytecode.ConcreteInterpreter.{Bool, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, ConstantObjects, Exceptions, Numbers}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
-import sturdy.values.{Abstractly, Finite, Topped, Widen, given}
+import sturdy.util.{Lazy, lazily}
+import sturdy.values.{Abstractly, Combine, Finite, MaybeChanged, Topped, Widen, Widening, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
@@ -60,11 +61,17 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     private given Instance = this
 
     override val fixpoint: fix.Fixpoint[FixIn, FixOut] =
+      fix.log(new Logger[FixIn, FixOut] {
+        override def enter(dom: FixIn): Unit = 
+          if (dom.isInstanceOf[FixIn.Eval]) println(s"enter $dom")
+        override def exit(dom: FixIn, codom: TrySturdy[FixOut]): Unit = ()
+      },
       fix.notContextSensitive(
-        fix.iter.innermost[FixIn, FixOut, Unit](StackedStates())
-      ).fixpoint
+        fix.filter[FixIn, FixOut](_.isInstanceOf[FixIn.Jump], 
+          fix.iter.innermost[FixIn, FixOut, Unit](StackedStates())
+        )
+      )).fixpoint
     
-
     override val fixpointSuper = fixpoint
 
     val joinUnit: WithJoin[Unit] = implicitly
