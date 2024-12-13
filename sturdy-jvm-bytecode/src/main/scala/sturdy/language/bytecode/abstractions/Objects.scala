@@ -161,7 +161,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
   
     override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
-      if (ref.isActual)
+      if (ref.isActual && idx.isActual)
         val tmp = ref.get
         tmp match
           case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
@@ -177,7 +177,7 @@ trait ConstantObjects extends Interpreter, Numbers:
 
 
     override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
-      if (ref.isActual)
+      if (ref.isActual && idx.isActual)
         val tmp = ref.get
         tmp match
           case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
@@ -209,7 +209,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       Seq.fill(size.get) {}
   
     override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
-      if (src.isActual && dest.isActual)
+      if (src.isActual && dest.isActual && srcPos.isActual && destPos.isActual && length.isActual)
         val tmp1 = src.get
         val tmp2 = dest.get
         (tmp1, tmp2) match

@@ -269,7 +269,7 @@ object test extends App{
   interp.evalExternal(POP2)
   println(interp.stack.size)*/
 
-  println("--- ConstantTest ---")
+//  println("--- ConstantTest ---")
 //  val constTest1 = cfs.findMethod("constantTest").head
 //  println(absInterp.invokeExternal(constTest1, true))
 //  val constTest2 = cfs.findMethod("constantTest2").head
@@ -278,10 +278,20 @@ object test extends App{
 //  println(absInterp.stack.size)
 //  absInterp.stack.push(ConstantAnalysis.Value.Int32(ConstantAnalysis.topI32))
 //  println(absInterp.invokeExternal(constTest2, true))
-  val constLoopTest = cfs.findMethod("constantLoopTest").head
-//  absInterp.evalExternal(ICONST_0)
-  intervalInterp.stack.push(IntervalAnalysis.Value.Int32(IntervalAnalysis.topI32))
-  println(intervalInterp.invokeExternal(constLoopTest, true))
+//  val constLoopTest = cfs.findMethod("constantLoopTest").head
+////  absInterp.evalExternal(ICONST_0)
+//  intervalInterp.stack.push(IntervalAnalysis.Value.Int32(IntervalAnalysis.topI32))
+//  println(intervalInterp.invokeExternal(constLoopTest, true))
+
+//  println("--- InfiniteLoopTest ---")
+//  val infiniteLoopTest = cfs.findMethod("infiniteLoopTest").head
+//  absInterp.evalExternal(ICONST_1)
+//  println(absInterp.invokeExternal(infiniteLoopTest, true))
+
+  println("--- SimpleRecursionTest ---")
+  val fibonacciTest = cfs.findMethod("fibonacciTest").head
+  intervalInterp.evalExternal(BIPUSH(3))
+  println(intervalInterp.invokeExternal(fibonacciTest, true))
 
 }
 

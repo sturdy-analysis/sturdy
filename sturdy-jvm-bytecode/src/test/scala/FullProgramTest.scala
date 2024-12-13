@@ -17,12 +17,12 @@ object FullProgramTest extends App:
   println(mainMethods)
 
 
-  for(mth <- mainMethods){
+  for(mth <- mainMethods.filter(meth => meth.classFile.thisType.simpleName == "QuickSort")){
     val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
     val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
     println("- - - - - - - - - - - - - - - - -")
     println("Executing Method: " ++ mth.name ++ " from " ++ mth.classFile.thisType.simpleName)
-    println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
+//    println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
     println("Abstract Interpretation: " ++ absInterp.invokeExternal(mth, true).toString)
     //println(interp.arrayValStore.entries.toSeq.sortBy(_._1))
     //println(interp.objFieldStore.entries)

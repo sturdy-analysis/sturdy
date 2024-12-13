@@ -524,6 +524,24 @@ public class SimpleMath {
         return x;
     }
 
+    public static int infiniteLoopTest(boolean flag){
+        int x = 0;
+        while(flag){
+            x++;
+        }
+        return x;
+    }
+
+    public static int fibonacciTest(int n){
+        if(n == 0){
+            return 0;
+        }
+        if(n == 1){
+            return 1;
+        }
+        return(fibonacciTest(n-1) + fibonacciTest(n-2));
+    }
+
     public static void main(String[] args) {
         int test = 10;
         test = 20;
@@ -618,6 +636,8 @@ public class SimpleMath {
         System.out.println(stringTest());
         System.out.println(stringTest2());
         //System.out.println(stringBuilderTest());
+        System.out.println("--- fibonacciTest ---");
+        System.out.println(fibonacciTest(8));
 
 
     }
