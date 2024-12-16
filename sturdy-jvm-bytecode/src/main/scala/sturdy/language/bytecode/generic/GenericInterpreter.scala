@@ -769,7 +769,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value")).get).map(vals => vals.get)
       arrayOps.printString(string)
       i32ops.integerLit(-1)
-    else
+    else {
       if (native.nativeFunList.contains(mth.name)) {
         val ret = invokeClassMethod(mth, args)
         if (!mth.descriptor.returnType.isVoidType) {
@@ -779,7 +779,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
           i32ops.integerLit(-1)
         }
       }
-      else{
+      else {
         val locals = if (!mth.body.get.localVariableTable.isEmpty) {
           mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
         }
@@ -789,23 +789,25 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
         val argsAndLocals = args.view ++ locals.map(defaultValue)
 
-        val remainingOperands = stack.popNOrAbort(stack.size)
-
+//        println(s"Stack before call ${stack.getState}")
+//        try
         stack.withNewFrame(0) {
           frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
             run(0, mth)
+            if (!mth.descriptor.returnType.isVoidType) {
+//              if (stack.size != 1)
+//                throw new IllegalStateException(s"Stack must have exactly one value after non-void method return: ${stack.frameSize}, ${stack.size}, ${stack.getState}.")
+              stack.popOrAbort()
+            } else {
+              i32ops.integerLit(-1)
+            }
           }
         }
-        if(!mth.descriptor.returnType.isVoidType){
-          val ret = stack.popOrAbort()
-          stack.pushN(remainingOperands)
-          ret
-        }
-        else{
-          stack.pushN(remainingOperands)
-          i32ops.integerLit(-1)
-        }
+//        finally println(s"Stack after call ${stack.getState}")
+
+
       }
+    }
 
   def evalNativeStatic(mth: Method, args: Seq[V]) =
     mth.name match

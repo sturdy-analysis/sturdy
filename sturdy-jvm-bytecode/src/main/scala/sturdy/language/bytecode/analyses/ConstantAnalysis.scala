@@ -62,8 +62,8 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     override val fixpoint: fix.Fixpoint[FixIn, FixOut] =
       fix.log(new Logger[FixIn, FixOut] {
-        override def enter(dom: FixIn): Unit = 
-          if (dom.isInstanceOf[FixIn.Eval]) println(s"enter $dom")
+        override def enter(dom: FixIn): Unit = ()
+          //if (dom.isInstanceOf[FixIn.Eval]) println(s"enter $dom")
         override def exit(dom: FixIn, codom: TrySturdy[FixOut]): Unit = ()
       },
       fix.notContextSensitive(
@@ -73,7 +73,8 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       )).fixpoint
     
     override val fixpointSuper = fixpoint
-
+    Fixpoint.DEBUG = false
+    
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[ConstantAnalysis.Value] = implicitly
 

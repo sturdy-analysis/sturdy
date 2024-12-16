@@ -65,8 +65,8 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     override val fixpoint: fix.Fixpoint[FixIn, FixOut] =
       fix.log(new Logger[FixIn, FixOut] {
-        override def enter(dom: FixIn): Unit =
-          if (dom.isInstanceOf[FixIn.Eval]) println(s"enter $dom")
+        override def enter(dom: FixIn): Unit = ()
+          //if (dom.isInstanceOf[FixIn.Eval]) println(s"enter $dom")
         override def exit(dom: FixIn, codom: TrySturdy[FixOut]): Unit = ()
       },
         fix.notContextSensitive(
@@ -77,6 +77,7 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
 
     override val fixpointSuper = fixpoint
+    Fixpoint.DEBUG = false
 
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[IntervalAnalysis.Value] = implicitly

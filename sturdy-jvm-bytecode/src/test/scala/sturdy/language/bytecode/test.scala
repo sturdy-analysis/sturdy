@@ -290,8 +290,9 @@ object test extends App{
 
   println("--- SimpleRecursionTest ---")
   val fibonacciTest = cfs.findMethod("fibonacciTest").head
-  intervalInterp.evalExternal(BIPUSH(3))
-  println(intervalInterp.invokeExternal(fibonacciTest, true))
+  // absInterp.stack.push()
+  absInterp.evalExternal(BIPUSH(3))
+  println(absInterp.invokeExternal(fibonacciTest, true))
 
 }
 
