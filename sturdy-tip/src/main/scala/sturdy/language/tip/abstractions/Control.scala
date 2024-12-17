@@ -7,8 +7,10 @@ import sturdy.effect.except.ObservableExcept
 import sturdy.fix
 import sturdy.fix.Logger
 import sturdy.fix.cfg.{ControlFlowGraph, ControlLogger}
+import sturdy.gradual.GradualLoggerOps
 import sturdy.language.tip.*
 import sturdy.util.{Label, Labeled}
+import sturdy.values.PartialOrder
 import sturdy.values.booleans.ObservedBooleanBranching
 
 import scala.collection.mutable.ListBuffer
@@ -66,6 +68,8 @@ class TipGradualLogger[T,V] extends GradualLogger[T, FixIn, FixOut[V]]:
       println(s"What to do here? $f")
 
   override def getCheck(l: Label): Option[Check[T]] = m.get(l).flatMap(_.headOption)
+
+type TipGradualOps[T, V] = GradualLoggerOps[T, FixIn, FixOut[V]]
 
 trait Control extends Interpreter:
   import Control.*

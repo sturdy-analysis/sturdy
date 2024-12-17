@@ -22,7 +22,7 @@ class GradualIntervalAnalysisTest extends AnyFlatSpec, Matchers:
     """.stripMargin
     val program = Parser.parse(sourceCode)
     if (program.funs.exists(_.name == "main")) {
-      val analysis = new SignAnalysis.Instance(Map(), Map(), StackedStates())
+      val analysis = new OverflowOptimisticIntervalAnalysis.Instance(Map(), Map(), StackedStates(), 0)
 
       val aresult = analysis.failure.fallible(analysis.execute(program))
 

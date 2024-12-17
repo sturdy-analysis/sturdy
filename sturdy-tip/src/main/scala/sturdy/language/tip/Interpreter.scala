@@ -4,11 +4,9 @@ import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.gradual.values.integer.{GradualIntegerOps, GradualLiftedIntegerOps, IntegerOpsGradualization}
 import sturdy.language.tip.*
-import sturdy.language.tip.abstractions.TipGradualLogger
-import sturdy.language.tip.analysis.SignAnalysis.gradualLogger
-import sturdy.values.MaybeChanged
+import sturdy.language.tip.abstractions.{TipGradualLogger, TipGradualOps}
+import sturdy.values.{Combine, Finite, MaybeChanged, PartialOrder, Top, Widening}
 import sturdy.values.booleans.*
-import sturdy.values.{Combine, Finite, Top, Widening}
 import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
@@ -127,7 +125,7 @@ trait Interpreter:
    */
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, J]:
-    given ConcreteGradualOps[T, V](using TipGradualLogger[T, V]): TipGradualOps[T, V] = new TipGradualOps[T, V]
-    
+    given [T, V](using TipGradualLogger[T, V], PartialOrder[T]): TipGradualOps[T, V] = new TipGradualOps[T, V]
+
     protected given Interpreter = Interpreter.this
     protected given Instance = this.asInstanceOf[Instance]

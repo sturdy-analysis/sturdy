@@ -4,7 +4,7 @@ import sturdy.data.*
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.tip
-import sturdy.language.tip.{TipElaborationOps, Exp, TipGradualOps}
+import sturdy.language.tip.{TipElaborationOps, Exp}
 import sturdy.values.integer.*
 import sturdy.values.{PartialOrder, Top}
 
