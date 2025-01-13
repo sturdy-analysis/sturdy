@@ -45,16 +45,6 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
   given Widen[I32] = new NumericIntervalWiden[Int](intIntervalBounds, Int.MinValue, Int.MaxValue)
   given Widen[I64] = new NumericIntervalWiden[Long](longIntervalBounds, Long.MinValue, Long.MaxValue)
 
-  //  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
-  //    override def apply(c: ConcreteInterpreter.Value): Value = c match
-  //      case ConcreteInterpreter.Value.TopValue => Value.TopValue
-  //      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
-  //      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
-  //      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-  //      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
-  //      //case ConcreteInterpreter.Value.Obj(o) => Value.Obj(Topped.Actual(o))
-  //      //case ConcreteInterpreter.Value.Array(a) => Value.Array(Topped.Actual(a))
-
   type arrayVarStore = Map[ArrayElemAddr, Value]
   type fieldStore = Map[FieldAddr, Value]
   type staticStore = Map[StaticAddr, Value]
