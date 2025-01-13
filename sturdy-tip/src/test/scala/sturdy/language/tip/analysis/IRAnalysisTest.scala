@@ -35,12 +35,12 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip IR analysis"
 
-  val uri = classOf[IRAnalysisTest].getResource("/sturdy/language/tip").toURI;
+  val uri = classOf[IRAnalysisTest].getResource("/sturdy/language/ir").toURI;
 
   Fixpoint.DEBUG = true
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith(".tip") && p.toString.contains("/while")
+    p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       println(s"analyze ${p.getFileName}")
@@ -72,6 +72,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
       println(s"RESULT")
       val ir = IRAnalysis.valueToIR(aresult.get.get)
+      //Files.write(Path.of("/home/armand/test.dot"), Export.toGraphViz(ir).getBytes())
       println(Export.toGraphViz(ir))
 
 
