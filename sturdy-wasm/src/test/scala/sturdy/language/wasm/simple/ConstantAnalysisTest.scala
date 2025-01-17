@@ -136,7 +136,6 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
   testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
-
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 
@@ -184,7 +183,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val constants = ConstantAnalysis.constantInstructions(interp)
+  val constants = ConstantAnalysis.constantInstructionsFix(interp, module)
 
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 

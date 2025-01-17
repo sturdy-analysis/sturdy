@@ -9,7 +9,7 @@ import sturdy.fix.Logger
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
 import sturdy.language.wasm.generic.InstLoc
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Topped
@@ -19,7 +19,7 @@ import sturdy.values.integer.given
 import sturdy.values.given
 import swam.OpCode
 import swam.syntax
-import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
+import swam.syntax.{AConst, Binop, Block, Br, BrIf, BrTable, Call, CallIndirect, Convertop, Drop, If, LoadInst, LoadNInst, Loop, MemoryGrow, MemoryInst, MemorySize, Miscop, Nop, Relop, Return, Select, StoreInst, StoreNInst, Testop, Unop, Unreachable, VarInst}
 
 import scala.collection.MapView
 
@@ -48,11 +48,32 @@ trait ConstantValues extends Interpreter:
     analysis.fixpoint.addContextFreeLogger(constants)
     constants
 
+  def constantInstructionsFix(analysis: Instance, module: swam.syntax.Module): ConstantInstructionsLoggerFix =
+    val constants = new ConstantInstructionsLoggerFix(analysis.stack)(module)(using analysis.failure)
+    analysis.fixpoint.addContextFreeLogger(constants)
+    constants
+
   class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(Topped.Actual(0))
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
+      case Value.TopValue => false
+      case Value.Int32(v) => v.isActual
+      case Value.Int64(v) => v.isActual
+      case Value.Float32(v) => v.isActual
+      case Value.Float64(v) => v.isActual
+    })
+
+    def grouped: Map[String, Map[InstLoc, List[Value]]] =
+      get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
+
+    def groupedCount: Map[String, Int] =
+      get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
+
+  class ConstantInstructionsLoggerFix(stack: DecidableOperandStack[Value])(module: swam.syntax.Module)(using Failure) extends InstructionResultLoggerFix[Value](stack)(module):
+
+    def get: Map[InstLoc, List[Value]] = instructionInfo.filter(i => !instructions(i._1).isInstanceOf[AConst]).filter(_._2.forall {
       case Value.TopValue => false
       case Value.Int32(v) => v.isActual
       case Value.Int64(v) => v.isActual

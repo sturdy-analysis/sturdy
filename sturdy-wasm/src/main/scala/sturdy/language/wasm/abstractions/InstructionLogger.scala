@@ -5,12 +5,10 @@ import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.fix
-import sturdy.language.wasm.generic.{FixIn, FixOut}
-import sturdy.language.wasm.generic.InstLoc
+import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc, ModuleInstance}
 import sturdy.values.*
-import swam.OpCode
-import swam.syntax
-import swam.syntax.Inst
+import swam.{BlockType, OpCode, syntax}
+import swam.syntax.{AConst, Binop, Block, Br, BrIf, BrTable, Call, CallIndirect, Convertop, Drop, GlobalGet, GlobalSet, If, Inst, LoadInst, LoadNInst, LocalGet, LocalSet, LocalTee, Loop, MemoryGrow, MemoryInst, MemorySize, Miscop, Nop, Relop, Return, Select, StoreInst, StoreNInst, Testop, Unop, Unreachable, VarInst, f32, f64, i32, i64}
 
 trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, FixOut[V]]:
 
@@ -97,3 +95,53 @@ trait InstructionResultLogger[V](stack: DecidableOperandStack[V])(using Top[V], 
     case _: syntax.If | _: syntax.BrIf => true
     case _: syntax.Select.type => true
     case _ => false
+
+trait InstructionResultLoggerFix[V](stack: DecidableOperandStack[V])(module : swam.syntax.Module)(using Top[V], Join[V]) extends InstructionLogger[List[V], V]:
+
+  override def enterInfo(inst: Inst): Option[List[V]] = None
+
+  override def exitInfo(inst: Inst, success: Boolean): Option[List[V]] =
+    val n = writeToStack(inst)
+    if(n > 0 && success) Some(stack.peekNOrAbort(n)) else None
+
+  def writeToStack(inst: syntax.Inst): Int =
+    inst match
+      case _: AConst => 1
+      case _: Unop => 1
+      case _: Binop => 1
+      case _: Testop => 1
+      case _: Relop => 1
+      case _: Convertop => 1
+      case _: Miscop => 1
+      case inst: MemoryInst => inst match
+        case _: LoadInst => 1
+        case _: LoadNInst => 1
+        case _: StoreInst => 0
+        case _: StoreNInst => 0
+      case inst: VarInst => inst match
+        case LocalGet(_) => 1
+        case LocalSet(_) => 0
+        case LocalTee(_) => 1
+        case GlobalGet(_) => 1
+        case GlobalSet(_) => 0
+      case Drop => 0
+      case Select => 1
+      case MemorySize => 1
+      case MemoryGrow => 1
+      case Nop => 0
+      case Unreachable => 0
+      case Block(tpe, _) => tpe match
+        case BlockType.FunctionType(tpe) => module.types(tpe).t.length
+        case _ => 0
+      case Loop(tpe, _) => tpe match
+        case BlockType.FunctionType(tpe) => module.types(tpe).t.length
+        case _ => 0
+      case If(tpe, _, _) => tpe match
+        case BlockType.FunctionType(tpe) => module.types(tpe).t.length
+        case _ => 0
+      case Br(_) => 0
+      case BrIf(_) => 0
+      case BrTable(_, _) => 0
+      case Return => 0
+      case Call(funcidx) => module.types(module.funcs(funcidx).tpe).t.length
+      case CallIndirect(typeidx) => module.types(typeidx).t.length
