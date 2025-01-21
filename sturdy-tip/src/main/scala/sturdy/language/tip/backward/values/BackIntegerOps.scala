@@ -4,10 +4,9 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.tip.backward.Meet
 import sturdy.language.tip.backward.TipBackFailure.BackwardsUnreachable
-import sturdy.values.integer.{CombineIntSign, IntSign, Interval, MyIntervalIntegerOps, SignIntegerOps}
+import sturdy.values.integer.{CombineIntSign, IntSign, IntegerOps, Interval, MyIntervalIntegerOps, SignIntegerOps}
 import sturdy.values.integer.IntSign.*
 import sturdy.values.integer.Interval.{I, *}
-import sturdy.values.integer.CombineIntSign
 
 
 
