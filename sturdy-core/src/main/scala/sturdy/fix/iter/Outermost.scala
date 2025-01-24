@@ -15,15 +15,15 @@ import scala.util.Try
  * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
  * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
  */
-def outermost[Dom, Codom, In, Out, All, Ctx]
+def outermost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
-  : Outermost[Dom, Codom, In, Out, All, Ctx] =
+  : Outermost[Dom, Codom, Ctx] =
   new Outermost(config, state, context)
 
-final class Outermost[Dom, Codom, In, Out, All, Ctx]
+final class Outermost[Dom, Codom, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
   (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
   extends Combinator[Dom, Codom], HasFixpointCache[Dom, Codom]:

@@ -16,15 +16,15 @@ import scala.util.Try
  * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
  * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
  */
-def topmost[Dom, Codom, In, Out, All, Ctx]
+def topmost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: State)
   (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
-  : Topmost[Dom, Codom, In, Out, All, Ctx] =
+  : Topmost[Dom, Codom, Ctx] =
   new Topmost(config, state, context)
 
-final class Topmost[Dom, Codom, In, Out, All, Ctx]
+final class Topmost[Dom, Codom, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
   (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
   extends Combinator[Dom, Codom], HasFixpointCache[Dom, Codom]:
