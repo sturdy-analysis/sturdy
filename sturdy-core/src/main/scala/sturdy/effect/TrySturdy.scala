@@ -26,10 +26,10 @@ case class RecurrentCall(frame: Any) extends SturdyThrowable:
  *  - [[TrySturdy.Recurrent]] is the result of a computation that encountered a recurrent recursive call (a recursive call that reappears further up the stack). 
  */
 enum TrySturdy[+A]:
-  protected case Success(a: A)
-  protected case Failure(f: SturdyFailure)
-  protected case Exception(e: SturdyException)
-  protected case Recurrent(rc: RecurrentCall)
+  case Success(a: A)
+  case Failure(f: SturdyFailure)
+  case Exception(e: SturdyException)
+  case Recurrent(rc: RecurrentCall)
 
   def isSuccess: Boolean = this match
     case _: Success[_] => true

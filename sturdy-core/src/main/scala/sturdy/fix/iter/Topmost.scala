@@ -2,7 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, State}
+import sturdy.fix.{Combinator, Contextual, Fixpoint, HasFixpointCache, Stack, StackConfig, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Join, Widen}
@@ -20,20 +20,22 @@ def topmost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: State)
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
   : Topmost[Dom, Codom, In, Out, All, Ctx] =
   new Topmost(config, state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
-  extends Combinator[Dom, Codom]:
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  extends Combinator[Dom, Codom], HasFixpointCache[Dom, Codom]:
 
   override def equals(obj: Any): Boolean = super.equals(obj)
 
   private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
   private var someComponentIsLooping: Boolean = false
   private var iterationCount: Int = 1
+
+  override def getCache: Map[Dom, TrySturdy[Codom]] = stack.getCache
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =

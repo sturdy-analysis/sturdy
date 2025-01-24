@@ -51,7 +51,7 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(Stac
 
   def get[V, In, Out, All, Ctx]
     (using EffectStack)
-    (using Widen[V])
+    (using Join[V], Widen[V])
     (using Finite[Ctx])
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
 

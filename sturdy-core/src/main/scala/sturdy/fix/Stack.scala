@@ -11,7 +11,7 @@ import sturdy.values.MaybeChanged
 object Stack:
   def apply[Dom, Codom, Ctx](state: State)
                             (config: StackConfig, contextual: Contextual[Ctx, Dom, Codom])
-                            (using Finite[Dom], Finite[Ctx], Widen[Codom])
+                            (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
                             : Stack[Dom, Codom, state.In, state.Out] = config match
     case StackConfig.StackedStates(readPriorOutput, observers) =>
       StackedStates(state)(new ContextualInStateWidening(contextual)(using state.stackWiden), readPriorOutput, observers)
@@ -20,7 +20,7 @@ object Stack:
 
   type FixEvent = FixpointControlEvent[Nothing,Nothing,Nothing,Any]
 
-trait Stack[Dom, Codom, In, Out]:
+trait Stack[Dom, Codom, In, Out] extends HasFixpointCache[Dom, Codom]:
   enum PushResult:
     case Recurrent(result: TrySturdy[Codom], widenedOut: Option[Out])
     case Continue(widenedIn: Option[In])
@@ -43,3 +43,6 @@ enum StackConfig:
     case ss: StackedStates => StackedStates(false, observers = ss.observers ++ newObservers.map(_.asInstanceOf[Stack.FixEvent => Unit]))
     case ss: StackedCfgNodes => StackedCfgNodes(false, observers = ss.observers ++ newObservers.map(_.asInstanceOf[Stack.FixEvent => Unit]))
 
+
+trait HasFixpointCache[Dom, Codom]:
+  def getCache: Map[Dom, TrySturdy[Codom]]

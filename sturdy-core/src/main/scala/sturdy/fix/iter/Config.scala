@@ -26,7 +26,7 @@ enum Config:
     case Topmost(config) => s"topmost($config)"
   
   def get[Dom, Codom, Ctx]
-  (using Widen[Codom], EffectStack)
+  (using Join[Codom], Widen[Codom], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = this match
     case Innermost(config) => fix.iter.innermost(config)

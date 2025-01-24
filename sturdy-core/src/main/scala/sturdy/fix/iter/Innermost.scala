@@ -3,10 +3,10 @@ package sturdy.fix.iter
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Stack, Combinator, Contextual, StackConfig, Fixpoint, StackedStates, StackedFrames, State}
+import sturdy.fix.{Combinator, Contextual, Fixpoint, HasFixpointCache, Stack, StackConfig, StackedFrames, StackedStates, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
-import sturdy.values.{Widen, Join}
+import sturdy.values.{Join, Widen}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -21,18 +21,20 @@ def innermost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: State)
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
   : Innermost[Dom, Codom, Ctx] =
   new Innermost(config, state, context)
 
 
 final class Innermost[Dom, Codom, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
-  extends Combinator[Dom, Codom]:
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  extends Combinator[Dom, Codom], HasFixpointCache[Dom, Codom]:
 
   private val stack: Stack[Dom, Codom, state.In, state.Out] = Stack(state)(config, context)
   private var iterationCounts: Map[Dom, Int] = Map()
+
+  override def getCache: Map[Dom, TrySturdy[Codom]] = stack.getCache
 
   /** Runs `f` until a fixed point is reached as soon as something is looping. */
   override def apply(f: Dom => Codom): Dom => Codom =
@@ -44,7 +46,7 @@ final class Innermost[Dom, Codom, Ctx]
         if (Fixpoint.DEBUG) {
           val iterationCount = iterationCounts.getOrElse(dom, 2)
           iterationCounts += dom -> (iterationCount + 1)
-          println(s"## REPEAT (Iteration $iterationCount) of $dom")
+          println(s"## REPEAT (Iteration $iterationCount) of $dom:${state.getInState(dom)}")
         }
         state.setAllState(allState)
         apply_(dom)

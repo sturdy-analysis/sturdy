@@ -17,7 +17,7 @@ final class StackedStates[Dom, Codom](val state: State)
                                      (inStateWidening: InStateWidening[Dom, state.In],
                                       readPriorOutput: Boolean,
                                       observers: Iterable[Stack.FixEvent => Unit])
-                                     (using Finite[Dom], Widen[Codom])
+                                     (using Finite[Dom], Join[Codom], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
 
   /** Set of active calls identified by their context and their stack position.
@@ -29,6 +29,10 @@ final class StackedStates[Dom, Codom](val state: State)
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
   private val outCache: mutable.Map[(Dom, state.In), OutCacheEntry] = mutable.Map()
+
+  override def getCache: Map[Dom, TrySturdy[Codom]] = outCache.groupBy(_._1._1).view.mapValues { m =>
+    m.values.map(_.result).reduce((r1,r2) => Join(r1,r2).get)
+  }.toMap
 
   case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
     def isStable: Boolean = stability eq Stability.Stable
@@ -116,7 +120,8 @@ final class StackedStates[Dom, Codom](val state: State)
     val stateFrame = (dom, in)
     inStateWidening.pop(dom, in)
     val newStackHeight = stackHeight - 1
-    val updatedResult = if (corecurrentCalls.remove(newStackHeight)) {
+    val isCorecurrent = corecurrentCalls.remove(newStackHeight)
+    val updatedResult = if (isCorecurrent) {
       storeCorecurrentOutput(stateFrame, result, out)
     } else {
       if (Fixpoint.DEBUG)
@@ -135,7 +140,7 @@ final class StackedStates[Dom, Codom](val state: State)
     case None =>
       outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- ${Changed(result)}:$out")
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- Initial($result):$out")
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
@@ -152,14 +157,15 @@ final class StackedStates[Dom, Codom](val state: State)
         }
         PopResult.Unstable(newResult.get, Some(newOut.get))
       } else {
-        outCacheEntry.stability = Stability.Stable
+        if (!hasRecurrentCalls)
+          outCacheEntry.stability = Stability.Stable
         PopResult.Stable
       }
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
                        (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
-                       (using Finite[Dom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
+                       (using Finite[Dom], Join[Codom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
     new StackedStates(state)(inStateWidening, readPriorOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 trait InStateWidening[Dom, In]:
