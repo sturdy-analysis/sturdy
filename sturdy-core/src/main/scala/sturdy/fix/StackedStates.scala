@@ -15,7 +15,7 @@ import scala.util.Try
 
 final class StackedStates[Dom, Codom](val state: State)
                                      (inStateWidening: InStateWidening[Dom, state.In],
-                                      readPriorOutput: Boolean,
+                                      readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean,
                                       observers: Iterable[Stack.FixEvent => Unit])
                                      (using Finite[Dom], Join[Codom], Widen[Codom])
   extends Stack[Dom, Codom, state.In, state.Out]:
@@ -79,7 +79,7 @@ final class StackedStates[Dom, Codom](val state: State)
           if (outEntry.exists(_.isStable)) {
             // previous input subsumes current input and previous result still stable => return previous result
             val OutCacheEntry(result, out, _) = outEntry.get
-            if (Fixpoint.DEBUG)
+            if (Fixpoint.DEBUG_PRIOR_OUTPUT)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
             fire(FixpointControlEvent.Recurrent(stateFrame))
             return PushResult.Recurrent(result, Some(out))
@@ -123,6 +123,9 @@ final class StackedStates[Dom, Codom](val state: State)
     val isCorecurrent = corecurrentCalls.remove(newStackHeight)
     val updatedResult = if (isCorecurrent) {
       storeCorecurrentOutput(stateFrame, result, out)
+    } else if (storeNonrecursiveOutput) {
+      storeCorecurrentOutput(stateFrame, result, out)
+      PopResult.Stable
     } else {
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
@@ -164,9 +167,9 @@ final class StackedStates[Dom, Codom](val state: State)
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
-                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
+                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
                        (using Finite[Dom], Join[Codom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
-    new StackedStates(state)(inStateWidening, readPriorOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
+    new StackedStates(state)(inStateWidening, readPriorOutput, storeNonrecursiveOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 trait InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In]
