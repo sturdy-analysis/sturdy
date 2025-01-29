@@ -49,6 +49,8 @@ final class StackedStates[Dom, Codom](val state: State)
   private val corecurrentCalls: mutable.Set[Int] = mutable.BitSet()
   def hasRecurrentCalls: Boolean = corecurrentCalls.nonEmpty
 
+  private val recurrentDeps: mutable.Map[Int, Set[OutCacheEntry]] = mutable.Map()
+
   override def toString: String = stack.keys.map(k => k.hashCode()).toString()
 
   private def fire(ev: Stack.FixEvent): Unit = observers.foreach(_.apply(ev.asInstanceOf[Stack.FixEvent]))
@@ -76,6 +78,8 @@ final class StackedStates[Dom, Codom](val state: State)
       case None =>
         if (readPriorOutput) {
           val outEntry = outCache.get(stateFrame)
+          if (Fixpoint.DEBUG_PRIOR_OUTPUT && outEntry.isDefined)
+            println(s"${stackHeightIndent}FOUND PRIOR OUTPUT $stateFrame <- $outEntry")
           if (outEntry.exists(_.isStable)) {
             // previous input subsumes current input and previous result still stable => return previous result
             val OutCacheEntry(result, out, _) = outEntry.get
@@ -122,6 +126,7 @@ final class StackedStates[Dom, Codom](val state: State)
     val newStackHeight = stackHeight - 1
     val isCorecurrent = corecurrentCalls.remove(newStackHeight)
     val updatedResult = if (isCorecurrent) {
+      recurrentDeps.remove(newStackHeight).getOrElse(Set()).foreach(_.stability = Stability.Unstable)
       storeCorecurrentOutput(stateFrame, result, out)
     } else if (storeNonrecursiveOutput) {
       storeCorecurrentOutput(stateFrame, result, out)
@@ -160,8 +165,10 @@ final class StackedStates[Dom, Codom](val state: State)
         }
         PopResult.Unstable(newResult.get, Some(newOut.get))
       } else {
-        if (!hasRecurrentCalls)
-          outCacheEntry.stability = Stability.Stable
+        /* mark as stable */
+        outCacheEntry.stability = Stability.Stable
+        /* but register dependencies on other active recurrent calls */
+        corecurrentCalls.foreach(i => recurrentDeps(i) = recurrentDeps.getOrElse(i, Set()) + outCacheEntry)
         PopResult.Stable
       }
 
