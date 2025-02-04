@@ -34,7 +34,7 @@ final class StackedStates[Dom, Codom](val state: State)
     m.values.map(_.result).reduce((r1,r2) => Join(r1,r2).get)
   }.toMap
 
-  case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
+  case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability, nonrecurrent: Boolean):
     def isStable: Boolean = stability eq Stability.Stable
     def setStable(): Unit = this.stability = Stability.Stable
     def setUnstable(): Unit = this.stability = Stability.Unstable
@@ -80,9 +80,9 @@ final class StackedStates[Dom, Codom](val state: State)
           val outEntry = outCache.get(stateFrame)
           if (Fixpoint.DEBUG_PRIOR_OUTPUT && outEntry.isDefined)
             println(s"${stackHeightIndent}FOUND PRIOR OUTPUT $stateFrame <- $outEntry")
-          if (outEntry.exists(_.isStable)) {
+          if (outEntry.exists(o => o.isStable && !o.nonrecurrent)) {
             // previous input subsumes current input and previous result still stable => return previous result
-            val OutCacheEntry(result, out, _) = outEntry.get
+            val OutCacheEntry(result, out, _, _) = outEntry.get
             if (Fixpoint.DEBUG_PRIOR_OUTPUT)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
             fire(FixpointControlEvent.Recurrent(stateFrame))
@@ -110,7 +110,7 @@ final class StackedStates[Dom, Codom](val state: State)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
             fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
-          case Some(OutCacheEntry(res, previousOut, _)) =>
+          case Some(OutCacheEntry(res, previousOut, _, _)) =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
             fire(FixpointControlEvent.Recurrent(stateFrame))
@@ -127,9 +127,9 @@ final class StackedStates[Dom, Codom](val state: State)
     val isCorecurrent = corecurrentCalls.remove(newStackHeight)
     val updatedResult = if (isCorecurrent) {
       recurrentDeps.remove(newStackHeight).getOrElse(Set()).foreach(_.stability = Stability.Unstable)
-      storeCorecurrentOutput(stateFrame, result, out)
+      storeCorecurrentOutput(stateFrame, result, out, false)
     } else if (storeNonrecursiveOutput) {
-      storeCorecurrentOutput(stateFrame, result, out)
+      storeCorecurrentOutput(stateFrame, result, out, true)
       PopResult.Stable
     } else {
       if (Fixpoint.DEBUG)
@@ -144,13 +144,13 @@ final class StackedStates[Dom, Codom](val state: State)
     updatedResult
 
 
-  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
+  inline private def storeCorecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, nonrecurrent: Boolean): PopResult = outCache.get(frame) match
     case None =>
-      outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable))
+      outCache.put(frame, OutCacheEntry(result, out, Stability.Unstable, nonrecurrent))
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- Initial($result):$out")
       PopResult.Unstable(result, None)
-    case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
+    case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, _, previousNonrecurrent)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
       val currentOut = state.getOutState(frame._1)
@@ -159,7 +159,7 @@ final class StackedStates[Dom, Codom](val state: State)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
       if (changed) {
-        outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))
+        outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable, previousNonrecurrent && nonrecurrent))
         if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
           throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
         }
