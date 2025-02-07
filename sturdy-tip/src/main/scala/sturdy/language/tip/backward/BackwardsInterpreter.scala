@@ -84,6 +84,7 @@ trait BackwardsInterpreter:
       case (TopValue, _) => Some(v2)
       case (_, TopValue) => Some(v1)
       case (IntValue(i1), IntValue(i2)) => Meet(i1, i2).map(Value.IntValue.apply)
+      case (v1, v2) => if(v1 == v2) then Some(v1) else None
       case _ => None
 
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}

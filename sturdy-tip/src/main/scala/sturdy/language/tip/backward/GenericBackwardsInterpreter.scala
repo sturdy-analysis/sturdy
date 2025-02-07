@@ -172,7 +172,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
       val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
-      println(s"????Getting adress for ${e} and ${topAddr.toString}: ${v}. Expected: $expected")
+      //println(s"????Getting adress for ${e} and ${topAddr.toString}: ${v}. Expected: $expected")
       val refined = assert(v, expected)
       val addr = evalBack(e, refValue(topAddr))
       store.write(refAddr(addr), refined)
@@ -256,7 +256,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
       callFrame.setLocalByName(x, topValue)
       v
     case Assignable.ADeref(e) =>
-      println(s"!!!????Getting adress for ${e}: ${store.read(topAddr)}")
+      //println(s"!!!????Getting adress for ${e}: ${store.read(topAddr)}")
       val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
       val addr = evalBack(e, refValue(topAddr))
       store.write(refAddr(addr), topValue)

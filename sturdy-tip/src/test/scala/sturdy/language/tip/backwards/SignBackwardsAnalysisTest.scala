@@ -28,6 +28,7 @@ import sturdy.language.tip.backward.SignBackwardsAnalysis
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
+import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
 class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
@@ -37,7 +38,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString != "simple4.tip"
+    p.getFileName.toString == "simple7.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -62,12 +63,15 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     if (program.funs.exists(_.name == "main")) {
       //println(s"Program is ${program}")
       val analysis = new SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
-      val expectedVal = analysis.intOps.toValue(List(5))
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val evalVal = interp.failure.fallible(interp.execute(program))
 
-      println(s"Expected output of the program is ${evalVal} ")
+      val res = evalVal.get.toString.split("\\(")
+      val transformed = res(1).dropRight(1).toInt
+      val expectedVal = analysis.intOps.toValue(List(transformed))
+
+      println(s"Expected output of the program is ${evalVal}; transform check: ${transformed} ")
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
 

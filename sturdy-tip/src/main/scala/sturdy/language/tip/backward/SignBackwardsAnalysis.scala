@@ -36,14 +36,16 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
     private given Failure = failure
 
     override val topInt: Value = Value.IntValue(IntSign.TopSign)
-    override  val topValue: Value = Value.IntValue(IntSign.TopSign)
+    override  val topValue: Value = Value.TopValue
     override def topFunction: Value = Value.FunValue(Powerset(functions.values.toSet))
 
     override def topAddr: Powerset[AllocationSiteAddr] =
       Powerset(functions.values.toSet.flatMap(_.fold(using
         fun => (fun.params ++ fun.locals).map(p => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)).toSet,
         _ => Set[AllocationSiteAddr](),
-        { case Exp.Alloc(e) => Set(AllocationSiteAddr.Alloc(e.label)(true)); case _ => Set() }
+        { case Exp.Alloc(e) =>
+            Set(AllocationSiteAddr.Alloc(e.label)(true));
+          case _ => Set() }
       )))
 
     //val initStoreTop: Store =  topAddr.toList.map(x => (x,topValue)).toMap
