@@ -40,10 +40,10 @@ final class Topmost[Dom, Codom, Ctx]
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
-    def apply_(dom: Dom): Codom =
+    def apply_(recursive: Boolean)(dom: Dom): Codom =
       if (stack.height == 0) {
         val allState: state.All = state.getAllState
-        val result = step(f, dom)
+        val result = step(f, dom, recursive)
         if (someComponentIsLooping) {
           if (Fixpoint.DEBUG) {
             iterationCount += 1
@@ -51,19 +51,19 @@ final class Topmost[Dom, Codom, Ctx]
           }
           someComponentIsLooping = false
           state.setAllState(allState)
-          apply_(dom)
+          apply_(recursive = true)(dom)
         } else
           result.getOrThrow
       } else {
-        step(f, dom).getOrThrow
+        step(f, dom, recursive).getOrThrow
       }
-    apply_
+    apply_(recursive = false)
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
+  private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): TrySturdy[Codom] =
     val in = state.getInState(dom)
     val outBefore = state.getOutState(dom)
-    stack.push(dom, in, outBefore) match
+    stack.push(dom, in, outBefore, recursive) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
         widenedOut.foreach(state.setOutState(dom, _))
         result

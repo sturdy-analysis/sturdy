@@ -39,9 +39,9 @@ final class Innermost[Dom, Codom, Ctx]
   /** Runs `f` until a fixed point is reached as soon as something is looping. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
-    def apply_(dom: Dom): Codom = {
+    def apply_(recursive: Boolean)(dom: Dom): Codom = {
       val allState: state.All = state.getAllState
-      val (result, loop) = step(f, dom)
+      val (result, loop) = step(f, dom, recursive)
       if (loop) {
         if (Fixpoint.DEBUG) {
           val iterationCount = iterationCounts.getOrElse(dom, 2)
@@ -49,17 +49,17 @@ final class Innermost[Dom, Codom, Ctx]
           println(s"## REPEAT (Iteration $iterationCount) of $dom:${state.getInState(dom)}")
         }
         state.setAllState(allState)
-        apply_(dom)
+        apply_(recursive = true)(dom)
       } else {
         result.getOrThrow
       }
     }
-    apply_
+    apply_(recursive = false)
 
-  private def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
+  private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): (TrySturdy[Codom], Boolean) =
     val in = state.getInState(dom)
     val outBefore = state.getOutState(dom)
-    stack.push(dom, in, outBefore) match
+    stack.push(dom, in, outBefore, recursive) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
         widenedOut.foreach(state.setOutState(dom, _))
         (result, false)

@@ -29,14 +29,14 @@ trait Stack[Dom, Codom, In, Out] extends HasFixpointCache[Dom, Codom]:
     case Stable
     case Unstable(codom: TrySturdy[Codom], widenedOut: Option[Out])
 
-  def push(dom: Dom, in: In, currentOut: Out): PushResult
+  def push(dom: Dom, in: In, currentOut: Out, invalidate: Boolean): PushResult
   def pop(dom: Dom, in: In, codom: TrySturdy[Codom], out: Out): PopResult
 
   def height: Int
   def hasRecurrentCalls: Boolean
 
 enum StackConfig:
-  case StackedStates(readPriorOutput: Boolean = true, storeNonrecursiveOutput: Boolean = false, observers: Iterable[Stack.FixEvent => Unit] = Seq())
+  case StackedStates(readPriorOutput: Boolean = true, storeNonrecursiveOutput: Boolean = true, observers: Iterable[Stack.FixEvent => Unit] = Seq())
   case StackedCfgNodes(readPriorOutput: Boolean = true, onlyWriteInCacheWhenRecurrent: Boolean = true, observers: Iterable[Stack.FixEvent => Unit] = Seq())
 
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): StackConfig = this match

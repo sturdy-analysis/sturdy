@@ -95,7 +95,7 @@ final class StackedFrames[Dom, Codom, Ctx](val state: State)
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: state.In, currentOut: state.Out): PushResult =
+  def push(dom: Dom, in: state.In, currentOut: state.Out, invalidate: Boolean): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
