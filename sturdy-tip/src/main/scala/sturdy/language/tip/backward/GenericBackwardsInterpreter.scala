@@ -187,14 +187,14 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     //    case _ => failure(BackwardsUnreachable, s"not implemented yet: expression $e")
 
 
-//    case r@Exp.Record(fields) =>
-//      // represents record as a reference to a record value
-//      val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
-//      val rec = makeRecord(fieldVals)
-//      val addr = alloc(AllocationSite.Record(r))
-//      println("This is the")
-//      store.write(addr, rec)
-//      refValue(addr)
+    case r@Exp.Record(fields) =>
+      // represents record as a reference to a record value
+      val fieldVals = fields.map(fe => Field(fe._1) -> evalBack(fe._2, topValue))
+      val rec = makeRecord(fieldVals)
+      val addr = alloc(AllocationSite.Record(r))
+      println("This is the")
+      store.write(addr, rec)
+      refValue(addr)
 
     case Exp.FieldAccess(rec, field) =>
       val v = store.read(topAddr).getOrElse(failure(UnboundVariable, topAddr.toString))
