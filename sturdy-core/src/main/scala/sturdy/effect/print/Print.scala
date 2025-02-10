@@ -6,3 +6,8 @@ import sturdy.effect.Effect
 trait Print[A] extends Effect:
   def apply(a: A): Unit
   def print(a: A): Unit = apply(a)
+
+trait BackwardPrint[A] extends Effect:
+  def apply(a: A => A): Unit
+  def print(a: A => A): Unit = apply(a)
+  

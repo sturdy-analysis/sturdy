@@ -20,3 +20,25 @@ trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
 trait MayStore[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]
 /** Tracks definite values for an address. When a read succeeds, the address must have that value and is definitely bound. */
 trait MustStore[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]
+
+
+/*
+
+forward store:
+    1. initially empty
+    2. alloc address
+    3. write to address
+    4. read from address, may fail
+
+backward store:
+    1. initially top value for all valid addresses
+    2. read expected value from address: refine stored value
+    3. store value in address: refine value, drop constraints on stored value
+    4. alloc address: nothing
+ */
+
+trait BackwardStore[Addr, V, J[_] <: MayJoin[_]] extends Effect:
+  /** Assert expected value is in cell. */
+  def read(x: Addr => Addr): V => JOption[J, V]
+  def write(x: Addr => Addr, v: V => V): Unit
+  

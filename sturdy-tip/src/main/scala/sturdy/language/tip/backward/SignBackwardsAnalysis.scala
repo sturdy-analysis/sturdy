@@ -12,6 +12,7 @@ import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
 import sturdy.fix.{CombinatorFixpoint, StackConfig, given}
+import sturdy.language.tip.AllocationSite.Alloc
 import sturdy.language.tip.{AllocationSite, Field, *, given}
 import sturdy.language.tip.backward.abstractions.*
 import sturdy.language.tip.backward.values.{*, given}
@@ -41,10 +42,10 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
 
     override def topAddr: Powerset[AllocationSiteAddr] =
       Powerset(functions.values.toSet.flatMap(_.fold(using
-        fun => (fun.params ++ fun.locals).map(p => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)).toSet,
+        fun => Set[AllocationSiteAddr](),
+          // (fun.params ++ fun.locals).map(p => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)).toSet,
         _ => Set[AllocationSiteAddr](),
-        { case Exp.Alloc(e) =>
-            Set(AllocationSiteAddr.Alloc(e.label)(true));
+        { case e@Exp.Alloc(_) => fromAllocationSite(AllocationSite.Alloc(e)).set
           case _ => Set() }
       )))
 
