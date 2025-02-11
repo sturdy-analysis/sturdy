@@ -1,8 +1,11 @@
 package sturdy.language.tip.backwards
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.CAllocationIntIncrement
@@ -13,6 +16,7 @@ import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.analysis.SignAnalysis.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
+import sturdy.language.tip.backward.SignBackwardsAnalysisSoundness.given
 import sturdy.language.tip.*
 import sturdy.util.Labeled
 import sturdy.values.booleans.{*, given}
@@ -23,6 +27,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 import sturdy.*
+import sturdy.AbstractlySound
 import sturdy.language.tip.backward.SignBackwardsAnalysis
 
 import java.nio.file.{Files, Path, Paths}
@@ -74,6 +79,9 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
       println(s"Expected output of the program is ${evalVal}; transform check: ${transformed} ")
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
+
+      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(evalVal, aresult))
+      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
 
       println(s"Backward run of ${p.getFileName} ")
       aresult match

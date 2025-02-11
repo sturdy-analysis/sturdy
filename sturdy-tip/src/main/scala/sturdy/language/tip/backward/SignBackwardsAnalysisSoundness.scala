@@ -1,23 +1,19 @@
-package sturdy.language.tip.analysis
+package sturdy.language.tip.backward
 
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
-import sturdy.values.Abstractly
-import sturdy.language.tip.{ConcreteInterpreter, Function, given}
-import sturdy.language.tip.{AllocationSite, Field}
-import sturdy.values.PartialOrder
-import sturdy.{*, given}
+import sturdy.language.tip.backward.SignBackwardsAnalysis
+import sturdy.language.tip.backward.SignBackwardsAnalysis.*
+import sturdy.language.tip.{AllocationSite, ConcreteInterpreter, Field, Function, given}
 import sturdy.util.{*, given}
-import sturdy.values.{*, given}
+import sturdy.values.Topped.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.records.{*, given}
-import sturdy.values.relational.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.{Topped, given}
-import sturdy.values.Topped.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
+import sturdy.{*, given}
 
-import SignAnalysis.*
-
-object SignAnalysisSoundness:
+object SignBackwardsAnalysisSoundness:
   given addrAbstractly(using calloc: CAllocationIntIncrement[AllocationSite]): Abstractly[ConcreteInterpreter.Addr, Addr] =
     new AllocationContextAbstractly(calloc, fromAllocationSite)
 
@@ -39,13 +35,13 @@ object SignAnalysisSoundness:
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
       case _ => false
+
   given Lazy[PartialOrder[Value]] = lazily(po)
 
-  given Soundness[ConcreteInterpreter.Instance, SignAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: SignAnalysis.Instance): IsSound = {
+  given Soundness[ConcreteInterpreter.Instance, SignBackwardsAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: SignBackwardsAnalysis.Instance): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.alloc
 
       // concrete environment is sound by construction
-      a.store.storeIsSound(c.store) &&
-      a.print.isSound(c.print)
+      a.store.storeIsSound(c.store)
     }
