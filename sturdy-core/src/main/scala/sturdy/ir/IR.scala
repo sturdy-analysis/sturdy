@@ -5,17 +5,17 @@ import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder}
 import scala.collection.mutable
 
 trait IROperator
-trait IRCheck[C]:
-  def assert(c: C): C
-
-case class SoundnessCheck[C,A](abs: Abstractly[C,A], unsafe: A, po: PartialOrder[A]) extends IRCheck[C]:
-  override def assert(c: C): C =
-    val a = abs(c)
-    if (po.lteq(a, unsafe)) {
-      c
-    } else {
-      throw new AssertionError(s"Unsound assumption $unsafe for run-time value $c, which abstracts to $a")
-    }
+//trait IRCheck[C]:
+//  def assert(c: C): C
+//
+//case class SoundnessCheck[C,A](abs: Abstractly[C,A], unsafe: A, po: PartialOrder[A]) extends IRCheck[C]:
+//  override def assert(c: C): C =
+//    val a = abs(c)
+//    if (po.lteq(a, unsafe)) {
+//      c
+//    } else {
+//      throw new AssertionError(s"Unsound assumption $unsafe for run-time value $c, which abstracts to $a")
+//    }
 
 enum IR:
   val uid = new IR_UID
@@ -25,8 +25,9 @@ enum IR:
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
-  case Feedback(init: IR, var cond: Option[IR], var loop: Option[IR])
-  case Cast[C](ir: IR, check: IRCheck[C])
+  case Feedback(init: List[IR], var cond: Option[IR], var step: List[IR])
+  case FeedbackAsk(index: Int, feedback: Option[Feedback])
+//  case Cast[C](ir: IR, check: IRCheck[C])
 
   override def hashCode(): Int = uid.hashCode()
   override def equals(obj: Any): Boolean = obj match
@@ -40,7 +41,8 @@ enum IR:
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
-    case IR.Feedback(init, cond, loop) => Seq(init -> "init") ++ cond.map(_ -> "cond") ++ loop.map(_ -> "loop")
+    case IR.Feedback(init, cond, step) => init.zipWithIndex.map((ir, i) => ir -> s"init_$i") ++ cond.map(_ -> "cond") ++ step.zipWithIndex.map((ir, i) => ir -> s"step_$i")
+    case IR.FeedbackAsk(_, feedback) => feedback.map(_ -> "feedback").toList
 
   override def toString: String = this match
     case IR.Unknown() => s"Unknown@$uid"
@@ -49,7 +51,8 @@ enum IR:
     case IR.Op(op, args) => s"Op($op)@$uid"
     case IR.Select(cond, left, right) => s"Select@$uid"
     case IR.Join(left, right) => s"Join@$uid"
-    case IR.Feedback(init, cond, loop) => s"Feedback@$uid"
+    case IR.Feedback(init, cond, step) => s"Feedback@$uid"
+    case IR.FeedbackAsk(index, fb)  => s"FeedbackAsk($index, $fb)@$uid"
 
   def foreach(f: IR => Unit): Unit =
     val visited = mutable.Set[IR]()
@@ -82,7 +85,7 @@ class IRJoin extends Join[IR]:
   override def apply(v1: IR, v2: IR): MaybeChanged[IR] = MaybeChanged.Changed(IR.Join(v1, v2))
 
 class SelectJoin(cond: IR) extends Join[IR]:
-  def apply(v1: IR, v2: IR): MaybeChanged[IR] = MaybeChanged.Changed(IR.Select(cond, v1, v2))
+  override def apply(v1: IR, v2: IR): MaybeChanged[IR] = MaybeChanged.Changed(IR.Select(cond, v1, v2))
 
 class IR_UID:
   override def toString: String = Integer.toHexString(hashCode)

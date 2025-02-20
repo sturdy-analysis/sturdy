@@ -25,7 +25,7 @@ import sturdy.values.{*, given}
 import sturdy.{Executor, data, fix}
 
 object IRAnalysis extends Interpreter,
-  Ints.IRVal, Functions.Powerset, Records.IRRecords, References.IRRef, Fix:
+  Ints.IRVal, Functions.IRFun, Records.IRRecords, References.IRRef, Fix:
 
   override type J[A] = WithJoin[A]
 
@@ -34,47 +34,27 @@ object IRAnalysis extends Interpreter,
     case Value.BoolValue(b) => b
     case Value.IntValue(i) => i
     case Value.RefValue(addr) => addr
-    case Value.FunValue(fun) => fun.set.map(IR.Const.apply).reduce(IR.Join.apply)
+    case Value.FunValue(fun) => fun
     case Value.RecValue(rec) => rec
 
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private var currentCond: Option[IR] = None
-    private var currentCondWiden: Option[(IR, Boolean)] = None
+    private var wideningStack: List[List[Value]] = List.empty
+    private var count = 0
+
 
     given IRBooleanBranching[R](using Join[R]): BooleanBranching[IR, R] with
       override def boolBranch(cond: IR, thn: => R, els: => R): R =
-        val vars = callFrame.getState
-        var fvars: Option[List[Value]] = None
-        var gvars: Option[List[Value]] = None
-
         val condBefore = currentCond
-        val conWidenBefore = currentCondWiden
+
         val r = try {
-          joinComputations {
-            currentCondWiden = Some(cond -> true)
-            val rThn = thn
-            fvars = Some(callFrame.getState)
-            rThn
-          } {
-            currentCondWiden = Some(cond -> false)
-            val rEls = els
-            currentCond = Some(cond)
-            gvars = Some(callFrame.getState)
-            rEls
-          }
+          currentCond = Some(cond)
+          joinComputations { thn } { els }
         } finally {
           currentCond = condBefore
-          currentCondWiden = conWidenBefore
         }
-        println(s"boolBranch($cond)")
-        println(s"  vars before = $vars")
-        println(s"       cond   = $cond")
-        println(s"  vars then   = $fvars")
-        println(s"  vars else   = $gvars")
-        println(s"  vars after  = ${callFrame.getState}")
-        println(s"     result   = $r")
-
         r
+
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
       case Some(cond) => Changed(IR.Select(cond, v2, v1))
@@ -91,7 +71,14 @@ object IRAnalysis extends Interpreter,
     override val boolOps: BooleanOps[Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly
-    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] =  new FunctionOps[Function, Seq[Value], Value, Value] {
+      override def funValue(fun: Function): IRAnalysis.Value = IRAnalysis.Value.FunValue(IR.Const(fun))
+      override def invokeFun(fun: IRAnalysis.Value, a: Seq[IRAnalysis.Value])(invoke: (Function, Seq[IRAnalysis.Value]) => IRAnalysis.Value): IRAnalysis.Value = fun match
+        case Value.FunValue(fun) => fun match
+          case IR.Const(f: Function) => invoke(f, a)
+          case _ => Value.IntValue(IR.Op(IRFunctionOperator.CALL(invoke), fun +: a.map(valueToIR)))
+        case _ => ???
+    }
     override val refOps: ReferenceOps[Addr, Value] = new ReferenceOps[Addr, Value]:
       override def mkNullRef: IRAnalysis.Value = ???
       override def mkRef(trg: PowersetAddr[AllocationSiteAddr, AllocationSiteAddr]): IRAnalysis.Value = ???
@@ -104,8 +91,75 @@ object IRAnalysis extends Interpreter,
 
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
-    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame[String, String, Value, Exp.Call]("$main", Iterable.empty) {
+      override def widen: Widen[List[Value]] = (v1: List[Value], v2: List[Value]) =>
+
+        println(s"v1 : $v1")
+        println(s"v2 : $v2")
+        println(s"stack : $wideningStack")
+        println(s"cond : $currentCond")
+        println(s"count : $count")
+        count += 1
+
+        val currentFeedback: Option[IR.Feedback] = v1.map(valueToIR).collectFirst{case v: IR.FeedbackAsk => v.feedback}.flatten // FIXME
+        val currentFeedbackAsks: List[Option[IR.FeedbackAsk]] = v1.map {
+          case Value.TopValue => None
+          case v => valueToIR(v) match
+            case a: IR.FeedbackAsk if a.feedback == currentFeedback => Some(a)
+            case _ => None
+        }
+        val refineFeedback = currentFeedbackAsks.exists(_.isDefined)
+
+        if (refineFeedback) {
+          println("branch 1")
+
+          val done = v1.zip(v2).filter {
+            case (Value.TopValue, _) => false
+            case _ => true
+          }.map((v1, v2) => (valueToIR(v1), valueToIR(v2))).forall((n1, n2) => n1.feedbackReroll(n2))
+
+          if (done || count > 5){ //  if v2 is unrolling of v1
+            // wideningStack = wideningStack.tail
+            Unchanged (v1)
+          } else {
+            val newVals = v2.map(valueToIR)
+            println(s"  old step ${currentFeedback.get.step}")
+            println(s"  new step $newVals")
+
+            if (currentFeedback.get.step == newVals) {
+              Unchanged(v1)
+            } else {
+              // Changed v1 with cond and steps updated
+              currentFeedback.get.cond = currentCond
+              currentFeedback.get.step = newVals
+            }
+            Changed(v1)
+          }
+
+
+        }
+
+        else {
+
+          println("branch 2")
+
+          val feedback: IR.Feedback = IR.Feedback(v1.map(valueToIR), None, List.empty)
+          val asks = v1.zipWithIndex.map((v, i) => v match
+            case Value.TopValue => Value.TopValue
+            case Value.BoolValue(_) => Value.BoolValue(IR.FeedbackAsk(i, Some(feedback)))
+            case Value.IntValue(_) => Value.IntValue(IR.FeedbackAsk(i, Some(feedback)))
+            case Value.RefValue(_) => Value.RefValue(IR.FeedbackAsk(i, Some(feedback)))
+            case Value.FunValue(_) => Value.FunValue(IR.FeedbackAsk(i, Some(feedback)))
+            case Value.RecValue(_) => Value.RecValue(IR.FeedbackAsk(i, Some(feedback)))
+          )
+
+          wideningStack = v1 :: wideningStack
+          Changed(asks)
+        }
+
+    }
+
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded[AllocationSiteAddr, Addr, Value](initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site))
     )
@@ -114,58 +168,7 @@ object IRAnalysis extends Interpreter,
 
     var bounds: Set[Int] = Set()
     given Widen[IR] = new Combine[VInt, Widening.Yes]:
-      var count = 0
-      override def apply(v1: IR, v2: IR): MaybeChanged[IR] = (v1, v2) match
-        case (feedback@IR.Feedback(init, cond, Some(other2)), other) =>
-          println(s"Widening, stable feedback loop ?")
-          println(s"  v1 = $feedback")
-          println(s"  v2 = $other")
-          println(s"  other2 = $other2")
-          println(s"  cond = $currentCond")
-          println(s"  condWiden = $currentCondWiden")
-
-//          println(sturdy.ir.Export.toGraphViz(feedback))
-//          println(sturdy.ir.Export.toGraphViz(other))
-
-          if (other == other2 || true) {
-            Unchanged(feedback)
-          } else
-            ???
-        case (feedback@IR.Feedback(init, None, None), other) =>
-          println(s"Widening, make feedback loop")
-          println(s"  v1 = $v1")
-          println(s"  v2 = $v2")
-          println(s"  cond = $currentCond")
-          println(s"  condWiden = $currentCondWiden")
-
-
-          feedback.loop = Some(other)
-          feedback.cond = currentCondWiden match
-            case Some((c, true)) => Some(c)
-            case Some((c, false)) => Some(IR.Op(???, c))
-            case None => throw new IllegalStateException()
-
-//          println(sturdy.ir.Export.toGraphViz(feedback))
-          Changed(feedback)
-        case _ =>
-          println(s"Widening, prepare feedback loop")
-          println(s"  v1 = $v1")
-          println(s"  v2 = $v2")
-          println(s"  cond = $currentCond")
-          println(s"  condWiden = $currentCondWiden")
-
-          val select = currentCondWiden match
-            case Some((c, true)) => IR.Select(c, v2, v1)
-            case Some((c, false)) => IR.Select(c, v1, v2)
-            case None =>
-              throw new IllegalStateException() // IR.Select(IR.Unknown(), v1, v2)
-
-          val feedback = IR.Feedback(select, None, None)
-//          println(sturdy.ir.Export.toGraphViz(feedback))
-          if (count > 3)
-            ???
-          count += 1
-          Changed(feedback)
+      override def apply(v1: IR, v2: IR): MaybeChanged[IR] = ???
 
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 

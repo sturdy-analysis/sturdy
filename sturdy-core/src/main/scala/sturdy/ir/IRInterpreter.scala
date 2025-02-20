@@ -1,7 +1,7 @@
 package sturdy.ir
 
-import sturdy.effect.EffectStack
-import sturdy.effect.failure.Failure
+import sturdy.effect.{Effect, EffectList, EffectStack}
+import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
 import sturdy.values.{Join, MaybeChanged, Structural, Topped}
 import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching, ToppedBooleanBranching}
 import sturdy.values.functions.IRFunctionOperator
@@ -9,6 +9,7 @@ import sturdy.values.integer.{ConcreteIntegerOps, IRIntegerOperator, IntegerOps,
 import sturdy.values.ordering.{ConcreteOrderingOps, EqOps, IREqualityOperator, IROrderingOperator, OrderingOps, StructuralEqOps, ToppedCertainEqOps, ToppedCertainOrderingOps, ToppedUncertainOrderingOps}
 
 import scala.annotation.tailrec
+import scala.collection.immutable.ArraySeq
 
 
 case class IRValue(c: Any)
@@ -18,7 +19,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   type VInt
   type VBool
 
-  var feedbackStore: Map[IR_UID, IRValue] = Map()
+  var feedbackStore: Map[IR_UID, List[IRValue]] = Map()
 
   val integerOps: IntegerOps[Int, VInt]
   val orderingOps: OrderingOps[VInt, VBool]
@@ -26,7 +27,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   val booleanBranching: BooleanBranching[VBool, IRValue]
 
   def interpret(ir: IR): IRValue = ir match
-    case IR.Unknown() => ???
+    case IR.Unknown() => IRValue(integerOps.randomInteger())
     case IR.External(name) => externals(name)
     case IR.Const(c) => c match
       case i: Integer => IRValue(integerOps.integerLit(i))
@@ -53,7 +54,6 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
           case IRIntegerOperator.MUL => integerOps.mul(v1, v2)
           case IRIntegerOperator.DIV => integerOps.div(v1, v2)
 
-
       case operator: IROrderingOperator =>
         val v1 = interpret(args.head).c.asInstanceOf[VInt]
         val v2 = interpret(args(1)).c.asInstanceOf[VInt]
@@ -67,26 +67,34 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
       booleanBranching.boolBranch(interpret(cond).c.asInstanceOf[VBool]) {interpret(thn)} {interpret(els)}
 
     case IR.Join(left, right) => ???
-    case IR.Feedback(init, Some(cond), Some(loop)) => feedbackStore.get(ir.uid) match
-      case Some(value) => value
-      case None =>
-        feedbackStore += ir.uid -> interpret(init)
-        interpretFeedback(ir.uid, cond, loop)
 
-    case IR.Cast(ir, check) =>
+    case IR.Feedback(init, Some(cond), step) => feedbackStore.get(ir.uid) match
+      case Some(_) => throw new Exception("Should not happen")
+      case None =>
+        feedbackStore += ir.uid -> init.map(interpret)
+        interpretFeedback(ir.uid, cond, step)
+        IRValue(null)
+
+    case IR.FeedbackAsk(index, Some(feedback)) =>
+      if !feedbackStore.isDefinedAt(feedback.uid) then interpret(feedback)
+      feedbackStore(feedback.uid).lift(index) match
+        case Some(value) => value
+        case None => throw new Exception("Variable not in Callframe")
+
+/*    case IR.Cast(ir, check) =>
       val v = interpret(ir)
-      IRValue(check.asInstanceOf[IRCheck[Any]].assert(v.c))
+      IRValue(check.asInstanceOf[IRCheck[Any]].assert(v.c))*/
+
+
 
 // TODO deactivated tailrecursion to trigger stack overvflows during testing
 //  @tailrec
-  private final def interpretFeedback(uid: IR_UID, cond: IR, loop: IR): IRValue = {
+  private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[IR]) : Unit = {
     val v = interpret(cond)
     v match
-      case IRValue(false | 0) => feedbackStore(uid)
-      case _ =>
-        feedbackStore += uid -> interpret(loop)
-        val v = interpretFeedback(uid, cond, loop)
-        v
+      case IRValue(false | 0) =>
+      case _ => feedbackStore += uid -> steps.map(interpret)
+                interpretFeedback(uid, cond, steps)
   }
 
 }
@@ -96,7 +104,7 @@ class IRInterpreterConcrete(externals: Map[String, IRValue]) extends IRInterpret
   override type VInt = Int
   override type VBool = Boolean
 
-  implicit val failure : Failure = ???
+  implicit val failure : Failure = new ConcreteFailure
 
   given Structural[Int] with {}
 
@@ -111,8 +119,8 @@ class IRInterpreterConstant(externals: Map[String, IRValue]) extends IRInterpret
   override type VInt = Topped[Int]
   override type VBool = Topped[Boolean]
 
-  implicit val failure : Failure = ???
-  implicit val effectStack: EffectStack = ???
+  implicit val failure : Failure = new ConcreteFailure
+  implicit val effectStack: EffectStack = EffectStack(EffectList(ArraySeq.empty[Effect]))
 
   given Structural[Int] with {}
   given Join[IRValue] with {
