@@ -60,7 +60,12 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       val analysis = new IRAnalysis.Instance(stackConfig)
       val aresult = analysis.failure.fallible(analysis.execute(program))
       println(aresult)
-      val ir = aresult.get.get
-      val graphViz = Export.toGraphViz(ir)
-      Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
-      println(graphViz)
+      if(aresult.isSucceeding)
+        val graphViz = Export.toGraphViz(aresult.get.get)
+        Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
+        println(graphViz)
+
+        // TODO : Run the IR
+
+      else
+        fail()
