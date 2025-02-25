@@ -68,14 +68,14 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
 
     case IR.Join(left, right) => ???
 
-    case IR.Feedback(init, Some(cond), step) => feedbackStore.get(ir.uid) match
+    case IR.Feedback(inits, Some(cond), steps) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
-        feedbackStore += ir.uid -> init.map(interpret)
-        interpretFeedback(ir.uid, cond, step)
+        feedbackStore += ir.uid -> inits.map(interpret)
+        interpretFeedback(ir.uid, cond, steps)
         IRValue(null)
 
-    case IR.FeedbackAsk(index, Some(feedback)) =>
+    case IR.FeedbackAsk(index, feedback) =>
       if !feedbackStore.isDefinedAt(feedback.uid) then interpret(feedback)
       feedbackStore(feedback.uid).lift(index) match
         case Some(value) => value

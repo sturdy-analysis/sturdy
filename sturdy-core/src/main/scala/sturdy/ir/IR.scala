@@ -25,8 +25,8 @@ enum IR:
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
-  case Feedback(init: List[IR], var cond: Option[IR], var step: List[IR])
-  case FeedbackAsk(index: Int, feedback: Option[Feedback])
+  case Feedback(inits: List[IR], var cond: Option[IR], var steps: List[IR])
+  case FeedbackAsk(index: Int, feedback: Feedback)
 //  case Cast[C](ir: IR, check: IRCheck[C])
 
   override def hashCode(): Int = uid.hashCode()
@@ -41,18 +41,18 @@ enum IR:
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
-    case IR.Feedback(init, cond, step) => init.zipWithIndex.map((ir, i) => ir -> s"init_$i") ++ cond.map(_ -> "cond") ++ step.zipWithIndex.map((ir, i) => ir -> s"step_$i")
-    case IR.FeedbackAsk(_, feedback) => feedback.map(_ -> "feedback").toList
+    case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.map((ir, i) => ir -> s"init_$i") ++ cond.map(_ -> "cond") ++ steps.zipWithIndex.map((ir, i) => ir -> s"step_$i")
+    case IR.FeedbackAsk(_, feedback) => Seq(feedback -> "feedback")
 
   override def toString: String = this match
     case IR.Unknown() => s"Unknown@$uid"
     case IR.External(name) => s"External($name)@$uid"
     case IR.Const(c) => s"Const($c)@$uid"
-    case IR.Op(op, args) => s"Op($op)@$uid"
-    case IR.Select(cond, left, right) => s"Select@$uid"
-    case IR.Join(left, right) => s"Join@$uid"
-    case IR.Feedback(init, cond, step) => s"Feedback@$uid"
-    case IR.FeedbackAsk(index, fb)  => s"FeedbackAsk($index, $fb)@$uid"
+    case IR.Op(op, _) => s"Op($op)@$uid"
+    case IR.Select(_, _, _) => s"Select@$uid"
+    case IR.Join(_, _) => s"Join@$uid"
+    case IR.Feedback(_, _, _) => s"Feedback@$uid"
+    case IR.FeedbackAsk(index, _)  => s"FeedbackAsk($index)@$uid"
 
   def foreach(f: IR => Unit): Unit =
     val visited = mutable.Set[IR]()
