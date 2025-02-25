@@ -39,65 +39,28 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
   Fixpoint.DEBUG = true
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.getFileName.toString.startsWith("debug__") &&
     p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       println(s"analyze ${p.getFileName}")
-      runIntervalAnalysis(p, StackConfig.StackedStates())
+      runIRAnalysis(p, StackConfig.StackedStates())
     }
   }
 
-  def runIntervalAnalysis(p: Path, stackConfig: StackConfig) =
+  def runIRAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
-    if (program.funs.exists(_.name == "main")) {
-      val analysis = new IRAnalysis.Instance(Map(), Map(), stackConfig, 0)
-
+    if (!program.funs.exists(_.name == "main"))
+      fail()
+    else
+      val analysis = new IRAnalysis.Instance(stackConfig)
       val aresult = analysis.failure.fallible(analysis.execute(program))
-      Profiler.printLastMeasured()
-      LinearStateOperationCounter.addToListAndReset()
-      println(s"${LinearStateOperationCounter.toString} in the last tests")
-      println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
-
-      println(s"Abstract run")
-
-//      given CAllocatorIntIncrement[AllocationSite] = interp.alloc
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
-
-      println(s"RESULT")
-      val ir = IRAnalysis.valueToIR(aresult.get.get)
-      //Files.write(Path.of("/home/armand/test.dot"), Export.toGraphViz(ir).getBytes())
-      println(Export.toGraphViz(ir))
-
-
-      println(s"IR run")
-      val externals = ir.externals.map(name => name -> IRValue(0)).toMap
-      val irInterp = new IRInterpreterConcrete(externals)
-      val v = try irInterp.interpret(ir) catch {
-        case e: StackOverflowError =>
-          println(e.getClass.getName)
-          null
-      }
-      println(v)
-
-      println(s"Concrete run")
-      val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
-      val cresult = interp.failure.fallible(interp.execute(program))
-      println(cresult)
-
-      if (!cresult.isFailing) {
-        assert(v != null, s": IR interpretation looped while concrete interpreter yielded ${cresult.get}")
-        assertResult(cresult.get.asInt(using interp))(v.c)
-      }
-
-      (aresult, analysis)
-    } else {
-      null
-    }
-
+      val ir = aresult.get.get
+      val graphViz = Export.toGraphViz(ir)
+      Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
+      println(graphViz)
