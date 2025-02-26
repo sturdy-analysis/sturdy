@@ -15,3 +15,5 @@ class IRFunctionOps[F, A](irArgs: A => Seq[IR]) extends FunctionOps[F, A, IR, IR
   override def invokeFun(fun: IR, a: A)(invoke: (F, A) => IR): IR = fun match
     case IR.Const(f: F) => invoke(f, a)
     case _ => IR.Op(CALL(invoke), fun +: irArgs(a))
+
+given IRFunctionOpsIRArgs[F] : IRFunctionOps[F, Seq[IR]](identity) with {}

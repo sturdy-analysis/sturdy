@@ -50,7 +50,7 @@ object IRAnalysis:
     override val boolOps: BooleanOps[IR] = implicitly
     override val compareOps: OrderingOps[IR, IR] = implicitly
     override val eqOps: EqOps[IR, IR] = implicitly
-    override val functionOps: FunctionOps[Function, Seq[IR], IR, IR] = new IRFunctionOps[Function, Seq[IR]](identity)
+    override val functionOps: FunctionOps[Function, Seq[IR], IR, IR] = implicitly // new IRFunctionOps[Function, Seq[IR]](identity)
 
     override val refOps: ReferenceOps[IR, IR] = new ReferenceOps[IR, IR] { // TODO : Unimplemented
       override def mkNullRef: IR = ???
