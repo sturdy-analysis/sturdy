@@ -90,15 +90,14 @@ object IRAnalysis:
       new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
         override def widen: Widen[List[IR]] = new Widen[List[IR]] {
           override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
-            if (count < 1)
-              count = count + 1
+            // if v2 is just an unrolling of the body of the feedback node of v1
+            if(v1.length == v2.length && v1.zip(v2).forall(v => v._1.structuralEquality(v._2)))
+              Unchanged(v1)
+            else
               val feedback = currentFeedback.get._2
               feedback.cond = currentCond
               feedback.steps = v2
-              // Changed(v1) ?
-              Changed(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
-            else
-              Unchanged(v1)
+              Changed(v1)
         }
       }
 
@@ -127,15 +126,19 @@ object IRAnalysis:
         if (currentFeedback.exists(_._1 == fixIn))
           phi(v1)(fixIn)
         else
-          count = 0
           val feedback : IR.Feedback = IR.Feedback(
             // TODO : Uninitialized variable are set as null in the callframe, and reading them should result in an error.
             // Replace the inits and steps by a list of Option[IR] to represent properly uninitialized variables ?
             callFrame.getState.map(v => if v == null then IR.Unknown() else v),
             None,
             List.empty) // Change to option for better semantics
-          currentFeedback = Some(fixIn, feedback)
-          callFrame.setState(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
-
-          phi(v1)(fixIn)
+          val beforeFeedback = currentFeedback
+          try {
+            currentFeedback = Some(fixIn, feedback)
+            callFrame.setState(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
+            phi(v1)(fixIn)
+          }
+          finally {
+            currentFeedback = beforeFeedback
+          }
       }

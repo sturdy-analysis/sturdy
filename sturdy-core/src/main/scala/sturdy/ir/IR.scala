@@ -54,6 +54,23 @@ enum IR:
     case IR.Feedback(_, _, _) => s"Feedback@$uid"
     case IR.FeedbackAsk(index, _)  => s"FeedbackAsk($index)@$uid"
 
+  def structuralEquality(that: IR): Boolean = (this, that) match
+    case (IR.Unknown(), _) => false
+    case (_, IR.Unknown()) => false
+    case (IR.External(name1), IR.External(name2)) if name1 == name2 => true
+    case (IR.Const(c1), IR.Const(c2)) if c1 == c2 => true
+    case (IR.Op(op1, args1), IR.Op(op2, args2)) if op1 == op2 && args1.length == args2.length =>
+      args1.zip(args2).forall( p => p._1.structuralEquality(p._2))
+    case (IR.Select(cond1, left1, right1), IR.Select(cond2, left2, right2)) =>
+      cond1.structuralEquality(cond2) &&
+      left1.structuralEquality(left2) &&
+      right1.structuralEquality(right2)
+    case (IR.Join(left1, right1), IR.Join(left2, right2)) => left1.structuralEquality(left2) && right1.structuralEquality(right2)
+    case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => true
+    // TODO Add Feedback ? Better guard for cycles ?
+    case (IR.Feedback(_, _, _), IR.Feedback(_, _, _)) if this == that => true
+    case _ => false
+
   def foreach(f: IR => Unit): Unit =
     val visited = mutable.Set[IR]()
     val stack = mutable.Stack[IR](this)
