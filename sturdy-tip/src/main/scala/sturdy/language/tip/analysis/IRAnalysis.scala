@@ -27,22 +27,31 @@ object IRAnalysis:
   class Instance(stackConfig: StackConfig) extends GenericInterpreter[IR, IR, WithJoin]:
 
     private var currentCond : Option[IR] = None
+    private var currentFeedback : Option[(FixIn, IR.Feedback)] = None // May be unnecessary
+    /*
+    Naive version which iterates one time over loop body and then considers nothing changes
+    - Would not work in a product
+    - Doesn't work with nested loops
+    - BUT works for simple loops (with multiple variables used for counter and results)
+    - AND consecutive loops
+    */
+    private var count : Int = 0
 
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
-      case Some(cond) => Changed(IR.Select(cond, v2, v1))
+      case Some(cond) => (v1, v2) match
+        case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => Unchanged(v1) // TODO : Ugly but give cleaner results by eliminating the join between iterations of while
+        case _ => Changed(IR.Select(cond, v2, v1))
 
-    given Widen[IR] = (v1: IR, v2: IR) => // TODO : Fix this
-      println(v1)
-      println(v2)
-      Unchanged(v1)
+    given Widen[IR] = (v1: IR, v2: IR) =>
+      ??? // TODO : Fix ?
 
     override def jv: WithJoin[IR] = implicitly
 
     override val fixpoint =
       notContextSensitive[FixIn, FixOut[IR], Combinator[FixIn, FixOut[IR]]](
         fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.innermost(stackConfig), fix.iter.innermost(stackConfig)
+          fix.iter.innermost(stackConfig), new CustomCombinator(fix.iter.innermost(stackConfig))
         ))
       ).fixpoint
 
@@ -78,7 +87,20 @@ object IRAnalysis:
     }
 
     override val callFrame: JoinableDecidableCallFrame[String, String, IR, Exp.Call] =
-      new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty)
+      new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
+        override def widen: Widen[List[IR]] = new Widen[List[IR]] {
+          override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
+            if (count < 1)
+              count = count + 1
+              val feedback = currentFeedback.get._2
+              feedback.cond = currentCond
+              feedback.steps = v2
+              // Changed(v1) ?
+              Changed(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
+            else
+              Unchanged(v1)
+        }
+      }
 
     override val store: Store[IR, IR, WithJoin] = new Store[IR, IR, WithJoin] { // TODO : Store is not supported
       override def read(x: IR): JOption[WithJoin, IR] = ???
@@ -99,3 +121,21 @@ object IRAnalysis:
     private given Failure = failure
 
     override def newInstance: Executor = new Instance(stackConfig)
+
+    class CustomCombinator(phi : Combinator[FixIn, FixOut[IR]]) extends Combinator[FixIn, FixOut[IR]] :
+      override def apply(v1: FixIn => FixOut[IR]): FixIn => FixOut[IR] = fixIn => {
+        if (currentFeedback.exists(_._1 == fixIn))
+          phi(v1)(fixIn)
+        else
+          count = 0
+          val feedback : IR.Feedback = IR.Feedback(
+            // TODO : Uninitialized variable are set as null in the callframe, and reading them should result in an error.
+            // Replace the inits and steps by a list of Option[IR] to represent properly uninitialized variables ?
+            callFrame.getState.map(v => if v == null then IR.Unknown() else v),
+            None,
+            List.empty) // Change to option for better semantics
+          currentFeedback = Some(fixIn, feedback)
+          callFrame.setState(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
+
+          phi(v1)(fixIn)
+      }

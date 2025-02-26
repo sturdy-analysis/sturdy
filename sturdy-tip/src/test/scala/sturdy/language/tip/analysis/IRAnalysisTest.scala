@@ -61,11 +61,20 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       val aresult = analysis.failure.fallible(analysis.execute(program))
       println(aresult)
       if(aresult.isSucceeding)
-        val graphViz = Export.toGraphViz(aresult.get.get)
+        val ir = aresult.get.get
+        val graphViz = Export.toGraphViz(ir)
         Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
         println(graphViz)
 
         // TODO : Run the IR
+        val interpreter = new IRInterpreterConcrete(Map.empty)
+        val irEval = interpreter.interpret(ir)
+        println(s"IR Result : $irEval")
+
+        val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
+        val cresult = interp.failure.fallible(interp.execute(program))
+        println(s"Concrete result : $cresult")
+
 
       else
         fail()
