@@ -71,7 +71,8 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
     case IR.Feedback(inits, Some(cond), steps) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
-        feedbackStore += ir.uid -> inits.map(interpret)
+        val initsValue = inits.map(interpret)
+        feedbackStore += ir.uid -> initsValue
         interpretFeedback(ir.uid, cond, steps)
         IRValue(null)
 
@@ -92,8 +93,9 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[IR]) : Unit = {
     val v = interpret(cond)
     v match
-      case IRValue(false | 0) =>
-      case _ => feedbackStore += uid -> steps.map(interpret)
+      case IRValue(false | 0) => println(s"Finished with $uid")
+      case _ => val newStore = steps.map(interpret)
+                feedbackStore += (uid -> newStore)
                 interpretFeedback(uid, cond, steps)
   }
 

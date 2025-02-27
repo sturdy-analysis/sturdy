@@ -69,11 +69,12 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
         // TODO : Run the IR
         val interpreter = new IRInterpreterConcrete(Map.empty)
         val irEval = interpreter.interpret(ir)
-        println(s"IR Result : $irEval")
+        println(s"IR Result: $irEval")
+        println(s"Feedback store: ${interpreter.feedbackStore}")
 
         val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
         val cresult = interp.failure.fallible(interp.execute(program))
-        println(s"Concrete result : $cresult")
+        println(s"Concrete result: $cresult")
 
 
       else
