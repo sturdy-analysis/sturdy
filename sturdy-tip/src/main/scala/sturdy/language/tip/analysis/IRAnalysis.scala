@@ -29,13 +29,12 @@ object IRAnalysis:
     private var currentCond : Option[IR] = None
     private var currentFeedback : Option[(FixIn, IR.Feedback)] = None // May be unnecessary
     /*
-    Naive version which iterates one time over loop body and then considers nothing changes
-    - Would not work in a product
-    - Doesn't work with nested loops
-    - BUT works for simple loops (with multiple variables used for counter and results)
-    - AND consecutive loops
+      Version based on structural equality for fixpoint stability:
+      - should work for simple and consecutive loops
+      - and for use in products
+      - but not for nested loops
+      - and not (yet) for recursive function calls
     */
-    private var count : Int = 0
 
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
@@ -43,7 +42,9 @@ object IRAnalysis:
         case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => Unchanged(v1) // TODO : Ugly but give cleaner results by eliminating the join between iterations of while
         case _ => Changed(IR.Select(cond, v2, v1))
 
-    given Widen[IR] = (v1: IR, v2: IR) =>
+    given Widen[IR] = (v1: IR, v2: IR) => // Used only (?) for the return value of a recursive function
+      println(v1)
+      println(v2)
       ??? // TODO : Fix ?
 
     override def jv: WithJoin[IR] = implicitly
@@ -51,7 +52,7 @@ object IRAnalysis:
     override val fixpoint =
       notContextSensitive[FixIn, FixOut[IR], Combinator[FixIn, FixOut[IR]]](
         fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.innermost(stackConfig), new CustomCombinator(fix.iter.innermost(stackConfig))
+          new CustomCombinator(fix.iter.innermost(stackConfig)), new CustomCombinator(fix.iter.innermost(stackConfig))
         ))
       ).fixpoint
 
@@ -90,6 +91,7 @@ object IRAnalysis:
       new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
         override def widen: Widen[List[IR]] = new Widen[List[IR]] {
           override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
+            println("Callframe widening")
             // if v2 is just an unrolling of the body of the feedback node of v1
             if(v1.length == v2.length && v1.zip(v2).forall(v => v._1.structuralEquality(v._2)))
               Unchanged(v1)
@@ -129,6 +131,9 @@ object IRAnalysis:
           val feedback : IR.Feedback = IR.Feedback(
             // TODO : Uninitialized variable are set as null in the callframe, and reading them should result in an error.
             // Replace the inits and steps by a list of Option[IR] to represent properly uninitialized variables ?
+            // This is also relevant for function fixpoint: when a non recursive function is ran, a virtual feedback node is created with only unknown as inits
+            // This node can be erased if all the variables are assigned to before another feedback node is created
+            // Should definetely switch to an option representation for inits
             callFrame.getState.map(v => if v == null then IR.Unknown() else v),
             None,
             List.empty) // Change to option for better semantics
