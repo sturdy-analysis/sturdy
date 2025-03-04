@@ -25,7 +25,7 @@ enum IR:
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
-  case Feedback(inits: List[IR], var cond: Option[IR], var steps: List[IR])
+  case Feedback(inits: List[Option[IR]], var cond: Option[IR], var steps: List[Option[IR]])
   case FeedbackAsk(index: Int, feedback: Feedback)
 //  case Cast[C](ir: IR, check: IRCheck[C])
 
@@ -41,7 +41,7 @@ enum IR:
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
-    case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.map((ir, i) => ir -> s"init_$i") ++ cond.map(_ -> "cond") ++ steps.zipWithIndex.map((ir, i) => ir -> s"step_$i")
+    case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.flatMap((ir, i) => ir.map(_ -> s"init_$i")) ++ cond.map(_ -> "cond") ++ steps.zipWithIndex.flatMap((ir, i) => ir.map(_ -> s"step_$i"))
     case IR.FeedbackAsk(_, feedback) => Seq(feedback -> "feedback")
 
   override def toString: String = this match

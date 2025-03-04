@@ -2,8 +2,8 @@ package sturdy.ir
 
 import sturdy.effect.{Effect, EffectList, EffectStack}
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
-import sturdy.values.{Join, MaybeChanged, Structural, Topped}
-import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching, ToppedBooleanBranching}
+import sturdy.values.{Join, MaybeChanged, Structural, Topped, booleans}
+import sturdy.values.booleans.{BooleanBranching, BooleanOps, ConcreteBooleanBranching, ConcreteBooleanOps, IRBooleanOperator, ToppedBooleanBranching, ToppedBooleanOps}
 import sturdy.values.functions.IRFunctionOperator
 import sturdy.values.integer.{ConcreteIntegerOps, IRIntegerOperator, IntegerOps, ToppedIntegerOps}
 import sturdy.values.ordering.{ConcreteOrderingOps, EqOps, IREqualityOperator, IROrderingOperator, OrderingOps, StructuralEqOps, ToppedCertainEqOps, ToppedCertainOrderingOps, ToppedUncertainOrderingOps}
@@ -19,9 +19,10 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   type VInt
   type VBool
 
-  var feedbackStore: Map[IR_UID, List[IRValue]] = Map()
+  var feedbackStore: Map[IR_UID, List[Option[IRValue]]] = Map()
 
   val integerOps: IntegerOps[Int, VInt]
+  val booleanOps: BooleanOps[VBool]
   val orderingOps: OrderingOps[VInt, VBool]
   val integerEqOps: EqOps[VInt, VBool]
   val booleanBranching: BooleanBranching[VBool, IRValue]
@@ -60,7 +61,14 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
         operator match
           case IROrderingOperator.LT => orderingOps.lt(v1, v2)
           case IROrderingOperator.LE => orderingOps.le(v1, v2)
-      case _ => ???
+
+      case operator: IRBooleanOperator =>
+        val v1 = interpret(args.head).c.asInstanceOf[VBool]
+        val v2 = args.lift(1).map(interpret(_).c.asInstanceOf[VBool])
+        operator match
+          case booleans.IRBooleanOperator.AND => booleanOps.and(v1, v2.getOrElse(throw new Exception("Wrong arity")))
+          case booleans.IRBooleanOperator.OR => booleanOps.or(v1, v2.getOrElse(throw new Exception("Wrong arity")))
+          case booleans.IRBooleanOperator.NOT => booleanOps.not(v1)
     )
 
     case IR.Select(cond, thn, els) =>
@@ -71,7 +79,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
     case IR.Feedback(inits, Some(cond), steps) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
-        val initsValue = inits.map(interpret)
+        val initsValue = inits.map(_.map(interpret))
         feedbackStore += ir.uid -> initsValue
         interpretFeedback(ir.uid, cond, steps)
         IRValue(null)
@@ -79,7 +87,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
     case IR.FeedbackAsk(index, feedback) =>
       if !feedbackStore.isDefinedAt(feedback.uid) then interpret(feedback)
       feedbackStore(feedback.uid).lift(index) match
-        case Some(value) => value
+        case Some(value) => value.getOrElse(throw new Exception("Variable uninitialized"))
         case None => throw new Exception("Variable not in Callframe")
 
 /*    case IR.Cast(ir, check) =>
@@ -90,11 +98,11 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
 
 // TODO deactivated tailrecursion to trigger stack overvflows during testing
 //  @tailrec
-  private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[IR]) : Unit = {
+  private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[Option[IR]]) : Unit = {
     val v = interpret(cond)
     v match
       case IRValue(false | 0) => println(s"Finished with $uid")
-      case _ => val newStore = steps.map(interpret)
+      case _ => val newStore = steps.map(_.map(interpret))
                 feedbackStore += (uid -> newStore)
                 interpretFeedback(uid, cond, steps)
   }
@@ -111,6 +119,7 @@ class IRInterpreterConcrete(externals: Map[String, IRValue]) extends IRInterpret
   given Structural[Int] with {}
 
   override val integerOps: IntegerOps[Int, Int] = new ConcreteIntegerOps
+  override val booleanOps: BooleanOps[Boolean] = implicitly
   override val orderingOps: OrderingOps[Int, Boolean] = new ConcreteOrderingOps[Int]
   override val integerEqOps: EqOps[Int, Boolean] = new StructuralEqOps[Int]
   override val booleanBranching: BooleanBranching[Boolean, IRValue] = new ConcreteBooleanBranching[IRValue]
@@ -130,6 +139,7 @@ class IRInterpreterConstant(externals: Map[String, IRValue]) extends IRInterpret
   }
 
   override val integerOps: IntegerOps[Int, VInt] = new ToppedIntegerOps[Int, Int]
+  override val booleanOps: BooleanOps[Topped[Boolean]] = new ToppedBooleanOps[Boolean]
   override val orderingOps: OrderingOps[Topped[Int], Topped[Boolean]] = new ToppedCertainOrderingOps[Int, Boolean]
   override val integerEqOps: EqOps[Topped[Int], Topped[Boolean]] = new ToppedCertainEqOps[Int, Boolean]
   override val booleanBranching: BooleanBranching[Topped[Boolean], IRValue] = new ToppedBooleanBranching[Boolean, IRValue]

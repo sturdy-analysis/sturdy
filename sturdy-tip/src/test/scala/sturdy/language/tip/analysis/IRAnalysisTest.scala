@@ -13,6 +13,7 @@ import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.abstractions.isFunOrWhile
 import sturdy.language.tip.analysis.IntervalAnalysis.{*, given}
+import sturdy.language.tip.ConcreteInterpreter.Value
 import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 import sturdy.language.tip.*
 import sturdy.util.{Labeled, LinearStateOperationCounter, Profiler}
@@ -76,6 +77,13 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
         val cresult = interp.failure.fallible(interp.execute(program))
         println(s"Concrete result: $cresult")
 
+        cresult.get match
+          case Value.TopValue => ???
+          case Value.BoolValue(b) => irEval.c == b
+          case Value.IntValue(i) => irEval.c == i
+          case Value.RefValue(addr) => ???
+          case Value.FunValue(fun) => ???
+          case Value.RecValue(rec) => ???
 
       else
         fail()

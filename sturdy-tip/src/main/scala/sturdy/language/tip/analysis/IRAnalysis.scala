@@ -32,8 +32,8 @@ object IRAnalysis:
       Version based on structural equality for fixpoint stability:
       - should work for simple and consecutive loops
       - and for use in products
+      - works for simple recursive calls (one call site, tail recursion (value widening is not called)
       - but not for nested loops
-      - and not (yet) for recursive function calls
     */
 
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
@@ -79,8 +79,13 @@ object IRAnalysis:
       override def boolBranch(cond: IR, thn: => Unit, els: => Unit): Unit =
         val condBefore = currentCond
         try {
-          currentCond = Some(cond)
-          joinComputations(thn)(els)
+          joinComputations {
+            currentCond = Some(cond)
+            thn
+          } {
+            currentCond = Some(IR.Op(IRBooleanOperator.NOT, cond))
+            els
+          }
         }
         finally {
           currentCond = condBefore
@@ -91,14 +96,13 @@ object IRAnalysis:
       new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
         override def widen: Widen[List[IR]] = new Widen[List[IR]] {
           override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
-            println("Callframe widening")
             // if v2 is just an unrolling of the body of the feedback node of v1
-            if(v1.length == v2.length && v1.zip(v2).forall(v => v._1.structuralEquality(v._2)))
+            if(v1.length == v2.length && v1.zip(v2).forall(v => v == (null, null) || v._1.structuralEquality(v._2))) // TODO : Cleaner implementation
               Unchanged(v1)
             else
               val feedback = currentFeedback.get._2
               feedback.cond = currentCond
-              feedback.steps = v2
+              feedback.steps = v2.map(Option(_))
               Changed(v1)
         }
       }
@@ -134,13 +138,13 @@ object IRAnalysis:
             // This is also relevant for function fixpoint: when a non recursive function is ran, a virtual feedback node is created with only unknown as inits
             // This node can be erased if all the variables are assigned to before another feedback node is created
             // Should definetely switch to an option representation for inits
-            callFrame.getState.map(v => if v == null then IR.Unknown() else v),
+            callFrame.getState.map(Option(_)),
             None,
             List.empty) // Change to option for better semantics
           val beforeFeedback = currentFeedback
           try {
             currentFeedback = Some(fixIn, feedback)
-            callFrame.setState(callFrame.getState.indices.map(i => IR.FeedbackAsk(i, feedback)).toList)
+            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => if v == null then null else IR.FeedbackAsk(i, feedback)))
             phi(v1)(fixIn)
           }
           finally {
