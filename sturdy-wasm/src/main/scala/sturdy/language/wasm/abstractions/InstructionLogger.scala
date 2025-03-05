@@ -8,7 +8,7 @@ import sturdy.fix
 import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc, ModuleInstance}
 import sturdy.values.*
 import swam.{BlockType, OpCode, syntax}
-import swam.syntax.{AConst, Binop, Block, Br, BrIf, BrTable, Call, CallIndirect, Convertop, Drop, GlobalGet, GlobalSet, If, Inst, LoadInst, LoadNInst, LocalGet, LocalSet, LocalTee, Loop, MemoryGrow, MemoryInst, MemorySize, Miscop, Nop, Relop, Return, Select, StoreInst, StoreNInst, Testop, Unop, Unreachable, VarInst, f32, f64, i32, i64}
+import swam.syntax.{AConst, Binop, Block, Br, BrIf, BrTable, Call, CallIndirect, Convertop, Drop, GlobalGet, GlobalSet, If, Import, Inst, LoadInst, LoadNInst, LocalGet, LocalSet, LocalTee, Loop, MemoryGrow, MemoryInst, MemorySize, Miscop, Nop, Relop, Return, Select, StoreInst, StoreNInst, Testop, Unop, Unreachable, VarInst, f32, f64, i32, i64}
 
 trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, FixOut[V]]:
 
@@ -98,13 +98,18 @@ trait InstructionResultLogger[V](stack: DecidableOperandStack[V])(using Top[V], 
 
 trait InstructionResultLoggerFix[V](stack: DecidableOperandStack[V])(module : swam.syntax.Module)(using Top[V], Join[V]) extends InstructionLogger[List[V], V]:
 
+  val funcReturnArity : List[Int] = module.imports.flatMap {
+    case Import.Function(moduleName, fieldName, tpe) => Some(module.types(tpe).t.length)
+    case _ => None
+  }.toList ++ module.funcs.map(func => module.types(func.tpe).t.length)
+
   override def enterInfo(inst: Inst): Option[List[V]] = None
 
   override def exitInfo(inst: Inst, success: Boolean): Option[List[V]] =
     val n = writeToStack(inst)
     if(n > 0 && success) Some(stack.peekNOrAbort(n)) else None
 
-  def writeToStack(inst: syntax.Inst): Int =
+  private def writeToStack(inst: syntax.Inst): Int =
     inst match
       case _: AConst => 1
       case _: Unop => 1
@@ -143,5 +148,5 @@ trait InstructionResultLoggerFix[V](stack: DecidableOperandStack[V])(module : sw
       case BrIf(_) => 0
       case BrTable(_, _) => 0
       case Return => 0
-      case Call(funcidx) => module.types(module.funcs(funcidx).tpe).t.length
+      case Call(funcidx) => funcReturnArity(funcidx)
       case CallIndirect(typeidx) => module.types(typeidx).t.length
