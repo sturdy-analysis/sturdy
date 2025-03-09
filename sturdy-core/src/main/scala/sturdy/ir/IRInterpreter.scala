@@ -28,7 +28,8 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   val booleanBranching: BooleanBranching[VBool, IRValue]
 
   def interpret(ir: IR): IRValue = ir match
-    case IR.Unknown() => IRValue(integerOps.randomInteger())
+    case IR.Unknown() => IRValue(0)
+    case IR.Undefined() => IRValue(null)
     case IR.External(name) => externals(name)
     case IR.Const(c) => c match
       case i: Integer => IRValue(integerOps.integerLit(i))
@@ -76,10 +77,10 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
 
     case IR.Join(left, right) => ???
 
-    case IR.Feedback(inits, Some(cond), steps) => feedbackStore.get(ir.uid) match
+    case IR.Feedback(inits, Some(cond), Some(steps)) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
-        val initsValue = inits.map(_.map(interpret))
+        val initsValue = inits.map(init => Some(interpret(init)))
         feedbackStore += ir.uid -> initsValue
         interpretFeedback(ir.uid, cond, steps)
         IRValue(null)
@@ -98,11 +99,11 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
 
 // TODO deactivated tailrecursion to trigger stack overvflows during testing
 //  @tailrec
-  private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[Option[IR]]) : Unit = {
+  private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[IR]) : Unit = {
     val v = interpret(cond)
     v match
       case IRValue(false | 0) => println(s"Finished with $uid")
-      case _ => val newStore = steps.map(_.map(interpret))
+      case _ => val newStore = steps.map(step => Some(interpret(step)))
                 feedbackStore += (uid -> newStore)
                 interpretFeedback(uid, cond, steps)
   }

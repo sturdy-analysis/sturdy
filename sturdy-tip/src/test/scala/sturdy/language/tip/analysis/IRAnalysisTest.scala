@@ -40,7 +40,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
   Fixpoint.DEBUG = true
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.getFileName.toString.startsWith("debug__") &&
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.getFileName.toString.startsWith("") &&
     p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
@@ -79,8 +79,8 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
         cresult.get match
           case Value.TopValue => ???
-          case Value.BoolValue(b) => irEval.c == b
-          case Value.IntValue(i) => irEval.c == i
+          case Value.BoolValue(b) => assert(irEval.c == b)
+          case Value.IntValue(i) => assert(irEval.c == i)
           case Value.RefValue(addr) => ???
           case Value.FunValue(fun) => ???
           case Value.RecValue(rec) => ???

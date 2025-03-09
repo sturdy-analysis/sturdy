@@ -20,12 +20,13 @@ trait IROperator
 enum IR:
   val uid = new IR_UID
   case Unknown()
+  case Undefined()
   case External(name: String)
   case Const[C](c: C)
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
-  case Feedback(inits: List[Option[IR]], var cond: Option[IR], var steps: List[Option[IR]])
+  case Feedback(inits: List[IR], var cond: Option[IR], var steps: Option[List[IR]])
   case FeedbackAsk(index: Int, feedback: Feedback)
 //  case Cast[C](ir: IR, check: IRCheck[C])
 
@@ -36,16 +37,18 @@ enum IR:
 
   def predecessors: Seq[(IR, String)] = this match
     case IR.Unknown() => Seq.empty
+    case IR.Undefined() => Seq.empty
     case IR.External(name) => Seq.empty
     case IR.Const(c) => Seq.empty
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
-    case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.flatMap((ir, i) => ir.map(_ -> s"init_$i")) ++ cond.map(_ -> "cond") ++ steps.zipWithIndex.flatMap((ir, i) => ir.map(_ -> s"step_$i"))
+    case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.map((ir, i) => ir ->  s"init_$i") ++ cond.map(_ -> "cond") ++ steps.map(_.zipWithIndex.map((ir, i) => ir ->  s"step_$i")).getOrElse(List.empty)
     case IR.FeedbackAsk(_, feedback) => Seq(feedback -> "feedback")
 
   override def toString: String = this match
     case IR.Unknown() => s"Unknown@$uid"
+    case IR.Undefined() => s"Undefined@$uid"
     case IR.External(name) => s"External($name)@$uid"
     case IR.Const(c) => s"Const($c)@$uid"
     case IR.Op(op, _) => s"Op($op)@$uid"
@@ -55,20 +58,21 @@ enum IR:
     case IR.FeedbackAsk(index, _)  => s"FeedbackAsk($index)@$uid"
 
   def structuralEquality(that: IR): Boolean = (this, that) match
-    case (IR.Unknown(), _) => false
-    case (_, IR.Unknown()) => false
+    case (IR.Unknown(), IR.Unknown()) => true
+    case (IR.Undefined(), IR.Undefined()) => true
     case (IR.External(name1), IR.External(name2)) if name1 == name2 => true
     case (IR.Const(c1), IR.Const(c2)) if c1 == c2 => true
     case (IR.Op(op1, args1), IR.Op(op2, args2)) if op1 == op2 && args1.length == args2.length =>
-      args1.zip(args2).forall( p => p._1.structuralEquality(p._2))
+      args1.zip(args2).forall(p => p._1.structuralEquality(p._2))
     case (IR.Select(cond1, left1, right1), IR.Select(cond2, left2, right2)) =>
       cond1.structuralEquality(cond2) &&
       left1.structuralEquality(left2) &&
       right1.structuralEquality(right2)
     case (IR.Join(left1, right1), IR.Join(left2, right2)) => left1.structuralEquality(left2) && right1.structuralEquality(right2)
     case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => true
-    // TODO Add Feedback ? Better guard for cycles ?
+    // TODO Add Feedback ? Better guard for cycles ? Does this really work (need tests)
     case (IR.Feedback(_, _, _), IR.Feedback(_, _, _)) if this == that => true
+    case _ if this == that => true
     case _ => false
 
   def foreach(f: IR => Unit): Unit =

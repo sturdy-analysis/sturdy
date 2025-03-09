@@ -38,14 +38,10 @@ object IRAnalysis:
 
     given Join[IR] = (v1: IR, v2: IR) => currentCond match
       case None => Changed(IR.Join(v1, v2))
-      case Some(cond) => (v1, v2) match
-        case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => Unchanged(v1) // TODO : Ugly but give cleaner results by eliminating the join between iterations of while
-        case _ => Changed(IR.Select(cond, v2, v1))
+      case Some(cond) => if v1.structuralEquality(v2) then Unchanged(v1) else Changed(IR.Select(cond, v2, v1))
 
     given Widen[IR] = (v1: IR, v2: IR) => // Used only (?) for the return value of a recursive function
-      println(v1)
-      println(v2)
-      ??? // TODO : Fix ?
+      if v1.structuralEquality(v2) then Unchanged(v1) else Changed(v2)
 
     override def jv: WithJoin[IR] = implicitly
 
@@ -79,31 +75,46 @@ object IRAnalysis:
       override def boolBranch(cond: IR, thn: => Unit, els: => Unit): Unit =
         val condBefore = currentCond
         try {
-          joinComputations {
-            currentCond = Some(cond)
-            thn
-          } {
-            currentCond = Some(IR.Op(IRBooleanOperator.NOT, cond))
+          currentCond = Some(cond)
+          joinComputations {thn} {
+            inElse = true
             els
           }
         }
         finally {
+          inElse = false
           currentCond = condBefore
         }
     }
 
     override val callFrame: JoinableDecidableCallFrame[String, String, IR, Exp.Call] =
       new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
+
+        override def setVars(newVars: Iterable[(String, Option[IR])]): Unit = { // TODO : Fix this ugly override that assigns Undefined as a default value to avoid inconvenient nulls.
+          val builder = Map.newBuilder[String, Int]
+          vars = Array.fill(newVars.size)(IR.Undefined())
+          var i = 0
+          for ((name, v) <- newVars) {
+            builder += name -> i
+            v.foreach(vars.update(i, _))
+            i += 1
+          }
+          names = builder.result()
+        }
+
         override def widen: Widen[List[IR]] = new Widen[List[IR]] {
           override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
             // if v2 is just an unrolling of the body of the feedback node of v1
-            if(v1.length == v2.length && v1.zip(v2).forall(v => v == (null, null) || v._1.structuralEquality(v._2))) // TODO : Cleaner implementation
+            if(v1.length == v2.length && v1.zip(v2).forall(v => v._1.structuralEquality(v._2))) // TODO : Cleaner implementation
               Unchanged(v1)
             else
               val feedback = currentFeedback.get._2
               feedback.cond = currentCond
-              feedback.steps = v2.map(Option(_))
-              Changed(v1)
+              feedback.steps = Some(v2)
+              Changed(v1.zip(v2).zipWithIndex.map((v, i) => v._1 match
+                case IR.Undefined() if v1 != v2 => IR.FeedbackAsk(i, feedback)
+                case _ => v._1
+              ))
         }
       }
 
@@ -133,18 +144,16 @@ object IRAnalysis:
           phi(v1)(fixIn)
         else
           val feedback : IR.Feedback = IR.Feedback(
-            // TODO : Uninitialized variable are set as null in the callframe, and reading them should result in an error.
-            // Replace the inits and steps by a list of Option[IR] to represent properly uninitialized variables ?
-            // This is also relevant for function fixpoint: when a non recursive function is ran, a virtual feedback node is created with only unknown as inits
-            // This node can be erased if all the variables are assigned to before another feedback node is created
-            // Should definetely switch to an option representation for inits
-            callFrame.getState.map(Option(_)),
+            callFrame.getState,
             None,
-            List.empty) // Change to option for better semantics
+            None)
+
           val beforeFeedback = currentFeedback
           try {
             currentFeedback = Some(fixIn, feedback)
-            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => if v == null then null else IR.FeedbackAsk(i, feedback)))
+            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => v match
+              case IR.Undefined() => IR.Undefined()
+              case _ => IR.FeedbackAsk(i, feedback)))
             phi(v1)(fixIn)
           }
           finally {
