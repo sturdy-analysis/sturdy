@@ -27,6 +27,7 @@ object IRAnalysis:
   class Instance(stackConfig: StackConfig) extends GenericInterpreter[IR, IR, WithJoin]:
 
     private var currentCond : Option[IR] = None
+    private var inElse = false
     private var currentFeedback : Option[(FixIn, IR.Feedback)] = None // May be unnecessary
     /*
       Version based on structural equality for fixpoint stability:
