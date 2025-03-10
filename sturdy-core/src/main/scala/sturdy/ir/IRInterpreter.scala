@@ -85,6 +85,18 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
         interpretFeedback(ir.uid, cond, steps)
         IRValue(null)
 
+    case IR.Feedback(inits, None, None) => feedbackStore.get(ir.uid) match // TODO : Fix this, it's ugly
+      // Some feedback nodes are just artifacts from the fixpoint algorithm, which pushes even for non-recursive functions.
+      // For most cases, this works because the feedback node will disappear from the result once the variable are initialized (hard update) and their feedbackAsk nodes deleted
+      // However, in some cases (external variable, variable initialized in a while) it stays in the final result
+      // Since for non recursive functions there is no widening, the callframe widening is never called and the steps and conditions remain None
+      // It could be fixed easily by "inlining" the inits after the fixpoint iteration is done if no steps is found (would also allow more efficient representation (maybe))
+      case Some(_) => throw new Exception("Should not happen")
+      case None =>
+        val initsValue = inits.map(init => Some(interpret(init)))
+        feedbackStore += ir.uid -> initsValue
+        IRValue(null)
+
     case IR.FeedbackAsk(index, feedback) =>
       if !feedbackStore.isDefinedAt(feedback.uid) then interpret(feedback)
       feedbackStore(feedback.uid).lift(index) match
