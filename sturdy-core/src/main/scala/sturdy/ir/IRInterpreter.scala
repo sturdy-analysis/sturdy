@@ -14,7 +14,7 @@ import scala.collection.immutable.ArraySeq
 
 case class IRValue(c: Any)
 
-abstract class IRInterpreter(val externals: Map[String, IRValue]) {
+abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: () => IRValue) {
 
   type VInt
   type VBool
@@ -28,7 +28,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
   val booleanBranching: BooleanBranching[VBool, IRValue]
 
   def interpret(ir: IR): IRValue = ir match
-    case IR.Unknown() => IRValue(0)
+    case IR.Unknown() => inputValue()
     case IR.Undefined() => IRValue(null)
     case IR.External(name) => externals(name)
     case IR.Const(c) => c match
@@ -110,7 +110,7 @@ abstract class IRInterpreter(val externals: Map[String, IRValue]) {
 
 }
 
-class IRInterpreterConcrete(externals: Map[String, IRValue]) extends IRInterpreter(externals: Map[String, IRValue]) {
+class IRInterpreterConcrete(externals: Map[String, IRValue], inputValue: () => IRValue) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {
 
   override type VInt = Int
   override type VBool = Boolean
@@ -126,7 +126,7 @@ class IRInterpreterConcrete(externals: Map[String, IRValue]) extends IRInterpret
   override val booleanBranching: BooleanBranching[Boolean, IRValue] = new ConcreteBooleanBranching[IRValue]
 }
 
-class IRInterpreterConstant(externals: Map[String, IRValue]) extends IRInterpreter(externals: Map[String, IRValue]) {
+class IRInterpreterConstant(externals: Map[String, IRValue], inputValue: () => IRValue) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {
 
   override type VInt = Topped[Int]
   override type VBool = Topped[Boolean]

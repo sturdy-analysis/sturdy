@@ -60,7 +60,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
     else
       val analysis = new IRAnalysis.Instance(stackConfig)
       val aresult = analysis.failure.fallible(analysis.execute(program))
-      println(aresult)
+      println(s"Abstract result: $aresult")
       if(aresult.isSucceeding)
         val ir = aresult.get.get
         val graphViz = Export.toGraphViz(ir)
@@ -68,7 +68,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
         println(graphViz)
 
         // TODO : Run the IR
-        val interpreter = new IRInterpreterConcrete(Map.empty)
+        val interpreter = new IRInterpreterConcrete(Map.empty, () => IRValue(0))
         val irEval = interpreter.interpret(ir)
         println(s"IR Result: $irEval")
         println(s"Feedback store: ${interpreter.feedbackStore}")
@@ -79,8 +79,8 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
         cresult.get match
           case Value.TopValue => ???
-          case Value.BoolValue(b) => assert(irEval.c == b)
-          case Value.IntValue(i) => assert(irEval.c == i)
+          case Value.BoolValue(b) => assert(b == irEval.c)
+          case Value.IntValue(i) => assert(i == irEval.c)
           case Value.RefValue(addr) => ???
           case Value.FunValue(fun) => ???
           case Value.RecValue(rec) => ???
