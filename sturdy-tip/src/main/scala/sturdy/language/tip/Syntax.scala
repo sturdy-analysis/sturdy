@@ -21,7 +21,11 @@ enum Exp extends Labeled:
   case Mul(e1: Exp, e2: Exp)
   case Div(e1: Exp, e2: Exp)
   case Gt(e1: Exp, e2: Exp)
+  case Lt(e1: Exp, e2: Exp)
+  case Ge(e1: Exp, e2: Exp)
+  case Le(e1: Exp, e2: Exp)
   case Eq(e1: Exp, e2: Exp)
+  case Neq(e1: Exp, e2: Exp)
   case Call(fun: Exp, args: Seq[Exp])
   case Alloc(e: Exp)
   case VarRef(name: String)
@@ -59,7 +63,11 @@ enum Exp extends Labeled:
     case Mul(e1, e2) => s"Mul@${this.label}"
     case Div(e1, e2) => s"Div@${this.label}"
     case Gt(e1, e2) => s"Gt@${this.label}"
+    case Lt(e1, e2) => s"Lt@${this.label}"
+    case Ge(e1, e2) => s"Ge@${this.label}"
+    case Le(e1, e2) => s"Le@${this.label}"
     case Eq(e1, e2) => s"Eq@${this.label}"
+    case Neq(e1, e2) => s"Neq@${this.label}"
     case Call(Var(fun), args) => s"Call($fun)@${this.label}"
     case Call(fun, args) => s"Call@${this.label}"
     case Alloc(e) => s"Alloc@${this.label}"
