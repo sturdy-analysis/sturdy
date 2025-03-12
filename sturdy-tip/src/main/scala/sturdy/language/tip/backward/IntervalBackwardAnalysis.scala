@@ -7,7 +7,7 @@ import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.{EffectStack, TrySturdy, given}
 import sturdy.effect.print.{PrintFiniteAlphabet, given}
 import sturdy.effect.store.must.PowersetAddrMustStore
-import sturdy.effect.store.Store
+import sturdy.effect.store.{PowersetAddrBackwardsStore, Store}
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.context.FiniteParameters
@@ -51,6 +51,9 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
         { case Exp.Alloc(e) => Set(AllocationSiteAddr.Alloc(e.label)(true)); case _ => Set() }
       )))
 
+    given Top[Powerset[AllocationSiteAddr]] with
+      def top = topAddr
+
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
     override val intOps: BackIntegerOps[Int, Value] = implicitly
     override val compareOps: BackOrderingOps[Value, Value] = implicitly
@@ -80,7 +83,7 @@ object IntervalBackwardAnalysis extends BackwardsInterpreter, References.Allocat
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
     override val callFrame: JoinableDecidableCallFrame[Unit, String, Value] = new JoinableDecidableCallFrame((), initEnvironment)
-    override val store: PowersetAddrMustStore[AllocationSiteAddr, Value] = new PowersetAddrMustStore(initStore)
+    override val store: PowersetAddrBackwardsStore[AllocationSiteAddr, Value] = new PowersetAddrBackwardsStore(initStore, assert)
     override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
     override val print: AUserInput[Value] = new AUserInput(Value.IntValue(Interval.ITop))
     override val input: PrintFiniteAlphabet[Value] = new PrintFiniteAlphabet
