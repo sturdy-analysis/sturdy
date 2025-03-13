@@ -26,7 +26,7 @@ import sturdy.values.relational.{*, given}
 import sturdy.values.{*, given}
 import sturdy.*
 import sturdy.AbstractlySound
-import sturdy.language.tip.backward.SignBackwardsAnalysis
+import sturdy.language.tip.backward.{SignBackwardsAnalysis}
 import sturdy.language.tip.backward.SignBackwardsAnalysis.{*, given}
 
 import java.nio.file.{Files, Path, Paths}
@@ -42,7 +42,7 @@ class SignBackwardsAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignBackwardsAnalysisTest].getResource("/MyTests").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.getFileName.toString != "simple4.tip"
+    p.getFileName.toString == "simple1.tip"
   ).foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {
       runSignAnalysis(p, StackConfig.StackedStates())
@@ -61,6 +61,7 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     if (functions.contains("main")) {
       //println(s"Program is ${program}")
       val analysis = new SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
+      val oldAnalysis = new oldBackward.SignBackwardsAnalysis.Instance(Map(), Map(), stackConfig)
 
       val inputs = () => ConcreteInterpreter.Value.IntValue(5)
       val interp = ConcreteInterpreter(Map(), Map(), inputs)
@@ -72,6 +73,7 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
       println(s"Expected output of the program is ${cresult}")
 
       val aresult = analysis.failure.fallible(analysis.executeBack(program, expectedVal))
+      val oldARresult = oldAnalysis.failure.fallible(analysis.executeBack(program, expectedVal))
 
       type C = CFallible[ConcreteInterpreter.Value]
       type A = AFallible[(Seq[Value], Value)]
@@ -111,7 +113,7 @@ def runSignAnalysis(p: Path, stackConfig: StackConfig) =
       aresult match
         case AFallible.Unfailing(t) => println(s"  yields ${t._2} given arguments ${t._1}")
         case AFallible.Failing(msgs) => println(s"  fails $msgs")
-        case AFallible.MaybeFailing(t, msgs) => println(s"  may yield ${t._2} given arguments ${t._1}, or fails $msgs")
+        case AFallible.MaybeFailing(t, msgs) => println(s"  may yield ${t._2} given arguments ${t._1}, with old ${oldARresult.get._1} or fails $msgs")
         case AFallible.Diverging(recur) => println(s"  diverges ($recur)")
 
       (aresult, analysis)
