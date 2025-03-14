@@ -90,8 +90,8 @@ trait BackwardsInterpreter:
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
 
   import Value.*
-  given ValueBackIntegerOps(using Failure, BackIntegerOps[Int, VInt]): BackIntegerOps[Int, Value] =
-    new LiftedBackIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)
+  given ValueBackIntegerOps(using Failure, IntegerOps[Int, VInt]): IntegerOps[Int, Value => Value] =
+    new LiftedIntegerOps[Int, Value => Value, VInt](_.asInt, IntValue.apply)
   given ValueBackOrderingOps(using Failure, BackOrderingOps[VInt, VBool]): BackOrderingOps[Value, Value] =
     new LiftedBackOrderingOps[Value, Value, VInt, VBool](_.asInt, IntValue.apply, asBoolean, boolean)
   given ValueEqOps(using EqOps[VInt, VBool], EqOps[VRef, VBool], EqOps[VFun, VBool], EqOps[VRecord, VBool], Failure): EqOps[Value, Value] with

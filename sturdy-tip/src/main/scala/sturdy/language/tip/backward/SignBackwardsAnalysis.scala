@@ -54,7 +54,7 @@ object SignBackwardsAnalysis extends BackwardsInterpreter, References.Allocation
       def top = topAddr
     
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
-    override val intOps: BackIntegerOps[Int, Value] = implicitly
+    override val intOps: IntegerOps[Int, Value => Value] = implicitly
     override val compareOps: BackOrderingOps[Value, Value] = implicitly
     override val backEqOps: BackEqOps[Value, Value] = new BackEqOps[Value, Value]:
       override def equ(v1: Value => Value, v2: Value => Value, r: Value): Value = asBoolean(r) match

@@ -92,7 +92,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   val meet: Meet[V]
 
   // value components
-  val intOps: BackIntegerOps[Int, V]; import intOps.*
+  val intOps: IntegerOps[Int, V => V]; import intOps.*
   val compareOps: BackOrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val backEqOps: BackEqOps[V, V]
@@ -135,7 +135,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     m.getOrElse(failure(BackwardsUnreachable, s"empty meet"))
 
   def evalBack_open(e: Exp, expected: V)(using BackFixed): V = e match {
-    case Exp.NumLit(n) => assert(integerLit(n), expected)
+    case Exp.NumLit(n) => assert(integerLit(n)(topInt), expected)
     case Exp.Input() =>
       input.print(expected); expected
       //input.read(expected)
@@ -146,10 +146,10 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         val refined = assert(xVal, expected)
         callFrame.setLocalByName(x, refined)
         refined
-    case Exp.Add(e1, e2) => add(evalBack(e1,_), evalBack(e2,_), expected)
-    case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_), expected)
-    case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
-    case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Add(e1, e2) => add(evalBack(e1,_), evalBack(e2,_))(expected)
+    case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_))(expected)
+    case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_))(expected)
+    case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_))(expected)
     case Exp.Gt(e1, e2) =>
       gt(evalBack(e1,_), evalBack(e2, _), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
@@ -204,7 +204,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.NullRef() =>
       assert(nullValue, expected)
 
-    case Exp.Neg(e) => neg(evalBack(e, _), expected)
+    case Exp.Neg(e) => sub(evalBack(Exp.NumLit(0),_), evalBack(e,_))(expected)
 
 
 
@@ -235,7 +235,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     val v = evalBack(e, expected)
     println(s"Backwards evaluation: ($e,$expected): $v and ${integerLit(0)}")
     // then block can only run backwards if condition was != 0
-    branchOps.boolBranch(eqOps.equ(v, integerLit(0))) {
+    branchOps.boolBranch(eqOps.equ(v, integerLit(0)(topInt))) {
       failure(BackwardsUnreachable, s"($e,$expected): pre-condition $v == 0")
     } {
     }
@@ -253,11 +253,11 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         ()
       } {
         els.foreach(runBack(_))
-        evalBack(cond, integerLit(0))
+        evalBack(cond, integerLit(0)(topInt))
         ()
       }
     case w@Stm.While(cond, body) =>
-      evalBack(cond, integerLit(0))
+      evalBack(cond, integerLit(0)(topInt))
       iterateBack(w)
     case Stm.Block(body) =>
       body.reverse.foreach(runBack(_))
@@ -348,7 +348,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
     val test = callBack(main, expected)
-    val test2 = (Seq(intOps.integerLit(5), intOps.integerLit(-5)), expected)
+    val test2 = (Seq(intOps.integerLit(5)(topInt), intOps.integerLit(-5)(topInt)), expected)
     println(test2)
     test2
   }
