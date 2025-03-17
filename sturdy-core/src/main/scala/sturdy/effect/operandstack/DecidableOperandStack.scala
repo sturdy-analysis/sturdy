@@ -64,6 +64,8 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
     else
       IsSound.Sound
 
+  override def toString: String = s"DecidableStack($stack)"
+
 
 class ConcreteOperandStack[V] extends DecidableOperandStack[V], Concrete
 

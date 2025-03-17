@@ -6,8 +6,11 @@ import sturdy.data.MayJoin
 import sturdy.data.JOption
 import sturdy.data.NoJoin
 import sturdy.data.SomeJOption
+import sturdy.values.Finite
 
 object StackUnderflow extends FailureKind
+
+given Finite[StackUnderflow.type] with {}
 
 /** [[OperandStack]] contains arguments to operations executed by a low-level machine. */
 trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
