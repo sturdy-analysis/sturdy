@@ -65,7 +65,7 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
     }
 
   def runMain(): Unit =
-    run(0)
+    trampoline(0)
 
 
 object ConcreteInterpreter:
@@ -113,7 +113,7 @@ def test(prog: Vector[Inst]): Unit =
 
 import Inst.*
 object Test1 extends App:
-  test(Vector(
+  def run = test(Vector(
     Const(1),
     Const(2),
     Add,
