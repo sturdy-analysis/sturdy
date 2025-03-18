@@ -53,15 +53,17 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
   def run(pc: Int): Unit =
     var current = pc
     while (current < prog.length) {
+//      println(s"step ${prog(current)}")
       step(prog(current))
       current = current + 1
     }
 
+  lazy val fixedTrampoline: Int => Unit = fixpoint(trampoline)
   def trampoline(pc: Int): Unit =
     except.tryCatch {
       run(pc)
     } {
-      case Jump(to) => fixpoint(trampoline)(to)
+      case Jump(to) => fixedTrampoline(to)
     }
 
   def runMain(): Unit =
@@ -96,7 +98,7 @@ object ConstantInterpreter:
     override val joinV: WithJoin[Topped[Int]] = implicitly
     override val joinUnit: data.MayJoin.WithJoin[Unit] = implicitly
     given Finite[Int] with {}
-    override val fixpoint: EffectStack ?=> Fixpoint[Int, Unit] =
+    override val fixpoint =
       fix.notContextSensitive(
         fix.iter.innermost[Int, Unit, Unit](StackConfig.StackedStates())
       ).fixpoint
@@ -113,7 +115,7 @@ def test(prog: Vector[Inst]): Unit =
 
 import Inst.*
 object Test1 extends App:
-  def run = test(Vector(
+  test(Vector(
     Const(1),
     Const(2),
     Add,
@@ -132,7 +134,7 @@ object Test3 extends App:
   test(Vector(
     Const(3),
     Unknown,
-    JumpIf(0)
+    JumpIf(1)
   ))
 
 object Test4 extends App:
