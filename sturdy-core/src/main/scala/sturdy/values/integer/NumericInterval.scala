@@ -224,39 +224,41 @@ class NumericIntervalIntegerOps[I]
                                            ): NumericInterval[I] = {
 
     boundary: (ret: Label[NumericInterval[I]]) ?=>
-      if (v1.countOfNumsInInterval * v2.countOfNumsInInterval > feasibleNumberOfOps)
-        break(soundResult)
+      if (v1.countOfNumsInInterval * v2.countOfNumsInInterval > feasibleNumberOfOps) {
+        soundResult
+      } else {
+        var lb = maxValue
+        var ub = minValue
+        val worstLb = soundResult.low
+        val worstUb = soundResult.high
+        var x = v1.low
+        while (true) { // quasi "while(x <= v1.high)", but this does not detect the overflow if v1.high == maxValue
+          var y = v2.low
+          boundary { (whl: Label[Unit]) ?=>
+            while (true) { // quasi "while(y <= v2.high)", but this does not detect the overflow if v2.high == maxValue
+              val result = op(x, y)
+              lb = lb.min(result)
+              ub = ub.max(result)
+              if (lb <= worstLb && ub >= worstUb) {
+                if (NumericInterval.DEBUG_INTERVALS)
+                  assert(lb == worstLb && ub == worstUb)
+                break(soundResult)(using ret)
+              }
 
-      var lb = maxValue
-      var ub = minValue
-      val worstLb = soundResult.low
-      val worstUb = soundResult.high
-      var x = v1.low
-      while (true) {       // quasi "while(x <= v1.high)", but this does not detect the overflow if v1.high == maxValue
-        var y = v2.low
-        boundary: (whl: Label[Unit]) ?=>
-          while (true) {      // quasi "while(y <= v2.high)", but this does not detect the overflow if v2.high == maxValue
-            val result = op(x, y)
-            lb = lb.min(result)
-            ub = ub.max(result)
-            if (lb <= worstLb && ub >= worstUb) {
-              if (NumericInterval.DEBUG_INTERVALS)
-                assert(lb == worstLb && ub == worstUb)
-              break(soundResult)(using ret)
+              if (x == v1.high && y == v2.high) {
+                if (NumericInterval.DEBUG_INTERVALS)
+                  assert(NumericIntervalOrdering.lteq(NumericInterval.safe(lb, ub), soundResult))
+                break(NumericInterval.safe(lb, ub))(using ret)
+              }
+              if (y == v2.high) break()(using whl)
+              y = ops.add(y, one)
             }
-
-            if (x == v1.high && y == v2.high) {
-              if (NumericInterval.DEBUG_INTERVALS)
-                assert(NumericIntervalOrdering.lteq(NumericInterval.safe(lb, ub), soundResult))
-              break(NumericInterval.safe(lb, ub))(using ret)
-            }
-            if (y == v2.high) break()
-            y = ops.add(y, one)
           }
-        x = ops.add(x, one)
-    }
+          x = ops.add(x, one)
+        }
 
-    throw IllegalStateException()
+        throw IllegalStateException()
+      }
   }
 
   def computeOpBruteForceIfFeasibleElseTakeWithOneOperandFixed(op: I => NumericInterval[I], v: NumericInterval[I],
@@ -390,11 +392,10 @@ class NumericIntervalIntegerOps[I]
     NumericInterval.safe(ops.min(v1.low, v2.low), ops.min(v1.high, v2.high))
 
 
-  def absolute(v: NumericInterval[I]): NumericInterval[I] = boundary:
+  def absolute(v: NumericInterval[I]): NumericInterval[I] =
     if (v.low == minValue) { // abs(minValue) = minValue * (-1) = minValue in Scala, C++, Java
-      break(NumericInterval.safe(minValue, v.high.abs))
-    }
-    if (v.low < zero) {
+      NumericInterval.safe(minValue, v.high.abs)
+    } else if (v.low < zero) {
       if (v.high < zero) {
         // neg, neg
         NumericInterval.safe(v.high.abs, v.low.abs)
@@ -529,7 +530,7 @@ class NumericIntervalIntegerOps[I]
     }
 
 
-  def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = boundary:
+  def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
     // a mod n has result in [0, |n| - 1]. Thus most imprecise result is NumericInterval.safe(zero, maxValue)
 
     // if [a1, a2] \subseteq [0, maxValue]: result = a rem n
@@ -548,30 +549,32 @@ class NumericIntervalIntegerOps[I]
     val NumericInterval(a1, a2) = v1
     val NumericInterval(n1, n2) = v2
 
-    if (a1 >= zero)
-      break(remainder(v1, v2))
-
-    val nAbsMinusOne = if (n1 == minValue) maxValue else n1.abs.max(n2.abs)
-    val nContainsZero = v2.containsNum(zero)
-    if (a1 <= -one && a2 >= zero) {
-      val result = NumericInterval.safe(zero, nAbsMinusOne)
-      break(
+    if (a1 >= zero) {
+      remainder(v1, v2)
+    } else {
+      val nAbsMinusOne = if (n1 == minValue) maxValue else n1.abs.max(n2.abs)
+      val nContainsZero = v2.containsNum(zero)
+      if (a1 <= -one && a2 >= zero) {
+        val result = NumericInterval.safe(zero, nAbsMinusOne)
         if (nContainsZero)
           joinWithFailure(result)(divByZero(v1, v2))
         else
           result
-      )
-    }
-    val remRes = remainder(v1, v2)
+      } else {
+        val remRes = remainder(v1, v2)
 
-    if (NumericInterval.DEBUG_INTERVALS)
-      assert(remRes.high <= zero && remRes.low > minValue)
-    val high = if (remRes == zero) nAbsMinusOne else (remRes.high + nAbsMinusOne) + one    // nAbsMinusOne + one might be maxValue + 1
-    val result = computeOpBruteForceIfFeasibleElseTake(ops.modulo, v1, v2, NumericInterval.safe(zero, high))
-    if (nContainsZero)
-      joinWithFailure(result)(divByZero(v1, v2))
-    else
-      result
+        if (NumericInterval.DEBUG_INTERVALS)
+          assert(remRes.high <= zero && remRes.low > minValue)
+        val high = if (remRes == zero) nAbsMinusOne else (remRes.high + nAbsMinusOne) + one // nAbsMinusOne + one might be maxValue + 1
+        val result = computeOpBruteForceIfFeasibleElseTake(ops.modulo, v1, v2, NumericInterval.safe(zero, high))
+        if (nContainsZero)
+          joinWithFailure(result)(divByZero(v1, v2))
+        else
+          result
+      }
+    }
+
+
 
   private def negativeAbsolute(v: NumericInterval[I]): NumericInterval[I] = {
     if (v.high >= zero) {

@@ -3,7 +3,7 @@ ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 ThisBuild / version := "0.1"
 
-ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalaVersion := "3.3.5"
 
 ThisBuild / Test / fork := false
 ThisBuild / Test / parallelExecution := false
