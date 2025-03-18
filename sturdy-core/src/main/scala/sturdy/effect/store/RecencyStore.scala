@@ -10,6 +10,7 @@ import sturdy.values.{*, given}
 import scala.collection.immutable.{HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
+import scala.util.boundary, boundary.break
 
 class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin],
@@ -108,19 +109,19 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
   def virtualAddressesByContext: Map[Context, PowVirtualAddress[Context]] =
     addressTranslation.virtualAddressesByContext
 
-  def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Context], vSoundness: Soundness[cV, V]): IsSound =
+  def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Context], vSoundness: Soundness[cV, V]): IsSound = boundary:
     val contextMap = physicalAddressesByContext
     c.entries.foreachEntry { case (a, v) =>
       val ctx = varAbstractly(a)
       val ps = contextMap.getOrElse(ctx, PowersetAddr(Set()))
       store.read(ps) match
-        case JOptionA.None() => return IsSound.NotSound(s"Concrete address $a abstracts to $ps, which is not bound in store")
+        case JOptionA.None() => break(IsSound.NotSound(s"Concrete address $a abstracts to $ps, which is not bound in store"))
         case JOptionA.Some(av) =>
           val s = vSoundness.isSound(v, av)
-          if (s.isNotSound) return s
+          if (s.isNotSound) break(s)
         case JOptionA.NoneSome(av) =>
           val s = vSoundness.isSound(v, av)
-          if (s.isNotSound) return s
+          if (s.isNotSound) break(s)
     }
     IsSound.Sound
 

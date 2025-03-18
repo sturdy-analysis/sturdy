@@ -14,12 +14,12 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-final class StackedStates[Dom, Codom](val state: State)
-                                     (inStateWidening: InStateWidening[Dom, state.In],
-                                      readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean,
-                                      observers: Iterable[Stack.FixEvent => Unit])
-                                     (using Finite[Dom], Join[Codom], Widen[Codom])
-  extends Stack[Dom, Codom, state.In, state.Out]:
+final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
+                                              (inStateWidening: InStateWidening[Dom, state.In],
+                                               readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean,
+                                               observers: Iterable[Stack.FixEvent => Unit])
+                                              (using Finite[Dom], Join[Codom], Widen[Codom])
+  extends Stack[Dom, Codom, In, Out]:
 
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.

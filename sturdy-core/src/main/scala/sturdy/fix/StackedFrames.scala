@@ -36,10 +36,11 @@ import scala.util.Try
  *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
  *
  */
-final class StackedFrames[Dom, Codom, Ctx](val state: State)
-                                          (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
-                                          (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
-  extends Stack[Dom, Codom, state.In, state.Out]:
+final class StackedFrames[Dom, Codom, Ctx, In, Out]
+    (val state: StateT[In, Out])
+    (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
+    (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  extends Stack[Dom, Codom, In, Out]:
 
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.

@@ -14,6 +14,7 @@ import scala.collection.IndexedSeqView
 import scala.collection.immutable.IntMap
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
+import scala.util.boundary, boundary.break
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
@@ -83,7 +84,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 
-  def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
+  def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound = boundary:
     // soundess for memory:
     //  - all concrete memories are present in abstract memories
     //  - all definite abstract memores have a concrete counterpart
@@ -91,18 +92,18 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     val cMemories = c.getMemories
     memories.filterNot{ (key, _) => cMemories.isDefinedAt(key)}.foreachEntry { (k, aMem) =>
       if (aMem.isDefinite)
-        return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")
+        break(IsSound.NotSound(s"Definite memory with key $k not present in concrete memory."))
     }
     cMemories.foreachEntry { (key, cMem) =>
-      val aMem = memories.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in constant address memory.") })
+      val aMem = memories.getOrElse(key, { break(IsSound.NotSound(s"Key $key not present in constant address memory.")) })
       val memSound = memInstanceIsSound(cMem, aMem)
       if (memSound.isNotSound)
-        return memSound
+        break(memSound)
     }
     IsSound.Sound
 
 
-  def memInstanceIsSound(c: ConcreteMemory.Mem, aMem: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound =
+  def memInstanceIsSound(c: ConcreteMemory.Mem, aMem: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound = boundary:
     // - sizes are equal
     // - all locations in concrete memory are approximated by locations in abstract memory
     aMem match
@@ -115,22 +116,21 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
           concreteInstanceApproximated(c, aMem.upperBound)
       case aMem: ImmutableByteMem[_] =>
         if (c.size != aMem.size || c.sizeLimit != aMem.sizeLimit)
-          return IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide, was \n  $aMem wanted \n  ${(c.size, c.sizeLimit, c.pageNum)}.")
+          break(IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide, was \n  $aMem wanted \n  ${(c.size, c.sizeLimit, c.pageNum)}."))
         c.bytes.zip(aMem.bytesIterable).foreach { (cByte, aByte) =>
           val bSound = bytesSound.isSound(cByte, aByte)
           if (bSound.isNotSound) {
-            val sound = IsSound.NotSound(s"Byte $cByte is not approximated by $aByte.")
-            return sound
+            break(IsSound.NotSound(s"Byte $cByte is not approximated by $aByte."))
           }
         }
         IsSound.Sound
 
 
-  def concreteInstanceApproximated(c: ConcreteMemory.Mem, b: B)(using bytesSound: Soundness[Byte, B]): IsSound =
+  def concreteInstanceApproximated(c: ConcreteMemory.Mem, b: B)(using bytesSound: Soundness[Byte, B]): IsSound = boundary:
     c.bytes.foreach { cByte =>
       val bSound = bytesSound.isSound(cByte, b)
       if (bSound.isNotSound)
-        return IsSound.NotSound(s"Byte $cByte is not approximated by $b.")
+        break(IsSound.NotSound(s"Byte $cByte is not approximated by $b."))
     }
     IsSound.Sound
 

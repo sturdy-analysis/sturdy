@@ -23,4 +23,4 @@ trait State:
   def joinOut(dom: Any): Join[Out]
   def widenOut(dom: Any): Widen[Out]
 
-
+type StateT[I, O] = State { type In = I; type Out = O}

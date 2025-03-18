@@ -6,6 +6,8 @@ import sturdy.Soundness
 import sturdy.effect.EffectStack
 import sturdy.values.ordering.EqOps
 
+import scala.util.boundary, boundary.break
+
 case class Powerset[A](set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
@@ -33,26 +35,26 @@ given JoinPowerset[A]: Join[Powerset[A]] with
     MaybeChanged(new Powerset(joinedSet), joinedSet.size > v1.set.size)
 
 given powersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
-  override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
+  override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = boundary:
     if (v1.set.size == 1 && v2.set.size == 1)
       Topped.Actual(ops.equ(v1.set.head, v2.set.head))
     else {
       for (a1 <- v1.set; a2 <- v2.set)
         if (ops.equ(a1, a2))
-          return Topped.Top
+          break(Topped.Top)
       Topped.Actual(false)
     }
 
   override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
 
 given powersetUncertainEqualOps[A](using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
-  override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
+  override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = boundary:
     if (v1.set.size == 1 && v2.set.size == 1)
       ops.equ(v1.set.head, v2.set.head)
     else {
       for (a1 <- v1.set; a2 <- v2.set) ops.equ(a1, a2) match
-        case Topped.Top => return Topped.Top
-        case Topped.Actual(true) => return Topped.Top
+        case Topped.Top => break(Topped.Top)
+        case Topped.Actual(true) => break(Topped.Top)
         case _ => // nothing
       Topped.Actual(false)
     }

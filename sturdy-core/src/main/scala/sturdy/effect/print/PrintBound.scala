@@ -5,6 +5,8 @@ import sturdy.Soundness
 import sturdy.effect.{Effect, Monotone}
 import sturdy.values.{*, given}
 
+import scala.util.boundary, boundary.break
+
 trait Serializer[A, Serialized]:
   def serialize(a: A): Serialized
 
@@ -34,11 +36,11 @@ class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSer
   override def join: Join[State] = combineSymbols(_, _, joinSerialized.apply)
   override def widen: Widen[State] = combineSymbols(_, _, widenSerialized.apply)
 
-  def isSound[C](cp: CPrint[C])(using s: Soundness[C, S]): IsSound =
+  def isSound[C](cp: CPrint[C])(using s: Soundness[C, S]): IsSound = boundary:
     cp.getPrinted.foreach { c =>
-      val isSound = s.isSound(c, symbol.getOrElse(return IsSound.NotSound(s"Abstract semantic predicted no prints, but got ${cp.getPrinted}")))
+      val isSound = s.isSound(c, symbol.getOrElse(break(IsSound.NotSound(s"Abstract semantic predicted no prints, but got ${cp.getPrinted}"))))
       if (isSound.isNotSound)
-        return IsSound.NotSound(s"Concretely printed symbol $c not approximated by ${symbol.get}: ${isSound.toString}")
+        break(IsSound.NotSound(s"Concretely printed symbol $c not approximated by ${symbol.get}: ${isSound.toString}"))
     }
     IsSound.Sound
 

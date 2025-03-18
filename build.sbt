@@ -3,7 +3,7 @@ ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 ThisBuild / version := "0.1"
 
-ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / scalaVersion := "3.3.1"
 
 ThisBuild / Test / fork := false
 ThisBuild / Test / parallelExecution := false
@@ -93,7 +93,7 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
     )
   )
 
-val swamCommit = "39999a1751076c6dbfe2a92c874f17683730d14e"
+val swamCommit = "580bdb83208e63cbdb2bcec86fc5432db288fd21"
 val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
