@@ -81,13 +81,10 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
 
   def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false
-    val joinedFrame = ops1.zipAll[V,V](ops2, null.asInstanceOf[V], null.asInstanceOf[V]).map {
-      case (v1, null) => v1
-      case (null, v2) => v2
-      case (v1, v2) =>
-        val v = comb(v1, v2)
-        hasChanged |= v.hasChanged
-        v.get
+    val joinedFrame = ops1.zip(ops2).map { case (v1, v2) =>
+      val v = comb(v1, v2)
+      hasChanged |= v.hasChanged
+      v.get
     }
     MaybeChanged(joinedFrame, hasChanged)
   override def join: Join[List[V]] = combineFrames(_, _, summon[Join[V]].apply)

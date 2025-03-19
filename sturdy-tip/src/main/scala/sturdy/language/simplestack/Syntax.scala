@@ -6,4 +6,4 @@ enum Inst:
   case Add
   case Mul
   case Gt
-  case JumpIf(pc: Int)
+  case JumpIf

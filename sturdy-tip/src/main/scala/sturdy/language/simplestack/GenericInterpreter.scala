@@ -6,7 +6,7 @@ import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure, FailureKind}
 import sturdy.effect.except.{ConcreteExcept, Except, JoinedExcept, given}
 import sturdy.effect.operandstack.{ConcreteOperandStack, DecidableOperandStack, JoinableDecidableOperandStack, OperandStack, StackUnderflow, given}
-import sturdy.{data, fix}
+import sturdy.{data, fix, values}
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.values.{Finite, Powerset, Topped, given}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching, given}
@@ -14,16 +14,19 @@ import sturdy.values.integer.{IntegerOps, given}
 import sturdy.values.exceptions.given
 import sturdy.values.ordering.{LiftedOrderingOps, OrderingOps, given}
 
-case class Jump(pc: Int)
+
+case class Jump[V](pc: V)
 
 trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
-
+  type Jump = sturdy.language.simplestack.Jump[V]
   val intops: IntegerOps[Int, V]
   val compare: OrderingOps[V, V]
   val stack: DecidableOperandStack[V]
   val except: Except[Jump, E, J]
   val branchops: BooleanBranching[V, Unit]
   implicit val failure: Failure
+
+  def jump(to: V)(k: Int => Unit): Unit
 
   implicit val effectStack: EffectStack = new EffectStack(EffectList(stack, except))
 
@@ -40,8 +43,8 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
     case Inst.Add => stack.push(intops.add.tupled(stack.pop2OrFail()))
     case Inst.Mul => stack.push(intops.mul.tupled(stack.pop2OrFail()))
     case Inst.Gt => stack.push(compare.gt.tupled(stack.pop2OrFail()))
-    case Inst.JumpIf(pc) =>
-      val c = stack.popOrFail()
+    case Inst.JumpIf =>
+      val (c, pc) = stack.pop2OrFail()
       branchops.boolBranch(c){
         except.throws(Jump(pc))
       } {
@@ -63,7 +66,7 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
     except.tryCatch {
       run(pc)
     } {
-      case Jump(to) => fixedTrampoline(to)
+      case Jump(to) => jump(to)(fixedTrampoline)
     }
 
   def runMain(): Unit =
@@ -71,13 +74,14 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
 
 
 object ConcreteInterpreter:
-  class Interpreter(val prog: Vector[Inst]) extends GenericInterpreter[Int, Jump, NoJoin]:
+  class Interpreter(val prog: Vector[Inst]) extends GenericInterpreter[Int, Jump[Int], NoJoin]:
     override val unknown: Int = 0
     override val intops: IntegerOps[Int, Int] = implicitly
     override val compare: OrderingOps[Int, Int] =
       new LiftedOrderingOps[Int, Int, Int, Boolean](identity, b => if (b) 1 else 0)
     override val stack: DecidableOperandStack[Int] = new ConcreteOperandStack[Int]
     override val except: Except[Jump, Jump, NoJoin] = new ConcreteExcept
+    override def jump(to: Int)(k: Int => Unit): Unit = k(to)
     override val branchops: BooleanBranching[Int, Unit] = new LiftedBooleanBranching(_ != 0)
     override implicit val failure: Failure = new ConcreteFailure
     override val joinV: NoJoin[Int] = noJoin
@@ -85,14 +89,18 @@ object ConcreteInterpreter:
     override val fixpoint: EffectStack ?=> Fixpoint[Int, Unit] = new fix.ConcreteFixpoint
 
 object ConstantInterpreter:
-  given Finite[Jump] with {}
-  class Interpreter(val prog: Vector[Inst]) extends GenericInterpreter[Topped[Int], Powerset[Jump], WithJoin]:
+  class Interpreter(val prog: Vector[Inst]) extends GenericInterpreter[Topped[Int], Powerset[Jump[Topped[Int]]], WithJoin]:
+    given Finite[Jump] with {}
     override val unknown: Topped[Int] = Topped.Top
     override val intops: IntegerOps[Int, Topped[Int]] = implicitly
     override val compare: OrderingOps[Topped[Int], Topped[Int]] =
       new LiftedOrderingOps[Topped[Int], Topped[Int], Topped[Int], Topped[Boolean]](identity, _.map(b => if (b) 1 else 0))
     override val stack: DecidableOperandStack[Topped[Int]] = new JoinableDecidableOperandStack
     override val except: Except[Jump, Powerset[Jump], WithJoin] = new JoinedExcept
+    override def jump(to: Topped[Int])(k: Int => Unit): Unit = to match
+      case Topped.Actual(v) => k(v)
+      case Topped.Top => sturdy.data.mapJoin(prog.indices, k)
+
     override val branchops: BooleanBranching[Topped[Int], Unit] = new LiftedBooleanBranching(_.map(_ != 0))
     override implicit val failure: Failure = new CollectedFailures[StackUnderflow.type]
     override val joinV: WithJoin[Topped[Int]] = implicitly
@@ -134,13 +142,15 @@ object Test3 extends App:
   test(Vector(
     Const(3),
     Unknown,
-    JumpIf(1)
+    Const(1),
+    JumpIf // if ? jump to 1
   ))
 
 object Test4 extends App:
   test(Vector(
-    Const(3),
-    JumpIf(3),
+    Unknown,
+    Unknown,
+    JumpIf, // if ? jump to ?
     Const(1),
     Const(2),
   ))
