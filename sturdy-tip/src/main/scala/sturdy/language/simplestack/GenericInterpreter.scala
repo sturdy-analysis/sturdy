@@ -8,7 +8,7 @@ import sturdy.effect.except.{ConcreteExcept, Except, JoinedExcept, given}
 import sturdy.effect.operandstack.{ConcreteOperandStack, DecidableOperandStack, JoinableDecidableOperandStack, OperandStack, StackUnderflow, given}
 import sturdy.{data, fix, values}
 import sturdy.fix.{Fixpoint, StackConfig}
-import sturdy.values.{Finite, Powerset, Topped, given}
+import sturdy.values.{BoundedPowerset, Finite, Powerset, Topped, given}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching, given}
 import sturdy.values.integer.{IntegerOps, given}
 import sturdy.values.exceptions.given
@@ -111,6 +111,31 @@ object ConstantInterpreter:
         fix.iter.innermost[Int, Unit, Unit](StackConfig.StackedStates())
       ).fixpoint
 
+object PowersetInterpreter:
+  class Interpreter(val prog: Vector[Inst], val bound: Int) extends GenericInterpreter[BoundedPowerset[Int], Powerset[Jump[BoundedPowerset[Int]]], WithJoin]:
+    given Finite[Jump] with {}
+
+    override val unknown: BoundedPowerset[Int] = BoundedPowerset.Unbound()
+    override val intops: IntegerOps[Int, BoundedPowerset[Int]] = implicitly
+    override val compare: OrderingOps[BoundedPowerset[Int], BoundedPowerset[Int]] = ???
+    override val stack: DecidableOperandStack[BoundedPowerset[Int]] = new JoinableDecidableOperandStack
+    override val except: Except[Jump, Powerset[Jump], WithJoin] = new JoinedExcept
+
+    override def jump(to: BoundedPowerset[Int])(k: Int => Unit): Unit = to match
+      case BoundedPowerset.Inbounds(set, _) => sturdy.data.mapJoin(set, k)
+      case BoundedPowerset.Unbound() => sturdy.data.mapJoin(prog.indices, k)
+
+    override val branchops: BooleanBranching[BoundedPowerset[Int], Unit] = ???
+    override implicit val failure: Failure = new CollectedFailures[StackUnderflow.type]
+    override val joinV: WithJoin[BoundedPowerset[Int]] = implicitly
+    override val joinUnit: data.MayJoin.WithJoin[Unit] = implicitly
+
+    given Finite[Int] with {}
+
+    override val fixpoint =
+      fix.notContextSensitive(
+        fix.iter.innermost[Int, Unit, Unit](StackConfig.StackedStates())
+      ).fixpoint
 
 def test(prog: Vector[Inst]): Unit =
   val cinterp = new ConcreteInterpreter.Interpreter(prog)

@@ -71,3 +71,40 @@ given powersetOptionSound[C, A](using s: Soundness[C, A]): Soundness[Option[C], 
   override def isSound(c: Option[C], as: Powerset[A]): IsSound = c match
       case None => IsSound.Sound
       case Some(c) => Soundness.isSound(c, as)
+
+enum BoundedPowerset[A]:
+  case Inbounds(set: Set[A], bound: Int)
+  case Unbound()
+
+  def map[B](f: A => B): BoundedPowerset[B] = this match
+    case Inbounds(set, bound) => Inbounds(set.map(f), bound)
+    case Unbound() => Unbound()
+
+  def flatMap[B](f: A => BoundedPowerset[B]): BoundedPowerset[B] = this match
+    case Inbounds(set, bound) =>
+      val bs = set.map(f)
+      if (bs.forall(_.isInstanceOf[Inbounds[B]])) {
+        val bset = bs.flatMap(_.asInstanceOf[Inbounds[B]].set)
+        BoundedPowerset(bound, bset)
+      } else {
+        Unbound()
+      }
+    case Unbound() => Unbound()
+
+object BoundedPowerset {
+  def empty[A](bound: Int): BoundedPowerset[A] = BoundedPowerset.Inbounds(Set.empty, bound)
+  def apply[A](bound: Int, as: Set[A]): BoundedPowerset[A] =
+    if (as.size <= bound)
+      BoundedPowerset.Inbounds(as, bound)
+    else
+      BoundedPowerset.Unbound()
+  def apply[A](bound: Int, as: A*): BoundedPowerset[A] = BoundedPowerset(bound, as.toSet)
+}
+
+given CombineBoundedPowerset[A, W <: Widening]: Combine[BoundedPowerset[A], W] with
+  override def apply(v1: BoundedPowerset[A], v2: BoundedPowerset[A]): MaybeChanged[BoundedPowerset[A]] = (v1, v2) match
+    case (BoundedPowerset.Unbound(), _) => Unchanged(BoundedPowerset.Unbound())
+    case (_, BoundedPowerset.Unbound()) => Changed(BoundedPowerset.Unbound())
+    case (BoundedPowerset.Inbounds(set1, bound1), BoundedPowerset.Inbounds(set2, bound2)) =>
+      val joinedSet = set1 ++ set2
+      MaybeChanged(BoundedPowerset(bound1.max(bound2), joinedSet), joinedSet.size > set1.size)
