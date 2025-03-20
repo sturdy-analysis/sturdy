@@ -40,6 +40,9 @@ trait GenericInterpreter[V, E, J[_] <: MayJoin[_]]:
   def step(i: Inst): Unit = i match
     case Inst.Unknown => stack.push(unknown)
     case Inst.Const(i) => stack.push(intops.integerLit(i))
+    case Inst.Dup =>
+      val v = stack.popOrFail()
+      stack.push(v) ; stack.push(v)
     case Inst.Add => stack.push(intops.add.tupled(stack.pop2OrFail()))
     case Inst.Mul => stack.push(intops.mul.tupled(stack.pop2OrFail()))
     case Inst.Gt => stack.push(compare.gt.tupled(stack.pop2OrFail()))
@@ -178,4 +181,20 @@ object Test4 extends App:
     JumpIf, // if ? jump to ?
     Const(1),
     Const(2),
+  ))
+
+object Test5 extends App:
+  // lam x. min(x,10)
+  test(Vector(
+    Unknown,
+    Dup,
+    Const(9),
+    Gt,
+    Const(Int.MaxValue),
+    JumpIf,
+    Const(1),
+    Add,
+    Const(1),
+    Const(1),
+    JumpIf
   ))
