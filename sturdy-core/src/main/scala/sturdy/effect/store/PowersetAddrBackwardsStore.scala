@@ -37,7 +37,7 @@ class PowersetAddrBackwardsStore[Addr <: ManageableAddr, V](_init: Map[Addr, V],
         (expected: V) => {
           val v = vs.reduce(Join.apply(_, _).get)
           val refined = this.assert(v, expected)
-          write(xs, _ => v)
+          write(xs, _ => refined)
           JOptionA.Some(refined)
         }
     }

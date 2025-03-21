@@ -83,61 +83,59 @@ class LiftedBackIntegerOps[B,V,I](extract: V => I, inject: I => V)(using ops: Ba
     // = Pos
     // found: y is Pos
 
-    override def add(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = r => { 
-      r match
-        case TopSign =>
-          val a2 = v2(TopSign)
-          val a1 = v1(TopSign)
-          SignIntegerOps.add(a1, a2)
-        case Neg => v2(TopSign) match
-          case Zero | Pos | ZeroOrPos => v1(Neg)
-          case Neg | NegOrZero | TopSign => v1(TopSign)
-            Neg
-        case NegOrZero => v2(TopSign) match
-          case Pos => v1(Neg)
-          case Zero | ZeroOrPos => v1(NegOrZero)
-          case Neg | NegOrZero | TopSign => v1(TopSign)
-            NegOrZero
-        case Zero =>
-          val a2 = v2(TopSign)
-          v1(a2.negated)
-          Zero
-        case ZeroOrPos => v2(TopSign) match
-          case Neg => v1(Pos)
-          case Zero | NegOrZero => v1(ZeroOrPos)
-          case Pos | ZeroOrPos | TopSign => v1(TopSign)
-            ZeroOrPos
-        case Pos => v2(TopSign) match
-          case Zero | NegOrZero | Neg => v1(Pos)
-          case Pos | ZeroOrPos | TopSign => v1(TopSign)
-            Pos
+    override def add(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = {
+      case TopSign =>
+        val a2 = v2(TopSign)
+        val a1 = v1(TopSign)
+        SignIntegerOps.add(a1, a2)
+      case Neg => v2(TopSign) match
+        case Zero | Pos | ZeroOrPos => v1(Neg)
+        case Neg | NegOrZero | TopSign => v1(TopSign)
+          Neg
+      case NegOrZero => v2(TopSign) match
+        case Pos => v1(Neg)
+        case Zero | ZeroOrPos => v1(NegOrZero)
+        case Neg | NegOrZero | TopSign => v1(TopSign)
+          NegOrZero
+      case Zero =>
+        val a2 = v2(TopSign)
+        v1(a2.negated)
+        Zero
+      case ZeroOrPos => v2(TopSign) match
+        case Neg => v1(Pos)
+        case Zero | NegOrZero => v1(ZeroOrPos)
+        case Pos | ZeroOrPos | TopSign => v1(TopSign)
+          ZeroOrPos
+      case Pos => v2(TopSign) match
+        case Zero | NegOrZero | Neg => v1(Pos)
+        case Pos | ZeroOrPos | TopSign => v1(TopSign)
+          Pos
     } 
 
-    override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = r => {
-      r match
-        case TopSign =>
-          val a2 = v2(TopSign)
-          val a1 = v1(TopSign)
-          SignIntegerOps.sub(a1, a2)
-        case Neg => v2(TopSign) match
-          case Zero | Neg | NegOrZero => v1(Neg)
-          case Pos | ZeroOrPos | TopSign => v1(TopSign)
-            Neg
-        case NegOrZero => v2(TopSign) match
-          case Neg => v1(Neg)
-          case Zero | NegOrZero => v1(NegOrZero)
-          case Pos | ZeroOrPos | TopSign => v1(TopSign)
-            NegOrZero
-        case Zero => v1(v2(TopSign)); Zero
-        case ZeroOrPos => v2(TopSign) match
-          case Pos => v1(Pos)
-          case ZeroOrPos | Zero => v1(ZeroOrPos)
-          case Neg | NegOrZero | TopSign => v1(TopSign)
-            ZeroOrPos
-        case Pos => v2(TopSign) match
-          case Pos | ZeroOrPos | Zero => v1(Pos)
-          case Neg | NegOrZero | TopSign => v1(TopSign)
-            Pos
+    override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = {
+      case TopSign =>
+        val a2 = v2(TopSign)
+        val a1 = v1(TopSign)
+        SignIntegerOps.sub(a1, a2)
+      case Neg => v2(TopSign) match
+        case Zero | Neg | NegOrZero => v1(Neg)
+        case Pos | ZeroOrPos | TopSign => v1(TopSign)
+          Neg
+      case NegOrZero => v2(TopSign) match
+        case Neg => v1(Neg)
+        case Zero | NegOrZero => v1(NegOrZero)
+        case Pos | ZeroOrPos | TopSign => v1(TopSign)
+          NegOrZero
+      case Zero => v1(v2(TopSign)); Zero
+      case ZeroOrPos => v2(TopSign) match
+        case Pos => v1(Pos)
+        case ZeroOrPos | Zero => v1(ZeroOrPos)
+        case Neg | NegOrZero | TopSign => v1(TopSign)
+          ZeroOrPos
+      case Pos => v2(TopSign) match
+        case Pos | ZeroOrPos | Zero => v1(Pos)
+        case Neg | NegOrZero | TopSign => v1(TopSign)
+          Pos
     }
 //    override def neg(v: IntSign => IntSign): IntSign => IntSign = r match
 //      case TopSign =>
@@ -153,38 +151,37 @@ class LiftedBackIntegerOps[B,V,I](extract: V => I, inject: I => V)(using ops: Ba
 //      case Pos =>
 //        v(Neg); Pos
 
-    override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = r => {
-      r match
-        case TopSign =>
-          val a2 = v2(TopSign)
-          val a1 = v1(TopSign)
-          SignIntegerOps.mul(a1, a2)
-        case Neg => v2(TopSign) match
-          case Neg | NegOrZero => v1(Pos)
-          case Pos | ZeroOrPos => v1(Neg)
-          case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Neg")
-          case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
-            Neg
-        case NegOrZero => v2(TopSign) match
-          case Neg => v1(ZeroOrPos)
-          case Pos => v1(NegOrZero)
-          case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-            NegOrZero
-        case Zero => v2(TopSign) match
-          case Neg | Pos => v1(Zero)
-          case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-            Zero
-        case ZeroOrPos => v2(TopSign) match
-          case Neg => v1(NegOrZero)
-          case Pos => v1(ZeroOrPos)
-          case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-            ZeroOrPos
-        case Pos => v2(TopSign) match
-          case Neg | NegOrZero => v1(Neg)
-          case Pos | ZeroOrPos => v1(Pos)
-          case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Pos")
-          case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
-            Pos
+    override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = {
+      case TopSign =>
+        val a2 = v2(TopSign)
+        val a1 = v1(TopSign)
+        SignIntegerOps.mul(a1, a2)
+      case Neg => v2(TopSign) match
+        case Neg | NegOrZero => v1(Pos)
+        case Pos | ZeroOrPos => v1(Neg)
+        case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Neg")
+        case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
+          Neg
+      case NegOrZero => v2(TopSign) match
+        case Neg => v1(ZeroOrPos)
+        case Pos => v1(NegOrZero)
+        case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+          NegOrZero
+      case Zero => v2(TopSign) match
+        case Neg | Pos => v1(Zero)
+        case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+          Zero
+      case ZeroOrPos => v2(TopSign) match
+        case Neg => v1(NegOrZero)
+        case Pos => v1(ZeroOrPos)
+        case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+          ZeroOrPos
+      case Pos => v2(TopSign) match
+        case Neg | NegOrZero => v1(Neg)
+        case Pos | ZeroOrPos => v1(Pos)
+        case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Pos")
+        case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
+          Pos
     }
     override def div(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign =
       def splitV2(f: (Neg.type | Pos.type) => IntSign) =
@@ -225,164 +222,203 @@ class LiftedBackIntegerOps[B,V,I](extract: V => I, inject: I => V)(using ops: Ba
       }
 
     override def divUnsigned(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
-//given SignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integral[B]): BackIntegerOps[B, IntSign] with
-//  override def integerLit(i: B): IntSign =
-//    if base.lt(i, base.zero) then Neg
-//    else if base.gt(i, base.zero) then Pos
-//    else Zero
-//
-//  override def toValue(is: List[B]): IntSign = is match
-//    case Nil => throw new IllegalArgumentException("List is empty, cannot extract head element.")
-//    case (i :: _) => integerLit(i)
-//  override def randomInteger(): IntSign = TopSign
-//
-//  //  { x = Pos, y = Pos }
-//  // x * y = Pos
-//  //  { x = Pos, y = Top }
-//
-//  // evalBack(x * y, Pos)
-//  //   evalBack(y, Top) = Top
-//  //   evalBack(x, Top) = Pos
-//  // = Pos
-//  // missed: y needs to be Pos
-//
-//  // evalBack(x * (y - 56), Pos)
-//  //   evalBack(y - 56, Top) = Top
-//  //     evalBack(y, Top) = Top
-//  //   evalBack(x, Top) = Pos
-//  // = Pos
-//  // missed: y needs to be Pos
-//
-//  // evalBack(y * x, Pos)
-//  //   evalBack(x, Top) = Pos
-//  //   evalBack(y, Pos) = Pos
-//  // = Pos
-//  // found: y is Pos
-//
-//  override def add(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
-//    case TopSign =>
-//      val a2 = v2(TopSign)
-//      val a1 = v1(TopSign)
-//      SignIntegerOps.add(a1, a2)
-//    case Neg => v2(TopSign) match
-//      case Zero | Pos | ZeroOrPos => v1(Neg)
-//      case Neg | NegOrZero | TopSign => v1(TopSign)
-//      Neg
-//    case NegOrZero => v2(TopSign) match
-//      case Pos => v1(Neg)
-//      case Zero | ZeroOrPos => v1(NegOrZero)
-//      case Neg | NegOrZero | TopSign => v1(TopSign)
-//      NegOrZero
-//    case Zero =>
-//      val a2 = v2(TopSign)
-//      v1(a2.negated)
-//      Zero
-//    case ZeroOrPos => v2(TopSign) match
-//      case Neg => v1(Pos)
-//      case Zero | NegOrZero => v1(ZeroOrPos)
-//      case Pos | ZeroOrPos | TopSign => v1(TopSign)
-//      ZeroOrPos
-//    case Pos => v2(TopSign) match
-//      case Zero | NegOrZero | Neg => v1(Pos)
-//      case Pos | ZeroOrPos | TopSign => v1(TopSign)
-//      Pos
-//
-//  override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
-//    case TopSign =>
-//      val a2 = v2(TopSign)
-//      val a1 = v1(TopSign)
-//      SignIntegerOps.sub(a1, a2)
-//    case Neg => v2(TopSign) match
-//      case Zero | Neg | NegOrZero => v1(Neg)
-//      case Pos | ZeroOrPos | TopSign => v1(TopSign)
-//      Neg
-//    case NegOrZero => v2(TopSign) match
-//      case Neg => v1(Neg)
-//      case Zero | NegOrZero => v1(NegOrZero)
-//      case Pos | ZeroOrPos | TopSign => v1(TopSign)
-//      NegOrZero
-//    case Zero => v1(v2(TopSign)); Zero
-//    case ZeroOrPos => v2(TopSign) match
-//      case Pos => v1(Pos)
-//      case ZeroOrPos | Zero => v1(ZeroOrPos)
-//      case Neg | NegOrZero | TopSign => v1(TopSign)
-//      ZeroOrPos
-//    case Pos => v2(TopSign) match
-//      case Pos | ZeroOrPos | Zero => v1(Pos)
-//      case Neg | NegOrZero | TopSign => v1(TopSign)
-//      Pos
-//
-//  override def neg(v: IntSign => IntSign, r: IntSign): IntSign = r match
-//    case TopSign =>
-//      SignIntegerOps.neg(v(TopSign))
-//    case Neg =>
-//      v(Pos);Neg
-//    case NegOrZero =>
-//      v(NegOrZero); NegOrZero
-//    case Zero =>
-//      v(Zero); Zero
-//    case ZeroOrPos =>
-//      v(ZeroOrPos); ZeroOrPos
-//    case Pos =>
-//      v(Neg); Pos
-//
-//  override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
-//    case TopSign =>
-//      val a2 = v2(TopSign)
-//      val a1 = v1(TopSign)
-//      SignIntegerOps.mul(a1, a2)
-//    case Neg => v2(TopSign) match
-//      case Neg | NegOrZero => v1(Pos)
-//      case Pos | ZeroOrPos => v1(Neg)
-//      case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Neg")
-//      case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
-//      Neg
-//    case NegOrZero => v2(TopSign) match
-//      case Neg => v1(ZeroOrPos)
-//      case Pos => v1(NegOrZero)
-//      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-//      NegOrZero
-//    case Zero => v2(TopSign) match
-//      case Neg | Pos => v1(Zero)
-//      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-//      Zero
-//    case ZeroOrPos => v2(TopSign) match
-//      case Neg => v1(NegOrZero)
-//      case Pos => v1(ZeroOrPos)
-//      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
-//      ZeroOrPos
-//    case Pos => v2(TopSign) match
-//      case Neg | NegOrZero => v1(Neg)
-//      case Pos | ZeroOrPos => v1(Pos)
-//      case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Pos")
-//      case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
-//      Pos
-//
-//  override def div(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign =
-//    def splitV2(f: (Neg.type | Pos.type ) => IntSign) =
-//      j.joinComputations{v2(Neg);f(Neg)}{v2(Pos);f(Pos)}
-//    r match
-//      case TopSign =>
-//        splitV2(a2 => SignIntegerOps.div(v1(TopSign), a2))
-//      case Neg => splitV2 {
-//        case Neg => v1(Pos)
-//        case Pos => v1(Neg)
-//      }; Neg
-//      case NegOrZero => splitV2 {
-//        case Neg => v1(ZeroOrPos)
-//        case Pos => v1(NegOrZero)
-//      }; NegOrZero
-//      case Zero => splitV2 {
-//        case Neg | Pos => v1(Zero)
-//      }; Zero
-//      case ZeroOrPos => splitV2 {
-//        case Neg => v1(NegOrZero)
-//        case Pos => v1(ZeroOrPos)
-//      }; ZeroOrPos
-//      case Pos => splitV2 {
-//        case Neg => v1(Neg)
-//        case Pos => v1(Pos)
-//      }; Pos
+
+    override def absolute(v: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def bitOr(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def bitXor(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def bitAnd(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def shiftLeft(v: IntSign => IntSign, shift: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def shiftRight(v: IntSign => IntSign, shift: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def shiftRightUnsigned(v: IntSign => IntSign, shift: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def rotateLeft(v: IntSign => IntSign, shift: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def rotateRight(v: IntSign => IntSign, shift: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def countLeadingZeros(v: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def countTrailingZeros(v: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def nonzeroBitCount(v: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def invertBits(v: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def gcd(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def max(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def min(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def modulo(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def remainder(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+    override def remainderUnsigned(v1: IntSign => IntSign, v2: IntSign => IntSign): IntSign => IntSign = ???
+
+given OldSignBackIntegerOps[B](using failure: Failure, j: EffectStack, base: Integral[B]): BackIntegerOps[B, IntSign] with
+  override def integerLit(i: B): IntSign =
+    if base.lt(i, base.zero) then Neg
+    else if base.gt(i, base.zero) then Pos
+    else Zero
+
+  override def toValue(is: List[B]): IntSign = is match
+    case Nil => throw new IllegalArgumentException("List is empty, cannot extract head element.")
+    case (i :: _) => integerLit(i)
+  override def randomInteger(): IntSign = TopSign
+
+  //  { x = Pos, y = Pos }
+  // x * y = Pos
+  //  { x = Pos, y = Top }
+
+  // evalBack(x * y, Pos)
+  //   evalBack(y, Top) = Top
+  //   evalBack(x, Top) = Pos
+  // = Pos
+  // missed: y needs to be Pos
+
+  // evalBack(x * (y - 56), Pos)
+  //   evalBack(y - 56, Top) = Top
+  //     evalBack(y, Top) = Top
+  //   evalBack(x, Top) = Pos
+  // = Pos
+  // missed: y needs to be Pos
+
+  // evalBack(y * x, Pos)
+  //   evalBack(x, Top) = Pos
+  //   evalBack(y, Pos) = Pos
+  // = Pos
+  // found: y is Pos
+
+  override def add(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
+    case TopSign =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignIntegerOps.add(a1, a2)
+    case Neg => v2(TopSign) match
+      case Zero | Pos | ZeroOrPos => v1(Neg)
+      case Neg | NegOrZero | TopSign => v1(TopSign)
+      Neg
+    case NegOrZero => v2(TopSign) match
+      case Pos => v1(Neg)
+      case Zero | ZeroOrPos => v1(NegOrZero)
+      case Neg | NegOrZero | TopSign => v1(TopSign)
+      NegOrZero
+    case Zero =>
+      val a2 = v2(TopSign)
+      v1(a2.negated)
+      Zero
+    case ZeroOrPos => v2(TopSign) match
+      case Neg => v1(Pos)
+      case Zero | NegOrZero => v1(ZeroOrPos)
+      case Pos | ZeroOrPos | TopSign => v1(TopSign)
+      ZeroOrPos
+    case Pos => v2(TopSign) match
+      case Zero | NegOrZero | Neg => v1(Pos)
+      case Pos | ZeroOrPos | TopSign => v1(TopSign)
+      Pos
+
+  override def sub(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
+    case TopSign =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignIntegerOps.sub(a1, a2)
+    case Neg => v2(TopSign) match
+      case Zero | Neg | NegOrZero => v1(Neg)
+      case Pos | ZeroOrPos | TopSign => v1(TopSign)
+      Neg
+    case NegOrZero => v2(TopSign) match
+      case Neg => v1(Neg)
+      case Zero | NegOrZero => v1(NegOrZero)
+      case Pos | ZeroOrPos | TopSign => v1(TopSign)
+      NegOrZero
+    case Zero => v1(v2(TopSign)); Zero
+    case ZeroOrPos => v2(TopSign) match
+      case Pos => v1(Pos)
+      case ZeroOrPos | Zero => v1(ZeroOrPos)
+      case Neg | NegOrZero | TopSign => v1(TopSign)
+      ZeroOrPos
+    case Pos => v2(TopSign) match
+      case Pos | ZeroOrPos | Zero => v1(Pos)
+      case Neg | NegOrZero | TopSign => v1(TopSign)
+      Pos
+
+  override def neg(v: IntSign => IntSign, r: IntSign): IntSign = r match
+    case TopSign =>
+      SignIntegerOps.neg(v(TopSign))
+    case Neg =>
+      v(Pos);Neg
+    case NegOrZero =>
+      v(NegOrZero); NegOrZero
+    case Zero =>
+      v(Zero); Zero
+    case ZeroOrPos =>
+      v(ZeroOrPos); ZeroOrPos
+    case Pos =>
+      v(Neg); Pos
+
+  override def mul(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign = r match
+    case TopSign =>
+      val a2 = v2(TopSign)
+      val a1 = v1(TopSign)
+      SignIntegerOps.mul(a1, a2)
+    case Neg => v2(TopSign) match
+      case Neg | NegOrZero => v1(Pos)
+      case Pos | ZeroOrPos => v1(Neg)
+      case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Neg")
+      case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
+      Neg
+    case NegOrZero => v2(TopSign) match
+      case Neg => v1(ZeroOrPos)
+      case Pos => v1(NegOrZero)
+      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+      NegOrZero
+    case Zero => v2(TopSign) match
+      case Neg | Pos => v1(Zero)
+      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+      Zero
+    case ZeroOrPos => v2(TopSign) match
+      case Neg => v1(NegOrZero)
+      case Pos => v1(ZeroOrPos)
+      case NegOrZero | ZeroOrPos | Zero | TopSign => v1(TopSign)
+      ZeroOrPos
+    case Pos => v2(TopSign) match
+      case Neg | NegOrZero => v1(Neg)
+      case Pos | ZeroOrPos => v1(Pos)
+      case Zero => failure(BackwardsUnreachable, "impossible: ? * Zero = Pos")
+      case TopSign => j.joinComputations(v1(Neg))(v1(Pos))
+      Pos
+
+  override def div(v1: IntSign => IntSign, v2: IntSign => IntSign, r: IntSign): IntSign =
+    def splitV2(f: (Neg.type | Pos.type ) => IntSign) =
+      j.joinComputations{v2(Neg);f(Neg)}{v2(Pos);f(Pos)}
+    r match
+      case TopSign =>
+        splitV2(a2 => SignIntegerOps.div(v1(TopSign), a2))
+      case Neg => splitV2 {
+        case Neg => v1(Pos)
+        case Pos => v1(Neg)
+      }; Neg
+      case NegOrZero => splitV2 {
+        case Neg => v1(ZeroOrPos)
+        case Pos => v1(NegOrZero)
+      }; NegOrZero
+      case Zero => splitV2 {
+        case Neg | Pos => v1(Zero)
+      }; Zero
+      case ZeroOrPos => splitV2 {
+        case Neg => v1(NegOrZero)
+        case Pos => v1(ZeroOrPos)
+      }; ZeroOrPos
+      case Pos => splitV2 {
+        case Neg => v1(Neg)
+        case Pos => v1(Pos)
+      }; Pos
 
 
 

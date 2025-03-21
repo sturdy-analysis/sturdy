@@ -92,7 +92,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
   val meet: Meet[V]
 
   // value components
-  val intOps: IntegerOps[Int, V => V]; import intOps.*
+  val intOps: BackIntegerOps[Int, V]; import intOps.*
   val compareOps: BackOrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val backEqOps: BackEqOps[V, V]
@@ -135,7 +135,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     m.getOrElse(failure(BackwardsUnreachable, s"empty meet"))
 
   def evalBack_open(e: Exp, expected: V)(using BackFixed): V = e match {
-    case Exp.NumLit(n) => assert(integerLit(n)(topInt), expected)
+    case Exp.NumLit(n) => assert(integerLit(n), expected)
     case Exp.Input() =>
       input.print(expected); expected
       //input.read(expected)
@@ -146,10 +146,10 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         val refined = assert(xVal, expected)
         callFrame.setLocalByName(x, refined)
         refined
-    case Exp.Add(e1, e2) => add(evalBack(e1,_), evalBack(e2,_))(expected)
-    case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_))(expected)
-    case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_))(expected)
-    case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_))(expected)
+    case Exp.Add(e1, e2) => add(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Sub(e1, e2) => sub(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Mul(e1, e2) => mul(evalBack(e1,_), evalBack(e2,_), expected)
+    case Exp.Div(e1, e2) => div(evalBack(e1,_), evalBack(e2,_), expected)
     case Exp.Gt(e1, e2) =>
       gt(evalBack(e1,_), evalBack(e2, _), expected)
     case Exp.Eq(e1, e2) => backEqOps.equ(evalBack(e1,_), evalBack(e2,_), expected)
@@ -194,7 +194,6 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         refAddr(evalBack(e, refValue(a)))
       }(expected).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
 
-
 //      val v = store.read(topAddr).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
 //      //println(s"????Getting adress for ${e} and ${topAddr.toString}: ${v}. Expected: $expected")
 //      val refined = assert(v, expected)
@@ -204,7 +203,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     case Exp.NullRef() =>
       assert(nullValue, expected)
 
-    case Exp.Neg(e) => sub(evalBack(Exp.NumLit(0),_), evalBack(e,_))(expected)
+    case Exp.Neg(e) => neg(evalBack(e, _), expected)
 
 
 
@@ -212,16 +211,22 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
 
     case r@Exp.Record(fields) =>
-      ???
 //      // represents record as a reference to a record value
 //      val fieldVals = fields.map(fe => Field(fe._1) -> evalBack(fe._2, topValue))
 //      val rec = makeRecord(fieldVals)
 //      val addr = alloc(AllocationSite.Record(r))
 //      store.write(addr, rec)
 //      refValue(addr)
+      val fieldVals = fields.map(fe => Field(fe._1) -> evalBack(fe._2, topValue))
+      val rec = makeRecord(fieldVals)
+      val addr = alloc(AllocationSite.Record(r))
+      store.write(
+        _ => addr,
+        _ => rec
+      )
+      refValue(addr)
 
     case Exp.FieldAccess(rec, field) =>
-      ???
 //      val v = store.read(topAddr).getOrElse(failure(UnboundVariable, topAddr.toString))
 //      val recVal = evalBack(rec, v)
 //      println(s"RecVal and expected:$recVal, $expected")
@@ -229,18 +234,27 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 //      println(s"fieldVal and expected:$fieldVal, $expected")
 //      val refined = assert(fieldVal, expected)
 //      refined
+
+      val v = topValue
+      val recVal = evalBack(rec, v)
+      println(s"RecVal and expected:$recVal, $expected")
+      val fieldVal = lookupRecordField(recVal, Field(field))
+      println(s"fieldVal and expected:$fieldVal, $expected")
+      val refined = assert(fieldVal, expected)
+      refined
   }
 
   def evalBackNonzero(e: Exp, expected: V)(using BackFixed): V =
     val v = evalBack(e, expected)
     println(s"Backwards evaluation: ($e,$expected): $v and ${integerLit(0)}")
     // then block can only run backwards if condition was != 0
-    branchOps.boolBranch(eqOps.equ(v, integerLit(0)(topInt))) {
+    branchOps.boolBranch(eqOps.equ(v, integerLit(0))) {
       failure(BackwardsUnreachable, s"($e,$expected): pre-condition $v == 0")
     } {
     }
     // TODO refinement?
     v
+
 
   def runBack_open(s: Stm)(using BackFixed): Unit = s match
     case s@Stm.Assign(lhs: Assignable, e: Exp) =>
@@ -253,11 +267,11 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
         ()
       } {
         els.foreach(runBack(_))
-        evalBack(cond, integerLit(0)(topInt))
+        evalBack(cond, integerLit(0))
         ()
       }
     case w@Stm.While(cond, body) =>
-      evalBack(cond, integerLit(0)(topInt))
+      evalBack(cond, integerLit(0))
       iterateBack(w)
     case Stm.Block(body) =>
       body.reverse.foreach(runBack(_))
@@ -288,11 +302,11 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
 
 //
       //TODO this seems wrong, currently it would write top to all addresses whenever something is written to the store
-      //TODO maybe introduce another read or just return top?
+      //TODO maybe just return top?
       //val v = store.read(a => topAddr)(topValue).getOrElse(failure(TipFailure.UnboundAddr, topAddr.toString))
       store.write(
         a => refAddr(evalBack(e2, refValue(a))),
-        v => topValue
+        v => v
       )
       topValue
       //println(s"!!!????Getting adress for ${e}: ${store.read(topAddr)}")
@@ -348,7 +362,7 @@ trait GenericBackwardsInterpreter[V, Addr] extends sturdy.Executor:
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
     val test = callBack(main, expected)
-    val test2 = (Seq(intOps.integerLit(5)(topInt), intOps.integerLit(-5)(topInt)), expected)
-    println(test2)
-    test2
+    val test2 = (Seq(intOps.integerLit(5), intOps.integerLit(-5)), expected)
+    //println(test2)
+    test
   }
