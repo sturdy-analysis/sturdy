@@ -147,11 +147,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   // effect stack
   val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, funTable, callFrame, except, failure), {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(memory, globals, callFrame)
-    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame)
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(funTable, memory, globals, callFrame)
+    case _: FixIn.Eval => EffectList(funTable, stack, memory, globals, callFrame)
   }, {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(stack, memory, globals, failure)
-    case _: FixIn.Eval => EffectList(stack, memory, globals, callFrame, except)
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(funTable, stack, memory, globals, failure)
+    case _: FixIn.Eval => EffectList(funTable, stack, memory, globals, callFrame, except)
   })
   given EffectStack = effectStack
 
