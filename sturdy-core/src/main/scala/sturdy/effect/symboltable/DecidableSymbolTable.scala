@@ -9,6 +9,7 @@ import sturdy.effect.TrySturdy
 import sturdy.values.*
 
 import scala.reflect.ClassTag
+import scala.util.boundary, boundary.break
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
@@ -24,14 +25,14 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
   override def putNew(key: Key): Unit =
     tables += key -> Map()
 
-  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     c.tables.foreachEntry { (key, cTab) =>
-      val aTab = tables.getOrElse(key, return IsSound.NotSound(s"Key $key not present in topped symbol table."))
+      val aTab = tables.getOrElse(key, break(IsSound.NotSound(s"Key $key not present in topped symbol table.")))
       for ((sym, cEntry) <- cTab)
-        val aEntry = aTab.getOrElse(sym, return IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table."))
+        val aEntry = aTab.getOrElse(sym, break(IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table.")))
         val eSound = Soundness.isSound(cEntry, aEntry)
         if (!eSound.isSound)
-          return eSound
+          break(eSound)
     }
     IsSound.Sound
 

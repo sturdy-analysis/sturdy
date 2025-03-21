@@ -33,6 +33,7 @@ enum AFallible[T]:
 given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
   override def apply(c: CFallible[C]): AFallible[A] = c match
     case CFallible.Unfailing(c) => AFallible.Unfailing(abs.apply(c))
+    case CFallible.Failing(kind: DivergingKind, msg) => AFallible.Diverging(null)
     case CFallible.Failing(kind, msg) => AFallible.Failing(Powerset(kind -> msg))
 
 given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallible[C], AFallible[A]] with
@@ -44,7 +45,7 @@ given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallib
 
 given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
   override def lteq(x: AFallible[T], y: AFallible[T]): Boolean = (x, y) match
-    case (AFallible.Diverging(_), _) => true
+    case (AFallible.Diverging(_), AFallible.Diverging(_)) => true
     case (AFallible.Unfailing(t1), AFallible.Unfailing(t2)) => po.lteq(t1, t2)
     case (AFallible.Failing(fails1), AFallible.Failing(fails2)) => fails1.set.map(_._1).subsetOf(fails2.set.map(_._1))
     case (AFallible.Unfailing(t1), AFallible.MaybeFailing(t2, fails2)) => po.lteq(t1, t2)
@@ -53,6 +54,7 @@ given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
     case _ => false
 
 given soundnessAFallible[C,A](using Soundness[C,A]): Soundness[CFallible[C], AFallible[A]] = {
+  case (CFallible.Failing(kind: DivergingKind, _), AFallible.Diverging(_)) => IsSound.Sound
   case (CFallible.Failing(kind,msg), AFallible.Failing(failures)) =>
     IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
   case (CFallible.Failing(kind,msg), AFallible.MaybeFailing(_,failures)) =>

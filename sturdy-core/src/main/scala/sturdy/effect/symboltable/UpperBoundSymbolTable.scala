@@ -8,6 +8,8 @@ import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
+import scala.util.boundary, boundary.break
+
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:
 
   protected var tables: Map[Key, Entry] = Map()
@@ -46,13 +48,13 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
           case Some(gEntry) => tables += fKey -> Join(fEntry, gEntry).get
   }
 
-  def tableIsSound[cSymbol, cEntry](c: ConcreteSymbolTable[Key, cSymbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cSymbol, cEntry](c: ConcreteSymbolTable[Key, cSymbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     c.entries.foreachEntry { (key, cTab) =>
-      val aEntry = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
+      val aEntry = tables.getOrElse(key, { break(IsSound.NotSound(s"Key $key not present in topped symbol table.")) })
       for (cEntry <- cTab.values)
         val eSound = Soundness.isSound(cEntry, aEntry)
         if (!eSound.isSound)
-          return eSound
+          break(eSound)
     }
     IsSound.Sound
 

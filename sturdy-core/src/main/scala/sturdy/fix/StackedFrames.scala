@@ -36,10 +36,11 @@ import scala.util.Try
  *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
  *
  */
-final class StackedFrames[Dom, Codom, Ctx](val state: State)
-                                          (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
-                                          (using Finite[Dom], Finite[Ctx], Widen[Codom])
-  extends Stack[Dom, Codom, state.In, state.Out]:
+final class StackedFrames[Dom, Codom, Ctx, In, Out]
+    (val state: StateT[In, Out])
+    (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
+    (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  extends Stack[Dom, Codom, In, Out]:
 
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
@@ -53,6 +54,10 @@ final class StackedFrames[Dom, Codom, Ctx](val state: State)
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
   private val outCache: mutable.Map[Frame[Dom, Ctx], OutCacheEntry] = mutable.Map.empty
+
+  override def getCache: Map[Dom, TrySturdy[Codom]] = outCache.groupBy(_._1._1).view.mapValues { m =>
+    m.values.map(_.result).reduce((r1,r2) => Join(r1,r2).get)
+  }.toMap
 
   case class OutCacheEntry(result: TrySturdy[Codom], out: state.Out, var stability: Stability):
     def isStable: Boolean = stability eq Stability.Stable
@@ -91,7 +96,7 @@ final class StackedFrames[Dom, Codom, Ctx](val state: State)
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: state.In, currentOut: state.Out): PushResult =
+  def push(dom: Dom, in: state.In, currentOut: state.Out, invalidate: Boolean): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
@@ -241,7 +246,7 @@ final class StackedFrames[Dom, Codom, Ctx](val state: State)
 object StackedFrames:
   def apply[Dom, Codom, Ctx](state: State)
                             (contextual: Contextual[Ctx, Dom, Codom], readPriorOutput: Boolean, onlyWriteInCacheWhenRecurrent: Boolean)
-                            (using Finite[Dom], Finite[Ctx], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
+                            (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
     new StackedFrames(state)(contextual, readPriorOutput, onlyWriteInCacheWhenRecurrent).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)

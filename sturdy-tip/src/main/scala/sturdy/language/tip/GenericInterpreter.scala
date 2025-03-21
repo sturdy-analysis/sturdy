@@ -5,7 +5,7 @@ import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.environment.Environment
-import sturdy.effect.failure.{Failure, FailureKind, assert}
+import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
 import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
@@ -37,7 +37,7 @@ enum TipFailure extends FailureKind:
   case UserError
   case TypeError
   case VariableReferencesNotSupported
-  case StackOverflow
+  case StackOverflow extends TipFailure with DivergingKind
 
 given Finite[TipFailure] with {}
 

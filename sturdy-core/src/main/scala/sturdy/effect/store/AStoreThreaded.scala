@@ -3,12 +3,10 @@ package sturdy.effect.store
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{*, given}
-import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.values.references.AbstractAddr
 import sturdy.values.{*, given}
 
-import scala.collection.mutable.ListBuffer
-import reflect.Selectable.reflectiveSelectable
+import scala.util.boundary, boundary.break
 import scala.reflect.ClassTag
 
 /** An abstract threaded store. */
@@ -48,16 +46,16 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     store.keysIterator.flatMap(valueIterator) ++ store.valuesIterator.flatMap(valueIterator)
 
-  def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, AA], vSoundness: Soundness[cV, V]): IsSound =
+  def isSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, AA], vSoundness: Soundness[cV, V]): IsSound = boundary:
     c.entries.foreachEntry { case (a, v) =>
       val aa = varAbstractly(a)
       read(aa) match
-        case JOptionA.None() => return IsSound.NotSound(s"Concrete address $a abstracts to $aa, which is not bound in store")
+        case JOptionA.None() => break(IsSound.NotSound(s"Concrete address $a abstracts to $aa, which is not bound in store"))
         case JOptionA.Some(av) =>
           val s = vSoundness.isSound(v, av)
-          if (s.isNotSound) return s
+          if (s.isNotSound) break(s)
         case JOptionA.NoneSome(av) =>
           val s = vSoundness.isSound(v, av)
-          if (s.isNotSound) return s
+          if (s.isNotSound) break(s)
     }
     IsSound.Sound

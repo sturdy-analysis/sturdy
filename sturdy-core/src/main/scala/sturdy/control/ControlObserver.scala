@@ -11,10 +11,10 @@ import scala.collection.mutable.ListBuffer
 */
 trait ControlObserver[Atom, Section, Exc,Fx]:
   final def handle(ev: ControlEvent[Atom,Section,Exc,Fx]): Unit = ev match
-    case e: BasicControlEvent[Atom,Section,Exc,Fx] => handle(e)
-    case e: ExceptionControlEvent[Atom,Section,Exc,Fx] => handle(e)
-    case e: BranchingControlEvent[Atom,Section,Exc,Fx] => handle(e)
-    case e: FixpointControlEvent[Atom,Section,Exc,Fx] => handle(e)
+    case e: BasicControlEvent[Atom,Section,Exc,Fx] @unchecked => handle(e)
+    case e: ExceptionControlEvent[Atom,Section,Exc,Fx] @unchecked => handle(e)
+    case e: BranchingControlEvent[Atom,Section,Exc,Fx] @unchecked => handle(e)
+    case e: FixpointControlEvent[Atom,Section,Exc,Fx] @unchecked => handle(e)
 
   def handle(ev: BasicControlEvent[Atom,Section,Exc,Fx]): Unit
   def handle(ev: ExceptionControlEvent[Atom,Section,Exc,Fx]): Unit
