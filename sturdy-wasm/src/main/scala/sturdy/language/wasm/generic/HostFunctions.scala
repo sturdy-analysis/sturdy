@@ -23,7 +23,7 @@ object wasi:
   val functions: Map[String, (HostFunction, Int)] = List(
     new HostFunction("args_sizes_get", FuncType(Vector(I32,I32), Vector(I32))),
     new HostFunction("args_get", FuncType(Vector(I32,I32), Vector(I32))),
-    new HostFunction("clock_time_get", FuncType(Vector(I32,I32,I32), Vector(I32))),
+    new HostFunction("clock_time_get", FuncType(Vector(I32,I64,I32), Vector(I32))),
     new HostFunction("environ_sizes_get", FuncType(Vector(I32,I32), Vector(I32))),
     new HostFunction("environ_get", FuncType(Vector(I32,I32), Vector(I32))),
     new HostFunction("fd_allocate", FuncType(Vector(I32,I64,I64), Vector(I32))),

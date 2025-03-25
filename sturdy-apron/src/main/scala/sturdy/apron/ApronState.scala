@@ -232,7 +232,7 @@ final class ApronRecencyState
             ApronExpr.Constant(_, _, _)
         )
     case (e1,e2) =>
-      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatmap(
+      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
           val ctx = allocator(joinedType)
           val result = recencyStore.addressTranslation.allocOld(ctx)

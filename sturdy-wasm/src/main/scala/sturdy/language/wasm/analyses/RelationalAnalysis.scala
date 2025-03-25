@@ -340,10 +340,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def newEffectStack: EffectStack =
       lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except, failure))
-      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, callFrame))
-      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame))
-      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, failure))
-      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, callFrame, except))
+      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, funTable, callFrame))
+      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame))
+      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, failure))
+      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except))
 
       new EffectStack(allEffects,
         {
