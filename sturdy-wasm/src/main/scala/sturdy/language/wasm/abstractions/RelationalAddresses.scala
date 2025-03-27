@@ -28,8 +28,8 @@ trait RelationalAddresses extends RelationalTypes:
   )
 
   given Ordering[AddrCtx] = {
-    case (AddrCtx.CallFrame(callFramePos1, data1), AddrCtx.CallFrame(callFramePos2, data2)) => Ordering[(Int,FrameData)].compare((callFramePos1, data1), (callFramePos2, data2))
-    case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(Int,FixIn,FrameData)].compare((stackPos1, programPos1, data1),(stackPos2, programPos2, data2))
+    case (AddrCtx.CallFrame(callFramePos1, data1), AddrCtx.CallFrame(callFramePos2, data2)) => Ordering[(FrameData, Int)].compare((data1, callFramePos1), (data2, callFramePos2))
+    case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
     case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
     case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{

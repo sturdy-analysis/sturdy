@@ -116,6 +116,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "__VERIFIER_nondet_int" =>
+        List(apronState.withTempVars(Type.I32Type)( (v, _) =>
+          apronState.assign(v, ApronExpr.constant(ApronExpr.topInterval, I32Type))
+          Value.Int32(Left(ApronExpr.addr(v, Type.I32Type)))
+        ))
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))

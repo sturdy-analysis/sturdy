@@ -2,6 +2,7 @@ package sturdy.language.wasm.svbenchc
 
 import apron.Polka
 import cats.effect.{Blocker, IO}
+import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -14,7 +15,7 @@ import sturdy.language.wasm
 import sturdy.language.wasm.Parsing.WasmParseError
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FrameData, FuncId, InstLoc}
+import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, wasi_snapshot_preview1}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, abstractions, testCfgDifference}
 import sturdy.values.Topped
 import swam.ModuleLoader
@@ -30,12 +31,12 @@ class RelationalAnalysisTest extends AnyFunSpec, Matchers:
 
     val uri = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
-    val includedBenchmarks = Set("recursive")
+    val includedBenchmarks = Set("own_tests") // Set("recursive")
     // Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
 
     val stackConfig = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     val entrypoint = "_start"
-    given apronManager: apron.Manager = new apron.Box
+    given apronManager: apron.Manager = new Polka(true)
 
     for {benchDirectory <- Files.list(Paths.get(uri)).toScala(Iterable)
          if includedBenchmarks.contains(benchDirectory.getFileName.toString)
@@ -59,16 +60,28 @@ class RelationalAnalysisTest extends AnyFunSpec, Matchers:
 
       val analysis = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
       val constants = analysis.constantInstructions
-//      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       val cfgBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
-      val modInst = analysis.initializeModule(module)
+      val hostModules = HostModules(
+        "wasi_snapshot_preview1" -> wasi_snapshot_preview1,
+        "env" -> svbenchHostFunctions
+      )
+      val modInst = analysis.initializeModule(module, hostModules = hostModules)
       val result = analysis.failure.fallible {
         analysis.invokeExported(modInst, entrypoint, List.empty).map(analysis.getInterval)
       }
       val cfg = cfgBuilder.get
       val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
       Files.writeString(dotPath, cfg.toGraphViz)
+
+      val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
+      val hostAssertFailCalled = cfg.nodes.exists {
+        case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
+        case _ => false
+      }
+
+      assert(!hostAssertFailCalled, ", analysis was to imprecise to prove property")
     } catch {
       case err: Throwable => fail(err)
     }

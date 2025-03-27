@@ -551,7 +551,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
     valueToAddr(v)
 
-  def resolveImports(module: Module, imports: Imports):
+  def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
@@ -560,13 +560,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
     module.imports.foreach { imp =>
       // handle host functions
-      if (imp.moduleName == "wasi_snapshot_preview1" || imp.moduleName == "wasi_unstable") {
+      if (hostModules.containsModule(imp.moduleName)) {
         imp match
           case Import.Function(_,funcName, funcType) =>
-            val (ix, hf) = wasi.get(funcName)
+            val (hostModule, ix, hf) = hostModules.getHostFunction(imp.moduleName, funcName).getOrElse(
+              throw IllegalArgumentException(s"No host function $funcName found in module ${imp.moduleName}.")
+            )
             if (hf.funcType != module.types(funcType))
               throw new Error(s"Importing host function $funcName with wrong type: expected ${hf.funcType}, but imported with ${module.types(funcType)}")
-            funcs += FunctionInstance.Host(wasi.module, ix, hf)
+            funcs += FunctionInstance.Host(hostModule, ix, hf)
           case _ => throw new Error(s"Import from runtime: expected a function, but got $imp.")
       } else {
         // get the module to import from
@@ -620,13 +622,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     }
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None): ModuleInstance = external {
+  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None, hostModules: HostModules = HostModules(("wasi_snapshot_preview1", wasi_snapshot_preview1))): ModuleInstance = external {
     initializeThis()
 
     val modInst = new ModuleInstance(moduleId)
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
-    val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
+    val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports, hostModules)
     modInst.globalAddrs = globImports
     val globValues = module.globals.map { glob =>
       val id = BlockId(glob)
