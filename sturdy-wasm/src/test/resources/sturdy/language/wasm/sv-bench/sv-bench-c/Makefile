@@ -1,17 +1,3 @@
-# This file is part of the SV-Benchmarks collection of verification tasks:
-# https://github.com/sosy-lab/sv-benchmarks
-#
-# SPDX-FileCopyrightText: 2015-2016 Daniel Liew <dan@su-root.co.uk>
-# SPDX-FileCopyrightText: 2015-2020 The SV-Benchmarks Community
-#
-# SPDX-License-Identifier: Apache-2.0
-
-LEVEL := ./
-
-# Don't try to build any sources on this level
-SKIP_LEVEL := 1
-
-# This directory does not contain tasks
-IGNORE_DIRS := ./properties/ ./Juliet_Test/
-
-include $(LEVEL)/Makefile.config
+version https://git-lfs.github.com/spec/v1
+oid sha256:8ad577e6beb7e972fcc033c6153ca1204ef984a0f2c65bf2b934dd2e1ce390e8
+size 489
