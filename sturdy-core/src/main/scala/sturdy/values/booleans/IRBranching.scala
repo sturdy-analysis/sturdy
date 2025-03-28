@@ -25,8 +25,7 @@ class IRBranching[R](using Join[R], EffectStack) extends BooleanBranching[IR, R]
         _inElse = true
         els
       }
-    }
-    finally {
+    } finally {
       _inElse = inElseBefore
       _currentCond = condBefore
     }

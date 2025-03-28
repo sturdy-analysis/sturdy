@@ -42,6 +42,13 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
+  def irvalue(v: Value): IR = v match
+    case Value.TopValue => IR.Unknown()
+    case Value.Int32(i) => i
+    case Value.Int64(l) => l
+    case Value.Float32(f) => f
+    case Value.Float64(d) => d
+
   def structuralEquals(v1: Value, v2: Value): Boolean =
     import Value.*  
     (v1, v2) match
@@ -87,9 +94,9 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
     implicit val branchOps: IRBranching[Unit] = new IRBranching[Unit]
 
     given Join[IR] = (v1: IR, v2: IR) => branchOps.currentCond match
-      case None => Changed(IR.Join(v1, v2))
+      case None =>
+        Changed(IR.join(v1, v2))
       case Some(cond) =>
-        println(s"$v1 or $v2")
         if (v1.structuralEquality(v2))
           Unchanged(v1)
         else if (branchOps.inElse)
@@ -114,6 +121,7 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
+
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 

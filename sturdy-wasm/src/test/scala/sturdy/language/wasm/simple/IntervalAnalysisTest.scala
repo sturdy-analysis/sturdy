@@ -55,7 +55,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
     testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
-      testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
+    testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
     testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)

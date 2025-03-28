@@ -5,24 +5,28 @@ import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
+import sturdy.effect.failure
 import sturdy.effect.failure.{AFallible, FailureKind}
-import sturdy.fix
+import sturdy.{fix, ir}
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.ir.*
 import sturdy.language.wasm
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
-import sturdy.language.wasm.analyses.IRAnalysis.Value
+import sturdy.language.wasm.analyses.IRAnalysis.{Value, irvalue}
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IRAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
-import sturdy.values.{Abstractly, Topped}
-import swam.syntax.Module
+import sturdy.values.convert.{&&, IRConvertBytesInt, IRConvertOp, SomeCC, given}
+import sturdy.values.integer.{IRIntegerOperator, IntegerDivisionByZero, NumericIntervalAbstractly}
+import sturdy.values.ordering.IREqualityOperator
+import sturdy.values.{Abstractly, Topped, config}
+import swam.syntax.{LoadInst, LoadNInst, Module, i32}
 import swam.text.*
 
+import java.nio.ByteOrder
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
@@ -56,88 +60,260 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 //    runConstantAnalysis(fact, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
 //  }
 
+  def ext(i : Int): IR = IR.External(s"#$i")
+
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
     testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
-    testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
+    testFunctionConstantArgs2(simple, "test-mem", List(Value.Int32(42)), List(IRAnalysis.Value.Int32(
+      IR.Op(IRIntegerOperator.ADD, IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed), IR.Unknown()), IR.Const(1))
+    )))
     testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
 //    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
     testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
     testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs2(simple, "test-br2", List.empty, List(IRAnalysis.Value.Int32(
+      IR.Op(IRIntegerOperator.ADD, IR.Const(42), IR.Const(1))
+    )))
+    testFunctionConstantArgs2(simple, "test-br3", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br3", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return2", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return2", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return3", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-br-and-return3", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
     testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
     testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
-    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
-    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
-    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
-    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
+    testFunctionConstantArgs2(simple, "test-unreachable5", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-unreachable5", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(42),
+        IR.Const(43)
+      )
+    )))
+
+    testFunctionConstantArgs2(simple, "test-global", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
+        IR.Const(1),
+        IR.Const(2)
+      )
+    )))
+    testFunctionConstantArgs2(simple, "test-global", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
+        IR.Const(1),
+        IR.Const(2)
+      )
+    )))
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
-    testFailingFunction(simple, "division", List(IRAnalysis.Value.Int32(IR.Const(1)),
-      IRAnalysis.Value.Int32(IR.Const(0))), IntegerDivisionByZero)
-    testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
+    testFailingFunction(simple, "division",
+      List(IRAnalysis.Value.Int32(IR.Const(1)), IRAnalysis.Value.Int32(IR.Const(0))),
+      IntegerDivisionByZero)
+    testFunctionConstantArgs2(simple, "effects", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
+      IR.Select(
+        IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)),
+        IR.Op(IRIntegerOperator.MUL,
+          IR.Op(IRIntegerOperator.SUB,
+            IR.Op(IRIntegerOperator.MUL,
+              IR.Const(1),
+              IR.Const(5)
+            ),
+            IR.Const(7)
+          ),
+          IR.Const(3)
+        ),
+        IR.Op(IRIntegerOperator.MUL,
+          IR.Op(IRIntegerOperator.SUB,
+            IR.Op(IRIntegerOperator.MUL,
+              IR.Const(1),
+              IR.Const(3)
+            ),
+            IR.Const(5)
+          ),
+          IR.Const(7)
+        )
+      )
+    )))
 
 //    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
   }
 
+  testFunction(simple, "const", List(Value.Int32(ext(0))), List(Value.Int32(ext(0))))
+  testFunction(simple, "first", List(Value.Int32(ext(0)), Value.Int32(ext(1))), List(Value.Int32(ext(0))))
+  testFunction(simple, "second", List(Value.Int32(ext(0)), Value.Int32(ext(1))), List(Value.Int32(ext(1))))
+  testFunction(simple, "test-mem", List(Value.Int32(ext(0))), List(Value.Int32(
+    IR.Op(IRIntegerOperator.ADD, IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed), IR.Unknown()), IR.Const(1))
+  )))
+  testFunction(simple, "test-size", List.empty, List(Value.Int32(IR.Unknown())))
+  testFunction(simple, "test-memgrow", List.empty, List(Value.Int32(IR.Unknown()), Value.Int32(IR.Unknown())))
+////  testFunction(simple, "nesting", List(Value.Float32(IRAnalysis.topF32), Value.Float32(IR.Const(2))), List(Value.Float32(IRAnalysis.topF32)))
+////  testFunction(simple, "nesting", List(Value.Float32(IR.Const(1)), Value.Float32(IRAnalysis.topF32)), List(Value.Float32(IRAnalysis.topF32)))
+  testFunction(simple, "test-br3", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(42),
+      IR.Const(43)
+    )
+  )))
+  testFunction(simple, "test-br-and-return", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(42),
+      IR.Const(43)
+    )
+  )))
+  testFunction(simple, "test-br-and-return2", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(42),
+      IR.Const(43)
+    )
+  )))
+  testFunction(simple, "test-br-and-return3", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(42),
+      IR.Const(43)
+    )
+  )))
+  testFunction(simple, "test-br-and-return4", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Const(42))))
 
-  testFunction(simple, "const", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "first", List(Value.Int32(IR.Const(1)), Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IR.Const(1))))
-  testFunction(simple, "first", List(Value.Int32(IRAnalysis.topI32), Value.Int32(IR.Const(2))), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "second", List(Value.Int32(IR.Const(1)), Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "second", List(Value.Int32(IRAnalysis.topI32), Value.Int32(IR.Const(2))), List(Value.Int32(IR.Const(2))))
-  testFunction(simple, "test-mem", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-//  testFunction(simple, "nesting", List(Value.Float32(IRAnalysis.topF32), Value.Float32(IR.Const(2))), List(Value.Float32(IRAnalysis.topF32)))
-//  testFunction(simple, "nesting", List(Value.Float32(IR.Const(1)), Value.Float32(IRAnalysis.topF32)), List(Value.Float32(IRAnalysis.topF32)))
-  testFunction(simple, "test-br3", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-br-and-return", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-br-and-return2", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-br-and-return3", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-br-and-return4", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IR.Const(42))))
-  testFunction(simple, "test-unreachable5", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-global", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
-  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IR.Const(0))))
-  testFailingFunction(simple, "division", List(Value.Int32(IR.Const(1)), Value.Int32(IRAnalysis.topI32)), IntegerDivisionByZero)
-  testFunction(simple, "effects", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
+  testFunction(simple, "test-unreachable5", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(42),
+      IR.Const(43)
+    )
+  )))
+  testFunction(simple, "test-global", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(1),
+      IR.Const(2)
+    )
+  )))
 
-//  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(1))), List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IR.Const(1))))
-//  (2 to 8).foreach { arg =>
-//    testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(arg))), List(Value.Int64(IRAnalysis.topI64)))
-//  }
-//  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-iter", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-rec-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-iter-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-opt", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(ext(0))), List(Value.Int32(IR.Const(0))))
+  testFailingFunction(simple, "division", List(Value.Int32(ext(0)), Value.Int32(ext(1))), IntegerDivisionByZero)
+  testFunction(simple, "division", List(Value.Int32(ext(0)), Value.Int32(ext(1))), List(Value.Int32(
+    IR.Op(IRIntegerOperator.DIV, ext(0), ext(1))
+  )))
+  testFunction(simple, "effects", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)),
+      IR.Op(IRIntegerOperator.MUL,
+        IR.Op(IRIntegerOperator.SUB,
+          IR.Op(IRIntegerOperator.MUL,
+            IR.Const(1),
+            IR.Const(5)
+          ),
+          IR.Const(7)
+        ),
+        IR.Const(3)
+      ),
+      IR.Op(IRIntegerOperator.MUL,
+        IR.Op(IRIntegerOperator.SUB,
+          IR.Op(IRIntegerOperator.MUL,
+            IR.Const(1),
+            IR.Const(3)
+          ),
+          IR.Const(5)
+        ),
+        IR.Const(7)
+      )
+    )
+  )))
+
+////  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(1))), List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IR.Const(1))))
+////  (2 to 8).foreach { arg =>
+////    testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(arg))), List(Value.Int64(IRAnalysis.topI64)))
+////  }
+////  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-iter", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-rec-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-iter-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-opt", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+////
+////  testFunction(fact, "fac-rec", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-iter", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-rec-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-iter-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+////  testFunction(fact, "fac-opt", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
 //
-//  testFunction(fact, "fac-rec", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-iter", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-rec-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-iter-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-//  testFunction(fact, "fac-opt", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-
-  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(0))), List(Value.Int32(IR.Const(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(1))), List(Value.Int32(IR.Const(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
+//  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(0))), List(Value.Int32(IR.Const(42))))
+//  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(1))), List(Value.Int32(IR.Const(42))))
+//  testFunction(simpleTest, "main", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
+
+  def testFunctionConstantArgs2(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[Value]) =
+    testFunction(path, funcName, args.map(Abstractly.apply), expectedResult)
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value], expectedFrames: List[Value] = null) =
     it must s"execute $funcName withs args $args with result $expected with stacked states" in {
@@ -200,6 +376,13 @@ def runIRAnalysis(path: Path, funName: String, args: List[Value], stackConfig: S
     }
   )
   println(s"$funName($args) = $result")
+  result match
+    case failure.AFallible.Unfailing(t) =>
+      t.foreach(v => println(Export.toGraphViz(irvalue(v))))
+    case failure.AFallible.MaybeFailing(t, msgs) =>
+      t.foreach(v => println(Export.toGraphViz(irvalue(v))))
+    case failure.AFallible.Failing(msgs) =>
+    case failure.AFallible.Diverging(recur) =>
 
   val cfg = graphBuilder.get
   println(cfg.toGraphViz)

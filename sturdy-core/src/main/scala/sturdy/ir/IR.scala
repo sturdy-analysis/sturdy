@@ -101,6 +101,12 @@ object IR:
   def Op(op: IROperator, arg: IR, args: IR*): IR.Op =
     IR.Op(op, arg +: args)
 
+  def join(left: IR, right: IR): IR = (left, right) match
+    case (Unknown(), _) => left
+    case (_, Unknown()) => right
+    case (_, _) if left.structuralEquality(right) => left
+    case _ => Join(left, right)
+
 class IR_UID:
   override def toString: String = Integer.toHexString(hashCode)
 
