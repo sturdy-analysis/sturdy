@@ -26,8 +26,6 @@ object IRAnalysis:
 
   class Instance(stackConfig: StackConfig) extends GenericInterpreter[IR, IR, WithJoin]:
 
-    private var currentCond : Option[IR] = None
-    private var inElse = false
     private var currentFeedback : Option[(FixIn, IR.Feedback)] = None // May be unnecessary
     /*
       Version based on structural equality for fixpoint stability:
@@ -37,15 +35,24 @@ object IRAnalysis:
       - but not for nested loops
     */
 
-    given Join[IR] = (v1: IR, v2: IR) => currentCond match
+    override implicit val branchOps: IRBranching[Unit] = new IRBranching[Unit]
+
+    given Join[IR] = (v1: IR, v2: IR) => branchOps.currentCond match
       case None => Changed(IR.Join(v1, v2))
       case Some(cond) =>
         println(s"$v1 or $v2")
-        if v1.structuralEquality(v2) then Unchanged(v1) else
-          if inElse then Changed(IR.Select(cond, v2, v1)) else Changed(IR.Select(cond, v1, v2))
+        if (v1.structuralEquality(v2))
+          Unchanged(v1)
+        else if (branchOps.inElse)
+          Changed(IR.Select(cond, v2, v1))
+        else
+          Changed(IR.Select(cond, v1, v2))
 
     given Widen[IR] = (v1: IR, v2: IR) => // Used only (?) for the return value of a recursive function
-      if v1.structuralEquality(v2) then Unchanged(v1) else Changed(v2)
+      if (v1.structuralEquality(v2))
+        Unchanged(v1)
+      else
+        Changed(v2)
 
     override def jv: WithJoin[IR] = implicitly
 
@@ -75,25 +82,6 @@ object IRAnalysis:
       override def updateRecordField(rec: IR, field: Field, newval: IR): IR = ???
     }
 
-    override implicit val branchOps: BooleanBranching[IR, Unit] = new BooleanBranching[IR, Unit] {
-      override def boolBranch(cond: IR, thn: => Unit, els: => Unit): Unit =
-        val condBefore = currentCond
-        val inElseBefore = inElse
-        try {
-          currentCond = Some(cond)
-          inElse = false
-
-          joinComputations {thn} {
-            inElse = true
-            els
-          }
-        }
-        finally {
-          inElse = inElseBefore
-          currentCond = condBefore
-        }
-    }
-
     override val callFrame: JoinableDecidableCallFrame[String, String, IR, Exp.Call] =
       new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
 
@@ -116,7 +104,11 @@ object IRAnalysis:
               Unchanged(v1)
             else
               val feedback = currentFeedback.get._2
-              feedback.cond = if inElse then currentCond.map(cond => IR.Op(IRBooleanOperator.NOT, Array(cond))) else currentCond
+              feedback.cond =
+                if (branchOps.inElse)
+                  branchOps.currentCond.map(cond => IR.Op(IRBooleanOperator.NOT, Array(cond)))
+                else
+                  branchOps.currentCond
               feedback.steps = Some(v2)
               Changed(v1.zip(v2).zipWithIndex.map((v, i) => v._1 match
                 case IR.Undefined() if v1 != v2 => IR.FeedbackAsk(i, feedback)

@@ -96,11 +96,8 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
       val v1NotMinValue = eqOps.neq(v1, i32ops.integerLit(Int.MinValue))
       val v2NotNeg1 = eqOps.neq(v2, i32ops.integerLit(-1))
       val noOverflow = i32ops.add(v1NotMinValue, v2NotNeg1)
-      wasmOps.branchOpsV.boolBranch(noOverflow) {
-        i32ops.div(v1, v2)
-      } {
-        Failure(IntegerOverflow, s"$v1 / $v2")
-      }
+      branchOps.boolBranch(noOverflow, (), Failure(IntegerOverflow, s"$v1 / $v2"))
+      i32ops.div(v1, v2)
     case i32.DivU => i32ops.divUnsigned(v1, v2)
     case i32.RemS => i32ops.remainder(v1, v2)
     case i32.RemU => i32ops.remainderUnsigned(v1, v2)
@@ -120,11 +117,8 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
       val v1NotMinValue = eqOps.neq(v1, i64ops.integerLit(Long.MinValue))
       val v2NotNeg1 = eqOps.neq(v2, i64ops.integerLit(-1))
       val noOverflow = i32ops.add(v1NotMinValue, v2NotNeg1)
-      wasmOps.branchOpsV.boolBranch(noOverflow) {
-        i64ops.div(v1, v2)
-      } {
-        Failure(IntegerOverflow, s"$v1 / $v2")
-      }
+      wasmOps.branchOps.boolBranch(noOverflow, (), Failure(IntegerOverflow, s"$v1 / $v2"))
+      i64ops.div(v1, v2)
     case i64.DivU => i64ops.divUnsigned(v1, v2)
     case i64.RemS => i64ops.remainder(v1, v2)
     case i64.RemU => i64ops.remainderUnsigned(v1, v2)

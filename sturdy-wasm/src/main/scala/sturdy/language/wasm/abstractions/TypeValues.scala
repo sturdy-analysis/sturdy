@@ -44,13 +44,13 @@ trait TypeValues extends Interpreter:
     val _ = v.asInt32
     BaseType[Boolean]
   final def boolean(b: Bool): Value =
-    Value.Int32(topI32)
+    Value.Int32(BaseType[Int])
 
   def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match
     case ConcreteInterpreter.Value.TopValue => Value.TopValue
-    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(topI32)
-    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(topI64)
-    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(topF32)
-    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(topF64)
+    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(BaseType[Int])
+    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(BaseType[Long])
+    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(BaseType[Float])
+    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(BaseType[Double])
 
 

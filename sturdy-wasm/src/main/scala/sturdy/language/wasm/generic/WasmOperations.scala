@@ -43,8 +43,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
   val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, J]
-  val branchOpsV: BooleanBranching[V, V]
-  val branchOpsUnit: BooleanBranching[V, Unit]
+  val branchOps: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
 trait SpecialWasmOperations[V, Addr, Size, FuncIx, J[_] <: MayJoin[_]]:

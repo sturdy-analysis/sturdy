@@ -263,7 +263,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       case Drop => stack.popOrAbort()
       case Select =>
         val isZero = num.evalNumeric(i32.Eqz)
-        branchOpsUnit.boolBranch(isZero) {
+        branchOps.boolBranch(isZero) {
           // v == 0: else branch
           val (_, v2) = stack.pop2OrAbort()
           stack.push(v2)
@@ -282,7 +282,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case ifInst@If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val ars = labelArities(bt, isLoop = false)
-      branchOpsUnit.boolBranch(isZero) {
+      branchOps.boolBranch(isZero) {
         // v == 0: else branch
         label(BlockId(ifInst -> false), ars, elsInsts, None)
       } {
@@ -292,7 +292,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       branch(labelIndex)
     case BrIf(labelIndex) =>
       val isZero = num.evalNumeric(i32.Eqz)
-      branchOpsUnit.boolBranch(isZero) {
+      branchOps.boolBranch(isZero) {
         // v == 0: else branch
         // do nothing
       } {
@@ -515,8 +515,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val v2 = stack.popOrAbort()
     val res = i32ops.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
-    val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
-    valueToAddr(v)
+    branchOps.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), ())
+    valueToAddr(res)
 
   def resolveImports(module: Module, imports: Imports):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =

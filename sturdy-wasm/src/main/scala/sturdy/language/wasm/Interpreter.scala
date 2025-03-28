@@ -131,7 +131,6 @@ trait Interpreter:
      , decodeI64: ConvertBytesLong[Bytes, I64]
      , decodeF32: ConvertBytesFloat[Bytes, F32]
      , decodeF64: ConvertBytesDouble[Bytes, F64]
-     , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
@@ -141,8 +140,7 @@ trait Interpreter:
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, J] = specOps
-    val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
-    val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
+    val branchOps: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)

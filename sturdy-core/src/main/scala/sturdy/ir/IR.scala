@@ -1,6 +1,6 @@
 package sturdy.ir
 
-import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder}
+import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder, Top}
 
 import scala.collection.mutable
 
@@ -101,12 +101,8 @@ object IR:
   def Op(op: IROperator, arg: IR, args: IR*): IR.Op =
     IR.Op(op, arg +: args)
 
-
-class IRJoin extends Join[IR]:
-  override def apply(v1: IR, v2: IR): MaybeChanged[IR] = MaybeChanged.Changed(IR.Join(v1, v2))
-
-class SelectJoin(cond: IR) extends Join[IR]:
-  override def apply(v1: IR, v2: IR): MaybeChanged[IR] = MaybeChanged.Changed(IR.Select(cond, v1, v2))
-
 class IR_UID:
   override def toString: String = Integer.toHexString(hashCode)
+
+given Top[IR] with
+  override def top: IR = IR.Unknown()
