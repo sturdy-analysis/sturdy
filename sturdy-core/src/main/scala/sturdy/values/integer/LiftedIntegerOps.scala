@@ -5,7 +5,7 @@ import sturdy.data.MayJoin
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 
-final class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: IntegerOps[B, I]) extends IntegerOps[B, V]:
+class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: IntegerOps[B, I]) extends IntegerOps[B, V]:
   inline def integerLit(i: B): V = inject(ops.integerLit(i))
   inline def randomInteger(): V = inject(ops.randomInteger())
 
@@ -23,9 +23,9 @@ final class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops
   inline def modulo(v1: V, v2: V): V = inject(ops.modulo(extract(v1), extract(v2)))
   inline def gcd(v1: V, v2: V): V = inject(ops.gcd(extract(v1), extract(v2)))
 
-  inline def bitAnd(v1: V, v2: V): V = inject(ops.bitAnd(extract(v1), extract(v2)))
-  inline def bitOr(v1: V, v2: V): V = inject(ops.bitOr(extract(v1), extract(v2)))
-  inline def bitXor(v1: V, v2: V): V = inject(ops.bitXor(extract(v1), extract(v2)))
+  def bitAnd(v1: V, v2: V): V = inject(ops.bitAnd(extract(v1), extract(v2)))
+  def bitOr(v1: V, v2: V): V = inject(ops.bitOr(extract(v1), extract(v2)))
+  def bitXor(v1: V, v2: V): V = inject(ops.bitXor(extract(v1), extract(v2)))
   inline def shiftLeft(v: V, shift: V): V = inject(ops.shiftLeft(extract(v), extract(shift)))
   inline def shiftRight(v: V, shift: V): V = inject(ops.shiftRight(extract(v), extract(shift)))
   inline def shiftRightUnsigned(v: V, shift: V): V = inject(ops.shiftRightUnsigned(extract(v), extract(shift)))

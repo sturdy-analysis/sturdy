@@ -7,9 +7,10 @@ import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.values.{Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
-import sturdy.values.booleans.BooleanOps
-import sturdy.values.references.{*, given}
+import sturdy.values.booleans.{BooleanOps, given}
+import sturdy.values.ordering.{EqOps, given}
 import sturdy.values.floating.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.data.{*, given}
 import sturdy.util.Lazy
 import sturdy.values.integer.NumericInterval
@@ -31,28 +32,34 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
+  def addCondition(condition: ApronBool[Addr,Type]): Unit
   def effects: EffectStack
-  def join[A: Join](f: => A)(g: => A): A =
+  inline def join[A: Join](f: => A)(g: => A): A =
     effects.joinComputations(f)(g)
 
-  def ifThenElse[A: Join](condition: ApronCons[Addr, Type])(f: => A)(g: => A): A =
+  inline def ifThenElse[A: Join](constraint: ApronCons[Addr, Type])(f: => A)(g: => A): A =
+    ifThenElse(effects)(constraint)(f)(g)
+  inline def ifThenElse[A: Join](effectStack: EffectStack)(constraint: ApronCons[Addr, Type])(f: => A)(g: => A): A =
+    ifThenElse(effectStack)(ApronBool.Constraint(constraint))(f)(g)
+  inline def ifThenElse[A: Join](condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
     ifThenElse(effects)(condition)(f)(g)
-  def ifThenElse[A: Join](effectStack: EffectStack)(condition: ApronCons[Addr, Type])(f: => A)(g: => A): A =
+  def ifThenElse[A: Join](effectStack: EffectStack)(condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
     getBoolean(condition) match
       case Topped.Actual(true) =>
-        addConstraints(condition)
+        addCondition(condition)
         f
       case Topped.Actual(false) =>
-        addConstraints(condition.negated)
+        addCondition(condition.negated)
         g
       case Topped.Top =>
         effectStack.joinComputations{
-          addConstraints(condition)
+          addCondition(condition)
           f
         } {
-          addConstraints(condition.negated)
+          addCondition(condition.negated)
           g
         }
+
 
   def join: Join[ApronExpr[Addr, Type]]
   def widen: Widen[ApronExpr[Addr, Type]]
@@ -98,6 +105,12 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     val upper: Array[Double] = Array(0.0)
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
+
+  def getBoolean(v: ApronBool[Addr, Type]): Topped[Boolean] =
+    v match
+      case ApronBool.Constraint(cons) => getBoolean(cons)
+      case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
+      case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
 
   def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
     getBoolean(v, getFloatInterval(v.e1), getFloatInterval(v.e2))
@@ -192,6 +205,17 @@ final class ApronRecencyState
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
     relationalStore.addConstraints(constraints.flatMap(convertExpr.virtToPhys(_))*)
+
+  override def addCondition(condition: ApronBool[VirtualAddress[Ctx], Type]): Unit =
+    condition match
+      case ApronBool.Constraint(constraint) => addConstraints(constraint)
+      case ApronBool.And(e1, e2) => addCondition(e1); addCondition(e2)
+      case ApronBool.Or(e1, e2) =>
+        effectStack.joinComputations {
+          addCondition(e1)
+        } {
+          addCondition(e2)
+        }
 
   inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
     relationalStore.getBound(convertExpr.virtToPhys(expr))

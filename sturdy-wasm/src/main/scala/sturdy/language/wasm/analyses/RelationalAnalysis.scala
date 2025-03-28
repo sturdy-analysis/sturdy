@@ -71,12 +71,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
   final override def asBoolean(v: Value)(using failure: Failure): Bool =
     v match
-      case Int32(Left(i)) => ApronCons.neq[VirtAddr, Type](i, intLit(0, i._type))
+      case Int32(Left(i)) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, intLit(0, i._type)))
       case Int32(Right(cons)) => cons
-      case Int64(l) => ApronCons.neq[VirtAddr, Type](l, intLit(0, l._type))
-      case Float32(f) => ApronCons.neq[VirtAddr, Type](f, intLit(0, f._type))
-      case Float64(d) => ApronCons.neq[VirtAddr, Type](d, intLit(0, d._type))
-      case TopValue => ApronCons.top(I32Type)
+      case Int64(l) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](l, intLit(0, l._type)))
+      case Float32(f) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](f, intLit(0, f._type)))
+      case Float64(d) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](d, intLit(0, d._type)))
+      case TopValue => ApronBool.Constraint(ApronCons.top(I32Type))
 
   given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match

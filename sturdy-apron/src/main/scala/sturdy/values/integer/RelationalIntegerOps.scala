@@ -173,13 +173,33 @@ trait RelationalBaseIntegerOps
     if(v1.cmp(v2) <= 0) v2 else v1
 
   override def bitAnd(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
+    val iv1 = apronState.getInterval(v1)
+    val iv2 = apronState.getInterval(v2)
+    if(iv1.isLeq(Interval(0,1)) && iv2.isLeq(Interval(0,1)))
+      mul(v1, v2)
+    else
+      ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
 
   override def bitOr(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.bitOr(v1._type, v2._type))
+    val iv1 = apronState.getInterval(v1)
+    val iv2 = apronState.getInterval(v2)
+    if(iv1.isLeq(Interval(0,1)) && iv2.isLeq(Interval(0,1)))
+      max(v1, v2)
+    else
+      ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
 
   override def bitXor(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    ApronExpr.top(typeIntOps.bitXor(v1._type, v2._type))
+    val iv1 = apronState.getInterval(v1)
+    val iv2 = apronState.getInterval(v2)
+    val resultType = typeIntOps.bitXor(v1._type, v2._type)
+    if (iv1.isLeq(Interval(0, 1)) && iv2.isLeq(Interval(0, 1)))
+      apronState.ifThenElse(neq(v1, v2)) {
+        ApronExpr.intLit[Addr,Type](1, resultType).asInstanceOf[ApronExpr[Addr,Type]]
+      } {
+        ApronExpr.intLit[Addr,Type](0, resultType).asInstanceOf[ApronExpr[Addr,Type]]
+      }
+    else
+      ApronExpr.top(typeIntOps.bitAnd(v1._type, v2._type))
 
   override def countLeadingZeros(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val (low,high) = apronState.getLongInterval(v)

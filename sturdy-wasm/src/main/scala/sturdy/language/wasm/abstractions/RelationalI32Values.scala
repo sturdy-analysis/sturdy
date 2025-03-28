@@ -20,13 +20,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Type.*
 
   final type I32 = Either[ApronExpr[VirtAddr, Type], Bool]
-  final type Bool = ApronCons[VirtAddr, Type]
+  final type Bool = ApronBool[VirtAddr, Type]
 
   extension (i32: I32)
     inline def asApronExpr(using apronState: ApronState[VirtAddr, Type]): ApronExpr[VirtAddr, Type] =
       i32 match
         case Left(expr) => expr
-        case Right(cons) => apronState.getBoolean(cons) match
+        case Right(condition) => apronState.getBoolean(condition) match
           case Topped.Actual(true) => ApronExpr.intLit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.intLit(0, I32Type)
           case Topped.Top => ApronExpr.intInterval(0, 1, I32Type)
@@ -46,42 +46,43 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         combineApronExpr(v1.asApronExprLazy, v2.asApronExprLazy).map(Left.apply)
 
   given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOps[Int, I32] =
-    LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asApronExpr, inject = Left(_))
+    given apronExprIntOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]] = RelationalIntOps[VirtAddr, Type]
+    new LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asApronExpr, inject = Left(_)):
+      override def bitAnd(v1: I32, v2: I32): I32 =
+        (v1, v2) match
+          case (Right(e1), Right(e2)) => Right(ApronBool.And(e1, e2))
+          case _ => Left(apronExprIntOps.bitAnd(v1.asApronExpr, v2.asApronExpr))
+      override def bitOr(v1: I32, v2: I32): I32 =
+        (v1, v2) match
+          case (Right(e1), Right(e2)) => Right(ApronBool.Or(e1, e2))
+          case _ => Left(apronExprIntOps.bitOr(v1.asApronExpr, v2.asApronExpr))
 
-  given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] = new EqOps[I32, Bool]:
+
+  given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
     override def equ(v1: I32, v2: I32): Bool =
-      (v1,v2) match
+      (v1, v2) match
         case (Right(c1), Left(i2@ApronExpr.Constant(coeff, _, tpe))) =>
-          val c1ContainsNaN = c1.e1.floatSpecials.nan || c1.e2.floatSpecials.nan
-          if(coeff.isEqual(0) && ! c1ContainsNaN)
+          val c1ContainsNaN = c1.constraint.exists { case ApronCons(_, e1, e2) => e1.floatSpecials.nan || e2.floatSpecials.nan }
+          if (coeff.isEqual(0) && !c1ContainsNaN)
             c1.negated
-          else if(coeff.isScalar && ! c1ContainsNaN /* && ! coeff.isEqual(0) */)
+          else if (coeff.isScalar && !c1ContainsNaN /* && ! coeff.isEqual(0) */ )
             c1
           else
             EqOps.equ(v1.asApronExpr, i2)
         case (Left(_), Right(_)) =>
           equ(v2, v1)
         case (Right(c1), Right(c2)) =>
-          ApronCons.from(Type.I32Type) {
-            apronState.join {
-              apronState.addConstraints(c1, c2)
-              Topped.Actual(true)
-            } {
-              apronState.addConstraints(c1.negated, c2.negated)
-              Topped.Actual(false)
-            }
-          }
-        case (Left(_),Left(_)) | (Right(_),Left(_)) => EqOps.equ(v1.asApronExpr, v2.asApronExpr)
+          println(s"Created boolean condition ($c1 iff $c2), which may blow up the size of the boolean exponentially")
+          ApronBool.Or(ApronBool.And(c1, c2), ApronBool.And(c1.negated, c2.negated))
+        case (Left(_), Left(_)) | (Right(_), Left(_)) => EqOps.equ(v1.asApronExpr, v2.asApronExpr)
 
-
-    override def neq(v1: I32, v2: I32): Bool = equ(v1,v2).negated
-
+    override def neq(v1: I32, v2: I32): Bool = equ(v1, v2).negated
 
   given I32OrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): OrderingOps[I32, Bool] =
-    LiftedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = x => x)
+    LiftedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = ApronBool.Constraint(_))
 
   given I32UnsignedOrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): UnsignedOrderingOps[I32, Bool] =
-    LiftedUnsignedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = x => x)
+    LiftedUnsignedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asApronExpr, inject = ApronBool.Constraint(_))
 
   given I32ConvertIntLong(using ApronState[VirtAddr, Type], ConvertIntLong[ApronExpr[VirtAddr, Type], I64]): ConvertIntLong[I32, I64] =
     LiftedConvert[Int, Long, I32, I64, ApronExpr[VirtAddr, Type], I64, Bits](extract = _.asApronExpr, inject = x => x)

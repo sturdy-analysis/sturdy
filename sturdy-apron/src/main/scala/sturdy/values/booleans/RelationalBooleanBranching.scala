@@ -17,20 +17,21 @@ import sturdy.effect.EffectStack
 given RelationalBooleanBranching[Addr, Type, A: Join]
   (using effectStack: EffectStack, apronState: ApronState[Addr, Type])
   : BooleanBranching[ApronCons[Addr, Type], A] with
-  override def boolBranch(v: ApronCons[Addr, Type], thn: => A, els: => A): A =
+  inline override def boolBranch(v: ApronCons[Addr, Type], thn: => A, els: => A): A =
     apronState.ifThenElse(effectStack)(v)(thn)(els)
 
+given RelationalBooleanBranchingEq[Addr, Type, A: Join]
+  (using effectStack: EffectStack, apronState: ApronState[Addr, Type])
+  : BooleanBranching[ApronBool[Addr, Type], A] with
+  inline override def boolBranch(v: ApronBool[Addr, Type], thn: => A, els: => A): A =
+    apronState.ifThenElse(effectStack)(v)(thn)(els)
 
-given RelationalBooleanSelection
-  [
-    Addr: Ordering: ClassTag,
-    Type : ApronType : Join,
-    A: Join
-  ]
-  (using
-   apronState: ApronState[Addr,Type],
-   typeIntegerOps: IntegerOps[Int,Type],
-   typeBooleanOps: BooleanOps[Type]
-  ): BooleanSelection[ApronCons[Addr,Type], A] with
-  override def boolSelect(v: ApronCons[Addr, Type], ifTrue: A, ifFalse: A): A =
+given RelationalBooleanSelection[Addr, Type, A: Join]
+  (using apronState: ApronState[Addr,Type]): BooleanSelection[ApronCons[Addr,Type], A] with
+  inline override def boolSelect(v: ApronCons[Addr, Type], ifTrue: A, ifFalse: A): A =
+    apronState.ifThenElse(v)(ifTrue)(ifFalse)
+
+given RelationalBooleanSelectionBool[Addr, Type, A: Join]
+  (using apronState: ApronState[Addr,Type]): BooleanSelection[ApronBool[Addr,Type], A] with
+  inline override def boolSelect(v: ApronBool[Addr, Type], ifTrue: A, ifFalse: A): A =
     apronState.ifThenElse(v)(ifTrue)(ifFalse)
