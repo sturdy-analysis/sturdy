@@ -95,57 +95,57 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs2(simple, "test-br3", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br3", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return2", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return2", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return3", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-br-and-return3", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
@@ -155,30 +155,30 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs2(simple, "test-unreachable5", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
     testFunctionConstantArgs2(simple, "test-unreachable5", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(42),
-        IR.Const(43)
+        IR.Const(43),
+        IR.Const(42)
       )
     )))
 
     testFunctionConstantArgs2(simple, "test-global", List(Value.Int32(0)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(0), IR.Const(0)), IR.Const(0)),
-        IR.Const(1),
-        IR.Const(2)
+        IR.Const(2),
+        IR.Const(1)
       )
     )))
     testFunctionConstantArgs2(simple, "test-global", List(Value.Int32(1)), List(IRAnalysis.Value.Int32(
       IR.Select(
         IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, IR.Const(1), IR.Const(0)), IR.Const(0)),
-        IR.Const(1),
-        IR.Const(2)
+        IR.Const(2),
+        IR.Const(1)
       )
     )))
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
@@ -256,34 +256,41 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       )
     )
   ))
-////  testFunction(simple, "nesting", List(Value.Float32(IRAnalysis.topF32), Value.Float32(IR.Const(2))), List(Value.Float32(IRAnalysis.topF32)))
-////  testFunction(simple, "nesting", List(Value.Float32(IR.Const(1)), Value.Float32(IRAnalysis.topF32)), List(Value.Float32(IRAnalysis.topF32)))
+//  testFunction(simple, "nesting", List(Value.Float32(IRAnalysis.topF32), Value.Float32(IR.Const(2))), List(Value.Float32(IRAnalysis.topF32)))
+//  testFunction(simple, "nesting", List(Value.Float32(IR.Const(1)), Value.Float32(IRAnalysis.topF32)), List(Value.Float32(IRAnalysis.topF32)))
   testFunction(simple, "test-br3", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(42),
-      IR.Const(43)
+      IR.Const(43),
+      IR.Const(42)
+    )
+  )))
+  testFunction(simple, "test-br4", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Select(
+      IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
+      IR.Const(43),
+      IR.Const(42)
     )
   )))
   testFunction(simple, "test-br-and-return", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(42),
-      IR.Const(43)
+      IR.Const(43),
+      IR.Const(42)
     )
   )))
   testFunction(simple, "test-br-and-return2", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(42),
-      IR.Const(43)
+      IR.Const(43),
+      IR.Const(42)
     )
   )))
   testFunction(simple, "test-br-and-return3", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(42),
-      IR.Const(43)
+      IR.Const(43),
+      IR.Const(42)
     )
   )))
   testFunction(simple, "test-br-and-return4", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
@@ -292,15 +299,15 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-unreachable5", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(42),
-      IR.Const(43)
+      IR.Const(43),
+      IR.Const(42)
     )
   )))
   testFunction(simple, "test-global", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
     IR.Select(
       IR.Op(IREqualityOperator.EQ, IR.Op(IREqualityOperator.EQ, ext(0), IR.Const(0)), IR.Const(0)),
-      IR.Const(1),
-      IR.Const(2)
+      IR.Const(2),
+      IR.Const(1)
     )
   )))
 
@@ -335,22 +342,22 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
     )
   )))
 
-////  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(1))), List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IR.Const(1))))
-////  (2 to 8).foreach { arg =>
-////    testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(arg))), List(Value.Int64(IRAnalysis.topI64)))
-////  }
-////  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-iter", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-rec-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-iter-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-opt", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
-////
-////  testFunction(fact, "fac-rec", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-iter", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-rec-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-iter-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
-////  testFunction(fact, "fac-opt", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(1))), List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IR.Const(1))))
+//  (2 to 8).foreach { arg =>
+//    testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(arg))), List(Value.Int64(IRAnalysis.topI64)))
+//  }
+//  testFunction(fact, "fac-rec", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-iter", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-rec-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-iter-named", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-opt", List(Value.Int64(IR.Const(25))), List(Value.Int64(IRAnalysis.topI64)))
 //
+//  testFunction(fact, "fac-rec", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-iter", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-rec-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-iter-named", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+//  testFunction(fact, "fac-opt", List(Value.Int64(IRAnalysis.topI64)), List(Value.Int64(IRAnalysis.topI64)))
+
 //  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(0))), List(Value.Int32(IR.Const(42))))
 //  testFunction(simpleTest, "main", List(Value.Int32(IR.Const(1))), List(Value.Int32(IR.Const(42))))
 //  testFunction(simpleTest, "main", List(Value.Int32(IRAnalysis.topI32)), List(Value.Int32(IRAnalysis.topI32)))

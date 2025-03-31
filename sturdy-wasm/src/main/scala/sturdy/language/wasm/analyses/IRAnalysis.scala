@@ -5,12 +5,12 @@ import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.bytememory.{ConstantAddressMemory, IRMemory, TopMemory}
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
-import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
-import sturdy.effect.except.JoinedExcept
+import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, PathSensitiveCallFrame}
+import sturdy.effect.except.{JoinedExcept, PathSensitiveExcept}
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
+import sturdy.effect.operandstack.{JoinableDecidableOperandStack, PathSensitiveOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable, UpperBoundSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable, PathSensitiveSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.ir.{*, given}
@@ -91,18 +91,7 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
 
     private var currentFeedback: Option[(FixIn, IR.Feedback)] = None // May be unnecessary
 
-    implicit val branchOps: IRBranching[Unit] = new IRBranching[Unit]
-
-    given Join[IR] = (v1: IR, v2: IR) => branchOps.currentCond match
-      case None =>
-        Changed(IR.join(v1, v2))
-      case Some(cond) =>
-        if (v1.structuralEquality(v2))
-          Unchanged(v1)
-        else if (branchOps.inElse)
-          Changed(IR.Select(cond, v2, v1))
-        else
-          Changed(IR.Select(cond, v1, v2))
+    implicit val branchOps: PathSensitiveBranching[IR, Unit] = new PathSensitiveBranching(c => IR.Op(IRBooleanOperator.NOT, c))
 
     given Widen[IR] = (v1: IR, v2: IR) => // Used only (?) for the return value of a recursive function
       if v1.structuralEquality(v2) then Unchanged(v1) else Changed(v2)
@@ -113,12 +102,12 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
 //    override def widenState: Widen[State] = implicitly
 
 
-    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
+    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack with PathSensitiveOperandStack[Value]
     val memory: IRMemory[MemoryAddr] = new IRMemory[MemoryAddr]
-    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
+    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable with PathSensitiveSymbolTable[Unit, GlobalAddr, Value]
     val funTable = new UpperBoundSymbolTable[TableAddr, FuncIx, FunV](Powerset.empty)
-    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap))
-    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc](rootFrameData, rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)) with PathSensitiveCallFrame[FrameData, Int, Value, InstLoc]
+    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept with PathSensitiveExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 

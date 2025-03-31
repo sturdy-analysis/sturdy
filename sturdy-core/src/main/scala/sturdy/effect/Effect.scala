@@ -58,6 +58,9 @@ trait Effect:
       setState(joined.get)
   )
 
+trait PathSensitiveEffect extends Effect:
+  def assert(cond: Any): Unit
+
 trait Stateless extends Effect:
   final type State = Unit
   final def getState: Unit = ()

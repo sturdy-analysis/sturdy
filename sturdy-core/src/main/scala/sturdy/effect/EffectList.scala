@@ -7,7 +7,7 @@ import scala.collection.immutable.ArraySeq
 object EffectList:
   def apply(effects: Effect*): EffectList = new EffectList(ArraySeq.from(effects))
 
-case class EffectList(effects: ArraySeq[Effect]) extends Effect:
+case class EffectList(effects: ArraySeq[Effect]) extends Effect, PathSensitiveEffect:
   override type State = ArraySeq[Any]
 
   override def getState: State =
@@ -17,7 +17,12 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
     effects.view.zip(st).foreach((effect,state) =>
       effect.setState(state.asInstanceOf)
     )
-    
+
+  override def assert(cond: Any): Unit = effects.foreach {
+    case eff: PathSensitiveEffect => eff.assert(cond)
+    case _ => // nothing
+  }
+
   override def join: Join[State] = combine((effect) => (s1, s2) => effect.join(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   override def widen: Widen[State] = combine((effect) => (s1, s2) => effect.widen(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   def combine[W <: Widening](combineEffectState: Effect => (Any, Any) => MaybeChanged[Any]): Combine[State, W] =

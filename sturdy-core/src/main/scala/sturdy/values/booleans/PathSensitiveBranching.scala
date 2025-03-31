@@ -6,24 +6,26 @@ import sturdy.data.MakeJoined
 import sturdy.effect.EffectStack
 import sturdy.values.Join
 
-class IRBranching[R](using Join[R], EffectStack) extends BooleanBranching[IR, R]:
-  private var _currentCond: Option[IR] = None
+class PathSensitiveBranching[Cond, R](negate: Cond => Cond)(using j: Join[R], eff: EffectStack) extends BooleanBranching[Cond, R]:
+  private var _currentCond: Option[Cond] = None
   private var _inElse = false
   
-  def currentCond: Option[IR] = _currentCond
+  def currentCond: Option[Cond] = _currentCond
   def inElse: Boolean = _inElse
 
-  override def boolBranch(cond: IR, thn: => R, els: => R): R =
+  override def boolBranch(cond: Cond, thn: => R, els: => R): R =
     val condBefore = _currentCond
     val inElseBefore = _inElse
     try {
       _currentCond = Some(cond)
       _inElse = false
       joinComputations {
-        thn
+        try thn
+        finally eff.assert(cond)
       } {
         _inElse = true
-        els
+        try els
+        finally eff.assert(negate(cond))
       }
     } finally {
       _inElse = inElseBefore

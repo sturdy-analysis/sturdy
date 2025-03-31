@@ -38,10 +38,11 @@ import sturdy.fix
  *    because the function does not have access to stack elements defined outside the function.
  *  - Function tables are neither inputs nor outputs, because they never change.
  */
-class EffectStack(_effects: => Effect,
-                  _inEffects: PartialFunction[Any, Effect] = PartialFunction.empty,
-                  _outEffects: PartialFunction[Any, Effect] = PartialFunction.empty)
-  extends fix.State, ObservableJoin, Effect:
+class EffectStack(
+     _effects: => Effect,
+     _inEffects: PartialFunction[Any, Effect] = PartialFunction.empty,
+     _outEffects: PartialFunction[Any, Effect] = PartialFunction.empty)
+  extends fix.State, ObservableJoin, Effect, PathSensitiveEffect:
 
   private lazy val effects: Effect = _effects
 
@@ -64,6 +65,10 @@ class EffectStack(_effects: => Effect,
   final override type State = All
   override def getState: State = getAllState
   override def setState(st: State): Unit = setAllState(st)
+
+  override def assert(cond: Any): Unit = effects match
+    case eff: PathSensitiveEffect => eff.assert(cond)
+    case _ => // nothing
 
   override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf

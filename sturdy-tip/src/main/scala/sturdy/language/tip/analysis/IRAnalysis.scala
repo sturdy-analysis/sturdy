@@ -35,7 +35,7 @@ object IRAnalysis:
       - but not for nested loops
     */
 
-    override implicit val branchOps: IRBranching[Unit] = new IRBranching[Unit]
+    override implicit val branchOps: PathSensitiveBranching[IR, Unit] = new PathSensitiveBranching(c => IR.Op(IRBooleanOperator.NOT, c))
 
     given Join[IR] = (v1: IR, v2: IR) => branchOps.currentCond match
       case None => Changed(IR.Join(v1, v2))

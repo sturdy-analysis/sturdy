@@ -52,7 +52,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
 
   def setLocal(ix: Int, v: V): JOptionC[Unit] =
     if (ix >= 0 && ix < vars.length) {
-      vars = vars.updated(ix, v)
+      vars(ix) = v
       JOptionC.Some(())
     } else {
       JOptionC.none
@@ -98,7 +98,7 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = vars
+    private val snapshot = vars.clone()
     private var fVars: Array[V] = _
 
     override def inbetween(fFailed: Boolean): Unit =

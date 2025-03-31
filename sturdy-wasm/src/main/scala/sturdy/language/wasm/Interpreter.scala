@@ -88,6 +88,14 @@ trait Interpreter:
       case (Float64(d1), Float64(d2)) => Combine[F64, W](d1, d2).map(Float64.apply)
       case _ => MaybeChanged(TopValue, v1)
 
+  given PathSensitiveValue(using PathSensitive[I32], PathSensitive[I64], PathSensitive[F32], PathSensitive[F64]): PathSensitive[Value] with
+    override def assert(cond: Any, v: Value): Value = v match
+      case Value.TopValue => Value.TopValue
+      case Value.Int32(i) => Value.Int32(i.assertPath(cond))
+      case Value.Int64(l) => Value.Int64(l.assertPath(cond))
+      case Value.Float32(f) => Value.Float32(f.assertPath(cond))
+      case Value.Float64(d) => Value.Float64(d.assertPath(cond))
+
   type Addr
   type Bytes
   type Size

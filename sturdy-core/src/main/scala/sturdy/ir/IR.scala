@@ -1,6 +1,8 @@
 package sturdy.ir
 
-import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder, Top}
+import sturdy.values.MaybeChanged.{Changed, Unchanged}
+import sturdy.values.booleans.IRBooleanOperator
+import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder, PathSensitive, Top}
 
 import scala.collection.mutable
 
@@ -26,6 +28,7 @@ enum IR:
   case Op(op: IROperator, args: Seq[IR])
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
+  case Assert(cond: IR, data: IR)
   case Feedback(inits: List[IR], var cond: Option[IR], var steps: Option[List[IR]])
   case FeedbackAsk(index: Int, feedback: Feedback)
 //  case Cast[C](ir: IR, check: IRCheck[C])
@@ -43,6 +46,7 @@ enum IR:
     case IR.Op(op, args) => args.zipWithIndex.map(a => a._1 -> a._2.toString)
     case IR.Select(cond, left, right) => Seq(cond -> "?", left -> "⊤", right -> "⊥")
     case IR.Join(left, right) => Seq(left -> "", right -> "")
+    case IR.Assert(cond, data) => Seq(cond -> "?", data -> "")
     case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.map((ir, i) => ir ->  s"init_$i") ++ cond.map(_ -> "cond") ++ steps.map(_.zipWithIndex.map((ir, i) => ir ->  s"step_$i")).getOrElse(List.empty)
     case IR.FeedbackAsk(_, feedback) => Seq(feedback -> "feedback")
 
@@ -54,6 +58,7 @@ enum IR:
     case IR.Op(op, _) => s"Op($op)@$uid"
     case IR.Select(_, _, _) => s"Select@$uid"
     case IR.Join(_, _) => s"Join@$uid"
+    case IR.Assert(_, _) => s"Assert@$uid"
     case IR.Feedback(_, _, _) => s"Feedback@$uid"
     case IR.FeedbackAsk(index, _)  => s"FeedbackAsk($index)@$uid"
 
@@ -69,6 +74,7 @@ enum IR:
       left1.structuralEquality(left2) &&
       right1.structuralEquality(right2)
     case (IR.Join(left1, right1), IR.Join(left2, right2)) => left1.structuralEquality(left2) && right1.structuralEquality(right2)
+    case (IR.Assert(cond1, data1), IR.Assert(cond2, data2)) => cond1.structuralEquality(cond2) && data1.structuralEquality(data2)
     case (IR.FeedbackAsk(i1, feedback1), IR.FeedbackAsk(i2, feedback2)) if i1 == i2 && feedback1 == feedback2 => true
     // TODO Add Feedback ? Better guard for cycles ? Does this really work (need tests)
     case (IR.Feedback(_, _, _), IR.Feedback(_, _, _)) if this == that => true
@@ -100,15 +106,35 @@ enum IR:
 object IR:
   def Op(op: IROperator, arg: IR, args: IR*): IR.Op =
     IR.Op(op, arg +: args)
+  def select(cond: IR, v1: IR, v2: IR): IR =
+    if (v1.structuralEquality(v2))
+      v1
+    else
+      IR.Select(cond, v1, v2)
 
-  def join(left: IR, right: IR): IR = (left, right) match
-    case (Unknown(), _) => left
-    case (_, Unknown()) => right
-    case (_, _) if left.structuralEquality(right) => left
-    case _ => Join(left, right)
+given sturdy.values.Join[IR] with
+  import IR.*
+  def apply(left: IR, right: IR): MaybeChanged[IR] =
+    val res = (left, right) match
+      case (Unknown(), _) => Changed(left)
+      case (_, Unknown()) => Unchanged(right)
+      case (Assert(cond1, v1), Assert(Op(IRBooleanOperator.NOT, Seq(cond2)), v2)) if cond1 == cond2 =>
+          Changed(select(cond1, v1, v2))
+      case (Assert(Op(IRBooleanOperator.NOT, Seq(cond1)), v1), Assert(cond2, v2)) if cond1 == cond2 =>
+        Changed(select(cond2, v2, v1))
+      case (_, _) if left.structuralEquality(right) =>
+        Unchanged(left)
+      case _ => Changed(IR.Join(left, right))
+//    println(s"join $left\n     $right\n   = $res")
+    res
 
 class IR_UID:
   override def toString: String = Integer.toHexString(hashCode)
 
 given Top[IR] with
   override def top: IR = IR.Unknown()
+
+given PathSensitive[IR] with
+  override def assert(cond: Any, v: IR): IR = cond match
+    case cond: IR => IR.Assert(cond, v)
+    case _ => throw new IllegalArgumentException(s"Cannot assert condition $cond on value $v")
