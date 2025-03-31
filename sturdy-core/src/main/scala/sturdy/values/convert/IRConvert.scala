@@ -30,5 +30,8 @@ class IRConvertOp[From, To, Config <: ConvertConfig[_]](val conf: Config)(using 
 def IRConvertBytesInt(conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): IRConvertOp[Seq[Byte], Int, BytesSize && SomeCC[ByteOrder] && Bits] =
   new IRConvertOp[Seq[Byte], Int, config.BytesSize && SomeCC[ByteOrder] && config.Bits](conf)
 
+def IRConvertIntBytes(conf: config.BytesSize && SomeCC[ByteOrder]): IRConvertOp[Int, Seq[Byte], BytesSize && SomeCC[ByteOrder]] =
+  new IRConvertOp[Int, Seq[Byte], config.BytesSize && SomeCC[ByteOrder]](conf)
+
 given IRConvert[From, To, Config <: ConvertConfig[_]](using ft: TypeTag[From], tt: TypeTag[To]): Convert[From, To, IR, IR, Config] with
   override def apply(from: IR, conf: Config): IR = IR.Op(new IRConvertOp(conf)(using ft, tt), from)

@@ -5,6 +5,7 @@ import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
+import sturdy.effect.bytememory.IRMemoryOperator
 import sturdy.effect.failure
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.{fix, ir}
@@ -19,7 +20,7 @@ import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IRAnalysis, Was
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.convert.{&&, IRConvertBytesInt, IRConvertOp, SomeCC, given}
+import sturdy.values.convert.{&&, IRConvertBytesInt, IRConvertIntBytes, IRConvertOp, SomeCC, given}
 import sturdy.values.integer.{IRIntegerOperator, IntegerDivisionByZero, NumericIntervalAbstractly}
 import sturdy.values.ordering.IREqualityOperator
 import sturdy.values.{Abstractly, Topped, config}
@@ -69,8 +70,20 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
     testFunctionConstantArgs2(simple, "test-mem", List(Value.Int32(42)), List(IRAnalysis.Value.Int32(
-      IR.Op(IRIntegerOperator.ADD, IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed), IR.Unknown()), IR.Const(1))
-    )))
+      IR.Op(IRIntegerOperator.ADD,
+        IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed),
+          IR.Op(IRMemoryOperator.MemRead(4),
+            IR.Op(IRMemoryOperator.MemWrite,
+              IR.Op(IRMemoryOperator.MemNew, IR.Const(1)),
+              IR.Const(0),
+              IR.Op(IRConvertIntBytes(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false)), IR.Const(42))
+            ),
+            IR.Const(0)
+          )
+        ),
+        IR.Const(1))
+      )
+    ))
     testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
 //    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
@@ -204,11 +217,45 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "const", List(Value.Int32(ext(0))), List(Value.Int32(ext(0))))
   testFunction(simple, "first", List(Value.Int32(ext(0)), Value.Int32(ext(1))), List(Value.Int32(ext(0))))
   testFunction(simple, "second", List(Value.Int32(ext(0)), Value.Int32(ext(1))), List(Value.Int32(ext(1))))
-  testFunction(simple, "test-mem", List(Value.Int32(ext(0))), List(Value.Int32(
-    IR.Op(IRIntegerOperator.ADD, IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed), IR.Unknown()), IR.Const(1))
+  testFunction(simple, "test-mem", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(
+    IR.Op(IRIntegerOperator.ADD,
+      IR.Op(IRConvertBytesInt(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false) && config.Bits.Signed),
+        IR.Op(IRMemoryOperator.MemRead(4),
+          IR.Op(IRMemoryOperator.MemWrite,
+            IR.Op(IRMemoryOperator.MemNew, IR.Const(1)),
+            IR.Const(0),
+            IR.Op(IRConvertIntBytes(config.BytesSize.Int && SomeCC(ByteOrder.LITTLE_ENDIAN, false)), ext(0))
+          ),
+          IR.Const(0)
+        )
+      ),
+      IR.Const(1))
+  )
+  ))
+  testFunction(simple, "test-size", List.empty, List(Value.Int32(
+    IR.Op(IRMemoryOperator.MemSize, IR.Op(IRMemoryOperator.MemNew, IR.Const(1)))
   )))
-  testFunction(simple, "test-size", List.empty, List(Value.Int32(IR.Unknown())))
-  testFunction(simple, "test-memgrow", List.empty, List(Value.Int32(IR.Unknown()), Value.Int32(IR.Unknown())))
+  testFunction(simple, "test-memgrow", List.empty, List(
+    Value.Int32(
+      IR.Join(
+        IR.Op(IRMemoryOperator.MemSize,
+          IR.Op(IRMemoryOperator.MemGrow,
+            IR.Op(IRMemoryOperator.MemNew, IR.Const(1)),
+            IR.Const(1)
+          )
+        ),
+        IR.Const(-1)
+      )
+    ),
+    Value.Int32(
+      IR.Op(IRMemoryOperator.MemSize,
+        IR.Op(IRMemoryOperator.MemGrow,
+          IR.Op(IRMemoryOperator.MemNew, IR.Const(1)),
+          IR.Const(1)
+        )
+      )
+    )
+  ))
 ////  testFunction(simple, "nesting", List(Value.Float32(IRAnalysis.topF32), Value.Float32(IR.Const(2))), List(Value.Float32(IRAnalysis.topF32)))
 ////  testFunction(simple, "nesting", List(Value.Float32(IR.Const(1)), Value.Float32(IRAnalysis.topF32)), List(Value.Float32(IRAnalysis.topF32)))
   testFunction(simple, "test-br3", List(Value.Int32(ext(0))), List(IRAnalysis.Value.Int32(

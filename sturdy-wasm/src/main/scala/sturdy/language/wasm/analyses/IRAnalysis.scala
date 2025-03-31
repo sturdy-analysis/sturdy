@@ -3,7 +3,7 @@ package sturdy.language.wasm.analyses
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
-import sturdy.effect.bytememory.{ConstantAddressMemory, TopMemory}
+import sturdy.effect.bytememory.{ConstantAddressMemory, IRMemory, TopMemory}
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.JoinedExcept
@@ -114,7 +114,7 @@ object IRAnalysis extends Interpreter, IRValues, ExceptionByTarget, ControlFlow,
 
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
-    val memory: TopMemory[MemoryAddr, IR, IR, IR] = new TopMemory[MemoryAddr, Addr, Bytes, Size]
+    val memory: IRMemory[MemoryAddr] = new IRMemory[MemoryAddr]
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable = new UpperBoundSymbolTable[TableAddr, FuncIx, FunV](Powerset.empty)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap))

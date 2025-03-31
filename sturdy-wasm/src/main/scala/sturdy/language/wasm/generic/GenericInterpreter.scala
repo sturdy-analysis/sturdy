@@ -218,10 +218,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def store(inst: StoreInst | StoreNInst): Unit =
     val v = stack.popOrAbort()
     val bytes = encode(v, SomeCC(inst, false))
-
-    // add offset to base address (which is already on the stack)
-    stack.push(i32ops.integerLit(inst.offset))
-    val addr = valueToAddr(num.evalNumeric(i32.Add))
+    val addr = effectiveAddr(inst.offset)
 
     val memIdx = memoryIndex
     memory.write(memIdx, addr, bytes).getOrElse(
@@ -511,12 +508,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   /** add offset to base address (which is already on the stack) */
   def effectiveAddr(offset: Int): Addr =
-    val v1 = i32ops.integerLit(offset)
-    val v2 = stack.popOrAbort()
-    val res = i32ops.add(v1,v2)
-    val cmp = unsignedCompareOps.ltUnsigned(res,v1)
-    branchOps.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), ())
-    valueToAddr(res)
+    if (offset == 0)
+      valueToAddr(stack.popOrAbort())
+    else {
+      val v1 = i32ops.integerLit(offset)
+      val v2 = stack.popOrAbort()
+      val res = i32ops.add(v1, v2)
+      val cmp = unsignedCompareOps.ltUnsigned(res, v1)
+      branchOps.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), ())
+      valueToAddr(res)
+    }
 
   def resolveImports(module: Module, imports: Imports):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
