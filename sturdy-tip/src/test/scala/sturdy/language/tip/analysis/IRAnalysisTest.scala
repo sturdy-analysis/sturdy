@@ -26,6 +26,7 @@ import sturdy.values.{*, given}
 import sturdy.*
 import sturdy.effect.{TrySturdy, failure}
 import sturdy.ir.{Export, IRInterpreterConcrete, IRValue}
+import sturdy.language.tip.analysis.IRAnalysis.irValue
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
@@ -62,14 +63,14 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
       val aresult = analysis.failure.fallible(analysis.execute(program))
       println(s"Abstract result: $aresult")
       if(aresult.isSucceeding)
-        val ir = aresult.get.get
-        val graphViz = Export.toGraphViz(ir)
-        Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
+        val res = aresult.get.get
+        val graphViz = Export.toGraphViz(irValue(res))
+//        Files.write(Path.of("/home/armand/test.dot"), graphViz.getBytes())
         println(graphViz)
 
         // TODO : Run the IR
         val interpreter = new IRInterpreterConcrete(Map.empty, () => IRValue(0))
-        val irEval = interpreter.interpret(ir)
+        val irEval = interpreter.interpret(irValue(res))
         println(s"IR Result: $irEval")
         println(s"Feedback store: ${interpreter.feedbackStore}")
 

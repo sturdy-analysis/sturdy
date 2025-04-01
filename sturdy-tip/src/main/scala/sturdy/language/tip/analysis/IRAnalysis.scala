@@ -3,14 +3,15 @@ package sturdy.language.tip.analysis
 import sturdy.data.MayJoin.WithJoin
 import sturdy.data.{JOption, joinComputations, given}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
-import sturdy.effect.callframe.{DecidableCallFrame, JoinableDecidableCallFrame}
+import sturdy.effect.callframe.{DecidableCallFrame, JoinableDecidableCallFrame, PathSensitiveCallFrame}
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.print.{Print, PrintBound}
 import sturdy.effect.store.{*, given}
-import sturdy.effect.userinput.{AUserInputFun, UserInput, WithNamedUserInput}
+import sturdy.effect.userinput.{AUserInput, AUserInputFun, UserInput, WithNamedUserInput}
 import sturdy.fix.{Combinator, Fixpoint, StackConfig, notContextSensitive}
 import sturdy.ir.{*, given}
-import sturdy.language.tip.abstractions.isFunOrWhile
+import sturdy.language.tip
+import sturdy.language.tip.abstractions.{Functions, Ints, Records, References, isFunOrWhile}
 import sturdy.language.tip.{*, given}
 import sturdy.util.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -22,11 +23,21 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import sturdy.{Executor, data, fix}
 
-object IRAnalysis:
+object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, References.AllocationSites, Records.PreciseFieldsOrTop:
 
-  class Instance(stackConfig: StackConfig) extends GenericInterpreter[IR, IR, WithJoin]:
+  override type J[A] = WithJoin[A]
+  given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-    private var currentFeedback : Option[(FixIn, IR.Feedback)] = None // May be unnecessary
+  def irValue(v: Value): IR = v match
+    case Value.TopValue => IR.Unknown()
+    case Value.IntValue(v) => v
+    case Value.BoolValue(v) => v
+    case Value.RefValue(v) => ???
+    case Value.FunValue(v) => ???
+    case Value.RecValue(v) => ???
+  
+  class Instance(stackConfig: StackConfig) extends GenericInstance:
+
     /*
       Version based on structural equality for fixpoint stability:
       - should work for simple and consecutive loops
@@ -35,127 +46,73 @@ object IRAnalysis:
       - but not for nested loops
     */
 
-    override implicit val branchOps: PathSensitiveBranching[IR, Unit] = new PathSensitiveBranching(c => IR.Op(IRBooleanOperator.NOT, c))
-
-    given Join[IR] = (v1: IR, v2: IR) => branchOps.currentCond match
-      case None => Changed(IR.Join(v1, v2))
-      case Some(cond) =>
-        println(s"$v1 or $v2")
-        if (v1.structuralEquality(v2))
-          Unchanged(v1)
-        else if (branchOps.inElse)
-          Changed(IR.Select(cond, v2, v1))
-        else
-          Changed(IR.Select(cond, v1, v2))
+    implicit val irBranchOps: PathSensitiveBranching[IR, Unit] = new PathSensitiveBranching(c => IR.Op(IRBooleanOperator.NOT, c))
 
     given Widen[IR] = (v1: IR, v2: IR) => // Used only (?) for the return value of a recursive function
       if (v1.structuralEquality(v2))
         Unchanged(v1)
       else
         Changed(v2)
+    given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
-    override def jv: WithJoin[IR] = implicitly
+    override def jv: WithJoin[Value] = implicitly
 
     override val fixpoint =
-      notContextSensitive[FixIn, FixOut[IR], Combinator[FixIn, FixOut[IR]]](
+      fix.notContextSensitive(
         fix.dispatch(isFunOrWhile, Seq(
-          new CustomCombinator(fix.iter.innermost(stackConfig)), new CustomCombinator(fix.iter.innermost(stackConfig))
+          fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig), fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig)
         ))
       ).fixpoint
 
-    override val intOps: IntegerOps[Int, IR] = implicitly
-    override val boolOps: BooleanOps[IR] = implicitly
-    override val compareOps: OrderingOps[IR, IR] = implicitly
-    override val eqOps: EqOps[IR, IR] = implicitly
-    override val functionOps: FunctionOps[Function, Seq[IR], IR, IR] = implicitly // new IRFunctionOps[Function, Seq[IR]](identity)
+    override val intOps: IntegerOps[Int, Value] = implicitly
+    override val boolOps: BooleanOps[Value] = implicitly
+    override val compareOps: OrderingOps[Value, Value] = implicitly
+    given Lazy[EqOps[Value, Value]] = lazily(eqOps)
+    override val eqOps: EqOps[Value, Value] = implicitly
+    override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = implicitly
+    override val refOps: ReferenceOps[Addr, Value] = implicitly
+    override val recOps: RecordOps[Field, Value, Value] = implicitly
+    override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val refOps: ReferenceOps[IR, IR] = new ReferenceOps[IR, IR] { // TODO : Unimplemented
-      override def mkNullRef: IR = ???
-      override def mkRef(trg: IR): IR = ???
-      override def mkManagedRef(trg: IR): IR = ???
-      override def deref(v: IR): IR = ???
-    }
+    given PathSensitive[VFun] = NotPathSensitive()
+    given PathSensitive[VRef] = NotPathSensitive()
+    given PathSensitive[VRecord] = NotPathSensitive()
+    
+    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] =
+      new JoinableDecidableCallFrame[String, String, Value, tip.Exp.Call]("$main", Iterable.empty) 
+        with PathSensitiveCallFrame[String, String, Value, tip.Exp.Call]
 
-    override val recOps: RecordOps[Field, IR, IR] = new RecordOps[Field, IR, IR] { // TODO : Records are not supported
-      override def makeRecord(fields: Seq[(Field, IR)]): IR = ???
-      override def lookupRecordField(rec: IR, field: Field): IR = ???
-      override def updateRecordField(rec: IR, field: Field, newval: IR): IR = ???
-    }
-
-    override val callFrame: JoinableDecidableCallFrame[String, String, IR, Exp.Call] =
-      new JoinableDecidableCallFrame[String, String, IR, Exp.Call]("$main", Iterable.empty) {
-
-        override def setVars(newVars: Iterable[(String, Option[IR])]): Unit = { // TODO : Fix this ugly override that assigns Undefined as a default value to avoid inconvenient nulls.
-          val builder = Map.newBuilder[String, Int]
-          vars = Array.fill(newVars.size)(IR.Undefined())
-          var i = 0
-          for ((name, v) <- newVars) {
-            builder += name -> i
-            v.foreach(vars.update(i, _))
-            i += 1
-          }
-          names = builder.result()
-        }
-
-        override def widen: Widen[List[IR]] = new Widen[List[IR]] {
-          override def apply(v1: List[IR], v2: List[IR]): MaybeChanged[List[IR]] =
-            // if v2 is just an unrolling of the body of the feedback node of v1
-            if(v1.length == v2.length && v1.zip(v2).forall(v => v._1.structuralEquality(v._2))) // TODO : Cleaner implementation
-              Unchanged(v1)
-            else
-              val feedback = currentFeedback.get._2
-              feedback.cond =
-                if (branchOps.inElse)
-                  branchOps.currentCond.map(cond => IR.Op(IRBooleanOperator.NOT, Array(cond)))
-                else
-                  branchOps.currentCond
-              feedback.steps = Some(v2)
-              Changed(v1.zip(v2).zipWithIndex.map((v, i) => v._1 match
-                case IR.Undefined() if v1 != v2 => IR.FeedbackAsk(i, feedback)
-                case _ => v._1
-              ))
-        }
-      }
-
-    override val store: Store[IR, IR, WithJoin] = new Store[IR, IR, WithJoin] { // TODO : Store is not supported
-      override def read(x: IR): JOption[WithJoin, IR] = ???
-      override def write(x: IR, v: IR): Unit = ???
-      override def free(x: IR): Unit = ???
-
-      override type State = Unit
-      override def getState: State = ()
-      override def join: Join[Unit] = implicitly
-      override def widen: Widen[Unit] = implicitly
-      override def setState(st: Unit): Unit = ()
-    }
-
-    override val alloc: Allocator[IR, AllocationSite] =  new AAllocatorFromContext(_ => ???)
-    override val print: Print[IR] = new PrintBound
-    override val input: UserInput[IR] = new AUserInputFun(IR.Unknown()) with WithNamedUserInput(name => IR.External(name))
+    override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(Map.empty)
+    override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
+      PowersetAddr(References.allocationSiteAddr(site))
+    )
+    override val print: PrintBound[Value] = new PrintBound
+    override val input: AUserInputFun[Value] = 
+      new AUserInputFun(Value.IntValue(IR.Unknown())) with WithNamedUserInput(name => Value.IntValue(IR.External(name)))
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
     override def newInstance: Executor = new Instance(stackConfig)
 
-    class CustomCombinator(phi : Combinator[FixIn, FixOut[IR]]) extends Combinator[FixIn, FixOut[IR]] :
-      override def apply(v1: FixIn => FixOut[IR]): FixIn => FixOut[IR] = fixIn => {
-        if (currentFeedback.exists(_._1 == fixIn))
-          phi(v1)(fixIn)
-        else
-          val feedback : IR.Feedback = IR.Feedback(
-            callFrame.getState,
-            None,
-            None)
-
-          val beforeFeedback = currentFeedback
-          try {
-            currentFeedback = Some(fixIn, feedback)
-            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => v match
-              case IR.Undefined() => IR.Undefined()
-              case _ => IR.FeedbackAsk(i, feedback)))
-            phi(v1)(fixIn)
-          }
-          finally {
-            currentFeedback = beforeFeedback
-          }
-      }
+//    class CustomCombinator(phi : Combinator[FixIn, FixOut[IR]]) extends Combinator[FixIn, FixOut[IR]] :
+//      override def apply(v1: FixIn => FixOut[IR]): FixIn => FixOut[IR] = fixIn => {
+//        if (currentFeedback.exists(_._1 == fixIn))
+//          phi(v1)(fixIn)
+//        else
+//          val feedback : IR.Feedback = IR.Feedback(
+//            callFrame.getState,
+//            None,
+//            None)
+//
+//          val beforeFeedback = currentFeedback
+//          try {
+//            currentFeedback = Some(fixIn, feedback)
+//            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => v match
+//              case IR.Undefined() => IR.Undefined()
+//              case _ => IR.FeedbackAsk(i, feedback)))
+//            phi(v1)(fixIn)
+//          }
+//          finally {
+//            currentFeedback = beforeFeedback
+//          }
+//      }

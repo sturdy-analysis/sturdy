@@ -81,7 +81,7 @@ object Ints:
       case Topped.Actual(false) => AbstractBitVector.constant(0)
     )
 
-  trait IRVal extends Interpreter:
+  trait IRInts extends Interpreter:
     final type VBool = IR
     final type VInt = IR
 

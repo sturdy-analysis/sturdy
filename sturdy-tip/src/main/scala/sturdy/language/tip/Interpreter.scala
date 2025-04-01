@@ -3,14 +3,13 @@ package sturdy.language.tip
 import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.tip.*
-import sturdy.values.MaybeChanged
+import sturdy.values.{Combine, Finite, MaybeChanged, PathSensitive, Top, Widening, assertPath}
 import sturdy.values.booleans.*
-import sturdy.values.{Finite, Top, Combine, Widening}
-import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
+import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
-import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.ordering.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.values.references.{LiftedReferenceOps, ReferenceOps}
+import sturdy.values.ordering.{EqOps, LiftedOrderingOps, OrderingOps}
 
 /**
  * Trait [[Interpreter]] allows sharing code between concrete and abstract interpreters.
@@ -81,6 +80,16 @@ trait Interpreter:
       case _ => MaybeChanged(TopValue, v1)
 
   given FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]): Finite[Value] with {}
+
+  given PathSensitiveValue(using PathSensitive[VInt], PathSensitive[VBool], PathSensitive[VFun], PathSensitive[VRef], PathSensitive[VRecord]): PathSensitive[Value] with
+    import Value.*
+    override def assert(cond: Any, v: Value): Value = v match
+      case TopValue => TopValue
+      case BoolValue(b) => BoolValue(b.assertPath(cond))
+      case IntValue(i) => IntValue(i.assertPath(cond))
+      case RefValue(ref) => RefValue(ref.assertPath(cond))
+      case FunValue(fun) => FunValue(fun.assertPath(cond))
+      case RecValue(rec) => RecValue(rec.assertPath(cond))
 
   import Value.*
   given ValueIntegerOps(using Instance, IntegerOps[Int, VInt]): IntegerOps[Int, Value] =
