@@ -1,5 +1,7 @@
 package sturdy.values.ordering
 
+import sturdy.values.booleans.IntBools
+
 trait OrderingOps[V, B]:
   def lt(v1: V, v2: V): B
   def le(v1: V, v2: V): B
@@ -20,3 +22,6 @@ object OrderingOps:
 given ConcreteOrderingOps[V] (using ord: Ordering[V]): OrderingOps[V, Boolean] with
   def lt(v1: V, v2: V): Boolean = ord.lt(v1, v2)
   def le(v1: V, v2: V): Boolean = ord.lteq(v1, v2)
+
+given IntBoolsOrderingOps[I,B,V](using ib: IntBools[I,B] ,ops: OrderingOps[V, B]): OrderingOps[V, I] = 
+  new LiftedOrderingOps(identity, ib.boolToInt)

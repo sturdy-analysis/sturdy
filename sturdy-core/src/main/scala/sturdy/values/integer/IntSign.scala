@@ -3,6 +3,7 @@ package sturdy.values.integer
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
+import sturdy.values.booleans.IntBools
 import sturdy.values.ordering.*
 
 enum IntSign:
@@ -196,3 +197,13 @@ given SignEqOps: EqOps[IntSign, Topped[Boolean]] with
   def neq(v1: IntSign, v2: IntSign): Topped[Boolean] = equ(v1, v2).map(!_)
 
 given FiniteIntSign: Finite[IntSign] with {}
+
+given IntBools[IntSign, Topped[Boolean]] with
+  override def intToBool(i: IntSign): Topped[Boolean] = i match
+    case IntSign.Zero => Topped.Actual(false)
+    case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
+    case _ => Topped.Top
+  override def boolToInt(b: Topped[Boolean]): IntSign = b match
+    case Topped.Top => IntSign.ZeroOrPos
+    case Topped.Actual(true) => IntSign.Pos
+    case Topped.Actual(false) => IntSign.Zero

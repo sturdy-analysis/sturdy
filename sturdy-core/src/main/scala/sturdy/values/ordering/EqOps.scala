@@ -1,6 +1,7 @@
 package sturdy.values.ordering
 
 import sturdy.values.Structural
+import sturdy.values.booleans.IntBools
 
 trait EqOps[V, B]:
   def equ(v1: V, v2: V): B
@@ -15,3 +16,5 @@ object EqOps:
 given StructuralEqOps[A](using Structural[A]): EqOps[A, Boolean] with
   override def equ(v1: A, v2: A): Boolean = v1 == v2
   override def neq(v1: A, v2: A): Boolean = v1 != v2
+
+given IntBoolsEqOps[I,B,A](using ib: IntBools[I,B], ops: EqOps[A,B]): EqOps[A, I] = new LiftedEqOps(identity, ib.boolToInt)

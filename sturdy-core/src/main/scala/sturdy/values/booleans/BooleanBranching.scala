@@ -30,6 +30,9 @@ given ConcreteBooleanBranching[R]: BooleanBranching[Boolean, R] with
   def boolBranch(v: Boolean, thn: => R, els: => R): R =
     if (v) thn else els
 
+given IntBoolsBooleanBranching[I, B, R](using ib: IntBools[I,B], ops: BooleanBranching[B, R]): BooleanBranching[I, R] =
+  new LiftedBooleanBranching(ib.intToBool)
+
 class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends BooleanBranching[B, R]:
   private var observer: List[B => Unit] = List()
   def addObserver(f: B => Unit): Unit = observer +:= f

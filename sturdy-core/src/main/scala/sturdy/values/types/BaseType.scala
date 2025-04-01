@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
-import sturdy.values.booleans.{BooleanBranching, BooleanOps}
+import sturdy.values.booleans.{BooleanBranching, BooleanOps, IntBools}
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
@@ -66,3 +66,7 @@ given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
       0
     else
       -1
+
+given IntBools[BaseType[Int], BaseType[Boolean]] with
+  override def intToBool(i: BaseType[Int]): BaseType[Boolean] = BaseType[Boolean]
+  override def boolToInt(b: BaseType[Boolean]): BaseType[Int] = BaseType[Int]

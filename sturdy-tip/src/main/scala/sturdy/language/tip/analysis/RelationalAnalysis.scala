@@ -70,43 +70,17 @@ object RelationalAnalysis extends Interpreter,
   type RelAddr = VirtualAddress[RelationalVar]
 
   override final type VInt = ApronExpr[RelAddr, RelType]
-  override final type VBool = ApronCons[RelAddr, RelType]
   override final type VRef = AbstractReference[Addr]
   
-  given CombineVBool[W <: Widening]: Combine[VBool, W] with
-    override def apply(v1: ApronCons[RelAddr, RelType], v2: ApronCons[RelAddr, RelType]): MaybeChanged[ApronCons[RelAddr, RelType]] = ???
-
   final type Addr = PowVirtualAddress[RelationalVar]
   final type PAddr = PowersetAddr[PhysicalAddress[RelationalVar],PhysicalAddress[RelationalVar]]
   final type Environment = Map[String, Value]
   final type InitStore = Map[RelAddr, Value]
 
-  final def asBoolean(v: Value)(using inst: Instance): VBool =
-    v match
-      case Value.BoolValue(toppedBool) => toppedBool
-      case Value.IntValue(i) =>
-        given Failure = inst.failure
-        given EffectStack = inst.effectStack
-        ApronCons.neq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
-      case Value.TopValue => topBool
-      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
-
-  final def asInt(v: Value)(using inst: Instance): VInt =
-    v match
-      case Value.BoolValue(bool) =>
-        import inst.given
-        BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1, BaseType[Int]), ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
-      case Value.IntValue(i) => i
-      case Value.TopValue => topInt
-      case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
-
   override def topInt(using inst: Instance): VInt =
-    given Failure = inst.failure
-    given EffectStack = inst.effectStack
     ApronExpr.top(BaseType[Int])
-  override def topBool(using inst: Instance): VBool =
-    import inst.given
-    ApronCons.top(BaseType[Int])
+  override def topBool: VInt =
+    ApronExpr.top(BaseType[Int])
 
   override def topReference(using self: Instance): VRef =
     val addrs = self.store.virtualAddresses
@@ -212,11 +186,23 @@ object RelationalAnalysis extends Interpreter,
 
     given Lazy[EqOps[Value, Value]] = lazily(eqOps)
 
-    given EqOps[VRef, VBool] = new LiftedEqOps[VRef, VBool, VRef, Topped[Boolean]](identity, ApronCons.from)
+    given IntBools[ApronExpr[RelAddr, RelType], ApronCons[RelAddr, RelType]] with
+      override def intToBool(i: ApronExpr[RelAddr, RelType]): ApronCons[RelAddr, RelType] =
+        ApronCons.neq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
+      override def boolToInt(b: ApronCons[RelAddr, RelType]): ApronExpr[RelAddr, RelType] =
+        val ops = ApronConsBooleanBranching[RelAddr, RelType, ApronExpr[RelAddr, RelType]]
+        ops.boolBranch(b,
+          ApronExpr.intLit[RelAddr, RelType](1, BaseType[Int]),
+          ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
 
-    given EqOps[VFun, VBool] = new LiftedEqOps[VFun, VBool, VFun, Topped[Boolean]](identity, ApronCons.from)
 
-    given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from)
+
+    given EqOps[VRef, ApronCons[RelAddr, RelType]] =
+      new LiftedEqOps[VRef, ApronCons[RelAddr, RelType], VRef, Topped[Boolean]](identity, ApronCons.from)
+    given EqOps[VFun, ApronCons[RelAddr, RelType]] =
+      new LiftedEqOps[VFun, ApronCons[RelAddr, RelType], VFun, Topped[Boolean]](identity, ApronCons.from)
+    given EqOps[VRecord, ApronCons[RelAddr, RelType]] =
+      new LiftedEqOps[VRecord, ApronCons[RelAddr, RelType], VRecord, Topped[Boolean]](identity, ApronCons.from)
 
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val boolOps: BooleanOps[Value] = ???

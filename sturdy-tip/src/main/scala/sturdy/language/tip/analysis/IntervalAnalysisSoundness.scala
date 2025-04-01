@@ -24,7 +24,6 @@ object IntervalAnalysisSoundness:
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Abstractly(b))
       case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(Abstractly(i))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case Reference.Null => Value.RefValue(AbstractReference.Null)

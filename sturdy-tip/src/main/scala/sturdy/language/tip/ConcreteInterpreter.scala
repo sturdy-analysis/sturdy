@@ -23,25 +23,16 @@ import sturdy.util.Label
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
 
-  override type VBool = Boolean
   override type VInt = Int
   override type VRef = Reference[Addr]
   override type VFun = Function
   override type VRecord = Map[Field, Value]
 
+  override def topBool: Int = throw new UnsupportedOperationException
   override def topInt(using Instance): VInt = throw new UnsupportedOperationException
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord: VRecord = throw new UnsupportedOperationException
-  override def topBool(using Instance): Boolean = throw new UnsupportedOperationException
-
-  override def asBoolean(v: Value)(using inst: Instance): Boolean = v match
-    case Value.BoolValue(b) => b
-    case _ => inst.failure(TipFailure.RuntimeTypeError, s"Expected Boolean but got $v")
-
-  override def asInt(v: Value)(using inst: Instance): Int = v match
-    case Value.IntValue(i) => i
-    case _ => inst.failure(TipFailure.RuntimeTypeError, s"Expected Int but got $v")
 
   given Structural[VRecord] with {}
   given Structural[Addr] with {}

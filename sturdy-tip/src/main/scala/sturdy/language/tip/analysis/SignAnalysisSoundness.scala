@@ -24,7 +24,6 @@ object SignAnalysisSoundness:
   given valuesAbstractly(using Abstractly[ConcreteInterpreter.Addr, Addr]): Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(Abstractly(b))
       case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case Reference.Null => Value.RefValue(AbstractReference.Null)

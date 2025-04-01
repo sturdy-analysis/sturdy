@@ -3,10 +3,10 @@ package sturdy.ir
 import sturdy.effect.{Effect, EffectList, EffectStack}
 import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
 import sturdy.values.{Join, MaybeChanged, Structural, Topped, booleans}
-import sturdy.values.booleans.{BooleanBranching, BooleanOps, ConcreteBooleanBranching, ConcreteBooleanOps, IRBooleanOperator, ToppedBooleanBranching, ToppedBooleanOps}
+import sturdy.values.booleans.{BooleanBranching, BooleanOps, IRBooleanOperator, IntBools, given}
 import sturdy.values.functions.IRFunctionOperator
-import sturdy.values.integer.{ConcreteIntegerOps, IRIntegerOperator, IntegerOps, ToppedIntegerOps}
-import sturdy.values.ordering.{ConcreteOrderingOps, EqOps, IREqualityOperator, IROrderingOperator, OrderingOps, StructuralEqOps, ToppedCertainEqOps, ToppedCertainOrderingOps, ToppedUncertainOrderingOps}
+import sturdy.values.integer.{IRIntegerOperator, IntegerOps, given}
+import sturdy.values.ordering.{EqOps, IREqualityOperator, IROrderingOperator, OrderingOps, given}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
@@ -122,20 +122,20 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
 
 }
 
-class IRInterpreterConcrete(externals: Map[String, IRValue], inputValue: () => IRValue) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {
+class IRInterpreterConcrete[I](externals: Map[String, IRValue], inputValue: () => IRValue)(using IntBools[I, Boolean]) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {
 
   override type VInt = Int
-  override type VBool = Boolean
+  override type VBool = I
 
   implicit val failure : Failure = new ConcreteFailure
 
   given Structural[Int] with {}
 
   override val integerOps: IntegerOps[Int, Int] = new ConcreteIntegerOps
-  override val booleanOps: BooleanOps[Boolean] = implicitly
-  override val orderingOps: OrderingOps[Int, Boolean] = new ConcreteOrderingOps[Int]
-  override val integerEqOps: EqOps[Int, Boolean] = new StructuralEqOps[Int]
-  override val booleanBranching: BooleanBranching[Boolean, IRValue] = new ConcreteBooleanBranching[IRValue]
+  override val booleanOps: BooleanOps[VBool] = implicitly
+  override val orderingOps: OrderingOps[Int, VBool] = implicitly
+  override val integerEqOps: EqOps[Int, VBool] = implicitly
+  override val booleanBranching: BooleanBranching[VBool, IRValue] = implicitly
 }
 
 class IRInterpreterConstant(externals: Map[String, IRValue], inputValue: () => IRValue) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {

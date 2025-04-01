@@ -28,13 +28,12 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
   override type J[A] = WithJoin[A]
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  def irValue(v: Value): IR = v match
-    case Value.TopValue => IR.Unknown()
-    case Value.IntValue(v) => v
-    case Value.BoolValue(v) => v
-    case Value.RefValue(v) => ???
-    case Value.FunValue(v) => ???
-    case Value.RecValue(v) => ???
+  def foreachIrValue(v: Value)(f: IR => Unit): Unit = v match
+    case Value.TopValue => f(IR.Unknown())
+    case Value.IntValue(v) => f(v)
+    case Value.RefValue(v) => // nothing 
+    case Value.FunValue(v) => // nothing
+    case Value.RecValue(v) => // nothing
   
   class Instance(stackConfig: StackConfig) extends GenericInstance:
 

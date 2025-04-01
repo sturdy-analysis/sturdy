@@ -3,6 +3,7 @@ package sturdy.values.integer
 import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.values.booleans.IntBools
 import sturdy.values.{Topped, *}
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
@@ -1142,6 +1143,14 @@ class NumericIntervalIntegerOps[I]
        and of course these bounds are tight for x=l and x=h
     */
     NumericInterval.safe(ops.invertBits(v.high), ops.invertBits(v.low))
+
+given NumericalIntervalIntBools[I](using ord: Ordering[I], num: Numeric[I]): IntBools[NumericInterval[I], Topped[Boolean]] with
+  override def intToBool(i: NumericInterval[I]): Topped[Boolean] = i.toBoolean
+  override def boolToInt(b: Topped[Boolean]): NumericInterval[I] = b match
+    case Topped.Top => NumericInterval(num.zero, num.one)
+    case Topped.Actual(true) => NumericInterval(num.one, num.one)
+    case Topped.Actual(false) => NumericInterval(num.zero, num.zero)
+
 
 given TopNumericIntervalInt: Top[NumericInterval[Int]] with
   def top: NumericInterval[Int] = NumericInterval.safe(Integer.MIN_VALUE, Integer.MAX_VALUE)
