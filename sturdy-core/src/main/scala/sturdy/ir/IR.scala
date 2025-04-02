@@ -126,6 +126,8 @@ given sturdy.values.Join[IR] with
         Unchanged(left)
       case _ => Changed(IR.Join(left, right))
 //    println(s"join $left\n     $right\n   = $res")
+//    println(Export.toGraphViz(left))
+//    println(Export.toGraphViz(right))
     res
 
 class IR_UID:
@@ -134,7 +136,16 @@ class IR_UID:
 given Top[IR] with
   override def top: IR = IR.Unknown()
 
-given PathSensitive[IR] with
+given PathSensitive[IR] = new PSIR
+
+class PSIR extends PathSensitive[IR]:
   override def assert(cond: Any, v: IR): IR = cond match
-    case cond: IR => IR.Assert(cond, v)
+    case cond: IR => v match
+      case IR.FeedbackAsk(ix, IR.Feedback(_, Some(fbCond), _)) =>
+        val ir = cond match
+          case _ if cond.structuralEquality(fbCond) => v
+          case IR.Op(IRBooleanOperator.NOT, Seq(cond)) if cond.structuralEquality(fbCond) => v
+          case _ => IR.Assert(cond, v)
+        ir
+      case _ => IR.Assert(cond, v)
     case _ => throw new IllegalArgumentException(s"Cannot assert condition $cond on value $v")

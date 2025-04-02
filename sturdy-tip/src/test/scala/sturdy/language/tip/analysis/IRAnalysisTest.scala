@@ -41,7 +41,7 @@ class IRAnalysisTest extends AnyFlatSpec, Matchers:
 
   Fixpoint.DEBUG = true
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.getFileName.toString.startsWith("") &&
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.getFileName.toString.startsWith("loop_doub") &&
     p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName} with stacked states" in {

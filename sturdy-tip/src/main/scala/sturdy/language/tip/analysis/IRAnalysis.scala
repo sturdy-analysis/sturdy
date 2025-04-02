@@ -42,10 +42,7 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
   def structuralEquals(v1: Value, v2: Value): Boolean =
     import Value.*
     (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) =>
-        val bool = i1.structuralEquality(i2)
-        println(s"$bool for $i1 and $i2")
-        bool
+      case (IntValue(i1), IntValue(i2)) => i1.structuralEquality(i2)
       case _ => v1 == v2
 
   class Instance(stackConfig: StackConfig) extends GenericInstance:
@@ -114,12 +111,12 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
               )
 
               val isEqual = v1.zip(res).forall(structuralEquals.tupled)
-              println(s"Widen callframe (changed = ${!isEqual}):")
-              res.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
-              println(s"v1 was")
-              v1.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
-              println(s"v2 was")
-              v2.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+//              println(s"Widen callframe (changed = ${!isEqual}):")
+//              res.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+//              println(s"v1 was")
+//              v1.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+//              println(s"v2 was")
+//              v2.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
               MaybeChanged(res, !isEqual)
             }
         }
