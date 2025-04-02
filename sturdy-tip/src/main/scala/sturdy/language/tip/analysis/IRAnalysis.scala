@@ -31,10 +31,23 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
   def foreachIrValue(v: Value)(f: IR => Unit): Unit = v match
     case Value.TopValue => f(IR.Unknown())
     case Value.IntValue(v) => f(v)
-    case Value.RefValue(v) => // nothing 
+    case Value.RefValue(v) => // nothing
     case Value.FunValue(v) => // nothing
     case Value.RecValue(v) => // nothing
-  
+
+  def selectIR(v: Value): Option[IR] = v match
+    case Value.IntValue(i) => Some(i)
+    case _ => None
+
+  def structuralEquals(v1: Value, v2: Value): Boolean =
+    import Value.*
+    (v1, v2) match
+      case (IntValue(i1), IntValue(i2)) =>
+        val bool = i1.structuralEquality(i2)
+        println(s"$bool for $i1 and $i2")
+        bool
+      case _ => v1 == v2
+
   class Instance(stackConfig: StackConfig) extends GenericInstance:
 
     /*
@@ -59,7 +72,8 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
     override val fixpoint =
       fix.notContextSensitive(
         fix.dispatch(isFunOrWhile, Seq(
-          fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig), fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig)
+          new CustomCombinator(fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig)),
+          new CustomCombinator(fix.iter.innermost[FixIn, FixOut[Value], Unit](stackConfig))
         ))
       ).fixpoint
 
@@ -76,42 +90,75 @@ object IRAnalysis extends Interpreter, Ints.IRInts, Functions.Powerset, Referenc
     given PathSensitive[VFun] = NotPathSensitive()
     given PathSensitive[VRef] = NotPathSensitive()
     given PathSensitive[VRecord] = NotPathSensitive()
-    
+
     override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] =
-      new JoinableDecidableCallFrame[String, String, Value, tip.Exp.Call]("$main", Iterable.empty) 
-        with PathSensitiveCallFrame[String, String, Value, tip.Exp.Call]
+      new JoinableDecidableCallFrame[String, String, Value, tip.Exp.Call]("$main", Iterable.empty)
+        with PathSensitiveCallFrame[String, String, Value, tip.Exp.Call] {
+
+        override def widen: Widen[List[Value]] = new Widen[List[Value]] {
+          override def apply(v1: List[Value], v2: List[Value]): MaybeChanged[List[Value]] =
+            // if v2 is just an unrolling of the body of the feedback node of v1
+            if (v1.length == v2.length && v1.zip(v2).forall(structuralEquals.tupled)) // TODO : Cleaner implementation
+              Unchanged(v1)
+            else {
+              val feedback = currentFeedback.get._2
+              if (irBranchOps.inElse)
+                feedback.cond = irBranchOps.currentCond.map(cond => IR.Op(IRBooleanOperator.NOT, Array(cond)))
+              else
+                feedback.cond = irBranchOps.currentCond
+              feedback.steps = Some(v2.map(selectIR.andThen(_.getOrElse(IR.Unknown()))))
+              val res = v1.zip(v2).zipWithIndex.map((v, i) => (v._1, v._2) match
+                case (Value.IntValue(IR.Undefined()), Value.IntValue(ir2)) if ir2 != IR.Undefined() =>
+                  Value.IntValue(IR.FeedbackAsk(i, feedback))
+                case _ => v._1
+              )
+
+              val isEqual = v1.zip(res).forall(structuralEquals.tupled)
+              println(s"Widen callframe (changed = ${!isEqual}):")
+              res.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+              println(s"v1 was")
+              v1.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+              println(s"v2 was")
+              v2.foreach(v => foreachIrValue(v) { ir => println(Export.toGraphViz(ir)) })
+              MaybeChanged(res, !isEqual)
+            }
+        }
+      }
 
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(Map.empty)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site))
     )
     override val print: PrintBound[Value] = new PrintBound
-    override val input: AUserInputFun[Value] = 
+    override val input: AUserInputFun[Value] =
       new AUserInputFun(Value.IntValue(IR.Unknown())) with WithNamedUserInput(name => Value.IntValue(IR.External(name)))
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
     override def newInstance: Executor = new Instance(stackConfig)
 
-//    class CustomCombinator(phi : Combinator[FixIn, FixOut[IR]]) extends Combinator[FixIn, FixOut[IR]] :
-//      override def apply(v1: FixIn => FixOut[IR]): FixIn => FixOut[IR] = fixIn => {
-//        if (currentFeedback.exists(_._1 == fixIn))
-//          phi(v1)(fixIn)
-//        else
-//          val feedback : IR.Feedback = IR.Feedback(
-//            callFrame.getState,
-//            None,
-//            None)
-//
-//          val beforeFeedback = currentFeedback
-//          try {
-//            currentFeedback = Some(fixIn, feedback)
-//            callFrame.setState(callFrame.getState.zipWithIndex.map((v, i) => v match
-//              case IR.Undefined() => IR.Undefined()
-//              case _ => IR.FeedbackAsk(i, feedback)))
-//            phi(v1)(fixIn)
-//          }
-//          finally {
-//            currentFeedback = beforeFeedback
-//          }
-//      }
+    var currentFeedback: Option[(FixIn, IR.Feedback)] = None
+    class CustomCombinator(phi : Combinator[FixIn, FixOut[Value]]) extends Combinator[FixIn, FixOut[Value]] :
+      override def apply(v1: FixIn => FixOut[Value]): FixIn => FixOut[Value] = fixIn => {
+        if (currentFeedback.exists(_._1 == fixIn))
+          phi(v1)(fixIn)
+        else
+          val feedback : IR.Feedback = IR.Feedback(
+            callFrame.getState.map(selectIR.andThen(_.getOrElse(IR.Unknown()))),
+            None,
+            None)
+
+          val beforeFeedback = currentFeedback
+          try {
+            currentFeedback = Some(fixIn, feedback)
+            callFrame.setState(callFrame.getState.zipWithIndex.map {
+              case (Value.IntValue(IR.Undefined()), _) => Value.IntValue(IR.Undefined())
+              case (Value.IntValue(_), i) => Value.IntValue(IR.FeedbackAsk(i, feedback))
+              case (v, _) => v
+            })
+            phi(v1)(fixIn)
+          }
+          finally {
+            currentFeedback = beforeFeedback
+          }
+      }
