@@ -3,9 +3,9 @@ package sturdy.effect.bytememory
 import sturdy.data.{*, given}
 import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.data.MayJoin.WithJoin
-import sturdy.effect.Effect
-import sturdy.ir.{IR, IROperator}
-import sturdy.values.{Finite, Join, Widen}
+import sturdy.effect.{Effect, PathSensitiveEffect}
+import sturdy.ir.{IR, IROperator, given}
+import sturdy.values.{Finite, Join, Widen, assertPath}
 
 enum IRMemoryOperator extends IROperator:
   case MemNew
@@ -15,7 +15,7 @@ enum IRMemoryOperator extends IROperator:
   case MemSize
   case MemGrow
 
-class IRMemory[Key](using Join[IR], Widen[IR], Finite[Key]) extends Memory[Key, IR, IR, IR, WithJoin]:
+class IRMemory[Key](using Join[IR], Widen[IR], Finite[Key]) extends Memory[Key, IR, IR, IR, WithJoin], PathSensitiveEffect:
   private var memories: Map[Key, IR] = Map.empty
   override def read(key: Key, addr: IR, length: Int): JOptionA[IR] =
     JOptionA.noneSome(IR.Op(IRMemoryOperator.MemRead(length), memories(key), addr))
@@ -37,6 +37,9 @@ class IRMemory[Key](using Join[IR], Widen[IR], Finite[Key]) extends Memory[Key, 
       case None => IR.Op(IRMemoryOperator.MemNew, initSize)
       case Some(limit) => IR.Op(IRMemoryOperator.MemNewLimit, initSize, limit)
     memories += key -> newMem
+
+  override def assert(cond: Any): Unit =
+    memories = memories.view.mapValues(_.assertPath(cond)).toMap
 
   /** The internal state of the effect. */
   override type State = Map[Key, IR]
