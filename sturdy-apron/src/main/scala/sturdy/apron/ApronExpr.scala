@@ -129,7 +129,9 @@ object ApronExpr:
   inline def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
     Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), FloatSpecials.Integer, tpe)
   inline def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), FloatSpecials.Integer, tpe)
+    doubleInterval[Addr,Type](lower, upper, FloatSpecials.Integer, tpe)
+  inline def doubleInterval[Addr, Type](lower: Double, upper: Double, specials: FloatSpecials, tpe: Type): Constant[Addr, Type] =
+    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), specials, tpe)
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, FloatSpecials.Integer, tpe)

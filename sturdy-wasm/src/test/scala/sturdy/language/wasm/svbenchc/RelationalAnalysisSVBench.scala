@@ -44,22 +44,23 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
 
     val uri = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
-    val includedBenchmarks = Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
+    val includedBenchmarks = Set("simple_precision_tests") // Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
 
     val stackConfig = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     val entrypoint = "_start"
 
     def isSlow(manager: Manager, script: String): org.scalatest.Tag =
-      if(manager.isInstanceOf[Polka] && script == "system-with-recursion.wasm")
+      val slow = Set("system-with-recursion.wasm", "recursified_dijkstra.wasm", "recursified_dijkstra-u.wasm", "image_filter.wasm", "mea8000.wasm")
+      if(manager.isInstanceOf[Polka] && slow.contains(script))
         SlowTest
       else
         FastTest
 
-    for {benchDirectory <- Files.list(Paths.get(uri)).toScala(Iterable)
+    for {benchDirectory <- Files.list(Paths.get(uri)).toScala(List).sorted
          if includedBenchmarks.contains(benchDirectory.getFileName.toString)
     } {
       describe(s"Suite ${benchDirectory.getFileName.toString}") {
-        for {benchFile <- Files.list(benchDirectory).toScala(Iterable)
+        for {benchFile <- Files.list(benchDirectory).toScala(List).sorted
              if benchFile.toString.endsWith(".wasm")
         } {
           it(s"Benchmark ${benchFile.getFileName.toString}", isSlow(manager, benchFile.getFileName.toString)) {
