@@ -56,13 +56,14 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
   val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
 
   val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
+  val numTestCases = new NumTestCases
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     Iterator(
-      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(stackedStates)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(stackedStates)), ctx = Insensitive)),
       () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(stackedStates)), ctx = Insensitive)),
-      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(stackedStates)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(stackedStates)), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
@@ -72,11 +73,11 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     )
 
   def isSlow(manager: Manager, script: String): Boolean =
-    manager.isInstanceOf[Polka] && script == "endianness.wast"
+    false
 
   def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
     val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
-    val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis)
+    val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis, numTestCases)
     interp.run(script)
 
   Fixpoint.DEBUG = false
@@ -86,16 +87,18 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
       if (isSlow(anl.apronManager, p.getFileName.toString))
         it must s"execute ${p.getFileName} with ${anl}" taggedAs(SlowTest) in {
           runTest(p, anl)
+          println(s"Number of Test Cases: ${numTestCases.n}")
         }
       else
         it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
+          println(s"Number of Test Cases: ${numTestCases.n}")
         }
+
     }
   }
 
-
-class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: RelationalAnalysis.Instance, useTop: Boolean = false):
+class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: RelationalAnalysis.Instance, numTestCases: NumTestCases, useTop: Boolean = false):
   import aInterp.given
   import sturdy.language.wasm.analyses.RelationalAnalysisSoundness.given
 
@@ -179,30 +182,35 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       assert(eqVals(expected, res.get), c.toString + s", expected $expected, but got ${res.get}")
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      numTestCases.increment()
     case AssertReturnCanonicalNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      numTestCases.increment()
     case AssertReturnArithmeticNaN(action) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      numTestCases.increment()
     case AssertTrap(action: Action, message: String) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      numTestCases.increment()
     case AssertModuleTrap(mod,_) =>
       val aRes = aInstantiate(mod)
       val res = instantiate(mod)
       assert(res.isFailing, c.toString)
       //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
+      numTestCases.increment()
     case _: AssertUnlinkable => // skip
     case _: AssertInvalid => // skip
     case _: AssertMalformed => // skip
@@ -338,3 +346,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       case ConcreteInterpreter.Value.Float32(f) => f.isNaN
       case ConcreteInterpreter.Value.Float64(d) => d.isNaN
       case _ => false
+
+class NumTestCases:
+  var n: Int = 0
+  def increment(): Unit = n += 1
