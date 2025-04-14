@@ -121,8 +121,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     def signedMin(numBytes: Int): BigInt = - BigInt(2).pow(8 * numBytes - 1)
     def signedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes - 1) - 1
-    def unsignedMin(numBytes: Int): BigInt = 0
-    def unsignedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes) - 1
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
       case "proc_exit" =>
@@ -130,22 +128,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case "__VERIFIER_nondet_bool" =>
         assignFreshTempVar(ApronExpr.intInterval(0, 1, I32Type))
-      case "__VERIFIER_nondet_char" =>
+      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
         assignFreshTempVar(ApronExpr.intInterval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
-      case "__VERIFIER_nondet_uchar" =>
-        assignFreshTempVar(ApronExpr.intInterval(unsignedMin(1).toInt, unsignedMax(1).toInt, I32Type))
-      case "__VERIFIER_nondet_short" =>
+      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
         assignFreshTempVar(ApronExpr.intInterval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
-      case "__VERIFIER_nondet_ushort" =>
-        assignFreshTempVar(ApronExpr.intInterval(unsignedMin(2).toInt, unsignedMax(2).toInt, I32Type))
-      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" =>
+      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
         assignFreshTempVar(ApronExpr.intInterval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
-      case "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
-        assignFreshTempVar(ApronExpr.intInterval(unsignedMin(4).toInt, unsignedMax(4).toInt, I32Type))
-      case "__VERIFIER_nondet_longlong" =>
+      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
         assignFreshTempVar(ApronExpr.longInterval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
-      case "__VERIFIER_nondet_ulonglong" =>
-        assignFreshTempVar(ApronExpr.longInterval(unsignedMin(8).toLong, unsignedMax(8).toLong, I64Type))
       case "__VERIFIER_nondet_float" =>
         assignFreshTempVar(ApronExpr.doubleInterval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
       case "__VERIFIER_nondet_double" =>
