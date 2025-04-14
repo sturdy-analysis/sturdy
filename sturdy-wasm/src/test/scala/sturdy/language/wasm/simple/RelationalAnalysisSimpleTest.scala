@@ -109,6 +109,8 @@ final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) exte
   testFailingFunction(simple, "division", List(i32(ApronExpr.intLit(1, I32Type)), topi32), IntegerDivisionByZero)
   testFunction(simple, "effects", List(topi32), List(i32(ApronExpr.intInterval(-14, -6, I32Type))))
 
+  testFunction(simple, "operand_stack_is_immutable", List(), List(i32(ApronExpr.intInterval(0, 0, I32Type))))
+
   (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(arg, I64Type))), List(topi64))
   }

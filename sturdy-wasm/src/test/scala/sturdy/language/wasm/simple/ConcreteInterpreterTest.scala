@@ -66,6 +66,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFailingFunction(simple, "test-unreachable4", List.empty, WasmFailure.UnreachableInstruction)
   testFunction(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
   testFunction(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+  testFunction(simple, "operand_stack_is_immutable", List(), List(Value.Int32(0)))
 
   testFunction(simpleTest, "main", List(Value.Int32(0)), List(Value.Int32(42)))
   testFunction(simpleTest, "main", List(Value.Int32(1)), List(Value.Int32(42)))
