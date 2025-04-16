@@ -20,7 +20,7 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
 
   override type State = RelationalSymbolTableState
   override def getState: State = RelationalSymbolTableState(tables)
-  override def setState(st: State): Unit = tables == st.tables
+  override def setState(st: State): Unit = tables = st.tables
   override def join: Join[State] = (s1, s2) => combineTables(widen = false, s1.tables, s2.tables).map(RelationalSymbolTableState.apply)
   override def widen: Widen[State] = (s1, s2) => combineTables(widen = true, s1.tables, s2.tables).map(RelationalSymbolTableState.apply)
 

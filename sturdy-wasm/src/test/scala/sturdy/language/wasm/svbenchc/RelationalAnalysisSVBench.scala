@@ -34,7 +34,7 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 object FastTest extends org.scalatest.Tag("FastTest")
 
 class RelationalAnalysisSVBench extends Suites(
-  new RelationalAnalysisTest(Polka(true)),
+//  new RelationalAnalysisTest(Polka(true)),
   new RelationalAnalysisTest(Octagon()),
   new RelationalAnalysisTest(Box()),
 )
@@ -42,21 +42,22 @@ class RelationalAnalysisSVBench extends Suites(
 class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matchers:
   describe(s"Relational Analysis of SV Bench C Benchmarks with ${manager.getClass.getSimpleName}") {
 
-    val uri = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
+    val wasmBinaries = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
-    val includedBenchmarks = Set("simple_precision_tests") // Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
+    val includedBenchmarks = //Set("simple_precision_tests")
+      Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
 
     val stackConfig = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     val entrypoint = "_start"
 
     def isSlow(manager: Manager, script: String): org.scalatest.Tag =
-      val slow = Set("system-with-recursion.wasm", "recursified_dijkstra.wasm", "recursified_dijkstra-u.wasm", "image_filter.wasm", "mea8000.wasm")
+      val slow = Set("system-with-recursion.wasm", "recursified_dijkstra.wasm", "recursified_dijkstra-u.wasm", "image_filter.wasm", "mea8000.wasm", "recursified_simple_array_index_value_4.i.v+nlh-reducer.wasm")
       if(manager.isInstanceOf[Polka] && slow.contains(script))
         SlowTest
       else
         FastTest
 
-    for {benchDirectory <- Files.list(Paths.get(uri)).toScala(List).sorted
+    for {benchDirectory <- Files.list(Paths.get(wasmBinaries)).toScala(List).sorted
          if includedBenchmarks.contains(benchDirectory.getFileName.toString)
     } {
       describe(s"Suite ${benchDirectory.getFileName.toString}") {

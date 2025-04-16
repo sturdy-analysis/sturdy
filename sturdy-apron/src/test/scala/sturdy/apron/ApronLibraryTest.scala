@@ -4,6 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import apron.*
 import gmp.*
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.references.{*, given}
 import sturdy.values.types.BaseType
 
@@ -73,6 +74,32 @@ class ApronLibraryTest extends AnyFunSuite:
     a2.isEqual(manager,a1) shouldBe true
     a1.hashCode(manager) shouldEqual (a2.hashCode(manager))
     a2.hashCode(manager) shouldEqual (a1.hashCode(manager))
+
+
+  test("{x = y, y ∈ [0,100]}.assign(x, x+1) = { x = y+1, y ∈ [0,100] }") {
+
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val inames = Array[Var](x, y)
+    val fnames: Array[Var] = Array()
+    val env = new Environment(inames, fnames)
+    val manager: Manager = new Polka(false)
+    val aState = new Abstract1(manager, env)
+
+    aState.assign(manager, y, ApronExpr.constant(Interval(0, 100), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, x, ApronExpr.addr("y", BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, x, ApronExpr.intAdd(ApronExpr.addr("x", BaseType[Int]), ApronExpr.intLit(1, BaseType[Int]), BaseType[Int]).toIntern(env), null)
+
+    aState.getBound(manager, x) shouldBe Interval(1, 101)
+    aState.getBound(manager, y) shouldBe Interval(0, 100)
+    aState.satisfy(manager,
+      ApronCons.eq(
+        ApronExpr.addr("x", BaseType[Int]),
+        ApronExpr.intAdd(ApronExpr.addr("y", BaseType[Int]), ApronExpr.intLit(1, BaseType[Int]), BaseType[Int])
+      ).toApron(env)
+    ) shouldBe true
+  }
+
 
   test("Abstract1.hashcode()") {
     val x = "x"

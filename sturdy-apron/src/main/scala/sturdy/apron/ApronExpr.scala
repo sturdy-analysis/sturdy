@@ -84,7 +84,7 @@ enum ApronExpr[Addr, +Type]:
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
-    case Constant(coeff, floatSpecials, tpe) => new sturdy.apron.FloatInterval(coeff.inf(), coeff.sup(), floatSpecials).toString
+    case Constant(coeff, floatSpecials, tpe) => coeff.toString
     case Unary(op, e, _, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
 
@@ -108,7 +108,9 @@ object ApronExpr:
   inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Integer, _type)
 
   inline def constant[Addr, Type](iv: Coeff, _type: Type): Constant[Addr, Type] =
-    Constant(iv, FloatSpecials.Integer, _type)
+    iv match
+      case floatIv: sturdy.apron.FloatInterval => Constant(floatIv, floatIv.floatSpecials, _type)
+      case _ => Constant(iv, FloatSpecials.Integer, _type)
 
   inline def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
     Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Integer, tpe)
