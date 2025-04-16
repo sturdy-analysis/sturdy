@@ -30,11 +30,11 @@ import sturdy.values.{Finite, Join, Widen}
 //  override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
 //  override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
 
-case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive):
+case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive, localSSA: Boolean = true):
   override def toString: String = s"$fix $ctx"
 
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): WasmConfig =
-    WasmConfig(fix.withObservers(newObservers), ctx)
+    WasmConfig(fix.withObservers(newObservers), ctx, localSSA = localSSA)
 
 object WasmConfig:
   def default = WasmConfig()

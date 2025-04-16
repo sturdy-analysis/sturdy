@@ -231,15 +231,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val callFrame: RelationalCallFrame[FrameData, Int, Value, InstLoc, AddrCtx, Type] = new RelationalCallFrame(
       initData = rootFrameData,
       initVars = Iterable.empty,
-      localVariableAllocator = localRelationaAlloc,
+      localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
       apronState
     )
 
-    val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(new AAllocatorFromContext(
-      (idx: Int, tpe: Type) =>
-        val fixIn = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
-        AddrCtx.Stack(idx, fixIn, callFrame.data)
-    ))
+    val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)
 

@@ -75,8 +75,12 @@ final class RelationalCallFrame
     }
 
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
-    addressCallFrame.getLocal(idx).map(virt =>
-      apronState.recencyStore.write(virt, v)
+    addressCallFrame.getLocal(idx).map(_virts =>
+      val name = findName(idx)
+      val ctx = localVariableAllocator.alloc((name, addressCallFrame.data, addressCallFrame.callSite))
+      val freshVirt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
+      addressCallFrame.setLocal(idx, freshVirt)
+      apronState.recencyStore.write(freshVirt, v)
     )
 
   override def setLocalByName(x: Var, v: Val): JOptionC[Unit] =
@@ -109,6 +113,10 @@ final class RelationalCallFrame
       f
     }
 
+  private def findName(idx: Int): Var =
+    addressCallFrame.getFrameNames.find((name,idx2) => idx == idx2)
+      .getOrElse(throw new IllegalStateException(s"No name bound to index $idx not bound in call frame $this"))
+      ._1
 
   override type State = addressCallFrame.State
 

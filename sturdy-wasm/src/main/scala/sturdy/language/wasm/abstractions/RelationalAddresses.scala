@@ -3,13 +3,14 @@ package sturdy.language.wasm.abstractions
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
+import sturdy.effect.callframe.CallFrame
 import sturdy.fix.DomLogger
 import sturdy.values.Finite
 import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
   enum AddrCtx:
-    case CallFrame(callFramePosition: Int, frame: FrameData)
+    case CallFrame(callFramePosition: Int, programPos: Option[FixIn], frame: FrameData)
     case Stack(stackPosition: Int, programPosition: FixIn, frame: FrameData)
     case Global(addr: Int)
     case Temp(programPosition: FixIn, tpe: Type)
@@ -23,12 +24,22 @@ trait RelationalAddresses extends RelationalTypes:
     tpe =>
       AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
   )
-  given localRelationaAlloc: AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), AddrCtx] = AAllocatorFromContext(
-    (i, data, _) => AddrCtx.CallFrame(i, data)
+  def localAlloc(ssa: Boolean, rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), AddrCtx] = AAllocatorFromContext(
+    (i, data, _) =>
+      if ssa then
+        AddrCtx.CallFrame(i, Some(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))), data)
+      else
+        AddrCtx.CallFrame(i, None, data)
+  )
+
+  def stackAlloc[Var,Val,Site, J[_]<: MayJoin[_]](rootFrameData: FrameData, callFrame: CallFrame[FrameData, Var, Val, Site, J])(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(Int,Type), AddrCtx] = new AAllocatorFromContext(
+    (idx: Int, tpe: Type) =>
+      val fixIn = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+      AddrCtx.Stack(idx, fixIn, callFrame.data)
   )
 
   given Ordering[AddrCtx] = {
-    case (AddrCtx.CallFrame(callFramePos1, data1), AddrCtx.CallFrame(callFramePos2, data2)) => Ordering[(FrameData, Int)].compare((data1, callFramePos1), (data2, callFramePos2))
+    case (AddrCtx.CallFrame(callFramePos1, progPos1, data1), AddrCtx.CallFrame(callFramePos2, progPos2, data2)) => Ordering[(FrameData, Option[FixIn], Int)].compare((data1, progPos1, callFramePos1), (data2, progPos2, callFramePos2))
     case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
     case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
