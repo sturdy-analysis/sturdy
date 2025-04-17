@@ -3,26 +3,21 @@ package sturdy.language.tip
 import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
-import sturdy.effect.environment.Environment
+import sturdy.effect.callframe.{DecidableCallFrame, MutableCallFrame}
 import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
 import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
-import sturdy.util.Label
-import sturdy.values.*
-import sturdy.values.booleans.{BooleanBranching, BooleanOps}
-import sturdy.values.integer.IntegerOps
-import sturdy.values.functions.FunctionOps
-import sturdy.values.records.RecordOps
-import sturdy.values.ordering.{EqOps, OrderingOps}
-import sturdy.fix
-import sturdy.data.unit
 import sturdy.effect.{Effect, EffectList, EffectStack}
+import sturdy.fix
+import sturdy.language.tip.TipFailure.*
+import sturdy.values.*
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.functions.FunctionOps
+import sturdy.values.integer.IntegerOps
+import sturdy.values.ordering.{EqOps, OrderingOps}
+import sturdy.values.records.RecordOps
 import sturdy.values.references.ReferenceOps
-
-import scala.collection.mutable.ListBuffer
-import TipFailure.*
 
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)

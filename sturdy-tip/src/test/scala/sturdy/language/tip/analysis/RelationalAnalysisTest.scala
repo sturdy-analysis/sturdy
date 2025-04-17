@@ -13,7 +13,7 @@ import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.failure.CFallible.Failing
 import sturdy.effect.failure.{AFallible, AssertionFailure, afallibleAbstractly, falliblePO, given}
 import sturdy.effect.print.given
-import sturdy.fix.StackConfig
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
@@ -46,7 +46,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    )
 
    val polyManager = new Polka(false)
-
+   Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
      p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
 //    p.endsWith("a1.tip")
@@ -69,7 +69,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
      if (program.funs.exists(_.name == "main")) {
        val analysis = new RelationalAnalysis.Instance(polyManager, Map(), stackConfig, 0)
-       analysis.addControlObserver(new PrintingControlObserver()(println))
+//       analysis.addControlObserver(new PrintingControlObserver()(println))
 
        val aresult = analysis.failure.fallible(analysis.execute(program))
        val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
@@ -77,8 +77,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
 
        given CAllocatorIntIncrement[AllocationSite] = interp.alloc
 
-       //      println(s"CONCRETE : $cresult")
-       //      println(s"ABSTRACT : $aresult")
+             println(s"CONCRETE : $cresult")
+             println(s"ABSTRACT : $aresult")
 
        // compute number of assertions in program
 //       val allAsserts = program.assertions

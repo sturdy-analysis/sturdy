@@ -1,20 +1,19 @@
 package sturdy.language.tip.analysis
 
 import apron.*
-import sturdy.Executor
+import sturdy.{Executor, data, fix, language}
 import sturdy.apron.{*, given}
 import sturdy.control.ControlObservable
 import sturdy.data.{*, given}
 import sturdy.effect.{Effect, EffectList, EffectStack, TrySturdy, given}
 import sturdy.effect.allocation.AAllocatorFromContext
-import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame, given}
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame, SplitCallFrame, given}
 import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.{PrintBound, PrintBoundSerializable, Serializer, given}
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
-import sturdy.fix
 import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
@@ -146,12 +145,32 @@ object RelationalAnalysis extends Interpreter,
     apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[RelationalVar], RelType] = apronState
 
-    override val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType] = new RelationalCallFrame(
+    val baseCallFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    val relCallFrame: RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType] = new RelationalCallFrame(
       initData = "$main",
       initVars = Iterable.empty,
       localVariableAllocator = localRelationaAlloc,
       apronState
     )
+    def useRelationalCallframe(name: String, v: Value, site: Exp.Call): Boolean =
+      val fun = site match { case Exp.Call(Exp.Var(f), _) => currentProgram.functions.get(f); case _ => None }
+      lazy val loopVar = fun.forall(f => f.loopVars.contains(name))
+      lazy val isRecursive = fun.forall(f => currentProgram.isRecursive(f.name))
+      lazy val tooManyLocals = fun.forall(f => f.locals.size > 10)
+      v match
+        case Value.IntValue(i) => loopVar || isRecursive || tooManyLocals
+        case Value.BoolValue(b) => loopVar || isRecursive || tooManyLocals
+        case _ => false
+
+    override val callFrame: SplitCallFrame[String, String, Value, Exp.Call] = new SplitCallFrame(baseCallFrame, relCallFrame, useRelationalCallframe) {
+      override def stackWiden: StackWidening[State] =
+        (stack: List[State], call: State) =>
+          //      Unchanged(call)
+          if (stack.contains(call))
+            Unchanged(call)
+          else
+            Changed(call)
+    }
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 
@@ -222,7 +241,9 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
+    var currentProgram: Program = _
     override def execute(p: Program): Value =
+      currentProgram = p
       super.execute(p)
 
     override def copyState(from: Executor): Unit = {
