@@ -24,7 +24,7 @@
           name = "numerical-analysis-libraries";
           paths = [
             apron
-            elina
+#            elina doesn't build on mac
             fenv
           ];
         };
@@ -32,7 +32,7 @@
           pname = "sturdy";
           version = "0.1";
           src = ./.;
-          buildInputs = [ pkgs.sbt pkgs.jdk19_headless apron elina fenv ];
+          buildInputs = [ pkgs.sbt pkgs.jdk21_headless apron elina fenv ];
           buildPhase = "sbt assembly";
           installPhase = ''
             mkdir -p $out/bin

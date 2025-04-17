@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchFromGitHub, gmp, mpfr, ppl, openjdk }:
+{ lib, stdenv, binutils, fetchFromGitHub, gmp, mpfr, ppl, openjdk }:
 
 stdenv.mkDerivation rec {
   name = "apron";
@@ -14,6 +14,11 @@ stdenv.mkDerivation rec {
     rev = "165dc0ebfa96f378b772e11eca556c47fdc64285";
     sha256 = "sha256-WyKPh60OegHn/jfL9sdms27nSVm/XVvqlQyajbJH7Ec=";
   };
+
+  patchPhase = ''
+    substituteInPlace configure \
+      --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\""
+  '';
 
   configurePhase = ''
     ./configure -prefix $out
