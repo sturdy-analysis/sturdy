@@ -11,10 +11,11 @@ import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
 import scala.util.boundary, boundary.break
+import Either as Eith
 
 class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
 
-  protected var tables: Map[Key, Either[Table[Symbol, Entry], Entry]] = Map()
+  protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
   override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =

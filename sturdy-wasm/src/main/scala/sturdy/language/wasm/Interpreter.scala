@@ -114,7 +114,7 @@ trait Interpreter:
   def boolean(b: Bool): Value
 
   given Top[Value] with
-    def top = Value.TopValue
+    def top: Value = Value.TopValue
 
   def applyI32(a:I32): Value.Num ={
     Value.Num(NumValue.Int32.apply(a))
@@ -197,84 +197,84 @@ trait Interpreter:
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
-    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, applyI32(_))
-    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, applyI64(_))
-    final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, applyF32(_))
-    final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, applyF64(_))
+    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, applyI32)
+    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, applyI64)
+    final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, applyF32)
+    final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, applyF64)
 
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*
       override def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(EqOps.equ(i1, i2))
         case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(EqOps.equ(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(EqOps.equ(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(EqOps.equ(d1, d2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(EqOps.equ(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(EqOps.equ(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def neq(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(EqOps.neq(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(EqOps.neq(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(EqOps.neq(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(EqOps.neq(d1, d2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(EqOps.neq(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(EqOps.neq(l1, l2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(EqOps.neq(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(EqOps.neq(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
       import Value.*
       override def lt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(OrderingOps.lt(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(OrderingOps.lt(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(OrderingOps.lt(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(OrderingOps.lt(d1, d2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(OrderingOps.lt(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(OrderingOps.lt(l1, l2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(OrderingOps.lt(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(OrderingOps.lt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def le(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(OrderingOps.le(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(OrderingOps.le(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(OrderingOps.le(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(OrderingOps.le(d1, d2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(OrderingOps.le(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(OrderingOps.le(l1, l2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(OrderingOps.le(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(OrderingOps.le(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def ge(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(OrderingOps.ge(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(OrderingOps.ge(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(OrderingOps.ge(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(OrderingOps.ge(d1, d2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(OrderingOps.ge(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(OrderingOps.ge(l1, l2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(OrderingOps.ge(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(OrderingOps.ge(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def gt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(OrderingOps.gt(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(OrderingOps.gt(l1, l2))
-        case (Num(NumValue.Float32(f1)), (Num(NumValue.Float32(f2)))) => boolean(OrderingOps.gt(f1, f2))
-        case (Num(NumValue.Float64(d1)), (Num(NumValue.Float64(d2)))) => boolean(OrderingOps.gt(d1, d2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(OrderingOps.gt(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(OrderingOps.gt(l1, l2))
+        case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => boolean(OrderingOps.gt(f1, f2))
+        case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => boolean(OrderingOps.gt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     final val unsignedCompareOps: UnsignedOrderingOps[Value, Value] = new UnsignedOrderingOps[Value, Value]:
       import Value.*
       override def ltUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(UnsignedOrderingOps.ltUnsigned(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(UnsignedOrderingOps.ltUnsigned(l1, l2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(UnsignedOrderingOps.ltUnsigned(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(UnsignedOrderingOps.ltUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def leUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(UnsignedOrderingOps.leUnsigned(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(UnsignedOrderingOps.leUnsigned(l1, l2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(UnsignedOrderingOps.leUnsigned(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(UnsignedOrderingOps.leUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def geUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(UnsignedOrderingOps.geUnsigned(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(UnsignedOrderingOps.geUnsigned(l1, l2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(UnsignedOrderingOps.geUnsigned(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(UnsignedOrderingOps.geUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def gtUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Num(NumValue.Int32(i1)), (Num(NumValue.Int32(i2)))) => boolean(UnsignedOrderingOps.gtUnsigned(i1, i2))
-        case (Num(NumValue.Int64(l1)), (Num(NumValue.Int64(l2)))) => boolean(UnsignedOrderingOps.gtUnsigned(l1, l2))
+        case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => boolean(UnsignedOrderingOps.gtUnsigned(i1, i2))
+        case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => boolean(UnsignedOrderingOps.gtUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
 
-    final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, applyI64(_))
-    final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, applyF32(_))
-    final val convert_i32_f64: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, applyF64(_))
-    final val convert_i64_i32: ConvertLongInt[Value, Value] = new LiftedConvert(_.asInt64, applyI32(_))
-    final val convert_i64_f32: ConvertLongFloat[Value, Value] = new LiftedConvert(_.asInt64, applyF32(_))
-    final val convert_i64_f64: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asInt64, applyF64(_))
-    final val convert_f32_i32: ConvertFloatInt[Value, Value] = new LiftedConvert(_.asFloat32, applyI32(_))
-    final val convert_f32_i64: ConvertFloatLong[Value, Value] = new LiftedConvert(_.asFloat32, applyI64(_))
-    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat32, applyF64(_))
-    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, applyI32(_))
-    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, applyI64(_))
-    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, applyF32(_))
+    final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, applyI64)
+    final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, applyF32)
+    final val convert_i32_f64: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, applyF64)
+    final val convert_i64_i32: ConvertLongInt[Value, Value] = new LiftedConvert(_.asInt64, applyI32)
+    final val convert_i64_f32: ConvertLongFloat[Value, Value] = new LiftedConvert(_.asInt64, applyF32)
+    final val convert_i64_f64: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asInt64, applyF64)
+    final val convert_f32_i32: ConvertFloatInt[Value, Value] = new LiftedConvert(_.asFloat32, applyI32)
+    final val convert_f32_i64: ConvertFloatLong[Value, Value] = new LiftedConvert(_.asFloat32, applyI64)
+    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat32, applyF64)
+    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, applyI32)
+    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, applyI64)
+    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, applyF32)
 
     val LITTLE_ENDIAN = SomeCC(ByteOrder.LITTLE_ENDIAN, false)
     override final val encode = new Convert[Value, Seq[Byte], Value, Bytes, SomeCC[StoreInst | StoreNInst]]:

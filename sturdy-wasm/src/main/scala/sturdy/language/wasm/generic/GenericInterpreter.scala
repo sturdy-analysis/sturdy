@@ -27,7 +27,6 @@ import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
-import sturdy.values.relational.*
 import sturdy.values.references.ReferenceOps
 import sturdy.values.references.given
 import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
