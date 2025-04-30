@@ -322,14 +322,14 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
 
-    import ConstantAnalysis.Value.*
+    import ConstantAnalysis.{Value, NumValue}
     def isConstant(value: ConstantAnalysis.Value): Boolean =
       value match
-        case TopValue => false
-        case Int32(v) => v.isActual
-        case Int64(v) => v.isActual
-        case Float32(v) => v.isActual
-        case Float64(v) => v.isActual
+        case Value.TopValue => false
+        case Value.Num(NumValue.Int32(v)) => v.isActual
+        case Value.Num(NumValue.Int64(v)) => v.isActual
+        case Value.Num(NumValue.Float32(v)) => v.isActual
+        case Value.Num(NumValue.Float64(v)) => v.isActual
 
     var indirectCalls: Set[InstLoc] = allInstructions.collect{ case CfgNode.Instruction(_: CallIndirect,loc) =>loc }
     val preciselyResolvedIndirectCalls = indirectCalls.count(loc =>

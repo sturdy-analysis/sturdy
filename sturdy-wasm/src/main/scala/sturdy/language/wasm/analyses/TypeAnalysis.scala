@@ -49,6 +49,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
+    // TODO: implement this for the TypeAnalysis
     override def numToRef(v: Value): Value = ???
     override def valToInt(v: Value): Int = ???
     override def funcRefToInt(r: Value): Int = ???
@@ -102,8 +103,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
-    override var tableLimits: List[(Int, Option[Int])] = List()
-    override var tableTypes: List[ReferenceType] = List()
     given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly

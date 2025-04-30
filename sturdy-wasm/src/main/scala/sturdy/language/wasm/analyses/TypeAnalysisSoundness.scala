@@ -38,7 +38,7 @@ object TypeAnalysisSoundness {
 
   given [C,A](using aValue: Abstractly[C,A]): Abstractly[List[C], List[A]] with
     override def apply(c: List[C]): List[A] =
-      c.map(aValue.apply(_))
+      c.map(aValue.apply)
 
   given [A](using poValue: PartialOrder[A]): PartialOrder[List[A]] with
     override def lteq(x: List[A], y: List[A]): Boolean =

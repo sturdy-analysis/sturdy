@@ -53,6 +53,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
+    // TODO: implement this for the IntervalAnalysis
     override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def numToRef(v: Value): Value = ???
@@ -117,8 +118,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
-    override var tableLimits: List[(Int, Option[Int])] = List()
-    override var tableTypes: List[ReferenceType] = List()
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =

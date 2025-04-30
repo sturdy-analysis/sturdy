@@ -174,8 +174,6 @@ object ConcreteInterpreter extends Interpreter with Control:
       )
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     val failure: ConcreteFailure = new ConcreteFailure
-    override var tableLimits: List[(Int, Option[Int])] = List()
-    override var tableTypes: List[ReferenceType] = List()
     private given Failure = failure
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, NoJoin] = implicitly

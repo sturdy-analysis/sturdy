@@ -12,6 +12,7 @@ import sturdy.values.ordering.*
 import swam.{NumType, ReferenceType, ValType}
 import swam.syntax.*
 
+//noinspection ScalaUnnecessaryParentheses
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
   (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
   (using Failure):

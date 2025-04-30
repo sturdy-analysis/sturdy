@@ -28,6 +28,7 @@ import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
+import java.net.URI
 import scala.reflect.ClassTag
 import scala.reflect.TypeTest
 
@@ -35,13 +36,13 @@ import scala.reflect.TypeTest
 class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm type analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
-  val simple = Paths.get(uriSimple)
-  val fact = Paths.get(uriFact)
+  val uriSimple: URI = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI
+  val uriFact: URI = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI
+  val simple: Path = Paths.get(uriSimple)
+  val fact: Path = Paths.get(uriFact)
 
-  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
-  val simpleTest = Paths.get(uriSimpleTest)
+  val uriSimpleTest: URI = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI
+  val simpleTest: Path = Paths.get(uriSimpleTest)
 
   testFunction(simple, "const", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
   testFunction(simple, "first", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32)), Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
@@ -66,7 +67,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-opt", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
   testFunction(fact, "fib", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
 
-  testFunction(simpleTest, "main", List(Value.Int32(topI32)), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simpleTest, "main", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
 
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =

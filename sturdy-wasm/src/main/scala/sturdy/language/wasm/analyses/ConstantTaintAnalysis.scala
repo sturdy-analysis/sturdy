@@ -53,6 +53,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
+    // TODO: implement this for the ConstantTaintAnalysis
     override def valToInt(v: Value): Int = ???
     override def numToRef(v: Value): Value = ???
     override def funcRefToInt(r: Value): Int = ???
@@ -112,11 +113,9 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val tables: ConstantSymbolTable[TableAddr, Int, Value] = new ConstantSymbolTable
-    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
-    override var tableLimits: List[(Int, Option[Int])] = List()
-    override var tableTypes: List[ReferenceType] = List()
     given Failure = failure
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
