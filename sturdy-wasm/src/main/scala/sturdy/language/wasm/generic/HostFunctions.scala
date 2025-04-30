@@ -9,7 +9,7 @@ class HostFunction(val name: String, val funcType: FuncType):
   override def toString: String = name
 object HostFunction:
   var instances: Vector[HostFunction] = Vector.empty
-  
+
   
 given Structural[HostFunction] with {}
 

@@ -17,7 +17,7 @@ import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.floating.FloatOps
 import swam.syntax.*
-import swam.FuncType
+import swam.{FuncType, ReferenceType}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -27,6 +27,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.references.{ReferenceOps, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -39,16 +40,26 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
-    //override def refvtoVal(r: FuncReference): Value = ???
+    override def numToRef(v: Value): Value = ???
+    override def valToInt(v: Value): Int = ???
+    override def funcRefToInt(r: Value): Int = ???
+    override def makeRef(f: FunctionInstance): TypeAnalysis.Value = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def makeRef(f: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): TypeAnalysis.Value = ???
+    override def isNull(r: Value): TypeAnalysis.Value = ???
+    override def makeExternRef(f: Int): TypeAnalysis.Value = ???
+    override def instToVal(i: Inst): TypeAnalysis.Value = ???
+    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
@@ -87,12 +98,14 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
+    val tables: UpperBoundSymbolTable[TableAddr, Index, Value] = new UpperBoundSymbolTable(Value.TopValue)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
+    override var tableLimits: List[(Int, Option[Int])] = List()
+    override var tableTypes: List[ReferenceType] = List()
     given Failure = failure
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

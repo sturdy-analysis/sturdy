@@ -13,6 +13,8 @@ import scala.util.boundary, boundary.break
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:
 
   protected var tables: Map[Key, Entry] = Map()
+  var min = 0
+  var max = None
 
   override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
     JOptionA.noneSome(tables(key))
@@ -20,13 +22,13 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
 
-  override def size(key: Key, symbol: Symbol): Int = ???
+  override def size(key: Key): Int = ???
 
-  override def grow(key: Key, delta: Byte, initEntry: Entry): Byte = ???
+  override def grow(key: Key, symbol: Symbol, initEntry: Entry): Int = ???
 
-  override def fill(key: Key, range: Byte, newEntry: Entry, length: Byte): Unit = ???
+  override def fill(key: Key, symbol: Symbol, newEntry: Entry): Unit = ???
 
-  override def copy(key: Key, range: Byte, dest: Key): Unit = ???
+  override def copy(key: Key, symbol: Symbol, dest: Key): Unit = ???
 
   override def init(key: Key, newEntry: Entry): Unit = ???
 

@@ -12,6 +12,8 @@ import scala.util.boundary, boundary.break
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
+  var min = 0
+  var max = None
 
   def entries: Map[Key, Map[Symbol, Entry]] = tables
   
@@ -21,19 +23,17 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     tables += key -> (tables(key) + (symbol -> newEntry))
 
-  override def size(key: Key, symbol: Symbol): Int =
+  override def size(key: Key): Int =
     tables(key).size
 
-  override def grow(key: Key, delta: Byte, initEntry: Entry): Byte = ???
+  override def grow(key: Key, symbol: Symbol, initEntry: Entry): Int = ???
 
-  override def fill(key: Key, range: Byte, newEntry: Entry, length: Byte): Unit = ???
 
-  override def copy(key: Key, range: Byte, dest: Key): Unit = ???
+  override def fill(key: Key, symbol: Symbol, newEntry: Entry): Unit = ???
+
+  override def copy(key: Key, symbol: Symbol, dest: Key): Unit = ???
 
   override def init(key: Key, newEntry: Entry): Unit = ???
-
-  //override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
-  //override def drop(key: Key, symbol: Symbol): Unit = ???
 
   override def putNew(key: Key): Unit =
     tables += key -> Map()

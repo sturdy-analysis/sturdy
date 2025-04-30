@@ -24,12 +24,14 @@ trait IntervalValues extends Interpreter:
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
   final type FuncReference = Topped[Int]
+  final type ExternReference = Topped[Int]
 
   final def topI32: I32 = NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)
   final def topI64: I64 = NumericInterval(Long.MinValue, Long.MaxValue)
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
   final def topFuncRef: FuncReference = Topped.Top
+  final def topExternRef: ExternReference = Topped.Top
 
   final def asBoolean(v: Value)(using Failure): Bool =
     v.asInt32.toBoolean

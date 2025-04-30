@@ -16,6 +16,8 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
   private val constantSymbolTable: ConstantSymbolTable[Key, I, Entry] = new ConstantSymbolTable
 
   private val one = summon[Numeric[I]].one
+  var min = 0
+  var max = None
 
   def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] =
     if (symbol.countOfNumsInInterval <= rangeLimit) {
@@ -39,13 +41,13 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     else
       constantSymbolTable.set(key, Topped.Top, newEntry)
 
-  def size(key: Key, symbol: NumericInterval[I]): Int = ???
+  def size(key: Key): Int = ???
 
-  override def grow(key: Key, delta: Byte, initEntry: Entry): Byte = ???
+  override def grow(key: Key, symbol: NumericInterval[I], initEntry: Entry): Int = ???
 
-  override def fill(key: Key, range: Byte, newEntry: Entry, length: Byte): Unit = ???
+  override def fill(key: Key, symbol: NumericInterval[I], newEntry: Entry): Unit = ???
 
-  override def copy(key: Key, range: Byte, dest: Key): Unit = ???
+  override def copy(key: Key, symbol: NumericInterval[I], dest: Key): Unit = ???
 
   override def init(key: Key, newEntry: Entry): Unit = ???
 

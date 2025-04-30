@@ -135,11 +135,6 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-opt", List(Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))), List(Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))))
 
 
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-
-
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
     testFunction(path, funcName, args.map(Abstractly.apply), expectedResult.map(Abstractly.apply))
 

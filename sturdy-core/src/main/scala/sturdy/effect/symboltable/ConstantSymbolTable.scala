@@ -10,7 +10,6 @@ import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
-import scala.Either as Eith
 import scala.util.boundary, boundary.break
 
 class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
@@ -44,13 +43,16 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           tables += key -> Left(tab.updated(sym, newEntry))
 
 
-  override def size(key: Key, symbol: Topped[Symbol]): Int = ???
+  override def size(key: Key): Int = tables(key) match {
+    case Left(table) => table.underlying.size
+    case _ => 0
+  }
 
-  override def grow(key: Key, delta: Byte, initEntry: Entry): Byte = ???
+  override def grow(key: Key, symbol: Topped[Symbol], initEntry: Entry): Int = ???
 
-  override def fill(key: Key, range: Byte, newEntry: Entry, length: Byte): Unit = ???
+  override def fill(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit = ???
 
-  override def copy(key: Key, range: Byte, dest: Key): Unit = ???
+  override def copy(key: Key, symbol: Topped[Symbol], dest: Key): Unit = ???
 
   override def init(key: Key, newEntry: Entry): Unit = ???
 

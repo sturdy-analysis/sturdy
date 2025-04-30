@@ -11,6 +11,7 @@ import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
+import sturdy.values.references.ReferenceOps
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
 import swam.syntax.LoadInst
@@ -18,6 +19,7 @@ import swam.syntax.LoadNInst
 import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
+import swam.syntax.ReferenceInst
 import swam.syntax.{f32, f64, i32, i64}
 import swam.{FuncType, NumType, ReferenceType, ValType}
 
@@ -34,8 +36,8 @@ trait Interpreter:
   type F64
   type Bool
   type FuncReference
-  //type FunV
-  
+  type ExternReference
+
   enum NumValue:
     case Top
     case Int32(i: I32)
@@ -44,16 +46,16 @@ trait Interpreter:
     case Float64(d: F64)
 
   enum RefValue:
-    case Null(t: RefType)
-    case Func(f: FuncReference)
-    //case Extern(e: ?)
-    
+    case FuncNull
+    case ExternNull
+    case FuncRef(f: FuncReference)
+    case ExternRef(e: ExternReference)
+
   enum Value:
     case TopValue
     case Num(n: NumValue)
     case Ref(r: RefValue)
     //case Vec(v: VecValue)
-    
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -81,18 +83,32 @@ trait Interpreter:
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
+    def asFuncRef(using f: Failure): FuncReference = this match
+      case Ref(RefValue.FuncRef(r)) => r
+      case Ref(RefValue.FuncRef(Top)) => topFuncRef
+      case TopValue => topFuncRef
+      case _ => f.fail(TypeError, s"Expected funcref but got $this")
+
+    def asExternRef(using f: Failure): ExternReference = this match
+      case Ref(RefValue.ExternRef(r)) => r
+      case Ref(RefValue.ExternRef(Top)) => topExternRef
+      case TopValue => topExternRef
+      case _ => f.fail(TypeError, s"Expected externref but got $this")
+
   def topI32: I32
   def topI64: I64
   def topF32: F32
   def topF64: F64
   def topFuncRef: FuncReference
-  
+  def topExternRef: ExternReference
+
   def typedTop(ty: ValType): Value = ty match
     case NumType.I32 => Value.Num(NumValue.Int32(topI32))
     case NumType.I64 => Value.Num(NumValue.Int64(topI64))
     case NumType.F32 => Value.Num(NumValue.Float32(topF32))
     case NumType.F64 => Value.Num(NumValue.Float64(topF64))
-    case ReferenceType.FuncRef => Value.Ref(RefValue.Func(topFuncRef))
+    case ReferenceType.FuncRef => Value.Ref(RefValue.FuncRef(topFuncRef))
+    case ReferenceType.ExternRef => Value.Ref(RefValue.ExternRef(topExternRef))
   
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
@@ -129,7 +145,7 @@ trait Interpreter:
   type Bytes
   type Size
   type ExcV
-  type FuncIx
+  type Index
   type FunV
 
   given ValueWasmOps
@@ -172,12 +188,12 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
+     , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -294,5 +310,4 @@ trait Interpreter:
   type Instance <: GenericInstance
 
   abstract class GenericInstance
-    //extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, Index, FunV, J]

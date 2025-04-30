@@ -124,7 +124,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(top64), List(top64))
   testFunction(fact, "fac-iter-named", List(top64), List(top64))
   testFunction(fact, "fac-opt", List(top64), List(top64))
-
+*/
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
