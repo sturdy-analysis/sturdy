@@ -136,8 +136,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   val failure: Failure
 
   // table size limits and types
-  private var tableLimits = mutable.Map[TableAddr, Limits]()
-  private var tableTypes = mutable.Map[TableAddr, ReferenceType]()
+  private val tableLimits = mutable.Map[TableAddr, Limits]()
+  private val tableTypes = mutable.Map[TableAddr, ReferenceType]()
 
   import except.*
 
@@ -374,7 +374,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       return false
     }
     for (i <- prevSize until newLen) {
-      tables.set(addr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRef(ReferenceType.FuncRef))
+      tables.set(addr, valToIdx(num.evalNumeric(i32.Const(i))), ref)
     }
     true
 
