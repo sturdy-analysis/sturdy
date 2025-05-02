@@ -149,7 +149,7 @@
 (assert_trap (invoke $Nt "call Mt.call" (i32.const 20)) "undefined")
 
 (assert_return (invoke $Nt "call" (i32.const 3)) (i32.const -4))
-(assert_trap (invoke $Nt "call" (i32.const 4)) "indirect call")
+(assert_trap (invoke $Nt "call" (i32.const 4)) "indirect call") ;; todo: this does not fail
 
 (module $Ot
   (type (func (result i32)))

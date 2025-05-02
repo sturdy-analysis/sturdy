@@ -204,7 +204,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       case TableGrow(ix) =>
         val n = stack.popOrAbort()
         val ref = stack.popOrAbort()
-        val prevSize = tables.size(TableAddr(ix))
+        val prevSize = tables.size(module.tableAddrs(ix))
         val err = -1
         if (growTable(ix, n, ref)) {
           stack.push(num.evalNumeric(i32.Const(prevSize)))
@@ -534,7 +534,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val func = module.functions.lift(funcRefToInt(fRef)).getOrElse(fail(UnboundFunctionIndex, fRef.toString))
+      val func = module.functions.lift(funcRefToInt(fRef)).getOrElse(fail(UnboundFunctionIndex, fRef.toString)) // TODO: fix this. CallIndirect can target any module
       val funV = funcInstToFunV(func)
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
@@ -949,7 +949,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
               stack.push(num.evalNumeric(i32.Add)) // adds index to base
               val idx = stack.popOrAbort() // stack is empty
               val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-              tables.set(modInst.tableAddrs(tableIdx), valToIdx(idx), makeRef(funV))
+              tables.set(addr, valToIdx(idx), makeRef(funV))
               // TODO add failure conditions for table writing
             }
 
