@@ -108,7 +108,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
         val res = runAction(action)
         assert(!res.isFailing, s"$action failed $res")
         val expected = constExprToVals(expectedRes)
-        assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
+        assert(eqVals(expected, res.get), c.toString + s" but expected $expected != actual ${res.get}")
       case AssertReturnCanonicalNaN(action) =>
         val res = runAction(action)
         checkNaN(res, c.toString)

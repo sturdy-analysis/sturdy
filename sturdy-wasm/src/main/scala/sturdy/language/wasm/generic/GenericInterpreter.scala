@@ -135,7 +135,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   val failure: Failure
 
   // table size limits and types
-  private var tableLimits: List[(Int, Option[Int])] = List.empty
+  private var tableLimits: List[Limits] = List.empty
   private var tableTypes: List[ReferenceType] = List.empty
 
   import except.*
@@ -363,7 +363,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     if (newLen >= math.pow(2, 32) | delta < 0) {
       return false
     }
-    val maxLimit = tableLimits(t)._2
+    val maxLimit = tableLimits(t).max
     if (maxLimit.isDefined && newLen > maxLimit.get) {
       return false
     }
@@ -746,10 +746,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     valToAddr(v)
 
   def resolveImports(module: Module, imports: Imports):
-  (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
+  (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableType], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
-    val tabs: VectorBuilder[TableAddr] = VectorBuilder()
+    val tabs: VectorBuilder[TableType] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
     module.imports.foreach { imp =>
@@ -799,7 +799,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
               case ExternalValue.Table(addr) =>
                 val tab = from.tableAddrs(addr)
                 // TODO: check table type
-                tabs += tab
+                tabs += tpe
               case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
           case Import.Memory(_, _, tpe) =>
             exp match
@@ -829,11 +829,21 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initialization values for globals
     val (funcImports, globImports, tabImports, memImports) = resolveImports(module, imports)
-    // modInst.globalAddrs = globImports
+    modInst.globalAddrs = globImports
+    val globValues = module.globals.map { glob =>
+      val id = BlockId(glob)
+      loc = modInst.registerBlockSizes(id, loc, glob.init)
+      evalInstructionSequence(id, glob.init, modInst, loc)
+    }
 
-    tabCount = 0
-    tableLimits = List.empty
-    tableTypes = List.empty
+    val tabAddrs = VectorBuilder[TableAddr]()
+    for (i <- tabImports.indices) {
+      val tabAddr = TableAddr(i)
+      tabAddrs += tabAddr
+      tables.putNew(tabAddr)
+      tableTypes = tableTypes ::: List(tabImports(i).referencetype)
+      tableLimits = tableLimits ::: List(tabImports(i).limits)
+    }
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
 
@@ -849,12 +859,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     }.foreach(modInst.addFunction)
 
     // globals
-    val globValues = module.globals.map { glob =>
-      val id = BlockId(glob)
-      loc = modInst.registerBlockSizes(id, loc, glob.init)
-      evalInstructionSequence(id, glob.init, modInst, loc)
-    }
-
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe, _), _), value) =>
         val globalAddr = GlobalAddr(globCount)
@@ -863,12 +867,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         globalAddr
     }
     // tables
-    modInst.tableAddrs = tabImports ++ module.tables.map {
+    tabCount = tabImports.length
+    modInst.tableAddrs = tabAddrs.result() ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
         tables.putNew(tabAddr)
         tableTypes = tableTypes ::: List(ty)
-        tableLimits = tableLimits ::: List((min, max))
+        tableLimits = tableLimits ::: List(new Limits(min, max))
         tabCount += 1
         tabAddr
     }
@@ -876,7 +881,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
     var i = 0
     while (i < tabCount) {
       var j = 0
-      val minLimit = tableLimits(i)._1
+      val minLimit = tableLimits(i).min
       while (j < minLimit) {
         tables.set(TableAddr(modInst.tableAddrs(i).addr), valToIdx(num.evalNumeric(i32.Const(j))), makeNullRef(tableTypes(i)))
         j += 1
@@ -945,7 +950,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
             loc = modInst.registerBlockSizes(id, loc, off)
             val base = evalInstructionSequence(id, off, modInst, loc)
             init.zipWithIndex.foreach { (funcIx, i) => //i = index in element
-              tableLimits(tableIdx)._2 match {
+              tableLimits(tableIdx).max match {
                 case Some(maxLimit) => if (i >= maxLimit) {
                   fail(TableAccessOutOfBounds, s"FuncRef $funcIx in Table $tableIdx is larger than max limit $maxLimit")
                 }
