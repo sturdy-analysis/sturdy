@@ -1,16 +1,13 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
+import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.config
 import sturdy.values.convert.*
-import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.values.ordering.*
-import swam.{NumType, ReferenceType, ValType}
 import swam.syntax.*
+import swam.{NumType, ReferenceType, ValType}
 
 //noinspection ScalaUnnecessaryParentheses
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
@@ -18,15 +15,9 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
   (using Failure):
 
   import wasmOps.*
-  import eqOps.*
   import compareOps.*
+  import eqOps.*
   import unsignedCompareOps.*
-  import convert_i32_i64.*
-  import convert_i32_f64.*
-  import convert_i64_f64.*
-  import convert_i32_f32.*
-  import convert_i64_f32.*
-  import convert_f32_f64.*
 
   def evalNumeric(inst: Inst): V =
     inst match

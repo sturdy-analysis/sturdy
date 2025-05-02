@@ -159,7 +159,7 @@ object ConcreteInterpreter extends Interpreter with Control:
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
-    override def jvUnit: NoJoin[Unit] = implicitly(sturdy.data.MayJoin.NoJoin()) //not correct but works for now, to be fixed
+    override def jvUnit: NoJoin[Unit] = implicitly 
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
 
