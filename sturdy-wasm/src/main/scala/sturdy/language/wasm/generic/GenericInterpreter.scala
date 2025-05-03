@@ -381,10 +381,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   }
 
   def getElemLeft(in: Seq[FuncIdx], s: V): V =
-    numToRef(num.evalNumeric(i32.Const(in(valToInt(s)))))
+    val funcIdx = valToInt(s)
+    val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
+    funVToRef(funcInstToFunV(func))
 
   def getElemRight(in: Seq[Inst], s: V): V =
-    instToVal(in(valToInt(s)))
+    val inst = in(valToInt(s))
+    inst match {
+      case RefFunc(funcIdx) =>
+        val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
+        funVToRef(funcInstToFunV(func))
+      case RefNull(t) =>
+        makeNullRef(t)
+      case _ => fail(UnboundFunctionIndex, s"Expected function reference but got $inst")
+    }
 
   def evalRefInst(inst: Inst): Unit = inst match {
     case RefNull(t) =>
@@ -534,8 +544,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val func = module.functions.lift(funcRefToInt(fRef)).getOrElse(fail(UnboundFunctionIndex, fRef.toString)) // TODO: fix this. CallIndirect can target any module
-      val funV = funcInstToFunV(func)
+      val funV = refToFunV(fRef).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 

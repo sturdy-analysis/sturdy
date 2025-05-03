@@ -34,6 +34,7 @@ import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
 import swam.validation.Validator
 
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -44,10 +45,10 @@ import scala.jdk.StreamConverters.*
 class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript constant analysis"
 
-  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm1").toURI;
+  val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm1").toURI
 
-  val spectest = Parsing.fromText(pathSpectest)
+  val spectest: Module = Parsing.fromText(pathSpectest)
 
 
   def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
@@ -294,7 +295,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
         case ExternRef => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
       }
       case unresolved.RefFunc(x) => x match {
-        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
+        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
         case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
       }
       case unresolved.RefExtern(x) => x match {

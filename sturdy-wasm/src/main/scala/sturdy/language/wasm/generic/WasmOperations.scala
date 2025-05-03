@@ -55,10 +55,9 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, J[_] <: MayJoin[_]]:
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def intToVal(i: Int): V
-  def instToVal(i: Inst): V
   def valToInt(v: V): Int
-  def numToRef(v: V): V
-  def funcRefToInt(r: V): Int
+  def funVToRef(v: FunV): V
+  def refToFunV(r: V): Option[FunV]
 
   def makeNullRef(t: ReferenceType): V
   def makeRef(f: FunctionInstance): V

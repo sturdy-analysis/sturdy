@@ -62,18 +62,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       }
     }
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
-    override def numToRef(v: Value): Value = {
-      v match {
-        case Value.Num(NumValue.Int32(Topped.Actual(-1))) => makeNullRef(FuncRef)
-        case Value.Num(NumValue.Int32(r)) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(r))
-        case _ => makeNullRef(FuncRef)
-      }
-    }
-    override def funcRefToInt(r: Value): Int =
-      r match {
-        case Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(i))) => i
-        case _ => -1
-      }
 
     override def makeRef(f: FunctionInstance): ConstantAnalysis.Value =
       f match {
@@ -81,6 +69,11 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
       }
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
+
+    override def funVToRef(v: Powerset[FunctionInstance]): ConstantAnalysis.Value = ???
+
+    override def refToFunV(r: ConstantAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
+    
     override def makeRef(f: Powerset[FunctionInstance]): ConstantAnalysis.Value = {
       Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(0)))
     }
@@ -103,11 +96,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         case -1 => makeNullRef(ExternRef)
         case _ => Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Actual(f)))
       }
-    override def instToVal(i: Inst): ConstantAnalysis.Value =
-      i match {
-        case RefFunc(x) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(x)))
-        case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
-      }
+      
     override def validateTableElem(tabSz: Int, e: Int): Boolean = {
       if (e < 0 | e >= tabSz) {
         false
@@ -143,7 +132,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Value.Ref(RefValue.FuncNull)
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Ref(RefValue.ExternNull)
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) => Value.Ref(RefValue.FuncRef(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) => 
+        f match
+          case FunctionInstance.Wasm(_, funcIx, _, _) => Value.Ref(RefValue.FuncRef(Topped.Actual(funcIx)))
+          case _ => Value.Ref(RefValue.FuncNull)
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends

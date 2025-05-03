@@ -56,15 +56,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     // TODO: implement this for the IntervalAnalysis
     override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
-    override def numToRef(v: Value): Value = ???
-    override def funcRefToInt(r: Value): Int = ???
+    override def funVToRef(v: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
+    override def refToFunV(r: IntervalAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
     override def makeRef(f: FunctionInstance): IntervalAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def makeRef(f: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def makeExternRef(f: Int): IntervalAnalysis.Value = ???
-    override def instToVal(i: Inst): IntervalAnalysis.Value = ???
     override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32

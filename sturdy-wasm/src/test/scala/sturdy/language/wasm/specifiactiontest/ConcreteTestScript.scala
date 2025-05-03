@@ -34,16 +34,17 @@ import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
 import swam.validation.Validator
 
+import java.net.URI
 import scala.collection.mutable
 
 
 class ConcreteTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
-  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm2").toURI;
+  val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/table-tests").toURI
 
-  val spectest = Parsing.fromText(pathSpectest)
+  val spectest: Module = Parsing.fromText(pathSpectest)
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
@@ -190,7 +191,7 @@ def constExprToVal(inst: unresolved.Inst): Value =
       case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
     }
     case unresolved.RefFunc(x) => x match {
-      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r))
+      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
       case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
     }
     case unresolved.RefExtern(x) => x match {
