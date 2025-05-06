@@ -1,4 +1,4 @@
-package sturdy.language.wasm.specifiactiontest
+package sturdy.language.wasm.specification
 
 import cats.effect.Blocker
 import cats.effect.IO
