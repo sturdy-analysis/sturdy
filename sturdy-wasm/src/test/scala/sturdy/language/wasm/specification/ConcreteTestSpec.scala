@@ -1,48 +1,31 @@
 package sturdy.language.wasm.specification
 
-import cats.effect.Blocker
-import cats.effect.IO
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.AFallible
-import sturdy.language.wasm.generic.ExternalValue
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.generic.ModuleInstance
-import sturdy.language.wasm.generic.WasmFailure
-import sturdy.language.wasm.generic.ExternalValue.Global
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
-import swam.syntax.Module
-import swam.text.*
 import org.scalatest.Assertions.*
 import org.scalatest.compatible
-import sturdy.control.{ControlEventChecker, PrintingControlObserver, RecordingControlObserver}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
-import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.language.wasm.Parsing
-import sturdy.values.ordering.EqOps
-import swam.ModuleLoader
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.generic.ExternalValue.Global
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
 import swam.ReferenceType.{ExternRef, FuncRef}
-import swam.binary.ModuleParser
-import swam.text.unresolved.FreshId
-import swam.text.unresolved.NoId
+import swam.syntax.Module
+import swam.text.*
 import swam.text.unresolved.SomeId
-import swam.validation.Validator
 
 import java.net.URI
+import java.nio.file.{Files, Path, Paths}
 import scala.collection.mutable
+import scala.jdk.StreamConverters.*
 
 
-class ConcreteTestScript extends AnyFlatSpec, Matchers:
+class ConcreteTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/table-tests").toURI
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm1").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
@@ -50,12 +33,12 @@ class ConcreteTestScript extends AnyFlatSpec, Matchers:
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript interpreter on ${p.getFileName}")
       val script = Parsing.testscript(p)
-      val interp = ConcreteTestScriptInterpreter(Some(spectest))
+      val interp = ConcreteTestSpecInterpreter(Some(spectest))
       interp.run(script)
     }
   }
 
-class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
+class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   interp.addControlObserver(new ControlEventChecker)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()

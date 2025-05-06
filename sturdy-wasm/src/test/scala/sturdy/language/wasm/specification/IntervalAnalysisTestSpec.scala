@@ -39,7 +39,7 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
+class IntervalAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript interval analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
@@ -65,16 +65,16 @@ class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript interval analysis on ${p.getFileName}")
         val script = Parsing.testscript(p)
-        val interp = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp())
+        val interp = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp())
         interp.run(script)
-        val interpTop = IntervalAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
+        val interpTop = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
         interpTop.run(script)
       }
     }
   }
 
 
-class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: IntervalAnalysis.Instance, useTop: Boolean = false):
+class IntervalAnalysisTestSpecInterpreter(spectest: Option[Module] = None, aInterp: IntervalAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = IntervalAnalysis.Value
 

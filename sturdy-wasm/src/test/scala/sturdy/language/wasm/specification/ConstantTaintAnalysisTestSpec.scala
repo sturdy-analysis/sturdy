@@ -42,7 +42,7 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class ConstantTaintAnalysisTestScript extends AnyFlatSpec, Matchers:
+class ConstantTaintAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript constant taint analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
@@ -54,14 +54,14 @@ class ConstantTaintAnalysisTestScript extends AnyFlatSpec, Matchers:
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript constant taint analysis on ${p.getFileName}")
       val script = Parsing.testscript(p)
-      val interp = ConstantTaintAnalysisTestScriptInterpreter(Some(spectest))
+      val interp = ConstantTaintAnalysisTestSpecInterpreter(Some(spectest))
       interp.run(script)
-      val interpTop = ConstantTaintAnalysisTestScriptInterpreter(Some(spectest), true)
+      val interpTop = ConstantTaintAnalysisTestSpecInterpreter(Some(spectest), true)
       interpTop.run(script)
     }
   }
 
-class ConstantTaintAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
+class ConstantTaintAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantTaintAnalysis.Value
 

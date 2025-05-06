@@ -45,7 +45,7 @@ import scala.jdk.StreamConverters.*
 
 
 
-class TypeAnalysisTestScript extends AnyFlatSpec, Matchers:
+class TypeAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript type analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
@@ -58,14 +58,14 @@ class TypeAnalysisTestScript extends AnyFlatSpec, Matchers:
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript type analysis on ${p.getFileName}")
       val script = Parsing.testscript(p)
-      val interp = TypeAnalysisTestScriptInterpreter(Some(spectest))
+      val interp = TypeAnalysisTestSpecInterpreter(Some(spectest))
       interp.run(script)
-      val interpTop = TypeAnalysisTestScriptInterpreter(Some(spectest), true)
+      val interpTop = TypeAnalysisTestSpecInterpreter(Some(spectest), true)
       interpTop.run(script)
     }
   }
 
-class TypeAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
+class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = TypeAnalysis.Value
 

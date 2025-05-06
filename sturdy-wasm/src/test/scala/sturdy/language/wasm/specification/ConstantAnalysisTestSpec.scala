@@ -42,7 +42,7 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
+class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript constant analysis"
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
@@ -67,16 +67,16 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
       it must s"execute ${p.getFileName} with ${aInterp()}" in {
         println(s"Executing TestScript constant analysis on ${p.getFileName}")
         val script = Parsing.testscript(p)
-        val interp = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp())
+        val interp = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp())
         interp.run(script)
-        val interpTop = ConstantAnalysisTestScriptInterpreter(Some(spectest), aInterp(), true)
+        val interpTop = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
         interpTop.run(script)
       }
     }
   }
 
 
-class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
+class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantAnalysis.Value
 
