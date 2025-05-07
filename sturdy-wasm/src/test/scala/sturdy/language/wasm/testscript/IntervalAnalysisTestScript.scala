@@ -1,6 +1,5 @@
 package sturdy.language.wasm.testscript
 
-import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -12,31 +11,20 @@ import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.analyses.{IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
 import sturdy.values.integer.given
-import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
-import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
-import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
-import swam.ModuleLoader
-import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.text.*
-import swam.text.unresolved.FreshId
-import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
-import swam.validation.Validator
 
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import scala.collection.mutable
-import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 class IntervalAnalysisTestScript extends AnyFlatSpec, Matchers:

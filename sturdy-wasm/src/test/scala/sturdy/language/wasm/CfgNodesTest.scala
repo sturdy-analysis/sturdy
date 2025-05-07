@@ -2,10 +2,9 @@ package sturdy.language.wasm
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.abstractions.ControlFlow
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FrameData, FuncId, FunctionInstance, InstLoc}
+import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
 
 import java.nio.file.{Path, Paths}

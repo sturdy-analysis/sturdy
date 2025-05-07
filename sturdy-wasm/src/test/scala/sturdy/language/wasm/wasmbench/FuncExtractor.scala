@@ -4,10 +4,10 @@ import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 
 import java.nio.file.{Files, Path, Paths}
 import java.util.regex.Pattern
-import scala.util.matching.Regex
-import sys.process.*
-import scala.util.matching.Regex.Match
 import scala.jdk.CollectionConverters.*
+import scala.sys.process.*
+import scala.util.matching.Regex
+import scala.util.matching.Regex.Match
 
 object FuncExtractor:
 

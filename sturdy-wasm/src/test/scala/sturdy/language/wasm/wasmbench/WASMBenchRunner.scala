@@ -2,25 +2,16 @@ package sturdy.language.wasm.wasmbench
 
 import org.scalatest
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.SpanSugar.GrainOfTime
 import org.scalatest.time.Span
+import org.scalatest.time.SpanSugar.GrainOfTime
 import sturdy.fix
-import sturdy.fix.{StackConfig, Fixpoint}
+import sturdy.fix.StackConfig
 import sturdy.language.wasm
-import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.Insensitive
-import sturdy.language.wasm.analyses.{FixpointConfig, TypeAnalysis, CallSites, ConstantAnalysis, ConstantTaintAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.FrameData
-import swam.syntax.{StoreNInst, StoreInst, LoadInst, LoadNInst}
+import sturdy.language.wasm.analyses.*
 
-import java.util.concurrent.{ExecutionException, TimeoutException}
-import scala.concurrent.{ExecutionContext, Future, Await}
-import scala.concurrent.duration.*
-import ExecutionContext.Implicits.global
+import java.nio.file.{Files, Path, StandardOpenOption}
+import java.util.concurrent.TimeoutException
 import scala.language.postfixOps
-import java.nio.file.{Path, StandardOpenOption, Paths, Files}
-import scala.util.{Try, Success, Failure}
 
 enum AnalysisScope:
   case SingleFunction(id: String)
@@ -162,9 +153,7 @@ object AnalysisConfig:
 
 class WASMBenchRunner extends AnyFunSpec :
 
-  import RunnerConfig.default.{
-    filtering, analyses, rootDir, datasetFilter,
-    onlyBinariesInCSV, skipTestsIncludingIndex, takeUntilIndex}
+  import RunnerConfig.default.*
 
   val store: Store[String, WASMBenchBinary] = {
     val mdPath = rootDir.resolve(s"sturdy.metadata.$filtering.json")

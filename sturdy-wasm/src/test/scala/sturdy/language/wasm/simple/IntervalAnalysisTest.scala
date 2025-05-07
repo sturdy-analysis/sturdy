@@ -1,38 +1,22 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.Blocker
-import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
-import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureKind
+import sturdy.control.ControlEventGraphBuilder
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
-import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
-import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.abstractions.Fix.given
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.language.wasm.analyses.{FixpointConfig, IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.{FrameData, WasmFailure}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Abstractly
-import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
+import sturdy.values.{Abstractly, Topped}
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
-import swam.syntax.Module
-import swam.text.*
-
-import scala.reflect.ClassTag
-import scala.reflect.TypeTest
+import java.nio.file.{Path, Paths}
 
 class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm interval analysis"

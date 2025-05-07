@@ -1,7 +1,5 @@
 package sturdy.language.wasm.testscript
 
-import cats.effect.Blocker
-import cats.effect.IO
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -10,7 +8,6 @@ import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, ConstantTaintAnalysisSoundness}
 import sturdy.language.wasm.analyses.ConstantTaintAnalysisSoundness.given
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
@@ -18,28 +15,17 @@ import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.ModuleInstance
-import sturdy.language.wasm.generic.WasmFailure
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.ordering.EqOps
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
-import swam.ModuleLoader
-import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.text.*
-import swam.text.unresolved.FreshId
-import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
-import swam.validation.Validator
 
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import scala.collection.mutable
-import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 class ConstantTaintAnalysisTestScript extends AnyFlatSpec, Matchers:

@@ -1,18 +1,14 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
-import sturdy.effect.failure.{AFallible, CFallible, FailureKind}
+import sturdy.effect.failure.{CFallible, FailureKind}
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import sturdy.language.wasm.generic.{FrameData, WasmFailure}
-import swam.syntax.Module
-import swam.text.*
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 
-import java.nio.file.{Files, Path, Paths}
-import scala.io.Source
+import java.nio.file.{Path, Paths}
 import scala.jdk.StreamConverters.*
 
 
@@ -36,11 +32,11 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     testFunction(fact, "fac-rec", List(Value.Int64(arg)), List(Value.Int64(res)))
   }
 
-  testFunction(fact, "fac-rec", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-  testFunction(fact, "fac-iter", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-  testFunction(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-  testFunction(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-  testFunction(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+  testFunction(fact, "fac-rec", List(Value.Int64(25)), List(Value.Int64(7034535277573963776L)))
+  testFunction(fact, "fac-iter", List(Value.Int64(25)), List(Value.Int64(7034535277573963776L)))
+  testFunction(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776L)))
+  testFunction(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776L)))
+  testFunction(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776L)))
   testFunction(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
   testFunction(simple, "test-size", List.empty, List(Value.Int32(1)))
   testFunction(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))

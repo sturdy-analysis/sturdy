@@ -1,39 +1,22 @@
 package sturdy.language.wasm.testscript
 
-import cats.effect.Blocker
-import cats.effect.IO
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.AFallible
-import sturdy.language.wasm.generic.ExternalValue
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.generic.ModuleInstance
-import sturdy.language.wasm.generic.WasmFailure
-import sturdy.language.wasm.generic.ExternalValue.Global
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import scala.io.Source
-import scala.jdk.StreamConverters.*
-import swam.syntax.Module
-import swam.text.*
 import org.scalatest.Assertions.*
 import org.scalatest.compatible
-import sturdy.control.{ControlEventChecker, PrintingControlObserver, RecordingControlObserver}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
-import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.language.wasm.Parsing
-import sturdy.values.ordering.EqOps
-import swam.ModuleLoader
-import swam.binary.ModuleParser
-import swam.text.unresolved.FreshId
-import swam.text.unresolved.NoId
+import sturdy.language.wasm.generic.ExternalValue.Global
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import swam.syntax.Module
+import swam.text.*
 import swam.text.unresolved.SomeId
-import swam.validation.Validator
 
+import java.nio.file.{Files, Paths}
 import scala.collection.mutable
+import scala.jdk.StreamConverters.*
 
 
 class ConcreteTestScript extends AnyFlatSpec, Matchers:

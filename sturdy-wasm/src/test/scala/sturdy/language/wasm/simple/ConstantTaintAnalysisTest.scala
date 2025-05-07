@@ -1,31 +1,18 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.{IO, Blocker}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.analyses.ConstantTaintAnalysis
-import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{untaint, Value}
-import sturdy.language.wasm.analyses.CallSites
-import sturdy.language.wasm.analyses.WasmConfig
-import sturdy.language.wasm.generic.{WasmFailure, FrameData}
-import sturdy.values.Abstractly
-import sturdy.values.Topped
+import sturdy.language.wasm.analyses.ConstantTaintAnalysis.Value
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, ConstantTaintAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.FrameData
 import sturdy.values.taint.Taint
-import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
-import sturdy.values.integer.IntegerDivisionByZero
-import sturdy.values.taint.TaintProduct
-import swam.syntax.Module
-import swam.text.*
+import sturdy.values.taint.Taint.{Tainted, TopTaint, Untainted}
+import sturdy.values.{Abstractly, Topped}
 
-import java.nio.file.{Path, Paths, Files}
-import scala.io.Source
-import scala.jdk.StreamConverters.*
-import scala.reflect.{TypeTest, ClassTag}
+import java.nio.file.{Path, Paths}
 
 
 class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:

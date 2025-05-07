@@ -1,14 +1,12 @@
 package sturdy.language.wasm.wasmbench
 
 import sturdy.fix.Fixpoint
-import sturdy.fix.cfg.ControlLogger
 import sturdy.language.wasm
-import sturdy.language.wasm.{Interpreter, Parsing}
+import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, IntervalAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, InstLoc, ModuleInstance}
-import sturdy.util.Profiler
-import swam.syntax.{CallIndirect, LoadInst, LoadNInst, StoreInst, StoreNInst}
+import sturdy.language.wasm.analyses.*
+import sturdy.language.wasm.generic.*
+import swam.syntax.*
 
 import java.nio.file.{Files, Path}
 

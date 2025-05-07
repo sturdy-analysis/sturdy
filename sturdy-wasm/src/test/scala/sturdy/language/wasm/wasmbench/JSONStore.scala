@@ -3,7 +3,7 @@ package sturdy.language.wasm.wasmbench
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
 import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read,write}
+import org.json4s.native.Serialization.{read, write}
 
 import java.io.InputStream
 import java.nio.file.{Files, Path, Paths}

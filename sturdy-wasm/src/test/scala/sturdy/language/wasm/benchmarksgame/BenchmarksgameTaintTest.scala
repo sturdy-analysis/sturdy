@@ -1,30 +1,16 @@
 package sturdy.language.wasm.benchmarksgame
 
-import cats.effect.Blocker
-import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.AFallible
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
-import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.abstractions.CfgNode
-import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.ConstantTaintAnalysis
-import sturdy.language.wasm.analyses.CallSites
-import sturdy.language.wasm.analyses.WasmConfig
+import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
+import sturdy.language.wasm.analyses.{CallSites, ConstantTaintAnalysis, WasmConfig}
 import sturdy.language.wasm.generic.FrameData
-import sturdy.values.Topped
-import swam.ModuleLoader
-import swam.binary.ModuleParser
 import swam.syntax.*
-import swam.validation.Validator
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:

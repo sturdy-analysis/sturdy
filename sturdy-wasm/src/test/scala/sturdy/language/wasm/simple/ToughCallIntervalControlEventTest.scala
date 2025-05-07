@@ -1,28 +1,19 @@
 package sturdy.language.wasm.simple
 
-import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
-import sturdy.effect.failure.AFallible
-import sturdy.effect.symboltable.{DecidableSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, Control, ControlFlow}
+import sturdy.language.wasm.Parsing
+import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.*
 import sturdy.language.wasm.generic.*
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
-import sturdy.util.{LinearStateOperationCounter, Profiler}
-import sturdy.values.Topped
 import sturdy.values.integer.NumericInterval
-import swam.binary.ModuleParser
-import swam.syntax.{Func, Module}
-import swam.validation.Validator
-import swam.{FuncType, ModuleLoader, ValType}
+import swam.{FuncType, ValType}
 
 import java.nio.file.{Files, Path, Paths}
-import scala.collection.mutable
-import scala.jdk.StreamConverters.*
 
 class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
   behavior of "That’s a Tough Call mini-benchmarks with interval analysis"
