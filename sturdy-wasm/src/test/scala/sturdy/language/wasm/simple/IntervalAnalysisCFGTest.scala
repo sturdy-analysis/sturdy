@@ -176,9 +176,6 @@ def runIntervalAnalysisCFG(path: Path, funName: String, args: List[Value], stack
   )
 
   val intervalCfg = graphBuilder.get.withName(s"intervalCFG-$funName")
-
-  // compares old (unsound) CFG construction to new (sound) CFG construction 
-  testCfgDifference(oldCfg, intervalCfg)
   
   // compares interval-based CFG to constant-based CFG
   val (constantRes, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)

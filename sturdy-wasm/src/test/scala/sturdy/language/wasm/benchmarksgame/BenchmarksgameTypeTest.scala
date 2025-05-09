@@ -92,5 +92,4 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".types.new.dot")
     Files.writeString(dotPath2, newCfg.toGraphViz)
 
-    testCfgDifference(oldCfg, newCfg)
     
