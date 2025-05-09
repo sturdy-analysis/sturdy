@@ -80,11 +80,11 @@ object ConcreteInterpreter extends Interpreter with Control:
     
     override def refToVal(r: ConcreteInterpreter.RefValue): ConcreteInterpreter.Value = Value.Ref(r)
     
-    override def refToFunV(r: ConcreteInterpreter.Value): Option[FunctionInstance] = 
+    override def refToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
       r match {
-        case Value.Ref(RefValue.FuncRef(f)) => Some(f)
-        case Value.Ref(RefValue.FuncNull) => Option.empty
-        case _ => Option.empty
+        case RefValue.FuncRef(f) => f
+        case RefValue.ExternRef(f) => f
+        case _ => f.fail(TypeError, s"Expected a function reference, but got $r")
       }
     
     override def makeNullRef(t: ReferenceType): ConcreteInterpreter.RefValue =

@@ -60,7 +60,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def makeNullRef(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
-    override def refToFunV(r: IntervalAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
+    override def refToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =

@@ -547,7 +547,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val funV = refToFunV(refToVal(fRef)).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      val funV = refToFunV(fRef)
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
