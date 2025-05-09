@@ -2,14 +2,16 @@ package sturdy.language.wasm.simple
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, CFallible}
+import sturdy.effect.failure.AFallible
+import sturdy.effect.failure.CFallible
 import sturdy.fix.StackConfig
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.Topped
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class RuntimeTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm runtime"

@@ -2,8 +2,9 @@ package sturdy.language.wasm.wasmbench
 
 import sturdy.language.wasm
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.generic.FrameData
 
 import java.nio.file.Path
 import scala.io.Source

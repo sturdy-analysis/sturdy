@@ -1,22 +1,32 @@
 package sturdy.language.wasm.simple
 
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventGraphBuilder, ControlGraph}
+import sturdy.control.{ControlEventGraphBuilder, ControlGraph, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.StackConfig
+import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
 import sturdy.language.wasm.abstractions.Control.{Atom, Section}
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
+import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.analyses.{ConstantAnalysis, FixpointConfig, IntervalAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FrameData, WasmFailure}
-import sturdy.language.wasm.{ConcreteInterpreter, compareControlGraphs}
-import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
+import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference, compareControlGraphs}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.Topped.Top
 import sturdy.values.{Abstractly, Topped}
+import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
 import swam.syntax.Module
+import swam.text.*
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
 class IntervalAnalysisCFGTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm interval analysis"
@@ -157,6 +167,7 @@ def runIntervalAnalysisCFG(path: Path, funName: String, args: List[Value], stack
 
   val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+  val oldCfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module, moduleId = Some("mod"))
@@ -165,9 +176,12 @@ def runIntervalAnalysisCFG(path: Path, funName: String, args: List[Value], stack
   )
 
   val intervalCfg = graphBuilder.get.withName(s"intervalCFG-$funName")
+
+  // compares old (unsound) CFG construction to new (sound) CFG construction 
+  testCfgDifference(oldCfg, intervalCfg)
   
   // compares interval-based CFG to constant-based CFG
-  val (_, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)
+  val (constantRes, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)
   compareControlGraphs(intervalCfg, constantCfg)
   result
 

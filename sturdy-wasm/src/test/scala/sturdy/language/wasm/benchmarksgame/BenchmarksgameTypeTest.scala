@@ -1,16 +1,32 @@
 package sturdy.language.wasm.benchmarksgame
 
+import cats.effect.Blocker
+import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.ControlEventGraphBuilder
+import sturdy.control.{ControlEventGraphBuilder, Node, RecordingControlObserver}
+import sturdy.effect.failure.AFallible
 import sturdy.fix.Fixpoint
+import sturdy.fix.cfg.ControlFlowGraph.CNode
 import sturdy.language.wasm
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, abstractions, testCfgDifference}
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.{TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.{Parsing, abstractions}
+import sturdy.language.wasm.abstractions.CfgNode
+import sturdy.language.wasm.abstractions.ControlFlow
+import sturdy.language.wasm.analyses.TypeAnalysis
+import sturdy.language.wasm.analyses.CallSites
+import sturdy.language.wasm.analyses.FixpointConfig
+import sturdy.language.wasm.analyses.WasmConfig
+import sturdy.language.wasm.generic.{FrameData, FuncId, InstLoc}
+import sturdy.values.Topped
+import swam.ModuleLoader
+import swam.binary.ModuleParser
+import swam.syntax.Module
+import swam.validation.Validator
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
@@ -36,6 +52,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
   def run(p: Path, binary: Boolean = false) =
     Fixpoint.DEBUG = false
     
+    val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
     val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
@@ -75,3 +92,5 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".types.new.dot")
     Files.writeString(dotPath2, newCfg.toGraphViz)
 
+    testCfgDifference(oldCfg, newCfg)
+    

@@ -1,30 +1,43 @@
 package sturdy.language.wasm.testscript
 
+import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder}
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
 import sturdy.language.wasm.analyses.{ConstantAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.values.Topped
+import sturdy.values.ordering.EqOps
 import sturdy.values.Abstractly
+import sturdy.values.PartialOrder
+import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
 import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
+import sturdy.language.wasm.analyses.IntervalAnalysis
+import swam.ModuleLoader
+import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.text.*
+import swam.text.unresolved.FreshId
+import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
+import swam.validation.Validator
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import scala.collection.mutable
+import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
@@ -106,6 +119,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
+    testCfgDifference(oldCfg, newCfg.get)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

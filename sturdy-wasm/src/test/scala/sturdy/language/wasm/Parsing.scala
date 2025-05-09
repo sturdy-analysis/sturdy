@@ -1,18 +1,25 @@
 package sturdy.language.wasm
 
-import cats.effect.{Blocker, ContextShift, IO, Timer}
+import cats.effect.IO
+
+import java.nio.file.Path
+import cats.effect.Blocker
+import cats.effect.ContextShift
+import cats.effect.Timer
 import fastparse.ParserInputSource
 import org.scalatest.Assertions.assert
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
+import swam.text.Command
+import swam.text.Compiler
 import swam.text.parser.TestScriptParser
-import swam.text.{Command, Compiler, unresolved}
+import swam.text.unresolved
 import swam.validation.Validator
 
 import java.io.FileInputStream
-import java.nio.file.Path
 import java.util.concurrent.TimeoutException
+import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 
 object Parsing:

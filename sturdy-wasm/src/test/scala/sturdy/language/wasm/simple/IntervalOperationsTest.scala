@@ -1,20 +1,30 @@
 package sturdy.language.wasm.simple
 
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.effect.failure.AFallible.MaybeFailing
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
 import sturdy.fix.{Fixpoint, StackConfig}
+import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.abstractions.Fix.given
+import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
+import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.analyses.{FixpointConfig, IntervalAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.FrameData
-import sturdy.values.Powerset
-import sturdy.values.integer.{NumericInterval, given}
+import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.{Abstractly, Join, Powerset, Topped}
+import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval, given}
+import swam.syntax.Module
+import swam.text.*
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
+import scala.io.Source
 import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
 class IntervalOperationsTest extends AnyFlatSpec, Matchers:
   behavior of "interval operations"
@@ -30,6 +40,7 @@ class IntervalOperationsTest extends AnyFlatSpec, Matchers:
 
   def isSpecialWasmOpCaseAndComputedCorrectly(operationName: String, args: List[NumericInterval[Int]], res: AFallible[List[Value]], expected: AFallible[List[Value]]): Boolean =
     import AFallible.*
+    import NumericInterval.*
     if (operationName == "div_s") {
       // minValue / -1 creates an overflow exception
       (args.head, args.tail.head, res, expected) match

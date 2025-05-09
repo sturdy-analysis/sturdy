@@ -1,14 +1,18 @@
 package sturdy.language.wasm.wasmbench
 
 
+import org.scalatest.flatspec.AnyFlatSpec
 import org.json4s.*
 import org.json4s.native.JsonMethods.*
-import org.scalatest.flatspec.AnyFlatSpec
 
+
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import java.io.InputStream
 import java.net.URI
-import java.nio.file.{Files, Path, StandardOpenOption}
 import scala.collection.mutable
+import sys.process.*
+import scala.util.matching.Regex
+import scala.util.matching.Regex.Match
 import scala.jdk.StreamConverters.*
 
 /*
@@ -23,7 +27,7 @@ It includes
 */
 
 class WASMBench extends AnyFlatSpec:
-  import RunnerConfig.default.{filtering, rootDir}
+  import RunnerConfig.default.{filtering, analyses, rootDir}
 
   val MAXSIZE: Int = 10485760
 
@@ -136,6 +140,7 @@ class WASMBench extends AnyFlatSpec:
 
   def mkMdStore: Store[String, WASMBenchBinary] =
     import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.{read,write}
 
     implicit val formats: Formats =
       Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
@@ -154,6 +159,7 @@ class WASMBench extends AnyFlatSpec:
 
   def metadataScripts() =
     import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.{read,write}
     implicit val formats: Formats =
       Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
         + new WASMTypeSerializer
@@ -310,7 +316,7 @@ class WASMBench extends AnyFlatSpec:
   def extractFuncDefsScript() =
 
     import org.json4s.native.Serialization
-    import org.json4s.native.Serialization.{read, write}
+    import org.json4s.native.Serialization.{read,write}
     implicit val formats: Formats =
       Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))
         + new WASMTypeSerializer
@@ -354,6 +360,7 @@ object WASMBench:
 
   def mkMdStore: Store[String, WASMBenchBinary] =
     import org.json4s.native.Serialization
+    import org.json4s.native.Serialization.{read,write}
 
     implicit val formats: Formats =
       Serialization.formats(ShortTypeHints(List(classOf[TypeDef])))

@@ -1,19 +1,26 @@
 package sturdy.language.wasm.benchmarksgame
 
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver, RecordingControlObserver}
+import sturdy.effect.failure.AFallible
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
-import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing, newEdgesTotal, newNodesTotal, testCfgDifference}
+import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.*
 import sturdy.language.wasm.generic.FrameData
-import sturdy.language.wasm.{Parsing, newEdgesTotal, newNodesTotal}
-import sturdy.util.Profiler
+import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.Topped
+import swam.ModuleLoader
+import swam.binary.ModuleParser
+import swam.syntax.Module
+import swam.validation.Validator
 
 import java.io.{BufferedOutputStream, FileOutputStream}
 import java.nio.file.attribute.FileAttribute
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
@@ -74,4 +81,6 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     Files.writeString(dotPath, oldCfg.toGraphViz)
     val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".constant.new.dot")
     Files.writeString(dotPath2, newCfg.toGraphViz)
+
+    testCfgDifference(oldCfg, newCfg)
 
