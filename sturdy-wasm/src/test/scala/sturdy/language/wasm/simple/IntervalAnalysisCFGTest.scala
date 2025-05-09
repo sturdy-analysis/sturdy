@@ -179,12 +179,12 @@ class IntervalAnalysisCFGTest extends AnyFlatSpec, Matchers:
       interp.invokeExported(modInst, funName, args)
     )
 
-  val intervalCfg = graphBuilder.get.withName(s"intervalCFG-$funName")
-
-  // compares interval-based CFG to constant-based CFG
-  val (constantRes, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)
-  compareControlGraphs(intervalCfg, constantCfg)
-  result
+    val intervalCfg = graphBuilder.get.withName(s"intervalCFG-$funName")
+  
+    // compares interval-based CFG to constant-based CFG
+    val (constantRes, constantCfg) = runConstantAnalysisForIntervalArgs(module, funName, args, stackConfig)
+    compareControlGraphs(intervalCfg, constantCfg)
+    result
 
   def runConstantAnalysisForIntervalArgs(module: Module, funName: String, args: List[Value], stackConfig: StackConfig): (AFallible[List[ConstantAnalysis.Value]], ControlGraph[Atom, Section]) =
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,

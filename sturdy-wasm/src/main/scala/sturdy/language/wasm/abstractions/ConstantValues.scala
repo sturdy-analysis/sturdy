@@ -6,10 +6,8 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.FixIn
-import sturdy.language.wasm.generic.FixOut
-import sturdy.language.wasm.generic.InstLoc
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Topped
@@ -29,8 +27,8 @@ trait ConstantValues extends Interpreter:
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
-  final type FuncReference = Topped[Int]
-  final type ExternReference = Topped[Int]
+  final type FuncReference = Topped[FunctionInstance]
+  final type ExternReference = Topped[FunctionInstance]
 
   final def topI32: I32 = Topped.Top
   final def topI64: I64 = Topped.Top

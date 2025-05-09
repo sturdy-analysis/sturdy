@@ -52,18 +52,13 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToIdx(v: Value): Index = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
-    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(untainted(sturdy.values.Topped.Top)))
     // TODO: implement this for the ConstantTaintAnalysis
     override def valToInt(v: Value): Int = ???
-    override def makeRef(f: FunctionInstance): ConstantTaintAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToRef(v: Powerset[FunctionInstance]): ConstantTaintAnalysis.Value = ???
+    override def funVToRef(v: Powerset[FunctionInstance], t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def refToFunV(r: ConstantTaintAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
-    override def makeRef(f: Powerset[FunctionInstance]): ConstantTaintAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
-    override def makeExternRef(f: Int): ConstantTaintAnalysis.Value = ???
-    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>

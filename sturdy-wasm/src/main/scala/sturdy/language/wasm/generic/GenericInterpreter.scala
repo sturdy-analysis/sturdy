@@ -15,6 +15,7 @@ import sturdy.values.convert.*
 import sturdy.{IsSound, Soundness, fix}
 import swam.syntax.*
 import swam.*
+import swam.ReferenceType.{ExternRef, FuncRef}
 
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
@@ -383,14 +384,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   def getElemLeft(in: Seq[FuncIdx], s: V): V =
     val funcIdx = valToInt(s)
     val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
-    funVToRef(funcInstToFunV(func))
+    funVToRef(funcInstToFunV(func), FuncRef)
 
   def getElemRight(in: Seq[Inst], s: V): V =
     val inst = in(valToInt(s))
     inst match {
       case RefFunc(funcIdx) =>
         val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
-        funVToRef(funcInstToFunV(func))
+        funVToRef(funcInstToFunV(func), FuncRef)
       case RefNull(t) =>
         makeNullRef(t)
       case _ => fail(UnboundFunctionIndex, s"Expected function reference but got $inst")
@@ -403,10 +404,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       val ref = stack.popOrAbort()
       stack.push(isNull(ref))
     case RefFunc(funcIdx) =>
-      val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
-      stack.push(makeRef(func))
+      val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
+      stack.push(funVToRef(funV, FuncRef))
     case RefExtern(funcIdx) =>
-      stack.push(makeExternRef(funcIdx))
+      val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
+      stack.push(funVToRef(funV, ExternRef))
 
   }
 
@@ -958,7 +960,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
               stack.push(num.evalNumeric(i32.Add)) // adds index to base
               val idx = stack.popOrAbort() // stack is empty
               val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-              tables.set(addr, valToIdx(idx), makeRef(funV))
+              tables.set(addr, valToIdx(idx), funVToRef(funV, reftype))
               // TODO add failure conditions for table writing
             }
 

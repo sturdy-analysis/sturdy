@@ -54,17 +54,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     // TODO: implement this for the IntervalAnalysis
-    override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
-    override def funVToRef(v: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
     override def refToFunV(r: IntervalAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
-    override def makeRef(f: FunctionInstance): IntervalAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def makeRef(f: Powerset[FunctionInstance]): IntervalAnalysis.Value = ???
+    override def funVToRef(v: Powerset[FunctionInstance], t: ReferenceType): IntervalAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
-    override def makeExternRef(f: Int): IntervalAnalysis.Value = ???
-    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))

@@ -46,7 +46,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Size = I32
   type Index = I32
   type FunV = Powerset[FunctionInstance]
-
+  
+  
   given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
@@ -61,22 +62,38 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         case _ => 0
       }
     }
-    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.ConstantAnalysis.topI32))
 
-    override def makeRef(f: FunctionInstance): ConstantAnalysis.Value =
-      f match {
-        case FunctionInstance.Wasm(_, funcIx, _, _) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(funcIx)))
-        case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
-      }
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 
-    override def funVToRef(v: Powerset[FunctionInstance]): ConstantAnalysis.Value = ???
-
-    override def refToFunV(r: ConstantAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
+    override def refToFunV(r: ConstantAnalysis.Value): Option[Powerset[FunctionInstance]] = r match 
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(f)) if f.isActual => Some(Powerset(f.get))
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternRef(f)) if f.isActual => Some(Powerset(f.get))
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull) => None
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull) => None
+      case _ => None
     
-    override def makeRef(f: Powerset[FunctionInstance]): ConstantAnalysis.Value = {
-      Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(0)))
+    
+    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): ConstantAnalysis.Value = {
+      t match {
+        case FuncRef => f match {
+          case Powerset(funcs) if funcs.size == 1 =>
+            funcs.head match {
+              case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(funcs.head)))
+              case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+            }
+          case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+        }
+        case ExternRef => f match {
+          case Powerset(funcs) if funcs.size == 1 =>
+            funcs.head match {
+              case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Actual(funcs.head)))
+              case _ => Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+            }
+          case _ => Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+        }
+      }
     }
+
     override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = {
       t match {
         case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
@@ -91,17 +108,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         case _ => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(0)))
       }
     }
-    override def makeExternRef(f: Int): ConstantAnalysis.Value =
-      f match {
-        case -1 => makeNullRef(ExternRef)
-        case _ => Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Actual(f)))
-      }
-      
-    override def validateTableElem(tabSz: Int, e: Int): Boolean = {
-      if (e < 0 | e >= tabSz) {
-        false
-      } else true
-    }
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -134,9 +141,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Ref(RefValue.ExternNull)
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) => 
         f match
-          case FunctionInstance.Wasm(_, funcIx, _, _) => Value.Ref(RefValue.FuncRef(Topped.Actual(funcIx)))
+          case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(RefValue.FuncRef(Topped.Actual(f)))
           case _ => Value.Ref(RefValue.FuncNull)
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) =>
+        f match
+          case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
+          case _ => Value.Ref(RefValue.ExternNull)
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

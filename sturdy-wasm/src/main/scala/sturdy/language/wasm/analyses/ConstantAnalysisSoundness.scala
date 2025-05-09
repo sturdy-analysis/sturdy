@@ -33,8 +33,6 @@ object ConstantAnalysisSoundness {
       case (Value.Ref(r1), Value.Ref(r2)) => (r1, r2) match
         case (RefValue.FuncNull, RefValue.FuncNull) => true
         case (RefValue.ExternNull, RefValue.ExternNull) => true
-        case (RefValue.FuncRef(f1), RefValue.FuncRef(f2)) => PartialOrder[Topped[Int]].lteq(f1,f2)
-        case (RefValue.ExternRef(e1), RefValue.ExternRef(e2)) => PartialOrder[Topped[Int]].lteq(e1,e2)
         case _ => false
       case _ => false
     

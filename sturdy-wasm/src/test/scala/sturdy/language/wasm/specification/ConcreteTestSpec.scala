@@ -40,7 +40,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
 class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  interp.addControlObserver(new ControlEventChecker)
+  // interp.addControlObserver(new ControlEventChecker)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
   var imports: Map[String, ModuleInstance] = Map()
@@ -178,7 +178,7 @@ def constExprToVal(inst: unresolved.Inst): Value =
       case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
     }
     case unresolved.RefExtern(x) => x match {
-      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
+      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
       case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
     }
 

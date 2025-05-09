@@ -298,7 +298,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
         case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
       }
       case unresolved.RefExtern(x) => x match {
-        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
+        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
         case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
       }
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")

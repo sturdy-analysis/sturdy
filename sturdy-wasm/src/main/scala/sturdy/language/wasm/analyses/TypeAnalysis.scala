@@ -48,19 +48,14 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
-    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(sturdy.language.wasm.analyses.TypeAnalysis.topI32))
 
     // TODO: implement this for the TypeAnalysis
-    override def funVToRef(v: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
+    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): TypeAnalysis.Value = ???
     override def refToFunV(r: TypeAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
     override def valToInt(v: Value): Int = ???
-    override def makeRef(f: FunctionInstance): TypeAnalysis.Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def makeRef(f: Powerset[FunctionInstance]): TypeAnalysis.Value = ???
     override def makeNullRef(t: ReferenceType): TypeAnalysis.Value = ???
     override def isNull(r: Value): TypeAnalysis.Value = ???
-    override def makeExternRef(f: Int): TypeAnalysis.Value = ???
-    override def validateTableElem(tabSz: Int, e: Int): Boolean = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()

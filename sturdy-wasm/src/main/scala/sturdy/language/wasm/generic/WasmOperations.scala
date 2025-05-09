@@ -54,20 +54,14 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, J[_] <: MayJoin[_]]:
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
-  def intToVal(i: Int): V
   def valToInt(v: V): Int
-  def funVToRef(v: FunV): V
   def refToFunV(r: V): Option[FunV]
 
   def makeNullRef(t: ReferenceType): V
-  def makeRef(f: FunctionInstance): V
-  def makeRef(i: FunV): V
-  def makeExternRef(f: Int): V
+  def funVToRef(i: FunV, t: ReferenceType): V
   def isNull(r: V): V
 
   def funcInstToFunV(f: FunctionInstance): FunV
-  def validateTableElem(tabSz: Int, e: Int): Boolean
-
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
