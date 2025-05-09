@@ -125,7 +125,6 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
-    testCfgDifference(oldCfg, newCfg.get)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

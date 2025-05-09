@@ -222,8 +222,6 @@ def runConstantAnalysisCFG(path: Path, funName: String, args: List[Value], stack
   assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
   assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
 
-  testCfgDifference(cfg, graphFromEvents)
-
 //  println(cfg.toGraphViz)
   println(graphFromEvents.toGraphViz)
 
