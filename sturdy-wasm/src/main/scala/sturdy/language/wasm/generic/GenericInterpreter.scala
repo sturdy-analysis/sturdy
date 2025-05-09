@@ -107,7 +107,7 @@ enum FixOut[V]:
 
 given finiteFixIn: Finite[FixIn] with {}
 
-trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
 
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
@@ -117,12 +117,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   implicit def jvUnit: J[Unit]
 
   implicit def jvV: J[V]
+  implicit def jvRefV: J[RefV]
 
   // implicit def jvFunV: J[V]
   implicit def jvFunV: J[FunV]
 
   // value components
-  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, J]
+  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J]
 
   import wasmOps.*
   import specialOps.*
@@ -131,7 +132,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
   val stack: DecidableOperandStack[V]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
-  val tables: SymbolTable[TableAddr, Index, V, J]
+  val tables: SymbolTable[TableAddr, Index, RefV, J]
   val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
@@ -193,12 +194,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         val addr = validateTableAccess(ix, elemIdx)
         val tpe = getTableType(addr)
         val ref = tables.getOrElse(addr, valToIdx(elemIdx), makeNullRef(tpe))
-        stack.push(ref)
+        stack.push(refToVal(ref))
       case TableSet(ix) =>
         val v = stack.popOrAbort()
         val elemIdx = stack.popOrAbort()
         val addr = validateTableAccess(ix, elemIdx)
-        tables.set(addr, valToIdx(elemIdx), v)
+        tables.set(addr, valToIdx(elemIdx), valToRef(v))
       case TableSize(ix) =>
         val sz = num.evalNumeric(i32.Const(tables.size(module.tableAddrs(ix))))
         stack.push(sz)
@@ -207,7 +208,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         val ref = stack.popOrAbort()
         val prevSize = tables.size(module.tableAddrs(ix))
         val err = -1
-        if (growTable(ix, n, ref)) {
+        if (growTable(ix, n, valToRef(ref))) {
           stack.push(num.evalNumeric(i32.Const(prevSize)))
         } else {
           stack.push(num.evalNumeric(i32.Const(err)))
@@ -310,8 +311,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
         }
         stack.push(d)
         elem.init match {
-          case Left(in) => stack.push(getElemLeft(in, s))
-          case Right(in) => stack.push(getElemRight(in, s))
+          case Left(in) => stack.push(refToVal(getElemLeft(in, s)))
+          case Right(in) => stack.push(refToVal(getElemRight(in, s)))
             evalTableInst(TableSet(ix))
             stack.push(d)
             stack.push(num.evalNumeric(i32.Const(1)))
@@ -361,7 +362,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
    * Grow the table with index t by n elements, filling them with the value ref.
    * Returns true if the operation was successful, false otherwise.
    */
-  def growTable(t: Int, n: V, ref: V): Boolean = {
+  def growTable(t: Int, n: V, ref: RefV): Boolean = {
     val prevSize = tables.size(module.tableAddrs(t))
     val delta = valToInt(n)
     val newLen = delta + prevSize
@@ -381,12 +382,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
 
   }
 
-  def getElemLeft(in: Seq[FuncIdx], s: V): V =
+  def getElemLeft(in: Seq[FuncIdx], s: V): RefV =
     val funcIdx = valToInt(s)
     val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
     funVToRef(funcInstToFunV(func), FuncRef)
 
-  def getElemRight(in: Seq[Inst], s: V): V =
+  def getElemRight(in: Seq[Inst], s: V): RefV =
     val inst = in(valToInt(s))
     inst match {
       case RefFunc(funcIdx) =>
@@ -399,16 +400,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
 
   def evalRefInst(inst: Inst): Unit = inst match {
     case RefNull(t) =>
-      stack.push(makeNullRef(t))
+      stack.push(refToVal(makeNullRef(t)))
     case RefIsNull() =>
       val ref = stack.popOrAbort()
       stack.push(isNull(ref))
     case RefFunc(funcIdx) =>
       val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
-      stack.push(funVToRef(funV, FuncRef))
+      stack.push(refToVal(funVToRef(funV, FuncRef)))
     case RefExtern(funcIdx) =>
       val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
-      stack.push(funVToRef(funV, ExternRef))
+      stack.push(refToVal(funVToRef(funV, ExternRef)))
 
   }
 
@@ -546,7 +547,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoi
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val funV = refToFunV(fRef).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      val funV = refToFunV(refToVal(fRef)).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 

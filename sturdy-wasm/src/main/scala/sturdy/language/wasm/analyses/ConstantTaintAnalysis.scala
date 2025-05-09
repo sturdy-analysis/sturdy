@@ -46,18 +46,21 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
   type Size = Topped[Int]
   type Index = Topped[Int]
   override type FunV = Powerset[FunctionInstance]
+  override type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32.value
     override def valToIdx(v: Value): Index = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     // TODO: implement this for the ConstantTaintAnalysis
+    override def valToRef(v: ConstantTaintAnalysis.Value): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToRef(v: Powerset[FunctionInstance], t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def refToFunV(r: ConstantTaintAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
-    override def makeNullRef(t: ReferenceType): ConstantTaintAnalysis.Value = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
@@ -101,16 +104,17 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: ConstantSymbolTable[TableAddr, Int, Value] = new ConstantSymbolTable
+    val tables: ConstantSymbolTable[TableAddr, Int, RefV] = new ConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     given Failure = failure
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     override def toString: String = s"constant-taint $config"

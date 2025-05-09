@@ -64,14 +64,22 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type ExcV = WasmException[Value]
   override type Index = Int
   override type FunV = FunctionInstance
-
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, Index, FunV, NoJoin] with
+  override type RefV = RefValue
+  
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, NoJoin] with
     override def valToAddr(v: Value): Int = v.asInt32
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def valToInt(v: Value): Int = v.asInt32
 
+    override def valToRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.RefValue = v match {
+      case Value.Ref(ref) => ref
+      case _ => f.fail(TypeError, s"Expected a reference value, but got $v")
+    }
+    
+    override def refToVal(r: ConcreteInterpreter.RefValue): ConcreteInterpreter.Value = Value.Ref(r)
+    
     override def refToFunV(r: ConcreteInterpreter.Value): Option[FunctionInstance] = 
       r match {
         case Value.Ref(RefValue.FuncRef(f)) => Some(f)
@@ -79,21 +87,21 @@ object ConcreteInterpreter extends Interpreter with Control:
         case _ => Option.empty
       }
     
-    override def makeNullRef(t: ReferenceType): ConcreteInterpreter.Value =
+    override def makeNullRef(t: ReferenceType): ConcreteInterpreter.RefValue =
       t match {
-        case FuncRef => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-        case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+        case FuncRef => ConcreteInterpreter.RefValue.FuncNull
+        case ExternRef => ConcreteInterpreter.RefValue.ExternNull
       }
 
-    override def funVToRef(f: FunV, t: ReferenceType): ConcreteInterpreter.Value =
+    override def funVToRef(f: FunV, t: ReferenceType): ConcreteInterpreter.RefValue =
       t match {
         case FuncRef => f match {
-          case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f))
-          case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+          case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
+          case _ => ConcreteInterpreter.RefValue.FuncNull
         }
         case ExternRef => f match {
-          case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f))
-          case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+          case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
+          case _ => ConcreteInterpreter.RefValue.ExternNull
         }
       }
     
@@ -145,11 +153,12 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def jvUnit: NoJoin[Unit] = implicitly 
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
+    override def jvRefV: NoJoin[RefV] = implicitly
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: ConcreteSymbolTable[TableAddr, Index, Value] = new ConcreteSymbolTable[TableAddr, Index, Value]
+    val tables: ConcreteSymbolTable[TableAddr, Index, RefV] = new ConcreteSymbolTable[TableAddr, Index, RefV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,
@@ -159,7 +168,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
 
-    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, NoJoin] = implicitly
+    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
 
     val fixpoint = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)

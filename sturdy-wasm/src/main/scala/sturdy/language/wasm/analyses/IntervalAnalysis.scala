@@ -47,18 +47,21 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type Size = Topped[Int]
   type Index = I32
   type FunV = Powerset[FunctionInstance]
+  type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     // TODO: implement this for the IntervalAnalysis
+    override def valToRef(v: IntervalAnalysis.Value): Powerset[IntervalAnalysis.RefValue] = ???
+    override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def refToFunV(r: IntervalAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToRef(v: Powerset[FunctionInstance], t: ReferenceType): IntervalAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): IntervalAnalysis.Value = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
@@ -102,13 +105,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalSymbolTable[TableAddr, Int, Value] = new IntervalSymbolTable(rangeLimit)
+    val tables: IntervalSymbolTable[TableAddr, Int, RefV] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
@@ -148,7 +152,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
         Convert(bytes, conf)
       }
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
     var longIntervalBounds: Set[Long] = Set(-1, 0, 1)

@@ -11,7 +11,7 @@ import swam.{NumType, ReferenceType, ValType}
 
 //noinspection ScalaUnnecessaryParentheses
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
-  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
+  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
   (using Failure):
 
   import wasmOps.*

@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
@@ -23,8 +23,8 @@ trait IntervalValues extends Interpreter:
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
-  final type FuncReference = Topped[Int]
-  final type ExternReference = Topped[Int]
+  final type FuncReference = Topped[FunctionInstance]
+  final type ExternReference = Topped[FunctionInstance]
 
   final def topI32: I32 = NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)
   final def topI64: I64 = NumericInterval(Long.MinValue, Long.MaxValue)

@@ -40,7 +40,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
 class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  // interp.addControlObserver(new ControlEventChecker)
+  interp.addControlObserver(new ControlEventChecker)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
   var imports: Map[String, ModuleInstance] = Map()

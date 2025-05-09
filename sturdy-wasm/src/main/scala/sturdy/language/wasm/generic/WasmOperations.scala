@@ -19,7 +19,7 @@ import sturdy.values.ordering.UnsignedOrderingOps
 import swam.syntax.{Inst, LoadInst, LoadNInst, MemoryInst, ReferenceInst, StoreInst, StoreNInst}
 
 
-trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoin[_]]:
+trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
@@ -43,22 +43,24 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, J[_] <: MayJoin[_]]:
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, Index, FunV, J[_] <: MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   def valToAddr(v: V): Addr
   def valToIdx(v: V): Index
+  def valToRef(v: V): RefV
+  def refToVal(r: RefV): V
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
   def valToInt(v: V): Int
   def refToFunV(r: V): Option[FunV]
 
-  def makeNullRef(t: ReferenceType): V
-  def funVToRef(i: FunV, t: ReferenceType): V
+  def makeNullRef(t: ReferenceType): RefV
+  def funVToRef(i: FunV, t: ReferenceType): RefV
   def isNull(r: V): V
 
   def funcInstToFunV(f: FunctionInstance): FunV

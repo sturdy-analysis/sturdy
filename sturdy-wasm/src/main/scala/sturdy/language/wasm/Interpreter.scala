@@ -116,6 +116,8 @@ trait Interpreter:
   given Top[Value] with
     def top: Value = Value.TopValue
 
+  given Finite[RefValue] with {}
+
   def applyI32(a:I32): Value.Num ={
     Value.Num(NumValue.Int32.apply(a))
   }
@@ -147,6 +149,7 @@ trait Interpreter:
   type ExcV
   type Index
   type FunV
+  type RefV
 
   given ValueWasmOps
     (using failure: Failure
@@ -188,12 +191,12 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, J] with
+     , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -310,4 +313,4 @@ trait Interpreter:
   type Instance <: GenericInstance
 
   abstract class GenericInstance
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, Index, FunV, J]
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J]

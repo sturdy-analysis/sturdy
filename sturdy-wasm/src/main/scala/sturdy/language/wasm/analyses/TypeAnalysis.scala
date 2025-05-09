@@ -42,19 +42,22 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Size = I32
   type Index = I32
   type FunV = Powerset[FunctionInstance]
+  type RefV = Powerset[RefValue]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
 
     // TODO: implement this for the TypeAnalysis
-    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): TypeAnalysis.Value = ???
+    override def valToRef(v: TypeAnalysis.Value): Powerset[TypeAnalysis.RefValue] = ???
+    override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
+    override def makeNullRef(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
+    override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
     override def refToFunV(r: TypeAnalysis.Value): Option[Powerset[FunctionInstance]] = ???
     override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def makeNullRef(t: ReferenceType): TypeAnalysis.Value = ???
     override def isNull(r: Value): TypeAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
@@ -90,16 +93,17 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: UpperBoundSymbolTable[TableAddr, Index, Value] = new UpperBoundSymbolTable(Value.TopValue)
+    val tables: UpperBoundSymbolTable[TableAddr, Index, RefV] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     given Failure = failure
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

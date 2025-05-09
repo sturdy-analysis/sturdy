@@ -46,13 +46,33 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type Size = I32
   type Index = I32
   type FunV = Powerset[FunctionInstance]
-  
-  
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, WithJoin] with
+  type RefV = Powerset[RefValue]
+
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
+    override def valToRef(v: ConstantAnalysis.Value): Powerset[ConstantAnalysis.RefValue] = v match
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(f)) => Powerset(ConstantAnalysis.RefValue.FuncRef(f))
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternRef(f)) => Powerset(ConstantAnalysis.RefValue.ExternRef(f))
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull) => Powerset(Set(ConstantAnalysis.RefValue.FuncNull))
+      case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull) => Powerset(Set(ConstantAnalysis.RefValue.ExternNull))
+      case _ => Powerset(Set())
+      
+    override def refToVal(r: Powerset[ConstantAnalysis.RefValue]): ConstantAnalysis.Value = r match
+      case Powerset(refs) =>
+        if (refs.size != 1)
+          Value.Num(NumValue.Int32(Topped.Top))
+        else {
+          val ref = refs.head
+          ref match {
+            case RefValue.FuncRef(f) => Value.Ref(RefValue.FuncRef(f))
+            case RefValue.ExternRef(f) => Value.Ref(RefValue.ExternRef(f))
+            case RefValue.FuncNull => Value.Ref(RefValue.FuncNull)
+            case RefValue.ExternNull => Value.Ref(RefValue.ExternNull)
+          }
+        }
     override def valToInt(v: Value): Int = {
       v match {
         case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => i match {
@@ -73,31 +93,37 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case _ => None
     
     
-    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): ConstantAnalysis.Value = {
+    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): Powerset[RefValue] = {
       t match {
         case FuncRef => f match {
-          case Powerset(funcs) if funcs.size == 1 =>
-            funcs.head match {
-              case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Actual(funcs.head)))
-              case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+          case Powerset(funcs) => 
+            if (funcs.isEmpty)
+              Powerset(Set(RefValue.FuncNull))
+            else {
+              Powerset(funcs.map {
+                case f@FunctionInstance.Wasm(_, _, _, _) => RefValue.FuncRef(Topped.Actual(f))
+                case _ => RefValue.FuncNull
+              })
             }
-          case _ => Value.Ref(ConstantAnalysis.RefValue.FuncNull)
         }
         case ExternRef => f match {
-          case Powerset(funcs) if funcs.size == 1 =>
-            funcs.head match {
-              case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Actual(funcs.head)))
-              case _ => Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+          case Powerset(funcs) =>
+            if (funcs.isEmpty)
+              Powerset(Set(RefValue.ExternNull))
+            else {
+              Powerset(funcs.map {
+                case f@FunctionInstance.Wasm(_, _, _, _) => RefValue.FuncRef(Topped.Actual(f))
+                case _ => RefValue.ExternNull
+              })
             }
-          case _ => Value.Ref(ConstantAnalysis.RefValue.ExternNull)
         }
       }
     }
 
-    override def makeNullRef(t: ReferenceType): ConstantAnalysis.Value = {
+    override def makeNullRef(t: ReferenceType): Powerset[ConstantAnalysis.RefValue] = {
       t match {
-        case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
-        case ExternRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+        case FuncRef => Powerset(Set(ConstantAnalysis.RefValue.FuncNull))
+        case ExternRef => Powerset(Set(ConstantAnalysis.RefValue.ExternNull))
       }
     }
 
@@ -159,19 +185,20 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvUnit: WithJoin[Unit] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: ConstantSymbolTable[TableAddr, Int, Value] = new ConstantSymbolTable
+    val tables: ConstantSymbolTable[TableAddr, Int, RefV] = new ConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
