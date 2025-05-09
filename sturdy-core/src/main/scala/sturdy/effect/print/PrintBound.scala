@@ -2,10 +2,10 @@ package sturdy.effect.print
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.{Effect, Monotone}
+import sturdy.data.{*, given}
+import sturdy.effect.{ComputationJoiner, Effect, Monotone, TrySturdy}
 import sturdy.values.{*, given}
 
-import scala.util.boundary, boundary.break
 
 trait Serializer[A, Serialized]:
   def serialize(a: A): Serialized
@@ -29,12 +29,32 @@ class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSer
     symbol = st
   private def combineSymbols(v1: State, v2: State, comb: (S, S) => MaybeChanged[S]): MaybeChanged[State] =
     (v1, v2) match
-      case (None, None) => Unchanged(None)
-      case (Some(a), None) => Unchanged(v1)
+      case (_, None) => Unchanged(v1)
       case (None, Some(a)) => Changed(v2)
       case (Some(a1), Some(a2)) => comb(a1, a2).map(Some.apply)
   override def join: Join[State] = combineSymbols(_, _, joinSerialized.apply)
   override def widen: Widen[State] = combineSymbols(_, _, widenSerialized.apply)
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {
+    val before = symbol
+    var afterFirst: State = null
+
+    override def inbetween(fFailed: Boolean): Unit =
+      afterFirst = symbol
+      symbol = before
+
+    override def retainNone(): Unit =
+      symbol = Join(afterFirst, symbol).get
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      symbol = Join(afterFirst, symbol).get
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      symbol = Join(afterFirst, symbol).get
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      symbol = Join(afterFirst, symbol).get
+  })
 
   def isSound[C](cp: CPrint[C])(using s: Soundness[C, S]): IsSound = boundary:
     cp.getPrinted.foreach { c =>

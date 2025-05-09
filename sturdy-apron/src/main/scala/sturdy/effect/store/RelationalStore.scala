@@ -87,14 +87,21 @@ final class RelationalStore
       // weak update implemented as join
       for (toAddr <- powAddr.iterator) {
         val to = ApronVar(toAddr)
+        val envBefore = _abstract1.getEnvironment
         writeMetaData(toAddr, physExpr)
-        val env = _abstract1.getEnvironment
-        if(env.hasVar(to) && physExpr.addrs.forall(env.hasVar(_))) {
-          val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
-          Profiler.addTime("Abstract1.combine") {
-            _abstract1.join(manager, assigned)
+        val envAfter = _abstract1.getEnvironment
+        if(!envBefore.hasVar(to)) {
+          if(envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_)))
+            _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+        } else {
+          if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_))) {
+            val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+            Profiler.addTime("Abstract1.combine") {
+              _abstract1.join(manager, assigned)
+            }
           }
         }
+
       }
     }
 
@@ -306,3 +313,5 @@ final class RelationalStore
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)
+
+  override def toString: String = _abstract1.toString

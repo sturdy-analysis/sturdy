@@ -20,7 +20,7 @@ given RelationalBooleanBranching[Addr, Type, A: Join]
   inline override def boolBranch(v: ApronCons[Addr, Type], thn: => A, els: => A): A =
     apronState.ifThenElse(effectStack)(v)(thn)(els)
 
-given RelationalBooleanBranchingEq[Addr, Type, A: Join]
+given RelationalBooleanBranchingBool[Addr, Type, A: Join]
   (using effectStack: EffectStack, apronState: ApronState[Addr, Type])
   : BooleanBranching[ApronBool[Addr, Type], A] with
   inline override def boolBranch(v: ApronBool[Addr, Type], thn: => A, els: => A): A =

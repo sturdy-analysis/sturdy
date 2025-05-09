@@ -145,32 +145,33 @@ object RelationalAnalysis extends Interpreter,
     apronState = new ApronRecencyState[RelationalVar, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[RelationalVar], RelType] = apronState
 
-    val baseCallFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
-    val relCallFrame: RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType] = new RelationalCallFrame(
+    val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, RelationalVar, RelType] = new RelationalCallFrame(
       initData = "$main",
       initVars = Iterable.empty,
       localVariableAllocator = localRelationaAlloc,
       apronState
     )
-    def useRelationalCallframe(name: String, v: Value, site: Exp.Call): Boolean =
-      val fun = site match { case Exp.Call(Exp.Var(f), _) => currentProgram.functions.get(f); case _ => None }
-      lazy val loopVar = fun.forall(f => f.loopVars.contains(name))
-      lazy val isRecursive = fun.forall(f => currentProgram.isRecursive(f.name))
-      lazy val tooManyLocals = fun.forall(f => f.locals.size > 10)
-      v match
-        case Value.IntValue(i) => loopVar || isRecursive || tooManyLocals
-        case Value.BoolValue(b) => loopVar || isRecursive || tooManyLocals
-        case _ => false
 
-    override val callFrame: SplitCallFrame[String, String, Value, Exp.Call] = new SplitCallFrame(baseCallFrame, relCallFrame, useRelationalCallframe) {
-      override def stackWiden: StackWidening[State] =
-        (stack: List[State], call: State) =>
-          //      Unchanged(call)
-          if (stack.contains(call))
-            Unchanged(call)
-          else
-            Changed(call)
-    }
+//    Sven: Currently Unsound. No time to debug the issue.
+//    val baseCallFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+//    override val callFrame: SplitCallFrame[String, String, Value, Exp.Call] = new SplitCallFrame(baseCallFrame, relCallFrame, useRelationalCallframe) {
+//      override def stackWiden: StackWidening[State] =
+//        (stack: List[State], call: State) =>
+//          //      Unchanged(call)
+//          if (stack.contains(call))
+//            Unchanged(call)
+//          else
+//            Changed(call)
+//    }
+//    def useRelationalCallframe(name: String, v: Value, site: Exp.Call): Boolean =
+//      val fun = site match { case Exp.Call(Exp.Var(f), _) => currentProgram.functions.get(f); case _ => None }
+//      lazy val loopVar = fun.forall(f => f.loopVars.contains(name))
+//      lazy val isRecursive = fun.forall(f => currentProgram.isRecursive(f.name))
+//      lazy val tooManyLocals = fun.forall(f => f.locals.size > 10)
+//      v match
+//        case Value.IntValue(i) => loopVar || isRecursive || tooManyLocals
+//        case Value.BoolValue(b) => loopVar || isRecursive || tooManyLocals
+//        case _ => false
 
     override val store: RecencyStore[RelationalVar, Addr, Value] = recencyStore
 
@@ -187,11 +188,7 @@ object RelationalAnalysis extends Interpreter,
       case Value.IntValue(expr) =>
         val addr = recencyStore.alloc(RelationalVar.Print(expr._type))
         recencyStore.joinRecentIntoOld(PowVirtualAddress(addr)) // Ensure the allocated address is old
-        apronState.join[Unit] {
-          apronState.assign(addr, expr)
-        } {
-          // do nothing
-        }
+        apronState.assign(addr, expr)
         Value.IntValue(ApronExpr.addr(addr, expr._type))
       case v => v
     }

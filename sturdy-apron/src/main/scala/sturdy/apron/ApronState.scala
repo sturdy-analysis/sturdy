@@ -255,6 +255,17 @@ final class ApronRecencyState
         Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
             ApronExpr.Constant(_, _, _)
         )
+    case (ApronExpr.Unary(op1, e1, rt1, rd1, specials1, tpe1), ApronExpr.Unary(op2, e2, rt2, rd2, specials2, tpe2)) if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(e1, e2)) =>
+      for {
+        eCombined <- combineExpr(widen, allocator).apply(e1, e2)
+        specialsCombined <- Join(specials1, specials2)
+      } yield(ApronExpr.Unary(op1, eCombined, rt1, rd1, specialsCombined, tpe1))
+    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, specials1, tpe1), ApronExpr.Binary(op2, l2, r2, rt2, rd2, specials2, tpe2)) if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(l1, l2) && structurallyJoinable(r1, r2)) =>
+      for {
+        lCombined <- combineExpr(widen, allocator).apply(l1, l2)
+        rCombined <- combineExpr(widen, allocator).apply(r1, r2)
+        specialsCombined <- Join(specials1, specials2)
+      } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
@@ -269,10 +280,20 @@ final class ApronRecencyState
           // in the recency closure join
           MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
       )
-
-
   }
 
+  private def structuralEq(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+    (e1, e2) match
+      case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) => v1.ctx == v2.ctx && tpe1 == tpe2
+      case (ApronExpr.Constant(_, _, tpe1), ApronExpr.Constant(_, _, tpe2)) => tpe1 == tpe2
+      case (ApronExpr.Unary(op1, e1, rt1, rd1, _, tpe1), ApronExpr.Unary(op2, e2, rt2, rd2, _, tpe2)) =>
+        op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2
+      case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) =>
+        op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structuralEq(r1, r2) && structuralEq(l1, l2)
+      case (_,_) => false
+
+  private inline def structurallyJoinable(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+    e1.isConstant && e2.isConstant || structuralEq(e1, e2)
 
   override def toString: String =
     relationalStore.abstract1.toString
