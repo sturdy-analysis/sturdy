@@ -84,7 +84,7 @@ object ConcreteInterpreter extends Interpreter with Control:
       r match {
         case RefValue.FuncRef(f) => f
         case RefValue.ExternRef(f) => f
-        case _ => f.fail(TypeError, s"Expected a function reference, but got $r")
+        case RefValue.FuncNull | RefValue.ExternNull => f.fail(UnboundFunctionIndex, s"Expected a function reference, but got $r")
       }
     
     override def makeNullRef(t: ReferenceType): ConcreteInterpreter.RefValue =

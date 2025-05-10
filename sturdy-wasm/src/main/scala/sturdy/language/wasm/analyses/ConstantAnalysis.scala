@@ -85,14 +85,16 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 
-    override def refToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = r match {
+    override def refToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] =
+      r match {
       case Powerset(refs) =>
         val funcs = refs.collect {
           case RefValue.FuncRef(Topped.Actual(f)) => f
           case RefValue.ExternRef(Topped.Actual(f)) => f
         }
-        if (funcs.isEmpty)
-          f.fail(TypeError, s"Cannot convert $refs to function instance")
+        if (funcs.isEmpty) {
+          f.fail(UnboundFunctionIndex, s"Cannot convert $refs to function instance")
+        }
         Powerset(funcs)
     }
 
