@@ -75,3 +75,10 @@ final class EffectListJoiner[A](effects: Seq[Effect]) extends ComputationJoiner[
   override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
   override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
   override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
+
+final class RetainBoth[A](joiner: ComputationJoiner[A]) extends ComputationJoiner[A]:
+  override def inbetween(fFailed: Boolean): Unit = joiner.inbetween(fFailed)
+  override def retainNone(): Unit = joiner.retainBoth(null, null)
+  override def retainFirst(fRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, null)
+  override def retainSecond(gRes: TrySturdy[A]): Unit = joiner.retainBoth(null, gRes)
+  override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, gRes)

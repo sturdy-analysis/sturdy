@@ -3,8 +3,11 @@ package sturdy.effect.print
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{*, given}
-import sturdy.effect.{ComputationJoiner, Effect, Monotone, TrySturdy}
+import sturdy.effect.{ComputationJoiner, Effect, Monotone, RetainBoth, TrySturdy}
 import sturdy.values.{*, given}
+
+import scala.util.boundary
+import scala.util.boundary.break
 
 
 trait Serializer[A, Serialized]:
@@ -35,26 +38,7 @@ class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSer
   override def join: Join[State] = combineSymbols(_, _, joinSerialized.apply)
   override def widen: Widen[State] = combineSymbols(_, _, widenSerialized.apply)
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A] {
-    val before = symbol
-    var afterFirst: State = null
-
-    override def inbetween(fFailed: Boolean): Unit =
-      afterFirst = symbol
-      symbol = before
-
-    override def retainNone(): Unit =
-      symbol = Join(afterFirst, symbol).get
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      symbol = Join(afterFirst, symbol).get
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit =
-      symbol = Join(afterFirst, symbol).get
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      symbol = Join(afterFirst, symbol).get
-  })
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = super.makeComputationJoiner.map(RetainBoth[A](_))
 
   def isSound[C](cp: CPrint[C])(using s: Soundness[C, S]): IsSound = boundary:
     cp.getPrinted.foreach { c =>

@@ -67,6 +67,9 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   def region(mapping: Map[Context, RecencyRegion], ctx: Context): Option[RecencyRegion] =
     mapping.get(ctx)
 
+  def setRegion(ctx: Context, region: RecencyRegion): Unit =
+    mapping += ctx -> region
+
   def isEqual(v1: VirtualAddress[Context], v2: VirtualAddress[Context]): Boolean =
     v1.ctx == v2.ctx && {
       otherMapping match
@@ -159,6 +162,9 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
           mapping += (ctx) -> Join(regionCurrent, regionState).get
     }
 
+  def setMapping(st: State): Unit =
+    mapping = st.mapping
+
   given finiteVirt: Finite[Context] with {}
   override def join: Join[State] = (s1: State, s2: State) =>
     Join[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
@@ -194,28 +200,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     override def toString: String =
       s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
-    val snapshotMapping = mapping
-    private var afterFirst: State = _
-
-    override def inbetween(fFailed: Boolean): Unit =
-      afterFirst = AddressTranslationState(mapping)
-      mapping = snapshotMapping
-
-    override def retainNone(): Unit =
-      mapping = snapshotMapping
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      mapping = afterFirst.mapping
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit =
-      () // do nothing
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      val afterSecond = AddressTranslationState(mapping)
-      val joined = join(afterFirst, afterSecond)
-      mapping = joined.get.mapping
-  )
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = throw new UnsupportedOperationException()
 
   def virtualAddresses: PowVirtualAddress[Context] =
     PowVirtualAddress(mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)
@@ -243,6 +228,8 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     )
 
   override def clone(): AddressTranslation[Context] = new AddressTranslation[Context](mapping)
+
+  override def toString: String = mapping.toString
 
 object AddressTranslation:
   def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)

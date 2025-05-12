@@ -29,7 +29,7 @@ given RelationalConvertIntLong[Addr, Type: ApronType](using failure: Failure, in
 
 given RelationalConvertLongInt[Addr, Type: ApronType](using intOps: RelationalIntOps[Addr,Type], convertType: ConvertLongInt[Type, Type]): ConvertLongInt[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] =
   (from, conf) =>
-    intOps.foldInteger(cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf)))
+    intOps.handleOverflow(cast(from, RoundingType.Int, RoundingDir.Zero, convertType(from._type, conf)))
 
 given RelationalConvertFloatInt[Addr: Ordering: ClassTag, Type: ApronType]
   (using

@@ -310,7 +310,6 @@ final class RelationalStore
         _abstract1 = snapshotAbs1
       }
 
-
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)
 

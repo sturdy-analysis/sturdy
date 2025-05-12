@@ -45,6 +45,8 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       else
         combineApronExpr(v1.asApronExprLazy, v2.asApronExprLazy).map(Left.apply)
 
+  given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
+
   given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOps[Int, I32] =
     given apronExprIntOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]] = RelationalIntOps[VirtAddr, Type]
     new LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asApronExpr, inject = Left(_)):

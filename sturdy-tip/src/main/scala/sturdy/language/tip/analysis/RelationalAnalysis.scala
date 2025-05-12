@@ -230,6 +230,7 @@ object RelationalAnalysis extends Interpreter,
 
     given EqOps[VRecord, VBool] = new LiftedEqOps[VRecord, VBool, VRecord, Topped[Boolean]](identity, ApronCons.from(BaseType[Int]))
 
+    given OverflowHandling = OverflowHandling.Fail
     override val intOps: IntegerOps[Int, Value] = implicitly
     override val compareOps: OrderingOps[Value, Value] = implicitly
     override val eqOps: EqOps[Value, Value] = implicitly

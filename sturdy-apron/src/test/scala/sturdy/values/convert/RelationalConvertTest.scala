@@ -67,6 +67,8 @@ class RelationalConvertTests(manager: Manager) extends Suites(
   RelationalConvertDoubleFloatTest(using manager)
 )
 
+given OverflowHandling = OverflowHandling.WrapAround
+
 class RelationalConvertIntLongTest(using manager: Manager) extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
   specials = List(),
   makeConvert = withApronState(using manager) (

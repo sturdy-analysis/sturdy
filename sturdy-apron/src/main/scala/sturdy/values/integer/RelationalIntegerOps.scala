@@ -15,6 +15,11 @@ import sturdy.effect.EffectStack
 import sturdy.util.Lazy
 import sturdy.{IsSound, Soundness}
 import sturdy.values.config.{Bits, UnsupportedConfiguration}
+import sturdy.values.integer.OverflowHandling.WrapAround
+
+enum OverflowHandling:
+  case WrapAround
+  case Fail
 
 trait RelationalBaseIntegerOps
     [
@@ -26,18 +31,19 @@ trait RelationalBaseIntegerOps
        apronState: ApronState[Addr,Type],
        effectStack: EffectStack,
        f: Failure,
+       overflowHandling: OverflowHandling,
        typeIntOps: IntegerOps[L,Type]
     ) extends IntegerOps[L, ApronExpr[Addr,Type]]:
   given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    foldInteger(intAdd(v1, v2))
+    handleOverflow(intAdd(v1, v2))
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    foldInteger(intSub(v1, v2))
+    handleOverflow(intSub(v1, v2))
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    foldInteger(intMul(v1, v2))
+    handleOverflow(intMul(v1, v2))
 
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -74,9 +80,9 @@ trait RelationalBaseIntegerOps
     if(iv.inf.sgn() >= 0)
       v
     else if(iv.sup.sgn() < 0)
-      foldInteger(intNegate(v))
+      handleOverflow(intNegate(v))
     else
-      foldInteger(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
+      handleOverflow(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v2)
@@ -96,7 +102,7 @@ trait RelationalBaseIntegerOps
       }
 
     }
-    foldInteger(res)
+    handleOverflow(res)
 
   override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(div(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
@@ -126,7 +132,7 @@ trait RelationalBaseIntegerOps
 
   override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val numBits = v._type.byteSize * 8
-    foldInteger(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(numBits, shift._type)))))
+    handleOverflow(intMul(v, intPow(intLit(2, v._type), modulo(shift, intLit(numBits, shift._type)))))
 
   override def shiftRight(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val ivV = apronState.getInterval(v)
@@ -157,7 +163,7 @@ trait RelationalBaseIntegerOps
     val absMax1 = absoluteMax(apronState.getInterval(v1))
     val absMax2 = absoluteMax(apronState.getInterval(v2))
     val sup = max(absMax1, absMax2)
-    foldInteger(ApronExpr.constant(Interval(DoubleScalar(0.0), sup), typeIntOps.gcd(v1._type, v2._type)))
+    handleOverflow(ApronExpr.constant(Interval(DoubleScalar(0.0), sup), typeIntOps.gcd(v1._type, v2._type)))
 
   private def absoluteMax(iv: Interval): Scalar =
     max(abs(iv.inf), abs(iv.sup))
@@ -251,27 +257,39 @@ trait RelationalBaseIntegerOps
   /**
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
-  def foldInteger(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def handleOverflow(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val fromType = v._type
 
-    // Interval within range of the fixed-size integer
-    if (iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
-      v
-      // No underflow
-    } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-      toSigned(castTo(intMod[L,Addr,Type](toUnsigned(v), uMax, v._type), v._type))
+    overflowHandling match
+      case OverflowHandling.WrapAround =>
+        val fromType = v._type
 
-      // Over and underflow
-    } else {
-      // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
-      // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-      val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-      val foldFirstRound = intMod[L,Addr,Type](toUnsigned(v), uMax, v._type)
-      val foldSecondRound = intMod[L,Addr,Type](intAdd[L,Addr,Type](foldFirstRound, uMax, v._type), uMax, v._type)
-      toSigned(foldSecondRound)
-    }
+        // Interval within range of the fixed-size integer
+        if (iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
+          v
+          // No underflow
+        } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
+          val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
+          toSigned(castTo(intMod[L, Addr, Type](toUnsigned(v), uMax, v._type), v._type))
+
+          // Over and underflow
+        } else {
+          // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
+          // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
+          val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
+          val foldFirstRound = intMod[L, Addr, Type](toUnsigned(v), uMax, v._type)
+          val foldSecondRound = intMod[L, Addr, Type](intAdd[L, Addr, Type](foldFirstRound, uMax, v._type), uMax, v._type)
+          toSigned(foldSecondRound)
+        }
+      case OverflowHandling.Fail =>
+        if (! iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
+          effectStack.joinWithFailure(v) {
+            Failure(IntegerOverflow, s"$v with interval $iv overflows bounds ${Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger)}")
+          }
+        } else {
+          v
+        }
+
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
@@ -312,6 +330,7 @@ given RelationalIntOps
      apronState: ApronState[Addr,Type],
      effectStack: EffectStack,
      f: Failure,
+     overflowHandling: OverflowHandling,
      typeIntOps: IntegerOps[Int,Type]
   ): RelationalBaseIntegerOps[Int, Addr, Type] with
 
@@ -330,6 +349,7 @@ given RelationalLongOps
     apronState: ApronState[Addr,Type],
     effectStack: EffectStack,
     f: Failure,
+    overflowHandling: OverflowHandling,
     typeIntOps: IntegerOps[Long,Type]
   ): RelationalBaseIntegerOps[Long, Addr, Type] with
 

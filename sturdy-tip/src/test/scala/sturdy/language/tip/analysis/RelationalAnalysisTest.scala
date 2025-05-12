@@ -41,22 +41,15 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    val uri = classOf[RelationalAnalysisTest].getResource("/sturdy/language/tip").toURI;
    val recursiveProgram: Array[String] = Source.fromFile(classOf[RelationalAnalysisTest].getResource("/sturdy/language/recursive_programs").toURI).getLines.toArray
 
-   val excluded : ArraySeq[String] = ArraySeq(
-//     "fibRec.tip" // Crashes JVM
-   )
-
    val polyManager = new Polka(false)
    Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//     p.toString.endsWith(".tip") && excluded.forall(exc => !p.endsWith(exc))
-    p.endsWith("div_by_zero.tip")
+//     p.toString.endsWith(".tip")
+    p.endsWith("a1.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates(readPriorOutput = false))
      }
-//     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-//       runRelationalAnalysis(p, StackConfig.StackedCfgNodes())
-//     }
    }
 
    def runRelationalAnalysis(p: Path, stackConfig: StackConfig) =
