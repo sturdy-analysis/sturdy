@@ -1,4 +1,4 @@
-{ lib, stdenv, binutils, fetchFromGitHub, gmp, mpfr, ppl, openjdk }:
+{ lib, stdenv, binutils, fetchFromGitHub, gmp, mpfr, ppl, jdk21_headless }:
 
 stdenv.mkDerivation rec {
   name = "apron";
@@ -24,7 +24,7 @@ stdenv.mkDerivation rec {
     ./configure -prefix $out
   '';
 
-  buildInputs = [ gmp mpfr ppl openjdk ];
+  buildInputs = [ gmp mpfr ppl jdk21_headless ];
 
   postInstall = ''
     install japron/apron/japron.h japron/gmp/jgmp.h $out/include/
