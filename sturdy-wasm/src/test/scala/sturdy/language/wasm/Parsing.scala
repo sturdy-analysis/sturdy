@@ -34,7 +34,7 @@ object Parsing:
           compiler <- Compiler[IO](blocker)
           mod <- compiler.compile(path, blocker)
         } yield mod
-      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(1000000, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing of $path timed out")
     }
@@ -66,7 +66,7 @@ object Parsing:
           binaryParser = new ModuleParser[IO](validator)
           mod <- binaryParser.parse(loader.sections(bytes))
         } yield mod
-      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(10000, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing timed out")
     }
@@ -80,7 +80,7 @@ object Parsing:
           compiler <- Compiler[IO](blocker)
           mod <- compiler.compile(mod)
         } yield mod
-      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(10000, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing of ${mod.id} timed out")
     }

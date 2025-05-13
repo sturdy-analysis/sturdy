@@ -8,6 +8,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.{DecidableSymbolTable, SymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
+import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value}
 import sturdy.language.wasm.generic.WasmFailure.*
 import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
@@ -294,11 +295,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
         validateTableAccess(ix, n)
-        var elemLen = 0
-        elem.init match {
-          case Left(in) => elemLen = in.length
-          case Right(in) => elemLen = in.length
-        }
+        val elemLen = elem.init.length
         if (valToInt(s) + valToInt(n) > elemLen) {
           fail(TableAccessOutOfBounds, "Index > Elem List")
         }
@@ -310,21 +307,29 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           return
         }
         stack.push(d)
-        elem.init match {
-          case Left(in) => stack.push(refToVal(getElemLeft(in, s)))
-          case Right(in) => stack.push(refToVal(getElemRight(in, s)))
-            evalTableInst(TableSet(ix))
-            stack.push(d)
-            stack.push(num.evalNumeric(i32.Const(1)))
-            stack.push(num.evalNumeric(i32.Add))
-            stack.push(s)
-            stack.push(num.evalNumeric(i32.Const(1)))
-            stack.push(num.evalNumeric(i32.Add))
-            stack.push(n)
-            stack.push(num.evalNumeric(i32.Const(1)))
-            stack.push(num.evalNumeric(i32.Sub))
-            evalTableInst(TableInit(ix, el))
+        // Todo: replace this with index
+        val index = valToInt(s)
+        val refInst = elem.init(index)
+        refInst match {
+          case RefFunc(funcIdx) =>
+            val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
+            val funV = functionOps.funValue(func)
+            stack.push(refToVal(funVToRef(funV, FuncRef)))
+          case RefNull(t) =>
+            stack.push(refToVal(makeNullRef(t)))
+          case _ => fail(UnboundFunctionIndex, s"Expected function reference but got $refInst")
         }
+        evalTableInst(TableSet(ix))
+        stack.push(d)
+        stack.push(num.evalNumeric(i32.Const(1)))
+        stack.push(num.evalNumeric(i32.Add))
+        stack.push(s)
+        stack.push(num.evalNumeric(i32.Const(1)))
+        stack.push(num.evalNumeric(i32.Add))
+        stack.push(n)
+        stack.push(num.evalNumeric(i32.Const(1)))
+        stack.push(num.evalNumeric(i32.Sub))
+        evalTableInst(TableInit(ix, el))
 
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
@@ -334,7 +339,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         while (i < elemSz) {
           val currElem = module.elements.lift(i).getOrElse(fail(TableAccessOutOfBounds, el.toString))
           if (currElem == elem) {
-            newElems = newElems.appended(Elem(ReferenceType.FuncRef, Left(Seq.empty), ElemMode.Passive(elem.reftype, elem.init)))
+            newElems = newElems.appended(Elem(elem.reftype, Seq.empty, ElemMode.Passive()))
           } else {
             newElems = newElems.appended(currElem)
           }
@@ -940,30 +945,40 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     // tables
     modInst.elements = module.elem
     module.elem.zipWithIndex.foreach {
-      case (elem@Elem(reftype, Left(init), mode), i) =>
+      case (elem@Elem(reftype, init, mode), i) =>
         mode match {
-          case ElemMode.Passive(_, _) => None
-          case ElemMode.Declarative(_, _) => None
-          case ElemMode.Active(_, _, tableIdx, off) =>
+          case ElemMode.Passive() => None
+          case ElemMode.Declarative() => None
+          case ElemMode.Active(tableIdx, offset) =>
             val id = BlockId(elem)
-            loc = modInst.registerBlockSizes(id, loc, off)
-            val base = evalInstructionSequence(id, off, modInst, loc)
+            loc = modInst.registerBlockSizes(id, loc, offset)
+            val baseIdx = evalInstructionSequence(id, offset, modInst, loc)
             val addr = modInst.tableAddrs(tableIdx)
-            init.zipWithIndex.foreach { (funcIx, i) => //i = index in element
+            // check if init is empty, if it is skip the rest
+            if (init.nonEmpty) {
+              // next, there are cases where init contains a sequence of references. Check for these
+              val funcRefs = init.collect { case rf: RefFunc => rf }
               getTableLimits(addr).max match {
                 case Some(maxLimit) => if (i >= maxLimit) {
-                  fail(TableAccessOutOfBounds, s"FuncRef $funcIx in Table $tableIdx is larger than max limit $maxLimit")
+                  fail(TableAccessOutOfBounds, s"FuncRef $funcRefs in Table $tableIdx is larger than max limit $maxLimit")
                 }
                 case _ => None
               }
-              stack.push(base)
-              stack.push(num.evalNumeric(i32.Const(i)))
-              stack.push(num.evalNumeric(i32.Add)) // adds index to base
-              val idx = stack.popOrAbort() // stack is empty
-              val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-              tables.set(addr, valToIdx(idx), funVToRef(funV, reftype))
-              // TODO add failure conditions for table writing
+              // todo: refactor this. Note that this approach is not clean under the new spec, because init can be a vector of any expressions. This compromise is taken so that vectors of references can be handled, which are not specified in the spec but CAN occur
+              funcRefs.zipWithIndex.foreach {
+                case (RefFunc(refIdx), offset) => {
+                  val funV = functionOps.funValue(modInst.functions.lift(refIdx).getOrElse(fail(UnboundFunctionIndex, refIdx.toString)))
+                  stack.push(num.evalNumeric(i32.Const(offset)))
+                  stack.push(baseIdx)
+                  stack.push(num.evalNumeric(i32.Add)) // adds index to base
+                  val offsetIdx = stack.popOrAbort()
+                  tables.set(addr, valToIdx(offsetIdx), funVToRef(funV, reftype))
+
+                }
+              }
+              // TODO add failure conditions for table writing.
             }
+
 
         }
       case _ => None
