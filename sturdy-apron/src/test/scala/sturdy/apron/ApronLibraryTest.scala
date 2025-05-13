@@ -101,6 +101,24 @@ class ApronLibraryTest extends AnyFunSuite:
   }
 
 
+  test("{x = y}.meet(x != y) == bottom") {
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val inames = Array[Var](x, y)
+    val fnames: Array[Var] = Array()
+    val env = new Environment(inames, fnames)
+    val manager: Manager = new Polka(true)
+    val aState = new Abstract1(manager, env)
+
+    aState.assign(manager, x, ApronExpr.addr("y", BaseType[Int]).toIntern(env), null)
+//    aState.meet(manager, ApronCons.neq(ApronExpr.addr("x", BaseType[Int]), ApronExpr.addr("y", BaseType[Int])).toApron(env))
+    val state1 = aState.meetCopy(manager, ApronCons.lt(ApronExpr.addr("x", BaseType[Int]), ApronExpr.addr("y", BaseType[Int])).toApron(env))
+    val state2 = aState.meetCopy(manager, ApronCons.lt(ApronExpr.addr("y", BaseType[Int]), ApronExpr.addr("x", BaseType[Int])).toApron(env))
+    val stateJoined = state1.joinCopy(manager, state2)
+    stateJoined.isBottom(manager) shouldBe true
+  }
+
+
   test("Abstract1.hashcode()") {
     val x = "x"
     val y = "y"

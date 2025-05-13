@@ -23,6 +23,10 @@ object ApronJoins:
     Profiler.addTime("Abstract1.combine") {
       if(s1.eq(s2)) {
         Unchanged(s1)
+      } else if(s1.isBottom(s1.getCreationManager)) {
+        MaybeChanged(s1, hasChanged = !s2.isBottom(s2.getCreationManager))
+      } else if(s2.isBottom(s2.getCreationManager)) {
+        Unchanged(s1)
       } else {
         val manager = s1.getCreationManager
 

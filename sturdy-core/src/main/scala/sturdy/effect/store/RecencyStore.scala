@@ -83,7 +83,8 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
   override def widen: Widen[State] = initStore.widen
   override def stackWiden: StackWidening[State] = initStore.stackWiden
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = throw new UnsupportedOperationException()
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
+    RecencyClosure(this, EffectList()).makeComputationJoiner[A]
 
   def virtualAddresses: PowVirtualAddress[Context] =
     addressTranslation.virtualAddresses
@@ -121,6 +122,11 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
 
   override def setState(st: State): Unit =
     recencyStore.addressTranslation.setState(st.addrTransState.asInstanceOf)
+    recencyStore.setState(st.recencyStoreState.asInstanceOf)
+    effect.setState(st.effectState)
+
+  def setStateNonMonotonically(st: State): Unit =
+    recencyStore.addressTranslation.setStateNonMonotonically(st.addrTransState.asInstanceOf)
     recencyStore.setState(st.recencyStoreState.asInstanceOf)
     effect.setState(st.effectState)
 
@@ -203,24 +209,14 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
 
     override def inbetween(fFailed: Boolean): Unit =
       afterFirst = RecencyClosureState[Context, Virt, V, effect.State](recencyStore, recencyStore.addressTranslation.getState, recencyStore.store.getState, effect.getState)
-      setState(before)
+      setStateNonMonotonically(before)
 
-    override def retainNone(): Unit =
-      // If both branches fail, no recent addresses are valid anymore. Retire everything to make space for new recent addresses.
-      val afterSecond = RecencyClosureState[Context, Virt, V, effect.State](recencyStore, recencyStore.addressTranslation.getState, recencyStore.store.getState, effect.getState)
-      setState(join(afterFirst, afterSecond).get)
-      val allRetiredAddrTrans = recencyStore.addressTranslation.mapping.map ((ctx, region) =>
-        recencyStore.store.move(
-          PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
-          PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
-        (ctx, RecencyRegion(recent = BitSet.empty, old = region.recent ++ region.old))
-      )
-      recencyStore.addressTranslation.setState(recencyStore.addressTranslation.AddressTranslationState(allRetiredAddrTrans))
+    override def retainNone(): Unit = {}
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       // Second branch failed.
       for ((ctx, afterSecondRegion) <- recencyStore.addressTranslation.mapping) {
-        val beforeRegion = before.addrTransState.asInstanceOf[recencyStore.addressTranslation.State].mapping(ctx)
+        val beforeRegion = before.addrTransState.asInstanceOf[recencyStore.addressTranslation.State].mapping.getOrElse(ctx, RecencyRegion(BitSet.empty, BitSet.empty))
 
         // Retire newly allocated recent addresses in store of second branch to avoid joining them with first branch.
         val newlyAllocatedRecents = afterSecondRegion.recent.diff(beforeRegion.recent)
@@ -232,19 +228,19 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
         recencyStore.addressTranslation.setRegion(ctx, RecencyRegion(recent = afterSecondRegion.recent.diff(newlyAllocatedRecents), old = newlyAllocatedRecents ++ afterSecondRegion.old))
       }
       val afterSecond = RecencyClosureState[Context, Virt, V, effect.State](recencyStore, recencyStore.addressTranslation.getState, recencyStore.store.getState, effect.getState)
-      setState(join(afterFirst, afterSecond).get)
+      setStateNonMonotonically(join(afterFirst, afterSecond).get)
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       val afterSecond = RecencyClosureState[Context, Virt, V, effect.State](recencyStore, recencyStore.addressTranslation.getState, recencyStore.store.getState, effect.getState)
-      setState(afterFirst)
+      setStateNonMonotonically(afterFirst)
       afterFirst = afterSecond
       retainFirst(gRes)
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       val afterSecond = RecencyClosureState[Context, Virt, V, effect.State](recencyStore, recencyStore.addressTranslation.getState, recencyStore.store.getState, effect.getState)
-      setState(join(afterFirst, afterSecond).get)
+      setStateNonMonotonically(join(afterFirst, afterSecond).get)
 
-  })// Some(EffectListJoiner[A](List(recencyStore.addressTranslation, recencyStore.store, effect)))
+  })
 
 object RecencyClosure:
   def apply[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V](recencyStore: RecencyStore[Context, Virt, V]): RecencyClosure[Context, Virt, V] = new RecencyClosure(recencyStore, new Stateless {})

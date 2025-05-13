@@ -162,7 +162,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
           mapping += (ctx) -> Join(regionCurrent, regionState).get
     }
 
-  def setMapping(st: State): Unit =
+  def setStateNonMonotonically(st: State): Unit =
     mapping = st.mapping
 
   given finiteVirt: Finite[Context] with {}

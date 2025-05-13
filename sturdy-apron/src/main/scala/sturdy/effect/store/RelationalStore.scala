@@ -195,6 +195,20 @@ final class RelationalStore
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
     val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
     this._abstract1.meet(manager, cons)
+
+    // Inequality constraints `x != y` are imprecise on polyhedra.
+    // The workaround is to take the join `state[x < y] U state[x > y]` (https://github.com/antoinemine/apron/issues/37)
+    val inequalityConstraints = constraints.filter { case ApronCons(CompareOp.Neq, _, _) => true; case _ => false }
+    if(! inequalityConstraints.isEmpty) {
+      val state1 = this._abstract1.meetCopy(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
+        ApronCons(CompareOp.Lt, e1, e2).toApron(this._abstract1.getEnvironment)
+      }.toArray[Tcons1])
+      this._abstract1.meet(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
+        ApronCons(CompareOp.Gt, e1, e2).toApron(this._abstract1.getEnvironment)
+      }.toArray[Tcons1])
+      this._abstract1.join(manager, state1)
+    }
+
     if (this._abstract1.isBottom(manager) && constraints.forall(cons => cons.e1.floatSpecials.isBottom && cons.e2.floatSpecials.isBottom))
       throw new BottomFailure
 

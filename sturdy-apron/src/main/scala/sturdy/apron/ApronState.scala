@@ -204,7 +204,8 @@ final class ApronRecencyState
         convertExpr.virtToPhys(expr)))
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
-    relationalStore.addConstraints(constraints.flatMap(convertExpr.virtToPhys(_))*)
+    val physConstraints = constraints.flatMap(convertExpr.virtToPhys(_))
+    relationalStore.addConstraints(physConstraints*)
 
   override def addCondition(condition: ApronBool[VirtualAddress[Ctx], Type]): Unit =
     condition match

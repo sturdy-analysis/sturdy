@@ -288,7 +288,7 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
 
   def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
     case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
-    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
+    case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
     case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
     case Le  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
     case Ge  => Tcons1(env, Tcons1.SUPEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
