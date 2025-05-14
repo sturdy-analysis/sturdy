@@ -188,7 +188,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val _ = getGlobalValue(globalIdx)
       writeGlobalValue(globalIdx, v)
 
-  def evalTableInst(inst: Inst): Unit =
+  def evalTableInst(inst: Inst, loc: InstLoc): Unit = external {
     inst match {
       case TableGet(ix) =>
         val elemIdx = stack.popOrAbort()
@@ -226,7 +226,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         if (valToInt(n) == 0) return
         stack.push(offset)
         stack.push(ref)
-        evalTableInst(TableSet(ix))
+        evalTableInst(TableSet(ix), loc)
         stack.push(offset)
         stack.push(num.evalNumeric(i32.Const(1)))
         stack.push(num.evalNumeric(i32.Add))
@@ -234,7 +234,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         stack.push(n)
         stack.push(num.evalNumeric(i32.Const(1)))
         stack.push(num.evalNumeric(i32.Sub))
-        evalTableInst(TableFill(ix))
+        evalTableInst(TableFill(ix), loc)
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
@@ -258,8 +258,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           }
           stack.push(d)
           stack.push(s)
-          evalTableInst(TableGet(y))
-          evalTableInst(TableSet(x))
+          evalTableInst(TableGet(y), loc)
+          evalTableInst(TableSet(x), loc)
           stack.push(d)
           stack.push(num.evalNumeric(i32.Const(1)))
           stack.push(num.evalNumeric(i32.Add))
@@ -280,17 +280,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           stack.push(num.evalNumeric(i32.Sub))
           stack.push(s)
           stack.push(num.evalNumeric(i32.Add))
-          evalTableInst(TableGet(y))
-          evalTableInst(TableSet(x))
+          evalTableInst(TableGet(y), loc)
+          evalTableInst(TableSet(x), loc)
           stack.push(d)
           stack.push(s)
         }
         stack.push(n)
         stack.push(num.evalNumeric(i32.Const(1)))
         stack.push(num.evalNumeric(i32.Sub))
-        evalTableInst(TableCopy(x, y))
+        evalTableInst(TableCopy(x, y), loc)
       case TableInit(ix, el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
+        if (elem.mode != ElemMode.Passive()) {
+          fail(TableAccessOutOfBounds, s"Tried to init non passive element $elem")
+        }
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
@@ -310,16 +313,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         // Todo: replace this with index
         val index = valToInt(s)
         val refInst = elem.init(index)
-        refInst match {
-          case RefFunc(funcIdx) =>
-            val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
-            val funV = functionOps.funValue(func)
-            stack.push(refToVal(funVToRef(funV, FuncRef)))
-          case RefNull(t) =>
-            stack.push(refToVal(makeNullRef(t)))
+        val instBlock = BlockId(elem)
+        val blockLoc = module.registerBlockSizes(instBlock, loc, refInst)
+        val ref = evalInstructionSequence(instBlock, refInst, module, blockLoc)
+        ref match {
+          case Value.Ref(RefValue.FuncRef(funcRef)) =>
+            val fRef = funVToRef(funcInstToFunV(funcRef), FuncRef)
+            stack.push(refToVal(fRef))
+          case Value.Ref(RefValue.FuncNull)  =>
+            stack.push(refToVal(makeNullRef(FuncRef)))
           case _ => fail(UnboundFunctionIndex, s"Expected function reference but got $refInst")
         }
-        evalTableInst(TableSet(ix))
+        evalTableInst(TableSet(ix), blockLoc)
         stack.push(d)
         stack.push(num.evalNumeric(i32.Const(1)))
         stack.push(num.evalNumeric(i32.Add))
@@ -329,7 +334,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         stack.push(n)
         stack.push(num.evalNumeric(i32.Const(1)))
         stack.push(num.evalNumeric(i32.Sub))
-        evalTableInst(TableInit(ix, el))
+        evalTableInst(TableInit(ix, el), blockLoc)
 
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
@@ -349,6 +354,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
+  }
 
   def validateTableAccess(tableIdx: TableIdx, elemIdx: V): TableAddr = {
     val addr = module.tableAddrs.lift(tableIdx).getOrElse(fail(TableAccessOutOfBounds, tableIdx.toString))
@@ -491,12 +497,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
-      evalTableInst(inst)
+      evalTableInst(inst, loc)
     else if (opcode >= OpCode.RefNull && opcode <= OpCode.RefFunc)
       evalRefInst(inst)
     else inst match
       case i: VarInst => evalVarInst(i)
-      case i: TableInst => evalTableInst(i)
+      case i: TableInst => evalTableInst(i, loc)
       case i: ReferenceInst => evalRefInst(i)
       case op: Miscop =>
         val v = stack.popOrAbort()
@@ -956,24 +962,27 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
             val addr = modInst.tableAddrs(tableIdx)
             // check if init is empty, if it is skip the rest
             if (init.nonEmpty) {
-              // next, there are cases where init contains a sequence of references. Check for these
-              val funcRefs = init.collect { case rf: RefFunc => rf }
+              val funcRefs = init.map(expr => {
+                val result = evalInstructionSequence(id, expr, modInst, loc)
+                result match {
+                  case Value.Ref(RefValue.FuncRef(_)) => result
+                  case Value.Ref(RefValue.ExternRef(_)) => result
+                  case _ => fail(TypeError, s"Element segment initialization expression must evaluate to a function reference, but got $result")
+                }
+              })
               getTableLimits(addr).max match {
                 case Some(maxLimit) => if (i >= maxLimit) {
                   fail(TableAccessOutOfBounds, s"FuncRef $funcRefs in Table $tableIdx is larger than max limit $maxLimit")
                 }
                 case _ => None
               }
-              // todo: refactor this. Note that this approach is not clean under the new spec, because init can be a vector of any expressions. This compromise is taken so that vectors of references can be handled, which are not specified in the spec but CAN occur
               funcRefs.zipWithIndex.foreach {
-                case (RefFunc(refIdx), offset) => {
-                  val funV = functionOps.funValue(modInst.functions.lift(refIdx).getOrElse(fail(UnboundFunctionIndex, refIdx.toString)))
+                case (Value.Ref(RefValue.FuncRef(fRef)), offset) => {
                   stack.push(num.evalNumeric(i32.Const(offset)))
                   stack.push(baseIdx)
                   stack.push(num.evalNumeric(i32.Add)) // adds index to base
                   val offsetIdx = stack.popOrAbort()
-                  tables.set(addr, valToIdx(offsetIdx), funVToRef(funV, reftype))
-
+                  tables.set(addr, valToIdx(offsetIdx), funVToRef(funcInstToFunV(fRef), FuncRef))
                 }
               }
               // TODO add failure conditions for table writing.
@@ -1002,4 +1011,3 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     modInst
 
   }
-

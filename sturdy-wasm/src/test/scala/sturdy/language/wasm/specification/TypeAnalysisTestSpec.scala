@@ -49,7 +49,7 @@ class TypeAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript type analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm1").toURI;
+  val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
 
   val spectest = Parsing.fromText(pathSpectest)
 

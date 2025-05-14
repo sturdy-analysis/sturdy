@@ -25,7 +25,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/specification-test-suite-wasm1").toURI
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
