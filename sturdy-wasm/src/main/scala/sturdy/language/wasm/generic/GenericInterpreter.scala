@@ -315,15 +315,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val refInst = elem.init(index)
         val instBlock = BlockId(elem)
         val blockLoc = module.registerBlockSizes(instBlock, loc, refInst)
-        val ref = evalInstructionSequence(instBlock, refInst, module, blockLoc)
-        ref match {
-          case Value.Ref(RefValue.FuncRef(funcRef)) =>
-            val fRef = funVToRef(funcInstToFunV(funcRef), FuncRef)
-            stack.push(refToVal(fRef))
-          case Value.Ref(RefValue.FuncNull)  =>
-            stack.push(refToVal(makeNullRef(FuncRef)))
-          case _ => fail(UnboundFunctionIndex, s"Expected function reference but got $refInst")
-        }
+        // assert result of eval(refInst) convertable to ref
+        val fRef = valToRef(evalInstructionSequence(instBlock, refInst, module, blockLoc))
+        stack.push(refToVal(fRef))
         evalTableInst(TableSet(ix), blockLoc)
         stack.push(d)
         stack.push(num.evalNumeric(i32.Const(1)))
@@ -962,14 +956,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
             val addr = modInst.tableAddrs(tableIdx)
             // check if init is empty, if it is skip the rest
             if (init.nonEmpty) {
-              val funcRefs = init.map(expr => {
-                val result = evalInstructionSequence(id, expr, modInst, loc)
-                result match {
-                  case Value.Ref(RefValue.FuncRef(_)) => result
-                  case Value.Ref(RefValue.ExternRef(_)) => result
-                  case _ => fail(TypeError, s"Element segment initialization expression must evaluate to a function reference, but got $result")
-                }
-              })
+              val funcRefs = init.map(expr => valToRef(evalInstructionSequence(id, expr, modInst, loc)))
               getTableLimits(addr).max match {
                 case Some(maxLimit) => if (i >= maxLimit) {
                   fail(TableAccessOutOfBounds, s"FuncRef $funcRefs in Table $tableIdx is larger than max limit $maxLimit")
@@ -977,13 +964,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 case _ => None
               }
               funcRefs.zipWithIndex.foreach {
-                case (Value.Ref(RefValue.FuncRef(fRef)), offset) => {
+                (fRef, offset) =>
                   stack.push(num.evalNumeric(i32.Const(offset)))
                   stack.push(baseIdx)
                   stack.push(num.evalNumeric(i32.Add)) // adds index to base
                   val offsetIdx = stack.popOrAbort()
-                  tables.set(addr, valToIdx(offsetIdx), funVToRef(funcInstToFunV(fRef), FuncRef))
-                }
+                  tables.set(addr, valToIdx(offsetIdx), fRef)
               }
               // TODO add failure conditions for table writing.
             }
