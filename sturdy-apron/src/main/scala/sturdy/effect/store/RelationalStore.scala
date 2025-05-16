@@ -199,7 +199,7 @@ final class RelationalStore
     // Inequality constraints `x != y` are imprecise on polyhedra.
     // The workaround is to take the join `state[x < y] U state[x > y]` (https://github.com/antoinemine/apron/issues/37)
     val inequalityConstraints = constraints.filter { case ApronCons(CompareOp.Neq, _, _) => true; case _ => false }
-    if(! inequalityConstraints.isEmpty) {
+    if(inequalityConstraints.nonEmpty) {
       val state1 = this._abstract1.meetCopy(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
         ApronCons(CompareOp.Lt, e1, e2).toApron(this._abstract1.getEnvironment)
       }.toArray[Tcons1])
@@ -295,6 +295,11 @@ final class RelationalStore
     metaData = s.metaData
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
+
+  override def setBottom: Unit =
+    metaData = Map()
+    _abstract1 = Abstract1(manager, new Environment())
+    nonRelationalStore.setBottom
 
   inline def copyAbstract1(abstract1: Abstract1): Abstract1 =
     Profiler.addTime("Abstract1.copy") {

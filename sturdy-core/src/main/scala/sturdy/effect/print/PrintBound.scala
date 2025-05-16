@@ -38,7 +38,7 @@ class PrintBoundSerializable[A,S](using val serializer: Serializer[A,S], joinSer
   override def join: Join[State] = combineSymbols(_, _, joinSerialized.apply)
   override def widen: Widen[State] = combineSymbols(_, _, widenSerialized.apply)
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = super.makeComputationJoiner.map(RetainBoth[A](_))
+//  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = super.makeComputationJoiner.map(RetainBoth[A](_))
 
   def isSound[C](cp: CPrint[C])(using s: Soundness[C, S]): IsSound = boundary:
     cp.getPrinted.foreach { c =>

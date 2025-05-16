@@ -93,9 +93,11 @@ class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(
 
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
   override type State = List[V]
-  override def getState: State = vars.toList
+  override def getState: State = if(vars == null) List() else vars.toList
   override def setState(s: State): Unit =
-    s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+    if(vars == null) vars = s.toArray
+    else  s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+  override def setBottom: Unit = vars = null
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 
@@ -109,7 +111,7 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
       vars = snapshot
 
     override def retainNone(): Unit =
-      vars = snapshot
+      setBottom
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       vars = fVars

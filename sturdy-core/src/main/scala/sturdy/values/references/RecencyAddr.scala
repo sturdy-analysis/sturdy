@@ -165,6 +165,8 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   def setStateNonMonotonically(st: State): Unit =
     mapping = st.mapping
 
+  override def setBottom: Unit = mapping = Map()
+
   given finiteVirt: Finite[Context] with {}
   override def join: Join[State] = (s1: State, s2: State) =>
     Join[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
@@ -200,7 +202,27 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     override def toString: String =
       s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = throw new UnsupportedOperationException()
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
+    val before: State = AddressTranslationState(mapping)
+    var afterFirst: State = _
+
+    override def inbetween(fFailed: Boolean): Unit =
+      afterFirst = AddressTranslationState(mapping)
+      mapping = before.mapping
+
+    override def retainNone(): Unit =
+      mapping = Map()
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      mapping = afterFirst.mapping
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
+      // Nothing to do
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      val afterSecond = AddressTranslationState(mapping)
+      mapping = join(afterFirst, afterSecond).get.mapping
+  )
 
   def virtualAddresses: PowVirtualAddress[Context] =
     PowVirtualAddress(mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)

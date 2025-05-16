@@ -126,6 +126,9 @@ final class RelationalCallFrame
   override def setState(state: State): Unit =
     addressCallFrame.setState(state)
 
+  override def setBottom: Unit =
+    addressCallFrame.setBottom
+
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]
   override def stackWiden: StackWidening[State] =

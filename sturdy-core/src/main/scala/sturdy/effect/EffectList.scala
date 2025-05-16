@@ -45,7 +45,6 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
 
       MaybeChanged(ArraySeq.from(joinedCall), changed)
 
-
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](effects))
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =

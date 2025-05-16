@@ -40,6 +40,7 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
   override type State = Map[A, V]
   override def getState: State = store
   override def setState(s: State): Unit = this.store = s
+  override def setBottom: Unit = this.store = Map()
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 
