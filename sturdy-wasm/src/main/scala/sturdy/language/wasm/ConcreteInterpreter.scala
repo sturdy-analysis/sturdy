@@ -32,6 +32,7 @@ import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.fix.{Combinator, Contextual}
 import sturdy.language.wasm.abstractions.Control
+import sturdy.values.Topped
 
 object ConcreteInterpreter extends Interpreter with Control:
   override type J[A] = NoJoin[A]
@@ -69,6 +70,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToAddr(v: Value): Int = v.asInt32
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
+    override def compareSize(a: Int, b: Int): Topped[Int] = Topped.Actual(a.compare(b))
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToSize(i: Int): Int = i
     override def valToInt(v: Value): Int = v.asInt32
@@ -158,7 +160,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: SizedConcreteSymbolTable[TableAddr, Index, RefV] = new SizedConcreteSymbolTable[TableAddr, Index, RefV]
+    val tables: SizedConcreteSymbolTable[TableAddr, RefV] = new SizedConcreteSymbolTable[TableAddr, RefV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

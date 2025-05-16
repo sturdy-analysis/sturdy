@@ -10,21 +10,32 @@ import sturdy.values.*
 
 import scala.util.boundary, boundary.break
 
-trait SizedDecidableSymbolTable[Key, Symbol, Entry] extends SizedSymbolTable[Key, Symbol, Entry, Int, NoJoin]:
+trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, Entry, Int, NoJoin]:
   protected var tables: Map[Key, Table] = Map()
 
   def entries: Map[Key, Table] = tables
 
-  override def get(key: Key, symbol: Symbol): JOptionC[Entry] =
+  override def get(key: Key, symbol: Int): JOptionC[Entry] =
     JOptionC(tables(key).entries.get(symbol))
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Int, newEntry: Entry): Unit =
     tables += key -> Table(tables(key).entries + (symbol -> newEntry), tables(key).limit)
 
   override def size(key: Key): Int =
     tables(key).entries.size
 
-  override def grow(key: Key, delta: Int, initEntry: Entry): JOption[NoJoin, Int] = ???
+  override def grow(key: Key, delta: Int, initEntry: Entry): JOptionC[Int] =
+    val oldTable = tables(key)
+    val newSize = oldTable.entries.size + delta
+    val upperLimit = oldTable.limit.max
+    if (upperLimit.isDefined && newSize > upperLimit.get)
+      JOptionC.none
+    else
+      val added = (oldTable.entries.size until oldTable.entries.size + delta).map(i => i -> initEntry).toMap
+      val newTable = Table(oldTable.entries ++ added, oldTable.limit)
+
+      tables += key -> newTable
+      JOptionC.Some(newSize)
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Int] = SizedSymbolTable.Limit(0, None)): Unit =
     tables += key -> Table(Map(), limit)
@@ -44,7 +55,7 @@ trait SizedDecidableSymbolTable[Key, Symbol, Entry] extends SizedSymbolTable[Key
     }
     IsSound.Sound*/
 
-  case class Table(entries: Map[Symbol, Entry], limit: SizedSymbolTable.Limit[Int])
+  case class Table(entries: Map[Int, Entry], limit: SizedSymbolTable.Limit[Int])
 
   given JoinTable(using je: Join[Entry], jl: Join[SizedSymbolTable.Limit[Int]]): Join[Table] with
     def apply(t1: Table, t2: Table): MaybeChanged[Table] =
@@ -82,7 +93,7 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
 
 class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], Concrete
 
-class SizedConcreteSymbolTable[Key, Symbol, Entry] extends SizedDecidableSymbolTable[Key, Symbol, Entry], Concrete
+class SizedConcreteSymbolTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entry], Concrete
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
   override type State =  Map[Key, Map[Symbol, Entry]]

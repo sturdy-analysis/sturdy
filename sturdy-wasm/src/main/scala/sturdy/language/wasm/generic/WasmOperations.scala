@@ -5,6 +5,7 @@ import sturdy.data.MayJoin
 import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.language.wasm.ConcreteInterpreter.ExternReference
 import sturdy.language.wasm.abstractions.CfgNode.Instruction
+import sturdy.values.Topped
 import sturdy.values.booleans.BooleanBranching
 import swam.{FuncType, GlobalIdx, ReferenceType, TableIdx}
 import sturdy.values.convert.*
@@ -56,6 +57,8 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
+
+  def compareSize(a: Size, b: Size): Topped[Int]
   def valToInt(v: V): Int
   def intToSize(i: Int): Size
   def refVToFunV(r: RefV): FunV
