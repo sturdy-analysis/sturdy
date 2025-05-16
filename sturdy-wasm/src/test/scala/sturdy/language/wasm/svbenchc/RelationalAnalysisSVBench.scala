@@ -95,6 +95,9 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
     Files.writeString(dotPath, cfg.toGraphViz)
 
+    p.getFileName.subpath(0,p.getFileName.toString.lastIndexOf(".")).
+    val yamlConf = io.circe.yaml.parser.parse()
+
     val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
     val hostAssertFailCalled = cfg.nodes.exists {
       case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
