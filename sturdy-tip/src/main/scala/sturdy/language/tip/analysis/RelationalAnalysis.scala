@@ -45,14 +45,21 @@ object RelationalAnalysis extends Interpreter,
   type RelType = BaseType[Int]
 
   enum RelationalVar:
-    case Local(x: String)
+    case Local(x: String, fun: String)
     case Temp(in: FixIn)
     case Alloc(label: Label)
     case Print(ty: RelType)
 
+    override def toString: String =
+      this match
+        case Local(x,fun) => s"$x@$fun"
+        case Temp(in) => s"temp@$in"
+        case Alloc(l) => s"alloc@$l"
+        case Print(t) => s"print@$t"
+
   given Ordering[RelationalVar] = {
     // Print <= Alloc <= Temp <= Local
-    case (RelationalVar.Local(x1), RelationalVar.Local(x2)) => x1.compareTo(x2)
+    case (RelationalVar.Local(x1, fun1), RelationalVar.Local(x2, fun2)) => (x1,fun1).compareTo((x2,fun2))
     case (RelationalVar.Temp(ty1), RelationalVar.Temp(ty2)) => ty1.toString.compareTo(ty2.toString)
     case (RelationalVar.Alloc(l1), RelationalVar.Alloc(l2)) => l1.toString.compareTo(l2.toString)
     case (RelationalVar.Print(ty1), RelationalVar.Print(ty2)) => ty1.toString.compareTo(ty2.toString)
@@ -109,7 +116,7 @@ object RelationalAnalysis extends Interpreter,
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
     implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, RelationalVar] = AAllocatorFromContext(_ => RelationalVar.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
-    implicit val localRelationaAlloc: AAllocatorFromContext[(String, Any, Option[Any]), RelationalVar] = AAllocatorFromContext((v,_,_) => RelationalVar.Local(v))
+    implicit val localRelationaAlloc: AAllocatorFromContext[(String, String, Option[Any]), RelationalVar] = AAllocatorFromContext((v,fun,_) => RelationalVar.Local(v,fun))
 
     given Manager = apronManager
 

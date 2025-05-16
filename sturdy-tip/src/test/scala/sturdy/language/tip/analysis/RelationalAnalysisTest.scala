@@ -44,8 +44,8 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
    val polyManager = new Polka(false)
    Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//     p.toString.endsWith(".tip")
-    p.endsWith("div_by_zero.tip")
+     p.toString.endsWith(".tip")
+//    p.endsWith("loop.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
        runRelationalAnalysis(p, StackConfig.StackedStates(readPriorOutput = false))
@@ -107,7 +107,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
      val printInt = Print(BaseType[Int])
      val alloc1 = Alloc(IntLabel(1))
      val tempInt = Temp(FixIn.Eval(sturdy.language.tip.Exp.Var("y")))
-     val localX = Local("x")
+     val localX = Local("x","fun")
 
      Ordering[RelationalAnalysis.RelationalVar].compare(printInt, alloc1) shouldBe -1
      Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, printInt) shouldBe 1

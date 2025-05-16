@@ -49,8 +49,10 @@ final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) exte
   import RelationalAnalysis.Type.*
 
   def i32(expr: ApronExpr[VirtAddr, Type]) = Value.Int32(Left(expr))
+  def i64(expr: ApronExpr[VirtAddr, Type]) = Value.Int64(expr)
+
   def iv(lower: Scalar, upper: Scalar, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, FloatSpecials.Bottom), tpe)
-  def doubleIv(lower: Double, upper: Double, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, FloatSpecials.Bottom), tpe)
+  def doubleIv(lower: Double, upper: Double, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, floatSpecials), tpe)
   val topi32 = Value.Int32(Left(iv(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom, I32Type)))
   val topi64 = Value.Int64(iv(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom, I64Type))
   val topf32 = Value.Float32(doubleIv(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
@@ -117,7 +119,8 @@ final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) exte
   testFunction(simple, "plus_five", List(i32(ApronExpr.intLit(0, I32Type))), List(i32(doubleIv(5, 5, FloatSpecials.Integer, I32Type))))
   testFunction(simple, "loop_to_100", List(i32(ApronExpr.intLit(0, I32Type))), List(i32(doubleIv(100, 100, FloatSpecials.Integer, I32Type))))
 
-  (1 to 8).foreach { arg =>
+  testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(1, I64Type))), List(i64(ApronExpr.intLit(1, I64Type))))
+  (2 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(arg, I64Type))), List(topi64))
   }
   testFunction(fact, "fac-rec", List(Value.Int64(ApronExpr.intLit(25, I64Type))), List(topi64))

@@ -177,11 +177,10 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       addParentDependency(outCacheEntry)
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
+      val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
       val currentOut = state.getOutState(frame._1)
       val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, currentOut)}
-      state.setOutState(frame._1, newOut.get)
-      val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged

@@ -73,36 +73,34 @@ final class RelationalStore
       case None => nonRelationalStore.write(powAddr, v)
 
   private def write(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
-    if (powAddr.isEmpty) {
-      // nothing
-    } else if (powAddr.isStrong) {
-      for (toAddr <- powAddr.iterator) {
-        writeMetaData(toAddr, physExpr)
-        val to = ApronVar(toAddr)
-        val env = _abstract1.getEnvironment
-        if(env.hasVar(to))
-          _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
-      }
-    } else /* if(powAddr.isWeak) */ {
-      // weak update implemented as join
-      for (toAddr <- powAddr.iterator) {
-        val to = ApronVar(toAddr)
-        val envBefore = _abstract1.getEnvironment
-        writeMetaData(toAddr, physExpr)
-        val envAfter = _abstract1.getEnvironment
-        if(!envBefore.hasVar(to)) {
-          if(envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_)))
+    if(containsFailedAddrs(physExpr))
+      throw new IllegalArgumentException("Cannot assign expression with addresses of failed branch.")
+
+    for(toAddr <- powAddr.iterator) {
+      toAddr.recency match
+        case Recency.Recent =>
+          writeMetaData(toAddr, physExpr)
+          val to = ApronVar(toAddr)
+          val env = _abstract1.getEnvironment
+          if (env.hasVar(to))
             _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
-        } else {
-          if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_))) {
-            val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
-            Profiler.addTime("Abstract1.combine") {
-              _abstract1.join(manager, assigned)
+        case Recency.Old =>
+          val to = ApronVar(toAddr)
+          val envBefore = _abstract1.getEnvironment
+          writeMetaData(toAddr, physExpr)
+          val envAfter = _abstract1.getEnvironment
+          if (!envBefore.hasVar(to)) {
+            if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_)))
+              _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+          } else {
+            if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_))) {
+              val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+              Profiler.addTime("Abstract1.combine") {
+                _abstract1.join(manager, assigned)
+              }
             }
           }
-        }
-
-      }
+        case Recency.Failed => throw new IllegalArgumentException("Cannot assign to physical address on failed branch")
     }
 
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
@@ -179,20 +177,20 @@ final class RelationalStore
 
   override def free(powAddr: PowAddr): Unit =
     nonRelationalStore.free(powAddr)
-
-    for(addr <- powAddr.iterator) {
-      val dest = ApronVar(addr)
-      val env = _abstract1.getEnvironment()
-      metaData -= dest.addr
-      if (env.hasVar(dest)) {
-        _abstract1.forget(manager, dest, false)
-        _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
-      }
-    }
+    val env = _abstract1.getEnvironment
+    val addrs = powAddr.iterator.map(ApronVar(_)).filter(env.hasVar(_)).toArray[Var]
+    _abstract1.forget(manager, addrs, false)
+    _abstract1.changeEnvironment(manager, env.remove(addrs), false)
+    powAddr.iterator.foreach(addr =>
+      metaData -= addr
+    )
 
   private final class BottomFailure extends SturdyFailure
 
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
+    if(constraints.exists{ case ApronCons(_, e1, e2) => containsFailedAddrs(e1) || containsFailedAddrs(e2) })
+      throw IllegalStateException("Constraints should not contain addresses of failed branches")
+
     val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
     this._abstract1.meet(manager, cons)
 
@@ -209,8 +207,11 @@ final class RelationalStore
       this._abstract1.join(manager, state1)
     }
 
-    if (this._abstract1.isBottom(manager) && constraints.forall(cons => cons.e1.floatSpecials.isBottom && cons.e2.floatSpecials.isBottom))
+    if (isBottom)
       throw new BottomFailure
+
+  def isBottom: Boolean =
+    this._abstract1.isBottom(manager)
 
   def satisfies(constraints: ApronCons[PhysicalAddress[Context], Type]*): Boolean =
     constraints.forall(cons =>
@@ -219,17 +220,26 @@ final class RelationalStore
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
     val env = _abstract1.getEnvironment
-    val addrs = expr.addrs
+    val expr1 = expr.mapAddrSame(replaceFailedAddrs)
+    val addrs = expr1.addrs
     if(addrs.forall(env.hasVar(_)))
-      _abstract1.getBound(_abstract1.getCreationManager, expr.toIntern(_abstract1.getEnvironment))
+      _abstract1.getBound(_abstract1.getCreationManager, expr1.toIntern(_abstract1.getEnvironment))
     else if(addrs.forall(metaData.contains(_)))
       ApronExpr.bottomInterval
     else
-      throw IllegalArgumentException(s"Expression $expr contains unbound variables ${addrs.filterNot(metaData.contains(_))}")
+      throw IllegalArgumentException(s"Expression $expr1 contains unbound variables ${addrs.filterNot(metaData.contains(_))}")
 
   def getFloatBound(expr: ApronExpr[PhysicalAddress[Context], Type]): sturdy.apron.FloatInterval =
     val iv = getBound(expr)
     new sturdy.apron.FloatInterval(iv.inf, iv.sup, expr.floatSpecials)
+
+  private def replaceFailedAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type): ApronExpr[PhysicalAddress[Context], Type] =
+    _var match
+      case ApronVar(PhysicalAddress(ctx, Recency.Failed)) => ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+      case _ => ApronExpr.Addr(_var, specials, tpe)
+
+  private def containsFailedAddrs(expr: ApronExpr[PhysicalAddress[Context], Type]): Boolean =
+    expr.addrs.exists(phys => phys.recency == Recency.Failed)
 
   private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
     val variable = ApronVar(addr)
@@ -270,7 +280,6 @@ final class RelationalStore
         _abstract1.changeEnvironment(manager, env, false)
       }
     }
-
 
   case class RelationalStoreState(metaData: MetaData, abs1: Abstract1, nonRelationalStoreState: nonRelationalStore.State):
     override def equals(obj: Any): Boolean =

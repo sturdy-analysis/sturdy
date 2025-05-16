@@ -1,6 +1,7 @@
 package sturdy.apron
 
 import sturdy.effect.store.{RecencyStore, RelationalStore}
+import sturdy.values.references.Recency.Recent
 import sturdy.values.{Join, Widen}
 import sturdy.values.references.{PhysicalAddress, PowRecency, PowVirtualAddress, PowersetAddr, Recency, RecencyRegion, VirtualAddress, given}
 
@@ -29,6 +30,8 @@ case class ApronExprConverter
       case PowRecency.RecentOld =>
         recencyStore.joinRecentIntoOld(mapping, PowVirtualAddress(virtAddr))
         PhysicalAddress(virtAddr.ctx, Recency.Old)
+      case PowRecency.Failed =>
+        PhysicalAddress(virtAddr.ctx, Recency.Failed)
 
   inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
     exprVirtAddr.mapAddr(virtToPhys(mapping,_))

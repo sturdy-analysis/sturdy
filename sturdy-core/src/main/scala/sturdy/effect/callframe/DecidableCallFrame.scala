@@ -123,3 +123,6 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
         throw IllegalStateException()
       vars = vars.zip(fVars).map(Join[V](_,_).get)
   }
+
+  override def toString: String =
+    getState.toString

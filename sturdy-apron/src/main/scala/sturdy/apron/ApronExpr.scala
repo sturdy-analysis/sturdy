@@ -12,7 +12,7 @@ import sturdy.values.{Join, MaybeChanged, Topped, Widen}
 import java.math.BigInteger
 import scala.reflect.ClassTag
 
-enum ApronExpr[Addr, +Type]:
+enum ApronExpr[Addr, Type]:
   case Addr(v: ApronVar[Addr], specials: FloatSpecials, tpe: Type)
   case Constant(coeff: Coeff, specials: FloatSpecials, tpe: Type)
   case Unary(op: UnOp,
@@ -65,9 +65,9 @@ enum ApronExpr[Addr, +Type]:
       case Binary(op, expr1, expr2, roundingType, roundingDir, specials, _type) =>
         Binary(op, expr1.mapAddr(f), expr2.mapAddr(f), roundingType, roundingDir, specials, _type)
 
-  def mapAddrSame(f: Addr => Addr): ApronExpr[Addr,Type] =
+  def mapAddrSame(f: (ApronVar[Addr], FloatSpecials, Type) => ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     this match
-      case Addr(_var, specials, _type) => Addr(_var.mapAddr(f), specials, _type)
+      case Addr(_var, specials, _type) => f(_var, specials, _type)
       case Constant(coeff, specials, _type) => Constant(coeff, specials, _type)
       case Unary(op, expr, roundingType, roundingDir, specials, _type) =>
         Unary(op, expr.mapAddrSame(f), roundingType, roundingDir, specials, _type)

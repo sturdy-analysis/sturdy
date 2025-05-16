@@ -152,6 +152,8 @@ final class RelationalCallFrame
     val aVals: ArraySeq[Val] = getVars
     seqIsSound.isSound(cVals, aVals)
 
+  override def toString: String = s"$addressCallFrame, ${apronState.recencyStore.addressTranslation}, ${apronState.relationalStore}"
+
 object RelationalCallFrame:
 
   def apply[

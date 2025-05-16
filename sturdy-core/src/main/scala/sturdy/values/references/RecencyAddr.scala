@@ -8,7 +8,43 @@ import sturdy.values.references.{AbstractAddr, PowersetAddr, given}
 import scala.collection.immutable.{BitSet, Map}
 import scala.collection.mutable
 
-case class RecencyRegion(recent: BitSet = BitSet.empty, old: BitSet = BitSet.empty):
+
+enum Recency:
+  case Recent
+  case Old
+  case Failed
+
+given RencencyOrdering: Ordering[Recency] = Ordering.by[Recency, Int] {
+  case Recency.Recent => 0
+  case Recency.Old => 1
+  case Recency.Failed => 2
+}
+
+enum PowRecency:
+  case Recent
+  case Old
+  case RecentOld
+  case Failed
+
+
+given PowRencencyOrdering: Ordering[PowRecency] = Ordering.by[PowRecency, Int] {
+  case PowRecency.Recent => 0
+  case PowRecency.Old => 1
+  case PowRecency.RecentOld => 2
+  case PowRecency.Failed => 2
+}
+
+given CombinePowRencency[W <: Widening]: Combine[PowRecency, W] with
+  override def apply(v1: PowRecency, v2: PowRecency): MaybeChanged[PowRecency] =
+    (v1, v2) match
+      case (PowRecency.Failed, _) => Unchanged(PowRecency.Failed)
+      case (_, PowRecency.Failed) => Changed(PowRecency.Failed)
+      case (PowRecency.Recent, PowRecency.Recent) => Unchanged(PowRecency.Recent)
+      case (PowRecency.Old, PowRecency.Old) => Unchanged(PowRecency.Old)
+      case (PowRecency.Recent, PowRecency.Old) | (PowRecency.Old, PowRecency.Recent) | (PowRecency.Recent, PowRecency.RecentOld) | (PowRecency.Old, PowRecency.RecentOld) => Changed(PowRecency.RecentOld)
+      case (PowRecency.RecentOld, PowRecency.Recent) | (PowRecency.RecentOld, PowRecency.Old) | (PowRecency.RecentOld, PowRecency.RecentOld) => Unchanged(PowRecency.RecentOld)
+
+case class RecencyRegion(recent: BitSet, old: BitSet, failed: BitSet):
   def recency: PowRecency =
     if(recent.isEmpty)
       PowRecency.Old
@@ -23,11 +59,14 @@ case class RecencyRegion(recent: BitSet = BitSet.empty, old: BitSet = BitSet.emp
   def isEmpty: Boolean = recent.isEmpty && old.isEmpty
 
   override def toString: String =
-    s"[" + (if(recent.isEmpty) "" else s"recent: ${recent.mkString(" ")}") + (if(old.isEmpty) "" else s", old: ${old.mkString(" ")}") + "]"
+    s"[" + (if(recent.isEmpty) "" else s"recent: ${recent.mkString(" ")}") + (if(old.isEmpty) "" else s", old: ${old.mkString(" ")}") + (if(failed.isEmpty) "" else s", failed: ${failed.mkString(" ")}") + "]"
 
 given CombineRecencyRegion[W <: Widening]: Combine[RecencyRegion, W] =
   (region1: RecencyRegion, region2: RecencyRegion) =>
-    val newRegion = RecencyRegion(region1.recent ++ region2.recent, region1.old ++ region2.old)
+    val joinedFailed = region1.failed ++ region2.failed
+    val joinedRecent = (region1.recent ++ region2.recent) -- joinedFailed
+    val joinedOld = (region1.old ++ region2.old) -- joinedFailed
+    val newRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
     MaybeChanged(newRegion, newRegion.recency != region1.recency)
 
 final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) extends Effect:
@@ -45,14 +84,18 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         PowersetAddr(PhysicalAddress(ctx, Recency.Recent))
       case PowRecency.Old =>
         PowersetAddr(PhysicalAddress(ctx, Recency.Old))
+      case PowRecency.Failed =>
+        PowersetAddr(PhysicalAddress(ctx, Recency.Failed))
 
   inline def recency(ctx: Context, n: Int): PowRecency =
     recency(mapping, ctx, n)
 
   def recency(mapping: Map[Context, RecencyRegion], ctx: Context, n: Int): PowRecency =
     mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old)) =>
-        if (recent.contains(n) && old.contains(n))
+      case Some(RecencyRegion(recent, old, failed)) =>
+        if (failed.contains(n))
+          PowRecency.Failed
+        else if (recent.contains(n) && old.contains(n))
           PowRecency.RecentOld
         else if (recent.contains(n))
           PowRecency.Recent
@@ -82,10 +125,10 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     this.fresh += (ctx) -> (freshId + 1)
 
     mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old)) =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), old ++ recent)
+      case Some(RecencyRegion(recent, old, failed)) =>
+        mapping += ctx -> RecencyRegion(BitSet(freshId), old ++ recent, failed)
       case None =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet())
+        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet.empty, BitSet.empty)
 
     VirtualAddress(ctx, freshId, this)
 
@@ -94,32 +137,32 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     this.fresh += (ctx) -> (freshId + 1)
 
     mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old)) =>
-        mapping += ctx -> RecencyRegion(recent + freshId, old)
+      case Some(RecencyRegion(recent, old, failed)) =>
+        mapping += ctx -> RecencyRegion(recent + freshId, old, failed)
       case None =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet())
+        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet.empty, BitSet.empty)
 
     VirtualAddress(ctx, freshId, this)
 
   def allocOld(ctx: Context): VirtualAddress[Context] =
     mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old)) =>
+      case Some(RecencyRegion(recent, old, failed)) =>
         if(old.isEmpty)
           val freshId = this.fresh.getOrElse(ctx, 0)
           this.fresh += (ctx) -> (freshId + 1)
-          mapping += ctx -> RecencyRegion(recent, old + freshId)
+          mapping += ctx -> RecencyRegion(recent, old + freshId, failed)
           VirtualAddress(ctx, freshId, this)
         else
           VirtualAddress(ctx, old.head, this)
       case None =>
         val freshId = this.fresh.getOrElse(ctx, 0)
         this.fresh += ctx -> (freshId + 1)
-        mapping += ctx -> RecencyRegion(BitSet(), BitSet(freshId))
+        mapping += ctx -> RecencyRegion(BitSet.empty, BitSet(freshId), BitSet.empty)
         VirtualAddress(ctx, freshId, this)
 
-  def joinRecentIntoOld(virt: VirtualAddress[Context]) =
+  def joinRecentIntoOld(virt: VirtualAddress[Context]): Unit =
     for(region <- mapping.get(virt.ctx)) {
-      mapping += virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n)
+      mapping += virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n, region.failed)
     }
 
   def deadPhysicalAddresses(alive: PowVirtualAddress[Context]): PowPhysicalAddress[Context] =
@@ -135,18 +178,23 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
   def removePhysicalAddresses(physicalAddresses: PowPhysicalAddress[Context]): Unit =
     for(phys <- physicalAddresses.iterator)
       mapping.get(phys.ctx) match
-        case Some(RecencyRegion(recent, old)) =>
+        case Some(RecencyRegion(recent, old, failed)) =>
           phys.recency match
             case Recency.Recent =>
               if(old.isEmpty)
                 mapping -= phys.ctx
               else
-                mapping += phys.ctx -> RecencyRegion(BitSet.empty, old)
+                mapping += phys.ctx -> RecencyRegion(BitSet.empty, old, failed)
             case Recency.Old =>
               if(recent.isEmpty)
                 mapping -= phys.ctx
               else
-                mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty)
+                mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty, failed)
+            case Recency.Failed =>
+              if(failed.isEmpty)
+                mapping -= phys.ctx
+              else
+                mapping += phys.ctx -> RecencyRegion(recent, old, BitSet.empty)
         case None => {}
 
   override type State = AddressTranslationState
@@ -189,13 +237,29 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
           (ctx, region1) =>
             other.mapping.get(ctx) match
               case Some(region2) =>
-                val newRegion = RecencyRegion(region1.recent.diff(region2.recent), region1.old.diff(region2.old))
+                val newRegion = RecencyRegion(region1.recent.diff(region2.recent), region1.old.diff(region2.old), region1.failed.diff(region2.failed))
                 if(newRegion.isEmpty)
                   None
                 else
                   Some((ctx, newRegion))
               case None =>
                 Some((ctx, region1))
+        }
+      )
+
+    /** Computes the virtual addresses allocated between a starting and an end state and sets them to failed. */
+    def failedVirts(before: AddressTranslationState): AddressTranslationState =
+      AddressTranslationState(
+        mapping.flatMap {
+          (ctx, regionAfter) =>
+            val regionBefore = before.mapping.getOrElse(ctx, RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
+            val virtsAllocatedInFailedBranch = (regionAfter.recent ++ regionAfter.old).diff(regionBefore.recent ++ regionBefore.old)
+            val newRegion = RecencyRegion(
+              recent = BitSet.empty,
+              old = BitSet.empty,
+              failed = regionAfter.failed ++ regionBefore.failed ++ virtsAllocatedInFailedBranch
+            )
+            Some((ctx, newRegion))
         }
       )
 
@@ -211,13 +275,14 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
       mapping = before.mapping
 
     override def retainNone(): Unit =
-      mapping = Map()
+      val afterSecond = AddressTranslationState(mapping)
+      mapping = join(before, join(afterFirst.failedVirts(before), afterSecond.failedVirts(before)).get).get.mapping
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      mapping = afterFirst.mapping
+      mapping = join(afterFirst, AddressTranslationState(mapping).failedVirts(before)).get.mapping
 
-    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
-      // Nothing to do
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
+      mapping = join(afterFirst.failedVirts(before), AddressTranslationState(mapping)).get.mapping
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       val afterSecond = AddressTranslationState(mapping)
@@ -293,8 +358,15 @@ given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] =
       val recency1 = addrTrans.recency(mapping, virt1.ctx, virt1.n)
       val recency2 = addrTrans.recency(otherMapping, virt2.ctx, virt2.n)
       val joinedRecency = Join(recency1, recency2)
-      if (joinedRecency.hasChanged)
-        addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old + virt1.n)
+      joinedRecency.get match
+        case PowRecency.Recent =>
+          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old - virt1.n, region1.failed - virt1.n)
+        case PowRecency.Old =>
+          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent - virt1.n, region1.old + virt1.n, region1.failed - virt1.n)
+        case PowRecency.RecentOld =>
+          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old + virt1.n, region1.failed - virt1.n)
+        case PowRecency.Failed =>
+          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent - virt1.n, region1.old - virt1.n, region1.failed + virt1.n)
       joinedRecency.map(_ => virt1)
     } else {
       throw new IllegalArgumentException(s"Cannot join virtual addresses with different contexts $virt1, $virt2")
@@ -318,34 +390,6 @@ given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress
 given finiteVirtualAddr[Context](using Finite[PhysicalAddress[Context]]): Finite[VirtualAddress[Context]] with {}
 given structuralVirtualAddr[Context]: Structural[VirtualAddress[Context]] with {}
 
-enum Recency:
-  case Recent
-  case Old
-
-given RencencyOrdering: Ordering[Recency] = Ordering.by[Recency, Int] {
-  case Recency.Recent => 0
-  case Recency.Old => 1
-}
-
-enum PowRecency:
-  case Recent
-  case Old
-  case RecentOld
-
-
-given PowRencencyOrdering: Ordering[PowRecency] = Ordering.by[PowRecency, Int] {
-  case PowRecency.Recent => 0
-  case PowRecency.Old => 1
-  case PowRecency.RecentOld => 2
-}
-
-given CombinePowRencency[W <: Widening]: Combine[PowRecency, W] with
-  override def apply(v1: PowRecency, v2: PowRecency): MaybeChanged[PowRecency] =
-    (v1,v2) match
-      case (PowRecency.Recent, PowRecency.Recent) => Unchanged(PowRecency.Recent)
-      case (PowRecency.Old, PowRecency.Old) => Unchanged(PowRecency.Old)
-      case (PowRecency.RecentOld, _) => Unchanged(PowRecency.RecentOld)
-      case (_,_) => Changed(PowRecency.RecentOld)
 
 
 type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], PhysicalAddress[Context]]
