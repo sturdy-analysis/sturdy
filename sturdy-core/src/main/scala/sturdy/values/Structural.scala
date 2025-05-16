@@ -8,6 +8,7 @@ trait Structural[T]
 given Structural[Unit] with {}
 given Structural[Boolean] with {}
 given Structural[String] with {}
+given Structural[Int] with {}
 given Structural[Label] with {}
 given Structural[Byte] with {}
 

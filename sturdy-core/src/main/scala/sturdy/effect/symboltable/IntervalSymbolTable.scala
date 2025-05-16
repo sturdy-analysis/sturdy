@@ -5,19 +5,18 @@ import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Effect
-import sturdy.effect.symboltable.ConstantSymbolTable.Tables
+import sturdy.effect.symboltable.SizedConstantSymbolTable.Tables
 import sturdy.values.*
 import sturdy.values.integer.NumericInterval
 
 import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
-class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[I]) extends SymbolTable[Key, NumericInterval[I], Entry, WithJoin], Effect:
-  private val constantSymbolTable: ConstantSymbolTable[Key, I, Entry] = new ConstantSymbolTable
+// TODO: replace Size with NumericInterval, change IntervalAnalysis to match this change
+class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[I]) extends SizedSymbolTable[Key, NumericInterval[I], Entry, Topped[Int], WithJoin], Effect:
+  private val constantSymbolTable: SizedConstantSymbolTable[Key, I, Entry] = new SizedConstantSymbolTable
 
   private val one = summon[Numeric[I]].one
-  var min = 0
-  var max = None
 
   def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] =
     if (symbol.countOfNumsInInterval <= rangeLimit) {
@@ -41,21 +40,16 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
     else
       constantSymbolTable.set(key, Topped.Top, newEntry)
 
-  def size(key: Key): Int = ???
+  override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = ???
 
-  override def grow(key: Key, symbol: NumericInterval[I], initEntry: Entry): Int = ???
-
-  override def fill(key: Key, symbol: NumericInterval[I], newEntry: Entry): Unit = ???
-
-  override def copy(key: Key, symbol: NumericInterval[I], dest: Key): Unit = ???
-
-  override def init(key: Key, newEntry: Entry): Unit = ???
-
-  //override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
-  //override def drop(key: Key, symbol: Symbol): Unit = ???
 
   def putNew(key: Key): Unit =
     constantSymbolTable.putNew(key)
+
+  override def size(key: Key): Topped[Int] = ???
+
+  override def grow(key: Key, delta: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
+  
 
   override type State = constantSymbolTable.State
   override def getState: State =

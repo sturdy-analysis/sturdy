@@ -7,11 +7,12 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
+import sturdy.effect.symboltable.joinLimit
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
-import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.{SizedConstantSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.SizedConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
@@ -73,6 +74,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
             case RefValue.ExternNull => Value.Ref(RefValue.ExternNull)
           }
         }
+
+    override def intToSize(i: Int): Topped[Int] = Topped.Actual(i)
+    
     override def valToInt(v: Value): Int = {
       v match {
         case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => i match {
@@ -85,7 +89,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 
-    override def refToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] =
+    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] =
       r match {
       case Powerset(refs) =>
         val funcs = refs.collect {
@@ -99,7 +103,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     }
 
 
-    override def funVToRef(f: Powerset[FunctionInstance], t: ReferenceType): Powerset[RefValue] = {
+    override def funVToRefV(f: Powerset[FunctionInstance], t: ReferenceType): Powerset[RefValue] = {
       t match {
         case FuncRef => f match {
           case Powerset(funcs) => 
@@ -126,7 +130,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       }
     }
 
-    override def makeNullRef(t: ReferenceType): Powerset[ConstantAnalysis.RefValue] = {
+    override def makeNullRefV(t: ReferenceType): Powerset[ConstantAnalysis.RefValue] = {
       t match {
         case FuncRef => Powerset(Set(ConstantAnalysis.RefValue.FuncNull))
         case ExternRef => Powerset(Set(ConstantAnalysis.RefValue.ExternNull))
@@ -198,7 +202,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: ConstantSymbolTable[TableAddr, Int, RefV] = new ConstantSymbolTable
+    val tables: SizedConstantSymbolTable[TableAddr, Int, RefV] = new SizedConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

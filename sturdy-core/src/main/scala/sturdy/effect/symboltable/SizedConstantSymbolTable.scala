@@ -4,7 +4,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.Effect
 import sturdy.values.{*, given}
 
-import ConstantSymbolTable.*
+import SizedConstantSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
@@ -13,7 +13,7 @@ import sturdy.effect.TrySturdy
 import scala.util.boundary, boundary.break
 import Either as Eith
 
-class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
+class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Key, Topped[Symbol], Entry, Topped[Int], WithJoin], Effect:
 
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -42,26 +42,26 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           tables += key -> Right((tab.entries + newEntry).reduce(Join(_, _).get))
         case Topped.Actual(sym) =>
           tables += key -> Left(tab.updated(sym, newEntry))
+  
 
+  override def size(key: Key): Topped[Int] = tables(key) match
+    case Left(table) => table.limit.min
+    case _ => Topped.Top
 
-  override def size(key: Key): Int = tables(key) match {
-    case Left(table) => table.underlying.size
-    case _ => 0
-  }
+  override def grow(key: Key, delta: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
+    /*tables(key) match
+      case Left(table) =>
+        val newLimit = table.limit.min + delta
+        tables += key -> Left(table.updated(key, MayMust.Must(initEntry)))
+        JOption(WithJoin(newLimit), true)
+      case _ => JOption(WithJoin(Topped.Top), false)*/
 
-  override def grow(key: Key, symbol: Topped[Symbol], initEntry: Entry): Int = ???
-
-  override def fill(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit = ???
-
-  override def copy(key: Key, symbol: Topped[Symbol], dest: Key): Unit = ???
-
-  override def init(key: Key, newEntry: Entry): Unit = ???
-
-  //override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
+  override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]] = SizedSymbolTable.Limit(Topped.Actual(0), None)): Unit =
+    tables += key -> Left(Table(Map(), Set(), limit))
+    dirtyTables += key
 
   override def putNew(key: Key): Unit =
-    tables += key -> Left(Table(Map(), Set()))
-    dirtyTables += key
+    putNew(key, SizedSymbolTable.Limit(Topped.Actual(0), None))
 
   override type State = Tables[Key, Symbol, Entry]
   override def getState: State = tables
@@ -168,7 +168,8 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
         }
         IsSound.Sound
 
-object ConstantSymbolTable:
+
+object SizedConstantSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Eith[Table[Symbol, Entry], Entry]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with
@@ -197,14 +198,32 @@ object ConstantSymbolTable:
             }
         }
       }
-      MaybeChanged(Table(tab, dirty), changed)
+      // combine limits
+      val limit1 = tab1.limit
+      val limit2 = tab2.limit
+      val finalLimit = if (limit1 != limit2) {
+        changed = true
+        (limit1, limit2) match
+          case (SizedSymbolTable.Limit(l1, max1), SizedSymbolTable.Limit(l2, max2)) =>
+            val joinedMin = Join(l1, l2).get
+            // Join the max values if both are defined
+            val joinedMax = (max1, max2) match
+              case (Some(m1), Some(m2)) => Some(Join(m1, m2).get)
+              case (Some(m), None) => Some(m)
+              case (None, Some(m)) => Some(m)
+              case (None, None) => None
+            SizedSymbolTable.Limit(joinedMin, joinedMax)
+      } else {
+        limit1
+      }
+      MaybeChanged(Table(tab, dirty, finalLimit), changed)
 
-  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], dirtySymbols: Set[Symbol]):
+  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], dirtySymbols: Set[Symbol], limit: SizedSymbolTable.Limit[Topped[Int]]):
     def entries: Set[Entry] = underlying.values.map(_.get).toSet
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
-      Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
+      Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol, limit)
     inline def updated(symbol: Symbol, entry: MayMust[Entry]): Table[Symbol, Entry] =
-      Table(underlying.updated(symbol, entry), dirtySymbols + symbol)
+      Table(underlying.updated(symbol, entry), dirtySymbols + symbol, limit)
     def allMay: Table[Symbol, Entry] =
       var newUnderlying = underlying
       var newDirtySymbols = dirtySymbols
@@ -212,9 +231,9 @@ object ConstantSymbolTable:
         newDirtySymbols += s
         newUnderlying += s -> mentry.asMay
       }
-      Table(newUnderlying, newDirtySymbols)
+      Table(newUnderlying, newDirtySymbols, limit)
 
     def isAllMay: Boolean = underlying.forall((_,e) => !e.isMust)
 
     def map[Symbol1, Entry1](mapSym: Symbol => Symbol1, mapEntry: Entry => Entry1): Table[Symbol1, Entry1] =
-      Table(underlying.map((sym, entry) => (mapSym(sym), entry.map(mapEntry))), dirtySymbols.map(mapSym))
+      Table(underlying.map((sym, entry) => (mapSym(sym), entry.map(mapEntry))), dirtySymbols.map(mapSym), limit)

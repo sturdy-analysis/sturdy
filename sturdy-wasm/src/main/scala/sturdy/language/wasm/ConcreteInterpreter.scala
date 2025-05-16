@@ -8,7 +8,7 @@ import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.DecidableSymbolTable
+import sturdy.effect.symboltable.{ConcreteSymbolTable, DecidableSymbolTable, SizedConcreteSymbolTable}
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -30,7 +30,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
-import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix.{Combinator, Contextual}
 import sturdy.language.wasm.abstractions.Control
 
@@ -71,6 +70,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
+    override def intToSize(i: Int): Int = i
     override def valToInt(v: Value): Int = v.asInt32
 
     override def valToRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.RefValue = v match {
@@ -80,20 +80,20 @@ object ConcreteInterpreter extends Interpreter with Control:
     
     override def refToVal(r: ConcreteInterpreter.RefValue): ConcreteInterpreter.Value = Value.Ref(r)
     
-    override def refToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
+    override def refVToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
       r match {
         case RefValue.FuncRef(f) => f
         case RefValue.ExternRef(f) => f
         case RefValue.FuncNull | RefValue.ExternNull => f.fail(UnboundFunctionIndex, s"Expected a function reference, but got $r")
       }
     
-    override def makeNullRef(t: ReferenceType): ConcreteInterpreter.RefValue =
+    override def makeNullRefV(t: ReferenceType): ConcreteInterpreter.RefValue =
       t match {
         case FuncRef => ConcreteInterpreter.RefValue.FuncNull
         case ExternRef => ConcreteInterpreter.RefValue.ExternNull
       }
 
-    override def funVToRef(f: FunV, t: ReferenceType): ConcreteInterpreter.RefValue =
+    override def funVToRefV(f: FunV, t: ReferenceType): ConcreteInterpreter.RefValue =
       t match {
         case FuncRef => f match {
           case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
@@ -158,7 +158,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: ConcreteSymbolTable[TableAddr, Index, RefV] = new ConcreteSymbolTable[TableAddr, Index, RefV]
+    val tables: SizedConcreteSymbolTable[TableAddr, Index, RefV] = new SizedConcreteSymbolTable[TableAddr, Index, RefV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

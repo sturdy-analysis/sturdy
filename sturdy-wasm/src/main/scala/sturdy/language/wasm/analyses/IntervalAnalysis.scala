@@ -10,9 +10,9 @@ import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.SizedConstantSymbolTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{SizedConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -57,10 +57,11 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     // TODO: implement this for the IntervalAnalysis
     override def valToRef(v: IntervalAnalysis.Value): Powerset[IntervalAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
-    override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def intToSize(i: Int): Topped[Int] = Topped.Actual(i)
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
-    override def refToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
+    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =

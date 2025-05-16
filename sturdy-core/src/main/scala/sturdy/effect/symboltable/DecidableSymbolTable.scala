@@ -10,10 +10,52 @@ import sturdy.values.*
 
 import scala.util.boundary, boundary.break
 
+trait SizedDecidableSymbolTable[Key, Symbol, Entry] extends SizedSymbolTable[Key, Symbol, Entry, Int, NoJoin]:
+  protected var tables: Map[Key, Table] = Map()
+
+  def entries: Map[Key, Table] = tables
+
+  override def get(key: Key, symbol: Symbol): JOptionC[Entry] =
+    JOptionC(tables(key).entries.get(symbol))
+
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+    tables += key -> Table(tables(key).entries + (symbol -> newEntry), tables(key).limit)
+
+  override def size(key: Key): Int =
+    tables(key).entries.size
+
+  override def grow(key: Key, delta: Int, initEntry: Entry): JOption[NoJoin, Int] = ???
+
+  override def putNew(key: Key, limit: SizedSymbolTable.Limit[Int] = SizedSymbolTable.Limit(0, None)): Unit =
+    tables += key -> Table(Map(), limit)
+
+  override def putNew(key: Key): Unit =
+    putNew(key, SizedSymbolTable.Limit(0, None))
+
+  // TODO: check if this has to be implemented here
+  /*def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
+    c.tables.foreachEntry { (key, cTab) =>
+      val aTab = tables.getOrElse(key, break(IsSound.NotSound(s"Key $key not present in topped symbol table.")))
+      for ((sym, cEntry) <- cTab.entries)
+        val aEntry = aTab.entries.getOrElse(sym, break(IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table.")))
+        val eSound = Soundness.isSound(cEntry, aEntry)
+        if (!eSound.isSound)
+          break(eSound)
+    }
+    IsSound.Sound*/
+
+  case class Table(entries: Map[Symbol, Entry], limit: SizedSymbolTable.Limit[Int])
+
+  given JoinTable(using je: Join[Entry], jl: Join[SizedSymbolTable.Limit[Int]]): Join[Table] with
+    def apply(t1: Table, t2: Table): MaybeChanged[Table] =
+      val entriesJoined = Join(t1.entries, t2.entries)
+      val limitJoined = jl(t1.limit, t2.limit)
+      MaybeChanged(Table(entriesJoined.get, limitJoined.get),
+        entriesJoined.hasChanged || limitJoined.hasChanged)
+
+
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
-  var min = 0
-  var max = None
 
   def entries: Map[Key, Map[Symbol, Entry]] = tables
   
@@ -22,18 +64,6 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
 
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     tables += key -> (tables(key) + (symbol -> newEntry))
-
-  override def size(key: Key): Int =
-    tables(key).size
-
-  override def grow(key: Key, symbol: Symbol, initEntry: Entry): Int = ???
-
-
-  override def fill(key: Key, symbol: Symbol, newEntry: Entry): Unit = ???
-
-  override def copy(key: Key, symbol: Symbol, dest: Key): Unit = ???
-
-  override def init(key: Key, newEntry: Entry): Unit = ???
 
   override def putNew(key: Key): Unit =
     tables += key -> Map()
@@ -52,6 +82,7 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
 
 class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], Concrete
 
+class SizedConcreteSymbolTable[Key, Symbol, Entry] extends SizedDecidableSymbolTable[Key, Symbol, Entry], Concrete
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
   override type State =  Map[Key, Map[Symbol, Entry]]

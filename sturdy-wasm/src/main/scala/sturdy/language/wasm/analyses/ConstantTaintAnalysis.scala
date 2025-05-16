@@ -7,8 +7,8 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable, given}
-import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.{SizedConstantSymbolTable, JoinableDecidableSymbolTable, given}
+import sturdy.effect.symboltable.SizedConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
@@ -56,11 +56,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     // TODO: implement this for the ConstantTaintAnalysis
     override def valToRef(v: ConstantTaintAnalysis.Value): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
-    override def makeNullRef(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
-    override def funVToRef(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def intToSize(i: Int): Topped[Int] = Topped.Actual(i)
     override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def refToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???
+    override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
@@ -110,7 +111,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: ConstantSymbolTable[TableAddr, Int, RefV] = new ConstantSymbolTable
+    val tables: SizedConstantSymbolTable[TableAddr, Int, RefV] = new SizedConstantSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

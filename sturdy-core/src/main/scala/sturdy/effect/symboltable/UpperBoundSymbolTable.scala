@@ -7,33 +7,29 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
+import sturdy.values.types.BaseType
 
-import scala.util.boundary, boundary.break
+import scala.util.boundary
+import boundary.break
+
+class SizedUpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry), SizedSymbolTable[Key, Symbol, Entry, BaseType[Int], WithJoin] {
+  override def size(key: Key): BaseType[Int] = ???
+
+  override def grow(key: Key, delta: BaseType[Int], initEntry: Entry): JOption[WithJoin, BaseType[Int]] = ???
+
+  override def putNew(key: Key, limit: SizedSymbolTable.Limit[BaseType[Int]]): Unit = ???
+}
 
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:
 
   protected var tables: Map[Key, Entry] = Map()
-  var min = 0
-  var max = None
 
   override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
     JOptionA.noneSome(tables(key))
 
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
-
-  override def size(key: Key): Int = ???
-
-  override def grow(key: Key, symbol: Symbol, initEntry: Entry): Int = ???
-
-  override def fill(key: Key, symbol: Symbol, newEntry: Entry): Unit = ???
-
-  override def copy(key: Key, symbol: Symbol, dest: Key): Unit = ???
-
-  override def init(key: Key, newEntry: Entry): Unit = ???
-
-  //override def drop(key: Key, symbol: Topped[Symbol]): Unit = ???
-  //override def drop(key: Key, symbol: Symbol): Unit = ???
+  
 
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry
