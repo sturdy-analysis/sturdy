@@ -293,11 +293,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val d = stack.popOrAbort()
         val elemLen = elem.init.length
         // check s + n <= elemLen
-        val accessIndex = num.evalIBinop(i32.Add, n, s)
-        val elemSizeAccess = compareSize(valToSize(accessIndex), intToSize(elemLen))
+        val elemIndex = num.evalIBinop(i32.Add, n, s)
+        val elemSizeAccess = compareSize(valToSize(elemIndex), intToSize(elemLen))
         elemSizeAccess match
           case Topped.Actual(i) =>
-            if (i < 0 || i >= elemLen) {
+            if (i > 0) {
               fail(TableAccessOutOfBounds, "Index > Elem List")
             }
           case Topped.Top =>
@@ -305,10 +305,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
         // check d + n <= tableSize
         val tableSize = tables.size(module.tableAddrs(ix))
-        val tableSizeAccess = compareSize(tableSize, intToSize(elemLen))
+        val tableIndex = num.evalIBinop(i32.Add, d, n)
+        val tableSizeAccess = compareSize(valToSize(tableIndex), tableSize)
         tableSizeAccess match
           case Topped.Actual(i) =>
-            if (i < 0 || i >= elemLen) {
+            if (i > 0) {
               fail(TableAccessOutOfBounds, "Index > Table Size")
             }
           case Topped.Top =>
@@ -322,6 +323,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               return
             }
           case Topped.Top =>
+            // TODO: This should also continue, as TOP does not indicate whether n is 0 larger than 0
             return
 
         stack.push(d)

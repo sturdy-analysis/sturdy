@@ -58,6 +58,12 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
 
+  /**
+   * Compare two sizes
+   * @param a size
+   * @param b size
+   * @return Topped[Int] with -1 if a < b, 0 if a == b and 1 if a > b
+   */
   def compareSize(a: Size, b: Size): Topped[Int]
   def valToInt(v: V): Int
   def intToSize(i: Int): Size
