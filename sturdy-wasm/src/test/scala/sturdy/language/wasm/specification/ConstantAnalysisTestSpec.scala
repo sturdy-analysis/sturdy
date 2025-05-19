@@ -83,7 +83,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
 
   val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), aInterp)
-  val newCfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
+  // val newCfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
 
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()

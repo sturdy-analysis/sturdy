@@ -48,7 +48,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
-    override def compareSize(a: BaseType[Int], b: BaseType[Int]): Topped[Int] = ???
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
 
     // TODO: implement this for the TypeAnalysis

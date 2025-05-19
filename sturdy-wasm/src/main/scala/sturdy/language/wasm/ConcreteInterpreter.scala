@@ -70,7 +70,6 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToAddr(v: Value): Int = v.asInt32
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
-    override def compareSize(a: Int, b: Int): Topped[Int] = Topped.Actual(a.compare(b))
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToSize(i: Int): Int = i
     override def valToInt(v: Value): Int = v.asInt32

@@ -53,16 +53,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
-    override def compareSize(a: Topped[Int], b: Topped[Int]): Topped[Int] =
-      a match {
-        case Topped.Actual(i) =>
-          b match {
-            case Topped.Actual(j) => Topped.Actual(i.compare(j))
-            case Topped.Top => Topped.Top
-          }
-        case Topped.Top =>
-          Topped.Top
-      }
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     // TODO: implement this for the IntervalAnalysis
     override def valToRef(v: IntervalAnalysis.Value): Powerset[IntervalAnalysis.RefValue] = ???

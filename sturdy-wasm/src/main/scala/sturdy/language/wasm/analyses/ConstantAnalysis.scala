@@ -53,16 +53,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
-    override def compareSize(a: Topped[Int], b: Topped[Int]): Topped[Int] = 
-      a match {
-        case Topped.Actual(i) =>
-          b match {
-            case Topped.Actual(j) => Topped.Actual(i.compare(j))
-            case Topped.Top => Topped.Top
-          }
-        case Topped.Top =>
-          Topped.Top
-      }
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToRef(v: ConstantAnalysis.Value): Powerset[ConstantAnalysis.RefValue] = v match
       case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(f)) => Powerset(ConstantAnalysis.RefValue.FuncRef(f))

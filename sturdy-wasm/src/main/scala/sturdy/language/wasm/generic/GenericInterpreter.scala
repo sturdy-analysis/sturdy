@@ -232,60 +232,44 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        // check s + n < tabYLength
+        // check s + n <= tabYLength
         val tabYLength = tables.size(module.tableAddrs(y))
-        val yAccess = num.evalIBinop(i32.Add, s, d)
-        compareSize(valToSize(yAccess), tabYLength) match {
-          case Topped.Actual(i) =>
-            if (i <= 0) {
-              fail(TableAccessOutOfBounds, "Invalid table.copy access")
+        val yTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(tabYLength))
+        branchOpsUnit.boolBranch(yTableCheck)(fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
+          // check d + n <= tabXLength
+          val tabXLength = tables.size(module.tableAddrs(x))
+          val xTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tabXLength))
+          branchOpsUnit.boolBranch(xTableCheck)(fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
+            val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
+            branchOpsUnit.boolBranch(nCheck)(return) {
+              // n > 0
+              // compare d, s
+              val dCheck = num.evalIRelop(i32.LeU, d, s)
+              branchOpsUnit.boolBranch(dCheck){
+                // d <= s
+                stack.push(d)
+                stack.push(s)
+                evalTableInst(TableGet(y), loc)
+                evalTableInst(TableSet(x), loc)
+                stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
+                stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
+              }{
+                // d > s
+                // push d + n - 1
+                stack.push(num.evalIBinop(i32.Add, d, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
+                // push s + n - 1
+                stack.push(num.evalIBinop(i32.Add, s, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
+                evalTableInst(TableGet(y), loc)
+                evalTableInst(TableSet(x), loc)
+                stack.push(d)
+                stack.push(s)
+              }
+              // push n - 1
+              stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
+              evalTableInst(TableCopy(x, y), loc)
             }
-          case Topped.Top => fail(TableAccessOutOfBounds, "Invalid table.copy access")
+          }
         }
-        // check d + n < tabXLength
-        val tabXLength = tables.size(module.tableAddrs(x))
-        val xAccess = num.evalIBinop(i32.Add, d, n)
-        compareSize(valToSize(xAccess), tabXLength) match {
-          case Topped.Actual(i) =>
-            if (i <= 0) {
-              fail(TableAccessOutOfBounds, "Invalid table.copy access")
-            }
-          case Topped.Top => fail(TableAccessOutOfBounds, "Invalid table.copy access")
-        }
-        // check n > 0
-        compareSize(valToSize(n), intToSize(0)) match {
-          case Topped.Actual(i) =>
-            if (i <= 0) {
-              return
-            }
-          case Topped.Top =>
-            return
-        }
-        // compare d, s
-        compareSize(valToSize(d), valToSize(s)) match {
-          case Topped.Actual(i) if i <= 0 =>
-            stack.push(d)
-            stack.push(s)
-            evalTableInst(TableGet(y), loc)
-            evalTableInst(TableSet(x), loc)
-            stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
-            stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
-          case Topped.Actual(i) if i > 0 =>
-            // push d + n - 1
-            stack.push(num.evalIBinop(i32.Add, d, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
-            // push s + n - 1
-            stack.push(num.evalIBinop(i32.Add, s, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
-            evalTableInst(TableGet(y), loc)
-            evalTableInst(TableSet(x), loc)
-            stack.push(d)
-            stack.push(s)
-          case Topped.Top => fail(TableAccessOutOfBounds, "Invalid table.copy access")
-          case _ => fail(TableAccessOutOfBounds, "Invalid table.copy access")
-        }
-        // push n - 1
-        stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
-        evalTableInst(TableCopy(x, y), loc)
-
       case TableInit(ix, el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
         val n = stack.popOrAbort()
@@ -293,57 +277,35 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val d = stack.popOrAbort()
         val elemLen = elem.init.length
         // check s + n <= elemLen
-        val elemIndex = num.evalIBinop(i32.Add, n, s)
-        val elemSizeAccess = compareSize(valToSize(elemIndex), intToSize(elemLen))
-        elemSizeAccess match
-          case Topped.Actual(i) =>
-            if (i > 0) {
-              fail(TableAccessOutOfBounds, "Index > Elem List")
+        val elemAccessCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(intToSize(elemLen)))
+        branchOpsUnit.boolBranch(elemAccessCheck)(fail(TableAccessOutOfBounds, "Index > Elem List")) {
+          // check d + n <= tableSize
+          val tableSize = tables.size(module.tableAddrs(ix))
+          val tableAccessCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
+          branchOpsUnit.boolBranch(tableAccessCheck)(fail(TableAccessOutOfBounds, "Index > Table Size")) {
+            // check n > 0
+            val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
+            branchOpsUnit.boolBranch(nCheck)(return) {
+              stack.push(d)
+              // Todo: replace this with index
+              val index = valToInt(s)
+              val refInst = elem.init(index)
+              val instBlock = BlockId(elem)
+              val blockLoc = module.registerBlockSizes(instBlock, loc, refInst)
+              // assert result of eval(refInst) convertable to ref
+              val fRef = valToRef(evalInstructionSequence(instBlock, refInst, module, blockLoc))
+              stack.push(refToVal(fRef))
+              evalTableInst(TableSet(ix), blockLoc)
+              // push d + 1
+              stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
+              // push s + 1
+              stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
+              // push n - 1
+              stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
+              evalTableInst(TableInit(ix, el), blockLoc)
             }
-          case Topped.Top =>
-            fail(TableAccessOutOfBounds, "Index > Elem List")
-
-        // check d + n <= tableSize
-        val tableSize = tables.size(module.tableAddrs(ix))
-        val tableIndex = num.evalIBinop(i32.Add, d, n)
-        val tableSizeAccess = compareSize(valToSize(tableIndex), tableSize)
-        tableSizeAccess match
-          case Topped.Actual(i) =>
-            if (i > 0) {
-              fail(TableAccessOutOfBounds, "Index > Table Size")
-            }
-          case Topped.Top =>
-            fail(TableAccessOutOfBounds, "Index > Table Size")
-
-        // check n > 0
-        val nAccess = compareSize(valToSize(n), intToSize(0))
-        nAccess match
-          case Topped.Actual(i) =>
-            if (i <= 0) {
-              return
-            }
-          case Topped.Top =>
-            // TODO: This should also continue, as TOP does not indicate whether n is 0 larger than 0
-            return
-
-        stack.push(d)
-        // Todo: replace this with index
-        val index = valToInt(s)
-        val refInst = elem.init(index)
-        val instBlock = BlockId(elem)
-        val blockLoc = module.registerBlockSizes(instBlock, loc, refInst)
-        // assert result of eval(refInst) convertable to ref
-        val fRef = valToRef(evalInstructionSequence(instBlock, refInst, module, blockLoc))
-        stack.push(refToVal(fRef))
-        evalTableInst(TableSet(ix), blockLoc)
-        // push d + 1
-        stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
-        // push s + 1
-        stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
-        // push n - 1
-        stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
-        evalTableInst(TableInit(ix, el), blockLoc)
-
+          }
+        }
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
         val elemSz = module.elements.size
