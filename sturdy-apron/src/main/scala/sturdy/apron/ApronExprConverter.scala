@@ -70,6 +70,11 @@ case class ApronExprConverter
           recentVirts.virtualAddresses.head
         else
           VirtualAddress(phys.ctx, region.old.max, recencyStore.addressTranslation)
+      case Recency.Failed =>
+        if (region.failed.isEmpty)
+          recencyStore.addressTranslation.allocFailed(phys.ctx)
+        else
+          VirtualAddress(phys.ctx, region.failed.max, recencyStore.addressTranslation)
 
   inline def physToVirt(mapping: Map[Ctx, RecencyRegion], physExpr: ApronExpr[PhysicalAddress[Ctx], Type]): ApronExpr[VirtualAddress[Ctx], Type] =
     physExpr.mapAddr(physToVirt(mapping,_))

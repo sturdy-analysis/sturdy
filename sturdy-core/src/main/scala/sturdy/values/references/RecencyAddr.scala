@@ -160,6 +160,22 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         mapping += ctx -> RecencyRegion(BitSet.empty, BitSet(freshId), BitSet.empty)
         VirtualAddress(ctx, freshId, this)
 
+  def allocFailed(ctx: Context): VirtualAddress[Context] =
+    mapping.get(ctx) match
+      case Some(RecencyRegion(recent, old, failed)) =>
+        if (failed.isEmpty)
+          val freshId = this.fresh.getOrElse(ctx, 0)
+          this.fresh += (ctx) -> (freshId + 1)
+          mapping += ctx -> RecencyRegion(recent, old, failed + freshId)
+          VirtualAddress(ctx, freshId, this)
+        else
+          VirtualAddress(ctx, failed.head, this)
+      case None =>
+        val freshId = this.fresh.getOrElse(ctx, 0)
+        this.fresh += ctx -> (freshId + 1)
+        mapping += ctx -> RecencyRegion(BitSet.empty, BitSet.empty, BitSet(freshId))
+        VirtualAddress(ctx, freshId, this)
+
   def joinRecentIntoOld(virt: VirtualAddress[Context]): Unit =
     for(region <- mapping.get(virt.ctx)) {
       mapping += virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n, region.failed)

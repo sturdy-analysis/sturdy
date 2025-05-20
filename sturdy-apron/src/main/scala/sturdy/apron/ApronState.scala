@@ -267,6 +267,16 @@ final class ApronRecencyState
         rCombined <- combineExpr(widen, allocator).apply(r1, r2)
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
+    case (e1,e2) if containsFailedAddrs(recencyStore.addressTranslation.mapping, e1) || containsFailedAddrs(recencyStore.addressTranslation.otherMapping.getOrElse(recencyStore.addressTranslation.mapping), e2) =>
+      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
+        (joinedSpecials, joinedType) =>
+          val iv1 = getInterval(e1)
+          val ctx = allocator(joinedType)
+          val failedVirt = recencyStore.addressTranslation.allocFailed(ctx)
+          val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
+          val iv2 = getInterval(failedExpr)
+          MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
+      )
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
@@ -282,6 +292,9 @@ final class ApronRecencyState
           MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
       )
   }
+
+  private def containsFailedAddrs(mapping: Map[Ctx, RecencyRegion], expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+    expr.addrs.exists(virt => recencyStore.addressTranslation.recency(mapping, virt.ctx, virt.n) == PowRecency.Failed)
 
   private def structuralEq(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
     (e1, e2) match

@@ -69,7 +69,7 @@ final class RelationalStore
 
   override def write(powAddr: PowAddr, v: Val): Unit =
     relationalValue.getRelationalVal(v) match
-      case Some(exp) => write(powAddr, exp)
+      case Some(exp) => write(powAddr, exp.mapAddrSame(replaceFailedAddrs))
       case None => nonRelationalStore.write(powAddr, v)
 
   private def write(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
