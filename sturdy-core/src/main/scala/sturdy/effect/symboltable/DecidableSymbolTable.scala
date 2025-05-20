@@ -15,27 +15,36 @@ trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, E
 
   def entries: Map[Key, Table] = tables
 
-  override def get(key: Key, symbol: Int): JOptionC[Entry] =
+  override def get(key: Key, symbol: Int): JOptionC[Entry] = {
+    if(!inBounds(key, symbol))
+      return JOptionC.none
     JOptionC(tables(key).entries.get(symbol))
+  }
 
-  override def set(key: Key, symbol: Int, newEntry: Entry): Unit =
-    tables += key -> Table(tables(key).entries + (symbol -> newEntry), tables(key).limit)
+  override def set(key: Key, symbol: Int, newEntry: Entry): JOptionC[Unit] = {
+    if(!inBounds(key, symbol))
+      return JOptionC.none
+    val tab = tables(key)
+    val newTable = Table(tab.entries + (symbol -> newEntry), tab.limit)
+    tables += key -> newTable
+    JOptionC.some(())
+  }
 
   override def size(key: Key): Int =
     tables(key).entries.size
 
-  override def grow(key: Key, delta: Int, initEntry: Entry): JOptionC[Int] =
+  override def grow(key: Key, newSize: Int, initEntry: Entry): JOptionC[Int] =
     val oldTable = tables(key)
-    val newSize = oldTable.entries.size + delta
+    val oldSize = oldTable.entries.size
     val upperLimit = oldTable.limit.max
     if (upperLimit.isDefined && newSize > upperLimit.get)
       JOptionC.none
     else
-      val added = (oldTable.entries.size until oldTable.entries.size + delta).map(i => i -> initEntry).toMap
+      val added = (oldSize until newSize).map(i => i -> initEntry).toMap
       val newTable = Table(oldTable.entries ++ added, oldTable.limit)
 
       tables += key -> newTable
-      JOptionC.Some(newSize)
+      JOptionC.Some(oldSize)
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Int] = SizedSymbolTable.Limit(0, None)): Unit =
     tables += key -> Table(Map(), limit)
@@ -54,6 +63,11 @@ trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, E
           break(eSound)
     }
     IsSound.Sound*/
+    
+  private def inBounds(key: Key, symbol: Int): Boolean =
+    val tab = tables(key)
+    val length = math.max(tab.entries.size, tab.limit.min)
+    !(symbol >= length || symbol < 0)
 
   case class Table(entries: Map[Int, Entry], limit: SizedSymbolTable.Limit[Int])
 
@@ -73,8 +87,9 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
   override def get(key: Key, symbol: Symbol): JOptionC[Entry] =
     JOptionC(tables(key).get(symbol))
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOptionC[Unit] =
     tables += key -> (tables(key) + (symbol -> newEntry))
+    JOptionC.some(())
 
   override def putNew(key: Key): Unit =
     tables += key -> Map()

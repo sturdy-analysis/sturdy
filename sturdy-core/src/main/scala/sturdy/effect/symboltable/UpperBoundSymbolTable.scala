@@ -15,7 +15,7 @@ import boundary.break
 class SizedUpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry), SizedSymbolTable[Key, Symbol, Entry, BaseType[Int], WithJoin] {
   override def size(key: Key): BaseType[Int] = ???
 
-  override def grow(key: Key, delta: BaseType[Int], initEntry: Entry): JOption[WithJoin, BaseType[Int]] = ???
+  override def grow(key: Key, newSize: BaseType[Int], initEntry: Entry): JOption[WithJoin, BaseType[Int]] = ???
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[BaseType[Int]]): Unit = ???
 }
@@ -27,9 +27,12 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
     JOptionA.noneSome(tables(key))
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOption[WithJoin, Unit] = {
+    // TODO: implement size check
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
-  
+    JOptionA.some(())
+  }
+
 
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry

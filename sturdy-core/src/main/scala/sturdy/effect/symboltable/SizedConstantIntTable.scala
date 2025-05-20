@@ -3,8 +3,7 @@ package sturdy.effect.symboltable
 import sturdy.data.{*, given}
 import sturdy.effect.Effect
 import sturdy.values.{*, given}
-
-import SizedConstantSymbolTable.*
+import SizedConstantIntTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
@@ -13,12 +12,13 @@ import sturdy.effect.TrySturdy
 import scala.util.boundary, boundary.break
 import Either as Eith
 
-class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Key, Topped[Symbol], Entry, Topped[Int], WithJoin], Effect:
 
-  protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
+class SizedConstantIntTable[Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
+
+  protected var tables: Map[Key, Either[Table[Int, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
-  override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
+  override def get(key: Key, symbol: Topped[Int]): JOptionA[Entry] =
     tables(key) match
       case Right(entry) => JOptionA.NoneSome(entry)
       case Left(tab) => symbol match
@@ -32,8 +32,29 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
           case Some(MayMust.Must(entry)) => JOptionA.some(entry)
           case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
 
-  override def set(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Topped[Int], newEntry: Entry): JOption[WithJoin, Unit] =
+    symbol match {
+      case Topped.Actual(i) if i < 0 =>
+        return JOptionA.none
+      case _ => ()
+    }
     dirtyTables += key
+    val tab = tables(key)
+    val length =
+      tab match {
+        case Right(_) => Topped.Top
+        case Left(t) => t.limit.min match {
+          case Topped.Actual(min) => Topped.Actual(math.max(min, t.underlying.size))
+          case Topped.Top => Topped.Top
+        }
+      }
+    length match
+      case Topped.Actual(len) => symbol match {
+        case Topped.Actual(i) if (i >= len) => return JOptionA.none
+        case _ => ()
+      }
+      case _ => ()
+
     tables(key) match
       case Right(entry) =>
         Join(entry, newEntry).ifChanged(tables += key -> Right(_))
@@ -42,19 +63,50 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
           tables += key -> Right((tab.entries + newEntry).reduce(Join(_, _).get))
         case Topped.Actual(sym) =>
           tables += key -> Left(tab.updated(sym, newEntry))
-  
+
+    length match
+      case Topped.Top => JOptionA.noneSome(())
+      case Topped.Actual(len) => symbol match
+        case Topped.Top => JOptionA.noneSome(())
+        case Topped.Actual(i) if (i < len) => JOptionA.some(())
+        case _ => JOptionA.noneSome(())
+
 
   override def size(key: Key): Topped[Int] = tables(key) match
     case Left(table) => table.limit.min
     case _ => Topped.Top
 
-  override def grow(key: Key, delta: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
-    /*tables(key) match
-      case Left(table) =>
-        val newLimit = table.limit.min + delta
-        tables += key -> Left(table.updated(key, MayMust.Must(initEntry)))
-        JOption(WithJoin(newLimit), true)
-      case _ => JOption(WithJoin(Topped.Top), false)*/
+  override def grow(key: Key, newSize: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = {
+    // TODO: finalize implementation
+    tables(key) match {
+      case Right(entry) =>
+        Join(entry, initEntry).ifChanged(tables += key -> Right(_))
+        JOptionA.noneSome(Topped.Top)
+      case Left(tab) =>
+        val oldSize = tab.entries.size
+        // TODO: change this check to MayMust logic
+        if (tab.dirtySymbols.isEmpty) {
+          newSize match
+            case Topped.Actual(newSz) =>
+              // assumption: fully concrete table
+              tab.limit.max match
+                case Some(Topped.Actual(maxLimit)) =>
+                  if (newSz > maxLimit) {
+                    return JOptionA.none
+                  }
+                  for (i <- oldSize until newSz) {
+                    tab.updated(i, initEntry)
+                  }
+                  return JOptionA.some(Topped.Actual(oldSize))
+                case Some(Topped.Top) =>
+                  tables += key -> Right((tab.entries + initEntry).reduce(Join(_, _).get))
+                  return JOptionA.noneSome(Topped.Actual(oldSize))
+                case None => ()
+              JOptionA.none
+        }
+        JOptionA.noneSome(Topped.Top)
+    }
+  }
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]] = SizedSymbolTable.Limit(Topped.Actual(0), None)): Unit =
     tables += key -> Left(Table(Map(), Set(), limit))
@@ -63,7 +115,7 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
   override def putNew(key: Key): Unit =
     putNew(key, SizedSymbolTable.Limit(Topped.Actual(0), None))
 
-  override type State = Tables[Key, Symbol, Entry]
+  override type State = Tables[Key, Entry]
   override def getState: State = tables
   override def setState(s: State): Unit = tables = s
   override def join: Join[State] = JoinMap(using {
@@ -85,7 +137,7 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables
     dirtyTables = Set()
-    private var fTables: Tables[Key, Symbol, Entry] = _
+    private var fTables: Tables[Key, Entry] = _
     private var fDirty: Set[Key] = _
 
     override def inbetween(fFailed: Boolean): Unit =
@@ -124,7 +176,7 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
       dirtyTables ++= snapDirtyTables
   }
 
-  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Int, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     // - all tables in c are present in the abstract
     // - all abstract tables with at least one 'must' entry have a concrete counterpart
     // - for each key in c, tabs(key) is sound
@@ -143,7 +195,7 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
     }
     IsSound.Sound
 
-  def tabInstanceIsSound[cEntry](c: Map[Symbol, cEntry], a: Eith[Table[Symbol,Entry], Entry])(using entrySound: Soundness[cEntry, Entry]): IsSound = boundary:
+  def tabInstanceIsSound[cEntry](c: Map[Int, cEntry], a: Either[Table[Int,Entry], Entry])(using entrySound: Soundness[cEntry, Entry]): IsSound = boundary:
     // all entries in c are approximated by corresponding entry in a
     // all abstract symbols not defined in c point to a 'may' entry
     a match
@@ -169,8 +221,8 @@ class SizedConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry
         IsSound.Sound
 
 
-object SizedConstantSymbolTable:
-  type Tables[Key, Symbol, Entry] = Map[Key, Eith[Table[Symbol, Entry], Entry]]
+object SizedConstantIntTable:
+  type Tables[Key, Entry] = Map[Key, Either[Table[Int, Entry], Entry]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with
     override def apply(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): MaybeChanged[Table[Symbol, Entry]] =

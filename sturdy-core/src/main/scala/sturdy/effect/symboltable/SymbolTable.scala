@@ -15,7 +15,7 @@ import sturdy.values.{Join, MaybeChanged}
   */
 trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   def get(key: Key, symbol: Symbol): JOption[J, Entry]
-  def set(key: Key, symbol: Symbol, newEntry: Entry): Unit
+  def set(key: Key, symbol: Symbol, newEntry: Entry): JOption[J, Unit]
 
   def putNew(key: Key): Unit
 
@@ -25,7 +25,15 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
 trait SizedSymbolTable[Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
   
   def size(key: Key): Size
-  def grow(key: Key, delta: Size, initEntry: Entry): JOption[J, Size]
+
+  /**
+   * Grow the table to a new size. The new size must be greater than the current size.
+   * @param key the key to grow
+   * @param newSize the new size of the table
+   * @param initEntry the initial value for all new entries
+   * @return JOption containing either the previous size of the table, or None if the new size exceeds the limit
+   */
+  def grow(key: Key, newSize: Size, initEntry: Entry): JOption[J, Size]
 
   def putNew(key: Key, limit: SizedSymbolTable.Limit[Size]): Unit
   

@@ -25,13 +25,23 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
+  val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
+  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
-    it must s"execute ${p.getFileName}" in {
-      println(s"Executing TestScript interpreter on ${p.getFileName}")
+  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+    it must s"execute WASM1 script ${p.getFileName}" in {
+      println(s"Executing TestScript interpreter on WASM1 script ${p.getFileName}")
+      val script = Parsing.testscript(p)
+      val interp = ConcreteTestSpecInterpreter(Some(spectest))
+      interp.run(script)
+    }
+  }
+
+  Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+    it must s"execute WASM2 script ${p.getFileName}" in {
+      println(s"Executing TestScript interpreter on WASM2 script ${p.getFileName}")
       val script = Parsing.testscript(p)
       val interp = ConcreteTestSpecInterpreter(Some(spectest))
       interp.run(script)

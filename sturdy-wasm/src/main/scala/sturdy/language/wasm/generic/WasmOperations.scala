@@ -56,6 +56,12 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   def refToVal(r: RefV): V
   
   def valToSize(v: V): Size
+
+  /**
+   * Convert a Size to a value.
+   * @param sz the size to convert
+   * @return sz wrapped in a i32 value
+   */
   def sizeToVal(sz: Size): V
   
   def valToInt(v: V): Int

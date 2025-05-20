@@ -10,9 +10,9 @@ import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.SizedConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{SizedConstantSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{SizedConstantIntTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -113,7 +113,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalSymbolTable[TableAddr, Int, RefV] = new IntervalSymbolTable(rangeLimit)
+    val tables: IntervalSymbolTable[TableAddr, RefV] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

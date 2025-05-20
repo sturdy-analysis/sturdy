@@ -194,18 +194,27 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case TableSet(ix) =>
         val v = stack.popOrAbort()
         val elemIdx = stack.popOrAbort()
-        val addr = validateTableAccess(ix, elemIdx)
-        tables.set(addr, valToIdx(elemIdx), valToRef(v))
+        val addr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
+        tables.set(addr, valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
       case TableSize(ix) =>
         val sz = tables.size(module.tableAddrs(ix))
         stack.push(sizeToVal(sz))
       case TableGrow(ix) =>
         val n = stack.popOrAbort()
         val initVal = stack.popOrAbort()
-        val result = tables.grow(module.tableAddrs(ix), valToSize(n), valToRef(initVal)).option
-          (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
-          (sizeToVal)
-        stack.push(result)
+        val tableSize = tables.size(module.tableAddrs(ix))
+        val newSize = num.evalIBinop(i64.Add, num.evalConvertop(i64.ExtendUI32, sizeToVal(tableSize)), num.evalConvertop(i64.ExtendUI32, n))
+        // check if newSize <= 0xFFFFFFFF
+        val newSizeCheck = num.evalIRelop(i64.GtU, newSize, num.evalNumeric(i64.Const(0xFFFFFFFF)))
+        branchOpsUnit.boolBranch(newSizeCheck) {
+          stack.push(num.evalNumeric(i32.Const(-1)))
+        } {
+          val newSize = num.evalIBinop(i32.Add, sizeToVal(tableSize), n)
+          val result = tables.grow(module.tableAddrs(ix), valToSize(newSize), valToRef(initVal)).option
+            (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
+            (sizeToVal)
+          stack.push(result)
+        }
 
       case TableFill(ix) =>
         val n = stack.popOrAbort()
@@ -245,7 +254,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               // n > 0
               // compare d, s
               val dCheck = num.evalIRelop(i32.LeU, d, s)
-              branchOpsUnit.boolBranch(dCheck){
+              branchOpsUnit.boolBranch(dCheck) {
                 // d <= s
                 stack.push(d)
                 stack.push(s)
@@ -253,7 +262,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 evalTableInst(TableSet(x), loc)
                 stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
                 stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
-              }{
+              } {
                 // d > s
                 // push d + n - 1
                 stack.push(num.evalIBinop(i32.Add, d, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
@@ -336,7 +345,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
     addr
   }
-  
+
   def getTableType(addr: TableAddr): ReferenceType = tableTypes.getOrElse(addr, fail(TableAccessOutOfBounds, addr.toString))
 
   def evalRefInst(inst: Inst): Unit = inst match {
@@ -414,7 +423,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   def writeGlobalValue(ga: GlobalAddr, v: V): Unit =
     globals.set((), ga, v)
-  
+
   def eval_open(inst: Inst, loc: InstLoc)(using Fixed): Unit =
     val opcode = inst.opcode
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)

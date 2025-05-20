@@ -5,7 +5,7 @@ import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Effect
-import sturdy.effect.symboltable.SizedConstantSymbolTable.Tables
+import sturdy.effect.symboltable.SizedConstantIntTable.Tables
 import sturdy.values.*
 import sturdy.values.integer.NumericInterval
 
@@ -13,12 +13,12 @@ import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
 // TODO: replace Size with NumericInterval, change IntervalAnalysis to match this change
-class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[I]) extends SizedSymbolTable[Key, NumericInterval[I], Entry, Topped[Int], WithJoin], Effect:
-  private val constantSymbolTable: SizedConstantSymbolTable[Key, I, Entry] = new SizedConstantSymbolTable
+class IntervalSymbolTable[Key, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[Int]) extends SizedSymbolTable[Key, NumericInterval[Int], Entry, Topped[Int], WithJoin], Effect:
+  private val constantSymbolTable: SizedConstantIntTable[Key, Entry] = new SizedConstantIntTable
 
-  private val one = summon[Numeric[I]].one
+  private val one = summon[Numeric[Int]].one
 
-  def get(key: Key, symbol: NumericInterval[I]): JOptionA[Entry] =
+  def get(key: Key, symbol: NumericInterval[Int]): JOptionA[Entry] =
     if (symbol.countOfNumsInInterval <= rangeLimit) {
       var result = constantSymbolTable.get(key, Topped.Actual(symbol.low))
       var i = symbol.low + one
@@ -31,7 +31,7 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
       constantSymbolTable.get(key, Topped.Top)
     }
 
-  def set(key: Key, symbol: NumericInterval[I], newEntry: Entry): Unit =
+  def set(key: Key, symbol: NumericInterval[Int], newEntry: Entry): JOption[WithJoin, Unit] =
     if (symbol.countOfNumsInInterval <= rangeLimit)
       var i = symbol.low
       while (i <= symbol.high)
@@ -39,6 +39,8 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
         i += one
     else
       constantSymbolTable.set(key, Topped.Top, newEntry)
+    // TODO: implement size check logic
+    JOptionA.some(())
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = ???
 
@@ -48,7 +50,7 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
 
   override def size(key: Key): Topped[Int] = ???
 
-  override def grow(key: Key, delta: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
+  override def grow(key: Key, newSize: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
   
 
   override type State = constantSymbolTable.State
@@ -62,5 +64,5 @@ class IntervalSymbolTable[Key, I, Entry](rangeLimit: Int)(using Finite[Key], Joi
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
     constantSymbolTable.makeComputationJoiner
 
-  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, I, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Int, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     constantSymbolTable.tableIsSound(c)

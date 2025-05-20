@@ -11,8 +11,8 @@ import sturdy.effect.symboltable.joinLimit
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{SizedConstantSymbolTable, JoinableDecidableSymbolTable}
-import sturdy.effect.symboltable.SizedConstantSymbolTable.CombineTable
+import sturdy.effect.symboltable.{SizedConstantIntTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
@@ -202,7 +202,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: SizedConstantSymbolTable[TableAddr, Int, RefV] = new SizedConstantSymbolTable
+    val tables: SizedConstantIntTable[TableAddr, RefV] = new SizedConstantIntTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
