@@ -39,7 +39,6 @@ trait Interpreter:
   type ExternReference
 
   enum NumValue:
-    case Top
     case Int32(i: I32)
     case Int64(l: I64)
     case Float32(f: F32)
@@ -61,25 +60,20 @@ trait Interpreter:
 
     def asInt32(using f: Failure): I32 = this match
       case Num(NumValue.Int32(i)) => i
-      case Num(NumValue.Top) => topI32
       case TopValue => topI32
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     def asInt64(using f: Failure): I64 = this match
       case Num(NumValue.Int64(l)) => l
-      case Num(NumValue.Top) => topI64
       case TopValue => topI64
       case _ => f.fail(TypeError, s"Expected i64 but got $this")
 
     def asFloat32(using f: Failure): F32 = this match
-      case Num(NumValue.Float32(f)) => f
-      case Num(NumValue.Top) => topF32
-      case TopValue => topF32
+      case Num(NumValue.Float32(f)) => f case TopValue => topF32
       case _ => f.fail(TypeError, s"Expected f32 but got $this")
 
     def asFloat64(using f: Failure): F64 = this match
       case Num(NumValue.Float64(d)) => d
-      case Num(NumValue.Top) => topF64
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
 

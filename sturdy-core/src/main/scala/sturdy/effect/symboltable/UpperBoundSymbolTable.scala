@@ -24,8 +24,10 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
 
   protected var tables: Map[Key, Entry] = Map()
 
-  override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
+  override def get(key: Key, symbol: Symbol): JOptionA[Entry] = {
+    // TODO: implement size chck
     JOptionA.noneSome(tables(key))
+  }
 
   override def set(key: Key, symbol: Symbol, newEntry: Entry): JOption[WithJoin, Unit] = {
     // TODO: implement size check

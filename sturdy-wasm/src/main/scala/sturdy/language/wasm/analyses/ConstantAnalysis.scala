@@ -64,7 +64,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def refToVal(r: Powerset[ConstantAnalysis.RefValue]): ConstantAnalysis.Value = r match
       case Powerset(refs) =>
         if (refs.size != 1)
-          Value.Num(NumValue.Int32(Topped.Top))
+          Value.TopValue
         else {
           val ref = refs.head
           ref match {

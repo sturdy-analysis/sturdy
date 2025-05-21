@@ -187,9 +187,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     inst match {
       case TableGet(ix) =>
         val elemIdx = stack.popOrAbort()
-        val addr = validateTableAccess(ix, elemIdx)
-        val tpe = getTableType(addr)
-        val ref = tables.getOrElse(addr, valToIdx(elemIdx), makeNullRefV(tpe))
+        val addr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
+        val ref = tables.getOrElse(addr, valToIdx(elemIdx), fail(UnboundFunctionIndex, elemIdx.toString))
         stack.push(refToVal(ref))
       case TableSet(ix) =>
         val v = stack.popOrAbort()
@@ -218,25 +217,26 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
       case TableFill(ix) =>
         val n = stack.popOrAbort()
-        val ref = stack.popOrAbort()
-        val offset = stack.popOrAbort()
-        stack.push(n)
-        stack.push(num.evalNumeric(i32.Const(1)))
-        stack.push(num.evalNumeric(i32.Sub))
-        stack.push(offset)
-        validateTableAccess(ix, num.evalNumeric(i32.Add))
-        if (valToInt(n) == 0) return
-        stack.push(offset)
-        stack.push(ref)
-        evalTableInst(TableSet(ix), loc)
-        stack.push(offset)
-        stack.push(num.evalNumeric(i32.Const(1)))
-        stack.push(num.evalNumeric(i32.Add))
-        stack.push(ref)
-        stack.push(n)
-        stack.push(num.evalNumeric(i32.Const(1)))
-        stack.push(num.evalNumeric(i32.Sub))
-        evalTableInst(TableFill(ix), loc)
+        val ref = stack.popOrAbort() // val
+        val offset = stack.popOrAbort() // i
+        val tableSize = tables.size(module.tableAddrs(ix))
+        // check offset + n <= tableSize
+        val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, offset, n), sizeToVal(tableSize))
+        branchOpsUnit.boolBranch(offsetCheck)(fail(TableAccessOutOfBounds, "Invalid table.fill access")) {
+          // check n > 0
+          val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
+          branchOpsUnit.boolBranch(nCheck)(return) {
+            // n > 0
+            stack.push(offset)
+            stack.push(ref)
+            evalTableInst(TableSet(ix), loc)
+            stack.push(num.evalIBinop(i32.Add, offset, num.evalNumeric(i32.Const(1))))
+            stack.push(ref)
+            stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
+            evalTableInst(TableFill(ix), loc)
+          }
+
+        }
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
@@ -333,17 +333,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
-  }
-
-  def validateTableAccess(tableIdx: TableIdx, elemIdx: V): TableAddr = {
-    // TODO: refactor, check if this function is actually needed anywhere
-    val addr = module.tableAddrs.lift(tableIdx).getOrElse(fail(TableAccessOutOfBounds, tableIdx.toString))
-    val tabSz = tables.size(addr)
-    val e = valToInt(elemIdx)
-    if (e < 0 | e >= valToInt(sizeToVal(tabSz))) {
-      fail(TableAccessOutOfBounds, "Element Index out of bounds")
-    }
-    addr
   }
 
   def getTableType(addr: TableAddr): ReferenceType = tableTypes.getOrElse(addr, fail(TableAccessOutOfBounds, addr.toString))

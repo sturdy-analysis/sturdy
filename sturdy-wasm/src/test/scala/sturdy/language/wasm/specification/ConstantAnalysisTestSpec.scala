@@ -64,7 +64,7 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
 
   Fixpoint.DEBUG = false
   val EXCLUDE_MEM_GROW = false
-  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".")).filter(p => {
+  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
     !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
   }).sorted.foreach { p =>
     for (aInterp <- analyses) {
@@ -336,8 +336,11 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
       case unresolved.i64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))
       case unresolved.f32.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(Topped.Top))
       case unresolved.f64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(Topped.Top))
-      case unresolved.RefFunc(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
-      case unresolved.RefExtern(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+      case unresolved.RefFunc(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Top))
+      case unresolved.RefExtern(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Top))
+      case unresolved.RefNull(t) => t match
+        case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
+        case ExternRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =

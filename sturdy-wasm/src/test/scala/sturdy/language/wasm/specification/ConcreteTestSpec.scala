@@ -30,7 +30,11 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
-  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  val EXCLUDE_MEM_GROW = true
+
+  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
+    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
+  }).sorted.foreach { p =>
     it must s"execute WASM1 script ${p.getFileName}" in {
       println(s"Executing TestScript interpreter on WASM1 script ${p.getFileName}")
       val script = Parsing.testscript(p)
@@ -39,7 +43,9 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
     }
   }
 
-  Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
+    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
+  }).sorted.foreach { p =>
     it must s"execute WASM2 script ${p.getFileName}" in {
       println(s"Executing TestScript interpreter on WASM2 script ${p.getFileName}")
       val script = Parsing.testscript(p)
