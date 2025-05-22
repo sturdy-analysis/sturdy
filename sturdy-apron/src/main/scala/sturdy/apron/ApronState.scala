@@ -282,14 +282,16 @@ final class ApronRecencyState
         (joinedSpecials, joinedType) =>
           val ctx = allocator(joinedType)
           val result = recencyStore.addressTranslation.allocOld(ctx)
-          val resultExpr = ApronExpr.Addr(result, joinedSpecials, joinedType)
-          val iv1 = getInterval(e1)
+          val resultPhys = result.physical.iterator.next()
+          val stateBefore = relationalStore.getState
           assign(result, e1)
           assign(result, e2)
-          val iv2 = getInterval(resultExpr)
-          // The check if the result has changed, happens on the abstract domain
-          // in the recency closure join
-          MaybeChanged(resultExpr, ! iv2.isLeq(iv1))
+          val stateAfter = relationalStore.getState
+          MaybeChanged(ApronExpr.Addr(result, joinedSpecials, joinedType),
+            Join(stateBefore.metaData.get(resultPhys), stateAfter.metaData.get(resultPhys)).hasChanged ||
+            ! stateBefore.abs1.getEnvironment.isEqual(stateAfter.abs1.getEnvironment) ||
+            ! stateBefore.abs1.isEqual(stateAfter.abs1.getCreationManager, stateAfter.abs1)
+          )
       )
   }
 

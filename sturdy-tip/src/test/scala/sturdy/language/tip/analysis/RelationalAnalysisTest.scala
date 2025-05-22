@@ -1,7 +1,8 @@
 package sturdy.language.tip.analysis
 
-import apron.{Polka, Texpr1Node}
+import apron.{Manager, Polka, Octagon, Box, Texpr1Node}
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import org.scalatest.Suites
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -35,13 +36,18 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
 
-class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
-   behavior of "Tip Relational analysis"
+class RelationalAnalysisTests extends Suites(
+  new RelationalAnalysisTest(Polka(true)),
+  new RelationalAnalysisTest(Octagon()),
+  new RelationalAnalysisTest(Box()),
+)
+
+class RelationalAnalysisTest(manager: Manager) extends AnyFlatSpec, Matchers:
+   behavior of ("Tip Relational analysis with " + manager.getClass.getSimpleName)
 
    val uri = classOf[RelationalAnalysisTest].getResource("/sturdy/language/tip").toURI;
    val recursiveProgram: Array[String] = Source.fromFile(classOf[RelationalAnalysisTest].getResource("/sturdy/language/recursive_programs").toURI).getLines.toArray
 
-   val polyManager = new Polka(false)
    Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
      p.toString.endsWith(".tip")
@@ -60,7 +66,7 @@ class RelationalAnalysisTest extends AnyFlatSpec, Matchers:
      val program = Parser.parse(sourceCode)
 
      if (program.funs.exists(_.name == "main")) {
-       val analysis = new RelationalAnalysis.Instance(polyManager, Map(), stackConfig, 0)
+       val analysis = new RelationalAnalysis.Instance(manager, Map(), stackConfig, 0)
        analysis.addControlObserver(new PrintingControlObserver()(println))
        val cfgBuilder = analysis.addControlObserver(ControlEventGraphBuilder())
 
