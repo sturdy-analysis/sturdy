@@ -2,7 +2,7 @@ package sturdy.effect.stack
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalValue, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -26,7 +26,7 @@ final class RelationalStack
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Val],
-    relationalValue: RelationalValue[Val, VirtualAddress[Ctx], Type]
+    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends JoinableDecidableOperandStack[Val]:
 
@@ -46,12 +46,12 @@ final class RelationalStack
     MaybeChanged(joinedFrame, hasChanged)
 
   private def combineValues(widen: Boolean, idx: Int, v1: Val, v2: Val): MaybeChanged[Val] =
-    (relationalValue.getRelationalVal(v1), relationalValue.getRelationalVal(v2)) match
+    (relationalValue.getRelationalExpr(v1), relationalValue.getRelationalExpr(v2)) match
       case (Some(e1), Some(e2)) =>
         val allocator = AAllocatorFromContext[Type, Ctx](
           (tpe: Type) => stackAllocator((idx, tpe))
         )
-        apronState.combineExpr(widen, allocator)(e1, e2).map(relationalValue.makeRelationalVal)
+        apronState.combineExpr(widen, allocator)(e1, e2).map(relationalValue.makeRelationalExpr)
       case (Some(_), None) | (None, Some(_)) | (None, None) =>
         if(widen)
           Widen(v1,v2)

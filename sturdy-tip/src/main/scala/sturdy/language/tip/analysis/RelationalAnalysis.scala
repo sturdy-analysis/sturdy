@@ -132,13 +132,13 @@ object RelationalAnalysis extends Interpreter,
     given lazyApronState: Lazy[ApronState[VirtualAddress[RelationalVar], RelType]] = lazily(apronState)
     given lazyExprConverter: Lazy[ApronExprConverter[RelationalVar, RelType, Value]] = lazily(exprConverter)
 
-    given relationalValue: RelationalValue[Value, VirtAddr, RelType] with
-      override def getRelationalVal(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
+    given relationalValue: RelationalExpr[Value, VirtAddr, RelType] with
+      override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
         v match
           case Value.IntValue(expr) => Some(expr)
           case _ => None
 
-      override def makeRelationalVal(expr: ApronExpr[VirtAddr, RelType]): Value =
+      override def makeRelationalExpr(expr: ApronExpr[VirtAddr, RelType]): Value =
         Value.IntValue(expr)
 
 

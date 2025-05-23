@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronState, ApronType, ApronVar, RelationalValue, given}
+import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronState, ApronType, ApronVar, RelationalExpr, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyStore, RelationalStore, given}
@@ -20,7 +20,7 @@ object RecencyRelationalStore:
     ]
     (using
      apronManager: Manager,
-     virtRelationalValue: RelationalValue[Val, VirtualAddress[Ctx], Type]
+     virtRelationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
     ):
     (
       RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],

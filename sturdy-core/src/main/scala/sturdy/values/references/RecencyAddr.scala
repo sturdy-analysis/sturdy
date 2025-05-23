@@ -94,6 +94,7 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     mapping.get(ctx) match
       case Some(RecencyRegion(recent, old, failed)) =>
         if (failed.contains(n))
+          assert(!recent.contains(n) && !old.contains(n), s"Virtual $n cannot be simultaneously failed and recent/old.")
           PowRecency.Failed
         else if (recent.contains(n) && old.contains(n))
           PowRecency.RecentOld

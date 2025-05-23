@@ -3,18 +3,13 @@ package sturdy.effect.store
 import apron.*
 import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
-import sturdy.effect.allocation.Allocator
 import sturdy.effect.{*, given}
 import sturdy.util.Profiler
 import sturdy.values.floating.{*, given}
-import sturdy.values.integer.{*, given}
+import sturdy.values.integer.given
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
-import sturdy.{IsSound, Soundness}
 
-import scala.collection.immutable.{HashMap, IntMap}
-import scala.collection.mutable
-import math.Ordered.orderingToOrdered
 import scala.reflect.ClassTag
 
 /**
@@ -31,7 +26,7 @@ final class RelationalStore
    initialState: Abstract1,
    initialMetaData: Map[PhysicalAddress[Context], (FloatSpecials,Type)])
   (using
-    relationalValue: RelationalValue[Val, PhysicalAddress[Context], Type]
+    relationalValue: RelationalExpr[Val, PhysicalAddress[Context], Type]
   )
   extends Store[PowAddr, Val, WithJoin]:
 
@@ -56,7 +51,7 @@ final class RelationalStore
       val v1 = powAddr.reduce(addr =>
         metaData.get(addr) match
           case Some((floatSpecials, tpe)) =>
-            JOptionA.Some(relationalValue.makeRelationalVal(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe)))
+            JOptionA.Some(relationalValue.makeRelationalExpr(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe)))
           case None =>
             JOptionA.None()
       )
@@ -68,7 +63,7 @@ final class RelationalStore
     }
 
   override def write(powAddr: PowAddr, v: Val): Unit =
-    relationalValue.getRelationalVal(v) match
+    relationalValue.getRelationalExpr(v) match
       case Some(exp) => write(powAddr, exp.mapAddrSame(replaceFailedAddrs))
       case None => nonRelationalStore.write(powAddr, v)
 

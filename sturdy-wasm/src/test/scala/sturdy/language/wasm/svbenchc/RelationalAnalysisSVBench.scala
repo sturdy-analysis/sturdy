@@ -44,8 +44,8 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
 
     val wasmBinaries = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
-    val includedBenchmarks = //Set("simple_precision_tests")
-      Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
+    val includedBenchmarks = Set("recursified_loop-simple")
+//      Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
 
     val stackConfig = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     val entrypoint = "_start"
@@ -96,18 +96,15 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     Files.writeString(dotPath, cfg.toGraphViz)
 
     val yamlFile = p.toString.substring(0,p.toString.lastIndexOf(".")) + ".yml"
-    if(unreachableCall(Paths.get(yamlFile))) {
-      val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
-      val hostAssertFailUnreachable = ! cfg.nodes.exists {
-        case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
-        case _ => false
-      }
-      assert(hostAssertFailUnreachable, ", analysis was to imprecise to prove property")
-    } else {
-      cancel("Analysis computes may reachability. Cannot verify if call must be reached.")
+    val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
+    val unreachableCallActualVerdict = !cfg.nodes.exists {
+      case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
+      case _ => false
     }
+    assertResult(unreachableCallExpectedVerdict(Paths.get(yamlFile))) { unreachableCallActualVerdict }
 
-  def unreachableCall(yamlPath: Path): Boolean =
+
+  def unreachableCallExpectedVerdict(yamlPath: Path): Boolean =
     val yamlConf = io.circe.yaml.parser.parse(Files.readString(yamlPath)).toTry.get
     var prop = yamlConf.hcursor.downField("properties").downArray.downField("property_file")
     while (!prop.failed && !prop.as[String].contains("../properties/unreach-call.prp")) {

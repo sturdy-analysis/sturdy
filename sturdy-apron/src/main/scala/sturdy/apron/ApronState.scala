@@ -168,14 +168,14 @@ final class ApronRecencyState
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   )(using
-    RelationalValue[Val, VirtualAddress[Ctx], Type]
+    RelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends ApronState[VirtualAddress[Ctx], Type]:
 
   val effectStack: EffectStack = EffectStack(recencyStore)
   val convertExpr: ApronExprConverter[Ctx, Type, Val] = ApronExprConverter(recencyStore, relationalStore)
   given Lazy[ApronExprConverter[Ctx, Type, Val]] = Lazy(convertExpr)
-  val relationalValue: RelationalValue[Val, PhysicalAddress[Ctx], Type] = implicitly
+  val relationalValue: RelationalExpr[Val, PhysicalAddress[Ctx], Type] = implicitly
 
   inline def unapply: (RecencyStore[Ctx, PowVirtualAddress[Ctx], Val], RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]) =
     (recencyStore, relationalStore)
@@ -200,7 +200,7 @@ final class ApronRecencyState
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     relationalStore.write(v.physical,
-      relationalValue.makeRelationalVal(
+      relationalValue.makeRelationalExpr(
         convertExpr.virtToPhys(expr)))
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =

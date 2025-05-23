@@ -51,7 +51,7 @@ import scala.math
 
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
-  final type Addr = BaseType[Int]
+  final type Addr = I32
   final type Size = I32
   final type FuncIx = apron.Interval
   final type FunV = Powerset[FunctionInstance]
@@ -81,8 +81,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
   given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match
-      case Int32(_) => BaseType[Int]
-      case TopValue => BaseType[Int]
+      case Int32(v) => v
+      case TopValue => topI32
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     override def valueToFuncIx(v: Value): FuncIx =
@@ -140,6 +140,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         assignFreshTempVar(ApronExpr.doubleInterval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
       case "__VERIFIER_nondet_double" =>
         assignFreshTempVar(ApronExpr.doubleInterval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
+      case "__blackhole_int" | "__blackhole_int_p" =>
+        args
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
@@ -171,8 +173,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given Join[ApronExpr[VirtAddr, Type]] = JoinApronExpr[VirtAddr, Type]
     given Widen[ApronExpr[VirtAddr, Type]] = WidenApronExpr[VirtAddr, Type]
 
-    given RelationalValue[Value, VirtAddr, Type] with
-      override def getRelationalVal(v: Value): Option[ApronExpr[VirtAddr, Type]] =
+    given RelationalExpr[Value, VirtAddr, Type] with
+      override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, Type]] =
         v match
           case Value.Int32(i32: I32) => Some(i32.asApronExprLazy)
           case Value.Int64(expr) => Some(expr)
@@ -180,7 +182,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Value.Float64(expr) => Some(expr)
           case Value.TopValue => None
 
-      override def makeRelationalVal(expr: ApronExpr[VirtAddr, Type]): Value =
+      override def makeRelationalExpr(expr: ApronExpr[VirtAddr, Type]): Value =
         expr._type match
           case I32Type => Value.Int32(Left(expr))
           case I64Type => Value.Int64(expr)

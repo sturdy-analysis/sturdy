@@ -2,7 +2,7 @@ package sturdy.effect.callframe
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalValue, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
@@ -30,7 +30,7 @@ final class RelationalCallFrame
     val localVariableAllocator: Allocator[Ctx, (Var,Data,Option[CallSite])],
     val apronState: ApronRecencyState[Ctx, Type, Val]
   )(using
-    relationalValue: RelationalValue[Val, VirtualAddress[Ctx], Type]
+    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
      with DecidableCallFrame[Data, Var, Val, CallSite]:
@@ -97,7 +97,7 @@ final class RelationalCallFrame
   private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
     virts.reduce {
       virt =>
-        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => relationalValue.makeRelationalVal(ApronExpr.Addr(virt, floatSpecials, tpe)))
+        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => relationalValue.makeRelationalExpr(ApronExpr.Addr(virt, floatSpecials, tpe)))
         val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
         Join(v1, v2).get
     }.toJOptionC

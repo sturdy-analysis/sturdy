@@ -10,10 +10,18 @@ import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
   enum AddrCtx:
-    case CallFrame(callFramePosition: Int, programPos: Option[FixIn], frame: FrameData)
-    case Stack(stackPosition: Int, programPosition: FixIn, frame: FrameData)
+    case CallFrame(callFramePosition: Int, programPos: Option[FixIn], function: FrameData)
+    case Stack(stackPosition: Int, programPosition: FixIn, function: FrameData)
     case Global(addr: Int)
     case Temp(programPosition: FixIn, tpe: Type)
+
+    override def toString: String =
+      this match
+        case CallFrame(callFramePosition, Some(programPos), function) => s"L$callFramePosition@$function:$programPos"
+        case CallFrame(callFramePosition, None, function) => s"L$callFramePosition@$function"
+        case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"
+        case Global(addr) => s"G$addr"
+        case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
   final type VirtAddr = VirtualAddress[AddrCtx]
   final type PhysAddr = PhysicalAddress[AddrCtx]

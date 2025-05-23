@@ -20,5 +20,7 @@ val svbenchHostFunctions: List[HostFunction] = List(
   HostFunction("__VERIFIER_nondet_double", FuncType(Vector(), Vector(F64))),
   HostFunction("host_assert_fail", FuncType(Vector(), Vector())),
   HostFunction("__assert_fail", FuncType(Vector(I32, I32, I32, I32), Vector())),
+  HostFunction("__blackhole_int", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_int_p", FuncType(Vector(I32), Vector(I32))),
 )
 

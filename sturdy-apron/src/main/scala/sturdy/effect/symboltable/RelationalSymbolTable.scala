@@ -1,6 +1,6 @@
 package sturdy.effect.symboltable
 
-import sturdy.apron.{ApronRecencyState, RelationalValue}
+import sturdy.apron.{ApronRecencyState, RelationalExpr}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.values.references.VirtualAddress
@@ -14,7 +14,7 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Entry],
-    relationalValue: RelationalValue[Entry, VirtualAddress[Ctx], Type]
+    relationalValue: RelationalExpr[Entry, VirtualAddress[Ctx], Type]
   )extends DecidableSymbolTable[Key, Symbol, Entry]:
 
 
@@ -27,12 +27,12 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
   private def combineTables(widen: Boolean, m1: Map[Key, Map[Symbol, Entry]], m2: Map[Key, Map[Symbol, Entry]]): MaybeChanged[Map[Key, Map[Symbol, Entry]]] =
     combineMaps(m1, m2, (key: Key, t1: Map[Symbol, Entry], t2: Map[Symbol, Entry]) =>
       combineMaps(t1, t2, (sym: Symbol, e1: Entry, e2: Entry) =>
-        (relationalValue.getRelationalVal(e1), relationalValue.getRelationalVal(e2)) match
+        (relationalValue.getRelationalExpr(e1), relationalValue.getRelationalExpr(e2)) match
           case (Some(expr1), Some(expr2)) =>
             val allocator = AAllocatorFromContext[Type, Ctx](
               (tpe: Type) => symbolTableAllocator((key, sym, tpe))
             )
-            apronState.combineExpr(widen, allocator)(expr1, expr2).map(relationalValue.makeRelationalVal)
+            apronState.combineExpr(widen, allocator)(expr1, expr2).map(relationalValue.makeRelationalExpr)
           case (Some(_), None) | (None, Some(_)) | (None, None) =>
             if(widen)
               Widen(e1,e2)
