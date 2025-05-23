@@ -129,23 +129,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   val stack: DecidableOperandStack[V]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
-  val tables: SizedSymbolTable[TableAddr, Index, RefV, Size, J]
   val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
 
-  // table size limits and types
-  private val tableTypes = mutable.Map[TableAddr, ReferenceType]()
-
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, tables, callFrame, except, failure), {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, memory, globals, callFrame)
-    case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame)
+  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, tableOps, callFrame, except, failure), {
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tableOps, memory, globals, callFrame)
+    case _: FixIn.Eval => EffectList(tableOps, stack, memory, globals, callFrame)
   }, {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, stack, memory, globals, failure)
-    case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame, except)
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tableOps, stack, memory, globals, failure)
+    case _: FixIn.Eval => EffectList(tableOps, stack, memory, globals, callFrame, except)
   })
 
   given EffectStack = effectStack
@@ -182,34 +178,35 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val v = stack.popOrAbort()
       val _ = getGlobalValue(globalIdx)
       writeGlobalValue(globalIdx, v)
+      
+  def toTableAddr(ix: Int): TableAddr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
 
   def evalTableInst(inst: Inst, loc: InstLoc): Unit = external {
     inst match {
       case TableGet(ix) =>
         val elemIdx = stack.popOrAbort()
-        val addr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
-        val ref = tables.getOrElse(addr, valToIdx(elemIdx), fail(UnboundFunctionIndex, elemIdx.toString))
+        val ref = tableOps.get(toTableAddr(ix), valToIdx(elemIdx)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.get access"))
         stack.push(refToVal(ref))
       case TableSet(ix) =>
         val v = stack.popOrAbort()
         val elemIdx = stack.popOrAbort()
-        val addr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
-        tables.set(addr, valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
+        tableOps.set(toTableAddr(ix), valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
       case TableSize(ix) =>
-        val sz = tables.size(module.tableAddrs(ix))
+        val sz = tableOps.size(toTableAddr(ix))
         stack.push(sizeToVal(sz))
       case TableGrow(ix) =>
         val n = stack.popOrAbort()
         val initVal = stack.popOrAbort()
-        val tableSize = tables.size(module.tableAddrs(ix))
+        val addr = toTableAddr(ix)
+        val tableSize = tableOps.size(addr)
         val newSize = num.evalIBinop(i64.Add, num.evalConvertop(i64.ExtendUI32, sizeToVal(tableSize)), num.evalConvertop(i64.ExtendUI32, n))
-        // check if newSize <= 0xFFFFFFFF
+        // assert that newSize <= 0xFFFFFFFF
         val newSizeCheck = num.evalIRelop(i64.GtU, newSize, num.evalNumeric(i64.Const(0xFFFFFFFF)))
         branchOpsUnit.boolBranch(newSizeCheck) {
           stack.push(num.evalNumeric(i32.Const(-1)))
         } {
           val newSize = num.evalIBinop(i32.Add, sizeToVal(tableSize), n)
-          val result = tables.grow(module.tableAddrs(ix), valToSize(newSize), valToRef(initVal)).option
+          val result = tableOps.grow(addr, valToSize(newSize), valToRef(initVal)).option
             (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
             (sizeToVal)
           stack.push(result)
@@ -219,123 +216,49 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val n = stack.popOrAbort()
         val ref = stack.popOrAbort() // val
         val offset = stack.popOrAbort() // i
-        val tableSize = tables.size(module.tableAddrs(ix))
-        // check offset + n <= tableSize
+        // assert unsigned offset + n <= tableSize
+        val tableSize = tableOps.size(toTableAddr(ix))
         val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, offset, n), sizeToVal(tableSize))
         branchOpsUnit.boolBranch(offsetCheck)(fail(TableAccessOutOfBounds, "Invalid table.fill access")) {
-          // check n > 0
-          val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
-          branchOpsUnit.boolBranch(nCheck)(return) {
-            // n > 0
-            stack.push(offset)
-            stack.push(ref)
-            evalTableInst(TableSet(ix), loc)
-            stack.push(num.evalIBinop(i32.Add, offset, num.evalNumeric(i32.Const(1))))
-            stack.push(ref)
-            stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
-            evalTableInst(TableFill(ix), loc)
-          }
-
+          tableOps.fillTable(toTableAddr(ix), valToRef(ref), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
         }
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        // check s + n <= tabYLength
-        val tabYLength = tables.size(module.tableAddrs(y))
-        val yTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(tabYLength))
-        branchOpsUnit.boolBranch(yTableCheck)(fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
-          // check d + n <= tabXLength
-          val tabXLength = tables.size(module.tableAddrs(x))
-          val xTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tabXLength))
-          branchOpsUnit.boolBranch(xTableCheck)(fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
-            val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
-            branchOpsUnit.boolBranch(nCheck)(return) {
-              // n > 0
-              // compare d, s
-              val dCheck = num.evalIRelop(i32.LeU, d, s)
-              branchOpsUnit.boolBranch(dCheck) {
-                // d <= s
-                stack.push(d)
-                stack.push(s)
-                evalTableInst(TableGet(y), loc)
-                evalTableInst(TableSet(x), loc)
-                stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
-                stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
-              } {
-                // d > s
-                // push d + n - 1
-                stack.push(num.evalIBinop(i32.Add, d, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
-                // push s + n - 1
-                stack.push(num.evalIBinop(i32.Add, s, num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1)))))
-                evalTableInst(TableGet(y), loc)
-                evalTableInst(TableSet(x), loc)
-                stack.push(d)
-                stack.push(s)
-              }
-              // push n - 1
-              stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
-              evalTableInst(TableCopy(x, y), loc)
-            }
-          }
+        // assert unsigned s + n <= tabYSize && d + n <= tabXSize
+        val tabYSize = tableOps.size(toTableAddr(y))
+        val tabXSize = tableOps.size(toTableAddr(x))
+        val yTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(tabYSize))
+        val xTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tabXSize))
+        val check = num.evalIBinop(i32.Or, yTableCheck, xTableCheck)
+        branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
+          tableOps.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
         }
       case TableInit(ix, el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        val elemLen = elem.init.length
-        // check s + n <= elemLen
-        val elemAccessCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(intToSize(elemLen)))
-        branchOpsUnit.boolBranch(elemAccessCheck)(fail(TableAccessOutOfBounds, "Index > Elem List")) {
-          // check d + n <= tableSize
-          val tableSize = tables.size(module.tableAddrs(ix))
-          val tableAccessCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
-          branchOpsUnit.boolBranch(tableAccessCheck)(fail(TableAccessOutOfBounds, "Index > Table Size")) {
-            // check n > 0
-            val nCheck = num.evalIRelop(i32.Eq, n, num.evalNumeric(i32.Const(0)))
-            branchOpsUnit.boolBranch(nCheck)(return) {
-              stack.push(d)
-              // Todo: replace this with index
-              val index = valToInt(s)
-              val refInst = elem.init(index)
-              val instBlock = BlockId(elem)
-              val blockLoc = module.registerBlockSizes(instBlock, loc, refInst)
-              // assert result of eval(refInst) convertable to ref
-              val fRef = valToRef(evalInstructionSequence(instBlock, refInst, module, blockLoc))
-              stack.push(refToVal(fRef))
-              evalTableInst(TableSet(ix), blockLoc)
-              // push d + 1
-              stack.push(num.evalIBinop(i32.Add, d, num.evalNumeric(i32.Const(1))))
-              // push s + 1
-              stack.push(num.evalIBinop(i32.Add, s, num.evalNumeric(i32.Const(1))))
-              // push n - 1
-              stack.push(num.evalIBinop(i32.Sub, n, num.evalNumeric(i32.Const(1))))
-              evalTableInst(TableInit(ix, el), blockLoc)
-            }
+        // assert unsigned s + n <= elemSize && d + n <= tableSize
+        val tableSize = tableOps.size(toTableAddr(ix))
+        val tableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
+        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), intToVal(elem.functions.size))
+        val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
+        branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.init access")) {
+          val elemRefVs = elem.functions.map {
+            case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f), FuncRef)
+            case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f), ExternRef)
           }
+          tableOps.initTable(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
         }
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
-        val elemSz = module.elements.size
-        var newElems = Vector.empty[Elem]
-        var i = 0
-        while (i < elemSz) {
-          val currElem = module.elements.lift(i).getOrElse(fail(TableAccessOutOfBounds, el.toString))
-          if (currElem == elem) {
-            newElems = newElems.appended(Elem(elem.reftype, Seq.empty, ElemMode.Passive()))
-          } else {
-            newElems = newElems.appended(currElem)
-          }
-          i += 1
-        }
-        module.elements = newElems
+        module.elements = module.elements.updated(el, ElemInstance(Vector.empty, elem.elemMode))
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
   }
-
-  def getTableType(addr: TableAddr): ReferenceType = tableTypes.getOrElse(addr, fail(TableAccessOutOfBounds, addr.toString))
 
   def evalRefInst(inst: Inst): Unit = inst match {
     case RefNull(t) =>
@@ -482,7 +405,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
-      val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+      val fRef = tableOps.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
       val funV = refVToFunV(fRef)
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
@@ -812,12 +735,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
-        tables.putNew(tabAddr, SizedSymbolTable.Limit(intToSize(min), max.map(intToSize)))
-        tableTypes.put(tabAddr, ty)
+        tableOps.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(intToVal(min)), max.map(m => valToSize(intToVal(m)))))
         tabCount += 1
         var i = 0
         while (i < min) {
-          tables.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
+          tableOps.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
           i += 1
         }
         tabAddr
@@ -873,25 +795,37 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
 
     // tables
-    modInst.elements = module.elem
-    module.elem.zipWithIndex.foreach {
-      case (elem@Elem(reftype, init, mode), i) =>
+    var elemInstances: Vector[ElemInstance] = Vector.empty
+    module.elem.foreach {
+      case elem@Elem(_, init, mode) =>
+        // resolve all init functions
+        val id = BlockId(elem)
+        val functions = init.map(expr => {
+          loc = modInst.registerBlockSizes(id, loc, expr)
+          funVToFuncInst(refVToFunV(valToRef(evalInstructionSequence(id, expr, modInst, loc))))
+        })
+        elemInstances = elemInstances :+ ElemInstance(functions, mode)
+    }
+    modInst.elements = elemInstances
+    
+    modInst.elements.zipWithIndex.foreach {
+      case (elem@ElemInstance(_, mode), i) =>
         mode match {
-          case ElemMode.Passive() => None
-          case ElemMode.Declarative() => None
+          case ElemMode.Passive() => ()
+          case ElemMode.Declarative() =>
+            // evalTableInst(ElemDrop(i), loc) TODO: reimplement this
           case ElemMode.Active(tableIdx, offset) =>
-            val id = BlockId(elem)
+            val id = BlockId(module.elem(i))
             loc = modInst.registerBlockSizes(id, loc, offset)
             callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
               val baseIdx = evalInstructionSequence(id, offset, modInst, loc)
               stack.push(baseIdx)
               stack.push(num.evalNumeric(i32.Const(0)))
-              stack.push(num.evalNumeric(i32.Const(elem.init.length)))
+              stack.push(num.evalNumeric(i32.Const(elem.functions.length)))
               evalTableInst(TableInit(tableIdx, i), loc)
               evalTableInst(ElemDrop(i), loc)
             }
         }
-      case _ => None
     }
 
     // invoke the start function

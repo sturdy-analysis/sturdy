@@ -7,7 +7,7 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.symboltable.{SizedConstantIntTable, JoinableDecidableSymbolTable, given}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps, given}
 import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -58,9 +58,10 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
-    override def intToSize(i: Int): Topped[Int] = Topped.Actual(i)
+    override def intToVal(i: Int): Value = ???
     override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???
     override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
@@ -84,6 +85,21 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
+
+  given EmptyTableOps: TableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with
+    override def get(table: TableAddr, index: Topped[Int]): JOption[WithJoin, Powerset[ConstantTaintAnalysis.RefValue]] = ???
+    override def set(table: TableAddr, index: Topped[Int], newEntry: Powerset[ConstantTaintAnalysis.RefValue]): JOption[WithJoin, Unit] = ???
+    override def putNew(table: TableAddr, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = ???
+    override def size(key: TableAddr): Topped[Int] = ???
+    override def grow(key: TableAddr, newSize: Topped[Int], initEntry: Powerset[ConstantTaintAnalysis.RefValue]): JOption[WithJoin, Topped[Int]] = ???
+    override def initTable(table: TableAddr, elem: Vector[Powerset[ConstantTaintAnalysis.RefValue]], elemOffset: ConstantTaintAnalysis.Value, tableOffset: ConstantTaintAnalysis.Value, amount: ConstantTaintAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override def fillTable(table: TableAddr, entry: Powerset[ConstantTaintAnalysis.RefValue], tableOffset: ConstantTaintAnalysis.Value, amount: ConstantTaintAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override def copy(dstTable: TableAddr, srcTable: TableAddr, dstOffset: ConstantTaintAnalysis.Value, srcOffset: ConstantTaintAnalysis.Value, amount: ConstantTaintAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override type State = this.type
+    override def getState: EmptyTableOps.this.type = ???
+    override def setState(st: EmptyTableOps.this.type): Unit = ???
+    override def join: Join[EmptyTableOps.this.type] = ???
+    override def widen: Widen[EmptyTableOps.this.type] = ???
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

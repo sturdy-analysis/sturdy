@@ -1,9 +1,11 @@
 package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
+import sturdy.IsSound.{NotSound, Sound}
+import sturdy.language.wasm.ConcreteInterpreter.RefValue
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.{Soundness, AbstractlySound, seqIsSound, IsSound}
+import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
 import sturdy.values.Finite
@@ -63,8 +65,7 @@ class ModuleInstance(val id: Option[Any] = None):
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
-  var elems: Vector[ElemInstance] = Vector.empty
-  var elements: Vector[Elem] = Vector.empty
+  var elements: Vector[ElemInstance] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
@@ -139,7 +140,7 @@ given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
     val tabSound = summon[Soundness[Vector[TableAddr], Vector[TableAddr]]].isSound(c.tableAddrs, a.tableAddrs)
     val memSound = summon[Soundness[Vector[MemoryAddr], Vector[MemoryAddr]]].isSound(c.memoryAddrs, a.memoryAddrs)
     val globSound = summon[Soundness[Vector[GlobalAddr], Vector[GlobalAddr]]].isSound(c.globalAddrs, a.globalAddrs)
-    val elemSound = seqIsSound(using elemInstanceIsSound(using functionInstanceIsSoundFlat)).isSound(c.elems, a.elems)
+    val elemSound = seqIsSound(using elemInstanceIsSound(using functionInstanceIsSoundFlat)).isSound(c.elements, a.elements)
     val datSound = summon[Soundness[Vector[DataInstance], Vector[DataInstance]]].isSound(c.data, a.data)
     val expSound = summon[Soundness[Vector[(String,ExternalValue)], Vector[(String,ExternalValue)]]].isSound(c.exports, a.exports)
 
@@ -166,11 +167,14 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
 //case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 //case class GlobalInstance[V](tpe: ValType, val value: V)
 case class DataInstance(data: ByteVector)
-case class ElemInstance(functions: Vector[FunctionInstance])
+case class ElemInstance(functions: Seq[FunctionInstance], elemMode: ElemMode)
+
+given ElemModeIsSound: Soundness[ElemMode, ElemMode] with
+  override def isSound(c: ElemMode, a: ElemMode): IsSound = if (c.equals(a)) Sound else NotSound("ElemMode mismatch")
 
 given elemInstanceIsSound(using fSoundness: Soundness[FunctionInstance, FunctionInstance]): Soundness[ElemInstance, ElemInstance] with
   override def isSound(c: ElemInstance, a: ElemInstance): IsSound =
-    seqIsSound.isSound(c.functions, a.functions)
+    seqIsSound.isSound(c.functions, a.functions) && summon[Soundness[ElemMode, ElemMode]].isSound(c.elemMode, a.elemMode)
 
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)

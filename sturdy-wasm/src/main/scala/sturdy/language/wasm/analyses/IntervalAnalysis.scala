@@ -11,8 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
-import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{SizedConstantIntTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{IntervalSymbolTable, JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -59,10 +58,11 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
-    override def intToSize(i: Int): Topped[Int] = Topped.Actual(i)
+    override def intToVal(i: Int): Value = ???
     override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def isNull(r: Value): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
@@ -86,6 +86,21 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
+
+  given EmptyTableOps: TableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with
+    override def get(table: TableAddr, index: NumericInterval[Int]): JOption[WithJoin, Powerset[IntervalAnalysis.RefValue]] = ???
+    override def set(table: TableAddr, index: NumericInterval[Int], newEntry: Powerset[IntervalAnalysis.RefValue]): JOption[WithJoin, Unit] = ???
+    override def putNew(table: TableAddr, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = ???
+    override def size(key: TableAddr): Topped[Int] = ???
+    override def grow(key: TableAddr, newSize: Topped[Int], initEntry: Powerset[IntervalAnalysis.RefValue]): JOption[WithJoin, Topped[Int]] = ???
+    override def initTable(table: TableAddr, elem: Vector[Powerset[IntervalAnalysis.RefValue]], elemOffset: IntervalAnalysis.Value, tableOffset: IntervalAnalysis.Value, amount: IntervalAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override def fillTable(table: TableAddr, entry: Powerset[IntervalAnalysis.RefValue], tableOffset: IntervalAnalysis.Value, amount: IntervalAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override def copy(dstTable: TableAddr, srcTable: TableAddr, dstOffset: IntervalAnalysis.Value, srcOffset: IntervalAnalysis.Value, amount: IntervalAnalysis.Value): JOption[WithJoin, Unit] = ???
+    override type State = this.type
+    override def getState: EmptyTableOps.this.type = ???
+    override def setState(st: EmptyTableOps.this.type): Unit = ???
+    override def join: Join[EmptyTableOps.this.type] = ???
+    override def widen: Widen[EmptyTableOps.this.type] = ???
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match

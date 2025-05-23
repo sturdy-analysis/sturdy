@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.JOption
 import sturdy.data.MayJoin
+import sturdy.effect.symboltable.TableOps
 import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.language.wasm.ConcreteInterpreter.ExternReference
 import sturdy.language.wasm.abstractions.CfgNode.Instruction
@@ -47,6 +48,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
+  val tableOps: TableOps[V, TableAddr, Index, Size, RefV, J]
 
 /** Operations specific to Wasm */
 trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
@@ -65,7 +67,7 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   def sizeToVal(sz: Size): V
   
   def valToInt(v: V): Int
-  def intToSize(i: Int): Size
+  def intToVal(i: Int): V
   def refVToFunV(r: RefV): FunV
 
   def makeNullRefV(t: ReferenceType): RefV
@@ -73,6 +75,7 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   def isNull(r: V): V
 
   def funcInstToFunV(f: FunctionInstance): FunV
+  def funVToFuncInst(f: FunV): FunctionInstance
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
