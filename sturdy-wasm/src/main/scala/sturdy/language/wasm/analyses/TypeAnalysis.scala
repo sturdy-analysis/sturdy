@@ -7,7 +7,7 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, TableOps, UpperBoundSymbolTable}
+import sturdy.effect.symboltable.{DummyTableOps, JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, TableOps, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -75,20 +75,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  given EmptyTableOps: TableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with
-    override def get(table: TableAddr, index: BaseType[Int]): JOption[WithJoin, Powerset[TypeAnalysis.RefValue]] = ???
-    override def set(table: TableAddr, index: BaseType[Int], newEntry: Powerset[TypeAnalysis.RefValue]): JOption[WithJoin, Unit] = ???
-    override def putNew(table: TableAddr, limit: SizedSymbolTable.Limit[BaseType[Int]]): Unit = ???
-    override def size(key: TableAddr): BaseType[Int] = ???
-    override def grow(key: TableAddr, newSize: BaseType[Int], initEntry: Powerset[TypeAnalysis.RefValue]): JOption[WithJoin, BaseType[Int]] = ???
-    override def initTable(table: TableAddr, elem: Vector[Powerset[TypeAnalysis.RefValue]], elemOffset: TypeAnalysis.Value, tableOffset: TypeAnalysis.Value, amount: TypeAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override def fillTable(table: TableAddr, entry: Powerset[TypeAnalysis.RefValue], tableOffset: TypeAnalysis.Value, amount: TypeAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override def copy(dstTable: TableAddr, srcTable: TableAddr, dstOffset: TypeAnalysis.Value, srcOffset: TypeAnalysis.Value, amount: TypeAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override type State = this.type
-    override def getState: EmptyTableOps.this.type = ???
-    override def setState(st: EmptyTableOps.this.type): Unit = ???
-    override def join: Join[EmptyTableOps.this.type] = ???
-    override def widen: Widen[EmptyTableOps.this.type] = ???
+  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

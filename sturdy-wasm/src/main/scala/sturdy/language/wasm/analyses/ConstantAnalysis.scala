@@ -7,7 +7,7 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps, joinLimit}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps, DummyTableOps, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
@@ -179,20 +179,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  given EmptyTableOps: TableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with
-    override def get(table: TableAddr, index: Topped[Int]): JOption[WithJoin, Powerset[ConstantAnalysis.RefValue]] = ???
-    override def set(table: TableAddr, index: Topped[Int], newEntry: Powerset[ConstantAnalysis.RefValue]): JOption[WithJoin, Unit] = ???
-    override def putNew(table: TableAddr, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = ???
-    override def size(key: TableAddr): Topped[Int] = ???
-    override def grow(key: TableAddr, newSize: Topped[Int], initEntry: Powerset[ConstantAnalysis.RefValue]): JOption[WithJoin, Topped[Int]] = ???
-    override def initTable(table: TableAddr, elem: Vector[Powerset[ConstantAnalysis.RefValue]], elemOffset: ConstantAnalysis.Value, tableOffset: ConstantAnalysis.Value, amount: ConstantAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override def fillTable(table: TableAddr, entry: Powerset[ConstantAnalysis.RefValue], tableOffset: ConstantAnalysis.Value, amount: ConstantAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override def copy(dstTable: TableAddr, srcTable: TableAddr, dstOffset: ConstantAnalysis.Value, srcOffset: ConstantAnalysis.Value, amount: ConstantAnalysis.Value): JOption[WithJoin, Unit] = ???
-    override type State = this.type
-    override def getState: EmptyTableOps.this.type = ???
-    override def setState(st: EmptyTableOps.this.type): Unit = ???
-    override def join: Join[EmptyTableOps.this.type] = ???
-    override def widen: Widen[EmptyTableOps.this.type] = ???
+  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
 
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with

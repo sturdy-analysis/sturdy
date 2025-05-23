@@ -1,14 +1,14 @@
 package sturdy.language.wasm
 
 import sturdy.data.{*, given}
-import sturdy.effect.{EffectStack, NoJoinsToObserve}
+import sturdy.effect.{Concrete, EffectStack, NoJoinsToObserve}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.{ConcreteSymbolTable, DecidableSymbolTable, SizedConcreteSymbolTable, SizedSymbolTable, StatelessTableOps, TableOps}
+import sturdy.effect.symboltable.{ConcreteSymbolTable, DecidableSymbolTable, SizedConcreteSymbolTable, SizedSymbolTable, TableOps, WrappedSymbolicTableOps}
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -149,14 +149,9 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc.name)(args)
       
-  given ConcreteTableOperations(using f: Failure): StatelessTableOps[Value, TableAddr, Index, Size, RefV, NoJoin] with {
+  given ConcreteTableOperations(using f: Failure): WrappedSymbolicTableOps[Value, TableAddr, Index, Size, RefV, NoJoin] with {
     val table = new SizedConcreteSymbolTable[TableAddr, RefV]
 
-    override def get(table: TableAddr, index: Index): JOptionC[RefV] = this.table.get(table, index)
-    override def set(table: TableAddr, index: Int, newEntry: RefV): JOptionC[Unit] = this.table.set(table, index, newEntry)
-    override def putNew(table: TableAddr, limit: SizedSymbolTable.Limit[Int]): Unit = this.table.putNew(table, limit)
-    override def size(key: TableAddr): Size = this.table.size(key)
-    override def grow(key: TableAddr, newSize: Size, initEntry: RefV): JOptionC[Size] = this.table.grow(key, newSize, initEntry)
     override def initTable(table: TableAddr, elem: Vector[RefV], elemOffset: Value, tableOffset: Value, amount: Value): JOptionC[Unit] =
       // elem bounds check
       if (elemOffset.asInt32 < 0 || elemOffset.asInt32 + amount.asInt32 > elem.size) {

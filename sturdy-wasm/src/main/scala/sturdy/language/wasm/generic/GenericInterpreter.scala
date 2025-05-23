@@ -6,7 +6,7 @@ import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable, TableOps}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value}
 import sturdy.language.wasm.generic.WasmFailure.*
