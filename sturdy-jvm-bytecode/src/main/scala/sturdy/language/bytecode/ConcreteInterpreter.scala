@@ -3,7 +3,7 @@ package sturdy.language.bytecode
 import org.opalj.br.{ArrayType, ClassFile, FieldType, Method, MethodDescriptor, ObjectType, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
-import sturdy.effect.allocation.{Allocation, CAllocationIntIncrement}
+import sturdy.effect.allocation.{Allocator, CAllocatorIntIncrement}
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
@@ -22,7 +22,7 @@ import sturdy.values.arrays.{*, given}
 import sturdy.fix
 import sturdy.language.bytecode.AuxillaryFunctions
 import sturdy.language.bytecode.ConcreteRefValues.NullValue
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 import java.io.File
 import java.net.URL
@@ -146,7 +146,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: ConcreteRefValues): Boolean = true
 
 /*  given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
-  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
+  (using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
     override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): Object[OID, ClassFile, FieldAddr, FieldName] =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -177,7 +177,7 @@ object ConcreteInterpreter extends Interpreter:
 
 */
   given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
-  (using alloc: Allocation[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, ConcreteRefValues, Site, Method, String, MethodDescriptor, I32, NoJoin] with
+  (using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, ConcreteRefValues, Site, Method, String, MethodDescriptor, I32, NoJoin] with
     override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -220,7 +220,7 @@ object ConcreteInterpreter extends Interpreter:
       case _ => 0
 
   given ConcreteArrayOps[AID, V, AType, Site]
-    (using alloc: Allocation[ArrayElemAddr, Site], store: Store[ArrayElemAddr, V, NoJoin]): ArrayOps[AID, Int, V, RefValue, AType, Site, NoJoin] with
+    (using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, V, NoJoin]): ArrayOps[AID, Int, V, RefValue, AType, Site, NoJoin] with
     override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): RefValue =
       val valAddrs = vals.map{ (v, site) =>
         val addr = alloc(site)
@@ -314,13 +314,13 @@ object ConcreteInterpreter extends Interpreter:
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
-    val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map(_.swap))
+    val frame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](newFrameData, args.view.zipWithIndex.map((x,y) => (y, Some(x))))
     val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
-    val objAlloc: CAllocationIntIncrement[InstructionSite] = new CAllocationIntIncrement
-    val objFieldAlloc: CAllocationIntIncrement[FieldInitSite] = new CAllocationIntIncrement
-    val arrayAlloc: CAllocationIntIncrement[InstructionSite] = new CAllocationIntIncrement
-    val arrayValAlloc: CAllocationIntIncrement[ArrayElemInitSite] = new CAllocationIntIncrement
-    val staticAlloc: CAllocationIntIncrement[StaticInitSite] = new CAllocationIntIncrement
+    val objAlloc: CAllocatorIntIncrement[InstructionSite] = new CAllocatorIntIncrement
+    val objFieldAlloc: CAllocatorIntIncrement[FieldInitSite] = new CAllocatorIntIncrement
+    val arrayAlloc: CAllocatorIntIncrement[InstructionSite] = new CAllocatorIntIncrement
+    val arrayValAlloc: CAllocatorIntIncrement[ArrayElemInitSite] = new CAllocatorIntIncrement
+    val staticAlloc: CAllocatorIntIncrement[StaticInitSite] = new CAllocatorIntIncrement
     val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
     val arrayValStore: CStore[FieldAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)

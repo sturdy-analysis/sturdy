@@ -5,9 +5,9 @@ import sturdy.data.MayJoin.WithJoin
 import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin, NoJoin}
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
-import sturdy.effect.allocation.Allocation
+import sturdy.effect.allocation.Allocator
 import sturdy.values.Structural
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 import scala.collection.mutable
 

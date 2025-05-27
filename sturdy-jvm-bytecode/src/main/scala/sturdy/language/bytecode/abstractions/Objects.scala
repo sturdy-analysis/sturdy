@@ -8,7 +8,7 @@ import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.data.MakeJoined
 import sturdy.effect.EffectStack
-import sturdy.effect.allocation.Allocation
+import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.{ManageableAddr, Store}
 import sturdy.language.bytecode.ConcreteInterpreter.Instance
@@ -85,7 +85,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
-  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
+  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -151,7 +151,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         topI32
 
-  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
+  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
@@ -418,7 +418,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
         MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
-  given constObjOps(using alloc: Allocation[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
+  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -485,7 +485,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       else
         topI32
 
-  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
+  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
@@ -582,7 +582,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
     override def printString(letters: Seq[NumericInterval[Int]]): Unit =
       println(letters.map(l => l.low.toChar))
         
-/*  given constArrayOps(using alloc: Allocation[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, IntervalArray, ArrayType, ArrayElemInitSite, WithJoin] with
+/*  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, IntervalArray, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): IntervalArray =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)

@@ -4,10 +4,10 @@ import sturdy.data.MayJoin.NoJoin
 import sturdy.data.noJoin
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.store.Store
-import sturdy.effect.allocation.Allocation
+import sturdy.effect.allocation.Allocator
 import sturdy.values.Structural
 import sturdy.values.objects.TypeOps
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 
 trait ArrayOps[AID, Idx, V, AV, AType, Site, J[_] <: MayJoin[_]]:
   def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): AV
@@ -24,7 +24,7 @@ case class Array[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayE
 given structuralArray[AID, Addr, AType, ASize]: Structural[Array[AID, Addr, AType, ASize]] with {}
 
 /*given ConcreteArrayOps[Addr, AID, V, AType, Site]
-  (using alloc: Allocation[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, ConcreteRefValue, AType, Site, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, ConcreteRefValue, AType, Site, NoJoin] with
   override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): Array[AID, Addr, AType, V] =
     val valAddrs = vals.map{ (v, site) =>
       val addr = alloc(site)

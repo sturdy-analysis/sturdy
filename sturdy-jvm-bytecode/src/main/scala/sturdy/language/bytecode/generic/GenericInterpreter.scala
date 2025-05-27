@@ -9,17 +9,17 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{CFailureException, Failure, FailureKind}
 import sturdy.effect.store.Store
-import sturdy.effect.allocation.Allocation
+import sturdy.effect.allocation.Allocator
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ObjectTypes, ReferenceType, ShortType}
 import org.opalj.io.process
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectList, EffectStack}
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.fix
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
@@ -72,21 +72,21 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   val stack: DecidableOperandStack[V]
   val failure: Failure
   val except: Except[JvmExcept[V], ExcV, J]
-  val objAlloc: Allocation[ObjAddr, InstructionSite]
-  val objFieldAlloc: Allocation[FieldAddr, FieldInitSite]
-  val arrayAlloc: Allocation[ArrayAddr, InstructionSite]
-  val arrayValAlloc: Allocation[ArrayElemAddr, ArrayElemInitSite]
+  val objAlloc: Allocator[ObjAddr, InstructionSite]
+  val objFieldAlloc: Allocator[FieldAddr, FieldInitSite]
+  val arrayAlloc: Allocator[ArrayAddr, InstructionSite]
+  val arrayValAlloc: Allocator[ArrayElemAddr, ArrayElemInitSite]
   val objFieldStore: Store[FieldAddr, V, J]
   val arrayValStore: Store[ArrayElemAddr, V, J]
   val staticVarStore: Store[StaticAddr, V, J]
-  val staticAlloc: Allocation[StaticAddr, StaticInitSite]
+  val staticAlloc: Allocator[StaticAddr, StaticInitSite]
   type FrameData = Int
-  val frame: DecidableMutableCallFrame[FrameData, Int, V]
+  val frame: DecidableMutableCallFrame[FrameData, Int, V, Unit]
 
   val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr]
 
 
-  val effectStack: EffectStack = new EffectStack(List(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
+  val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
   given EffectStack = effectStack
 
   val classStack: scala.collection.mutable.Stack[ClassFile] = scala.collection.mutable.Stack[ClassFile]()
@@ -792,7 +792,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 //        println(s"Stack before call ${stack.getState}")
 //        try
         stack.withNewFrame(0) {
-          frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map(_.swap)) {
+          frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map((x,y) => (y, Some(x))), ()) {
             run(0, mth)
             if (!mth.descriptor.returnType.isVoidType) {
 //              if (stack.size != 1)

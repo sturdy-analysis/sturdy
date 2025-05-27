@@ -4,7 +4,7 @@ import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import sturdy.values.objects.*
  
 trait BytecodeOps[Idx, V, TypeRep]:

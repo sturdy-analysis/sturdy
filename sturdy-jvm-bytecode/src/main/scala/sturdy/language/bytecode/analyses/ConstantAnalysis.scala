@@ -5,12 +5,12 @@ import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType,
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.{EffectStack, TrySturdy}
-import sturdy.effect.allocation.{AAllocationFromContext, Allocation}
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.{DecidableMutableCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.{Except, JoinedExcept}
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack}
-import sturdy.effect.store.{AStoreMultiAddrThreadded, AStoreSingleAddrThreadded, Store, TopStore}
+import sturdy.effect.store.{AStoreThreaded, Store, TopStore}
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.context.Sensitivity
@@ -26,7 +26,7 @@ import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps, given}
 import sturdy.values.references.{AllocationSiteAddr, given}
 
@@ -81,14 +81,14 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objAlloc = new AAllocationFromContext(site => ObjAddr(site))
-    override val objFieldAlloc: Allocation[FieldAddr, FieldInitSite] = new AAllocationFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
-    override val arrayAlloc = new AAllocationFromContext(site => ArrayAddr(site))
-    override val arrayValAlloc = new AAllocationFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val staticAlloc = new AAllocationFromContext(site => StaticAddr(site.obj, site.name))
-    override val objFieldStore: AStoreSingleAddrThreadded[FieldAddr, Value] = new AStoreSingleAddrThreadded(initFieldStore)
-    override val arrayValStore: AStoreSingleAddrThreadded[ArrayElemAddr, Value] = new AStoreSingleAddrThreadded(initArrayVarStore)
-    override val staticVarStore: AStoreSingleAddrThreadded[StaticAddr, Value] = new AStoreSingleAddrThreadded(initStaticStore)
+    override val objAlloc = new AAllocatorFromContext(site => ObjAddr(site))
+    override val objFieldAlloc: Allocator[FieldAddr, FieldInitSite] = new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
+    override val arrayAlloc = new AAllocatorFromContext(site => ArrayAddr(site))
+    override val arrayValAlloc = new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val staticAlloc = new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
+    override val objFieldStore: AStoreThreaded[FieldAddr, Value] = new AStoreThreaded(initFieldStore)
+    override val arrayValStore: AStoreThreaded[ArrayElemAddr, Value] = new AStoreThreaded(initArrayVarStore)
+    override val staticVarStore: AStoreThreaded[StaticAddr, Value] = new AStoreThreaded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path

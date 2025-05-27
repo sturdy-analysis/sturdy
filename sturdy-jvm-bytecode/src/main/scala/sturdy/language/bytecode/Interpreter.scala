@@ -7,7 +7,7 @@ import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
 import org.opalj.br.ObjectType
 import org.opalj.br.analyses.Project
