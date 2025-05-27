@@ -2,8 +2,8 @@ package sturdy.effect.symboltable
 
 import sturdy.data.{*, given}
 import sturdy.effect.Effect
-import sturdy.values.{Topped, *, given}
-import SizedConstantIntTable.*
+import sturdy.values.{*, given}
+import SizedConstantTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
@@ -13,7 +13,7 @@ import scala.util.boundary
 import boundary.break
 
 
-class SizedConstantIntTable[Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
+class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Value, Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
 
   protected var tables: Map[Key, Either[Table[Int, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -268,8 +268,14 @@ class SizedConstantIntTable[Key, Entry](using Finite[Key], Join[Entry]) extends 
         }
         IsSound.Sound
 
+  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
 
-object SizedConstantIntTable:
+  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+
+
+object SizedConstantTable:
   type Tables[Key, Entry] = Map[Key, Either[Table[Int, Entry], Entry]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with

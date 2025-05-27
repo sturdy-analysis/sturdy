@@ -6,7 +6,7 @@ import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable, TableOps}
+import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value}
 import sturdy.language.wasm.generic.WasmFailure.*
@@ -129,6 +129,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   val stack: DecidableOperandStack[V]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
+  val tables: SizedSymbolTable[V, TableAddr, Index, RefV, Size, J]
   val callFrame: DecidableMutableCallFrame[FrameData, Int, V, InstLoc]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
@@ -136,12 +137,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, tableOps, callFrame, except, failure), {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tableOps, memory, globals, callFrame)
-    case _: FixIn.Eval => EffectList(tableOps, stack, memory, globals, callFrame)
+  val effectStack: EffectStack = new EffectStack(EffectList(stack, memory, globals, tables, callFrame, except, failure), {
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, memory, globals, callFrame)
+    case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame)
   }, {
-    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tableOps, stack, memory, globals, failure)
-    case _: FixIn.Eval => EffectList(tableOps, stack, memory, globals, callFrame, except)
+    case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, stack, memory, globals, failure)
+    case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame, except)
   })
 
   given EffectStack = effectStack
@@ -185,20 +186,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     inst match {
       case TableGet(ix) =>
         val elemIdx = stack.popOrAbort()
-        val ref = tableOps.get(toTableAddr(ix), valToIdx(elemIdx)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.get access"))
+        val ref = tables.get(toTableAddr(ix), valToIdx(elemIdx)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.get access"))
         stack.push(refToVal(ref))
       case TableSet(ix) =>
         val v = stack.popOrAbort()
         val elemIdx = stack.popOrAbort()
-        tableOps.set(toTableAddr(ix), valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
+        tables.set(toTableAddr(ix), valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
       case TableSize(ix) =>
-        val sz = tableOps.size(toTableAddr(ix))
+        val sz = tables.size(toTableAddr(ix))
         stack.push(sizeToVal(sz))
       case TableGrow(ix) =>
         val n = stack.popOrAbort()
         val initVal = stack.popOrAbort()
         val addr = toTableAddr(ix)
-        val tableSize = tableOps.size(addr)
+        val tableSize = tables.size(addr)
         val newSize = num.evalIBinop(i64.Add, num.evalConvertop(i64.ExtendUI32, sizeToVal(tableSize)), num.evalConvertop(i64.ExtendUI32, n))
         // assert that newSize <= 0xFFFFFFFF
         val newSizeCheck = num.evalIRelop(i64.GtU, newSize, num.evalNumeric(i64.Const(0xFFFFFFFF)))
@@ -206,7 +207,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           stack.push(num.evalNumeric(i32.Const(-1)))
         } {
           val newSize = num.evalIBinop(i32.Add, sizeToVal(tableSize), n)
-          val result = tableOps.grow(addr, valToSize(newSize), valToRef(initVal)).option
+          val result = tables.grow(addr, valToSize(newSize), valToRef(initVal)).option
             (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
             (sizeToVal)
           stack.push(result)
@@ -217,23 +218,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val ref = stack.popOrAbort() // val
         val offset = stack.popOrAbort() // i
         // assert unsigned offset + n <= tableSize
-        val tableSize = tableOps.size(toTableAddr(ix))
+        val tableSize = tables.size(toTableAddr(ix))
         val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, offset, n), sizeToVal(tableSize))
         branchOpsUnit.boolBranch(offsetCheck)(fail(TableAccessOutOfBounds, "Invalid table.fill access")) {
-          tableOps.fillTable(toTableAddr(ix), valToRef(ref), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
+          tables.fillTable(toTableAddr(ix), valToRef(ref), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
         }
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
         // assert unsigned s + n <= tabYSize && d + n <= tabXSize
-        val tabYSize = tableOps.size(toTableAddr(y))
-        val tabXSize = tableOps.size(toTableAddr(x))
+        val tabYSize = tables.size(toTableAddr(y))
+        val tabXSize = tables.size(toTableAddr(x))
         val yTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(tabYSize))
         val xTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tabXSize))
         val check = num.evalIBinop(i32.Or, yTableCheck, xTableCheck)
         branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
-          tableOps.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
+          tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
         }
       case TableInit(ix, el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
@@ -241,7 +242,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
         // assert unsigned s + n <= elemSize && d + n <= tableSize
-        val tableSize = tableOps.size(toTableAddr(ix))
+        val tableSize = tables.size(toTableAddr(ix))
         val tableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
         val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), intToVal(elem.functions.size))
         val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
@@ -250,7 +251,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
             case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f), FuncRef)
             case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f), ExternRef)
           }
-          tableOps.initTable(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
+          tables.init(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
         }
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
@@ -405,7 +406,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
-      val fRef = tableOps.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+      val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
       val funV = refVToFunV(fRef)
       invokeIndirect(funV, ftExpected, funcIx, loc)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
@@ -735,11 +736,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
-        tableOps.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(intToVal(min)), max.map(m => valToSize(intToVal(m)))))
+        tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(intToVal(min)), max.map(m => valToSize(intToVal(m)))))
         tabCount += 1
         var i = 0
         while (i < min) {
-          tableOps.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
+          tables.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
           i += 1
         }
         tabAddr

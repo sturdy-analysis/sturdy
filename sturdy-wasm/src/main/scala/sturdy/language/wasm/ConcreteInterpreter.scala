@@ -8,7 +8,7 @@ import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.{ConcreteSymbolTable, DecidableSymbolTable, SizedConcreteSymbolTable, SizedSymbolTable, TableOps, WrappedSymbolicTableOps}
+import sturdy.effect.symboltable.{ConcreteSizedTable, ConcreteSymbolTable, DecidableSymbolTable, SizedSymbolTable}
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -72,7 +72,6 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
-    override def valToInt(v: Value): Int = v.asInt32
 
     override def valToRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.RefValue = v match {
       case Value.Ref(ref) => ref
@@ -148,57 +147,6 @@ object ConcreteInterpreter extends Interpreter with Control:
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc.name)(args)
-      
-  given ConcreteTableOperations(using f: Failure): WrappedSymbolicTableOps[Value, TableAddr, Index, Size, RefV, NoJoin] with {
-    val table = new SizedConcreteSymbolTable[TableAddr, RefV]
-
-    override def initTable(table: TableAddr, elem: Vector[RefV], elemOffset: Value, tableOffset: Value, amount: Value): JOptionC[Unit] =
-      // elem bounds check
-      if (elemOffset.asInt32 < 0 || elemOffset.asInt32 + amount.asInt32 > elem.size) {
-        return JOptionC.none
-      }
-      // table bounds check
-      if (!inBounds(tableOffset, amount, table)) {
-        return JOptionC.none
-      }
-      val newEntries = elem.slice(elemOffset.asInt32, elemOffset.asInt32 + amount.asInt32)
-      for ((entry, index) <- newEntries.zipWithIndex) {
-        this.table.set(table, tableOffset.asInt32 + index, entry)
-      }
-      JOptionC.some(())
-    override def fillTable(table: TableAddr, entry: RefV, tableOffset: Value, amount: Value): JOptionC[Unit] =
-      // table bounds check
-      if(!inBounds(tableOffset, amount, table)) {
-        return JOptionC.none
-      }
-      for (index <- tableOffset.asInt32 until tableOffset.asInt32 + amount.asInt32) {
-        this.table.set(table, index, entry)
-      }
-      JOptionC.some(())
-    override def copy(dstTable: TableAddr, srcTable: TableAddr, dstOffset: Value, srcOffset: Value, amount: Value): JOptionC[Unit] =
-      // dst table bounds check
-      if (!inBounds(dstOffset, amount, dstTable)) {
-        return JOptionC.none
-      }
-      // src table bounds check
-      if(!inBounds(srcOffset, amount, srcTable)) {
-        return JOptionC.none
-      }
-      // copy entries to Vector
-      var entries: Vector[RefV] = Vector.empty
-      for (index <- 0 until amount.asInt32) {
-        val entry = this.table.get(srcTable, srcOffset.asInt32 + index).getOrElse(return JOptionC.none)
-        entries = entries :+ entry
-      }
-      for ((entry, index) <- entries.zipWithIndex) {
-        this.table.set(dstTable, dstOffset.asInt32 + index, entry)
-      }
-      JOptionC.some(())
-
-    private def inBounds(offset: Value, amount: Value, table: TableAddr): Boolean = offset.asInt32 >= 0 && offset.asInt32 + amount.asInt32 <= this.table.size(table)
-  }
-
-    
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
@@ -211,7 +159,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: SizedConcreteSymbolTable[TableAddr, RefV] = new SizedConcreteSymbolTable[TableAddr, RefV]
+    val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32)
     val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

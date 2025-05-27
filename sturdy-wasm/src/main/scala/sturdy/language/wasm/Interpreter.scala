@@ -25,8 +25,6 @@ import swam.{FuncType, NumType, ReferenceType, ValType}
 
 import java.nio.ByteOrder
 import WasmFailure.*
-import sturdy.effect.symboltable.TableOps
-import sun.jvm.hotspot.debugger.cdbg.RefType
 import swam.ReferenceType.*
 
 trait Interpreter:
@@ -187,7 +185,6 @@ trait Interpreter:
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J]
-     , tabOps: TableOps[Value, TableAddr, Index, Size, RefV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
@@ -195,7 +192,6 @@ trait Interpreter:
     val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
-    val tableOps: TableOps[Value, TableAddr, Index, Size, RefV, J] = tabOps
 
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, applyI32)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, applyI64)

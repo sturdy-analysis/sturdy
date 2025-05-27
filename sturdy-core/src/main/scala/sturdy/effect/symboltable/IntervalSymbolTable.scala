@@ -5,7 +5,7 @@ import sturdy.Soundness
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.Effect
-import sturdy.effect.symboltable.SizedConstantIntTable.Tables
+import sturdy.effect.symboltable.SizedConstantTable.Tables
 import sturdy.values.*
 import sturdy.values.integer.NumericInterval
 
@@ -13,8 +13,8 @@ import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
 // TODO: replace Size with NumericInterval, change IntervalAnalysis to match this change
-class IntervalSymbolTable[Key, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[Int]) extends SizedSymbolTable[Key, NumericInterval[Int], Entry, Topped[Int], WithJoin], Effect:
-  private val constantSymbolTable: SizedConstantIntTable[Key, Entry] = new SizedConstantIntTable
+class IntervalSymbolTable[Value, Key, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[Int]) extends SizedSymbolTable[Value, Key, NumericInterval[Int], Entry, Topped[Int], WithJoin], Effect:
+  private val constantSymbolTable: SizedConstantTable[Value, Key, Entry] = new SizedConstantTable
 
   private val one = summon[Numeric[Int]].one
 
@@ -51,7 +51,12 @@ class IntervalSymbolTable[Key, Entry](rangeLimit: Int)(using Finite[Key], Join[E
   override def size(key: Key): Topped[Int] = ???
 
   override def grow(key: Key, newSize: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = ???
-  
+
+  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+
+  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
 
   override type State = constantSymbolTable.State
   override def getState: State =
@@ -66,3 +71,5 @@ class IntervalSymbolTable[Key, Entry](rangeLimit: Int)(using Finite[Key], Join[E
 
   def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Int, cEntry])(using Soundness[cEntry, Entry]): IsSound =
     constantSymbolTable.tableIsSound(c)
+
+

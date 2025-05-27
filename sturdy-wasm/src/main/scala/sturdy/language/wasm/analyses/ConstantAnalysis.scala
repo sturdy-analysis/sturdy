@@ -7,11 +7,11 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps, DummyTableOps, joinLimit}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
+import sturdy.effect.symboltable.SizedConstantTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
@@ -75,16 +75,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         }
 
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(i)))
-    
-    override def valToInt(v: Value): Int = {
-      v match {
-        case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => i match {
-          case Topped.Actual(n) => n
-          case Topped.Top => 0
-        }
-        case _ => 0
-      }
-    }
 
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 
@@ -179,9 +169,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
-
-
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
@@ -218,7 +205,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: SizedConstantIntTable[TableAddr, RefV] = new SizedConstantIntTable
+    val tables: SizedConstantTable[Value, TableAddr, RefV] = new SizedConstantTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

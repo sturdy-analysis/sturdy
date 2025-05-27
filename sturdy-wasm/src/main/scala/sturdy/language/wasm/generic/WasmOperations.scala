@@ -2,7 +2,6 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.JOption
 import sturdy.data.MayJoin
-import sturdy.effect.symboltable.TableOps
 import sturdy.language.wasm.ConcreteInterpreter.FuncReference
 import sturdy.language.wasm.ConcreteInterpreter.ExternReference
 import sturdy.language.wasm.abstractions.CfgNode.Instruction
@@ -48,7 +47,6 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
-  val tableOps: TableOps[V, TableAddr, Index, Size, RefV, J]
 
 /** Operations specific to Wasm */
 trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
@@ -65,8 +63,7 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
    * @return sz wrapped in a i32 value
    */
   def sizeToVal(sz: Size): V
-  
-  def valToInt(v: V): Int
+
   def intToVal(i: Int): V
   def refVToFunV(r: RefV): FunV
 

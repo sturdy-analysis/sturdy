@@ -10,8 +10,8 @@ import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
-import sturdy.effect.symboltable.{DummyTableOps, IntervalSymbolTable, JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps}
+import sturdy.effect.symboltable.SizedConstantTable.CombineTable
+import sturdy.effect.symboltable.{IntervalSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -59,7 +59,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def intToVal(i: Int): Value = ???
-    override def valToInt(v: IntervalAnalysis.Value): Int = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
@@ -87,8 +86,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
-
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
@@ -115,7 +112,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalSymbolTable[TableAddr, RefV] = new IntervalSymbolTable(rangeLimit)
+    val tables: IntervalSymbolTable[Value, TableAddr, RefV] = new IntervalSymbolTable(rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

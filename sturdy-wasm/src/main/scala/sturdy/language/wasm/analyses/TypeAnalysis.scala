@@ -7,7 +7,7 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{DummyTableOps, JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, TableOps, UpperBoundSymbolTable}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -57,7 +57,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def intToVal(i: Int): Value = ???
-    override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def isNull(r: Value): TypeAnalysis.Value = ???
@@ -74,8 +73,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-
-  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -102,7 +99,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: SizedUpperBoundSymbolTable[TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
+    val tables: SizedUpperBoundSymbolTable[Value, TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

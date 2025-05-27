@@ -7,8 +7,8 @@ import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.symboltable.{DummyTableOps, JoinableDecidableSymbolTable, SizedConstantIntTable, SizedSymbolTable, TableOps, given}
-import sturdy.effect.symboltable.SizedConstantIntTable.CombineTable
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, given}
+import sturdy.effect.symboltable.SizedConstantTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
@@ -59,7 +59,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def intToVal(i: Int): Value = ???
-    override def valToInt(v: Value): Int = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???
@@ -85,8 +84,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
       case _ =>
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-
-  given EmptyTableOps: DummyTableOps[Value, TableAddr, Index, Size, RefV, WithJoin] with {}
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -114,7 +111,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: SizedConstantIntTable[TableAddr, RefV] = new SizedConstantIntTable
+    val tables: SizedConstantTable[Value, TableAddr, RefV] = new SizedConstantTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

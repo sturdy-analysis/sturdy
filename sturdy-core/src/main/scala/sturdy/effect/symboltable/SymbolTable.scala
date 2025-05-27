@@ -8,10 +8,10 @@ import sturdy.values.{Join, MaybeChanged}
   * Map[Key, Table]
   * Table = Map[Symbol, Entry]
   *
-  * @tparam Key
-  * @tparam Symbol
-  * @tparam Entry
-  * @tparam J
+  * @tparam Key key type, used to identify the symbol table
+  * @tparam Symbol symbol type, used to identify the entry in the table
+  * @tparam Entry the type of the entry in the table
+  * @tparam J the join type, used to combine results from different computations
   */
 trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   def get(key: Key, symbol: Symbol): JOption[J, Entry]
@@ -22,8 +22,9 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   final def getOrElse(key: Key, symbol: Symbol, default: => Entry)(using J[Entry]): Entry =
     get(key, symbol).getOrElse(default)
 
-trait SizedSymbolTable[Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
-  
+trait SizedSymbolTable[Value, Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
+
+  def putNew(key: Key, limit: SizedSymbolTable.Limit[Size]): Unit
   def size(key: Key): Size
 
   /**
@@ -35,7 +36,19 @@ trait SizedSymbolTable[Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends Sym
    */
   def grow(key: Key, newSize: Size, initEntry: Entry): JOption[J, Size]
 
-  def putNew(key: Key, limit: SizedSymbolTable.Limit[Size]): Unit
+  /**
+   * Writes n entries starting at entries(entryOffset) into the table, starting at tableOffset.
+   * @param key the key of the table to write to
+   * @param entries the entries to write
+   * @param entryOffset the offset in the entries vector where to start writing
+   * @param tableOffset the offset in the table where to start writing
+   * @param amount the number of entries to write
+   * @return JOption containing Unit if successful, or None if boundaries are exceeded
+   */
+  def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[J, Unit]
+  def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[J, Unit]
+  def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[J, Unit]
+
   
   
 object SizedSymbolTable:  
