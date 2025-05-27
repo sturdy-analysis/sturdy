@@ -159,7 +159,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32)
+    val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32.toInt)
     val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

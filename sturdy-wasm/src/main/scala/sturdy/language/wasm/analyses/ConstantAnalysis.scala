@@ -7,7 +7,7 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
+import sturdy.effect.symboltable.{IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
@@ -205,7 +205,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: SizedConstantTable[Value, TableAddr, RefV] = new SizedConstantTable
+    val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](extractor = (v: Value) => {
+      val i32Val = v.asInt32
+      i32Val match {
+        case Topped.Actual(i) => NumericInterval(i, i)
+        case Topped.Top => NumericInterval(Int.MinValue, Int.MaxValue)
+      }
+    })
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

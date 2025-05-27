@@ -6,20 +6,18 @@ import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
-import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value}
 import sturdy.language.wasm.generic.WasmFailure.*
-import sturdy.values.{Finite, Topped}
+import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
 import sturdy.{IsSound, Soundness, fix}
-import swam.syntax.*
 import swam.*
 import swam.ReferenceType.{ExternRef, FuncRef}
+import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
-import scala.collection.mutable
 
 case class FrameData(returnArity: Int, module: ModuleInstance):
   override def toString: String =
