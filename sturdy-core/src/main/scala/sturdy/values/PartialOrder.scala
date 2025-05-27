@@ -23,6 +23,7 @@ trait PartialOrder[T] extends PartialOrdering[T]:
 
 object PartialOrder:
   def apply[T](using po: PartialOrder[T]): PartialOrder[T] = po
+  def lteq[T](x: T, y: T)(using po: PartialOrder[T]): Boolean = po.lteq(x, y)
 
 given concretePO[T: Structural] : PartialOrder[T] with
   def lteq(c1: T, c2: T): Boolean = c1 == c2

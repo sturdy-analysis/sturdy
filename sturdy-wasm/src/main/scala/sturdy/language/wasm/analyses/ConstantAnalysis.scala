@@ -10,11 +10,11 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -27,15 +27,17 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
+import sturdy.language.wasm.abstractions.Control.Exc
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow:
+object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[Topped[Byte]]
@@ -62,8 +64,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
           else
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc match
-      case HostFunction.proc_exit =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
@@ -79,7 +81,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-      GenericInstance
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
@@ -96,21 +98,22 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
-    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[ConstantAnalysis.Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[ConstantAnalysis.Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
+      override protected def contextSensitive = observedConfig.fix.get
     }
 
-    override val fixpointSuper = fixpoint
     override def toString: String = s"constant $config"

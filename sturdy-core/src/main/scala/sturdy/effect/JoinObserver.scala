@@ -19,3 +19,5 @@ trait ObservableJoin:
     observers.foreach(_.joinEnd(leftFailed, rightFailed))
   def repeating(): Unit =
     observers.foreach(_.repeating())
+
+object NoJoinsToObserve extends ObservableJoin

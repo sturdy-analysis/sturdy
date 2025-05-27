@@ -10,25 +10,27 @@ import sturdy.{IsSound, Soundness, seqIsSound}
 
 import scala.reflect.ClassTag
 
-trait DecidableCallFrame[Data, Var, V] extends CallFrame[Data, Var, V, NoJoin]
+trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Site, NoJoin]
 
-abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, NoJoin], DecidableCallFrame[Data, Var, V]:
+abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
   protected var _data: Data = initData
   protected var vars: Array[V] = _
   protected var names: Map[Var, Int] = _
 
-  def setVars(newVars: Iterable[(Var, V)]): Unit = {
+  def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
     val builder = Map.newBuilder[Var, Int]
     vars = Array.ofDim(newVars.size)
     var i = 0
     for ((name, v) <- newVars) {
       builder += name -> i
-      vars(i) = v
+      v.foreach(vars.update(i, _))
       i += 1
     }
     names = builder.result()
   }
   setVars(initVars)
+
+  def getVars: Array[V] = vars.clone()
 
   def data: Data = _data
   def setData(d: Data): Unit =
@@ -36,8 +38,13 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
-    if (ix >= 0 && ix < vars.length)
-      JOptionC.Some(vars(ix))
+    if (ix >= 0 && ix < vars.length) {
+      val v = vars(ix)
+      if (v == null)
+        JOptionC.none
+      else
+        JOptionC.Some(v)
+    }
     else
       JOptionC.none
 
@@ -57,7 +64,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
     case Some(ix) => setLocal(ix, v)
     case None => JOptionC.none
 
-  def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
+  def withNew[A](d: Data, vars: Iterable[(Var, Option[V])], site: Site)(f: => A): A = {
     val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars
@@ -70,7 +77,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
     }
   }
 
-  def isSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
+  def isSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV, Site])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.data, data)
     if (dataIsSound.isNotSound)
       return dataIsSound
@@ -81,16 +88,17 @@ abstract class DecidableMutableCallFrame[Data, Var, V](initData: Data, initVars:
     seqIsSound.isSound(cVals, aVals)
 
 
-class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars), Concrete
+class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars), Concrete
 
-class JoinableDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V](initData, initVars):
+class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
   override type State = List[V]
-  override def getState: List[V] = vars.toList
-  override def setState(s: List[V]): Unit =
+  override def getState: State = vars.toList
+  override def setState(s: State): Unit =
     s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
-  override def join: Join[List[V]] = implicitly
-  override def widen: Widen[List[V]] = implicitly
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = vars
     private var fVars: Array[V] = _

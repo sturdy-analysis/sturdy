@@ -9,7 +9,7 @@ import sturdy.values.booleans.*
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 import java.nio.{ByteBuffer, ByteOrder}
 import java.lang.Math
@@ -108,7 +108,7 @@ case class AbstractBitVector[I](bits: Array[AbstractBit]):
   val indices: Array[Int] = (0 to 31).toArray
 
   override def equals(obj: Any): Boolean = obj match
-    case vector: AbstractBitVector[I] => this.bits sameElements vector.bits
+    case vector: AbstractBitVector[_] => this.bits sameElements vector.bits
     case _ => super.equals(obj)
 
   override def hashCode(): Int = this.bits.hashCode()
@@ -350,8 +350,8 @@ class AbstractBitVectorIntegerOps[I]
     rem.getOrElse(throw new IllegalStateException( s"unable to compute meet between $rem1 % $rem2"))
 
   def gcd(v1: AbstractBitVector[I], v2: AbstractBitVector[I]): AbstractBitVector[I] = {
-    if v1 == constant(zero) then v2
-    if v2 == constant(zero) then v1
+    if (v1 == constant(zero)) return v2
+    if (v2 == constant(zero)) return v1
     val n = v1.bits.length-1
     var gcdOptions = ArrayBuffer[AbstractBitVector[I]]() //all possible gcd
     var u = absolute(v1) //work only with absolute values
@@ -582,9 +582,9 @@ class AbstractBitVectorIntegerOps[I]
 //untested
 //top values for int and long
 given TopAbstractBitVectorInt: Top[AbstractBitVector[Int]] with
-  def top: AbstractBitVector[Int] = AbstractBitVector(Array.fill(32)(Zer))
+  def top: AbstractBitVector[Int] = AbstractBitVector(Array.fill(32)(Bit))
 given TopAbstractBitVectorLong: Top[AbstractBitVector[Long]] with
-  def top: AbstractBitVector[Long] = AbstractBitVector(Array.fill(64)(Zer))
+  def top: AbstractBitVector[Long] = AbstractBitVector(Array.fill(64)(Bit))
 
 //untested
 //make number into abstract rep

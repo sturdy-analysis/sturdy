@@ -61,18 +61,13 @@ enum Exp extends Labeled:
     case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
     case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
-  def intLiterals: Set[Int] =
-    fold(using e => e match
-      case NumLit(n: Int) => Set(n)
-      case _ => Set()
-    )
-
 enum Stm extends Labeled:
   case Assign(lhs: Assignable, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
   case While(cond: Exp, body: Stm)
   case Block(body: Seq[Stm])
   case Output(e: Exp)
+  case Assert(e : Exp)
   case Error(e: Exp)
 
   def fold[A](using f: Stm => A, g: Exp => A)(using m: Monoid[A]): A = this match
@@ -84,6 +79,7 @@ enum Stm extends Labeled:
     case Block(body) =>
       m.combine(f(this), m.combineAll(body.view.map(_.fold)))
     case Output(e) => m.combine(f(this), e.fold)
+    case Assert(e) => m.combine(f(this), e.fold)
     case Error(e) => m.combine(f(this), e.fold)
 
   override def toString: String = this match
@@ -92,10 +88,8 @@ enum Stm extends Labeled:
     case While(c, b) => s"While($c)@${this.label}"
     case Block(body) => s"Block@${this.label}"
     case Output(e) => s"Output@${this.label}"
+    case Assert(e) => s"Assert@${this.label}"
     case Error(e) => s"Error@${this.label}"
-
-  def intLiterals: Set[Int] =
-    fold(using _ => Set(), _.intLiterals)
 
 enum Assignable:
   case AVar(name: String)
@@ -108,25 +102,17 @@ enum Assignable:
     case ADerefField(rec, _) => g(rec)
     case _ => m.empty
 
-  def intLiterals: Set[Int] = this match
-    case AVar(_) => Set()
-    case ADeref(e) => e.intLiterals
-    case AField(_, _) => Set()
-    case ADerefField(rec, _) => rec.intLiterals
-
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
   override def toString: String = s"function $name"
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))
 
-  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
-
 case class Program(funs: Seq[Function]):
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))
 
-  def intLiterals: Set[Int] = fold(using _ => Set(), _.intLiterals, _.intLiterals)
-
+  def intLiterals: Set[Int] = fold(using _ => Set(), _ => Set(), {case Exp.NumLit(n) => Set(n); case _ => Set()})
+  def assertions: Set[Stm.Assert] = fold(using _ => Set(), {case a: Stm.Assert => Set(a); case _ => Set()}, _ => Set())
 
 given StructuralFunction: Structural[Function] with {}
 given FiniteFunction: Finite[Function] with {}

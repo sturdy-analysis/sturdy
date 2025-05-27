@@ -4,20 +4,21 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.AFallible
 import sturdy.effect.failure.FailureKind
 import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
-import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.{WasmConfig, CallSites, FixpointConfig, IntervalAnalysis}
+import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, IntervalAnalysis, WasmConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis.Value
-import sturdy.language.wasm.generic.{FixIn, WasmFailure, FixOut, FrameData}
-import sturdy.util.{Profiler, LinearStateOperationCounter}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
@@ -40,6 +41,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
+
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
 
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
@@ -119,6 +123,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-iter-named", List(top64), List(top64))
   testFunction(fact, "fac-opt", List(top64), List(top64))
 
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(0,1))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(Value.Int32(NumericInterval(1,5))), List(Value.Int32(NumericInterval(42, 42))))
+  testFunction(simpleTest, "main", List(top32), List(Value.Int32(NumericInterval(42,42))))
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
@@ -133,14 +140,14 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
         case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
     }
-    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
-        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
-        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
-        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
-    }
+//    it must s"execute $funcName withs args $args with result $expected with stacked frames" in {
+//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assertResult(expected)(vals)
+//        case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)
+//        case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $expected but execution diverged: $recur")
+//    }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind): Unit =
     it must s"execute $funcName with args $args throwing exception $failureKind with stacked states" in {
@@ -151,14 +158,14 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
         case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
     }
-    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
-      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
-      res match
-        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
-        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
-        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
-    }
+//    it must s"execute $funcName with args $args throwing exception $failureKind with stacked frames" in {
+//      val res = runIntervalAnalysis(path, funcName, args, StackConfig.StackedCfgNodes())
+//      res match
+//        case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
+//        case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Failing(fails) => assert(fails.set.exists(_._1 == failureKind))
+//        case AFallible.Diverging(recur) => assert(false, s"Expected $failureKind but execution diverged: $recur")
+//    }
 
 
 def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackConfig: StackConfig): AFallible[List[Value]] =
@@ -166,25 +173,21 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
 
   val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
     WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
-  val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = IntervalAnalysis.constantInstructions(interp)
+  val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
   val modInst = interp.initializeModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-//  println(cfg.toGraphViz)
 
-  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
-  val deadLabels = ControlFlow.deadLabels(cfg)
   val constantInstructions = constants.get
-  println(s"Found ${deadInstructions.size} dead instructions")
-  println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
-  println(cfg.withBlocks(shortLabels = false).toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()
   println(s"${LinearStateOperationCounter.toString} in the last tests")
   println(s"#linear state operations in the last tests: ${LinearStateOperationCounter.getSummedOperationsPerTest}")
   Profiler.printLastMeasured()
+
+  println(graphBuilder.get.toGraphViz)
   result

@@ -4,13 +4,14 @@ import sturdy.data.{*, given}
 import sturdy.effect.Effect
 import sturdy.values.{*, given}
 
-import scala.Either as Eith
-
 import ConstantSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
+
+import scala.Either as Eith
+import scala.util.boundary, boundary.break
 
 class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effect:
 
@@ -47,15 +48,15 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     dirtyTables += key
 
   override type State = Tables[Key, Symbol, Entry]
-  def getState: Tables[Key, Symbol, Entry] = tables
-  def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
-  override def join: Join[Tables[Key, Symbol, Entry]] = JoinMap(using {
+  override def getState: State = tables
+  override def setState(s: State): Unit = tables = s
+  override def join: Join[State] = JoinMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
     case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
   })
-  override def widen: Widen[Tables[Key, Symbol, Entry]] = WidenFiniteKeyMap(using {
+  override def widen: Widen[State] = CombineFiniteKeyMap(using {
     case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
     case (v1@Right(_), Left(_)) => Unchanged(v1)
     case (Left(_), v2@Right(_)) => Changed(v2)
@@ -63,6 +64,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
   })
 
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
   class ToppedSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables
@@ -106,7 +108,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
       dirtyTables ++= snapDirtyTables
   }
 
-  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     // - all tables in c are present in the abstract
     // - all abstract tables with at least one 'must' entry have a concrete counterpart
     // - for each key in c, tabs(key) is sound
@@ -114,18 +116,18 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
     tables.filterNot { (key,_) => cTables.isDefinedAt(key) }.foreachEntry { (k, aTab) => aTab match
       case Left(tab) =>
         if (!tab.isAllMay)
-          return IsSound.NotSound(s"Definite table with key $k not present in concrete tables.")
+          break(IsSound.NotSound(s"Definite table with key $k not present in concrete tables."))
       case _ =>
     }
     cTables.foreachEntry { (key, cTab) =>
-      val aTab = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
+      val aTab = tables.getOrElse(key, { break(IsSound.NotSound(s"Key $key not present in topped symbol table.")) })
       val tabSound = tabInstanceIsSound(cTab, aTab)
       if (tabSound.isNotSound)
-        return tabSound
+        break(tabSound)
     }
     IsSound.Sound
 
-  def tabInstanceIsSound[cEntry](c: Map[Symbol, cEntry], a: Eith[Table[Symbol,Entry], Entry])(using entrySound: Soundness[cEntry, Entry]): IsSound =
+  def tabInstanceIsSound[cEntry](c: Map[Symbol, cEntry], a: Eith[Table[Symbol,Entry], Entry])(using entrySound: Soundness[cEntry, Entry]): IsSound = boundary:
     // all entries in c are approximated by corresponding entry in a
     // all abstract symbols not defined in c point to a 'may' entry
     a match
@@ -133,20 +135,20 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
         c.foreachEntry { (key, cEntry) =>
           val eSound = entrySound.isSound(cEntry, aEntry)
           if (!eSound.isSound)
-            return IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not approximated by abstract entry $aEntry.")
+            break(IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not approximated by abstract entry $aEntry."))
         }
         IsSound.Sound
       case Left(aTab) =>
         aTab.underlying.filterNot { (symbol,_) => c.isDefinedAt(symbol) }.foreachEntry { (s, aEntry) =>
           if (aEntry.isMust)
-            return IsSound.NotSound(s"Definite entry $aEntry with symbol $s not present in concrete table.")
+            break(IsSound.NotSound(s"Definite entry $aEntry with symbol $s not present in concrete table."))
         }
         c.foreachEntry { (key, cEntry) =>
           val aEntry = aTab.underlying.getOrElse(key,
-            { return IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not present in abstract table.") })
+            { break(IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not present in abstract table.")) })
           val eSound = entrySound.isSound(cEntry, aEntry.get)
           if (!eSound.isSound)
-            return IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not approximated by abstract entry ${aEntry.get}.")
+            break(IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not approximated by abstract entry ${aEntry.get}."))
         }
         IsSound.Sound
 
@@ -181,7 +183,7 @@ object ConstantSymbolTable:
       }
       MaybeChanged(Table(tab, dirty), changed)
 
-  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
+  case class Table[Symbol, Entry](underlying: Map[Symbol, MayMust[Entry]], dirtySymbols: Set[Symbol]):
     def entries: Set[Entry] = underlying.values.map(_.get).toSet
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
       Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
@@ -198,4 +200,5 @@ object ConstantSymbolTable:
 
     def isAllMay: Boolean = underlying.forall((_,e) => !e.isMust)
 
-
+    def map[Symbol1, Entry1](mapSym: Symbol => Symbol1, mapEntry: Entry => Entry1): Table[Symbol1, Entry1] =
+      Table(underlying.map((sym, entry) => (mapSym(sym), entry.map(mapEntry))), dirtySymbols.map(mapSym))

@@ -12,14 +12,14 @@ import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.config.BytesSize
 import sturdy.values.convert.{*, given}
@@ -27,17 +27,18 @@ import sturdy.values.exceptions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
 import swam.FuncType
 import swam.syntax.*
 import swam.traversal.Traverser
 
-import java.nio.{ByteOrder, ByteBuffer}
+import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
+import sturdy.control.{ControlObservable, RecordingControlObserver}
 
-object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
+object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[NumericInterval[Byte]]
@@ -66,8 +67,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc match
-      case HostFunction.proc_exit =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case _ =>
@@ -83,7 +84,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
-      GenericInstance
+      GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
@@ -100,9 +101,9 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
-    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
     given ConvertIntFloat[I32, F32] =
@@ -153,20 +154,21 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
       override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
     }
-    override def initializeModule(module: Module, imports: Imports): ModuleInstance = {
+    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any]): ModuleInstance = {
       module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-      super.initializeModule(module, imports)
+      super.initializeModule(module, imports, moduleId)
     }
 
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {
-      override type Ctx = config.ctx.Ctx
-      val (contextPreparation, sensitivity) = config.ctx.make[IntervalAnalysis.Value]
-      import config.ctx.finiteCtx
-      override protected def contextFree = contextPreparation
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[IntervalAnalysis.Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-      override protected def contextSensitive = config.fix.get
+      override protected def contextSensitive = observedConfig.fix.get
     }
 
-    override val fixpointSuper = fixpoint
     override def toString: String = s"constant $config"

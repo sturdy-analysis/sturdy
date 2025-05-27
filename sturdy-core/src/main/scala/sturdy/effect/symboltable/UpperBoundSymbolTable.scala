@@ -8,6 +8,8 @@ import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
+import scala.util.boundary, boundary.break
+
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:
 
   protected var tables: Map[Key, Entry] = Map()
@@ -21,6 +23,7 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new UpperBoundSymbolTableJoiner[A])
   private class UpperBoundSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Entry] = _
@@ -45,18 +48,18 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
           case Some(gEntry) => tables += fKey -> Join(fEntry, gEntry).get
   }
 
-  def tableIsSound[cSymbol, cEntry](c: ConcreteSymbolTable[Key, cSymbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cSymbol, cEntry](c: ConcreteSymbolTable[Key, cSymbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     c.entries.foreachEntry { (key, cTab) =>
-      val aEntry = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
+      val aEntry = tables.getOrElse(key, { break(IsSound.NotSound(s"Key $key not present in topped symbol table.")) })
       for (cEntry <- cTab.values)
         val eSound = Soundness.isSound(cEntry, aEntry)
         if (!eSound.isSound)
-          return eSound
+          break(eSound)
     }
     IsSound.Sound
 
   type State = Map[Key, Entry]
-  override def getState: Map[Key, Entry] = tables
-  override def setState(s: Map[Key, Entry]): Unit = tables = s
-  override def join: Join[Map[Key, Entry]] = implicitly
-  override def widen: Widen[Map[Key, Entry]] = implicitly
+  override def getState: State = tables
+  override def setState(s: State): Unit = tables = s
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly

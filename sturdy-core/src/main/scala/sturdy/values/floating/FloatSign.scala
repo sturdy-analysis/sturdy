@@ -2,7 +2,7 @@ package sturdy.values.floating
 
 import sturdy.effect.Effect
 import sturdy.values.*
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 enum FloatSign:
   case TopSign

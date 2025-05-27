@@ -1,22 +1,27 @@
 package sturdy.language.pcf
 
 import sturdy.data.MayJoin
-import sturdy.effect.EffectStack
+import sturdy.effect.{EffectList, EffectStack}
 import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.environment.CyclicEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.userinput.UserInput
 import sturdy.fix
 import sturdy.util.{IntLabel, Labeled}
+import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.closures.ClosureOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.relational.{OrderingOps, EqOps}
+import sturdy.values.ordering.{EqOps, OrderingOps}
 
 import scala.collection.immutable.List
 
-case object UnboundVariable extends FailureKind
-case object TypeError extends FailureKind
+enum PCFFailure extends FailureKind:
+  case UnboundVariable
+  case TypeError
+given Finite[PCFFailure] with {}
+
+import PCFFailure.*
 
 trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
 
@@ -32,7 +37,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
   val environment: CyclicEnvironment[String, V, J] with ClosableEnvironment[String, V, Env, J]
   val input: UserInput[V]
 
-  val effectStack: EffectStack = new EffectStack(List(failure, environment, input))
+  val effectStack: EffectStack = new EffectStack(EffectList(failure, environment, input))
   given EffectStack = effectStack
 
   // joins
@@ -81,6 +86,7 @@ trait GenericInterpreter[V, Env, J[_] <: MayJoin[_]]:
           val a = eval(arg)
           environment.loadClosedEnvironment(env)
           environment.bind(x, a)
+          // TODO enter
           eval(body)
         }
       }

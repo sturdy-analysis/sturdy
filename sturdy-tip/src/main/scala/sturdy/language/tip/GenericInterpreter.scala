@@ -1,10 +1,11 @@
 package sturdy.language.tip
 
+import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
-import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.DecidableMutableCallFrame
+import sturdy.effect.allocation.Allocator
+import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.environment.Environment
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
 import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
@@ -14,18 +15,17 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
-import sturdy.effect.EffectStack
+import sturdy.effect.{Effect, EffectList, EffectStack}
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
+import TipFailure.*
 
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
-  case ParamBinding(fun: Function, name: String)
-  case LocalBinding(fun: Function, name: String)
   case Record(r: Exp.Record)
 
 case class Field(name: String)
@@ -37,6 +37,8 @@ enum TipFailure extends FailureKind:
   case UserError
   case TypeError
   case VariableReferencesNotSupported
+  case StackOverflow extends TipFailure with DivergingKind
+
 given Finite[TipFailure] with {}
 
 enum FixIn:
@@ -64,15 +66,26 @@ given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V]
     case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
     case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
-import TipFailure.*
-
+/**
+ * The generic interpreter for the Tip language (https://github.com/cs-au-dk/TIP).
+ *
+ * The generic interpreter captures the core semantics of the language and
+ * is used to derive abstract interpreters and as well as the concrete interpreter.
+ * This is useful for sharing code between different abstract interpreters,
+ * but also simplifies the soundness proof as no reasoning about the generic interpreter
+ * is necessary (https://doi.org/10.1145/3236767).
+ * @param V The type of values
+ * @param Addr The type of addresses
+ * @param J Abstracts over if the interpreter joins or not.
+ *           - The concrete interpreter defines `J` as [[NoJoin]], meaning the interpreter does not join.
+ *           - The abstract interpreters defines `J` to be [[WithJoin]], meaning the interpreter does join.
+ */
 trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   // fixpoint
   val fixpoint: EffectStack ?=> fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
 
-  // joins
   implicit def jv: J[V]
 
   // value components
@@ -82,18 +95,30 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
-  val branchOps: BooleanBranching[V, Unit]; import branchOps.*
+  implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableMutableCallFrame[Unit, String, V]
+  val callFrame: DecidableCallFrame[String, String, V, Exp.Call] with MutableCallFrame[String, String, V, Exp.Call, NoJoin]
   val store: Store[Addr, V, J]
-  val alloc: Allocation[Addr, AllocationSite]
+  val alloc: Allocator[Addr, AllocationSite]
   val print: Print[V]
   val input: UserInput[V]
-  val failure: Failure
+  implicit val failure: Failure
 
-  // effect stack
-  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input, failure))
+  // Factory method for effect stacks
+  def newEffectStack(effects: => Effect,
+                     inEffects: PartialFunction[Any, Effect],
+                     outEffects: PartialFunction[Any, Effect]): EffectStack =
+    new EffectStack(effects, inEffects, outEffects)
+
+  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure), {
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
+    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure)
+  }, {
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
+    case _: FixIn.Eval => EffectList(callFrame, alloc, failure)
+  })
+
   given EffectStack = effectStack
 
   // analysis state
@@ -112,31 +137,31 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
     case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
     case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
-    case Exp.Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case site@Exp.Call(fun, args) =>
+      invokeFun(eval(fun), args.map(eval(_)))(call(site))
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
       store.write(addr, eval(e))
-      refValue(addr)
+      mkManagedRef(addr)
     case Exp.VarRef(x) =>
       failure(VariableReferencesNotSupported, s"&$x")
 //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
 //      unmanagedRefValue(addr)
     case Exp.Deref(e) =>
-      val addr = refAddr(eval(e))
+      val addr = deref(eval(e))
       val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       result
     case Exp.NullRef() =>
-      nullValue
+      mkNullRef
     case r@Exp.Record(fields) =>
       // represents record as a reference to a record value
       val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
       val rec = makeRecord(fieldVals)
       val addr = alloc(AllocationSite.Record(r))
       store.write(addr, rec)
-      refValue(addr)
+      mkManagedRef(addr)
     case Exp.FieldAccess(rec, field) =>
-      val addr = refAddr(eval(rec))
+      val addr = deref(eval(rec))
       val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
       lookupRecordField(recVal, Field(field))
   }
@@ -153,6 +178,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       body.foreach(run(_))
     case Stm.Output(e) =>
       print(eval(e))
+    case a@Stm.Assert(e) =>
+      assert(eval(e), a)  
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
 
@@ -160,33 +187,32 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Assignable.AVar(x) =>
       callFrame.setLocalByName(x, v).getOrElse(failure(UnboundVariable, x))
     case Assignable.ADeref(e) =>
-      val addr = refAddr(eval(e))
+      val addr = deref(eval(e))
       store.write(addr, v)
     case Assignable.AField(recVar, field) =>
       val recRef = eval(Exp.Var(recVar))
-      val recAddr = refAddr(recRef)
+      val recAddr = deref(recRef)
       val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
     case Assignable.ADerefField(rec, field) =>
       val recRef = eval(rec)
-      val recAddr = refAddr(recRef)
+      val recAddr = deref(recRef)
       val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
       store.write(recAddr, updated)
 
-  def call(fun: Function, args: Seq[V])(using Fixed): V =
-    val locals: Map[String, V] =
-      Map() ++
-        fun.params.zip(args) ++
-        fun.locals.map(x => (x, integerLit(-1)))
-    callFrame.withNew((), locals) {
+  def call(site: Exp.Call)(fun: Function, args: Seq[V])(using Fixed): V =
+    val locals: Iterable[(String, Option[V])] =
+      fun.params.zip(args.map(Some.apply)) ++
+      fun.locals.map(x => (x, None))
+    callFrame.withNew(fun.name, locals, site) {
       enterFunction(fun)
     }
 
   inline def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
   inline def run(s: Stm)(using rec: Fixed): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
-  private inline def enterFunction(fun: Function)(using rec: Fixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
+  private def enterFunction(fun: Function)(using rec: Fixed): V = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
   private lazy val fixed = {
     fixpoint {

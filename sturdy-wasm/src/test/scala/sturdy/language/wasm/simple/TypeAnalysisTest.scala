@@ -40,6 +40,9 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
+  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
+  val simpleTest = Paths.get(uriSimpleTest)
+
   testFunction(simple, "const", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
   testFunction(simple, "first", List(Value.Int32(topI32), Value.Int32(topI32)), List(Value.Int32(topI32)))
   testFunction(simple, "second", List(Value.Int32(topI32), Value.Int32(topI32)), List(Value.Int32(topI32)))
@@ -63,6 +66,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-opt", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
   testFunction(fact, "fib", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
 
+  testFunction(simpleTest, "main", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
 
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =

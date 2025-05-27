@@ -5,6 +5,8 @@ import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 import sturdy.values.config
 
+import scala.util.boundary, boundary.break
+
 import java.nio.ByteOrder
 
 given ToppedConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]]
@@ -22,9 +24,9 @@ given ToppedConvertSeq[From, To, VFromElem, VTo, Conf <: ConvertConfig[_]]
   (using EffectStack, Failure)
   : Convert[From, To, Seq[Topped[VFromElem]], Topped[VTo], Conf] with
 
-  override def apply(from: Seq[Topped[VFromElem]], conf: Conf): Topped[VTo] =
+  override def apply(from: Seq[Topped[VFromElem]], conf: Conf): Topped[VTo] = boundary:
     val elems = from.map {
-      case Topped.Top => return safeConversion(conf, Topped.Top)
+      case Topped.Top => break(safeConversion(conf, Topped.Top))
       case Topped.Actual(b) => b
     }
     Topped.Actual(c(elems, conf))

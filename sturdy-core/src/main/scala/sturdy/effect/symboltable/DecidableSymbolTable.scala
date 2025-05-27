@@ -8,6 +8,8 @@ import sturdy.effect.Concrete
 import sturdy.effect.TrySturdy
 import sturdy.values.*
 
+import scala.util.boundary, boundary.break
+
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
 
@@ -22,14 +24,14 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
   override def putNew(key: Key): Unit =
     tables += key -> Map()
 
-  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound = boundary:
     c.tables.foreachEntry { (key, cTab) =>
-      val aTab = tables.getOrElse(key, return IsSound.NotSound(s"Key $key not present in topped symbol table."))
+      val aTab = tables.getOrElse(key, break(IsSound.NotSound(s"Key $key not present in topped symbol table.")))
       for ((sym, cEntry) <- cTab)
-        val aEntry = aTab.getOrElse(sym, return IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table."))
+        val aEntry = aTab.getOrElse(sym, break(IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table.")))
         val eSound = Soundness.isSound(cEntry, aEntry)
         if (!eSound.isSound)
-          return eSound
+          break(eSound)
     }
     IsSound.Sound
 
@@ -39,11 +41,12 @@ class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
   override type State =  Map[Key, Map[Symbol, Entry]]
-  override def getState: Map[Key, Map[Symbol, Entry]] = tables
-  override def setState(st: Map[Key, Map[Symbol, Entry]]): Unit = tables = st
-  override def join: Join[Map[Key, Map[Symbol, Entry]]] = implicitly
-  override def widen: Widen[Map[Key, Map[Symbol, Entry]]] = implicitly
+  override def getState: State = tables
+  override def setState(st: State): Unit = tables = st
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Map[Symbol, Entry]] = null

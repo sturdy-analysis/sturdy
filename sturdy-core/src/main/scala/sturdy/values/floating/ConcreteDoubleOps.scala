@@ -5,8 +5,8 @@ import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.OrderingOps
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.OrderingOps
+import sturdy.values.ordering.EqOps
 
 import scala.util.Random
 import java.lang.Float as JFloat

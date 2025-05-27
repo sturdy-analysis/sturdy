@@ -4,8 +4,9 @@ import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.effect.Effect
 
-/*
- * The environment interface.
+/**
+ * [[Environment]] is a mapping from variables to values.
+ * Variables are immutable.
  */
 trait Environment[Var, V, J[_] <: MayJoin[_]] extends Effect:
   def lookup(x: Var): JOption[J, V]

@@ -13,4 +13,4 @@ class ConstantAnalysisState:
   var interp: ConstantAnalysis.Instance = _
   @Setup(Level.Invocation)
   def setup(): Unit =
-    interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+    interp = new ConstantAnalysis.Instance(WasmConfig.default)

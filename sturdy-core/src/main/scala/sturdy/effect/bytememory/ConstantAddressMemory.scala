@@ -14,6 +14,7 @@ import scala.collection.IndexedSeqView
 import scala.collection.immutable.IntMap
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
+import scala.util.boundary, boundary.break
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
@@ -48,6 +49,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
       case Topped.Actual(size) =>
         memories += key -> ImmutableByteMem.ofSize(size * pageSize, sizeLimit.flatMap(_.toOption), emptyB)
 
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ConstantAddressMemoryJoiner[A])
   private class ConstantAddressMemoryJoiner[A] extends ComputationJoiner[A] {
     val snapshot = memories
     var fmemories: Map[Key, Mem[B]] = _
@@ -77,12 +79,12 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
   }
 
   override type State = Map[Key, Mem[B]]
-  override def getState: Map[Key, Mem[B]] = memories
-  override def setState(s: Map[Key, Mem[B]]): Unit = memories = s
-  override def join: Join[Map[Key, Mem[B]]] = implicitly
-  override def widen: Widen[Map[Key, Mem[B]]] = implicitly
+  override def getState: State = memories
+  override def setState(s: State): Unit = memories = s
+  override def join: Join[State] = implicitly
+  override def widen: Widen[State] = implicitly
 
-  def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
+  def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound = boundary:
     // soundess for memory:
     //  - all concrete memories are present in abstract memories
     //  - all definite abstract memores have a concrete counterpart
@@ -90,18 +92,18 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     val cMemories = c.getMemories
     memories.filterNot{ (key, _) => cMemories.isDefinedAt(key)}.foreachEntry { (k, aMem) =>
       if (aMem.isDefinite)
-        return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")
+        break(IsSound.NotSound(s"Definite memory with key $k not present in concrete memory."))
     }
     cMemories.foreachEntry { (key, cMem) =>
-      val aMem = memories.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in constant address memory.") })
+      val aMem = memories.getOrElse(key, { break(IsSound.NotSound(s"Key $key not present in constant address memory.")) })
       val memSound = memInstanceIsSound(cMem, aMem)
       if (memSound.isNotSound)
-        return memSound
+        break(memSound)
     }
     IsSound.Sound
 
 
-  def memInstanceIsSound(c: ConcreteMemory.Mem, aMem: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound =
+  def memInstanceIsSound(c: ConcreteMemory.Mem, aMem: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound = boundary:
     // - sizes are equal
     // - all locations in concrete memory are approximated by locations in abstract memory
     aMem match
@@ -114,22 +116,21 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
           concreteInstanceApproximated(c, aMem.upperBound)
       case aMem: ImmutableByteMem[_] =>
         if (c.size != aMem.size || c.sizeLimit != aMem.sizeLimit)
-          return IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide, was \n  $aMem wanted \n  ${(c.size, c.sizeLimit, c.pageNum)}.")
+          break(IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide, was \n  $aMem wanted \n  ${(c.size, c.sizeLimit, c.pageNum)}."))
         c.bytes.zip(aMem.bytesIterable).foreach { (cByte, aByte) =>
           val bSound = bytesSound.isSound(cByte, aByte)
           if (bSound.isNotSound) {
-            val sound = IsSound.NotSound(s"Byte $cByte is not approximated by $aByte.")
-            return sound
+            break(IsSound.NotSound(s"Byte $cByte is not approximated by $aByte."))
           }
         }
         IsSound.Sound
 
 
-  def concreteInstanceApproximated(c: ConcreteMemory.Mem, b: B)(using bytesSound: Soundness[Byte, B]): IsSound =
+  def concreteInstanceApproximated(c: ConcreteMemory.Mem, b: B)(using bytesSound: Soundness[Byte, B]): IsSound = boundary:
     c.bytes.foreach { cByte =>
       val bSound = bytesSound.isSound(cByte, b)
       if (bSound.isNotSound)
-        return IsSound.NotSound(s"Byte $cByte is not approximated by $b.")
+        break(IsSound.NotSound(s"Byte $cByte is not approximated by $b."))
     }
     IsSound.Sound
 
@@ -186,6 +187,7 @@ object ConstantAddressMemory:
     def read(a: Int, length: Int): JOptionA[Seq[B]]
     def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit])
     def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]])
+    def map[C: ClassTag](f: B => C): Mem[C]
 
   case class TopMem[B: ClassTag](isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
@@ -197,6 +199,7 @@ object ConstantAddressMemory:
       (newMem, JOptionA.noneSome(()))
     override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]]) = (None, JOptionA.noneSome(Topped.Top))
 
+    override def map[C: ClassTag](f: B => C): Mem[C] = TopMem(isDefinite, f(upperBound))
 
   case class SizeMem[B: ClassTag](size: Int, sizeLimit: Option[Int], isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
@@ -244,6 +247,8 @@ object ConstantAddressMemory:
           (None, JOptionA.none)
         }
 
+    override def map[C: ClassTag](f: B => C): Mem[C] =
+      SizeMem(size, sizeLimit, isDefinite, f(upperBound))
 
   case class Word[B](b1: B, b2: B, b3: B, b4: B):
     def toIterable: Iterable[B] = Iterable(b1, b2, b3, b4)
@@ -255,6 +260,8 @@ object ConstantAddressMemory:
       case 2 => Word(b1, b2, b, b4)
       case 3 => Word(b1, b2, b3, b)
       case _ => throw new IllegalArgumentException
+    def map[C](f: B => C): Word[C] = Word(f(b1), f(b2), f(b3), f(b4))
+
   val WordSize: Int = 4
 
   given CombineWord[B, W <: Widening](using Combine[B, W]): Combine[Word[B], W] with
@@ -407,6 +414,8 @@ object ConstantAddressMemory:
           (None, JOptionA.none)
         }
 
+    override def map[C: ClassTag](f: B => C): Mem[C] =
+      ImmutableByteMem(size, f(emptyB), words.map((i,w) => (i,w.map(f))), sizeLimit , isDefinite, f(upperBound))
 
 //  case class MutableByteMem[B: ClassTag](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: Option[Int], isDefinite: Boolean, upperBound: B) extends Mem[B]:
 //    override def cloned: MutableByteMem[B] = MutableByteMem(bytes.clone(), dirty.clone(), sizeLimit, isDefinite, upperBound)

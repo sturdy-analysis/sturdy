@@ -227,6 +227,6 @@ object SQLscript extends App:
 
 //  println(module.funcs(0))
 //  val config = WasmConfig(ctx = CallSites(1), fix = FixpointConfig(iter = sturdy.fix.iter.Config.Outermost()))
-//  val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, config)
+//  val interp = new ConstantTaintAnalysis.Instance(config)
 //  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
 //  println(ControlFlow.)

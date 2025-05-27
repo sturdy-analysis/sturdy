@@ -4,6 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
@@ -13,7 +14,7 @@ import sturdy.language.wasm.analyses.IntervalAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.values.integer.given
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
 import sturdy.{IsSound, Soundness}
 import sturdy.{*, given}
@@ -78,12 +79,13 @@ class IntervalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aIn
   type AValue = IntervalAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  aInterp.addControlObserver(new ControlEventChecker)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
-  val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cImports: Map[String, ModuleInstance] = Map()
+  var aImports: Map[String, ModuleInstance] = Map()
   val convertVals: unresolved.Expr => List[IntervalAnalysis.Value] =
     if (useTop)
       constExprToTops

@@ -67,14 +67,14 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
     case NoneSome(a) => NoneSome(f(a))
     case Some(a) => Some(f(a))
 
-  override def flatMap[B](f: A => JOption[WithJoin, B]): JOption[WithJoin, B] = this match
+  override def flatMap[B](f: A => JOption[WithJoin, B]): JOptionA[B] = this match
     case None() => None()
     case NoneSome(a) => f(a) match
       case None() => None()
       case NoneSome(b) => NoneSome(b)
       case Some(b) => NoneSome(b)
       case other => throw new IllegalArgumentException(s"Cannot flatMap OptionA to different type $other")
-    case Some(a) => f(a)
+    case Some(a) => f(a).asInstanceOf[JOptionA[B]]
 
   def joinDeep[AA <: A](that: JOptionA[AA])(using Join[A]): JOptionA[A] = (this, that) match
     case (None(), None()) => None()
@@ -87,6 +87,18 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
     case (Some(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
+
+  def toJOptionC: JOptionC[A] =
+    this match
+      case None() => JOptionC.None()
+      case NoneSome(a) => JOptionC.Some(a)
+      case Some(a) => JOptionC.Some(a)
+
+  def toOption: Option[A] =
+    this match
+      case None() => scala.None
+      case NoneSome(a) => scala.Some(a)
+      case Some(a) => scala.Some(a)
 
 object JOptionA:
   inline def none[A]: JOptionA[A] = JOptionA.None()

@@ -2,7 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
-import sturdy.fix.{Combinator, Contextual, Fixpoint, Stack, StackConfig, StackedFrames, State}
+import sturdy.fix.{Combinator, Contextual, Fixpoint, HasFixpointCache, Stack, StackConfig, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
 import sturdy.values.{Join, Widen}
@@ -11,18 +11,23 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
-def topmost[Dom, Codom, In, Out, All, Ctx]
+/**
+ * Fixpoint combinator [[Topmost]] iterates on the entire program.
+ * The combinator uses widening on the output of the abstract interpreter to avoid non-termination.
+ * Furthermore, the combinator assumes that every recursive call chain of the abstract interpreter contains a recurrent call.
+ */
+def topmost[Dom, Codom, Ctx]
   (config: StackConfig)
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: State)
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
-  : Topmost[Dom, Codom, In, Out, All, Ctx] =
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  : Topmost[Dom, Codom, Ctx] =
   new Topmost(config, state, context)
 
-final class Topmost[Dom, Codom, In, Out, All, Ctx]
+final class Topmost[Dom, Codom, Ctx]
   (config: StackConfig, state: State, context: Contextual[Ctx, Dom, Codom])
-  (using Finite[Dom], Finite[Ctx], Widen[Codom])
-  extends Combinator[Dom, Codom]:
+  (using Finite[Dom], Finite[Ctx], Join[Codom], Widen[Codom])
+  extends Combinator[Dom, Codom], HasFixpointCache[Dom, Codom]:
 
   override def equals(obj: Any): Boolean = super.equals(obj)
 
@@ -30,13 +35,15 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   private var someComponentIsLooping: Boolean = false
   private var iterationCount: Int = 1
 
+  override def getCache: Map[Dom, TrySturdy[Codom]] = stack.getCache
+
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
-    def apply_(dom: Dom): Codom =
+    def apply_(recursive: Boolean)(dom: Dom): Codom =
       if (stack.height == 0) {
         val allState: state.All = state.getAllState
-        val result = step(f, dom)
+        val result = step(f, dom, recursive)
         if (someComponentIsLooping) {
           if (Fixpoint.DEBUG) {
             iterationCount += 1
@@ -44,19 +51,19 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
           }
           someComponentIsLooping = false
           state.setAllState(allState)
-          apply_(dom)
+          apply_(recursive = true)(dom)
         } else
           result.getOrThrow
       } else {
-        step(f, dom).getOrThrow
+        step(f, dom, recursive).getOrThrow
       }
-    apply_
+    apply_(recursive = false)
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
+  private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): TrySturdy[Codom] =
     val in = state.getInState(dom)
     val outBefore = state.getOutState(dom)
-    stack.push(dom, in, outBefore) match
+    stack.push(dom, in, outBefore, recursive) match
       case stack.PushResult.Recurrent(result, widenedOut) =>
         widenedOut.foreach(state.setOutState(dom, _))
         result

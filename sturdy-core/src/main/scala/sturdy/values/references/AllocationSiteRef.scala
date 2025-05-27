@@ -3,10 +3,8 @@ package sturdy.values.references
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.ManageableAddr
 import sturdy.util.Label
-import sturdy.values.Finite
-import sturdy.values.Structural
-import sturdy.values.relational.EqOps
-import sturdy.values.Topped
+import sturdy.values.{Finite, Join, Structural, Topped}
+import sturdy.values.ordering.EqOps
 
 enum AllocationSiteRef:
   case Null
@@ -16,7 +14,7 @@ enum AllocationSiteRef:
     case Null => "null"
     case Addr(a) => a.toString
 
-sealed trait AllocationSiteAddr extends ManageableAddr:
+sealed trait AllocationSiteAddr extends ManageableAddr with AbstractAddr[AllocationSiteAddr]:
   override def toString: String = this match
     case AllocationSiteAddr.Alloc(l) => s"alloc-$l"
     case AllocationSiteAddr.AllocRelative(l, name) => s"alloc-$l-$name"
@@ -26,19 +24,27 @@ sealed trait AllocationSiteAddr extends ManageableAddr:
     case AllocationSiteAddr.AllocRelative(l, name) => AllocationSiteAddr.AllocRelative(l, name)(false)
     case AllocationSiteAddr.Variable(name) => AllocationSiteAddr.Variable(name)(false)
 
+  override def isEmpty: Boolean = false
+  override def isStrong: Boolean = false
+  override def reduce[A](f: AllocationSiteAddr => A)(using Join[A]): A = f(this)
+  override def iterator: Iterator[AllocationSiteAddr] = Iterator(this)
+
 object AllocationSiteAddr:
   case class Alloc(lab: Label)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class AllocRelative(lab: Label, name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class Variable(name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
 
 given Finite[AllocationSiteRef] with {}
+
 given Finite[AllocationSiteAddr] with {}
 
+given Structural[AllocationSiteAddr] with {}
+
 given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteAddr, AllocationSiteRef] with
-  override def nullValue: AllocationSiteRef = AllocationSiteRef.Null
-  override def refValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr)
-  override def unmanagedRefValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr.unmanaged)
-  override def refAddr(r: AllocationSiteRef): AllocationSiteAddr = r match
+  override def mkNullRef: AllocationSiteRef = AllocationSiteRef.Null
+  override def mkManagedRef(trg: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(trg)
+  override def mkRef(trg: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(trg.unmanaged)
+  override def deref(r: AllocationSiteRef): AllocationSiteAddr = r match
     case AllocationSiteRef.Null => f.fail(NullDereference, "")
     case AllocationSiteRef.Addr(a) => a
 

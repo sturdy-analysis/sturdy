@@ -1,12 +1,12 @@
 package sturdy.values.types
 
-import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
+import sturdy.data.{MakeJoined, WithJoin, joinComputations, joinWithFailure}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
-import sturdy.values.relational.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
-import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
@@ -24,8 +24,12 @@ class BaseType[B](using val tag: ClassTag[B]):
 object BaseType:
   def apply[B: ClassTag] = new BaseType[B]
 
-given CombineBaseType[B: ClassTag, W <: Widening]: Combine[BaseType[B], W] with
+given FiniteBaseType[B]: Finite[BaseType[B]] with {}
+
+given JoinBaseType[B: ClassTag]: Join[BaseType[B]] with
   override def apply(v1: BaseType[B], v2: BaseType[B]): MaybeChanged[BaseType[B]] = MaybeChanged.Unchanged(v1)
+
+export sturdy.values.finitely
 
 given TopBaseType[B: ClassTag]: Top[BaseType[B]] with
   def top: BaseType[B] = BaseType[B]
@@ -42,6 +46,12 @@ given BaseTypeUnsignedOrderingOps[B: ClassTag]: UnsignedOrderingOps[BaseType[B],
   def ltUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def leUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
+given BaseTypeBooleanOps: BooleanOps[BaseType[Boolean]] with
+  override def boolLit(b: Boolean): BaseType[Boolean] = BaseType[Boolean]
+  override def and(v1: BaseType[Boolean], v2: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
+  override def not(v: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
+  override def or(v1: BaseType[Boolean], v2: BaseType[Boolean]): BaseType[Boolean] = BaseType[Boolean]
+
 given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, EffectStack): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =
     joinWithFailure(BaseType[B2])(Failure(ConversionFailure, "Potential conversion failure from $from to $to"))
@@ -49,3 +59,10 @@ given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](us
 given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)
+
+given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
+  (t1: BaseType[B], t2: BaseType[B]) =>
+    if(t1 == t2)
+      0
+    else
+      -1

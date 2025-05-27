@@ -8,7 +8,7 @@ import sturdy.values.MaybeChanged
 import sturdy.values.Widen
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.relational.*
+import sturdy.values.ordering.*
 
 object FloatInterval:
   val Top = FloatInterval(Float.NegativeInfinity, Float.PositiveInfinity)
@@ -58,7 +58,8 @@ given WidenFloatInterval: Widen[FloatInterval] with
         Float.PositiveInfinity
     MaybeChanged(FloatInterval(low, high), v1)
 
-given IntervalFloatOps: FloatOps[Float, FloatInterval] with
+given FloatOps[Float, FloatInterval] = new IntervalFloatOps {}
+trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
 
   override def NaN: FloatInterval = FloatInterval.Top

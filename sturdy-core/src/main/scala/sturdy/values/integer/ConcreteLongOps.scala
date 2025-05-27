@@ -9,7 +9,7 @@ import sturdy.values.{Structural, Topped, config}
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.{EqOps, OrderingOps, UnsignedOrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 
 import java.lang.Float as JFloat
 import java.lang.Long as JLong

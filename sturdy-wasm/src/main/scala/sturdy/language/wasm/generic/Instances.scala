@@ -37,7 +37,16 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
     case _ => false
   override val hashCode: Int = b.hashCode
 
-class ModuleInstance:
+class ModuleInstance(val id: Option[Any] = None):
+  override def equals(obj: Any): Boolean = obj match
+    case that: ModuleInstance => (this.id, that.id) match
+      case (Some(id1), Some(id2)) => id1 == id2
+      case _ => this eq that
+    case _ => false
+  override def hashCode(): Int = id match
+    case None => super.hashCode()
+    case Some(id) => id.hashCode()
+
   var functionTypes: Vector[FuncType] = Vector.empty
 
   private var _functions: Vector[FunctionInstance] = Vector.empty
@@ -67,7 +76,7 @@ class ModuleInstance:
   var blockInstLocs: Map[(BlockId, Int), InstLoc] = Map.empty
 
   lazy val cfgNodes: Set[CfgNode] = ControlFlow.allCfgNodes(this)
-  
+
   def registerBlockSizes(block: BlockId, loc: InstLoc, insts: Iterable[Inst]): InstLoc =
     var current = loc
     for ((inst, ix) <- insts.zipWithIndex)
@@ -88,20 +97,26 @@ class ModuleInstance:
         case _ =>
           current = current + 1
     current
-  
-  override def toString: Name = Integer.toHexString(this.hashCode)
+
+  override def toString: Name = id match
+    case Some(id) => id.toString
+    case None => Integer.toHexString(super.hashCode())
 
 given Structural[Func] with {}
 given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
 enum FunctionInstance:
-  case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
-  case Host(hf: HostFunction)
+  case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
+  case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
 
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
-    case Host(hf) => hf.funcType
+    case Host(_, _, hf) => hf.funcType
+
+  def module: ModuleInstance = this match
+    case Wasm(mod, _, _, _) => mod
+    case Host(mod, _, _) => mod
 
 enum ExternalValue:
   case Function(addr: Int)
@@ -142,7 +157,7 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
       val fIsSound = summon[Soundness[Func,Func]].isSound(cFunc, aFunc)
       val tIsSound = summon[Soundness[FuncType,FuncType]].isSound(cFt, aFt)
       fIsSound && tIsSound
-    case (FunctionInstance.Host(chf), FunctionInstance.Host(ahf)) => summon[Soundness[HostFunction, HostFunction]].isSound(chf, ahf)
+    case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) => summon[Soundness[HostFunction, HostFunction]].isSound(chf, ahf)
     case _ => IsSound.NotSound(s"Concrete function instance $c not approximated by $a.")
 }
 

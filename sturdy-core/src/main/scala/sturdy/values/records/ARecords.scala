@@ -1,11 +1,14 @@
 package sturdy.values.records
 
+import sturdy.{IsSound, Soundness}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.util.*
 import sturdy.values.*
 import sturdy.values.booleans.{BooleanBranching, BooleanSelection}
-import sturdy.values.relational.EqOps
+import sturdy.values.ordering.EqOps
+
+import scala.util.boundary, boundary.break
 
 import reflect.Selectable.reflectiveSelectable
 
@@ -30,58 +33,74 @@ given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: EffectStack): Re
       case Some(_) => ARecord.Map(m + (field -> newval))
 
 given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
-  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): MaybeChanged[ARecord[F, V]] = (rec1, rec2) match
-    case (ARecord.Top(), _ ) => Unchanged(rec1)
-    case (_, ARecord.Top()) => Changed(rec2)
-    case (ARecord.Map(m1), ARecord.Map(m2)) =>
-      if (m1.size != m2.size)
-        return Changed(ARecord.Top())
-      var joined =  m1
-      var changed = false
-      for ((f, v2) <- m2)
-        joined.get(f) match
-          case None => return Changed(ARecord.Top())
-          case Some(v1) =>
-            Combine[V, W](v1, v2)(using force).ifChanged { changedV =>
-              joined += f -> changedV
-              changed = true
-            }
-      MaybeChanged(ARecord.Map(joined), changed)
+  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): MaybeChanged[ARecord[F, V]] = boundary:
+    (rec1, rec2) match
+      case (ARecord.Top(), _ ) => Unchanged(rec1)
+      case (_, ARecord.Top()) => Changed(rec2)
+      case (ARecord.Map(m1), ARecord.Map(m2)) =>
+        if (m1.size != m2.size)
+          break(Changed(ARecord.Top()))
+        var joined =  m1
+        var changed = false
+        for ((f, v2) <- m2)
+          joined.get(f) match
+            case None => break(Changed(ARecord.Top()))
+            case Some(v1) =>
+              Combine[V, W](v1, v2)(using force).ifChanged { changedV =>
+                joined += f -> changedV
+                changed = true
+              }
+        MaybeChanged(ARecord.Map(joined), changed)
 
 given FiniteARecord[F, V](using Finite[F], Lazy[Finite[V]]): Finite[ARecord[F, V]] with {}
 
 given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[ARecord[F, V]] with
-  override def lteq(rec1: ARecord[F, V], rec2: ARecord[F, V]): Boolean = (rec1, rec2) match
-    case (_, ARecord.Top()) => true
-    case (ARecord.Top(), _) => false
-    case (ARecord.Map(m1), ARecord.Map(m2)) =>
-      // rec1 and rec2 must have the same entries or they are incomparable
-      if (m1.size != m2.size)
-        return false
-      // all entries e1 of rec1 have a corresponding e2 in rec2 that s.t. e1 <= e2
-      for ((f, v1) <- m1) {
-        val v2 = m2.getOrElse(f, return false)
-        if (!PartialOrder[V](using force).lteq(v1, v2))
-          return false
-      }
-      true
+  override def lteq(rec1: ARecord[F, V], rec2: ARecord[F, V]): Boolean = boundary:
+    (rec1, rec2) match
+      case (_, ARecord.Top()) => true
+      case (ARecord.Top(), _) => false
+      case (ARecord.Map(m1), ARecord.Map(m2)) =>
+        // rec1 and rec2 must have the same entries or they are incomparable
+        if (m1.size != m2.size)
+          break(false)
+        // all entries e1 of rec1 have a corresponding e2 in rec2 that s.t. e1 <= e2
+        for ((f, v1) <- m1) {
+          val v2 = m2.getOrElse(f, break(false))
+          if (!PartialOrder[V](using force).lteq(v1, v2))
+            break(false)
+        }
+        true
 
 given ARecordEqOps[F, V, B](using Lazy[EqOps[V, B]], BooleanSelection[B, Topped[Boolean]]): EqOps[ARecord[F, V], Topped[Boolean]] with
-  override def equ(rec1: ARecord[F, V], rec2: ARecord[F, V]): Topped[Boolean] = (rec1, rec2) match
-    case (ARecord.Top(), _) | (_, ARecord.Top()) => Topped.Top
-    case (ARecord.Map(m1), ARecord.Map(m2)) =>
-      // rec1 and rec2 must have the same entries or they are incomparable
-      if (m1.size != m2.size)
-        return Topped.Actual(false)
+  override def equ(rec1: ARecord[F, V], rec2: ARecord[F, V]): Topped[Boolean] = boundary:
+    (rec1, rec2) match
+      case (ARecord.Top(), _) | (_, ARecord.Top()) => Topped.Top
+      case (ARecord.Map(m1), ARecord.Map(m2)) =>
+        // rec1 and rec2 must have the same entries or they are incomparable
+        if (m1.size != m2.size)
+          break(Topped.Actual(false))
 
-      for ((f, v1) <- m1) {
-        val v2 = m2.getOrElse(f, return Topped.Actual(false))
-        val b = EqOps.equ(v1, v2)(using force)
-        BooleanSelection(b, Topped.Actual(true), Topped.Actual(false)) match
-          case Topped.Top => return Topped.Top
-          case Topped.Actual(false) => return Topped.Actual(false)
-          case _ => // nothing
-      }
-      Topped.Actual(true)
+        for ((f, v1) <- m1) {
+          val v2 = m2.getOrElse(f, break(Topped.Actual(false)))
+          val b = EqOps.equ(v1, v2)(using force)
+          BooleanSelection(b, Topped.Actual(true), Topped.Actual(false)) match
+            case Topped.Top => break(Topped.Top)
+            case Topped.Actual(false) => break(Topped.Actual(false))
+            case _ => // nothing
+        }
+        Topped.Actual(true)
 
   override def neq(v1: ARecord[F, V], v2: ARecord[F, V]): Topped[Boolean] = equ(v1, v2).map(!_)
+
+given soundnessARecord[F, CV, V](using Soundness[CV, V]): Soundness[Map[F,CV], ARecord[F, V]] = {
+  case (_, ARecord.Top()) => IsSound.Sound
+  case (cRec, ARecord.Map(aRec)) =>
+    if(cRec.keySet == aRec.keySet)
+      boundary:
+        for ((field, cval) <- cRec)
+          if (Soundness.isSound(cval, aRec(field)).isNotSound)
+            break(IsSound.NotSound(s"Abstract value ${aRec(field)} of field $field in abstract record $aRec does not overapproximate value $cval of field $field in concrete record $cRec"))
+        IsSound.Sound
+    else
+      IsSound.NotSound(s"abstract record $aRec does not have the same fields as concrete record $cRec")
+}

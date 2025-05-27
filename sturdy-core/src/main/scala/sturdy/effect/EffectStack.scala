@@ -1,68 +1,82 @@
 package sturdy.effect
 
-import sturdy.values.{Combine, Join, MaybeChanged, Widening, Widen}
+import sturdy.values.{Combine, Join, MaybeChanged, StackWidening, Widen}
 import sturdy.fix
 
-import scala.collection.mutable.ListBuffer
+/**
+ * `EffectStack` composes multiple effects.
+ *
+ * For example:
+ * {{{
+ * val callFrame: DecidableMutableCallFrame[Unit, String, V]
+ * val store: Store[Addr, V, J]
+ * val alloc: Allocation[Addr, AllocationSite]
+ * val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc))
+ * }}}
+ *
+ * `EffectStack` distinguishes inputs and outputs of effects based on the evaluated program expression.
+ *  - An effect state is an input for an evaluated expression, if a different effect state changes the evaluated result.
+ *  - An effect state is an output for an evaluated expression, if the output state can change compared to the input state.
+ *
+ * For example:
+ * {{{
+ * val effectStack: EffectStack = new EffectStack(
+ *   EffectList(stack, memory, globals, funTable, callFrame, except, failure),
+ *   { // Inputs
+ *     case _: EnterFunction => EffectList(memory, globals, callFrame)
+ *     case _: Eval => EffectList(stack, memory, globals, callFrame)
+ *   },
+ *   { // Outputs
+ *     case _: EnterFunction => EffectList(stack, memory, globals, failure)
+ *     case _: Eval => EffectList(stack, memory, globals, callFrame, except)
+ *   }
+ * )
+ * }}}
+ *  - The operand stack is an input for `Eval`,
+ *    because the evaluated expression has access to elements on the stack.
+ *  - The operand stack is not an input for `EnterFunction`,
+ *    because the function does not have access to stack elements defined outside the function.
+ *  - Function tables are neither inputs nor outputs, because they never change.
+ */
+class EffectStack(_effects: => Effect,
+                  _inEffects: PartialFunction[Any, Effect] = PartialFunction.empty,
+                  _outEffects: PartialFunction[Any, Effect] = PartialFunction.empty)
+  extends fix.State, ObservableJoin, Effect:
 
+  private lazy val effects: Effect = _effects
 
-class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty, _outEffects: PartialFunction[Any, List[Effect]] = PartialFunction.empty) extends fix.State, ObservableJoin:
+  private def inEffects(dom: Any): Effect = _inEffects.applyOrElse(dom, _ => effects)
+  private def outEffects(dom: Any): Effect = _outEffects.applyOrElse(dom, _ => effects)
 
-  private lazy val effects = _effects
-  private def inEffects(dom: Any): List[Effect] = _inEffects.applyOrElse(dom, _ => effects)
-  private def outEffects(dom: Any): List[Effect] = _outEffects.applyOrElse(dom, _ => effects)
+  final override type All = Any
+  final override type In = Any
+  final override type Out = Any
 
-  final override type All = List[Any]
-  final override type In = List[Any]
-  final override type Out = List[Any]
+  override def getAllState: All = effects.getState
+  override def getInState(dom: Any): In = inEffects(dom).getState
+  override def getOutState(dom: Any): Out = outEffects(dom).getState
+  override def setAllState(st: All): Unit = 
+    effects.setState(st.asInstanceOf)
+    repeating()
+  override def setInState(dom: Any, in: In): Unit = inEffects(dom).setState(in.asInstanceOf)
+  override def setOutState(dom: Any, out: Out): Unit = outEffects(dom).setState(out.asInstanceOf)
+  
+  final override type State = All
+  override def getState: State = getAllState
+  override def setState(st: State): Unit = setAllState(st)
 
-  private inline def getEffectState(eff: List[Effect]): List[Any] =
-    eff.map(_.getState)
-  private def setEffectState(eff: List[Effect], st: List[Any]): Unit = {
-    var effs = eff
-    var s = st
-    while (effs.nonEmpty) {
-      val e = effs.head
-      e.setState(s.head.asInstanceOf[e.State])
-      effs = effs.tail
-      s = s.tail
-    }
-  }
-  private def joinEffectulState[W <: Widening](eff: List[Effect], comb: Effect => (Any, Any) => MaybeChanged[Any]): Combine[List[Any], W] = new Combine {
-    override def apply(st1: List[Any], st2: List[Any]): MaybeChanged[List[Any]] =
-      var effs = eff
-      var s1 = st1
-      var s2 = st2
-      val res = ListBuffer[Any]()
-      var changed = false
-      while (effs.nonEmpty) {
-        val e = effs.head
-        comb(e)(s1.head, s2.head) match
-          case MaybeChanged.Changed(a) =>
-            res += a
-            changed |= true
-          case MaybeChanged.Unchanged(a) =>
-            res += a
-        effs = effs.tail
-        s1 = s1.tail
-        s2 = s2.tail
-      }
-      MaybeChanged(res.toList, changed)
-  }
+  override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
+  override def joinOut(dom: Any): Join[Out] = (out1: Out, out2: Out) => outEffects(dom).join(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
+  override def widenOut(dom: Any): Widen[Out] = (out1: Out, out2: Out) => outEffects(dom).widen(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
 
-  override def getAllState: All = getEffectState(effects)
-  override def getInState(dom: Any): In = getEffectState(inEffects(dom))
-  override def getOutState(dom: Any): Out = getEffectState(outEffects(dom))
-  override def setAllState(st: All): Unit = setEffectState(effects, st)
-  override def setInState(dom: Any, in: In): Unit = setEffectState(inEffects(dom), in)
-  override def setOutState(dom: Any, out: Out): Unit = setEffectState(outEffects(dom), out)
+  override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
+  override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
+  override def stackWiden: StackWidening[State] =
+    (stack: List[State], call: State) => effects.stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
 
-  override def joinIn(dom: Any): Join[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def widenIn(dom: Any): Widen[In] = joinEffectulState(inEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def joinOut(dom: Any): Join[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.join(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-  override def widenOut(dom: Any): Widen[Out] = joinEffectulState(outEffects(dom), e => (a1, a2) => e.widen(a1.asInstanceOf[e.State], a2.asInstanceOf[e.State]))
-
-  private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
+  private def baseJoiner[A]: ComputationJoiner[A] = new ComputationJoiner[A] {
     joinStart()
     override def inbetween(fFailed: Boolean): Unit = joinSwitch(fFailed)
     override def retainNone(): Unit = joinEnd(true, true)
@@ -70,18 +84,13 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd(true, false)
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd(false, false)
   }
-  
-  def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
-    val joiners: Seq[ComputationJoiner[A]] = baseJoiner +: effects.flatMap(_.makeComputationJoiner[A])
-    override def inbetween(fFailed: Boolean): Unit = joiners.foreach(_.inbetween(fFailed))
-    override def retainNone(): Unit = joiners.foreach(_.retainNone())
-    override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
-    override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
-  }
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
+    for(joiner <- effects.makeComputationJoiner[A])
+      yield(baseJoiner.compose(joiner))
 
   final def joinComputations[A](f: => A)(g: => A): Join[A] ?=> A = {
-    val joiner = makeComputationJoiner[A]
+    val joiner = makeComputationJoiner[A].get
 
     val triedF = TrySturdy(f)
     joiner.inbetween(triedF.isBottom)
@@ -97,7 +106,7 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {
-    val joiner = makeComputationJoiner[A]
+    val joiner = makeComputationJoiner[A].get
 
     val triedF = TrySturdy(f)
     joiner.inbetween(triedF.isBottom)
@@ -136,8 +145,11 @@ class EffectStack(_effects: => List[Effect], _inEffects: PartialFunction[Any, Li
     }
 
 object EffectStack:
+  def apply(effects: Effect*): EffectStack =
+    new EffectStack(EffectList(effects*))
+
   def localEffect(eff: Effect): EffectStack =
-    new EffectStack(List(eff))
+    new EffectStack(eff)
 
   def pureJoinFold[A, B](as: Iterable[A], f: A => B): Join[B] ?=> B = as.size match
     case 0 => throw new IllegalArgumentException

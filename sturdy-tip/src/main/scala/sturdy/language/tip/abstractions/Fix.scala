@@ -33,9 +33,9 @@ trait Fix extends Interpreter:
   type CallString = context.CallString[Exp.Call]
   given Finite[CallString] = context.FiniteCallString
 
-  final def parameters(callFrame: DecidableCallFrame[Unit, String, Value]): context.Sensitivity[FixIn, Parameters[String, Value]] =
+  final def parameters(callFrame: DecidableCallFrame[String, String, Value, Exp.Call]): context.Sensitivity[FixIn, Parameters[String, Value]] =
     context.parameters[FixIn, String, Value] {
-      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).get).toMap)
+      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).getOrElse(null)).toMap)
       case _ => None
     }
 

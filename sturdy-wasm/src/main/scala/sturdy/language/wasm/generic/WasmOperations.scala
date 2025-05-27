@@ -9,9 +9,9 @@ import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.*
-import sturdy.values.relational.OrderingOps
-import sturdy.values.relational.EqOps
-import sturdy.values.relational.UnsignedOrderingOps
+import sturdy.values.ordering.OrderingOps
+import sturdy.values.ordering.EqOps
+import sturdy.values.ordering.UnsignedOrderingOps
 import swam.syntax.LoadInst
 import swam.syntax.LoadNInst
 import swam.syntax.MemoryInst
