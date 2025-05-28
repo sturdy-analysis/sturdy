@@ -178,7 +178,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val _ = getGlobalValue(globalIdx)
       writeGlobalValue(globalIdx, v)
       
-  def toTableAddr(ix: Int): TableAddr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
+  private def toTableAddr(ix: Int): TableAddr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
 
   def evalTableInst(inst: Inst, loc: InstLoc): Unit = external {
     inst match {
@@ -189,7 +189,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case TableSet(ix) =>
         val v = stack.popOrAbort()
         val elemIdx = stack.popOrAbort()
-        tables.set(toTableAddr(ix), valToIdx(elemIdx), valToRef(v)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
+        tables.set(toTableAddr(ix), valToIdx(elemIdx), valToRef(v, module.functions)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.set access"))
       case TableSize(ix) =>
         val sz = tables.size(toTableAddr(ix))
         stack.push(sizeToVal(sz))
@@ -205,7 +205,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           stack.push(num.evalNumeric(i32.Const(-1)))
         } {
           val newSize = num.evalIBinop(i32.Add, sizeToVal(tableSize), n)
-          val result = tables.grow(addr, valToSize(newSize), valToRef(initVal)).option
+          val result = tables.grow(addr, valToSize(newSize), valToRef(initVal, module.functions)).option
             (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
             (sizeToVal)
           stack.push(result)
@@ -219,7 +219,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val tableSize = tables.size(toTableAddr(ix))
         val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, offset, n), sizeToVal(tableSize))
         branchOpsUnit.boolBranch(offsetCheck)(fail(TableAccessOutOfBounds, "Invalid table.fill access")) {
-          tables.fillTable(toTableAddr(ix), valToRef(ref), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
+          tables.fillTable(toTableAddr(ix), valToRef(ref, module.functions), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
         }
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
@@ -801,7 +801,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val id = BlockId(elem)
         val functions = init.map(expr => {
           loc = modInst.registerBlockSizes(id, loc, expr)
-          funVToFuncInst(refVToFunV(valToRef(evalInstructionSequence(id, expr, modInst, loc))))
+          funVToFuncInst(refVToFunV(valToRef(evalInstructionSequence(id, expr, modInst, loc), modInst.functions)))
         })
         elemInstances = elemInstances :+ ElemInstance(functions, mode)
     }

@@ -7,7 +7,7 @@ import sturdy.effect.symboltable.IntervalMappedSymbolTable.IntervalMap
 import sturdy.effect.symboltable.SizedSymbolTable.Limit
 import sturdy.values.Topped.Top
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin}
-import sturdy.values.*
+import sturdy.values.{*, given}
 
 class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry])(extractor: Value => NumericInterval[Int]) extends SizedSymbolTable[Value, Key, Topped[Int], Entry, Topped[Int], WithJoin] {
   var tables: Map[Key, IntervalMap[Entry]] = Map()
@@ -19,7 +19,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
     }
     tables.get(key) match {
       case Some(intervalMap) =>
-        intervalMap.get(symbol) match {
+        intervalMap.getSingle(symbol) match {
           case Some(entry) =>
             JOptionA.noneSome(entry)
           case None =>
@@ -36,7 +36,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
     }
     tables.get(key) match {
       case Some(intervalMap) =>
-        val updatedMap = intervalMap.addInterval(newEntry, symbol)
+        val updatedMap = intervalMap.addInterval(newEntry, symbol, overrideExisting = true)
         tables += (key -> updatedMap)
         JOptionA.noneSome(())
       case None =>
@@ -58,14 +58,14 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
           case _ => ()
         }
         val oldSize = intervalMap.size
-        val newIntervalMap = intervalMap.increaseSize(newSize)
+        var newIntervalMap = intervalMap.setSize(newSize)
         val initEntryInterval = (oldSize, newSize) match {
           case (Topped.Actual(oldS), Topped.Actual(newS)) => NumericInterval(oldS, newS)
           case (Topped.Actual(oldS), Topped.Top) => NumericInterval(oldS, Int.MaxValue)
           case (Topped.Top, Topped.Actual(newS)) => NumericInterval(Int.MinValue, newS)
           case (Topped.Top, Topped.Top) => NumericInterval(Int.MinValue, Int.MaxValue)
         }
-        newIntervalMap.addInterval(initEntry, initEntryInterval)
+        newIntervalMap = newIntervalMap.addInterval(initEntry, initEntryInterval)
         tables += (key -> newIntervalMap)
         JOptionA.some(oldSize)
       case None =>
@@ -85,25 +85,27 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
         if (entryOffset.low < 0 || entryOffset.high > entries.size || amount.low < 0 || amount.high < 0) {
           return JOptionA.none
         }
-        var resizedMap = intervalMap.increaseSize(amount.toConstant)
+        var updatedMap = intervalMap
         // table bounds check
-        val boundCheck = inBounds(resizedMap, tableOffset, amount)
+        val boundCheck = inBounds(updatedMap, tableOffset, amount)
         if (boundCheck.isDefined && !boundCheck.get) {
           return JOptionA.none
         }
-        val newEntries = if(containsTop(entryOffset)) entries else entries.slice(entryOffset.low, entryOffset.high + amount.high)
+        val newEntries = if (containsTop(entryOffset)) entries else entries.slice(entryOffset.low, entryOffset.high + amount.high)
         if (containsTop(tableOffset)) {
           // if tableOffset is top, we add all entries to the top interval
           newEntries.foreach { entry =>
-            resizedMap = resizedMap.addInterval(entry, Topped.Top)
+            updatedMap = updatedMap.addInterval(entry, Topped.Top, overrideExisting = false)
           }
         } else {
-          // otherwise we add entries to the specified interval
-          newEntries.foreach { entry =>
-            resizedMap = resizedMap.addInterval(entry, NumericInterval(tableOffset.low, tableOffset.high + amount.high - 1))
+          // otherwise we add the ordered entries starting from the tableOffset
+          for (i <- newEntries.indices) {
+            val entry = newEntries(i)
+            val offset = NumericInterval(tableOffset.low + i, tableOffset.low + i)
+            updatedMap = updatedMap.addInterval(entry, offset, overrideExisting = true)
           }
         }
-        tables += (key -> resizedMap)
+        tables += (key -> updatedMap)
         JOptionA.some(())
       case None =>
         JOptionA.none
@@ -122,7 +124,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
       case Some(intervalMap) =>
         (containsTop(tableOffset), containsTop(amount)) match {
           case (true, _) =>
-            tables += (key -> intervalMap.addInterval(entry, Topped.Top))
+            tables += (key -> intervalMap.addInterval(entry, Topped.Top, overrideExisting = false))
           case (false, true) =>
             tables += (key -> intervalMap.addInterval(entry, NumericInterval(tableOffset.low, Int.MaxValue)))
           case (false, false) =>
@@ -151,34 +153,46 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
       case (Some(dstIntervalMap), Some(srcIntervalMap)) =>
         (containsTop(dstOffset), containsTop(srcOffset), containsTop(amount)) match {
           case (false, false, false) =>
-            // all intervals are finite -> copy finite intervals
-            val elementsToCopy = srcIntervalMap.get(NumericInterval(srcOffset.low, srcOffset.high + amount.high - 1))
-            elementsToCopy.foreach { entry =>
-              tables += (dstKey -> dstIntervalMap.addInterval(entry, NumericInterval(dstOffset.low, dstOffset.high + amount.high - 1)))
+            // all intervals are finite -> copy finite intervals by iterating over srcOffset + amount and getting the elements at those indices
+            var updatedDstMap = dstIntervalMap
+            for (i <- srcOffset.low until srcOffset.high + amount.high) {
+              val srcSymbol = Topped.Actual(i)
+              val symbols = srcIntervalMap.getSingle(srcSymbol)
+              symbols.foreach { entry =>
+                updatedDstMap = updatedDstMap.addInterval(entry, NumericInterval(dstOffset.low + (i - srcOffset.low), dstOffset.low + (i - srcOffset.low)))
+              }
             }
+            tables += (dstKey -> updatedDstMap)
+            JOptionA.some(())
           case (true, false, false) =>
             // dst is top but elements are finite -> copy them to top interval
             val elementsToCopy = srcIntervalMap.get(NumericInterval(srcOffset.low, srcOffset.high + amount.high - 1))
             elementsToCopy.foreach { entry =>
-              tables += (dstKey -> dstIntervalMap.addInterval(entry, Topped.Top))
+              tables += (dstKey -> dstIntervalMap.addInterval(entry, Topped.Top, overrideExisting = false))
             }
+            JOptionA.some(())
           case (_, _, true) | (_, true, _) =>
             // elements are top in at least one direction -> copy all to top interval
-            val elementsToCopy = srcIntervalMap.get(NumericInterval(srcOffset.low, Int.MaxValue))
-            elementsToCopy.foreach { entry =>
+            val iv = NumericInterval(srcOffset.low, Int.MaxValue)
+            var elemsToCopy: Vector[Entry] = Vector.empty
+            if (containsTop(iv)) {
+              elemsToCopy = srcIntervalMap.getAll
+            } else {
+              elemsToCopy = srcIntervalMap.get(iv)
+            }
+            elemsToCopy.foreach { entry =>
               tables += (dstKey -> dstIntervalMap.addInterval(entry, NumericInterval(dstOffset.low, Int.MaxValue)))
             }
+            JOptionA.some(())
         }
     }
-
-    JOptionA.none
   }
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]]): Unit = tables += (key -> IntervalMap[Entry](Map.empty, limit, limit.min))
   override def putNew(key: Key): Unit = putNew(key, SizedSymbolTable.Limit(Topped.Actual(0), None))
 
   private def containsTop(interval: NumericInterval[Int]): Boolean = {
-    interval.low == Int.MinValue && interval.high == Int.MaxValue
+    interval.low <= 0 && interval.high == Int.MaxValue
   }
 
   private def inBounds(intervalMap: IntervalMap[Entry], offset: NumericInterval[Int], amount: NumericInterval[Int]): Option[Boolean] = {
@@ -187,17 +201,20 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
     if (constOffset.isTop || constAmount.isTop) return None
     inBounds(intervalMap, Topped.Actual(constOffset.get + constAmount.get - 1))
   }
+
   private def inBounds(key: Key, offset: NumericInterval[Int], amount: NumericInterval[Int]): Option[Boolean] = {
     val constOffset = offset.toConstant
     val constAmount = amount.toConstant
     if (constOffset.isTop || constAmount.isTop) return None
     inBounds(key, Topped.Actual(constOffset.get + constAmount.get - 1))
   }
+
   private def inBounds(key: Key, symbol: Topped[Int]): Option[Boolean] =
     tables.get(key) match {
       case Some(intervalMap) => inBounds(intervalMap, symbol)
       case None => None
     }
+
   private def inBounds(intervalMap: IntervalMap[Entry], symbol: Topped[Int]): Option[Boolean] = {
     if (symbol.isTop) return None
     intervalMap.size match {
@@ -210,7 +227,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
   override def getState: State = tables
   override def setState(s: State): Unit = tables = s
   override def join: Join[State] = JoinMap(using {
-    case(a, b) => Join(a, b)
+    case (a, b) => Join(a, b)
   })
   override def widen: Widen[State] = CombineFiniteKeyMap(using {
     case (a, b) => Widen(a, b)
@@ -236,29 +253,60 @@ object IntervalMappedSymbolTable:
             }
         }
       }
-      MaybeChanged(IntervalMap(joinedMap, v1.limit, v1.size), changed)
+      val limitJoined = Join(v1.limit, v2.limit) match {
+        case MaybeChanged.Changed(newLimit) =>
+          changed = true
+          newLimit
+        case MaybeChanged.Unchanged(_) => v1.limit
+      }
+      val sizeJoined = Join(v1.size, v2.size) match {
+        case MaybeChanged.Changed(newSize) =>
+          changed = true
+          newSize
+        case MaybeChanged.Unchanged(_) => v1.size
+      }
+      MaybeChanged(IntervalMap(joinedMap, limitJoined, sizeJoined), changed)
     }
   }
-  
+
   case class IntervalMap[Entry](map: Map[Entry, NumericInterval[Int]], limit: Limit[Topped[Int]], size: Topped[Int])(using Join[Entry]) {
-    def addInterval(entry: Entry, interval: NumericInterval[Int]): IntervalMap[Entry] = {
-      map.get(entry) match {
-        case Some(existingInterval) => Join.apply(existingInterval, interval) match {
-          case MaybeChanged.Changed(a) => IntervalMap(map.updated(entry, a), limit, size)
-          case MaybeChanged.Unchanged(_) => IntervalMap(map, limit, size)
+    def addInterval(entry: Entry, interval: NumericInterval[Int], overrideExisting: Boolean = false): IntervalMap[Entry] = {
+      var updatedMap = map
+      if (overrideExisting && interval.isConstant) {
+        val conflictingEntries = this.get(interval)
+        for (conflictingEntry <- conflictingEntries) {
+          val conflictingInterval = map.get(conflictingEntry)
+          conflictingInterval match {
+            case None => ()
+            case Some(conflictingInterval) =>
+              if (conflictingInterval.isConstant) {
+                updatedMap = updatedMap - conflictingEntry
+              } else if (conflictingInterval.low == interval.toConstant.get) {
+                updatedMap = updatedMap.updated(conflictingEntry, NumericInterval(conflictingInterval.low + 1, conflictingInterval.high))
+              } else if (conflictingInterval.high == interval.toConstant.get) {
+                updatedMap = updatedMap.updated(conflictingEntry, NumericInterval(conflictingInterval.low, conflictingInterval.high - 1))
+              }
+          }
         }
-        case None => IntervalMap(map.updated(entry, interval), limit, size)
+      }
+
+      updatedMap.get(entry) match {
+        case Some(existingInterval) => Join.apply(existingInterval, interval) match {
+          case MaybeChanged.Changed(a) => IntervalMap(updatedMap.updated(entry, a), limit, size)
+          case MaybeChanged.Unchanged(_) => IntervalMap(updatedMap, limit, size)
+        }
+        case None => IntervalMap(updatedMap.updated(entry, interval), limit, size)
       }
     }
 
-    def addInterval(entry: Entry, interval: Topped[Int]): IntervalMap[Entry] = {
+    def addInterval(entry: Entry, interval: Topped[Int], overrideExisting: Boolean): IntervalMap[Entry] = {
       interval match {
-        case Topped.Actual(i) => addInterval(entry, NumericInterval(i, i))
-        case Topped.Top => addInterval(entry, NumericInterval(Int.MinValue, Int.MaxValue))
+        case Topped.Actual(i) => addInterval(entry, NumericInterval(i, i), overrideExisting)
+        case Topped.Top => addInterval(entry, NumericInterval(Int.MinValue, Int.MaxValue), overrideExisting)
       }
     }
 
-    def get(index: Topped[Int]): Option[Entry] = {
+    def getSingle(index: Topped[Int]): Option[Entry] = {
       index match {
         case Topped.Actual(i) => map.collect {
           case (entry, interval) if interval.containsNum(i) => entry
@@ -270,7 +318,7 @@ object IntervalMappedSymbolTable:
     def get(index: NumericInterval[Int]): Vector[Entry] = {
       var entries: Vector[Entry] = Vector.empty
       for (i <- index.low to index.high) {
-        get(Topped.Actual(i)) match {
+        getSingle(Topped.Actual(i)) match {
           case Some(entry) => entries = entries :+ entry
           case None => ()
         }
@@ -278,12 +326,11 @@ object IntervalMappedSymbolTable:
       entries
     }
 
-    def increaseSize(amount: Topped[Int]): IntervalMap[Entry] = {
-      val newSize = (size, amount) match {
-        case (Topped.Actual(s), Topped.Actual(a)) => Topped.Actual(s + a)
-        case (Topped.Top, _) => Topped.Top
-        case (_, Topped.Top) => Topped.Top
-      }
+    def getAll: Vector[Entry] = {
+      map.keys.toVector
+    }
+
+    def setSize(newSize: Topped[Int]): IntervalMap[Entry] = {
       IntervalMap(map, limit, newSize)
     }
 

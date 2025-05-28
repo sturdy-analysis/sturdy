@@ -54,7 +54,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(untainted(sz)))
     // TODO: implement this for the ConstantTaintAnalysis
-    override def valToRef(v: ConstantTaintAnalysis.Value): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def valToRef(v: ConstantTaintAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???

@@ -73,7 +73,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
     override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
 
-    override def valToRef(v: ConcreteInterpreter.Value): ConcreteInterpreter.RefValue = v match {
+    override def valToRef(v: ConcreteInterpreter.Value, funcs: Vector[FunctionInstance]): ConcreteInterpreter.RefValue = v match {
       case Value.Ref(ref) => ref
       case _ => f.fail(TypeError, s"Expected a reference value, but got $v")
     }

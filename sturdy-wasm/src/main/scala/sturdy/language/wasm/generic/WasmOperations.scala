@@ -52,7 +52,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
 trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   def valToAddr(v: V): Addr
   def valToIdx(v: V): Index
-  def valToRef(v: V): RefV
+  def valToRef(v: V, funcs: Vector[FunctionInstance]): RefV
   def refToVal(r: RefV): V
   
   def valToSize(v: V): Size

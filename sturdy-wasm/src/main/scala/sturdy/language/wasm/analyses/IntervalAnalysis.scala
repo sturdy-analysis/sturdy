@@ -54,7 +54,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     // TODO: implement this for the IntervalAnalysis
-    override def valToRef(v: IntervalAnalysis.Value): Powerset[IntervalAnalysis.RefValue] = ???
+    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???

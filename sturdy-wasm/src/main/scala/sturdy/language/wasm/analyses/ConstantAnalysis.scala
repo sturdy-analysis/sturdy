@@ -53,13 +53,19 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
-    override def valToRef(v: ConstantAnalysis.Value): Powerset[ConstantAnalysis.RefValue] = v match
+    override def valToRef(v: ConstantAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[ConstantAnalysis.RefValue] = v match
       case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(f)) => Powerset(ConstantAnalysis.RefValue.FuncRef(f))
       case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternRef(f)) => Powerset(ConstantAnalysis.RefValue.ExternRef(f))
       case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull) => Powerset(Set(ConstantAnalysis.RefValue.FuncNull))
       case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull) => Powerset(Set(ConstantAnalysis.RefValue.ExternNull))
-      case _ => Powerset(Set())
-      
+      case ConstantAnalysis.Value.TopValue =>
+        // powerset of all function references
+        val funcRefs = funcs.map {
+          case f@FunctionInstance.Wasm(_, _, _, _) => ConstantAnalysis.RefValue.FuncRef(Topped.Actual(f))
+          case f@FunctionInstance.Host(_, _, _) => ConstantAnalysis.RefValue.ExternRef(Topped.Actual(f))
+        }
+        Powerset(funcRefs.toSet + ConstantAnalysis.RefValue.FuncNull + ConstantAnalysis.RefValue.ExternNull)
+
     override def refToVal(r: Powerset[ConstantAnalysis.RefValue]): ConstantAnalysis.Value = r match
       case Powerset(refs) =>
         if (refs.size != 1)

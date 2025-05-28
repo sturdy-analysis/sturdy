@@ -51,7 +51,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
 
     // TODO: implement this for the TypeAnalysis
-    override def valToRef(v: TypeAnalysis.Value): Powerset[TypeAnalysis.RefValue] = ???
+    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
