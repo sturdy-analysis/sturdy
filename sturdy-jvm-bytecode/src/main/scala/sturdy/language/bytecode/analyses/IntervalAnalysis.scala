@@ -27,7 +27,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.objects.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps, given}
-import sturdy.values.references.{AllocationSiteAddr, given}
+import sturdy.values.references.{AllocationSiteAddr, PowersetAddr, given}
 
 import java.net.URL
 import scala.collection.mutable
@@ -80,9 +80,9 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val arrayAlloc = new AAllocatorFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
     override val staticAlloc = new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
-    override val objFieldStore: AStoreThreaded[FieldAddr, Value] = new AStoreThreaded(initFieldStore)
-    override val arrayValStore: AStoreThreaded[ArrayElemAddr, Value] = new AStoreThreaded(initArrayVarStore)
-    override val staticVarStore: AStoreThreaded[StaticAddr, Value] = new AStoreThreaded(initStaticStore)
+    override val objFieldStore: AStoreThreaded[FieldAddr, PowersetAddr[FieldAddr, FieldAddr], Value] = new AStoreThreaded(initFieldStore)
+    override val arrayValStore: AStoreThreaded[ArrayElemAddr, PowersetAddr[ArrayElemAddr, ArrayElemAddr], Value] = new AStoreThreaded(initArrayVarStore)
+    override val staticVarStore: AStoreThreaded[StaticAddr, PowersetAddr[StaticAddr, StaticAddr], Value] = new AStoreThreaded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path

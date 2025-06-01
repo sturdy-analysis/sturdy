@@ -46,7 +46,7 @@ object ConcreteInterpreter extends Interpreter:
   override type MthName = String
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
-  override type FieldAddr = Int
+  override type FieldAddr = (FieldInitSite, Int)
   override type StaticAddr = Int
   override type Idx = Int
   override type TypeRep = ReferenceType
@@ -57,7 +57,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ArrayAddr = Int
   override type AType = ArrayType
   //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
-  override type ArrayElemAddr = Int
+  override type ArrayElemAddr = (ArrayElemInitSite, Int)
 
   override type RefValue = ConcreteRefValues
 
@@ -303,9 +303,10 @@ object ConcreteInterpreter extends Interpreter:
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
   type varStore = Map[FieldAddr, Value]
+  type elemStore = Map[ArrayElemAddr, Value]
   type StaticStore = Map[StaticAddr, Value]
 
-  class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: varStore, initStaticStore: StaticStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: elemStore, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = 0
     val args: List[Value] = List()
 
@@ -323,7 +324,7 @@ object ConcreteInterpreter extends Interpreter:
     val arrayValAlloc: CAllocatorIntIncrement[ArrayElemInitSite] = new CAllocatorIntIncrement
     val staticAlloc: CAllocatorIntIncrement[StaticInitSite] = new CAllocatorIntIncrement
     val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
-    val arrayValStore: CStore[FieldAddr, Value] = new CStore(initArrayValStore)
+    val arrayValStore: CStore[ArrayElemAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)
     
     val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr] = scala.collection.mutable.Map()

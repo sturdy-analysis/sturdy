@@ -18,7 +18,7 @@ import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, Instr
 import sturdy.values.{Combine, Finite, MaybeChanged, Powerset, Structural, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
-import sturdy.values.references.AllocationSiteAddr
+import sturdy.values.references.{AbstractAddr, AllocationSiteAddr}
 import sturdy.language.bytecode.AuxillaryFunctions.*
 import sturdy.values.Topped.Actual
 import sturdy.values.integer.NumericInterval
@@ -35,19 +35,19 @@ trait ConstantObjects extends Interpreter, Numbers:
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = (ObjectType, String)
-  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]
   given FiniteFieldAddr: Finite[FieldAddr] with {}
   type constantObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
   override type RefValue = Topped[AbstractReferenceValue[constantArray, constantObj]]
   final def topRef: RefValue = Topped.Top
 
-  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
   //final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
   type constantArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
+  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
 
   type TypeRep = ReferenceType
@@ -366,7 +366,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = (ObjectType, String)
-  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true)
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]
   given FiniteFieldAddr: Finite[FieldAddr] with {}
 
   type IntervalObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
@@ -376,10 +376,10 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
 
   type IntervalArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true)
+  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
 
-  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true)
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
   type TypeRep = ReferenceType
@@ -418,6 +418,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
         MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
+  // duplicate definition for some reason
   given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
