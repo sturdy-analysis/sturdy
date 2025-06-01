@@ -47,14 +47,14 @@ object ConcreteInterpreter extends Interpreter:
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
   override type FieldAddr = (FieldInitSite, Int)
-  override type StaticAddr = Int
+  override type StaticAddr = (StaticInitSite, Int)
   override type Idx = Int
   override type TypeRep = ReferenceType
   //override type NullVal = Null
-  override type ObjAddr = Int
+  override type ObjAddr = (InstructionSite, Int)
   override type FieldName = (ObjectType, String)
   //override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
-  override type ArrayAddr = Int
+  override type ArrayAddr = (InstructionSite, Int)
   override type AType = ArrayType
   //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
   override type ArrayElemAddr = (ArrayElemInitSite, Int)

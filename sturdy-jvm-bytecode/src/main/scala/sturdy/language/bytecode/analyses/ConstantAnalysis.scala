@@ -78,6 +78,10 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[ConstantAnalysis.Value] = implicitly
 
+    type FieldAddrs = PowersetAddr[FieldAddr, FieldAddr]
+    type ArrayElemAddrs = PowersetAddr[ArrayElemAddr, ArrayElemAddr]
+    type StaticAddrs = PowersetAddr[StaticAddr, StaticAddr]
+
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
@@ -86,9 +90,9 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val arrayAlloc = new AAllocatorFromContext(site => ArrayAddr(site))
     override val arrayValAlloc = new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
     override val staticAlloc = new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
-    override val objFieldStore: AStoreThreaded[FieldAddr, PowersetAddr[FieldAddr, FieldAddr], Value] = new AStoreThreaded(initFieldStore)
-    override val arrayValStore: AStoreThreaded[ArrayElemAddr, PowersetAddr[ArrayElemAddr, ArrayElemAddr], Value] = new AStoreThreaded(initArrayVarStore)
-    override val staticVarStore: AStoreThreaded[StaticAddr, PowersetAddr[StaticAddr, StaticAddr], Value] = new AStoreThreaded(initStaticStore)
+    override val objFieldStore: AStoreThreaded[FieldAddr, FieldAddrs, Value] = new AStoreThreaded(initFieldStore)
+    override val arrayValStore: AStoreThreaded[ArrayElemAddr, ArrayElemAddrs, Value] = new AStoreThreaded(initArrayVarStore)
+    override val staticVarStore: AStoreThreaded[StaticAddr, StaticAddrs, Value] = new AStoreThreaded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path

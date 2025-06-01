@@ -15,10 +15,10 @@ import sturdy.language.bytecode.ConcreteInterpreter.Instance
 import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
 import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, InstructionSite}
-import sturdy.values.{Combine, Finite, MaybeChanged, Powerset, Structural, Topped, Widening}
+import sturdy.values.{Combine, Finite, Join, MaybeChanged, Powerset, Structural, Topped, Widening}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
-import sturdy.values.references.{AbstractAddr, AllocationSiteAddr}
+import sturdy.values.references.{AbstractAddr, AllocationSiteAddr, PowersetAddr}
 import sturdy.language.bytecode.AuxillaryFunctions.*
 import sturdy.values.Topped.Actual
 import sturdy.values.integer.NumericInterval
@@ -35,19 +35,37 @@ trait ConstantObjects extends Interpreter, Numbers:
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = (ObjectType, String)
-  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: FieldAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[FieldAddr] = ???
+
   given FiniteFieldAddr: Finite[FieldAddr] with {}
   type constantObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
   override type RefValue = Topped[AbstractReferenceValue[constantArray, constantObj]]
   final def topRef: RefValue = Topped.Top
 
-  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: StaticAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[StaticAddr] = ???
+
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
   //final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
   type constantArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]
+  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: ArrayElemAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[ArrayElemAddr] = ???
+
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
 
   type TypeRep = ReferenceType
@@ -85,16 +103,20 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
-  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
+  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[PowersetAddr[FieldAddr, FieldAddr], Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
+      /* TODO: fix function body
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
       }.toVector.toMap
       Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
+       */
+      ???
 
     override def getField(ref: RefValue, name: FieldName): JOption[MayJoin.WithJoin, Value] =
+      /* TODO: fix function body
       if(ref.isActual)
         val tmp = ref.get
         tmp match
@@ -107,8 +129,11 @@ trait ConstantObjects extends Interpreter, Numbers:
           case _ => ???
       else
         JOptionA.none
+      */
+      ???
 
     override def setField(ref: RefValue, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
+      /* TODO: fix function body
       if (ref.isActual)
         val tmp = ref.get
         tmp match
@@ -122,6 +147,8 @@ trait ConstantObjects extends Interpreter, Numbers:
           case _ => ???
       else
         JOptionA.some(Value.TopValue)
+      */
+      ???
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
       if (ref.isActual)
@@ -151,16 +178,20 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         topI32
 
-  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
+  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[PowersetAddr[ArrayElemAddr, ArrayElemAddr], Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
+      /* TODO: fix function body
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
         addr
       }.toVector
       Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
-  
+      */
+      ???
+
     override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
+      /* TODO: fix function body
       if (ref.isActual && idx.isActual)
         val tmp = ref.get
         tmp match
@@ -173,10 +204,12 @@ trait ConstantObjects extends Interpreter, Numbers:
           case _ => ???
       else
         JOptionA.some(Value.TopValue)
-
+       */
+      ???
 
 
     override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+      /* TODO: fix function body
       if (ref.isActual && idx.isActual)
         val tmp = ref.get
         tmp match
@@ -190,6 +223,8 @@ trait ConstantObjects extends Interpreter, Numbers:
           case _ => ???
       else
         JOptionA.none
+      */
+      ???
 
 
     override def arrayLength(ref: RefValue): Value =
@@ -209,6 +244,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       Seq.fill(size.get) {}
   
     override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
+      /* TODO: fix function body
       if (src.isActual && dest.isActual && srcPos.isActual && destPos.isActual && length.isActual)
         val tmp1 = src.get
         val tmp2 = dest.get
@@ -227,6 +263,8 @@ trait ConstantObjects extends Interpreter, Numbers:
           case _ => ???
       else
         JOptionA.none
+      */
+      ???
 
 
     override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
@@ -366,7 +404,13 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
   type ObjType = ClassFile
   case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
   type FieldName = (ObjectType, String)
-  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]
+  case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: FieldAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[FieldAddr] = ???
+
   given FiniteFieldAddr: Finite[FieldAddr] with {}
 
   type IntervalObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
@@ -376,10 +420,22 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
 
   type IntervalArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
   case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]
+  case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: ArrayElemAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[ArrayElemAddr] = ???
+
   given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
 
-  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]
+  case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]:
+    // TODO: implement members
+    override def isEmpty: Boolean = ???
+    override def isStrong: Boolean = ???
+    override def reduce[A](f: StaticAddr => A)(using Join[A]): A = ???
+    override def iterator: Iterator[StaticAddr] = ???
+
   given FiniteStaticAddr: Finite[StaticAddr] with {}
 
   type TypeRep = ReferenceType
@@ -419,16 +475,20 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
   // duplicate definition for some reason
-  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
+  given constObjOps(using alloc: Allocator[FieldAddr, FieldInitSite], store: Store[PowersetAddr[FieldAddr, FieldAddr], Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, FieldInitSite, FieldName)]): RefValue =
+      /* TODO: fix function body
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
       }.toVector.toMap
       Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
+       */
+      ???
 
     override def getField(ref: RefValue, name: FieldName): JOption[MayJoin.WithJoin, Value] =
+      /* TODO: fix function body
       if (ref.isActual)
         val tmp = ref.get
         tmp match
@@ -441,8 +501,11 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           case _ => ???
       else
         JOptionA.some(Value.TopValue)
+      */
+      ???
 
     override def setField(ref: RefValue, name: FieldName, v: Value): JOption[MayJoin.WithJoin, Unit] =
+      /* TODO: fix function body
       if (ref.isActual)
         val tmp = ref.get
         tmp match
@@ -456,6 +519,8 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           case _ => ???
       else
         JOptionA.none
+      */
+      ???
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
       if (ref.isActual)
@@ -486,16 +551,20 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       else
         topI32
 
-  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
+  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[PowersetAddr[ArrayElemAddr, ArrayElemAddr], Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): RefValue =
+      /* TODO: fix function body
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
         addr
       }.toVector
       Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
+      */
+      ???
 
     override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
+      /*
       if (idx.isConstant)
         if (ref.isActual)
           val tmp = ref.get
@@ -511,8 +580,11 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           JOptionA.some(Value.TopValue)
       else
         ???
+    */
+      ???
 
     override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+      /* TODO: fix function body
       if (idx.isConstant)
         if (ref.isActual)
           val tmp = ref.get
@@ -529,6 +601,8 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           JOptionA.none
       else
         ???
+      */
+      ???
 
     override def arrayLength(ref: RefValue): Value =
       if (ref.isActual)
@@ -546,6 +620,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       Seq.fill(size.low) {}
 
     override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
+      /* TODO: fix function body
       if (srcPos.isConstant && destPos.isConstant)
         if (src.isActual && dest.isActual)
           val tmp1 = src.get
@@ -567,6 +642,8 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
           ???
       else
         ???
+      */
+      ???
 
     override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
       if (ref.isActual)
@@ -582,7 +659,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
 
     override def printString(letters: Seq[NumericInterval[Int]]): Unit =
       println(letters.map(l => l.low.toChar))
-        
+
 /*  given constArrayOps(using alloc: Allocator[ArrayElemAddr, ArrayElemInitSite], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, IntervalArray, ArrayType, ArrayElemInitSite, WithJoin] with
     override def makeArray(aid: ArrayAddr, vals: Seq[(Value, ArrayElemInitSite)], arrayType: AType, arraySize: Value): IntervalArray =
       val valAddrs = vals.map { (v, site) =>
@@ -659,4 +736,3 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       case fieldType: CharType => Value.Int32(topI32)
       case fieldType: ObjectType => Value.ReferenceValue(topRef)
       case fieldType: ArrayType => Value.ReferenceValue(topRef)
-
