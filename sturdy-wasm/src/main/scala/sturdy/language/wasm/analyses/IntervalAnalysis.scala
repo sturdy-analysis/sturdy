@@ -11,7 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.SizedConstantTable.CombineTable
-import sturdy.effect.symboltable.{IntervalSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable}
+import sturdy.effect.symboltable.{IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -57,12 +57,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
-    override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
     override def intToVal(i: Int): Value = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
-    override def isNull(r: Value): IntervalAnalysis.Value = ???
+    override def isNullRef(r: Value): IntervalAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -112,7 +112,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalSymbolTable[Value, TableAddr, RefV] = new IntervalSymbolTable(rangeLimit)
+    val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](rangeLimit, (v: Value) => v.asInt32)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

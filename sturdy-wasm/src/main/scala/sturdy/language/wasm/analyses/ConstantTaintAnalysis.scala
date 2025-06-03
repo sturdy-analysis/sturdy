@@ -57,12 +57,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToRef(v: ConstantTaintAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
-    override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def intToVal(i: Int): Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???
-    override def isNull(r: Value): ConstantTaintAnalysis.Value = ???
+    override def isNullRef(r: Value): ConstantTaintAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>

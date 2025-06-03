@@ -22,17 +22,19 @@ object ConstantAnalysisSoundness {
   given poDouble: PartialOrder[Double] with
     override def lteq(d1: Double, d2: Double): Boolean =
       d1.isNaN && d2.isNaN || d1 == d2
-  
+
   given po: PartialOrder[Value] with
-    override def lteq(x: Value, y: Value): Boolean = (x,y) match
+    override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (_, Value.TopValue) => true
-      case (Value.Num(NumValue.Int32(i1)), Value.Num(NumValue.Int32(i2))) => PartialOrder[Topped[Int]].lteq(i1,i2)
-      case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => PartialOrder[Topped[Long]].lteq(l1,l2)
-      case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[Topped[Float]].lteq(f1,f2)
-      case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[Topped[Double]].lteq(d1,d2)
+      case (Value.Num(NumValue.Int32(i1)), Value.Num(NumValue.Int32(i2))) => PartialOrder[Topped[Int]].lteq(i1, i2)
+      case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => PartialOrder[Topped[Long]].lteq(l1, l2)
+      case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[Topped[Float]].lteq(f1, f2)
+      case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[Topped[Double]].lteq(d1, d2)
       case (Value.Ref(r1), Value.Ref(r2)) => (r1, r2) match
         case (RefValue.FuncNull, RefValue.FuncNull) => true
         case (RefValue.ExternNull, RefValue.ExternNull) => true
+        case (RefValue.FuncRef(f1), RefValue.FuncRef(f2)) => PartialOrder[Topped[FunctionInstance]].lteq(f1, f2)
+        case (RefValue.ExternRef(e1), RefValue.ExternRef(e2)) => PartialOrder[Topped[Int]].lteq(e1, e2)
         case _ => false
       case _ => false
     

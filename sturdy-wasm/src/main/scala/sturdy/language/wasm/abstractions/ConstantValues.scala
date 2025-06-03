@@ -28,7 +28,7 @@ trait ConstantValues extends Interpreter:
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
   final type FuncReference = Topped[FunctionInstance]
-  final type ExternReference = Topped[FunctionInstance]
+  final type ExternReference = Topped[Int]
 
   final def topI32: I32 = Topped.Top
   final def topI64: I64 = Topped.Top

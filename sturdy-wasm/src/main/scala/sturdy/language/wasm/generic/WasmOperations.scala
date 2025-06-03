@@ -68,8 +68,14 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
   def refVToFunV(r: RefV): FunV
 
   def makeNullRefV(t: ReferenceType): RefV
-  def funVToRefV(i: FunV, t: ReferenceType): RefV
-  def isNull(r: V): V
+  def funVToRefV(i: FunV): RefV
+
+  /**
+   * Check if a reference is null.
+   * @param r the reference to check
+   * @return Boolean WASM value indicating if the reference is null (0=false for non-null, 1=true for null)
+   */
+  def isNullRef(r: V): V
 
   def funcInstToFunV(f: FunctionInstance): FunV
   def funVToFuncInst(f: FunV): FunctionInstance

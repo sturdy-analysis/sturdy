@@ -7,7 +7,7 @@ import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
@@ -62,7 +62,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
         // powerset of all function references
         val funcRefs = funcs.map {
           case f@FunctionInstance.Wasm(_, _, _, _) => ConstantAnalysis.RefValue.FuncRef(Topped.Actual(f))
-          case f@FunctionInstance.Host(_, _, _) => ConstantAnalysis.RefValue.ExternRef(Topped.Actual(f))
+          case f@FunctionInstance.Host(_, _, _) => ConstantAnalysis.RefValue.FuncRef(Topped.Actual(f))
         }
         Powerset(funcRefs.toSet + ConstantAnalysis.RefValue.FuncNull + ConstantAnalysis.RefValue.ExternNull)
 
@@ -103,7 +103,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case Powerset(refs) =>
         val funcs = refs.collect {
           case RefValue.FuncRef(Topped.Actual(f)) => f
-          case RefValue.ExternRef(Topped.Actual(f)) => f
+          case RefValue.ExternRef(Topped.Actual(_)) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $refs")
         }
         if (funcs.isEmpty) {
           f.fail(UnboundFunctionIndex, s"Cannot convert $refs to function instance")
@@ -112,30 +112,18 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     }
 
 
-    override def funVToRefV(f: Powerset[FunctionInstance], t: ReferenceType): Powerset[RefValue] = {
-      t match {
-        case FuncRef => f match {
-          case Powerset(funcs) => 
-            if (funcs.isEmpty)
-              Powerset(Set(RefValue.FuncNull))
-            else {
-              Powerset(funcs.map {
-                case f@FunctionInstance.Wasm(_, _, _, _) => RefValue.FuncRef(Topped.Actual(f))
-                case _ => RefValue.FuncNull
-              })
-            }
-        }
-        case ExternRef => f match {
-          case Powerset(funcs) =>
-            if (funcs.isEmpty)
-              Powerset(Set(RefValue.ExternNull))
-            else {
-              Powerset(funcs.map {
-                case f@FunctionInstance.Wasm(_, _, _, _) => RefValue.FuncRef(Topped.Actual(f))
-                case _ => RefValue.ExternNull
-              })
-            }
-        }
+    override def funVToRefV(f: Powerset[FunctionInstance]): Powerset[RefValue] = {
+      f match {
+        case Powerset(funcs) =>
+          if (funcs.isEmpty)
+            Powerset(Set(RefValue.FuncNull))
+          else {
+            Powerset(funcs.map {
+              case f@FunctionInstance.Wasm(_, _, _, _) => RefValue.FuncRef(Topped.Actual(f))
+              case f@FunctionInstance.Host(_, _, _) => RefValue.FuncRef(Topped.Actual(f))
+              case _ => RefValue.FuncNull
+            })
+          }
       }
     }
 
@@ -146,10 +134,11 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       }
     }
 
-    override def isNull(r: Value): ConstantAnalysis.Value = {
+    override def isNullRef(r: Value): ConstantAnalysis.Value = {
       r match {
         case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull) => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(1)))
         case ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull) => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(1)))
+        case ConstantAnalysis.Value.TopValue => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))
         case _ => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Actual(0)))
       }
     }
@@ -184,21 +173,18 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Value.Ref(RefValue.FuncNull)
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Ref(RefValue.ExternNull)
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) => 
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(f)) =>
         f match
           case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(RefValue.FuncRef(Topped.Actual(f)))
           case _ => Value.Ref(RefValue.FuncNull)
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) =>
-        f match
-          case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
-          case _ => Value.Ref(RefValue.ExternNull)
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
-    
+
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
@@ -207,11 +193,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
-    
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](extractor = (v: Value) => {
+    val tables: ConstantIntervalMappedSymbolTable[Value, TableAddr, RefV] = new ConstantIntervalMappedSymbolTable[Value, TableAddr, RefV](extractor = (v: Value) => {
       val i32Val = v.asInt32
       i32Val match {
         case Topped.Actual(i) => NumericInterval(i, i)

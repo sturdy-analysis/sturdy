@@ -42,14 +42,14 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type F64 = Double
   override type Bool = Boolean
   override type FuncReference = FunctionInstance
-  override type ExternReference = FunctionInstance
+  override type ExternReference = Int
 
   override def topI32: Int = throw new UnsupportedOperationException
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
   override def topFuncRef: FuncReference = throw new UnsupportedOperationException
-  override def topExternRef: FuncReference = throw new UnsupportedOperationException
+  override def topExternRef: Int = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   override def boolean(b: Boolean): Value =
@@ -83,7 +83,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def refVToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
       r match {
         case RefValue.FuncRef(f) => f
-        case RefValue.ExternRef(f) => f
+        case RefValue.ExternRef(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $r")
         case RefValue.FuncNull | RefValue.ExternNull => f.fail(UnboundFunctionIndex, s"Expected a function reference, but got $r")
       }
     
@@ -93,19 +93,15 @@ object ConcreteInterpreter extends Interpreter with Control:
         case ExternRef => ConcreteInterpreter.RefValue.ExternNull
       }
 
-    override def funVToRefV(f: FunV, t: ReferenceType): ConcreteInterpreter.RefValue =
-      t match {
-        case FuncRef => f match {
+    override def funVToRefV(f: FunV): ConcreteInterpreter.RefValue =
+        f match {
           case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
+          case FunctionInstance.Host(_, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
           case _ => ConcreteInterpreter.RefValue.FuncNull
         }
-        case ExternRef => f match {
-          case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
-          case _ => ConcreteInterpreter.RefValue.ExternNull
-        }
-      }
+
     
-    override def isNull(r: ConcreteInterpreter.Value): ConcreteInterpreter.Value =
+    override def isNullRef(r: ConcreteInterpreter.Value): ConcreteInterpreter.Value =
       r match {
         case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Value.Num(ConcreteInterpreter.NumValue.Int32(1))
         case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Num(ConcreteInterpreter.NumValue.Int32(1))

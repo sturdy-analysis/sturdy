@@ -190,11 +190,11 @@ def constExprToVal(inst: unresolved.Inst): Value =
       case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
     }
     case unresolved.RefFunc(x) => x match {
-      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
+      case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
       case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
     }
     case unresolved.RefExtern(x) => x match {
-      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
+      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
       case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
     }
 

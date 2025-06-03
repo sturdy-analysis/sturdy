@@ -246,8 +246,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
         branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.init access")) {
           val elemRefVs = elem.functions.map {
-            case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f), FuncRef)
-            case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f), ExternRef)
+            case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f))
+            case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f))
           }
           tables.init(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
         }
@@ -264,14 +264,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(refToVal(makeNullRefV(t)))
     case RefIsNull() =>
       val ref = stack.popOrAbort()
-      stack.push(isNull(ref))
+      stack.push(isNullRef(ref))
     case RefFunc(funcIdx) =>
       val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
-      stack.push(refToVal(funVToRefV(funV, FuncRef)))
-    case RefExtern(funcIdx) =>
-      val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
-      stack.push(refToVal(funVToRefV(funV, ExternRef)))
-
+      stack.push(refToVal(funVToRefV(funV)))
+    case RefExtern(_) =>
+      fail(UnboundFunctionIndex, "Cannot call extern reference")
   }
 
   def evalMemoryInst(inst: Inst): Unit = inst match

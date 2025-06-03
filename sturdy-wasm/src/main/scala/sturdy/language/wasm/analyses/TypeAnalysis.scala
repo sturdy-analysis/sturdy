@@ -54,12 +54,12 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
-    override def funVToRefV(i: Powerset[FunctionInstance], t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def intToVal(i: Int): Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
-    override def isNull(r: Value): TypeAnalysis.Value = ???
+    override def isNullRef(r: Value): TypeAnalysis.Value = ???
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()

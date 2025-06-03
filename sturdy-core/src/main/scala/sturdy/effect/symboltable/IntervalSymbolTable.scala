@@ -12,7 +12,7 @@ import sturdy.values.integer.NumericInterval
 import Numeric.Implicits.infixNumericOps
 import Ordering.Implicits.infixOrderingOps
 
-// TODO: replace Size with NumericInterval, change IntervalAnalysis to match this change
+// TODO: replace Size with NumericInterval to improve precision
 class IntervalSymbolTable[Value, Key, Entry](rangeLimit: Int)(using Finite[Key], Join[Entry], Numeric[Int]) extends SizedSymbolTable[Value, Key, NumericInterval[Int], Entry, Topped[Int], WithJoin], Effect:
   private val constantSymbolTable: SizedConstantTable[Value, Key, Entry] = new SizedConstantTable
 
