@@ -111,14 +111,17 @@ given Structural[DataInstance] with {}
 enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
+  case Null()
 
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
     case Host(_, _, hf) => hf.funcType
+    case Null() => FuncType(Vector.empty, Vector.empty)
 
   def module: ModuleInstance = this match
     case Wasm(mod, _, _, _) => mod
     case Host(mod, _, _) => mod
+    case Null() => ModuleInstance()
 
 enum ExternalValue:
   case Function(addr: Int)
@@ -167,14 +170,17 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
 //case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 //case class GlobalInstance[V](tpe: ValType, val value: V)
 case class DataInstance(data: ByteVector)
-case class ElemInstance(functions: Seq[FunctionInstance], elemMode: ElemMode)
+case class ElemInstance(functions: Seq[FunctionInstance], referenceType: ReferenceType, elemMode: ElemMode)
 
-given ElemModeIsSound: Soundness[ElemMode, ElemMode] with
+given elemModeIsSound: Soundness[ElemMode, ElemMode] with
   override def isSound(c: ElemMode, a: ElemMode): IsSound = if (c.equals(a)) Sound else NotSound("ElemMode mismatch")
+
+given elemRefTypeIsSound: Soundness[ReferenceType, ReferenceType] with
+  override def isSound(c: ReferenceType, a: ReferenceType): IsSound = if (c.equals(a)) Sound else NotSound(s"ElemInstance reference type mismatch: $c != $a")
 
 given elemInstanceIsSound(using fSoundness: Soundness[FunctionInstance, FunctionInstance]): Soundness[ElemInstance, ElemInstance] with
   override def isSound(c: ElemInstance, a: ElemInstance): IsSound =
-    seqIsSound.isSound(c.functions, a.functions) && summon[Soundness[ElemMode, ElemMode]].isSound(c.elemMode, a.elemMode)
+    seqIsSound.isSound(c.functions, a.functions) && summon[Soundness[ElemMode, ElemMode]].isSound(c.elemMode, a.elemMode) && summon[Soundness[ReferenceType, ReferenceType]].isSound(c.referenceType, a.referenceType)
 
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)

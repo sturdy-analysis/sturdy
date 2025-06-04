@@ -248,12 +248,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           val elemRefVs = elem.functions.map {
             case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f))
             case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f))
+            case FunctionInstance.Null() => elem.referenceType match {
+              case FuncRef => makeNullRefV(FuncRef)
+              case ExternRef => makeNullRefV(ExternRef)
+            }
           }
           tables.init(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
         }
       case ElemDrop(el) =>
         val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
-        module.elements = module.elements.updated(el, ElemInstance(Vector.empty, elem.elemMode))
+        module.elements = module.elements.updated(el, ElemInstance(Vector.empty, elem.referenceType, elem.elemMode))
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
@@ -801,12 +805,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           loc = modInst.registerBlockSizes(id, loc, expr)
           funVToFuncInst(refVToFunV(valToRef(evalInstructionSequence(id, expr, modInst, loc), modInst.functions)))
         })
-        elemInstances = elemInstances :+ ElemInstance(functions, mode)
+        elemInstances = elemInstances :+ ElemInstance(functions, elem.reftype, mode)
     }
     modInst.elements = elemInstances
     
     modInst.elements.zipWithIndex.foreach {
-      case (elem@ElemInstance(_, mode), i) =>
+      case (elem@ElemInstance(_, _, mode), i) =>
         mode match {
           case ElemMode.Passive() => ()
           case ElemMode.Declarative() =>
