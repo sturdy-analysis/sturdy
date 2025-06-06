@@ -143,7 +143,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
     }
 
   def run(commands: Seq[Command]): Unit =
-    commands.map(eval)
+    commands.foreach(c => {println(c); eval(c)})
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

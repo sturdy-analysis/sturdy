@@ -103,7 +103,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case Powerset(refs) =>
         val funcs = refs.collect {
           case RefValue.FuncRef(Topped.Actual(f)) => f
-          case RefValue.ExternRef(Topped.Actual(_)) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $refs")
+          case RefValue.ExternRef(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $refs")
+          case RefValue.FuncNull | RefValue.ExternNull => FunctionInstance.Null()
         }
         if (funcs.isEmpty) {
           f.fail(UnboundFunctionIndex, s"Cannot convert $refs to function instance")

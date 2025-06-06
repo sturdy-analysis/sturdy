@@ -8,12 +8,7 @@ import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
-import sturdy.values.Finite
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
-import sturdy.values.Structural
-import sturdy.values.concretePO
-import sturdy.values.concreteAbstractly
+import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Structural, concreteAbstractly, concretePO}
 
 case class TableAddr(addr: Int) extends AnyVal
 case class MemoryAddr(addr: Int) extends AnyVal
@@ -131,8 +126,6 @@ enum ExternalValue:
 
 
 
-
-
 given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
   // TODO: not optimal, because we don't check soundness of the function instances' modules
   override def isSound(c: ModuleInstance, a: ModuleInstance): IsSound =
@@ -166,6 +159,17 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
     case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) => summon[Soundness[HostFunction, HostFunction]].isSound(chf, ahf)
     case _ => IsSound.NotSound(s"Concrete function instance $c not approximated by $a.")
 }
+
+given functionInstancePO: PartialOrder[FunctionInstance] with
+  override def lteq(c: FunctionInstance, a: FunctionInstance): Boolean = (c, a) match
+    case (FunctionInstance.Wasm(_, _, cFunc, cFt), FunctionInstance.Wasm(_, _, aFunc, aFt)) =>
+      cFunc == aFunc && cFt == aFt
+    case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) =>
+      chf == ahf
+    case (FunctionInstance.Null(), FunctionInstance.Null()) =>
+      true
+    case _ =>
+      false
 
 //case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 //case class GlobalInstance[V](tpe: ValType, val value: V)

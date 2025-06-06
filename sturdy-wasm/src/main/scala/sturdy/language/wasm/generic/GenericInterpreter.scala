@@ -407,8 +407,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val funV = refVToFunV(fRef)
-      invokeIndirect(funV, ftExpected, funcIx, loc)
+      val nullRef = isNullRef(refToVal(fRef))
+      branchOpsUnit.boolBranch(nullRef) {
+        fail(UnboundFunctionIndex, s"Cannot call function with null reference $fRef.")
+      } {
+        val funV = refVToFunV(fRef)
+        invokeIndirect(funV, ftExpected, funcIx, loc)
+      }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -701,19 +706,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
     val modInst = new ModuleInstance(moduleId)
     var loc = InstLoc.InInit(modInst, 0)
-    // compute the initialization values for globals
+
     val (funcImports, globImports, tabImports, memImports) = resolveImports(module, imports)
-    modInst.globalAddrs = globImports
-    val globValues = module.globals.map { glob =>
-      val id = BlockId(glob)
-      loc = modInst.registerBlockSizes(id, loc, glob.init)
-      evalInstructionSequence(id, glob.init, modInst, loc)
-    }
 
-    // in the current swam version reference vectors are already provided via the elem fields of the module
-    // -> we don't have to compute anything here for now
-
-    // allocate structures for the new module
     // types
     modInst.functionTypes = module.types
 
@@ -724,6 +719,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
     }.foreach(modInst.addFunction)
 
+    // compute the initialization values for globals
+    modInst.globalAddrs = globImports
+    val globValues = module.globals.map { glob =>
+      val id = BlockId(glob)
+      loc = modInst.registerBlockSizes(id, loc, glob.init)
+      evalInstructionSequence(id, glob.init, modInst, loc)
+    }
+
+    // in the current swam version reference vectors are already provided via the elem fields of the module
+    // -> we don't have to compute anything here for now
+
     // globals
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe, _), _), value) =>
@@ -732,6 +738,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         writeGlobalValue(globalAddr, value)
         globalAddr
     }
+
     // tables
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
@@ -814,7 +821,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         mode match {
           case ElemMode.Passive() => ()
           case ElemMode.Declarative() =>
-            // evalTableInst(ElemDrop(i), loc) TODO: reimplement this
+            callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
+              evalTableInst(ElemDrop(i), loc)
+            }
           case ElemMode.Active(tableIdx, offset) =>
             val id = BlockId(module.elem(i))
             loc = modInst.registerBlockSizes(id, loc, offset)
