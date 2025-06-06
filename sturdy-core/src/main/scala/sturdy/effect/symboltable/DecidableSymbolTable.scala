@@ -9,7 +9,7 @@ import scala.util.boundary
 import scala.util.boundary.break
 
 trait SizedDecidableSymbolTable[Value, Key, Entry] extends SizedSymbolTable[Value, Key, Int, Entry, Int, NoJoin]:
-  protected var tables: Map[Key, Table] = Map()
+  var tables: Map[Key, Table] = Map()
 
   def entries: Map[Key, Table] = tables
 

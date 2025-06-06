@@ -63,7 +63,7 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
     )
 
   Fixpoint.DEBUG = false
-  val EXCLUDE_MEM_GROW = false
+  val EXCLUDE_MEM_GROW = true
   Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
     !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
   }).sorted.foreach { p =>

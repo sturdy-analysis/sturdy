@@ -12,6 +12,7 @@ import sturdy.values.toppedPartialOrder
 import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*,given}
+import sturdy.effect.symboltable.IntervalMappedSymbolTable.{*, given}
 
 object ConstantAnalysisSoundness {
 
@@ -64,6 +65,6 @@ object ConstantAnalysisSoundness {
       a.stack.operandStackIsSound(c.stack) &&
         a.memory.memoryIsSound(c.memory) &&
         a.globals.tableIsSound(c.globals) &&
-        //a.tables.tableIsSound(c.tables) &&
+        a.tables.tableIsSound(c.tables) &&
         a.callFrame.isSound(c.callFrame)
 }

@@ -1,6 +1,6 @@
 package sturdy.effect.symboltable
 
-import sturdy.data
+import sturdy.{IsSound, Soundness, data}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.data.{JOption, JOptionA, MayJoin}
@@ -9,6 +9,9 @@ import sturdy.effect.symboltable.SizedSymbolTable.Limit
 import sturdy.values.Topped.Top
 import sturdy.values.integer.{NumericInterval, NumericIntervalJoin}
 import sturdy.values.{*, given}
+
+import scala.util.boundary
+import scala.util.boundary.break
 
 class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry])(rangeLimit: Int, extractor: Value => NumericInterval[Int])
   extends SizedSymbolTable[Value, Key, NumericInterval[Int], Entry, Topped[Int], WithJoin] {
@@ -282,6 +285,23 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
   override def widen: Widen[State] = CombineFiniteKeyMap(using {
     case (a, b) => Widen(a, b)
   })
+
+  def tableIsSound[cValue, cEntry](c: ConcreteSizedTable[cValue, Key, cEntry])(using Soundness[Limit[Int], Limit[NumericInterval[Int]]]): IsSound =
+    boundary[IsSound]:
+      for ((key, cTab) <- c.tables) {
+        val aTab = tables.getOrElse(key, break(IsSound.NotSound(s"Key $key not present in interval mapped symbol table.")))
+
+        if (!Soundness.isSound(cTab.limit, aTab.limit).isSound)
+          break(IsSound.NotSound(s"Table $key has mismatched limits: concrete ${cTab.limit} vs abstract ${aTab.limit}."))
+
+        for ((sym, cEntry) <- cTab.entries) {
+          val matching = aTab.get(NumericInterval(sym, sym)).map(aEntry => aEntry == cEntry)
+          if (matching.isEmpty)
+            break(IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table."))
+        }
+      }
+      IsSound.Sound
+
 }
 
 object IntervalMappedSymbolTable:
@@ -378,6 +398,20 @@ object IntervalMappedSymbolTable:
 
   }
 
+  given limitIsSound: Soundness[Limit[Int], Limit[NumericInterval[Int]]] with {
+    override def isSound(c: Limit[Int], a: Limit[NumericInterval[Int]]): IsSound = {
+      (c.max, a.max) match {
+        case (Some(cMax), Some(aMax)) =>
+          if (aMax.containsNum(cMax) && a.min.containsNum(c.min)) IsSound.Sound
+          else IsSound.NotSound(s"Limit max mismatch: concrete $cMax vs abstract $aMax.")
+        case (None, None) =>
+          if (a.min.containsNum(c.min)) IsSound.Sound
+          else IsSound.NotSound(s"Limit min mismatch: concrete ${c.min} vs abstract ${a.min}.")
+        case _ => IsSound.NotSound(s"Limit max mismatch: concrete $c vs abstract $a.")
+      }
+    }
+  }
+
 class ConstantIntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry])(extractor: Value => NumericInterval[Int])
   extends SizedSymbolTable[Value, Key, Topped[Int], Entry, Topped[Int], WithJoin] {
 
@@ -421,4 +455,8 @@ class ConstantIntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Jo
   override def setState(st: State): Unit = intervalTables.setState(st)
   override def join: Join[State] = intervalTables.join
   override def widen: Widen[State] = intervalTables.widen
+
+  def tableIsSound[cValue, cEntry](c: ConcreteSizedTable[cValue, Key, cEntry])(using Soundness[Limit[Int], Limit[NumericInterval[Int]]]): IsSound = {
+    intervalTables.tableIsSound(c)
+  }
 }
