@@ -60,7 +60,7 @@ case class ApronExprConverter
     phys.recency match
       case Recency.Recent =>
         if (region.recent.isEmpty)
-          recencyStore.addressTranslation.allocNoRetire(phys.ctx)
+          recencyStore.addressTranslation.allocNoRetire(phys.ctx, PowRecency.Recent)
         else
           VirtualAddress(phys.ctx, region.recent.max, recencyStore.addressTranslation)
       case Recency.Old =>
@@ -72,7 +72,7 @@ case class ApronExprConverter
           VirtualAddress(phys.ctx, region.old.max, recencyStore.addressTranslation)
       case Recency.Failed =>
         if (region.failed.isEmpty)
-          recencyStore.addressTranslation.allocFailed(phys.ctx)
+          recencyStore.addressTranslation.allocNoRetire(phys.ctx, PowRecency.Failed)
         else
           VirtualAddress(phys.ctx, region.failed.max, recencyStore.addressTranslation)
 

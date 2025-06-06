@@ -48,7 +48,7 @@ class RelationalMemory
         inRangeOfAddress.size match
           case 0 => JOptionA.None()
           case 1 =>
-            val virt = apronState.recencyStore.addressTranslation.allocNoRetire(inRangeOfAddress.head._1)
+            val virt = apronState.recencyStore.addressTranslation.allocNoRetire(inRangeOfAddress.head._1, PowRecency.Recent)
             val tpe = apronState.relationalStore.getType(PowersetAddr(PhysicalAddress(virt.ctx, Recency.Recent))).toOption.get
             JOptionA.Some(relationalBytes.makeRelationalExpr(ApronExpr.addr(virt, tpe)))
           case _ /* address in range of multiple memory objects */ =>

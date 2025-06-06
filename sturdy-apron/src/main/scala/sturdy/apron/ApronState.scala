@@ -6,7 +6,7 @@ import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
-import sturdy.values.{Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
+import sturdy.values.{Changed, Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
 import sturdy.values.booleans.{BooleanOps, given}
 import sturdy.values.ordering.{EqOps, given}
 import sturdy.values.floating.{*, given}
@@ -234,17 +234,15 @@ final class ApronRecencyState
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
     case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) if v1.ctx == v2.ctx =>
+      val joinedRecency = Join(v1.recency, v2.recency)
       val joinedType = Join(tpe1, tpe2)
       val joinedSpecials = Join(specials1, specials2)
-      relationalStore.copy(PowersetAddr(PhysicalAddress(v1.ctx, Recency.Recent)), PowersetAddr(PhysicalAddress(v1.ctx, Recency.Old)))
-      (v1.recency, v2.recency) match
-        case (PowRecency.RecentOld,_) | (PowRecency.Old,_) =>
-          recencyStore.addressTranslation.joinRecentIntoOld(v1)
-          MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
-        case (_,PowRecency.RecentOld) | (_, PowRecency.Old) =>
-          recencyStore.addressTranslation.joinRecentIntoOld(v2)
-          MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
-        case _ => throw IllegalStateException("Impossible branch. Covered by [case (e1, e2) if (e1 == e2) => ...]")
+      val virt: VirtualAddress[Ctx] = if(joinedRecency.hasChanged) {
+        recencyStore.addressTranslation.allocNoRetire(v1.ctx, joinedRecency.get)
+      } else {
+        v1
+      }
+      MaybeChanged(ApronExpr.Addr(ApronVar(virt), joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)
       val iv2 = getInterval(e2)
@@ -272,7 +270,7 @@ final class ApronRecencyState
         (joinedSpecials, joinedType) =>
           val iv1 = getInterval(e1)
           val ctx = allocator(joinedType)
-          val failedVirt = recencyStore.addressTranslation.allocFailed(ctx)
+          val failedVirt = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed)
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
           val iv2 = getInterval(failedExpr)
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
@@ -281,7 +279,7 @@ final class ApronRecencyState
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
           val ctx = allocator(joinedType)
-          val result = recencyStore.addressTranslation.allocOld(ctx)
+          val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
           val resultPhys = result.physical.iterator.next()
           val stateBefore = relationalStore.getState
           assign(result, e1)

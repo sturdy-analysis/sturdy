@@ -105,6 +105,18 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         else throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
       case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
+  def setRecency(virt: VirtualAddress[Context], powRecency: PowRecency) =
+    val RecencyRegion(recent, old, failed) = region(mapping, virt.ctx).getOrElse(RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
+      powRecency match
+        case PowRecency.Recent =>
+          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old - virt.n, failed - virt.n))
+        case PowRecency.Old =>
+          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old + virt.n, failed - virt.n))
+        case PowRecency.RecentOld =>
+          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old + virt.n, failed - virt.n))
+        case PowRecency.Failed =>
+          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old - virt.n, failed + virt.n))
+
   inline def region(ctx: Context): Option[RecencyRegion] =
     region(mapping, ctx)
 
@@ -122,60 +134,25 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     }
 
   def alloc(ctx: Context): VirtualAddress[Context] =
+    val virt = freshVirt(ctx)
+
+    mapping.get(ctx) match
+      case Some(RecencyRegion(recent, old, failed)) =>
+        mapping += ctx -> RecencyRegion(BitSet(virt.n), old ++ recent, failed)
+      case None =>
+        mapping += ctx -> RecencyRegion(BitSet(virt.n), BitSet.empty, BitSet.empty)
+
+    virt
+
+  inline def freshVirt(ctx: Context): VirtualAddress[Context] =
     val freshId = this.fresh.getOrElse(ctx, 0)
     this.fresh += (ctx) -> (freshId + 1)
-
-    mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old, failed)) =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), old ++ recent, failed)
-      case None =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet.empty, BitSet.empty)
-
     VirtualAddress(ctx, freshId, this)
 
-  def allocNoRetire(ctx: Context): VirtualAddress[Context] =
-    val freshId = this.fresh.getOrElse(ctx, 0)
-    this.fresh += (ctx) -> (freshId + 1)
-
-    mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old, failed)) =>
-        mapping += ctx -> RecencyRegion(recent + freshId, old, failed)
-      case None =>
-        mapping += ctx -> RecencyRegion(BitSet(freshId), BitSet.empty, BitSet.empty)
-
-    VirtualAddress(ctx, freshId, this)
-
-  def allocOld(ctx: Context): VirtualAddress[Context] =
-    mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old, failed)) =>
-        if(old.isEmpty)
-          val freshId = this.fresh.getOrElse(ctx, 0)
-          this.fresh += (ctx) -> (freshId + 1)
-          mapping += ctx -> RecencyRegion(recent, old + freshId, failed)
-          VirtualAddress(ctx, freshId, this)
-        else
-          VirtualAddress(ctx, old.head, this)
-      case None =>
-        val freshId = this.fresh.getOrElse(ctx, 0)
-        this.fresh += ctx -> (freshId + 1)
-        mapping += ctx -> RecencyRegion(BitSet.empty, BitSet(freshId), BitSet.empty)
-        VirtualAddress(ctx, freshId, this)
-
-  def allocFailed(ctx: Context): VirtualAddress[Context] =
-    mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old, failed)) =>
-        if (failed.isEmpty)
-          val freshId = this.fresh.getOrElse(ctx, 0)
-          this.fresh += (ctx) -> (freshId + 1)
-          mapping += ctx -> RecencyRegion(recent, old, failed + freshId)
-          VirtualAddress(ctx, freshId, this)
-        else
-          VirtualAddress(ctx, failed.head, this)
-      case None =>
-        val freshId = this.fresh.getOrElse(ctx, 0)
-        this.fresh += ctx -> (freshId + 1)
-        mapping += ctx -> RecencyRegion(BitSet.empty, BitSet.empty, BitSet(freshId))
-        VirtualAddress(ctx, freshId, this)
+  def allocNoRetire(ctx: Context, recency: PowRecency): VirtualAddress[Context] =
+    val virt = freshVirt(ctx)
+    setRecency(virt, recency)
+    virt
 
   def joinRecentIntoOld(virt: VirtualAddress[Context]): Unit =
     for(region <- mapping.get(virt.ctx)) {
