@@ -33,6 +33,3 @@ enum Site {
   case FieldInitialization(s: Site, name: String, cls: ObjectType)
   case StaticInitialization(obj: ObjectType, name: String)
 }
-
-// TODO:
-// - use addr and addrset

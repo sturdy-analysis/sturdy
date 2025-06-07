@@ -1,6 +1,7 @@
 package sturdy.language.bytecode
 
-import org.opalj.br.{ArrayType, ClassFile, FieldType, Method, MethodDescriptor, ObjectType, ReferenceType}
+import scala.util.boundary, boundary.break
+import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.{Allocator, CAllocatorIntIncrement}
@@ -10,24 +11,21 @@ import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.store.{CStore, Store}
 import sturdy.fix.Fixpoint
-import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.generic.*
-import sturdy.values.booleans.{BooleanBranching, ConcreteBooleanBranching}
+import sturdy.values.booleans.ConcreteBooleanBranching
 import sturdy.values.exceptions.ConcreteExceptional
-import sturdy.values.floating.FloatOps
-import sturdy.values.floating.{*, given}
-import sturdy.values.integer.{*, given}
-import sturdy.values.objects.{*, given}
-import sturdy.values.arrays.{*, given}
+import sturdy.values.floating.given
+import sturdy.values.integer.given
+import sturdy.values.objects.*
+import sturdy.values.arrays.*
 import sturdy.fix
-import sturdy.language.bytecode.AuxillaryFunctions
-import sturdy.language.bytecode.ConcreteRefValues.NullValue
-import sturdy.language.bytecode.abstractions.{Addr, Site}
+import sturdy.language.bytecode.abstractions.Site
 import sturdy.values.ordering.EqOps
 
-import java.io.File
 import java.net.URL
 
+// note:
+// this type is only used in this file. this might aid in fixing the type testing warnings
 enum ConcreteRefValues:
   case nonNullObject[OID, CF, FieldAddr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, FieldAddr])
   case nonNullArray[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASize)
@@ -201,28 +199,29 @@ object ConcreteInterpreter extends Interpreter:
       ConcreteRefValues.nonNullObject(oid, cfs, fieldAddrs)
 
     override def getField(obj: RefValue, name: FieldName): JOption[NoJoin, V] = obj match
-      case obj: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName] =>
-        if (!obj.fields.contains(name))
+      // TODO: find a solution for this warning
+      case ConcreteRefValues.nonNullObject(_, _, fields: Map[FieldName, FieldAddr]) =>
+        if !fields.contains(name) then
           JOptionC.none
         else
-          store.read(obj.fields(name))
+          store.read(fields(name))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     override def setField(obj: RefValue, name: FieldName, v: V): JOptionC[Unit] = obj match
-      case obj: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName] =>
-        if (!obj.fields.contains(name))
+      // TODO: find a solution for this warning
+      case ConcreteRefValues.nonNullObject(_, _, fields: Map[FieldName, FieldAddr]) =>
+        if !fields.contains(name) then
           JOptionC.none
-        else {
-          store.write(obj.fields(name), v)
+        else
+          store.write(fields(name), v)
           JOptionC.some(())
-        }
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     override def invokeFunctionCorrect(obj: RefValue, mthName: String, sig: MthSig, args: Seq[V])(invoke: (RefValue, Mth, Seq[V]) => V): V = obj match
-      case obj: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName] =>
-        val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
+      case ConcreteRefValues.nonNullObject(_, cls: ClassFile, _) =>
+        val mth = AuxillaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
         invoke(obj, mth, args)
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
@@ -236,34 +235,39 @@ object ConcreteInterpreter extends Interpreter:
   given ConcreteArrayOps[AID, V, AType, Site]
     (using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, V, NoJoin]): ArrayOps[AID, Int, V, RefValue, AType, Site, NoJoin] with
     override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): RefValue =
-      val valAddrs = vals.map{ (v, site) =>
+      val valAddrs = vals.map{(v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
         addr
       }.toVector
       ConcreteRefValues.nonNullArray(aid, valAddrs, arrayType, arraySize)
+
     override def getVal(array: RefValue, idx: Int): JOption[NoJoin, V] = array match
-      case array: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32] =>
-        if (idx >= array.vals.size)
+      // TODO: find a solution for this warning
+      case ConcreteRefValues.nonNullArray(_, vals: Vector[ArrayElemAddr], _, _) =>
+        if idx >= vals.size then
           JOptionC.none
         else
-          store.read(array.vals(idx))
+          store.read(vals(idx))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
+
     override def setVal(array: RefValue, idx: Int, v: V): JOptionC[Unit] = array match
-      case array: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32] =>
-        if (idx >= array.vals.size)
+      // TODO: find a solution for this warning
+      case ConcreteRefValues.nonNullArray(_, vals: Vector[ArrayElemAddr], _, _) =>
+        if (idx >= vals.size)
           JOptionC.none
         else {
-          store.write(array.vals(idx), v)
+          store.write(vals(idx), v)
           JOptionC.some(())
         }
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
     override def arrayLength(array: RefValue): V = array match
-      case array: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, V] =>
-        array.arraySize
+      // TODO: find a solution for this warning
+      case ConcreteRefValues.nonNullArray(_, _, _, size: V) =>
+        size
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -271,23 +275,21 @@ object ConcreteInterpreter extends Interpreter:
       Seq.fill(size){}
 
     override def arraycopy(src: RefValue, srcPos: Int, dest: RefValue, destPos: Int, length: Int): JOption[MayJoin.NoJoin, Unit] = (src, dest) match
-      case (src, dest): (ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32], ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32]) =>
-        for (i <- 0 until length){
-          if(srcPos+i >= src.vals.size || destPos+i >= dest.vals.size){
-            return JOptionC.none
-          }
-          else{
-            val toCopy = store.read(src.vals(srcPos + i)).get
-            store.write(dest.vals(destPos + i), toCopy)
-          }
-        }
+      case (ConcreteRefValues.nonNullArray(_, srcVals: Vector[ArrayElemAddr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Vector[ArrayElemAddr], _, _)) =>
+        boundary:
+          for (i <- 0 until length) do
+            if srcPos+i >= srcVals.size || destPos+i >= destVals.size then
+              break(JOptionC.none)
+            else
+              val toCopy = store.read(srcVals(srcPos + i)).get
+              store.write(destVals(destPos + i), toCopy)
         JOptionC.some(())
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $src, $dest")
 
     override def getArray(array: RefValue): Seq[JOption[NoJoin, V]] = array match
-      case array: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32] =>
-        val arrayVals = array.vals.map(addr => getVal(array, array.vals.indexOf(addr)))
+      case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
+        val arrayVals = vals.map(addr => getVal(array, vals.indexOf(addr)))
         arrayVals
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $array")
@@ -297,28 +299,28 @@ object ConcreteInterpreter extends Interpreter:
 
   given RefEqOps[AID, OID, ASize]: EqOps[RefValue, Boolean] with
     override def equ(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
-      case (v1: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName], v2: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName]) =>
-        v1.oid == v2.oid
-      case (v1: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize], v2: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize]) =>
-        v1.aid == v2.aid
+      case (ConcreteRefValues.nonNullObject(oid1, _, _), ConcreteRefValues.nonNullObject(oid2, _, _)) =>
+        oid1 == oid2
+      case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
+        aid1 == aid2
       case (v1: ConcreteRefValues.NullValue, v2: ConcreteRefValues.NullValue) =>
         true
       case _ =>
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
     override def neq(v1: ConcreteRefValues, v2: ConcreteRefValues): Boolean = (v1, v2) match
-      case (v1: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName], v2: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName]) =>
-        v1.oid != v2.oid
-      case (v1: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize], v2: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, ASize]) =>
-        v1.aid != v2.aid
-      case (v1: ConcreteRefValues.NullValue, v2: ConcreteRefValues.NullValue) =>
+      case (ConcreteRefValues.nonNullObject(oid1, _, _), ConcreteRefValues.nonNullObject(oid2, _, _)) =>
+        oid1 != oid2
+      case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
+        aid1 != aid2
+      case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
         false
       case _ =>
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
-  type varStore = Map[FieldAddr, Value]
-  type elemStore = Map[ArrayElemAddr, Value]
-  type StaticStore = Map[StaticAddr, Value]
+  private type varStore = Map[FieldAddr, Value]
+  private type elemStore = Map[ArrayElemAddr, Value]
+  private type StaticStore = Map[StaticAddr, Value]
 
   class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: elemStore, initStaticStore: StaticStore) extends GenericInstance:
     val newFrameData: FrameData = 0
@@ -340,7 +342,7 @@ object ConcreteInterpreter extends Interpreter:
     val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
     val arrayValStore: CStore[ArrayElemAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)
-    
+
     val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr] = scala.collection.mutable.Map()
 
     override val project: Project[URL] = files
@@ -360,4 +362,4 @@ object ConcreteInterpreter extends Interpreter:
       )
 
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut]
-    override val fixpointSuper = fixpoint
+    override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
