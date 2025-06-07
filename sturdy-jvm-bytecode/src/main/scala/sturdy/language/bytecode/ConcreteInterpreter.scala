@@ -106,6 +106,7 @@ object ConcreteInterpreter extends Interpreter:
 */
 
   given concreteTypeOps[OID, AID](using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
+    /* rewritten below to no longer cause warnings
     override def instanceOf(v: ConcreteRefValues, target: TypeRep): Boolean = v match
       case v: ConcreteRefValues.nonNullObject[OID, ClassFile, FieldAddr, FieldName] =>
         if(target == null)
@@ -122,7 +123,19 @@ object ConcreteInterpreter extends Interpreter:
           true
         else
           false
-
+    */
+    override def instanceOf(v: ConcreteRefValues, target: TypeRep): Boolean = v match
+      case ConcreteRefValues.nonNullObject(_, cf: ClassFile, _) =>
+        if (target == null)
+          false
+        else
+          cf.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
+      case ConcreteRefValues.nonNullArray(_, _, arrayType: AType, _) =>
+        if (target == null)
+          false
+        else
+          arrayType == target.asArrayType
+      case ConcreteRefValues.NullValue() => target == null
 
   given intSizeOps: SizeOps[I32, Boolean] with
     override def is32Bit(v: I32): Boolean = true
@@ -153,7 +166,7 @@ object ConcreteInterpreter extends Interpreter:
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
-      }.toVector.toMap
+      }.toMap
       Object(oid, cfs, fieldAddrs)
 
     override def getField(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: FieldName): JOption[NoJoin, V] =
@@ -184,7 +197,7 @@ object ConcreteInterpreter extends Interpreter:
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
-      }.toVector.toMap
+      }.toMap
       ConcreteRefValues.nonNullObject(oid, cfs, fieldAddrs)
 
     override def getField(obj: RefValue, name: FieldName): JOption[NoJoin, V] = obj match
