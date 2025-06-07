@@ -266,7 +266,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def evalRefInst(inst: Inst): Unit = inst match {
     case RefNull(t) =>
       stack.push(refToVal(makeNullRefV(t)))
-    case RefIsNull() =>
+    case RefIsNull =>
       val ref = stack.popOrAbort()
       stack.push(isNullRef(ref))
     case RefFunc(funcIdx) =>
