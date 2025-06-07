@@ -17,7 +17,7 @@ import sturdy.fix.context.Sensitivity
 import sturdy.fix.{ContextualFixpoint, Fixpoint, Logger}
 import sturdy.language.bytecode.ConcreteInterpreter.{Bool, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, ConstantObjects, Exceptions, Numbers}
+import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, ConstantObjects, Exceptions, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.{Abstractly, Combine, Finite, MaybeChanged, Topped, Widen, Widening, given}
@@ -52,9 +52,9 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 //      //case ConcreteInterpreter.Value.Obj(o) => Value.Obj(Topped.Actual(o))
 //      //case ConcreteInterpreter.Value.Array(a) => Value.Array(Topped.Actual(a))
 
-  type arrayVarStore = Map[ArrayElemAddr, Value]
-  type fieldStore = Map[FieldAddr, Value]
-  type staticStore = Map[StaticAddr, Value]
+  type arrayVarStore = Map[Addr, Value]
+  type fieldStore = Map[Addr, Value]
+  type staticStore = Map[Addr, Value]
 
   class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore, initStaticStore: staticStore) extends GenericInstance:
 
@@ -78,21 +78,23 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[ConstantAnalysis.Value] = implicitly
 
+    /* deprecated
     type FieldAddrs = PowersetAddr[FieldAddr, FieldAddr]
     type ArrayElemAddrs = PowersetAddr[ArrayElemAddr, ArrayElemAddr]
     type StaticAddrs = PowersetAddr[StaticAddr, StaticAddr]
+    */
 
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objAlloc = new AAllocatorFromContext(site => ObjAddr(site))
-    override val objFieldAlloc: Allocator[FieldAddr, FieldInitSite] = new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
-    override val arrayAlloc = new AAllocatorFromContext(site => ArrayAddr(site))
-    override val arrayValAlloc = new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val staticAlloc = new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
-    override val objFieldStore: AStoreThreaded[FieldAddr, FieldAddrs, Value] = new AStoreThreaded(initFieldStore)
-    override val arrayValStore: AStoreThreaded[ArrayElemAddr, ArrayElemAddrs, Value] = new AStoreThreaded(initArrayVarStore)
-    override val staticVarStore: AStoreThreaded[StaticAddr, StaticAddrs, Value] = new AStoreThreaded(initStaticStore)
+    override val objAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ObjAddr(site))
+    override val objFieldAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
+    override val arrayAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ArrayAddr(site))
+    override val arrayValAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val staticAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
+    override val objFieldStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initFieldStore)
+    override val arrayValStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initArrayVarStore)
+    override val staticVarStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
@@ -141,7 +143,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
           val tmp = v.get
           tmp match
             case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
-              val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+              val obj: Object[Addr, ClassFile, Addr, FieldName] = ??? // tmp.obj
               if (target == null)
                 Topped.Actual(false)
               else
@@ -184,14 +186,13 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
-      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
+      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
       //???
-    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
       )
       //???
-

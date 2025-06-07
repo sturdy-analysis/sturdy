@@ -21,6 +21,7 @@ import sturdy.values.arrays.Array
 import sturdy.values.objects.{Object, ObjectOps, TypeOps}
 import sturdy.values.ordering.EqOps
 import sturdy.fix
+import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.{Finite, Join, MaybeChanged, Powerset}
@@ -36,10 +37,15 @@ enum JvmExcept[V]:
   case Throw(exception: ObjectType)
   case ThrowObject(exception: V)
 
-case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
-case class ArrayElemInitSite(s: InstructionSite, ix: Int)
-case class FieldInitSite(s: InstructionSite, name: String, cls: ObjectType)
-case class StaticInitSite(obj: ObjectType, name: String)
+// case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
+// case class ArrayElemInitSite(s: InstructionSite, ix: Int)
+// case class FieldInitSite(s: InstructionSite, name: String, cls: ObjectType)
+// case class StaticInitSite(obj: ObjectType, name: String)
+
+type InstructionSite = Site
+type ArrayElemInitSite = Site
+type FieldInitSite = Site
+type StaticInitSite = Site
 
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
@@ -116,6 +122,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   lazy val native = new JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, ObjAddr, ArrayAddr, ObjRep, TypeRep, J](bytecodeOps, objectOps, arrayOps)
 
   def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit = {
+    /* TODO: fix
     val site = InstructionSite(mth, pc)
     inst match
       // No Op opcode 0
@@ -680,6 +687,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       // breakpoint
       case _ if (inst.opcode == 202) =>
         ()
+     */
   }
 
   def findClassFile(objType: ObjectType): ClassFile =
@@ -714,6 +722,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     }
 
   def createLibraryObj(toLoad: ObjectType, site: InstructionSite): V =
+    ???
+    /* TODO: fix
     val cfs = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), FieldInitSite(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
@@ -747,8 +757,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, counterSnap)), temp2, compType, dims(numDims-1))
       array
     }
+     */
 
   def create2DArray(size: V, compType: ArrayType, site: InstructionSite): V =
+    ???
+    /* TODO: fix
     val counterSnap = counter
     //println("2D: " + counterSnap)
     counter += 1
@@ -757,6 +770,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       .zipWithIndex.map(vals => (vals._1, ArrayElemInitSite(InstructionSite(site.mth, site.pc, counterSnap), vals._2)))
     val array = arrayOps.makeArray(arrayAlloc(InstructionSite(site.mth, site.pc, counterSnap)), convertedArrayVals, compType, size)
     array
+     */
 
   def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
 
@@ -810,6 +824,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     }
 
   def evalNativeStatic(mth: Method, args: Seq[V]) =
+    ???
+    /* TODO: fix
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get
@@ -824,6 +840,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)
+     */
 
   def invokeExternal(mth: Method, isStatic: Boolean) = external {
     val args = stack.popNOrAbort(stack.size)
@@ -863,7 +880,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         val handler = mth.body.get.exceptionHandlersFor(currPC)
           .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
           .getOrElse(except.throws(JvmExcept.Throw(exception)))
-        val exceptionObject = createLibraryObj(exception, InstructionSite(mth, pc))
+        val exceptionObject = createLibraryObj(exception, ??? /* TODO: fix InstructionSite(mth, pc)*/)
         stack.push(exceptionObject)
         run(handler.handlerPC, mth)
       case JvmExcept.ThrowObject(exception) =>
@@ -953,7 +970,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         ???
       case "getPrimitiveClass" =>
         // not in docs
-        val clsObj = createLibraryObj(ObjectType("java/lang/Class"), InstructionSite(mth, 0))
+        val clsObj = createLibraryObj(ObjectType("java/lang/Class"), ??? /* TODO: fix InstructionSite(mth, 0)*/)
         clsObj
       case "getProtectionDomain" =>
         // returns protectionDomain of this class

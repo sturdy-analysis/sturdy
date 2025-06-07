@@ -17,7 +17,7 @@ import sturdy.fix.context.Sensitivity
 import sturdy.fix.{ContextualFixpoint, Fixpoint, Logger}
 import sturdy.language.bytecode.ConcreteInterpreter.{Bool, TypeRep}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, ConstantObjects, Exceptions, IntervalNumbers, IntervalObjects, Numbers}
+import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, ConstantObjects, Exceptions, IntervalNumbers, IntervalObjects, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.{Abstractly, Finite, Topped, Widen, given}
 import sturdy.values.booleans.{*, given}
@@ -45,9 +45,9 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
   given Widen[I32] = new NumericIntervalWiden[Int](intIntervalBounds, Int.MinValue, Int.MaxValue)
   given Widen[I64] = new NumericIntervalWiden[Long](longIntervalBounds, Long.MinValue, Long.MaxValue)
 
-  type arrayVarStore = Map[ArrayElemAddr, Value]
-  type fieldStore = Map[FieldAddr, Value]
-  type staticStore = Map[StaticAddr, Value]
+  type arrayVarStore = Map[Addr, Value]
+  type fieldStore = Map[Addr, Value]
+  type staticStore = Map[Addr, Value]
 
   class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore, initStaticStore: staticStore) extends GenericInstance:
 
@@ -75,14 +75,14 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objAlloc = new AAllocatorFromContext(site => ObjAddr(site))
-    override val objFieldAlloc: Allocator[FieldAddr, FieldInitSite] = new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
-    override val arrayAlloc = new AAllocatorFromContext(site => ArrayAddr(site))
-    override val arrayValAlloc = new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val staticAlloc = new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
-    override val objFieldStore: AStoreThreaded[FieldAddr, PowersetAddr[FieldAddr, FieldAddr], Value] = new AStoreThreaded(initFieldStore)
-    override val arrayValStore: AStoreThreaded[ArrayElemAddr, PowersetAddr[ArrayElemAddr, ArrayElemAddr], Value] = new AStoreThreaded(initArrayVarStore)
-    override val staticVarStore: AStoreThreaded[StaticAddr, PowersetAddr[StaticAddr, StaticAddr], Value] = new AStoreThreaded(initStaticStore)
+    override val objAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ObjAddr(site))
+    override val objFieldAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
+    override val arrayAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ArrayAddr(site))
+    override val arrayValAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val staticAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
+    override val objFieldStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initFieldStore)
+    override val arrayValStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initArrayVarStore)
+    override val staticVarStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initStaticStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
@@ -201,8 +201,8 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
         using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
     //???
-    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, ArrayElemInitSite, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =
+      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
       )
 //???

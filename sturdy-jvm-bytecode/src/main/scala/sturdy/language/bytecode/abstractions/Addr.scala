@@ -1,29 +1,20 @@
 package sturdy.language.bytecode.abstractions
 
+import org.opalj.br.{Method, ObjectType}
 import sturdy.effect.store.ManageableAddr
 import sturdy.values.{Finite, Join}
-import sturdy.values.references.{AbstractAddr, AllocationSiteAddr, PowersetAddr}
+import sturdy.values.references.{AbstractAddr, PowersetAddr}
 
 // type to represent addresses.
 // addresses are somewhat typed, but this is currently not enforced through the type system,
 // this may change in the future
 // variants try to make use of sturdy_core and/or contain what they replace
 enum Addr extends ManageableAddr(true) with AbstractAddr[Addr]{
-  case Array(allocationSiteAddr: AllocationSiteAddr)
-  case ArrayElement(allocationSiteAddr: AllocationSiteAddr)
-  case Object(allocationSiteAddr: AllocationSiteAddr)
-  case Field(allocationSiteAddr: AllocationSiteAddr)
-  case Static(allocationSiteAddr: AllocationSiteAddr)
-
-  /* uncomment if needed
-  def addr: AllocationSiteAddr = this match {
-    case Addr.Array(allocationSiteAddr) => allocationSiteAddr
-    case Addr.ArrayElement(allocationSiteAddr) => allocationSiteAddr
-    case Addr.Object(allocationSiteAddr) => allocationSiteAddr
-    case Addr.Field(allocationSiteAddr) => allocationSiteAddr
-    case Addr.Static(allocationSiteAddr) => allocationSiteAddr
-  }
-  */
+  case Array(site: Site)
+  case ArrayElement(site: Site, index: Int)
+  case Object(site: Site)
+  case Field(site: Site, name: String, cls: ObjectType)
+  case Static(id: (ObjectType, String))
   
   // implementation without much thought put into it currently
   override def isEmpty: Boolean = false
@@ -36,7 +27,12 @@ given Finite[Addr] with {}
 
 type AddrSet = PowersetAddr[Addr, Addr]
 
+enum Site {
+  case Instruction(mth: Method, pc: Int, variant: Int = 0)
+  case ArrayElementInitialization(s: Site, ix: Int)
+  case FieldInitialization(s: Site, name: String, cls: ObjectType)
+  case StaticInitialization(obj: ObjectType, name: String)
+}
+
 // TODO:
-// - site types
-// - change enum variant fields, copy the information currently stored in the respective types
 // - use addr and addrset
