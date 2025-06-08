@@ -1,24 +1,19 @@
 package sturdy.language.bytecode
 
-import sturdy.data.MayJoin.NoJoin
-import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter, InstructionSite, JvmExcept}
+import sturdy.effect.failure.Failure
+import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter, JvmExcept}
 import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
-import org.opalj.br.ObjectType
-import org.opalj.br.analyses.Project
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
-import sturdy.values.objects.{ObjectOps, SizeOps, TypeOps}
-import sturdy.values.arrays.{ArrayOps, LiftedArrayOps}
+import sturdy.values.objects.{ SizeOps, TypeOps}
 
-import java.net.URL
 trait Interpreter:
 
   type J[A] <: MayJoin[A]
@@ -148,7 +143,7 @@ trait Interpreter:
                                    ): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => 
+      case (Int32(i1), Int32(i2)) =>
         val r = Combine[I32, W](i1, i2).map(Int32.apply)
         r
       case (Int64(i1), Int64(i2)) => Combine[I64, W](i1, i2).map(Int64.apply)
@@ -295,11 +290,10 @@ trait Interpreter:
       import Value.*
       override def instanceOf(v: Value, check: TypeRep): Value = v match
         case ReferenceValue(r1) => boolean(TypeOps.instanceOf(r1, check))
-
+        case _ => ??? // TODO: not implemented
 
     final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
       import Value.*
-
       override def is32Bit(v: Value): Value = v match
         case Int32(v) => boolean(SizeOps.is32Bit(v))
         case Int64(v) => boolean(SizeOps.is32Bit(v))
@@ -308,11 +302,10 @@ trait Interpreter:
         //case Obj(v) => boolean(SizeOps.is32Bit(v))
         //case Array(v) => boolean(SizeOps.is32Bit(v))
         case ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
+        case TopValue => ??? // TODO: not implemented
 
     //final val f32compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat32, Value.Int32.apply)
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
-
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, RefValue, TypeRep, ExcV, J]
-
