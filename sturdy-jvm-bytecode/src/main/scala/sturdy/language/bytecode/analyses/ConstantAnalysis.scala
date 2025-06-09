@@ -4,31 +4,28 @@ import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
-import sturdy.effect.{EffectStack, TrySturdy}
+import sturdy.effect.TrySturdy
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
-import sturdy.effect.callframe.{DecidableMutableCallFrame, JoinableDecidableCallFrame}
-import sturdy.effect.except.{Except, JoinedExcept}
+import sturdy.effect.callframe.JoinableDecidableCallFrame
+import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{CollectedFailures, Failure}
-import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack}
-import sturdy.effect.store.{AStoreThreaded, Store, TopStore}
+import sturdy.effect.operandstack.JoinableDecidableOperandStack
+import sturdy.effect.store.AStoreThreaded
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
-import sturdy.fix.context.Sensitivity
-import sturdy.fix.{ContextualFixpoint, Fixpoint, Logger}
-import sturdy.language.bytecode.ConcreteInterpreter.{Bool, TypeRep}
+import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, ConstantObjects, Exceptions, Numbers, Site, given}
-import sturdy.language.bytecode.generic.{ArrayElemInitSite, BytecodeFailure, BytecodeOps, FieldInitSite, FixIn, FixOut, JvmExcept, given}
-import sturdy.util.{Lazy, lazily}
-import sturdy.values.{Abstractly, Combine, Finite, MaybeChanged, Topped, Widen, Widening, given}
-import sturdy.values.booleans.{*, given}
-import sturdy.values.convert.{*, given}
-import sturdy.values.floating.{*, given}
-import sturdy.values.integer.{*, given}
-import sturdy.values.objects.{*, given}
-import sturdy.values.ordering.{*, given}
-import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps, given}
-import sturdy.values.references.{AllocationSiteAddr, PowersetAddr, given}
+import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
+import sturdy.values.{Topped, given}
+import sturdy.values.booleans.given
+import sturdy.values.convert.given
+import sturdy.values.floating.given
+import sturdy.values.integer.given
+import sturdy.values.objects.*
+import sturdy.values.ordering.given
+import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps}
+import sturdy.values.references.PowersetAddr
 
 import java.net.URL
 import scala.collection.mutable
@@ -72,7 +69,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
         )
       )).fixpoint
     
-    override val fixpointSuper = fixpoint
+    override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
     Fixpoint.DEBUG = false
     
     val joinUnit: WithJoin[Unit] = implicitly
@@ -87,11 +84,11 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ObjAddr(site))
-    override val objFieldAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
-    override val arrayAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => ArrayAddr(site))
-    override val arrayValAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val staticAlloc: Allocator[AddrSet, Site] = ??? // new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
+    override val objAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Object(site))) // new AAllocatorFromContext(site => ObjAddr(site))
+    override val objFieldAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Field(site, ???, ???))) // new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
+    override val arrayAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Array(site))) // new AAllocatorFromContext(site => ArrayAddr(site))
+    override val arrayValAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.ArrayElement(site, ???))) // new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
+    override val staticAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Static(???))) // new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
     override val objFieldStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initFieldStore)
     override val arrayValStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initArrayVarStore)
     override val staticVarStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initStaticStore)
@@ -183,16 +180,14 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     given refSizeOps: SizeOps[RefValue, Bool] with
       override def is32Bit(v: RefValue): Bool = Topped.Actual(true)
 
-
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
 
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
       new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
-      //???
+
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =
       new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
       )
-      //???
