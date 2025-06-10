@@ -22,6 +22,9 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   final def getOrElse(key: Key, symbol: Symbol, default: => Entry)(using J[Entry]): Entry =
     get(key, symbol).getOrElse(default)
 
+/**
+ * Note: Value is guaranteed to be a I32 type
+ */
 trait SizedSymbolTable[Value, Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
 
   def putNew(key: Key, limit: SizedSymbolTable.Limit[Size]): Unit

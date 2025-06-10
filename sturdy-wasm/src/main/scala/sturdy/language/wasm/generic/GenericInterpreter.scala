@@ -816,6 +816,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
     modInst.elements = elemInstances
     
+    // elements
     modInst.elements.zipWithIndex.foreach {
       case (elem@ElemInstance(_, _, mode), i) =>
         mode match {

@@ -34,7 +34,7 @@ object Parsing:
           compiler <- Compiler[IO](blocker)
           mod <- compiler.compile(path, blocker)
         } yield mod
-      }.timeout(FiniteDuration(1000000, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing of $path timed out")
     }
