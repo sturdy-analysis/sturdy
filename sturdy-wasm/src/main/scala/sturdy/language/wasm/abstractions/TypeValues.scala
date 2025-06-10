@@ -53,4 +53,7 @@ trait TypeValues extends Interpreter:
     case ConcreteInterpreter.Value.Float32(f) => Value.Float32(topF32)
     case ConcreteInterpreter.Value.Float64(d) => Value.Float64(topF64)
 
-
+  def recursiveCallLogger(analysis: Instance): RecursiveCallLogger[Value] =
+    val recCall = new RecursiveCallLogger[Value]
+    analysis.fixpoint.addContextFreeLogger(recCall)
+    recCall

@@ -94,6 +94,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, config)
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
+    val log = TypeAnalysis.recursiveCallLogger(interp)
 
     val modInst = interp.initializeModule(module)
     interp.failure.fallible({
@@ -147,6 +148,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
       "deadLabelsIf" -> deadLabelsIf.size,
       "eliminatable" -> eliminatable,
       "eliminatablePercent" -> eliminatablePercent,
+      "recursiveFunctions" -> log.recursiveFunc.size
     )
 object TypeRunnable:
   def getCsvHeadders: String =
@@ -164,6 +166,7 @@ object TypeRunnable:
       "deadLabelsIf" -> 0,
       "eliminatable" -> 0,
       "eliminatablePercent" -> 0,
+      "recursiveFunctions" -> 0
     ).getCsvHeaders
 
 

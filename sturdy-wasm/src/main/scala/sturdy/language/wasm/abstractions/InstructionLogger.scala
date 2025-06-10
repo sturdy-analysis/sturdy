@@ -1,16 +1,35 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{noJoin, CombineEquiList}
+import sturdy.data.{CombineEquiList, noJoin}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.fix
-import sturdy.language.wasm.generic.{FixIn, FixOut}
-import sturdy.language.wasm.generic.InstLoc
+import sturdy.language.wasm.generic.{FixIn, FixOut, FuncId, InstLoc}
 import sturdy.values.*
 import swam.OpCode
 import swam.syntax
 import swam.syntax.Inst
+
+import scala.collection.mutable
+
+
+class RecursiveCallLogger[V] extends fix.Logger[FixIn, FixOut[V]]:
+
+  val activeCalls: mutable.Set[FuncId] = mutable.Set.empty
+  val recursiveFunc: mutable.Set[FuncId] = mutable.Set.empty
+
+  override def enter(dom: FixIn): Unit = dom match {
+    case FixIn.EnterWasmFunction(id, _, _) => if activeCalls.add(id) then () else recursiveFunc.add(id)
+    case FixIn.EnterHostFunction(id, _) => if activeCalls.add(id) then () else recursiveFunc.add(id)
+    case _ => ()
+  }
+
+  override def exit(dom: FixIn, codom: TrySturdy[FixOut[V]]): Unit = dom match {
+    case FixIn.EnterWasmFunction(id, _, _) => activeCalls.remove(id)
+    case FixIn.EnterHostFunction(id, _) => activeCalls.remove(id)
+    case _ => ()
+  }
 
 trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, FixOut[V]]:
 
