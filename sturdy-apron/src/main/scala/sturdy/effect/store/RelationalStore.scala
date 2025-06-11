@@ -208,10 +208,13 @@ final class RelationalStore
   def isBottom: Boolean =
     this._abstract1.isBottom(manager)
 
-  def satisfies(constraints: ApronCons[PhysicalAddress[Context], Type]*): Boolean =
-    constraints.forall(cons =>
-      _abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment))
-    )
+  def satisfies(cons: ApronCons[PhysicalAddress[Context], Type]): Topped[Boolean] =
+    if(_abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment)))
+      Topped.Actual(true)
+    else if(_abstract1.satisfy(manager, cons.negated.toApron(_abstract1.getEnvironment)))
+      Topped.Actual(false)
+    else
+      Topped.Top
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
     val env = _abstract1.getEnvironment

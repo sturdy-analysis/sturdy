@@ -106,6 +106,8 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
 
+  def satisfies(v: ApronCons[Addr,Type]): Topped[Boolean]
+
   def getBoolean(v: ApronBool[Addr, Type]): Topped[Boolean] =
     v match
       case ApronBool.Constraint(cons) => getBoolean(cons)
@@ -224,6 +226,8 @@ final class ApronRecencyState
   inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
     relationalStore.getFloatBound(convertExpr.virtToPhys(expr))
 
+  inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type]): Topped[Boolean] =
+    convertExpr.virtToPhys(v).map(relationalStore.satisfies).getOrElse(Topped.Top)
 
   override def effects: EffectStack = effectStack
 

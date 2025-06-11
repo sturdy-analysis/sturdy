@@ -4,6 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import apron.*
 import gmp.*
+import sturdy.apron.ApronExpr.bottomInterval
 import sturdy.values.floating.FloatSpecials
 import sturdy.values.references.{*, given}
 import sturdy.values.types.BaseType
@@ -50,11 +51,11 @@ class ApronLibraryTest extends AnyFunSuite:
 
   test("{x ∈ [1,2], y ∈ [3,4], z ∈ [6,7]}.fold([x,y,z]) = { x ∈ [1,7] }") {
 
-    val x = "x"
-    val y = "y"
-    val z = "z"
-    val inames = Array(x, y, z)
-    val fnames: Array[String] = Array()
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val z = ApronVar("z")
+    val inames = Array[Var](x, y, z)
+    val fnames: Array[Var] = Array()
     val env = new Environment(inames, fnames)
     val manager: Manager = new Polka(false)
     val aState = new Abstract1(manager, env)
@@ -62,11 +63,15 @@ class ApronLibraryTest extends AnyFunSuite:
     aState.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env), null)
     aState.assign(manager, y, ApronExpr.constant(Interval(3, 4), BaseType[Int]).toIntern(env), null)
     aState.assign(manager, z, ApronExpr.constant(Interval(6, 7), BaseType[Int]).toIntern(env), null)
-    aState.fold(manager, Array(x,y,z))
+    aState.fold(manager, Array[Var](x,y,z))
 
     aState.getBound(manager, x) shouldBe Interval(1,7)
     aState.getEnvironment.hasVar(y) shouldBe false
     aState.getEnvironment.hasVar(z) shouldBe false
+
+    val cons = ApronCons.lt(ApronExpr.addr("x", BaseType[Int]), ApronExpr.floatConstant(bottomInterval, FloatSpecials.PosInfinity, BaseType[Int]))
+    aState.satisfy(manager, cons.toApron(aState.getEnvironment)) shouldBe false
+    aState.satisfy(manager, cons.negated.toApron(aState.getEnvironment)) shouldBe false
   }
 
   def compare(manager: Manager, a1: Abstract1, a2: Abstract1) =
@@ -118,6 +123,19 @@ class ApronLibraryTest extends AnyFunSuite:
     stateJoined.isBottom(manager) shouldBe true
   }
 
+  test("modulo") {
+    val env = new Environment()
+    val manager: Manager = new Polka(false)
+    val a1 = new Abstract1(manager, env)
+    def modulo(n: Int, m: Int) =
+      a1.getBound(manager, ApronExpr.intMod(ApronExpr.intLit(n, BaseType[Int]), ApronExpr.intLit(m, BaseType[Int]), BaseType[Int]).toIntern(env))
+
+    modulo(5, 5) shouldBe Interval(0,0)
+    modulo(6, 5) shouldBe Interval(1,1)
+    modulo(-1, 5) shouldBe Interval(-1,-1)
+    modulo(-5, 5) shouldBe Interval(0,0)
+    modulo(-6, 5) shouldBe Interval(-1,-1)
+  }
 
   test("Abstract1.hashcode()") {
     val x = "x"

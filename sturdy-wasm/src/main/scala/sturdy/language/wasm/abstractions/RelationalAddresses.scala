@@ -1,5 +1,6 @@
 package sturdy.language.wasm.abstractions
 
+import sturdy.apron.ApronExpr
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -13,6 +14,7 @@ trait RelationalAddresses extends RelationalTypes:
     case CallFrame(callFramePosition: Int, programPos: Option[FixIn], function: FrameData)
     case Stack(stackPosition: Int, programPosition: FixIn, function: FrameData)
     case Global(addr: Int)
+    case Heap(memoryAddr: MemoryAddr, storeInstruction: FixIn)
     case Temp(programPosition: FixIn, tpe: Type)
 
     override def toString: String =
@@ -20,6 +22,7 @@ trait RelationalAddresses extends RelationalTypes:
         case CallFrame(callFramePosition, Some(programPos), function) => s"L$callFramePosition@$function:$programPos"
         case CallFrame(callFramePosition, None, function) => s"L$callFramePosition@$function"
         case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"
+        case Heap(memoryAddr, storeInstruction) => s"H$storeInstruction@$memoryAddr"
         case Global(addr) => s"G$addr"
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
@@ -46,16 +49,24 @@ trait RelationalAddresses extends RelationalTypes:
       AddrCtx.Stack(idx, fixIn, callFrame.data)
   )
 
+  def heapAlloc[Bytes](rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,ApronExpr[VirtAddr, Type],Bytes), AddrCtx] = AAllocatorFromContext(
+    (key, _, _) =>
+      val fixIn = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+      AddrCtx.Heap(key, fixIn)
+  )
+
   given Ordering[AddrCtx] = {
     case (AddrCtx.CallFrame(callFramePos1, progPos1, data1), AddrCtx.CallFrame(callFramePos2, progPos2, data2)) => Ordering[(FrameData, Option[FixIn], Int)].compare((data1, progPos1, callFramePos1), (data2, progPos2, callFramePos2))
     case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
+    case (AddrCtx.Heap(memAddr1, storeInst1), AddrCtx.Heap(memAddr2, storeInst2)) => Ordering[(MemoryAddr, FixIn)].compare((memAddr1, storeInst1),(memAddr2, storeInst2))
     case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
     case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{
       case _: AddrCtx.CallFrame => 1
       case _: AddrCtx.Stack => 2
-      case _: AddrCtx.Global => 3
-      case _: AddrCtx.Temp => 4
+      case _: AddrCtx.Heap => 3
+      case _: AddrCtx.Global => 4
+      case _: AddrCtx.Temp => 5
     }.compare(ctx1, ctx2)
 
   }

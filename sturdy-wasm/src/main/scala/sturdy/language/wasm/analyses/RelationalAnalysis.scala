@@ -6,7 +6,7 @@ import sturdy.apron.ApronExpr.*
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy}
-import sturdy.effect.bytememory.{ConstantAddressMemory, TopMemory}
+import sturdy.effect.bytememory.{ConstantAddressMemory, HasSize, RelationalMemory, TopMemory}
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
@@ -23,6 +23,7 @@ import sturdy.language.wasm.generic.{*, given}
 import sturdy.language.wasm.abstractions.Control.Exc
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
+import sturdy.values.bytes.{*, given}
 import sturdy.values.config.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -42,7 +43,7 @@ import scala.collection.{IndexedSeqView, mutable}
 import WasmFailure.*
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
-import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.{DomLogger, Logger}
 
 import java.math.BigInteger
@@ -51,14 +52,14 @@ import scala.math
 
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
-  final type Addr = I32
-  final type Size = I32
+  final type Addr = ApronExpr[VirtAddr, Type]
+  final type Size = ApronExpr[VirtAddr, Type]
   final type FuncIx = apron.Interval
   final type FunV = Powerset[FunctionInstance]
   final type I64 = ApronExpr[VirtAddr, Type]
   final type F32 = ApronExpr[VirtAddr, Type]
   final type F64 = ApronExpr[VirtAddr, Type]
-  final type Bytes = Interval
+  final type Bytes = sturdy.values.bytes.Bytes[Value]
 
   import Value.*
   import Type.*
@@ -68,7 +69,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   final override def topF64: F64 = ApronExpr.floatConstant(ApronExpr.topInterval, FloatSpecials.Top, F64Type)
 
   val topSize: Top[Size] = new Top[Size]:
-    override def top: Size = topI32
+    override def top: Size = constant(ApronExpr.topInterval, I32Type)
 
   final override def asBoolean(v: Value)(using failure: Failure): Bool =
     v match
@@ -81,8 +82,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
   given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match
-      case Int32(v) => v
-      case TopValue => topI32
+      case Int32(v) => v.asApronExpr
+      case TopValue => constant(ApronExpr.topInterval, I32Type)
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     override def valueToFuncIx(v: Value): FuncIx =
@@ -90,8 +91,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       apronState.getInterval(expr)
 
     override def valToSize(v: Value): Size = v match
-      case Int32(v) => v
-      case TopValue => topI32
+      case Int32(v) => v.asApronExpr
+      case TopValue => constant(ApronExpr.topInterval, I32Type)
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     override def sizeToVal(sz: Size): Value =
@@ -239,7 +240,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
-    val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory(using implicitly[Top[Bytes]], topSize)
+    val byteStore: RecencyStore[AddrCtx, VirtualAddress[AddrCtx], Bytes] = new RecencyStore(AStoreThreaded(Map()), addressTranslation)
+    val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Bytes] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Bytes](
+      apronState,
+      byteStore,
+      sturdy.values.bytes.Bytes(Value.Int64(ApronExpr.intLit(0, I64Type)), NumericInterval(4,4), Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+      heapAlloc(rootFrameData))
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
         (key: Unit, sym: GlobalAddr, tpe: Type) =>
