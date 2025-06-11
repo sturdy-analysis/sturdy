@@ -48,7 +48,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
   override type FunV = Powerset[FunctionInstance]
   override type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32.value
     override def valToIdx(v: Value): Index = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
@@ -57,8 +57,9 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToRef(v: ConstantTaintAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[ConstantTaintAnalysis.RefValue]): ConstantTaintAnalysis.Value = ???
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
+    override def liftBytes(b: Seq[Byte]): Seq[AByte] = ???
     override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
-    override def intToVal(i: Int): Value = ???
+    override def liftInt(i: Int): Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???

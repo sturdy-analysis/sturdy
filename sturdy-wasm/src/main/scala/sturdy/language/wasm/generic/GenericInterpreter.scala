@@ -1,5 +1,6 @@
 package sturdy.language.wasm.generic
 
+import scodec.bits.ByteVector
 import sturdy.data.{CombineUnit, JOptionC, MayJoin, noJoin}
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.callframe.DecidableMutableCallFrame
@@ -16,6 +17,7 @@ import sturdy.{IsSound, Soundness, fix}
 import swam.*
 import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.syntax.*
+import swam.syntax.i32.Store8
 
 import scala.collection.immutable.VectorBuilder
 
@@ -235,14 +237,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
         }
       case TableInit(ix, el) =>
-        val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
+        val elem = module.elements.lift(el).getOrElse(fail(ElementSegmentOutOfBounds, el.toString))
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
         // assert unsigned s + n <= elemSize && d + n <= tableSize
         val tableSize = tables.size(toTableAddr(ix))
         val tableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
-        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), intToVal(elem.functions.size))
+        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), liftInt(elem.functions.size))
         val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
         branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.init access")) {
           val elemRefVs = elem.functions.map {
@@ -276,6 +278,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       fail(UnboundFunctionIndex, "Cannot call extern reference")
   }
 
+  val pageSize: Int = 65536
+  val maxPageNum: Int = 65536
+
   def evalMemoryInst(inst: Inst): Unit = inst match
     case i: LoadInst => load(i)
     case i: LoadNInst => load(i)
@@ -292,6 +297,40 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
         (sizeToVal)
       stack.push(res)
+    case MemoryFill =>
+      val n = stack.popOrAbort()
+      val v = stack.popOrAbort() // val
+      val d = stack.popOrAbort()
+      val memSize = num.evalIBinop(i32.Mul, sizeToVal(memory.size(memoryIndex)), num.evalNumeric(i32.Const(pageSize)))
+      val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), memSize)
+      branchOpsUnit.boolBranch(offsetCheck)(fail(MemoryAccessOutOfBounds, "Invalid memory.fill access")) {
+        memory.fill(memoryIndex, valToAddr(d), valToSize(n), encode(v, SomeCC(i32.Store8(0, 0), false))).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.fill access"))
+      }
+    case MemoryCopy =>
+      val n = stack.popOrAbort()
+      val s = stack.popOrAbort()
+      val d = stack.popOrAbort()
+      // assert unsigned s + n <= memSize && d + n <= memSize
+      val memSize = num.evalIBinop(i32.Mul, sizeToVal(memory.size(memoryIndex)), num.evalNumeric(i32.Const(pageSize)))
+      val srcCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), memSize)
+      val dstCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), memSize)
+      val check = num.evalIBinop(i32.Or, srcCheck, dstCheck)
+      branchOpsUnit.boolBranch(check)(fail(MemoryAccessOutOfBounds, "Invalid memory.copy access")) {
+        memory.copy(memoryIndex, valToAddr(s), valToAddr(d), valToSize(n)).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.copy access"))
+      }
+    case MemoryInit(ix) => 
+      val n = stack.popOrAbort()
+      val s = stack.popOrAbort()
+      val d = stack.popOrAbort()
+      
+      val data = module.data.lift(ix).getOrElse(fail(DataSegmentOutOfBounds, ix.toString))
+      memory.init(memoryIndex, valToAddr(d), valToAddr(s), valToSize(n), liftBytes(data.data.toIterable.toSeq)).getOrElse(
+        fail(MemoryAccessOutOfBounds, s"Cannot initialize memory with $data at address $d with size $n from offset $s in current memory.")
+      )
+      
+    case DataDrop(ix) =>
+      module.data.lift(ix).getOrElse(fail(MemoryAccessOutOfBounds, ix.toString))
+      module.data = module.data.updated(ix, DataInstance(ByteVector.empty))
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: LoadInst | LoadNInst): Unit =
@@ -325,9 +364,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def memoryIndex: MemoryAddr =
     module.memoryAddrs(0)
 
-  def tableIndex(i: Int): TableAddr =
-    module.tableAddrs(i)
-
   def globalTableIndex: TableAddr =
     TableAddr(0)
 
@@ -352,8 +388,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     else inst match
       case i: VarInst => evalVarInst(i)
       case i: TableInst => evalTableInst(i, loc)
+      case i: TableMiscOp => evalTableInst(i, loc)
+      case i: MemoryMiscOp => evalMemoryInst(i)
       case i: ReferenceInst => evalRefInst(i)
-      case op: Miscop =>
+      case op: SatConvertop =>
         val v = stack.popOrAbort()
         stack.push(num.evalMiscop(op, v))
       case Drop => stack.popOrAbort()
@@ -743,7 +781,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
-        tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(intToVal(min)), max.map(m => valToSize(intToVal(m)))))
+        tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(liftInt(min)), max.map(m => valToSize(liftInt(m)))))
         tabCount += 1
         var i = 0
         while (i < min) {
@@ -765,9 +803,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
     // data
     modInst.data = module.data.map {
-      case Data(_, _, init) => DataInstance(init.toByteVector)
+      case Data(init, _) => DataInstance(init.toByteVector)
     }
-    // we don't need elems currently
     // exports
     modInst.exports = module.exports.map {
       case Export(fieldName, kind, index) =>
@@ -782,27 +819,24 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     // initialize tables and memories
     // memory
     module.data.zipWithIndex.foreach {
-      case (data@Data(memIdx, off, init), i) =>
-        assert(memIdx == 0)
-        val id = BlockId(data)
-        loc = modInst.registerBlockSizes(id, loc, off)
-        val base = evalInstructionSequence(id, off, modInst, loc)
-        val bytes = init.toByteVector.toIterable
-        callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
-          bytes.zipWithIndex.foreach { (byte, byteIdx) =>
-            stack.push(base)
-            stack.push(num.evalNumeric(i32.Const(byte.toInt)))
-            store(i32.Store8(0, byteIdx))
-          }
+      case (data@Data(init, mode), i) =>
+        mode match {
+          case DataMode.Passive => ()
+          case DataMode.Active(memoryIdx, offset) =>
+            val id = BlockId(data)
+            loc = modInst.registerBlockSizes(id, loc, offset)
+            callFrame.withNew(FrameData(1, modInst), Iterable.empty, loc) {
+              val baseAddr = evalInstructionSequence(id, offset, modInst, loc)
+              stack.push(baseAddr)
+              stack.push(num.evalNumeric(i32.Const(0)))
+              stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
+              evalMemoryInst(MemoryInit(i))
+              evalMemoryInst(DataDrop(i))
+            }
         }
-      // in case we want to use memory.init here:
-      //stack.push(num.evalNumeric(i32.Const(0)))
-      //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
-      //memoryInit(i)
-      // memoryDrop(i) for the current wasm version
     }
 
-    // tables
+    // elements
     var elemInstances: Vector[ElemInstance] = Vector.empty
     module.elem.foreach {
       case elem@Elem(_, init, mode) =>
@@ -815,8 +849,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         elemInstances = elemInstances :+ ElemInstance(functions, elem.reftype, mode)
     }
     modInst.elements = elemInstances
-    
-    // elements
+
     modInst.elements.zipWithIndex.foreach {
       case (elem@ElemInstance(_, _, mode), i) =>
         mode match {

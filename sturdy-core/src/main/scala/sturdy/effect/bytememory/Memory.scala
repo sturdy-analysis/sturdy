@@ -10,5 +10,8 @@ trait Memory[Key, Addr, Bytes, Size, J[_] <: MayJoin[_]] extends Effect:
   def write(key: Key, addr: Addr, bytes: Bytes): JOption[J, Unit]
   def size(key: Key): Size
   def grow(key: Key, delta: Size): JOption[J, Size]
+  def fill(key: Key, addr: Addr, size: Size, value: Bytes): JOption[J, Unit]
+  def copy(key: Key, srcAddr: Addr, dstAddr: Addr, size: Size): JOption[J, Unit]
+  def init(key: Key, tableAddr: Addr, dataAddr: Addr, size: Size, dataBytes: Bytes): JOption[J, Unit]
   def putNew(key: Key, initSize: Size, sizeLimit: scala.Option[Size]): Unit
   

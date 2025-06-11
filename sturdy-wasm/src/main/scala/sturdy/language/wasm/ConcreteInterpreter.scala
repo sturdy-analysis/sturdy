@@ -66,12 +66,12 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type FunV = FunctionInstance
   override type RefV = RefValue
   
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, NoJoin] with
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, NoJoin] with
     override def valToAddr(v: Value): Int = v.asInt32
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
-    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(i))
+    override def liftInt(i: Int): Value = Value.Num(NumValue.Int32(i))
 
     override def valToRef(v: ConcreteInterpreter.Value, funcs: Vector[FunctionInstance]): ConcreteInterpreter.RefValue = v match {
       case Value.Ref(ref) => ref
@@ -79,6 +79,8 @@ object ConcreteInterpreter extends Interpreter with Control:
     }
     
     override def refToVal(r: ConcreteInterpreter.RefValue): ConcreteInterpreter.Value = Value.Ref(r)
+    
+    override def liftBytes(b: Seq[Byte]): Seq[Byte] = b
     
     override def refVToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
       r match {

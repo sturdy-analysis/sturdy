@@ -44,7 +44,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type FunV = Powerset[FunctionInstance]
   type RefV = Powerset[RefValue]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -53,10 +53,11 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     // TODO: implement this for the TypeAnalysis
     override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
+    override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = ???
     override def makeNullRefV(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
-    override def intToVal(i: Int): Value = ???
+    override def liftInt(i: Int): Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def isNullRef(r: Value): TypeAnalysis.Value = ???

@@ -42,6 +42,12 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     newMem.foreach(memories += key -> _)
     res
 
+  override def fill(key: Key, addr: Topped[Int], size: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] = ???
+
+  override def copy(key: Key, srcAddr: Topped[Int], dstAddr: Topped[Int], size: Topped[Int]): JOption[WithJoin, Unit] = ???
+
+  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], size: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = ???
+  
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     initSize match
       case Topped.Top => // unknown size

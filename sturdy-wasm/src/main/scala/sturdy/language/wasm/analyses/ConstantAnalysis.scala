@@ -48,7 +48,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
   type FunV = Powerset[FunctionInstance]
   type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -80,7 +80,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
           }
         }
 
-    override def intToVal(i: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(i)))
+    override def liftBytes(b: Seq[Byte]): Seq[Topped[Byte]] = b.map(Topped.Actual(_))
+
+    override def liftInt(i: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(i)))
 
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 

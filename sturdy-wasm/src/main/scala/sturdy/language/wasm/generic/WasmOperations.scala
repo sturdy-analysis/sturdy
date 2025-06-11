@@ -44,16 +44,17 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   def valToAddr(v: V): Addr
   def valToIdx(v: V): Index
   def valToRef(v: V, funcs: Vector[FunctionInstance]): RefV
   def refToVal(r: RefV): V
+  def liftBytes(b: Seq[Byte]): Bytes
   
   def valToSize(v: V): Size
 
@@ -64,7 +65,7 @@ trait SpecialWasmOperations[V, Addr, Size, Index, FunV, RefV, J[_] <: MayJoin[_]
    */
   def sizeToVal(sz: Size): V
 
-  def intToVal(i: Int): V
+  def liftInt(i: Int): V
   def refVToFunV(r: RefV): FunV
 
   def makeNullRefV(t: ReferenceType): RefV

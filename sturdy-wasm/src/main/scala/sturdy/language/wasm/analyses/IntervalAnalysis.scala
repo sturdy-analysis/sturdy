@@ -48,7 +48,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type FunV = Powerset[FunctionInstance]
   type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
@@ -56,9 +56,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     // TODO: implement this for the IntervalAnalysis
     override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
     override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
+    override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
-    override def intToVal(i: Int): Value = ???
+    override def liftInt(i: Int): Value = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???

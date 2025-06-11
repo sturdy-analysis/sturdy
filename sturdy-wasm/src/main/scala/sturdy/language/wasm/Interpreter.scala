@@ -184,12 +184,12 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J]
+     , specOps: SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, Index, FunV, RefV, J] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 

@@ -30,7 +30,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
-  val EXCLUDE_MEM_GROW = true
+  val EXCLUDE_MEM_GROW = false
 
   Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
     !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
@@ -122,7 +122,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)
       case _: AssertUnlinkable => // skip
-      case _: AssertInvalid => // skip
+      case _: AssertInvalid => //todo: implement. This assertion should be checked
       case _: AssertMalformed => // skip
       case _: AssertExhaustion => // skip
       case action: Action => runAction(action)
