@@ -325,7 +325,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       
       val data = module.data.lift(ix).getOrElse(fail(DataSegmentOutOfBounds, ix.toString))
       memory.init(memoryIndex, valToAddr(d), valToAddr(s), valToSize(n), liftBytes(data.data.toIterable.toSeq)).getOrElse(
-        fail(MemoryAccessOutOfBounds, s"Cannot initialize memory with $data at address $d with size $n from offset $s in current memory.")
+        fail(MemoryAccessOutOfBounds, s"Cannot initialize memory with $data at address $d with size $n from offset $s")
       )
       
     case DataDrop(ix) =>
@@ -337,7 +337,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val addr = effectiveAddr(inst.offset)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
-    memory.read(memIdx, addr, length).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory.")) {
+    memory.read(memIdx, addr, length).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr")) {
       bytes =>
         val v = decode(bytes, SomeCC(inst, false))
         stack.push(v)
