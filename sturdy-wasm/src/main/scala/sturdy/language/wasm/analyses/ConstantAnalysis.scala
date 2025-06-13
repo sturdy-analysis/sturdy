@@ -82,8 +82,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def liftBytes(b: Seq[Byte]): Seq[Topped[Byte]] = b.map(Topped.Actual(_))
 
-    override def liftInt(i: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(i)))
-
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = Powerset(f)
 
     override def funVToFuncInst(fVal: Powerset[FunctionInstance]): FunctionInstance =

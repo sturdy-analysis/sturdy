@@ -59,7 +59,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
     override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
     override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
-    override def liftInt(i: Int): Value = ???
     override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???

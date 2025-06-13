@@ -59,7 +59,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def makeNullRefV(t: ReferenceType): Powerset[ConstantTaintAnalysis.RefValue] = ???
     override def liftBytes(b: Seq[Byte]): Seq[AByte] = ???
     override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[ConstantTaintAnalysis.RefValue] = ???
-    override def liftInt(i: Int): Value = ???
     override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
     override def refVToFunV(r: Powerset[ConstantTaintAnalysis.RefValue]): Powerset[FunctionInstance] = ???

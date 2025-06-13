@@ -71,7 +71,6 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToIdx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
-    override def liftInt(i: Int): Value = Value.Num(NumValue.Int32(i))
 
     override def valToRef(v: ConcreteInterpreter.Value, funcs: Vector[FunctionInstance]): ConcreteInterpreter.RefValue = v match {
       case Value.Ref(ref) => ref

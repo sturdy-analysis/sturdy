@@ -64,8 +64,6 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
    * @return sz wrapped in a i32 value
    */
   def sizeToVal(sz: Size): V
-
-  def liftInt(i: Int): V
   def refVToFunV(r: RefV): FunV
 
   def makeNullRefV(t: ReferenceType): RefV

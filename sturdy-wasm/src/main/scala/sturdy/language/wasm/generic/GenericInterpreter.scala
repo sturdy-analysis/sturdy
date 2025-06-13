@@ -244,7 +244,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         // assert unsigned s + n <= elemSize && d + n <= tableSize
         val tableSize = tables.size(toTableAddr(ix))
         val tableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
-        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), liftInt(elem.functions.size))
+        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), i32ops.integerLit(elem.functions.size))
         val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
         branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.init access")) {
           val elemRefVs = elem.functions.map {
@@ -781,7 +781,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
-        tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(liftInt(min)), max.map(m => valToSize(liftInt(m)))))
+        tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(i32ops.integerLit(min)), max.map(m => valToSize(i32ops.integerLit(m)))))
         tabCount += 1
         var i = 0
         while (i < min) {
