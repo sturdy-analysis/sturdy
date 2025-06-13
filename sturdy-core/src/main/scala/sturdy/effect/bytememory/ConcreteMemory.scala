@@ -73,7 +73,7 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
 
   override def init(key: Key, tableAddr: Int, dataAddr: Int, byteAmount: Int, dataBytes: Seq[Byte]): JOption[NoJoin, Unit] =
     val mem = memories(key)
-    if (tableAddr >= 0 && dataAddr >= 0 && byteAmount >= 0 && tableAddr + byteAmount <= mem.size) {
+    if (tableAddr >= 0 && dataAddr >= 0 && byteAmount >= 0 && tableAddr + byteAmount <= mem.size && dataAddr + byteAmount <= dataBytes.size) {
       if (!mem.sizeLimit.forall(lim => tableAddr + byteAmount <= lim * pageSize && dataAddr + byteAmount <= lim * pageSize)) {
         return JOptionC.none
       }
