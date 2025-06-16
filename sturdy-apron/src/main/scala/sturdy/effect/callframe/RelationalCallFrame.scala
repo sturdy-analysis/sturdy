@@ -145,7 +145,7 @@ final class RelationalCallFrame
       return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$addressCallFrame.getFrameNames")
     val cVals: Array[cVal] = c.getVars
     val aVals: ArraySeq[Val] = getVars
-    seqIsSound.isSound(cVals, aVals)
+    seqIsSound.isSound(cVals.toSeq, aVals)
 
   override def toString: String = s"$addressCallFrame, ${apronState.recencyStore.addressTranslation}, ${apronState.relationalStore}"
 
