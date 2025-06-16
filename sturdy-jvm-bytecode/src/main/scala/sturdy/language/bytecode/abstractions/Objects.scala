@@ -1,29 +1,25 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType, Type}
-import org.opalj.constraints.NullValue
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType, Type}
 import sturdy.data
-import sturdy.data.{JOption, JOptionA, JOptionC, MayJoin}
+import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.data.MayJoin.WithJoin
-import sturdy.data.MakeJoined
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
-import sturdy.effect.store.{ManageableAddr, Store}
-import sturdy.language.bytecode.ConcreteInterpreter.Instance
-import sturdy.language.bytecode.generic.BytecodeFailure.MethodNotFound
-import sturdy.language.bytecode.{AuxillaryFunctions, ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.generic.{ArrayElemInitSite, FieldInitSite, InstructionSite}
-import sturdy.values.{Combine, Finite, Join, MaybeChanged, Structural, Topped, Widening}
+import sturdy.effect.store.Store
+import sturdy.language.bytecode.{AuxillaryFunctions, Interpreter}
+import sturdy.language.bytecode.generic.FieldInitSite
 import sturdy.values.arrays.{Array, ArrayOps}
-import sturdy.values.objects.{Object, ObjectOps}
-import sturdy.values.references.{AbstractAddr, AllocationSiteAddr}
-import sturdy.language.bytecode.AuxillaryFunctions.*
-import sturdy.values.Topped.Actual
+import sturdy.values.{Combine, Finite, MaybeChanged, Structural, Topped, Widening}
 import sturdy.values.integer.NumericInterval
+import sturdy.values.objects.{Object, ObjectOps}
+import sturdy.values.Topped.Actual
 
 import java.net.URL
+import scala.util.boundary
+import scala.util.boundary.break
 
 enum AbstractReferenceValue[A, O]:
   case maybeNullObject(obj: O, maybeNull: Boolean)
@@ -232,13 +228,13 @@ trait ConstantObjects extends Interpreter, Numbers:
           case (tmp1: AbstractReferenceValue.maybeNullArray[constantArray, constantObj], tmp2: AbstractReferenceValue.maybeNullArray[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
             val srcArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp1.array
             val destArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp2.array
-            for (i <- 0 until length.get) {
-              if (srcPos.get + i >= srcArray.vals.size || destPos.get + i >= destArray.vals.size)
-                return JOptionA.none
-              else
-                val toCopy = store.read(srcArray.vals(srcPos.get + i)).get
-                store.write(destArray.vals(destPos.get + i), toCopy)
-            }
+            boundary:
+              for (i <- 0 until length.get)
+                if (srcPos.get + i >= srcArray.vals.size || destPos.get + i >= destArray.vals.size)
+                  break(JOptionA.none)
+                else
+                  val toCopy = store.read(srcArray.vals(srcPos.get + i)).get
+                  store.write(destArray.vals(destPos.get + i), toCopy)
             JOptionA.some(())
           case _ => ???
       else
@@ -271,6 +267,7 @@ trait ConstantObjects extends Interpreter, Numbers:
       case fieldType: CharType => Value.Int32(topI32)
       case fieldType: ObjectType => Value.ReferenceValue(topRef)
       case fieldType: ArrayType => Value.ReferenceValue(topRef)
+      case _ => ??? // TODO: not implemented
  /*
 trait TypeObjects extends Interpreter:
   final type NullVal = Null
@@ -589,13 +586,13 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
             case (tmp1: AbstractReferenceValue.maybeNullArray[constantArray, constantObj], tmp2: AbstractReferenceValue.maybeNullArray[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
               val srcArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp1.array
               val destArray: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp2.array
-              for (i <- 0 until length.low) {
-                if (srcPos.low + i >= srcArray.vals.size || destPos.low + i >= destArray.vals.size)
-                  return JOptionA.none
-                else
-                  val toCopy = store.read(srcArray.vals(srcPos.low + i)).get
-                  store.write(destArray.vals(destPos.low + i), toCopy)
-              }
+              boundary:
+                for (i <- 0 until length.low)
+                  if (srcPos.low + i >= srcArray.vals.size || destPos.low + i >= destArray.vals.size)
+                    break(JOptionA.none)
+                  else
+                    val toCopy = store.read(srcArray.vals(srcPos.low + i)).get
+                    store.write(destArray.vals(destPos.low + i), toCopy)
               JOptionA.some(())
             case _ => ???
         else
@@ -694,3 +691,4 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
       case fieldType: CharType => Value.Int32(topI32)
       case fieldType: ObjectType => Value.ReferenceValue(topRef)
       case fieldType: ArrayType => Value.ReferenceValue(topRef)
+      case _ => ??? // TODO: not implemented
