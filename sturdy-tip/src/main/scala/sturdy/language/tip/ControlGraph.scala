@@ -145,6 +145,7 @@ class Transformer(funs: Seq[Function]):
       body.foldRight(skip)((s, n) => Node.Seq(transStm(s), n))
     case Stm.Output(e) => Node.Atom(s)
     case Stm.Error(e) => Node.Atom(s)
+    case Stm.Assert(e) => ??? // TODO
 
 
 class Resolver(root: Node):
