@@ -1,34 +1,29 @@
 package sturdy.language.bytecode.generic
 
 import org.opalj.br.instructions.*
-import sturdy.effect.operandstack.{DecidableOperandStack, OperandStack}
-import sturdy.values.floating.*
-import sturdy.values.integer.*
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin, noJoin}
-import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame}
+import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
-import sturdy.effect.failure.{CFailureException, Failure, FailureKind}
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocator
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ObjectTypes, ReferenceType, ShortType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType}
 import org.opalj.io.process
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.values.arrays.ArrayOps
-import sturdy.values.arrays.Array
-import sturdy.values.objects.{Object, ObjectOps, TypeOps}
-import sturdy.values.ordering.EqOps
+import sturdy.values.objects.ObjectOps
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
-import sturdy.values.{Finite, Join, MaybeChanged, Powerset}
+import sturdy.values.{Finite, Join, MaybeChanged}
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
-import scala.collection.View
 import scala.collection.immutable.ArraySeq
 
 enum JvmExcept[V]:
@@ -101,10 +96,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   val project: Project[URL]
   val projectSource: String
 
-  val nativeSource = org.opalj.bytecode.RTJar
-  val objectCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
-  val classCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Class.class").head
-  val stringCF = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
+  val nativeSource: File = org.opalj.bytecode.RTJar
+  val objectCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
+  // TODO: ununsed
+  val classCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Class.class").head
+  val stringCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
 
   var staticInitialized: Set[ObjectType] = Set()
 
@@ -154,7 +150,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadString =>
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
         val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.size))
+        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
         objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
@@ -176,7 +172,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadString_W =>
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
         val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.size))
+        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
         val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
         objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
@@ -787,8 +783,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         }
       }
       else {
-        val locals = if (!mth.body.get.localVariableTable.isEmpty) {
-          mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes(_))
+        val locals = if (mth.body.get.localVariableTable.isDefined) {
+          mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes)
         }
         else {
           ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
@@ -816,11 +812,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       }
     }
 
-  def evalNativeStatic(mth: Method, args: Seq[V]) =
+  def evalNativeStatic(mth: Method, args: Seq[V]): Unit =
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
+        val baseString = arrayOps.getArray(objectOps.getField(args.head, (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
         val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
@@ -832,11 +828,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case _ =>
         native.evalNative(mth, args)
 
-  def invokeExternal(mth: Method, isStatic: Boolean) = external {
+  def invokeExternal(mth: Method, isStatic: Boolean): V = external {
     val args = stack.popNOrAbort(stack.size)
     invoke(mth, args)
   }
-  def evalExternal(inst: Instruction) = external {
+  def evalExternal(inst: Instruction): Unit = external {
     eval(inst, null, 0)
   }
   inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using rec: Fixed): FixOut =
@@ -1031,7 +1027,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
       case "arraycopy" =>
-        val src = args(0)
+        val src = args.head
         val srcPos = args(1)
         val dest = args(2)
         val destPos = args(3)
