@@ -226,23 +226,23 @@ trait RelationalBaseIntegerOps
     ApronExpr.top(typeIntOps.invertBits(v._type))
 
 
-  def signedMinValue(tpe: Type): BigInt =
-    -BigInt(2).pow(tpe.byteSize * 8 - 1)
+  def signedMinValue(numBytes: Int): BigInt =
+    -BigInt(2).pow(numBytes * 8 - 1)
 
-  def signedMaxValue(tpe: Type): BigInt =
-    BigInt(2).pow(tpe.byteSize * 8 - 1) - 1
+  def signedMaxValue(numBytes: Int): BigInt =
+    BigInt(2).pow(numBytes * 8 - 1) - 1
 
-  def unsignedMinValue(tpe: Type): BigInt =
+  def unsignedMinValue(numBytes: Int): BigInt =
     0
 
-  def unsignedMaxValue(tpe: Type): BigInt =
-    BigInt(2).pow(tpe.byteSize * 8)
+  def unsignedMaxValue(numBytes: Int): BigInt =
+    BigInt(2).pow(numBytes * 8)
 
   def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intSub(v, bigIntLit(signedMinValue(v._type), v._type))
+    intSub(v, bigIntLit(signedMinValue(v._type.byteSize), v._type))
 
   def toSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intAdd(v, bigIntLit(signedMinValue(v._type), v._type))
+    intAdd(v, bigIntLit(signedMinValue(v._type.byteSize), v._type))
 
   val infty = new MpqScalar();
   infty.setInfty(1)
@@ -260,66 +260,73 @@ trait RelationalBaseIntegerOps
   def handleOverflow(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
 
+    val sMin = signedMinValue(v._type.byteSize)
+    val sMax = signedMaxValue(v._type.byteSize)
+    val signedRange = Interval(sMin.bigInteger, sMax.bigInteger)
+    val uMin = unsignedMinValue(v._type.byteSize)
+    val uMax = unsignedMaxValue(v._type.byteSize)
+
     overflowHandling match
       case OverflowHandling.WrapAround =>
         val fromType = v._type
 
         // Interval within range of the fixed-size integer
-        if (iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
+        if (iv.isLeq(signedRange)) {
           v
           // No underflow
-        } else if (iv.isLeq(Interval(MpqScalar(signedMinValue(v._type).bigInteger), infty))) {
-          val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-          toSigned(castTo(intMod[L, Addr, Type](toUnsigned(v), uMax, v._type), v._type))
+        } else if (iv.isLeq(Interval(MpqScalar(sMin.bigInteger), infty))) {
+          val uMaxLit = bigIntLit[Addr, Type](uMax, fromType)
+          toSigned(castTo(intMod[L, Addr, Type](toUnsigned(v), uMaxLit, v._type), v._type))
 
           // Over and underflow
         } else {
           // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
           // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-          val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), fromType)
-          val foldFirstRound = intMod[L, Addr, Type](toUnsigned(v), uMax, v._type)
-          val foldSecondRound = intMod[L, Addr, Type](intAdd[L, Addr, Type](foldFirstRound, uMax, v._type), uMax, v._type)
+          val uMaxLit = bigIntLit[Addr, Type](uMax, fromType)
+          val foldFirstRound = intMod[L, Addr, Type](toUnsigned(v), uMaxLit, v._type)
+          val foldSecondRound = intMod[L, Addr, Type](intAdd[L, Addr, Type](foldFirstRound, uMaxLit, v._type), uMaxLit, v._type)
           toSigned(foldSecondRound)
         }
       case OverflowHandling.Fail =>
-        if (! iv.isLeq(Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger))) {
+        if (! iv.isLeq(signedRange)) {
           effectStack.joinWithFailure(v) {
-            Failure(IntegerOverflow, s"$v with interval $iv overflows bounds ${Interval(signedMinValue(v._type).bigInteger, signedMaxValue(v._type).bigInteger)}")
+            Failure(IntegerOverflow, s"$v with interval $iv overflows bounds ${signedRange}")
           }
         } else {
           v
         }
 
 
-  def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  inline def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
+    interpretSignedAsUnsigned(v, v._type.byteSize)
+
+  def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val uMax = bigIntLit[Addr, Type](unsignedMaxValue(v._type), v._type)
+    val uMax = unsignedMaxValue(fromNumBytes)
     val resultType = v._type
     if(iv.inf.sgn() >= 0) { // v >= 0
       v
     } else if(iv.sup.sgn() < 0) { // v < 0
-      intAdd(v, uMax, resultType)
+      intAdd(v, bigIntLit(uMax, resultType))
     } else { // iv.inf < 0 <= iv.sup
-      val sup = apronState.getInterval(intAdd(v, uMax, resultType)).sup
-      ApronExpr.constant(Interval(DoubleScalar(0), sup), resultType)
+      intAdd(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType))
     }
 
+  inline def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
+    interpretUnsignedAsSigned(v, v._type.byteSize)
 
-  def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+  def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
-    val sMax = signedMaxValue(v._type)
-    val uMax = unsignedMaxValue(v._type)
+    val sMax = signedMaxValue(fromNumBytes)
+    val uMax = unsignedMaxValue(fromNumBytes)
     val resultType = v._type
     if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) { // v <= signedMax
       v
     } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) { // v > signedMax
       intSub(v, bigIntLit(uMax, resultType))
     } else { // iv.inf <= signedMax < iv.sup
-      val inf = apronState.getInterval(intSub(v, bigIntLit(uMax, resultType))).inf
-      ApronExpr.constant(Interval(inf, MpqScalar(sMax.bigInteger)), resultType)
+      intSub(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType))
     }
-
-
 
 given RelationalIntOps
   [

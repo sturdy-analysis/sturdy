@@ -147,7 +147,6 @@ enum FixOut[V]:
 
 given finiteFixIn: Finite[FixIn] with {}
 
-
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
 
   // fixpoint
@@ -614,71 +613,33 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
     (funcs.result(), globs.result(), tabs.result(), mems.result())
 
-  private var initialized: Boolean = false
-  def initializeThis(): Unit =
-    if (!initialized) {
-      globals.putNew(globalTableIndex)
-      initialized = true
-    }
-
   // we assume a valid module here
   def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None, hostModules: HostModules = HostModules(("wasi_snapshot_preview1", wasi_snapshot_preview1))): ModuleInstance = external {
     initializeThis()
 
     val modInst = new ModuleInstance(moduleId)
-    var loc = InstLoc.InInit(modInst, 0)
-    // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports, hostModules)
-    modInst.globalAddrs = globImports
-    val globValues = module.globals.map { glob =>
-      val id = BlockId(glob)
-      loc = modInst.registerBlockSizes(id, loc, glob.init)
-      evalInstructionSequence(id, glob.init, modInst, loc)
-    }
-    // in the current swam version reference vectors are already provided via the elem fields of the module
-    // -> we don't have to compute anything here for now
 
-    // allocate structures for the new module
-    // types
-    modInst.functionTypes = module.types
+    var loc = InstLoc.InInit(modInst, 0)
+    loc = initializeGlobals(module, modInst, globImports, loc)
+    initializeFunctions(module, modInst, funcImports)
+    initializeTables(module, modInst, tabImports)
+    initializeMemory(module, modInst, memImpors)
+    loc = initializeData(module, modInst, loc)
+    initializeExports(module, modInst)
+    initializeElements(module, modInst, loc)
+    invokeStartFunction(module, modInst)
+    modInst
+  }
 
-    // functions
-    val funcImportsSize = funcImports.size
-    funcImports.foreach(modInst.addFunction)
-    module.funcs.view.zipWithIndex.map { (func, ix) =>
-      FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
-    }.foreach(modInst.addFunction)
+  private var initialized: Boolean = false
+  private inline def initializeThis(): Unit =
+    if (!initialized) {
+      globals.putNew(globalTableIndex)
+      initialized = true
+    }
 
-    // globals
-    modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
-      case (Global(GlobalType(tpe, _), _), value) =>
-        val globalAddr = GlobalAddr(globCount)
-        globCount += 1
-        writeGlobalValue(globalAddr, value)
-        globalAddr
-    }
-    // tables
-    modInst.tableAddrs = tabImports ++ module.tables.map {
-      case TableType(_, Limits(min, max)) =>
-        val tabAddr = TableAddr(tabCount)
-        funTable.putNew(tabAddr)
-        tabCount += 1
-        tabAddr
-    }
-    // memory
-    modInst.memoryAddrs = memImpors ++ module.mems.map {
-      case MemType(Limits(min, max)) =>
-        val initSize = valToSize(i32ops.integerLit(min))
-        val sizeLimit = max.map(i => valToSize(i32ops.integerLit(i)))
-        val memAddr = MemoryAddr(memCount)
-        memory.putNew(memAddr, initSize, sizeLimit)
-        memCount += 1
-        memAddr
-    }
-    // data
-    modInst.data = module.data.map {
-      case Data(_, _, init) => DataInstance(init.toByteVector)
-    }
+  private inline def initializeExports(module: Module, modInst: ModuleInstance): Unit = {
     // we don't need elems currently
     // exports
     modInst.exports = module.exports.map {
@@ -690,9 +651,71 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           case ExternalKind.Table => (fieldName, ExternalValue.Table(index))
         }
     }
+  }
 
-    // initialize tables and memories
+  private inline def initializeFunctions[J[_] <: MayJoin[_], FunV, FuncIx, ExcV, Size, Bytes, Addr, V](module: Module, modInst: ModuleInstance, funcImports: Vector[FunctionInstance]): Unit = {
+    // types
+    modInst.functionTypes = module.types
+
+    // functions
+    val funcImportsSize = funcImports.size
+    funcImports.foreach(modInst.addFunction)
+    module.funcs.view.zipWithIndex.map { (func, ix) =>
+      FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
+    }.foreach(modInst.addFunction)
+  }
+
+  private inline def initializeGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], initLoc: InstLoc)(using Fixed): InstLoc = {
+    var loc = initLoc
+
+    modInst.globalAddrs = globImports
+
+    val globValues = module.globals.map { glob =>
+      val id = BlockId(glob)
+      loc = modInst.registerBlockSizes(id, loc, glob.init)
+      evalInstructionSequence(id, glob.init, modInst, loc)
+    }
+
+    modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
+      case (Global(GlobalType(tpe, _), _), value) =>
+        val globalAddr = GlobalAddr(globCount)
+        globCount += 1
+        writeGlobalValue(globalAddr, value)
+        globalAddr
+    }
+
+    loc
+  }
+
+  private inline def initializeTables(module: Module, modInst: ModuleInstance, tabImports: Vector[TableAddr]): Unit = {
+    // tables
+    modInst.tableAddrs = tabImports ++ module.tables.map {
+      case TableType(_, Limits(min, max)) =>
+        val tabAddr = TableAddr(tabCount)
+        funTable.putNew(tabAddr)
+        tabCount += 1
+        tabAddr
+    }
+  }
+
+  private inline def initializeMemory(module: Module, modInst: ModuleInstance, memImpors: Vector[MemoryAddr]): Unit = {
     // memory
+    modInst.memoryAddrs = memImpors ++ module.mems.map {
+      case MemType(Limits(min, max)) =>
+        val initSize = valToSize(i32ops.integerLit(min))
+        val sizeLimit = max.map(i => valToSize(i32ops.integerLit(i)))
+        val memAddr = MemoryAddr(memCount)
+        memory.putNew(memAddr, initSize, sizeLimit)
+        memCount += 1
+        memAddr
+    }
+  }
+
+  private inline def initializeData(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc = {
+    var loc = initLoc
+    modInst.data = module.data.map {
+      case Data(_, _, init) => DataInstance(init.toByteVector)
+    }
     module.data.zipWithIndex.foreach {
       case (data@Data(memIdx, off, init), i) =>
         assert(memIdx == 0)
@@ -713,7 +736,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       //memoryInit(i)
       // memoryDrop(i) for the current wasm version
     }
-    // tables
+
+    loc
+  }
+
+  private inline def initializeElements(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc =
+    var loc = initLoc
     module.elem.zipWithIndex.foreach {
       case (elem@Elem(tableIdx, off, init), i) =>
         val id = BlockId(elem)
@@ -729,7 +757,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           // TODO add failure conditions for table writing
         }
     }
+    loc
 
+
+  private inline def invokeStartFunction(module: Module, modInst: ModuleInstance)(using Fixed): Unit = {
     // invoke the start function
     module.start.foreach {
       funcIdx =>
@@ -744,7 +775,4 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
             }))
           case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?
     }
-    //stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty after module initialization.")})
-    modInst
   }
-

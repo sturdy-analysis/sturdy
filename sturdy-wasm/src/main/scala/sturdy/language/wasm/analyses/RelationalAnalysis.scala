@@ -59,7 +59,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   final type I64 = ApronExpr[VirtAddr, Type]
   final type F32 = ApronExpr[VirtAddr, Type]
   final type F64 = ApronExpr[VirtAddr, Type]
-  final type Bytes = sturdy.values.bytes.Bytes[Value]
+  final type Bytes = sturdy.values.bytes.Bytes[VirtAddr, Type]
 
   import Value.*
   import Type.*

@@ -56,6 +56,7 @@ class RelationalMemory
     val Mem(addressRanges, numPages, _) = memories(key)
     val result = addressRanges
       .filter((_,range) =>
+        // TODO: Address overlaps with range (use length)
         range.contains(addr) match
           case Topped.Actual(true) | Topped.Top => true
           case Topped.Actual(false) => false
