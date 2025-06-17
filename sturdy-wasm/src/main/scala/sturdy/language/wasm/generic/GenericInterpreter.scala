@@ -395,7 +395,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val v = stack.popOrAbort()
         stack.push(num.evalMiscop(op, v))
       case Drop => stack.popOrAbort()
-      case Select =>
+      case Select | SelectReturns(_) =>
         val isZero = num.evalNumeric(i32.Eqz)
         branchOpsUnit.boolBranch(isZero) {
           // v == 0: else branch
