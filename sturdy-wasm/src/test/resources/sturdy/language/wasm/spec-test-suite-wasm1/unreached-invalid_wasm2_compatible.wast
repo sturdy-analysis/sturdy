@@ -535,6 +535,7 @@
   ))
   "type mismatch"
 )
+(; this is allowed in WASM2, see unreached-valid.wast
 (assert_invalid
   (module (func $type-br_table-label-num-vs-label-num-after-unreachable
     (block (result f64)
@@ -548,7 +549,7 @@
     (drop)
   ))
   "type mismatch"
-)
+);)
 
 (assert_invalid
   (module (func $type-block-value-nested-unreachable-num-vs-void

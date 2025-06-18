@@ -356,7 +356,7 @@
 (assert_trap (invoke "call" (i32.const 3)) "uninitialized element")
 (assert_trap (invoke "call" (i32.const 100)) "undefined element")
 
-
+(; This is allowed in WASM2
 (assert_invalid
   (module (import "" "" (table 10 funcref)) (import "" "" (table 10 funcref)))
   "multiple tables"
@@ -369,7 +369,7 @@
   (module (table 10 funcref) (table 10 funcref))
   "multiple tables"
 )
-
+;)
 (module (import "test" "table-10-inf" (table 10 funcref)))
 (module (import "test" "table-10-inf" (table 5 funcref)))
 (module (import "test" "table-10-inf" (table 0 funcref)))

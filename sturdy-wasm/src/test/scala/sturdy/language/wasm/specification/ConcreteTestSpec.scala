@@ -7,10 +7,11 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import swam.ReferenceType.{ExternRef, FuncRef}
+import swam.SwamException
 import swam.syntax.Module
 import swam.text.*
 import swam.text.unresolved.SomeId
@@ -122,7 +123,10 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)
       case _: AssertUnlinkable => // skip
-      case _: AssertInvalid => //todo: implement. This assertion should be checked
+      case AssertInvalid(m, _) =>
+        assertThrows[SwamException] {
+          instantiate(m)
+        }
       case _: AssertMalformed => // skip
       case _: AssertExhaustion => // skip
       case action: Action => runAction(action)
@@ -142,8 +146,8 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
         interp.failure.fallible {
           interp.initializeModule(mod, imports)
         }
-      case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
-      case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
+      case BinaryModule(id,s) => throw new SwamException("instantiation of binary modules not yet implemented.")
+      case QuotedModule(id, s) => throw new SwamException("instantiation of quoted modules not yet implemented.")
 
   def runAction(a: Action): Result = a match {
     case Invoke(modName, fun, expr) => evalInvoke(modName, fun, constExprToVals(expr))

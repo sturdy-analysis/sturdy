@@ -9,8 +9,10 @@
 ;; scala doesn't have unsigned integers
 ;;(module (table 0 0xffff_ffff funcref))
 
+(; This is allowed in WASM2
 (assert_invalid (module (table 0 funcref) (table 0 funcref)) "multiple tables")
 (assert_invalid (module (table (import "spectest" "table") 0 funcref) (table 0 funcref)) "multiple tables")
+;)
 
 (assert_invalid (module (elem (i32.const 0))) "unknown table")
 (assert_invalid (module (elem (i32.const 0) $f) (func $f)) "unknown table")
