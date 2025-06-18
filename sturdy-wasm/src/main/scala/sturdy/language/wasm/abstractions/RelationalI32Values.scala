@@ -103,9 +103,3 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given I32ConvertDoubleInt(using ApronState[VirtAddr, Type], ConvertDoubleInt[F64, ApronExpr[VirtAddr, Type]]): ConvertDoubleInt[F64, I32] =
     LiftedConvert[Double, Int, F64, I32, F64, ApronExpr[VirtAddr, Type], Overflow && Bits](extract = x => x, inject = Left(_))
-
-  given I32ConvertIntBytes(using ApronState[VirtAddr, Type], ConvertIntBytes[ApronExpr[VirtAddr, Type], Bytes]): ConvertIntBytes[I32, Bytes] =
-    LiftedConvert[Int, Seq[Byte], I32, Bytes, ApronExpr[VirtAddr, Type], Bytes, BytesSize && SomeCC[ByteOrder]](extract = _.asApronExpr, inject = x => x)
-
-  given I32ConvertBytesInt(using ApronState[VirtAddr, Type], ConvertBytesInt[Bytes, ApronExpr[VirtAddr, Type]]): ConvertBytesInt[Bytes, I32] =
-    LiftedConvert[Seq[Byte], Int, Bytes, I32, Bytes, ApronExpr[VirtAddr, Type], BytesSize && SomeCC[ByteOrder] && Bits](extract = x => x, inject = Left(_))

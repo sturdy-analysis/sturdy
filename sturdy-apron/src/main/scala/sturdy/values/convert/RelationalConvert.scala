@@ -14,7 +14,6 @@ import sturdy.values.config.{Bits, *, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.apron.FloatInterval as FInterval
-import sturdy.values.bytes.Bytes
 
 import scala.math.BigInt.javaBigInteger2bigInt
 import java.math.BigInteger
@@ -275,39 +274,39 @@ private final class RelationalConvertIntegerFloating[From, To: Numeric: Bounded,
         unsupportedConfiguration(conf, this)
       )
 
-private final class RelationalConvertIntegerBytes[From, Addr: Ordering: ClassTag, Type: ApronType]
-  (using failure: Failure, apronState: ApronState[Addr,Type], typeOps: IntegerOps[From, Type])
-  extends Convert[From, Seq[Byte], ApronExpr[Addr,Type], Bytes[Addr,Type], BytesSize && SomeCC[ByteOrder]]:
-  def apply(from: ApronExpr[Addr,Type], config: BytesSize && SomeCC[ByteOrder]): Bytes[Addr,Type] =
-    val byteSize && SomeCC(byteOrder, _) = config
-    Bytes(Topped.Actual(from), NumericInterval(byteSize.bytes, byteSize.bytes), Topped.Actual(byteOrder))
-
-given RelationalConvertIntBytes[Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr,Type], typeOps: IntegerOps[Int, Type]):
-  ConvertIntBytes[ApronExpr[Addr,Type], Bytes[Addr,Type]] = RelationalConvertIntegerBytes[Int, Addr, Type]
-
-given RelationalConvertLongBytes[Addr: Ordering : ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr, Type], typeOps: IntegerOps[Long, Type]):
-  ConvertLongBytes[ApronExpr[Addr, Type], Bytes[Addr, Type]] = RelationalConvertIntegerBytes[Long, Addr, Type]
-
-given RelationalConvertBytesInteger[To: Numeric, Addr: Ordering : ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr, Type], intOps: RelationalBaseIntegerOps[To, Addr,Type], typeOps: IntegerOps[To, Type]):
-  Convert[Seq[Byte], To, Bytes[Addr, Type], ApronExpr[Addr, Type], BytesSize && SomeCC[ByteOrder] && Bits] with
-  def apply(from: Bytes[Addr, Type], config: BytesSize && SomeCC[ByteOrder] && Bits): ApronExpr[Addr, Type] =
-    val ((byteSize && SomeCC(byteOrder, _)) && bits) = config
-    val toType = typeOps.integerLit(implicitly[Numeric[To]].zero)
-    from match
-      case Bytes(Topped.Actual(fromExpr), NumericInterval(l,u), Topped.Actual(fromByteOrder)) if(fromExpr._type == ApronRepresentation.Int && fromByteOrder == byteOrder) =>
-        val signedMinValue = -BigInt(2).pow(byteSize.bytes * 8 - 1)
-        val unsignedMaxValue = BigInt(2).pow(byteSize.bytes * 8)
-        var result: ApronExpr[Addr,Type] =
-          intAdd(
-            intMod(from.value, bigIntLit(unsignedMaxValue, fromType), fromType),
-            bigIntLit(signedMinValue, fromType),
-            fromType
-          )
-        result
-      case _ =>
-        // Don't know how to precisely convert from a byte sequence of a floating point number to an integer
-        // Don't know how to precisely convert between different byte orders
-        constant(topInterval, toType)
+//private final class RelationalConvertIntegerBytes[From, Addr: Ordering: ClassTag, Type: ApronType]
+//  (using failure: Failure, apronState: ApronState[Addr,Type], typeOps: IntegerOps[From, Type])
+//  extends Convert[From, Seq[Byte], ApronExpr[Addr,Type], Bytes[Addr,Type], BytesSize && SomeCC[ByteOrder]]:
+//  def apply(from: ApronExpr[Addr,Type], config: BytesSize && SomeCC[ByteOrder]): Bytes[Addr,Type] =
+//    val byteSize && SomeCC(byteOrder, _) = config
+//    Bytes(Topped.Actual(from), NumericInterval(byteSize.bytes, byteSize.bytes), Topped.Actual(byteOrder))
+//
+//given RelationalConvertIntBytes[Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr,Type], typeOps: IntegerOps[Int, Type]):
+//  ConvertIntBytes[ApronExpr[Addr,Type], Bytes[Addr,Type]] = RelationalConvertIntegerBytes[Int, Addr, Type]
+//
+//given RelationalConvertLongBytes[Addr: Ordering : ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr, Type], typeOps: IntegerOps[Long, Type]):
+//  ConvertLongBytes[ApronExpr[Addr, Type], Bytes[Addr, Type]] = RelationalConvertIntegerBytes[Long, Addr, Type]
+//
+//given RelationalConvertBytesInteger[To: Numeric, Addr: Ordering : ClassTag, Type: ApronType](using failure: Failure, apronState: ApronState[Addr, Type], intOps: RelationalBaseIntegerOps[To, Addr,Type], typeOps: IntegerOps[To, Type]):
+//  Convert[Seq[Byte], To, Bytes[Addr, Type], ApronExpr[Addr, Type], BytesSize && SomeCC[ByteOrder] && Bits] with
+//  def apply(from: Bytes[Addr, Type], config: BytesSize && SomeCC[ByteOrder] && Bits): ApronExpr[Addr, Type] =
+//    val ((byteSize && SomeCC(byteOrder, _)) && bits) = config
+//    val toType = typeOps.integerLit(implicitly[Numeric[To]].zero)
+//    from match
+//      case Bytes(Topped.Actual(fromExpr), NumericInterval(l,u), Topped.Actual(fromByteOrder)) if(fromExpr._type == ApronRepresentation.Int && fromByteOrder == byteOrder) =>
+//        val signedMinValue = -BigInt(2).pow(byteSize.bytes * 8 - 1)
+//        val unsignedMaxValue = BigInt(2).pow(byteSize.bytes * 8)
+//        var result: ApronExpr[Addr,Type] =
+//          intAdd(
+//            intMod(from.value, bigIntLit(unsignedMaxValue, fromType), fromType),
+//            bigIntLit(signedMinValue, fromType),
+//            fromType
+//          )
+//        result
+//      case _ =>
+//        // Don't know how to precisely convert from a byte sequence of a floating point number to an integer
+//        // Don't know how to precisely convert between different byte orders
+//        constant(topInterval, toType)
 
 //given RelationalConvertToBytes[From, Addr: Ordering: ClassTag, Type: ApronType, Config <: ConvertConfig[_]]: Convert[From, Seq[Byte], ApronExpr[Addr,Type], Interval, Config] with
 //  def apply(from: ApronExpr[Addr,Type], config: Config) = topInterval

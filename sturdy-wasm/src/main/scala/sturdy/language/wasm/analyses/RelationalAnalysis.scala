@@ -6,8 +6,7 @@ import sturdy.apron.ApronExpr.*
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy}
-import sturdy.effect.bytememory.{ConstantAddressMemory, HasSize, RelationalMemory, TopMemory}
-import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
+import sturdy.effect.bytememory.{*,given}
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
@@ -23,7 +22,6 @@ import sturdy.language.wasm.generic.{*, given}
 import sturdy.language.wasm.abstractions.Control.Exc
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.bytes.{*, given}
 import sturdy.values.config.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -50,35 +48,18 @@ import java.math.BigInteger
 import scala.collection.immutable.List
 import scala.math
 
-object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalI32Values, ExceptionByTarget, Control:
+object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalBytes, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
   final type Addr = ApronExpr[VirtAddr, Type]
   final type Size = ApronExpr[VirtAddr, Type]
   final type FuncIx = apron.Interval
   final type FunV = Powerset[FunctionInstance]
-  final type I64 = ApronExpr[VirtAddr, Type]
-  final type F32 = ApronExpr[VirtAddr, Type]
-  final type F64 = ApronExpr[VirtAddr, Type]
-  final type Bytes = sturdy.values.bytes.Bytes[VirtAddr, Type]
 
   import Value.*
   import Type.*
 
-  final override def topI64: I64 = constant(ApronExpr.topInterval, I64Type)
-  final override def topF32: F32 = ApronExpr.floatConstant(ApronExpr.topInterval, FloatSpecials.Top, F32Type)
-  final override def topF64: F64 = ApronExpr.floatConstant(ApronExpr.topInterval, FloatSpecials.Top, F64Type)
-
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = constant(ApronExpr.topInterval, I32Type)
-
-  final override def asBoolean(v: Value)(using failure: Failure): Bool =
-    v match
-      case Int32(Left(i)) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, intLit(0, i._type)))
-      case Int32(Right(cons)) => cons
-      case Int64(l) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](l, intLit(0, l._type)))
-      case Float32(f) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](f, intLit(0, f._type)))
-      case Float64(d) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](d, intLit(0, d._type)))
-      case TopValue => ApronBool.Constraint(ApronCons.top(I32Type))
 
   given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match
@@ -147,14 +128,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         val result = hostFunc.funcType.t.map(typedTop).toList
         eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
-    override def apply(c: ConcreteInterpreter.Value): Value = c match
-      case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Left(intLit(i, I32Type)))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(longLit(l, I64Type))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(FloatingLit(f, F32Type))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(FloatingLit(d, F64Type))
-
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
@@ -209,6 +182,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Value.Int64(expr) => expr.addrs.iterator
         case Value.Float32(expr) => expr.addrs.iterator
         case Value.Float64(expr) => expr.addrs.iterator
+        case expr: ApronExpr[VirtAddr,Type] => expr.addrs.iterator
         case excV: ExcV =>
           for(listVals <- excV.values.iterator;
               value <- listVals.iterator;
@@ -240,11 +214,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
-    val byteStore: RecencyStore[AddrCtx, VirtualAddress[AddrCtx], Bytes] = new RecencyStore(AStoreThreaded(Map()), addressTranslation)
-    val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Bytes] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Bytes](
-      apronState,
-      byteStore,
-      sturdy.values.bytes.Bytes(Value.Int64(ApronExpr.intLit(0, I64Type)), NumericInterval(4,4), Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+    val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Value] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Value](
+      Bytes.StoredBytes(Value.TopValue, Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
       heapAlloc(rootFrameData))
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(

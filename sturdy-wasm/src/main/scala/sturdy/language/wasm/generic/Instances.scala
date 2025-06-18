@@ -13,9 +13,12 @@ import sturdy.values.Structural
 import sturdy.values.concretePO
 import sturdy.values.concreteAbstractly
 
-case class TableAddr(addr: Int) extends AnyVal
-case class MemoryAddr(addr: Int) extends AnyVal
-case class GlobalAddr(addr: Int) extends AnyVal
+case class TableAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
+case class MemoryAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
+case class GlobalAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
 
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}

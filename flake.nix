@@ -17,6 +17,11 @@
         };
     in {
       packages = rec {
+        pyenv = pkgs.python3.withPackages (ps: with ps; [
+          jupyter
+          ipython
+          pandas
+        ]);
         apron = pkgs.apron;
         elina = pkgs.elina;
         fenv = pkgs.fenv;

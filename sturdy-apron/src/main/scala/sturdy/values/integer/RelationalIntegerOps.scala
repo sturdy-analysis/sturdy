@@ -307,9 +307,9 @@ trait RelationalBaseIntegerOps
     if(iv.inf.sgn() >= 0) { // v >= 0
       v
     } else if(iv.sup.sgn() < 0) { // v < 0
-      intAdd(v, bigIntLit(uMax, resultType))
+      intAdd(v, bigIntLit(uMax, resultType), resultType)
     } else { // iv.inf < 0 <= iv.sup
-      intAdd(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType))
+      intAdd(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType), resultType)
     }
 
   inline def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
@@ -323,9 +323,9 @@ trait RelationalBaseIntegerOps
     if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) { // v <= signedMax
       v
     } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) { // v > signedMax
-      intSub(v, bigIntLit(uMax, resultType))
+      intSub(v, bigIntLit(uMax, resultType), resultType)
     } else { // iv.inf <= signedMax < iv.sup
-      intSub(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType))
+      intSub(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType), resultType)
     }
 
 given RelationalIntOps

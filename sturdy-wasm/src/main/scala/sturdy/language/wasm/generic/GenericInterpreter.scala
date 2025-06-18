@@ -1,6 +1,6 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{*,given}
+import sturdy.data.{*, given}
 import sturdy.effect.{ComputationJoiner, EffectList, EffectStack}
 import sturdy.effect.callframe.{DecidableMutableCallFrame, MutableCallFrame}
 import sturdy.effect.except.Except
@@ -15,7 +15,7 @@ import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.effect.symboltable.JoinableDecidableSymbolTable
-import sturdy.values.{*,given}
+import sturdy.values.{*, given}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
@@ -29,6 +29,8 @@ import swam.syntax.*
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 import WasmFailure.*
+
+import java.nio.ByteOrder
 
 case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
   override def toString: String =
@@ -633,7 +635,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   }
 
   private var initialized: Boolean = false
-  private inline def initializeThis(): Unit =
+  inline def initializeThis(): Unit =
     if (!initialized) {
       globals.putNew(globalTableIndex)
       initialized = true

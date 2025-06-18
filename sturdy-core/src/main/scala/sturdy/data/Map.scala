@@ -2,7 +2,7 @@ package sturdy.data
 
 import sturdy.values.*
 
-import scala.collection.immutable.{HashMap, IntMap}
+import scala.collection.immutable.{HashMap, IntMap, SortedMap}
 
 given FiniteMap[K, V](using Finite[K], Finite[V]): Finite[Map[K, V]] with {}
 
@@ -54,6 +54,21 @@ given WidenFiniteKeyMap[K, V](using j: Widen[V], fk: Finite[K]): Widen[Map[K, V]
 
 given CombineFiniteKeyMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finite[K]): Combine[Map[K, V], W] with
   override def apply(v1: Map[K, V], v2: Map[K, V]): MaybeChanged[Map[K, V]] =
+    var joined = v1
+    var changed = false
+    for ((x, v2V) <- v2)
+      joined.get(x) match
+        case None =>
+          joined += x -> v2V
+          changed = true
+        case Some(v1V) =>
+          val joinedV = j(v1V, v2V)
+          joined += x -> joinedV.get
+          changed |= joinedV.hasChanged
+    MaybeChanged(joined, changed)
+
+given CombineFiniteKeySortedMap[K, V, W <: Widening](using j: Combine[V, W], fk: Finite[K]): Combine[SortedMap[K, V], W] with
+  override def apply(v1: SortedMap[K, V], v2: SortedMap[K, V]): MaybeChanged[SortedMap[K, V]] =
     var joined = v1
     var changed = false
     for ((x, v2V) <- v2)
