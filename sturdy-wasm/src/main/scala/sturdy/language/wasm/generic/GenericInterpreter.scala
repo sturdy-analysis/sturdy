@@ -236,7 +236,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
           tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
         }
-      case TableInit(ix, el) =>
+      case TableInit(el, ix) =>
         val elem = module.elements.lift(el).getOrElse(fail(ElementSegmentOutOfBounds, el.toString))
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
@@ -663,9 +663,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     valToAddr(v)
 
   def resolveImports(module: Module, imports: Imports):
-  (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
+  (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
+    val globAddrs: VectorBuilder[GlobalType] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
@@ -697,12 +698,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
                 }
               case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
-          case Import.Global(_, _, GlobalType(tpe, mut)) =>
+          case Import.Global(_, _, globType) =>
             exp match
               case ExternalValue.Global(addr) =>
+                val fromTpe = from.globalTypes(addr)
+                if (fromTpe != globType)
+                  throw new Error(s"Type mismatch: expected global of type $globType but found ${fromTpe}.")
                 val glob = from.globalAddrs(addr)
                 // TODO: check mutability (=> add mut to GlobalInstance)
                 globs += glob
+                globAddrs += globType
               case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
           /*case Import.Reference(_, _, ReferenceType.FuncRef()) =>
             exp match
@@ -728,7 +733,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    (funcs.result(), globs.result(), tabs.result(), mems.result())
+    (funcs.result(), globs.result(), globAddrs.result(), tabs.result(), mems.result())
 
   private var initialized: Boolean = false
 
@@ -745,10 +750,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val modInst = new ModuleInstance(moduleId)
     var loc = InstLoc.InInit(modInst, 0)
 
-    val (funcImports, globImports, tabImports, memImports) = resolveImports(module, imports)
+    val (funcImports, globImports, globTypes, tabImports, memImports) = resolveImports(module, imports)
 
     // types
     modInst.functionTypes = module.types
+    modInst.globalTypes = globTypes
 
     // functions
     val funcImportsSize = funcImports.size
@@ -775,6 +781,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         globCount += 1
         writeGlobalValue(globalAddr, value)
         globalAddr
+    }
+
+    modInst.globalTypes = modInst.globalTypes :++ module.globals.map {
+      case Global(GlobalType(tpe, mut), _) => GlobalType(tpe, mut)
     }
 
     // tables
@@ -866,7 +876,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               stack.push(baseIdx)
               stack.push(num.evalNumeric(i32.Const(0)))
               stack.push(num.evalNumeric(i32.Const(elem.functions.length)))
-              evalTableInst(TableInit(tableIdx, i), loc)
+              evalTableInst(TableInit(i, tableIdx), loc)
               evalTableInst(ElemDrop(i), loc)
             }
         }

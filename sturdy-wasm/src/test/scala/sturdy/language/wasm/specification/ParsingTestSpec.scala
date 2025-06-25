@@ -59,7 +59,6 @@ class ParsingTestSpec extends AnyFlatSpec, Matchers:
   val spectest: Module = Parsing.fromText(pathSpectest)
 
   val onlyRunDirs: Seq[String] = Vector(
-    "elem"
   )
 
   val onlyRunModules: Seq[String] = Vector(
@@ -84,10 +83,10 @@ class ParsingTestSpec extends AnyFlatSpec, Matchers:
     wasmFiles.filter(p => if (onlyRunModules.isEmpty) true else onlyRunModules.exists(p.getFileName.toString.contains(_))).sorted.foreach { p =>
       val commandType = commands.getOrElse(p.getFileName.toString, "unknown")
       commandType match {
-        case "assert_invalid" | "assert_uninstantiable" =>
+        case "assert_invalid" | "assert_uninstantiable" | "assert_malformed" | "assert_unlinkable" =>
           it must s"parse invalid binary file ${p.getFileName} in directory ${dir.getFileName}" in {
             println(s"Parsing invalid binary file ${p.getFileName} in directory ${dir.getFileName}")
-            assertThrows[Exception] {
+            assertThrows[Throwable] {
               val module = Parsing.fromBinary(p)
 
               testInterp.interp.failure.fallible {

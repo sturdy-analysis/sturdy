@@ -60,6 +60,7 @@ class ModuleInstance(val id: Option[Any] = None):
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
+  var globalTypes: Vector[GlobalType] = Vector.empty
   var elements: Vector[ElemInstance] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
