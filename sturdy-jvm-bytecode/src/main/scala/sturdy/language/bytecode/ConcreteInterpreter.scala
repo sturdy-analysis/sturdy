@@ -82,27 +82,6 @@ object ConcreteInterpreter extends Interpreter:
     else
       Value.Int32(0)
 
-/*  given objectTypeOps[OID, Addr, FieldName](using project: Project[URL]): TypeOps[Object[OID, ClassFile, Addr, FieldName], TypeRep, Bool] =
-    new ConcreteObjectTypeOps({ (cls, target) =>
-      if (target == null)
-        false
-      else
-        cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
-    })
-
-  given arrayTypeOps[AID, Addr]: TypeOps[Array[AID, Addr, AType, Value], ReferenceType, Boolean] =
-    new ConcreteArrayTypeOps((atype, target) => target != null && atype == target.asArrayType)
-
-  given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
-    override def instanceOf(v: NullVal, target: ReferenceType): Boolean =
-      if (target == null) {
-        true
-      }
-      else {
-        false
-      }
-*/
-
   given concreteTypeOps[OID, AID](using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
     /* rewritten below to no longer cause warnings
     override def instanceOf(v: ConcreteRefValues, target: TypeRep): Boolean = v match
@@ -147,47 +126,9 @@ object ConcreteInterpreter extends Interpreter:
   given doubleSizeOps: SizeOps[F64, Boolean] with
     override def is32Bit(v: F64): Boolean = false
 
-/*  given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
-    override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
-
-  given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType, Value], Boolean] with
-    override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true
-*/
-
   given refSizeOps: SizeOps[ConcreteRefValues, Boolean] with
     override def is32Bit(v: ConcreteRefValues): Boolean = true
 
-/*  given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
-  (using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, Object[OID, ClassFile, FieldAddr, FieldName], Site, Method, String, MethodDescriptor, Null, NoJoin] with
-    override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): Object[OID, ClassFile, FieldAddr, FieldName] =
-      val fieldAddrs = vals.map { (v, site, name) =>
-        val addr = alloc(site)
-        store.write(addr, v)
-        (name, addr)
-      }.toMap
-      Object(oid, cfs, fieldAddrs)
-
-    override def getField(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: FieldName): JOption[NoJoin, V] =
-      if (!obj.fields.contains(name))
-        JOptionC.none
-      else
-        store.read(obj.fields(name))
-
-    override def setField(obj: Object[OID, ClassFile, FieldAddr, FieldName], name: FieldName, v: V): JOptionC[Unit] =
-      if (!obj.fields.contains(name))
-        JOptionC.none
-      else {
-        store.write(obj.fields(name), v)
-        JOptionC.some(())
-      }
-
-    override def invokeFunctionCorrect(obj: Object[OID, ClassFile, FieldAddr, FieldName], mthName: String, sig: MthSig, args: Seq[V])(invoke: (Object[OID, ClassFile, FieldAddr, FieldName], Mth, Seq[V]) => V): V =
-      val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
-      invoke(obj, mth, args)
-
-    override def makeNull(): Null = null
-
-*/
   given TestConcObjectOps[FieldAddr, FieldName, OID, V, Site]
   (using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, V, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, OID, V, ClassFile, ConcreteRefValues, Site, Method, String, MethodDescriptor, I32, NoJoin] with
     override def makeObject(oid: OID, cfs: ClassFile, vals: Seq[(V, Site, FieldName)]): RefValue =

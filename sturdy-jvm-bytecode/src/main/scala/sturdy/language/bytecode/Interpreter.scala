@@ -122,16 +122,7 @@ trait Interpreter:
   def topRef: RefValue
 
   given Top[Value] with
-    override def top: Value = Value.TopValue  
-  
-  /*
-  def typedTop(ty: ValType): Value = ty match
-    case ValType.I32 => Value.Int32(topI32)
-    case ValType.I64 => Value.Int64(topI64)
-    case ValType.F32 => Value.Float32(topF32)
-    case ValType.F64 => Value.Float64(topF64)
-
-  */
+    override def top: Value = Value.TopValue
 
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
@@ -192,16 +183,11 @@ trait Interpreter:
     //, objEqOps: EqOps[ObjRep, Bool]
     //, arrayEqOps: EqOps[ArrayRep, Bool]
     , refEqOps: EqOps[RefValue, Bool]
-    //, objTypeOps: TypeOps[ObjRep, TypeRep, Bool]
-    //, arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool]
-    //, nullTypeOps: TypeOps[NullVal, TypeRep, Bool]
     , refTypeOps: TypeOps[RefValue, TypeRep, Bool]
     , i32SizeOps: SizeOps[I32, Bool]
     , i64SizeOps: SizeOps[I64, Bool]
     , f32SizeOps: SizeOps[F32, Bool]
     , f64SizeOps: SizeOps[F64, Bool]
-    //, objSizeOps: SizeOps[ObjRep, Bool]
-    //, arraySizeOps: SizeOps[ArrayRep, Bool]
     //, objOps: ObjectOps[Addr, Idx, Value, ObjType, ObjRep]
     , refSizeOps: SizeOps[RefValue, Bool]
       ): BytecodeOps[Idx, Value, TypeRep] with
@@ -278,14 +264,6 @@ trait Interpreter:
         case (ReferenceValue(r1), ReferenceValue(r2)) => boolean(EqOps.neq(r1, r2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-/*    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
-      import Value.*
-      override def instanceOf(v: Value, check: TypeRep): Value = v match
-        case Obj(o1) => boolean(TypeOps.instanceOf(o1, check))
-        case Array(a1) => boolean(TypeOps.instanceOf(a1, check))
-        case Null(n1) => boolean(TypeOps.instanceOf(n1, check))
-        case _ => throw new IllegalArgumentException(s"Expected values of type object or array but got $v")
-*/
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
       import Value.*
       override def instanceOf(v: Value, check: TypeRep): Value = v match

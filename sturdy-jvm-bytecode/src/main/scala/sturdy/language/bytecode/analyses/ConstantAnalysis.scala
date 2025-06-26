@@ -102,38 +102,6 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     private given Failure = failure
     import ConcreteInterpreter.given
 
-/*
-    given objectTypeOps: TypeOps[ObjRep, TypeRep, Bool] with
-      override def instanceOf(v: ObjRep, target: ReferenceType): Topped[Boolean] =
-        if(target == null)
-          Topped.Actual(false)
-        else{
-          v match
-            case Topped.Top => Topped.Top
-            case Topped.Actual(o) =>
-              if (o.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
-                Topped.Actual(true) // because `null <= o` and `instanceOf(null, target) == false`
-              else
-                Topped.Actual(false)
-        }
-     
-
-    given arrayTypeOps: TypeOps[ArrayRep, TypeRep, Bool] with
-      override def instanceOf(v: ArrayRep, target: ReferenceType): Topped[Boolean] = v match
-        case Topped.Top => Topped.Top
-        case Topped.Actual(o) =>
-          if (o.arrayType == target.asArrayType)
-            Topped.Top // because `null <= o` and `instanceOf(null, target) == false`
-          else
-            Topped.Actual(false)
-
-    given nullTypeOps: TypeOps[NullVal, TypeRep, Bool] with
-      override def instanceOf(v: NullVal, target: ReferenceType): Topped[Boolean] =
-        if (target == null)
-          Topped.Actual(true)
-        else
-          Topped.Actual(false)
-*/
     given constantTypeOps[OID, AID] (using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
       override def instanceOf(v: RefValue, target: TypeRep): Bool =
         if (v.isActual)
@@ -170,12 +138,6 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     given doubleSizeOps: SizeOps[F64, Bool] with
       override def is32Bit(v: F64): Bool = Topped.Actual(false)
-
-    /*given objectSizeOps[OID, Addr, FieldName]: SizeOps[Object[OID, ClassFile, Addr, FieldName], Boolean] with
-      override def is32Bit(v: Object[OID, ClassFile, Addr, FieldName]): Boolean = true
-
-    given arraySizeOps[AID, Addr, ArrayType]: SizeOps[Array[AID, Addr, ArrayType, Value], Boolean] with
-      override def is32Bit(v: Array[AID, Addr, ArrayType, Value]): Boolean = true*/
 
     given refSizeOps: SizeOps[RefValue, Bool] with
       override def is32Bit(v: RefValue): Bool = Topped.Actual(true)
