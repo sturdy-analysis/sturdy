@@ -116,7 +116,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   implicit def jvV: J[V]
   implicit def jvRefV: J[RefV]
 
-  // implicit def jvFunV: J[V]
   implicit def jvFunV: J[FunV]
 
   // value components
@@ -632,17 +631,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         LabelArities(params, results, results)
 
 
-  //  // placeholder for the (not yet present in swam) memory.init instruction
-  //  def memoryInit(dataIdx: Int): Unit =
-  //    val dataInstance = module.data(dataIdx)
-  //    val cnt = stack.pop() // i32
-  //    val src = stack.pop() // i32
-  //    val dst = stack.pop() // i32
-  //    // check ranges TODO
-  //    //if (src + cnt > dataInstance.data.size)
-  //    // TODO WIP
-  //    ???
-
   def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance, loc: InstLoc)(using Fixed): V =
     val frameData = FrameData(1, mod)
     labelStack.withNew(stack.withNewStack(callFrame.withNew(frameData, Iterable.empty, loc) {
@@ -666,7 +654,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
-    val globAddrs: VectorBuilder[GlobalType] = VectorBuilder()
+    val globTpes: VectorBuilder[GlobalType] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
@@ -707,15 +695,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 val glob = from.globalAddrs(addr)
                 // TODO: check mutability (=> add mut to GlobalInstance)
                 globs += glob
-                globAddrs += globType
+                globTpes += globType
               case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
-          /*case Import.Reference(_, _, ReferenceType.FuncRef()) =>
-            exp match
-              case ExternalValue.Global(addr) =>
-                val glob = from.globalAddrs(addr)
-                // TODO: check mutability (=> add mut to GlobalInstance)
-                globs += glob
-              case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")*/
           case Import.Table(_, _, tpe) =>
             exp match
               case ExternalValue.Table(addr) =>
@@ -733,7 +714,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    (funcs.result(), globs.result(), globAddrs.result(), tabs.result(), mems.result())
+    (funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result())
 
   private var initialized: Boolean = false
 
