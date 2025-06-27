@@ -26,56 +26,29 @@ enum AbstractReferenceValue[A, O]:
   case maybeNullArray(array: A, maybeNull: Boolean)
   case NullValue()
 
-trait ConstantObjects extends Interpreter, Numbers:
-
+trait Objects extends Interpreter:
   override type ArrayAddr = AddrSet
   override type ArrayElemAddr = AddrSet
   override type ObjAddr = AddrSet
   override type FieldAddr = AddrSet
   override type StaticAddr = AddrSet
 
-  type ObjType = ClassFile
-  // case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
-  type FieldName = (ObjectType, String)
-  // case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: FieldAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[FieldAddr] = ???
+  override type ObjType = ClassFile
+  override type FieldName = (ObjectType, String)
+
+  type Obj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
+  type Arr = Array[ArrayAddr, ArrayElemAddr, AType, Value]
+  override type RefValue = Topped[AbstractReferenceValue[Arr, Obj]]
+  override type TypeRep = ReferenceType
+  override type AType = ArrayType
+
+  override final def topRef: RefValue = Topped.Top
 
   given FiniteFieldAddr: Finite[FieldAddr] with {}
-  type constantObj = Object[AddrSet, ObjType, AddrSet, FieldName]
-  override type RefValue = Topped[AbstractReferenceValue[constantArray, constantObj]]
-  final def topRef: RefValue = Topped.Top
 
-  // case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: StaticAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[StaticAddr] = ???
-
-  // given FiniteStaticAddr: Finite[StaticAddr] with {}
-
-  //final type ArrayRep = Topped[Array[ArrayAddr, ArrayElemAddr, ArrayType, Value]]
-  type constantArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
-  // case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  // case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: ArrayElemAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[ArrayElemAddr] = ???
-
-  // given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
-
-  type TypeRep = ReferenceType
-  type AType = ArrayType
-  //final def topArray: ArrayRep = Topped.Top
-
-  //final type NullVal = Null
-  //final def topNull: NullVal = null
-
-  //given combineNull[W <: Widening]: Combine[Null, W] with
-  //  override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
+  // TODO: are these needed?
+  final type NullVal = Null
+  final def topNull: NullVal = null
 
   given combineRef[W <: Widening]: Combine[RefValue, W] with
     override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] =
@@ -102,7 +75,37 @@ trait ConstantObjects extends Interpreter, Numbers:
       else
         MaybeChanged.Changed(topRef)
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
-  given constObjOps(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, WithJoin] with
+
+  // helper functions
+  object Helper:
+    def topOpalVal(ty: Type): Value =
+      ty match
+        case fieldType: ByteType => Value.Int32(topI32)
+        case fieldType: ShortType => Value.Int32(topI32)
+        case fieldType: IntegerType => Value.Int32(topI32)
+        case fieldType: FloatType => Value.Float32(topF32)
+        case fieldType: LongType => Value.Int64(topI64)
+        case fieldType: DoubleType => Value.Float64(topF64)
+        case fieldType: BooleanType => Value.Int32(topI32)
+        case fieldType: CharType => Value.Int32(topI32)
+        case fieldType: ObjectType => Value.ReferenceValue(topRef)
+        case fieldType: ArrayType => Value.ReferenceValue(topRef)
+        case _ => ??? // TODO: not implemented
+
+    def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value)(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): Value =
+      if (ref.isActual)
+        val tmp = ref.get
+        tmp match
+          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
+            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+            val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
+            invoke(ref, mth, args)
+          case _ => ???
+      else
+        topOpalVal(sig.returnType)
+
+trait ConstantObjects extends Objects, Numbers:
+  given constObjOps(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
@@ -141,18 +144,10 @@ trait ConstantObjects extends Interpreter, Numbers:
         JOptionA.some(Value.TopValue)
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
-      if (ref.isActual)
-        val tmp = ref.get
-        tmp match
-          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
-            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = ??? // tmp.obj
-            val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
-            invoke(ref, mth, args)
-          case _ => ???
-      else
-        topOpalVal(sig.returnType)
+      Helper.invokeFunctionCorrect(ref, mthName, sig, args)(invoke)
 
     override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
+
     override def isNull(ref: RefValue): I32 =
       if (ref.isActual)
         val tmp = ref.get
@@ -255,98 +250,7 @@ trait ConstantObjects extends Interpreter, Numbers:
     override def printString(letters: Seq[Topped[Int]]): Unit =
       println(letters.map(l => l.get.toChar))
 
-  def topOpalVal(ty: Type): Value =
-    ty match
-      case fieldType: ByteType => Value.Int32(topI32)
-      case fieldType: ShortType => Value.Int32(topI32)
-      case fieldType: IntegerType => Value.Int32(topI32)
-      case fieldType: FloatType => Value.Float32(topF32)
-      case fieldType: LongType => Value.Int64(topI64)
-      case fieldType: DoubleType => Value.Float64(topF64)
-      case fieldType: BooleanType => Value.Int32(topI32)
-      case fieldType: CharType => Value.Int32(topI32)
-      case fieldType: ObjectType => Value.ReferenceValue(topRef)
-      case fieldType: ArrayType => Value.ReferenceValue(topRef)
-      case _ => ??? // TODO: not implemented
-
-trait IntervalObjects extends Interpreter, IntervalNumbers:
-
-  override type ArrayAddr = AddrSet
-  override type ArrayElemAddr = AddrSet
-  override type ObjAddr = AddrSet
-  override type FieldAddr = AddrSet
-  override type StaticAddr = AddrSet
-
-  type ObjType = ClassFile
-  // case class ObjAddr(site: InstructionSite) extends ManageableAddr(true)
-  type FieldName = (ObjectType, String)
-  // case class FieldAddr(site: InstructionSite, name: String, cls: ObjectType) extends ManageableAddr(true) with AbstractAddr[FieldAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: FieldAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[FieldAddr] = ???
-
-  // given FiniteFieldAddr: Finite[FieldAddr] with {}
-
-  type IntervalObj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
-  override type RefValue = Topped[AbstractReferenceValue[IntervalArray, IntervalObj]]
-
-  final def topRef: RefValue = Topped.Top
-
-  type IntervalArray = Array[ArrayAddr, ArrayElemAddr, AType, Value]
-  // case class ArrayAddr(site: InstructionSite) extends ManageableAddr(true)
-  // case class ArrayElemAddr(site: InstructionSite, ix: Int) extends ManageableAddr(true) with AbstractAddr[ArrayElemAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: ArrayElemAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[ArrayElemAddr] = ???
-
-  // given FiniteArrayAddr: Finite[ArrayElemAddr] with {}
-
-  // case class StaticAddr(id: (ObjectType, String)) extends ManageableAddr(true) with AbstractAddr[StaticAddr]:
-  //   override def isEmpty: Boolean = ???
-  //   override def isStrong: Boolean = ???
-  //   override def reduce[A](f: StaticAddr => A)(using Join[A]): A = ???
-  //   override def iterator: Iterator[StaticAddr] = ???
-
-  // given FiniteStaticAddr: Finite[StaticAddr] with {}
-
-  type TypeRep = ReferenceType
-  type AType = ArrayType
-  //final def topArray: ArrayRep = Topped.Top
-
-  final type NullVal = Null
-  final def topNull: NullVal = null
-
- // given combineNull[W <: Widening]: Combine[Null, W] with
- //  override def apply(v1: Null, v2: Null): MaybeChanged[Null] = MaybeChanged.Unchanged(null)
-
-  given combineRef[W <: Widening]: Combine[RefValue, W] with
-    override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] =
-      import AbstractReferenceValue.*
-      if (v1.isActual && v2.isActual)
-        val tmp1 = v1.get
-        val tmp2 = v2.get
-        (tmp1, tmp2) match
-          case (tmp1: maybeNullObject[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
-            MaybeChanged.Changed(Topped.Actual(maybeNullObject(tmp1.obj, true)))
-          case (tmp1: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]], tmp2: maybeNullObject[constantArray, constantObj]) =>
-            MaybeChanged.Changed(Topped.Actual(maybeNullObject(tmp2.obj, true)))
-          case (tmp1: maybeNullObject[constantArray, constantObj], tmp2: maybeNullObject[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
-            MaybeChanged.Changed(topRef)
-          case (tmp1: maybeNullArray[constantArray, constantObj], tmp2: maybeNullArray[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
-            MaybeChanged.Changed(topRef)
-          case (tmp1: maybeNullArray[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
-            MaybeChanged.Changed(Topped.Actual(maybeNullArray(tmp1.array, true)))
-          case (tmp1: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]], tmp2: maybeNullArray[constantArray, constantObj]) =>
-            MaybeChanged.Changed(Topped.Actual(maybeNullArray(tmp2.array, true)))
-          case (tmp1: NullValue[constantArray, constantObj], tmp2: NullValue[Array[ArrayAddr, ArrayElemAddr, AType, Value], Object[ObjAddr, ClassFile, FieldAddr, FieldName]]) =>
-            MaybeChanged.Changed(topRef)
-          case _ => ???
-      else
-        MaybeChanged.Changed(topRef)
-  given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
-
+trait IntervalObjects extends Objects, IntervalNumbers:
   given constObjOps(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] with
     override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
@@ -386,16 +290,7 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
         JOptionA.none
 
     override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
-      if (ref.isActual)
-        val tmp = ref.get
-        tmp match
-          case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
-            val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
-            val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
-            invoke(ref, mth, args)
-          case _ => ???
-      else
-        topOpalVal(sig.returnType)
+      Helper.invokeFunctionCorrect(ref, mthName, sig, args)(invoke)
 
     override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
 
@@ -510,17 +405,3 @@ trait IntervalObjects extends Interpreter, IntervalNumbers:
 
     override def printString(letters: Seq[NumericInterval[Int]]): Unit =
       println(letters.map(l => l.low.toChar))
-
-  def topOpalVal(ty: Type): Value =
-    ty match
-      case fieldType: ByteType => Value.Int32(topI32)
-      case fieldType: ShortType => Value.Int32(topI32)
-      case fieldType: IntegerType => Value.Int32(topI32)
-      case fieldType: FloatType => Value.Float32(topF32)
-      case fieldType: LongType => Value.Int64(topI64)
-      case fieldType: DoubleType => Value.Float64(topF64)
-      case fieldType: BooleanType => Value.Int32(topI32)
-      case fieldType: CharType => Value.Int32(topI32)
-      case fieldType: ObjectType => Value.ReferenceValue(topRef)
-      case fieldType: ArrayType => Value.ReferenceValue(topRef)
-      case _ => ??? // TODO: not implemented
