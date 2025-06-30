@@ -149,7 +149,4 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
     res
 
   override def toString: String =
-    if(floatSpecials.isBottom)
-      super.toString
-    else
-      s"${if(isNonSpecialBottom) "⟂" else super.toString} ∪ $floatSpecials"
+    super.toString

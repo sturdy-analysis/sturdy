@@ -237,6 +237,14 @@ final class ApronRecencyState
   def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
+    case (e1, e2) if (getInterval(e1).isBottom) =>
+      Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
+        e2.setFloatSpecials(specials).setType(tpe)
+      )
+    case (e1, e2) if (getInterval(e2).isBottom) =>
+      Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
+        e1.setFloatSpecials(specials).setType(tpe)
+      )
     case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) if v1.ctx == v2.ctx =>
       val joinedRecency = Join(v1.recency, v2.recency)
       val joinedType = Join(tpe1, tpe2)
@@ -284,7 +292,6 @@ final class ApronRecencyState
         (joinedSpecials, joinedType) =>
           val ctx = allocator(joinedType)
           val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
-          val resultPhys = result.physical.iterator.next()
           assign(result, e1)
           assign(result, e2)
 

@@ -56,6 +56,14 @@ enum ApronExpr[Addr, Type]:
   inline def setPosInfinity(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setPosInfinity(b))
   inline def setNaN(b: Boolean): ApronExpr[Addr,Type] = mapFloatSpecials(_.setNaN(b))
 
+  inline def mapType(f: Type => Type): ApronExpr[Addr,Type] =
+    this match
+      case Addr(a, s, t) => Addr(a, s, f(t))
+      case Constant(c, s, t) => Constant(c, s, f(t))
+      case Unary(op, e, rt, rd, s, t) => Unary(op, e, rt, rd, s, f(t))
+      case Binary(op, e1, e2, rt, rd, s, t) => Binary(op, e1, e2, rt, rd, s, f(t))
+  inline def setType(tpe: Type): ApronExpr[Addr,Type] = mapType(_ => tpe)
+
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
       case Addr(ApronVar(addr), specials, _type) => Addr(ApronVar(f(addr)), specials, _type)
@@ -84,9 +92,22 @@ enum ApronExpr[Addr, Type]:
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
-    case Constant(coeff, floatSpecials, tpe) => coeff.toString
     case Unary(op, e, _, _, _, _) => s"$op $e"
     case Binary(op, l, r, _, _, _, _) => s"($l $op $r)"
+    case Constant(coeff, floatSpecials, tpe) =>
+      var result = ""
+
+      if(coeff.inf.cmp(coeff.sup) > 0)
+        result += "⊥"
+      else if(coeff.isScalar)
+        result += coeff.inf().toString
+      else
+        result += coeff.toString
+
+      if(! floatSpecials.isBottom)
+        result += s" ∪ ${floatSpecials.toString()}"
+
+      result
 
   def toApron(env: apron.Environment): Texpr1Node = this match
     case Addr(v, _, _) => new Texpr1VarNode(v)

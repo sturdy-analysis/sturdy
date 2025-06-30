@@ -178,6 +178,15 @@ enum Bytes[Val]:
       case bytes: StoredBytes[Val] => bytes.value
       case bytes: ReadBytes[Val] => bytes.value
 
+  override def toString: String =
+    this match
+      case bytes: StoredBytes[Val] => s"${bytes.value}[${bytes.storedBytes}]"
+      case bytes: ReadBytes[Val] =>
+        if(bytes.storedBytes == bytes.readBytes)
+          s"${bytes.value}[${bytes.readOffset}]"
+        else
+          s"ReadBytes(${bytes.value}, ${bytes.storedBytes}, ${bytes.storedByteOrder}, ${bytes.readOffset}, ${bytes.readBytes})"
+
 case class MemoryRegion[Addr, Type: ApronType, Val](startAddr: ApronExpr[Addr, Type], bytes: StoredBytes[Val]):
   def endAddr: ApronExpr[Addr, Type] =
     val addrType = startAddr._type

@@ -124,8 +124,8 @@ enum FixIn:
 
 given Ordering[FixIn] = {
   case (FixIn.Eval(_, loc1), FixIn.Eval(_, loc2)) => Ordering[InstLoc].compare(loc1, loc2)
-  case (FixIn.EnterWasmFunction(_, fun1, _), FixIn.EnterWasmFunction(_, fun2, _)) => Ordering[Int].compare(fun1.hashCode(), fun2.hashCode())
-  case (FixIn.EnterHostFunction(_, fun1), FixIn.EnterHostFunction(_, fun2)) => Ordering[Int].compare(fun1.hashCode(), fun2.hashCode())
+  case (FixIn.EnterWasmFunction(fun1, _, _), FixIn.EnterWasmFunction(fun2, _, _)) => Ordering[FuncId].compare(fun1, fun2)
+  case (FixIn.EnterHostFunction(fun1, _), FixIn.EnterHostFunction(fun2, _)) => Ordering[FuncId].compare(fun1, fun2)
   case (FixIn.MostGeneralClientLoop(mod1), FixIn.MostGeneralClientLoop(mod2)) => Ordering.by[ModuleInstance, Option[Int]](
     mod =>
       if(mod == null)
