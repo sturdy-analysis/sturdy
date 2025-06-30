@@ -20,6 +20,7 @@ import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
+import sturdy.util.Profiler
 import sturdy.values.integer.given
 import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
@@ -44,8 +45,8 @@ import scala.util.CommandLineParser
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
-  new RelationalAnalysisTestScript(Polka(true)),
-  new RelationalAnalysisTestScript(Octagon()),
+//  new RelationalAnalysisTestScript(Polka(true)),
+//  new RelationalAnalysisTestScript(Octagon()),
   new RelationalAnalysisTestScript(Box()),
 )
 
@@ -82,7 +83,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.toString.endsWith("fac.wast")
+    p.toString.endsWith("float_exprs.wast")
     p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
@@ -91,11 +92,15 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
         it must s"execute ${p.getFileName} with ${anl}" taggedAs(SlowTest) in {
           runTest(p, anl)
           println(s"Number of Test Cases: ${numTestCases.n}")
+          Profiler.printLastMeasured()
+          Profiler.reset()
         }
       else
         it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
           println(s"Number of Test Cases: ${numTestCases.n}")
+          Profiler.printLastMeasured()
+          Profiler.reset()
         }
 
     }

@@ -285,15 +285,25 @@ final class ApronRecencyState
           val ctx = allocator(joinedType)
           val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
           val resultPhys = result.physical.iterator.next()
-          val stateBefore = relationalStore.getState
           assign(result, e1)
           assign(result, e2)
-          val stateAfter = relationalStore.getState
-          MaybeChanged(ApronExpr.Addr(result, joinedSpecials, joinedType),
-            Join(stateBefore.metaData.get(resultPhys), stateAfter.metaData.get(resultPhys)).hasChanged ||
-            ! stateBefore.abs1.getEnvironment.isEqual(stateAfter.abs1.getEnvironment) ||
-            ! stateBefore.abs1.isEqual(stateAfter.abs1.getCreationManager, stateAfter.abs1)
-          )
+
+          // Check if joined value has grown is done on the relational abstract domain.
+          // The joined value has grown iff variable "result" has grown.
+          Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+
+//          val ctx = allocator(joinedType)
+//          val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
+//          val resultPhys = result.physical.iterator.next()
+//          val stateBefore = relationalStore.getState
+//          assign(result, e1)
+//          assign(result, e2)
+//          val stateAfter = relationalStore.getState
+//          MaybeChanged(ApronExpr.Addr(result, joinedSpecials, joinedType),
+//            Join(stateBefore.metaData.get(resultPhys), stateAfter.metaData.get(resultPhys)).hasChanged ||
+//            ! stateBefore.abs1.getEnvironment.isEqual(stateAfter.abs1.getEnvironment) ||
+//            ! stateBefore.abs1.isEqual(stateAfter.abs1.getCreationManager, stateAfter.abs1)
+//          )
       )
   }
 

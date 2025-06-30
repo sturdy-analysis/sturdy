@@ -64,32 +64,31 @@ final class RelationalStore
 
   override def write(powAddr: PowAddr, v: Val): Unit =
     relationalValue.getRelationalExpr(v) match
-      case Some(exp) => write(powAddr, exp.mapAddrSame(replaceFailedAddrs))
+      case Some(exp) => write(powAddr, exp.mapAddrSame(replaceMissingAddrs))
       case None => nonRelationalStore.write(powAddr, v)
 
   private def write(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
-    if(containsFailedAddrs(physExpr))
-      throw new IllegalArgumentException("Cannot assign expression with addresses of failed branch.")
+    val resolvedExpr = replaceMissingAddrs(physExpr)
 
     for(toAddr <- powAddr.iterator) {
       toAddr.recency match
         case Recency.Recent =>
-          writeMetaData(toAddr, physExpr)
+          writeMetaData(toAddr, resolvedExpr)
           val to = ApronVar(toAddr)
           val env = _abstract1.getEnvironment
           if (env.hasVar(to))
-            _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+            _abstract1.assign(manager, to, resolvedExpr.toIntern(_abstract1.getEnvironment), null)
         case Recency.Old =>
           val to = ApronVar(toAddr)
           val envBefore = _abstract1.getEnvironment
-          writeMetaData(toAddr, physExpr)
+          writeMetaData(toAddr, resolvedExpr)
           val envAfter = _abstract1.getEnvironment
           if (!envBefore.hasVar(to)) {
-            if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_)))
-              _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+            if (envAfter.hasVar(to) && resolvedExpr.addrs.forall(envAfter.hasVar(_)))
+              _abstract1.assign(manager, to, resolvedExpr.toIntern(_abstract1.getEnvironment), null)
           } else {
-            if (envAfter.hasVar(to) && physExpr.addrs.forall(envAfter.hasVar(_))) {
-              val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+            if (envAfter.hasVar(to) && resolvedExpr.addrs.forall(envAfter.hasVar(_))) {
+              val assigned = _abstract1.assignCopy(manager, to, resolvedExpr.toIntern(_abstract1.getEnvironment), null)
               Profiler.addTime("Abstract1.combine") {
                 _abstract1.join(manager, assigned)
               }
@@ -170,28 +169,70 @@ final class RelationalStore
           // Nothing to do
     }
 
-  override def free(powAddr: PowAddr): Unit =
-    nonRelationalStore.free(powAddr)
+  /**
+   * Does not actually delete addresses from store.
+   * This is important, because addresses may still be referenced from somewhere.
+   * Instead, it moves addresses from the relational store into the non-relational store.
+   * This reduces the size of the relational store, which improves performance.
+   */
+  override inline def free(powAddr: PowAddr): Unit =
+    Profiler.addTime("RelationalStore.free") {
+      moveToNonRelationalStore(powAddr)
+    }
+
+  private def moveToNonRelationalStore(powAddr: PowAddr): Unit =
     val env = _abstract1.getEnvironment
-    val addrs = powAddr.iterator.map(ApronVar(_)).filter(env.hasVar(_)).toArray[Var]
-    _abstract1.forget(manager, addrs, false)
-    _abstract1.changeEnvironment(manager, env.remove(addrs), false)
-    powAddr.iterator.foreach(addr =>
-      metaData -= addr
-    )
+
+    for (addr <- powAddr.iterator;
+         (specials, tpe) <- metaData.get(addr);
+         if (env.hasVar(ApronVar(addr)))) {
+
+      // Create non-relational value from address
+      val iv = getBound(ApronExpr.addr(addr, tpe))
+      val relVal =
+        if(iv.isScalar)
+          JOptionA.Some(relationalValue.makeRelationalExpr(ApronExpr.floatConstant(iv.inf(), specials, tpe)))
+        else
+          JOptionA.Some(relationalValue.makeRelationalExpr(ApronExpr.floatConstant(iv, specials, tpe)))
+
+      // Join value into non-relational store.
+      val paddr = PowersetAddr(addr).asInstanceOf[PowAddr]
+      val nonRelVal = nonRelationalStore.read(paddr)
+      for (resVal <- Join(nonRelVal, relVal).get.toOption) {
+        nonRelationalStore.write(paddr, resVal)
+      }
+    }
+
+    // Remove addresses from meta-data map
+    powAddr.iterator.foreach { addr => metaData -= addr }
+
+    // Remove addresses from relational abstract domain
+    val addrArray = powAddr.iterator.map(ApronVar(_)).filter(env.hasVar(_)).toArray[Var]
+    _abstract1.forget(manager, addrArray, false)
+    _abstract1.changeEnvironment(manager, env.remove(addrArray), false)
+
+  inline def optimize(): Unit =
+    moveUnconstrainedToNonRelationalStore()
+
+  private def moveUnconstrainedToNonRelationalStore(): Unit =
+    val env = _abstract1.getEnvironment
+    val unconstrained = metaData.keys.filter { phys =>
+      val aVar: ApronVar[PhysicalAddress[Context]] = ApronVar(phys)
+      env.hasVar(phys) && _abstract1.isDimensionUnconstrained(manager, aVar)
+    }.toSet
+    moveToNonRelationalStore(PowersetAddr(unconstrained).asInstanceOf[PowAddr])
 
   private final class BottomFailure extends SturdyFailure
 
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
-    if(constraints.exists{ case ApronCons(_, e1, e2) => containsFailedAddrs(e1) || containsFailedAddrs(e2) })
-      throw IllegalStateException("Constraints should not contain addresses of failed branches")
+    val resolvedConstraints = constraints.map(replaceMissingAddrs)
 
-    val cons = constraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
+    val cons = resolvedConstraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
     this._abstract1.meet(manager, cons)
 
     // Inequality constraints `x != y` are imprecise on polyhedra.
     // The workaround is to take the join `state[x < y] U state[x > y]` (https://github.com/antoinemine/apron/issues/37)
-    val inequalityConstraints = constraints.filter { case ApronCons(CompareOp.Neq, _, _) => true; case _ => false }
+    val inequalityConstraints = resolvedConstraints.filter { case ApronCons(CompareOp.Neq, _, _) => true; case _ => false }
     if(inequalityConstraints.nonEmpty) {
       val state1 = this._abstract1.meetCopy(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
         ApronCons(CompareOp.Lt, e1, e2).toApron(this._abstract1.getEnvironment)
@@ -209,16 +250,17 @@ final class RelationalStore
     this._abstract1.isBottom(manager)
 
   def satisfies(cons: ApronCons[PhysicalAddress[Context], Type]): Topped[Boolean] =
-    if(_abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment)))
+    val resolvedCons = replaceMissingAddrs(cons)
+    if(_abstract1.satisfy(manager, resolvedCons.toApron(_abstract1.getEnvironment)))
       Topped.Actual(true)
-    else if(_abstract1.satisfy(manager, cons.negated.toApron(_abstract1.getEnvironment)))
+    else if(_abstract1.satisfy(manager, resolvedCons.negated.toApron(_abstract1.getEnvironment)))
       Topped.Actual(false)
     else
       Topped.Top
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
     val env = _abstract1.getEnvironment
-    val expr1 = expr.mapAddrSame(replaceFailedAddrs)
+    val expr1 = replaceMissingAddrs(expr)
     val addrs = expr1.addrs
     if(addrs.forall(env.hasVar(_)))
       _abstract1.getBound(_abstract1.getCreationManager, expr1.toIntern(_abstract1.getEnvironment))
@@ -231,13 +273,23 @@ final class RelationalStore
     val iv = getBound(expr)
     new sturdy.apron.FloatInterval(iv.inf, iv.sup, expr.floatSpecials)
 
-  private def replaceFailedAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type): ApronExpr[PhysicalAddress[Context], Type] =
+
+  private def replaceMissingAddrs(cons: ApronCons[PhysicalAddress[Context], Type]): ApronCons[PhysicalAddress[Context], Type] =
+    cons.mapExprs(replaceMissingAddrs)
+
+  private def replaceMissingAddrs(expr: ApronExpr[PhysicalAddress[Context], Type]): ApronExpr[PhysicalAddress[Context], Type] =
+    expr.mapAddrSame(replaceMissingAddrs)
+
+  private def replaceMissingAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type): ApronExpr[PhysicalAddress[Context], Type] =
     _var match
       case ApronVar(PhysicalAddress(ctx, Recency.Failed)) => ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+      case ApronVar(phys) if(!metaData.contains(phys) && readApronExprFromNonRelationalStore(phys).isDefined) =>
+        readApronExprFromNonRelationalStore(phys).get
       case _ => ApronExpr.Addr(_var, specials, tpe)
 
-  private def containsFailedAddrs(expr: ApronExpr[PhysicalAddress[Context], Type]): Boolean =
-    expr.addrs.exists(phys => phys.recency == Recency.Failed)
+  private def readApronExprFromNonRelationalStore(phys: PhysicalAddress[Context]): Option[ApronExpr[PhysicalAddress[Context], Type]] =
+    nonRelationalStore.read(PowersetAddr(phys).asInstanceOf[PowAddr]).toOption.flatMap(relationalValue.getRelationalExpr)
+
 
   private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
     val variable = ApronVar(addr)
@@ -318,23 +370,29 @@ final class RelationalStore
 
   def combineRelationalStoreState[W <: Widening](using combineTypeEnv: Combine[MetaData,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
-      val state = getState
-      val snapshotTypeEnv = state.metaData
-      val snapshotAbs1 = state.abs1
-      try {
-        val joinedTypeEnv = combineTypeEnv(s1.metaData, s2.metaData)
-        val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
-        metaData = joinedTypeEnv.get
-        _abstract1 = copyAbstract1(joinedAbs1.get)
-        val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
-        MaybeChanged(
-          RelationalStoreState(metaData, copyAbstract1(_abstract1), joinedNonRelationalStore.get),
-          joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
-        )
-      } finally {
-        metaData = snapshotTypeEnv
-        _abstract1 = snapshotAbs1
-      }
+      Profiler.addTime("RelationalStoreState.combine") {
+        val state = getState
+        val snapshotTypeEnv = state.metaData
+        val snapshotAbs1 = state.abs1
+        val snapshotNonRelStore = state.nonRelationalStoreState
+        try {
+          val joinedTypeEnv = combineTypeEnv(s1.metaData, s2.metaData)
+          val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
+          metaData = joinedTypeEnv.get
+          _abstract1 = copyAbstract1(joinedAbs1.get)
+          val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
+          nonRelationalStore.setState(joinedNonRelationalStore.get)
+//          optimize()
+          MaybeChanged(
+            RelationalStoreState(metaData, copyAbstract1(_abstract1), nonRelationalStore.getState),
+            joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
+          )
+        } finally {
+          metaData = snapshotTypeEnv
+          _abstract1 = snapshotAbs1
+          nonRelationalStore.setState(snapshotNonRelStore)
+        }
+        }
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)

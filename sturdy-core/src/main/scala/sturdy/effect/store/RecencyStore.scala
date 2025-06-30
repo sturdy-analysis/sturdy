@@ -4,6 +4,7 @@ import sturdy.{IsSound, Soundness}
 import sturdy.data.{JOption, JOptionA, WithJoin, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.{ComputationJoiner, Effect, EffectList, EffectListJoiner, Stateless, TrySturdy}
+import sturdy.util.Profiler
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
@@ -40,11 +41,9 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
     val pa = virtToPhys(vs)
     store.write(pa, v)
 
-  override def free(vs: Virt): Unit = {}
-//    val pa = virtToPhys(vs)
-//    store.free(pa)
-//    if (vs.isStrong)
-//      vs.reduce(v => addressTranslation -= ((v.ctx,v.n)))
+  override def free(vs: Virt): Unit =
+    val pa = virtToPhys(vs)
+    store.free(pa)
 
   def alloc(ctx: Context): VirtualAddress[Context] =
     store.move(
@@ -72,9 +71,10 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
     store.addressIterator(valueIterator)
 
   def collectGarbage(alive: PowVirtualAddress[Context]): Unit =
-    val deadPhysicals = addressTranslation.deadPhysicalAddresses(alive)
-    store.free(deadPhysicals)
-    addressTranslation.removePhysicalAddresses(deadPhysicals)
+    Profiler.addTime("RecencyStore.free") {
+      val deadPhysicals = addressTranslation.deadPhysicalAddresses(alive)
+      store.free(deadPhysicals)
+    }
 
   override type State = initStore.State
   override inline def getState: State = this.store.getState

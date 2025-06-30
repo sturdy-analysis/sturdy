@@ -284,6 +284,9 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
     ApronCons(op, e1.mapAddr(f), e2.mapAddr(f))
 
+  def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
+    ApronCons(op, f(e1), f(e2))
+
   def addrs: Set[Addr] = e1.addrs ++ e2.addrs
 
   def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match

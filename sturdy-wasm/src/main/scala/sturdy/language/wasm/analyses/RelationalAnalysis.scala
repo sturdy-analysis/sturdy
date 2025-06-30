@@ -188,9 +188,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               value <- listVals.iterator;
               addr <- valueIterator(value))
             yield(addr)
+        case physAddr: PhysAddr => Iterator.empty
         case _ =>
-          println("Unknown Value "+value)
-          Iterator()
+          throw IllegalArgumentException("Unknown Value "+value)
 
       effectStack.addressIterator[VirtAddr](valueIterator)
 
