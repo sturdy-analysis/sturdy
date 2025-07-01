@@ -176,7 +176,7 @@ final class RelationalStore
       moveToNonRelationalStore(powAddr)
     }
 
-  private def moveToNonRelationalStore(powAddr: PowAddr): Unit =
+  def moveToNonRelationalStore(powAddr: PowAddr): Unit =
     val env = _abstract1.getEnvironment
 
     for (addr <- powAddr.iterator;
@@ -200,15 +200,21 @@ final class RelationalStore
     _abstract1.forget(manager, addrArray, false)
     _abstract1.changeEnvironment(manager, env.remove(addrArray), false)
 
-  inline def optimize(): Unit =
-    moveUnconstrainedToNonRelationalStore()
+  def isUnconstrained(powAddr: PowAddr): Boolean =
+    val env = _abstract1.getEnvironment
+    powAddr.iterator.map(ApronVar(_)).forall(x =>
+      env.hasVar(x) && _abstract1.isDimensionUnconstrained(manager, x)
+    )
 
   private def moveUnconstrainedToNonRelationalStore(): Unit =
     val env = _abstract1.getEnvironment
-    val unconstrained = env.getVars.filter { phys =>
-      env.hasVar(phys) && _abstract1.isDimensionUnconstrained(manager, phys)
-    }.map(_.addr.asInstanceOf[PhysicalAddress[Context]]).toSet
+    val unconstrained = env.getVars.map(_.addr.asInstanceOf[PhysicalAddress[Context]]).filter { phys =>
+      isUnconstrained(PowersetAddr(phys).asInstanceOf[PowAddr])
+    }.toSet
     moveToNonRelationalStore(PowersetAddr(unconstrained).asInstanceOf[PowAddr])
+
+  inline def optimize(): Unit =
+    moveUnconstrainedToNonRelationalStore()
 
   private final class BottomFailure extends SturdyFailure
 

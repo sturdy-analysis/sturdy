@@ -159,6 +159,9 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case CompareOp.Ge =>
         getBoolean(ApronCons(CompareOp.Le, v.e2, v.e1), iv2, iv1)
 
+  def isUnconstraint(addr: Addr): Boolean
+  def makeNonRelational(addr: Addr): Unit
+
 final class ApronRecencyState
   [
     Ctx: Ordering,
@@ -288,31 +291,21 @@ final class ApronRecencyState
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
       )
     case (e1,e2) =>
-      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
-        (joinedSpecials, joinedType) =>
-          val ctx = allocator(joinedType)
-          val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
-          assign(result, e1)
-          assign(result, e2)
-
-          // Check if joined value has grown is done on the relational abstract domain.
-          // The joined value has grown iff variable "result" has grown.
-          Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
-
-//          val ctx = allocator(joinedType)
-//          val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
-//          val resultPhys = result.physical.iterator.next()
-//          val stateBefore = relationalStore.getState
-//          assign(result, e1)
-//          assign(result, e2)
-//          val stateAfter = relationalStore.getState
-//          MaybeChanged(ApronExpr.Addr(result, joinedSpecials, joinedType),
-//            Join(stateBefore.metaData.get(resultPhys), stateAfter.metaData.get(resultPhys)).hasChanged ||
-//            ! stateBefore.abs1.getEnvironment.isEqual(stateAfter.abs1.getEnvironment) ||
-//            ! stateBefore.abs1.isEqual(stateAfter.abs1.getCreationManager, stateAfter.abs1)
-//          )
-      )
+      Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
+        val ctx = allocator(joinedType)
+        val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
+        assign(result, e1)
+        assign(result, e2)
+        // The check if the value has grown happens on the abstract domain
+        Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+      }
   }
+
+  override def isUnconstraint(virtualAddress: VirtualAddress[Ctx]): Boolean =
+    relationalStore.isUnconstrained(virtualAddress.physical)
+
+  override def makeNonRelational(virtualAddress: VirtualAddress[Ctx]): Unit =
+    relationalStore.moveToNonRelationalStore(virtualAddress.physical)
 
   private def containsFailedAddrs(mapping: Map[Ctx, RecencyRegion], expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
     expr.addrs.exists(virt => recencyStore.addressTranslation.recency(mapping, virt.ctx, virt.n) == PowRecency.Failed)

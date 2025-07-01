@@ -3,7 +3,7 @@ package sturdy.values.integer
 import gmp.*
 import apron.*
 import sturdy.data.{joinWithFailure, given}
-import sturdy.apron.{ApronExpr, *, given}
+import sturdy.apron.{*, given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
@@ -11,6 +11,7 @@ import sturdy.values.references.{*, given}
 import scala.reflect.ClassTag
 import ApronExpr.*
 import ApronCons.*
+import ApronBool.*
 import sturdy.effect.EffectStack
 import sturdy.util.Lazy
 import sturdy.{IsSound, Soundness}
@@ -260,32 +261,22 @@ trait RelationalBaseIntegerOps
   def handleOverflow(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
 
-    val sMin = signedMinValue(v._type.byteSize)
-    val sMax = signedMaxValue(v._type.byteSize)
-    val signedRange = Interval(sMin.bigInteger, sMax.bigInteger)
-    val uMin = unsignedMinValue(v._type.byteSize)
-    val uMax = unsignedMaxValue(v._type.byteSize)
+    val sMin = signedMinValue(v._type.byteSize).bigInteger
+    val sMax = signedMaxValue(v._type.byteSize).bigInteger
+    val signedRange = Interval(sMin, sMax)
+    val uMin = unsignedMinValue(v._type.byteSize).bigInteger
+    val uMax = unsignedMaxValue(v._type.byteSize).bigInteger
 
     overflowHandling match
       case OverflowHandling.WrapAround =>
         val fromType = v._type
 
-        // Interval within range of the fixed-size integer
-        if (iv.isLeq(signedRange)) {
-          v
-          // No underflow
-        } else if (iv.isLeq(Interval(MpqScalar(sMin.bigInteger), infty))) {
-          val uMaxLit = bigIntLit[Addr, Type](uMax, fromType)
-          toSigned(castTo(intMod[L, Addr, Type](toUnsigned(v), uMaxLit, v._type), v._type))
+        inline def inSignedRange(v: ApronExpr[Addr,Type]) = And(Constraint(le(constant(MpqScalar(sMin), v._type), v)), Constraint(le(v, constant(MpqScalar(sMax), v._type))))
 
-          // Over and underflow
-        } else {
-          // Apron doesn't have a modulo operator with a positive domain, i.e., negative numbers are left unchanged.
-          // To solve this, we apply the modulo operator for a second time, such that negative numbers from -1 to -unsignedMaxValue are folded.
-          val uMaxLit = bigIntLit[Addr, Type](uMax, fromType)
-          val foldFirstRound = intMod[L, Addr, Type](toUnsigned(v), uMaxLit, v._type)
-          val foldSecondRound = intMod[L, Addr, Type](intAdd[L, Addr, Type](foldFirstRound, uMaxLit, v._type), uMaxLit, v._type)
-          toSigned(foldSecondRound)
+        apronState.ifThenElse(inSignedRange(v)) {
+          v
+        } {
+          constant(Interval(MpqScalar(sMin), MpqScalar(sMax)), fromType)
         }
       case OverflowHandling.Fail =>
         if (! iv.isLeq(signedRange)) {
