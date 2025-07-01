@@ -42,12 +42,37 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     newMem.foreach(memories += key -> _)
     res
 
-  override def fill(key: Key, addr: Topped[Int], size: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] = ???
+  override def fill(key: Key, addr: Topped[Int], byteAmount: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] = ???
 
-  override def copy(key: Key, srcAddr: Topped[Int], dstAddr: Topped[Int], size: Topped[Int]): JOption[WithJoin, Unit] = ???
+  override def copy(key: Key, srcAddr: Topped[Int], dstAddr: Topped[Int], byteAmount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], size: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = ???
-  
+  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], byteAmount: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = {
+    // execute using iterative mem.store
+    var mem = memories(key)
+    if (tableAddr.isTop || dataAddr.isTop || byteAmount.isTop) {
+      // If any of the addresses is top, return top memory. Note that this loses precision because SizeMem could be used to track the size in some cases.
+      memories += key -> TopMem(isDefinite = true, mem.upperBound)
+      return JOptionA.noneSome(())
+    }
+    var noneSome = false
+    boundary:
+      for (i <- 0 until byteAmount.get) {
+        if(dataAddr.get + i > dataBytes.size) {
+          break(JOptionA.none) // out of bounds
+        }
+        val addr = Topped.Actual(tableAddr.get + i)
+        val byte = dataBytes(dataAddr.get + i)
+        val (newMem, res) = mem.store(addr, Seq(byte))
+        mem = newMem.getOrElse(break(JOptionA.none)) // out of bounds
+        res match
+          case JOptionA.Some(_) => // ok
+          case JOptionA.None() => break(JOptionA.none)
+          case JOptionA.NoneSome(_) => noneSome = true // error in store
+      }
+      memories += key -> mem
+      if (noneSome) JOptionA.noneSome(()) else JOptionA.some(())
+  }
+
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     initSize match
       case Topped.Top => // unknown size
