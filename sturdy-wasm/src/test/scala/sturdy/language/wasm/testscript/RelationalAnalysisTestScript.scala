@@ -45,8 +45,8 @@ import scala.util.CommandLineParser
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
-//  new RelationalAnalysisTestScript(Polka(true)),
-//  new RelationalAnalysisTestScript(Octagon()),
+  new RelationalAnalysisTestScript(Polka(true)),
+  new RelationalAnalysisTestScript(Octagon()),
   new RelationalAnalysisTestScript(Box()),
 )
 
@@ -74,7 +74,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     )
 
   def isSlow(manager: Manager, script: String): Boolean =
-    false
+    script.contains("float_exprs.wast")
 
   def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
     val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
@@ -83,7 +83,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("float_exprs.wast")
+    p.toString.endsWith("memory_grow.wast")
 //    p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {

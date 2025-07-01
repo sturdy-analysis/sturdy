@@ -97,18 +97,17 @@ class RelationalMemory
       case bs: StoredBytes[Val] =>
         val Mem(store, numPages, pageLimit) = memories(key)
         val ctx = memLocAllocator(key,addr,bytes)
-
-        var newStore = store
         val newRegion = MemoryRegion(addr, bs)
-        newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
-        for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)),
-                               store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-          newStore += (PhysicalAddress(ctx, Recency.Old) -> oldRegion)
-        }
-
-        memories += key -> Mem(newStore, numPages, pageLimit)
 
         apronState.ifThenElse(ApronCons.le(newRegion.endAddr, ApronExpr.intMul(numPages, pageSize))) {
+          var newStore = store
+          newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
+          for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)),
+            store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+            newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
+          }
+          memories += key -> Mem(newStore, numPages, pageLimit)
+
           JOptionA.Some(())
         } {
           JOptionA.None()
@@ -125,7 +124,7 @@ class RelationalMemory
     memories += key -> Mem(addressRanges, newNumPages, pageLimit)
 
     apronState.ifThenElse(And(Constraint(le(newNumPages, maxPages)), Constraint(le(newNumPages, pageLimit)))) {
-      JOptionA.Some(newNumPages)
+      JOptionA.Some(numPages)
     } {
       JOptionA.None[ApronExpr[VirtualAddress[Context], Type]]()
     }
@@ -205,7 +204,7 @@ case class MemoryRegion[Addr, Type: ApronType, Val](startAddr: ApronExpr[Addr, T
     }
 
   def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
-    valueIterator(startAddr) ++ valueIterator(bytes._value)
+    valueIterator(startAddr) //++ valueIterator(bytes._value)
 
 given CombineBytes[Val, W <: Widening](using combineVal: Combine[Val, W]): Combine[Bytes[Val], W] with
   override def apply(v1: Bytes[Val], v2: Bytes[Val]): MaybeChanged[Bytes[Val]] =

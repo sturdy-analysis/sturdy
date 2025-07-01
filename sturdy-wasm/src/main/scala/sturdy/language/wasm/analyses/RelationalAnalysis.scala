@@ -77,7 +77,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     override def sizeToVal(sz: Size): Value =
-      Int32(topI32)
+      Int32(Left(sz))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val expr = ix.asInt32.asApronExpr
