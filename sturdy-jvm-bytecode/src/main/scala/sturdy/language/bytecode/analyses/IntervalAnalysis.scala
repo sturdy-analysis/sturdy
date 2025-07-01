@@ -158,7 +158,7 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin] =
       new LiftedObjectOps[(ObjectType, String), ObjAddr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
+        using objOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
 
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =

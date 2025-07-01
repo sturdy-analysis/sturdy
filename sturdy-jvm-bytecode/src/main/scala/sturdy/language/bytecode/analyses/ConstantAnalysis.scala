@@ -146,7 +146,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
       new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using new constObjOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
+        using objOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
 
     override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =
