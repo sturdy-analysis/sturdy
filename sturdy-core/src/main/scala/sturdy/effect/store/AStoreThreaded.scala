@@ -29,7 +29,7 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
     } else {
       xs.reduce { x => store.get(x) match
         case None => store += x -> v
-        case Some(old) => Join(old, v).ifChanged(vJ => store += x -> vJ)
+        case Some(old) => store += x -> Join(old, v).get
       }
     }
 

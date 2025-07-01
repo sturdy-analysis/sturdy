@@ -3,7 +3,7 @@ package sturdy.values.integer
 import gmp.*
 import apron.*
 import sturdy.data.{joinWithFailure, given}
-import sturdy.apron.{*, given}
+import sturdy.apron.{ApronExpr, *, given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
@@ -276,7 +276,7 @@ trait RelationalBaseIntegerOps
         apronState.ifThenElse(inSignedRange(v)) {
           v
         } {
-          constant(Interval(MpqScalar(sMin), MpqScalar(sMax)), fromType)
+          constant(ApronExpr.topInterval, fromType)
         }
       case OverflowHandling.Fail =>
         if (! iv.isLeq(signedRange)) {

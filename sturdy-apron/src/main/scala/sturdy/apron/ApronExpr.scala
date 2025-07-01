@@ -84,6 +84,16 @@ enum ApronExpr[Addr, Type]:
         
   def isConstant: Boolean = addrs.isEmpty
 
+  def isTop: Topped[Boolean] =
+    this match
+      case Constant(iv, _, _) => Topped.Actual(iv.inf().isInfty == -1 && iv.sup().isInfty == 1)
+      case _ => Topped.Top
+
+  def isBottom: Topped[Boolean] =
+    this match
+      case Constant(iv, _, _) => Topped.Actual(iv.inf().cmp(iv.sup()) > 0)
+      case _ => Topped.Top
+
   def addrs: Set[Addr] = this match
     case Addr(v, _, _) => Set(v.addr)
     case Constant(_, _, _) => Set()

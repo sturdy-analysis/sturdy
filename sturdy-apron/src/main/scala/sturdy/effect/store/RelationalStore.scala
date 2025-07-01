@@ -9,7 +9,7 @@ import sturdy.util.Profiler
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.given
 import sturdy.values.references.{*, given}
-import sturdy.values.{*, given}
+import sturdy.values.{Topped, *, given}
 
 import scala.reflect.ClassTag
 
@@ -179,9 +179,8 @@ final class RelationalStore
   def moveToNonRelationalStore(powAddr: PowAddr): Unit =
     val env = _abstract1.getEnvironment
 
-    for (addr <- powAddr.iterator;
-         (specials, tpe) <- getMetaData(addr).toOption.iterator;
-         if (env.hasVar(ApronVar(addr)))) {
+    for(addr <- powAddr.iterator;
+        (specials, tpe) <- getMetaData(addr).toOption) {
 
       // Create non-relational value from address
       val iv = getBound(ApronExpr.addr(addr, tpe))
@@ -190,9 +189,9 @@ final class RelationalStore
       // Join value into non-relational store.
       val paddr = PowersetAddr(addr).asInstanceOf[PowAddr]
       val oldVal = nonRelationalStore.read(paddr)
-      for (resVal <- Join(oldVal, newVal).get.toOption) {
-        nonRelationalStore.write(paddr, resVal)
-      }
+      val resVal = Join(oldVal, newVal).get.toOption.getOrElse(throw new IllegalStateException(s"no value to write at address $addr to the non-relational store"))
+      nonRelationalStore.write(paddr, resVal)
+      val res = nonRelationalStore.read(paddr)
     }
 
     // Remove addresses from relational abstract domain
@@ -208,10 +207,12 @@ final class RelationalStore
 
   private def moveUnconstrainedToNonRelationalStore(): Unit =
     val env = _abstract1.getEnvironment
-    val unconstrained = env.getVars.map(_.addr.asInstanceOf[PhysicalAddress[Context]]).filter { phys =>
-      isUnconstrained(PowersetAddr(phys).asInstanceOf[PowAddr])
-    }.toSet
-    moveToNonRelationalStore(PowersetAddr(unconstrained).asInstanceOf[PowAddr])
+    val unconstrainedVars = env
+      .getVars
+      .map{ case ApronVar(addr) => addr.asInstanceOf[PhysicalAddress[Any]] }
+      .filter { phys => isUnconstrained(PowersetAddr(phys).asInstanceOf[PowAddr]) }
+      .toSet
+    moveToNonRelationalStore(PowersetAddr(unconstrainedVars).asInstanceOf[PowAddr])
 
   inline def optimize(): Unit =
     moveUnconstrainedToNonRelationalStore()
@@ -275,9 +276,27 @@ final class RelationalStore
   private def replaceMissingAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type): ApronExpr[PhysicalAddress[Context], Type] =
     _var match
       case ApronVar(PhysicalAddress(ctx, Recency.Failed)) => ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
-      case ApronVar(phys) if(!_abstract1.getEnvironment.hasVar(_var) && getMetaData(phys).toOption.isDefined) =>
-        readApronExprFromNonRelationalStore(phys).get
-      case _ => ApronExpr.Addr(_var, specials, tpe)
+      case ApronVar(phys) =>
+        readApronExprFromNonRelationalStore(phys) match
+          case Some(e) =>
+            val env = _abstract1.getEnvironment
+            if(env.hasVar(_var)) {
+              if (e.isBottom == Topped.Actual(true))
+                ApronExpr.Addr(_var, specials, tpe)
+              else if (e.isTop == Topped.Actual(true))
+                e
+              else
+                ApronExpr.Constant(
+                  Join(abstract1.getBound(manager, _var), abstract1.getBound(manager, _var)).get, specials, tpe)
+            } else {
+              e
+            }
+          case None =>
+            throw new IllegalArgumentException(s"No metadata for $phys store")
+//            ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+
+
+
 
   private def readApronExprFromNonRelationalStore(phys: PhysicalAddress[Context]): Option[ApronExpr[PhysicalAddress[Context], Type]] =
     nonRelationalStore.read(PowersetAddr(phys).asInstanceOf[PowAddr]).toOption.flatMap(relationalValue.getRelationalExpr)
@@ -286,7 +305,7 @@ final class RelationalStore
     override def equals(obj: Any): Boolean =
       obj match
         case RelationalStoreState(abs2, nonRel2) =>
-          MapEquals(nonRelationalStoreState,nonRel2) && Profiler.addTime("Abstract1.equals") { abs1.isEqual(manager, abs2) }
+          MapEquals(nonRelationalStoreState,nonRel2) && abs1.getEnvironment.isEqual(abs2.getEnvironment) && Profiler.addTime("Abstract1.equals") { abs1.isEqual(manager, abs2) }
         case _ =>
           false
     override def hashCode: Int =
@@ -314,10 +333,10 @@ final class RelationalStore
       new Abstract1(manager, abstract1)
     }
 
-  override def join: Join[State] = combineRelationalStoreState
-  override def widen: Widen[State] = combineRelationalStoreState
+  override def join: Join[State] = combineRelationalStoreState(widen = true)
+  override def widen: Widen[State] = combineRelationalStoreState(widen = false)
 
-  def combineRelationalStoreState[W <: Widening](using combineTypeEnv: Combine[MetaData,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
+  def combineRelationalStoreState[W <: Widening](widen: Boolean)(using combineTypeEnv: Combine[MetaData,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
       Profiler.addTime("RelationalStoreState.combine") {
         val state = getState
@@ -328,7 +347,8 @@ final class RelationalStore
           _abstract1 = copyAbstract1(joinedAbs1.get)
           val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
           nonRelationalStore.setState(joinedNonRelationalStore.get)
-//          optimize()
+          if(widen)
+            moveUnconstrainedToNonRelationalStore()
           MaybeChanged(
             RelationalStoreState(copyAbstract1(_abstract1), nonRelationalStore.getState),
             joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged

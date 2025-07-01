@@ -59,7 +59,31 @@ case class RecencyRegion(recent: BitSet, old: BitSet, failed: BitSet):
   def isEmpty: Boolean = recent.isEmpty && old.isEmpty
 
   override def toString: String =
-    s"[" + (if(recent.isEmpty) "" else s"recent: ${recent.mkString(" ")}") + (if(old.isEmpty) "" else s", old: ${old.mkString(" ")}") + (if(failed.isEmpty) "" else s", failed: ${failed.mkString(" ")}") + "]"
+    s"[" +
+      (if(recent.isEmpty) "" else s"recent: ${bitSetToRanges(recent).map(rangeToString).mkString(" ")}") +
+      (if(old.isEmpty) "" else s", old: ${bitSetToRanges(old).map(rangeToString).mkString(" ")}") +
+      (if(failed.isEmpty) "" else s", failed: ${bitSetToRanges(failed).map(rangeToString).mkString(" ")}") + "]"
+
+  private def bitSetToRanges(bs: BitSet): List[Range] = {
+    if (bs.isEmpty){
+      Nil
+    } else {
+      val sorted = bs.toList.sorted
+      val (ranges, lastStart, lastEnd) = sorted.tail.foldLeft((List.empty[Range], sorted.head, sorted.head)) {
+        case ((acc, start, end), current) =>
+          if (current == end + 1)
+            (acc, start, current)
+          else
+            (Range(start, end + 1) :: acc, current, current)
+      }
+      (Range(lastStart, lastEnd + 1) :: ranges).reverse
+    }
+  }
+  private def rangeToString(r: Range): String =
+    if(r.size == 1)
+      s"${r.start}"
+    else
+      s"[${r.start},${r.end-1}]"
 
 given CombineRecencyRegion[W <: Widening]: Combine[RecencyRegion, W] =
   (region1: RecencyRegion, region2: RecencyRegion) =>

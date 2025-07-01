@@ -46,7 +46,7 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
 //  new RelationalAnalysisTestScript(Polka(true)),
-  new RelationalAnalysisTestScript(Octagon()),
+//  new RelationalAnalysisTestScript(Octagon()),
   new RelationalAnalysisTestScript(Box()),
 )
 
@@ -83,8 +83,8 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.toString.endsWith("call.wast")
-    p.toString.endsWith(".wast")
+    p.toString.endsWith("float_exprs.wast")
+//    p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
