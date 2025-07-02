@@ -139,13 +139,11 @@ object ConcreteInterpreter extends Interpreter:
       }.toMap
       ConcreteRefValues.nonNullObject(oid, cfs, fieldAddrs)
 
-    override def getField(obj: RefValue, name: FieldName): JOption[NoJoin, V] = obj match
+    override def getField(obj: RefValue, name: FieldName)(using failure: Failure): V = obj match
       // TODO: find a solution for this warning
       case ConcreteRefValues.nonNullObject(_, _, fields: Map[FieldName, FieldAddr]) =>
-        if !fields.contains(name) then
-          JOptionC.none
-        else
-          store.read(fields(name))
+        store.read(fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
+      case ConcreteRefValues.NullValue() => throw NullPointerException()
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 

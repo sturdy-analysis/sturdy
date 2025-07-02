@@ -2,7 +2,6 @@ package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType, Type}
-import sturdy.data
 import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.EffectStack
@@ -10,9 +9,9 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.Store
 import sturdy.language.bytecode.{AuxillaryFunctions, Interpreter}
-import sturdy.language.bytecode.generic.FieldInitSite
+import sturdy.language.bytecode.generic.{BytecodeFailure, FieldInitSite}
 import sturdy.values.arrays.{Array, ArrayOps}
-import sturdy.values.{Combine, Finite, MaybeChanged, Structural, Topped, Widening}
+import sturdy.values.{Combine, Finite, Join, MaybeChanged, Structural, Topped, Widening}
 import sturdy.values.integer.NumericInterval
 import sturdy.values.objects.{Object, ObjectOps}
 
@@ -99,14 +98,14 @@ trait Objects extends Interpreter:
         }.toMap
         Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
 
-      override def getField(ref: RefValue, name: FieldName): JOption[WithJoin, Value] =
+      override def getField(ref: RefValue, name: FieldName)(using failure: Failure): Value =
+        // TODO: fix
+        // import sturdy.data.MakeJoined
         ref match
-          case Topped.Top => getFieldNonActual
-          case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
-            if (!obj.fields.contains(name))
-              JOptionA.none
-            else
-              store.read(obj.fields(name))
+          case Topped.Top => ??? // getFieldNonActual
+          case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) => ???
+            // store.read(obj.fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
+          case Topped.Actual(AbstractReferenceValue.NullValue()) => throw NullPointerException()
           case Topped.Actual(_) => ???
 
       override def setField(ref: RefValue, name: FieldName, v: Value): JOption[WithJoin, Unit] =

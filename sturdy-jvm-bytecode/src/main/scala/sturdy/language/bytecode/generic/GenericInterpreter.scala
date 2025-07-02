@@ -480,7 +480,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       // Load and Store Fields opcode 180 - 181
       case inst: GETFIELD =>
         val obj = stack.popOrAbort()
-        val field = objectOps.getField(obj, (inst.declaringClass, inst.name)).getOrElse(fail(UnboundField, inst.name))
+        val field = objectOps.getField(obj, (inst.declaringClass, inst.name))
         stack.push(field)
       case inst: PUTFIELD =>
         val value = stack.popOrAbort()
@@ -769,7 +769,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     val newFrameData = 0
 
     if(mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value")).get).map(vals => vals.get)
+      val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value"))).map(vals => vals.get)
       arrayOps.printString(string)
       i32ops.integerLit(-1)
     else {
@@ -816,8 +816,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(args.head, (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value")).get).map(vals => vals.get)
+        val baseString = arrayOps.getArray(objectOps.getField(args.head, (ObjectType("java/lang/String"),"value"))).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value"))).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),

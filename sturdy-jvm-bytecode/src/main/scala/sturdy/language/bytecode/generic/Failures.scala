@@ -5,6 +5,7 @@ import sturdy.values.Finite
 
 enum BytecodeFailure extends FailureKind:
   case UnboundLocal
+  // field not assigned
   case UnboundField
   case UnboundStaticVar
   case IndexOutOfBounds
@@ -14,5 +15,7 @@ enum BytecodeFailure extends FailureKind:
   case IncorrectAddrVariant
   // a different variant of the Site enum was expected
   case IncorrectSiteVariant
+  // the field does not exist
+  case FieldNotFound
 
 given Finite[BytecodeFailure] with {}
