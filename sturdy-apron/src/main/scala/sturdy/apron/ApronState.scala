@@ -296,16 +296,10 @@ final class ApronRecencyState
         val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
         assign(result, e1)
         assign(result, e2)
-        if(isUnconstraint(result)) {
+        if(isUnconstraint(result))
           makeNonRelational(result)
-          MaybeChanged(
-            ApronExpr.Addr(result, joinedSpecials, joinedType),
-            ! getInterval(e1).isTop
-          )
-        } else {
-          // The check if the value has grown happens on the abstract domain
-          Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
-        }
+        // Check if expression has grown happens when combining Abstract1
+        Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
       }
   }
 

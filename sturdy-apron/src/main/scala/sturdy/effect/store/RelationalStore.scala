@@ -312,7 +312,7 @@ final class RelationalStore
       val abs1Hash = Profiler.addTime("Abstract1.hashCode") { abs1.hashCode(manager) }
       (abs1Hash, nonRelationalStoreState).hashCode()
 
-    override def toString: String = s"RelationalStoreState($hashCode, $abs1, $nonRelationalStoreState)"
+    override def toString: String = s"RelationalStoreState($hashCode, ${abs1.getEnvironment}, $abs1, $nonRelationalStoreState)"
 
   override type State = RelationalStoreState
 
@@ -333,8 +333,8 @@ final class RelationalStore
       new Abstract1(manager, abstract1)
     }
 
-  override def join: Join[State] = combineRelationalStoreState(widen = true)
-  override def widen: Widen[State] = combineRelationalStoreState(widen = false)
+  override def join: Join[State] = combineRelationalStoreState(widen = false)
+  override def widen: Widen[State] = combineRelationalStoreState(widen = true)
 
   def combineRelationalStoreState[W <: Widening](widen: Boolean)(using combineTypeEnv: Combine[MetaData,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
@@ -345,19 +345,22 @@ final class RelationalStore
         try {
           val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
           _abstract1 = copyAbstract1(joinedAbs1.get)
-          val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
-          nonRelationalStore.setState(joinedNonRelationalStore.get)
-          if(widen)
-            moveUnconstrainedToNonRelationalStore()
-          MaybeChanged(
-            RelationalStoreState(copyAbstract1(_abstract1), nonRelationalStore.getState),
-            joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
+          val joinedNonRelStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
+
+          val joinedState = RelationalStoreState(copyAbstract1(_abstract1), joinedNonRelStore.get)
+
+          val res = MaybeChanged(
+            joinedState,
+            joinedAbs1.hasChanged || joinedNonRelStore.hasChanged
           )
+
+          res
+
         } finally {
           _abstract1 = snapshotAbs1
           nonRelationalStore.setState(snapshotNonRelStore)
         }
-        }
+      }
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)

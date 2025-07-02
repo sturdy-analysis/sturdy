@@ -21,7 +21,7 @@ given Abstract1Widen: Widen[Abstract1] with
 object ApronJoins:
   def combineAbstract1(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] =
     Profiler.addTime("Abstract1.combine") {
-      if(s1.eq(s2)) {
+      if(s1.getEnvironment.isEqual(s2.getEnvironment) && s2.isIncluded(s2.getCreationManager, s1)) {
         Unchanged(s1)
       } else if(s1.isBottom(s1.getCreationManager)) {
         MaybeChanged(s1, hasChanged = !s2.isBottom(s2.getCreationManager))
