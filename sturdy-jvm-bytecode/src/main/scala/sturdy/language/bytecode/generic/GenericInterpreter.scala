@@ -349,89 +349,33 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // Branching opcode 153 - 166
       case inst: IFEQ =>
-        val v = stack.popOrAbort()
-        val isEq = eqOps.equ(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isEq) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(eqOps.equ, pc + inst.branchoffset)
       case inst: IFNE =>
-        val v = stack.popOrAbort()
-        val isNe = eqOps.neq(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isNe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(eqOps.neq, pc + inst.branchoffset)
       case inst: IFLT =>
-        val v = stack.popOrAbort()
-        val isLt = compareOps.lt(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isLt) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(compareOps.lt, pc + inst.branchoffset)
       case inst: IFGE =>
-        val v = stack.popOrAbort()
-        val isGe = compareOps.ge(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isGe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(compareOps.ge, pc + inst.branchoffset)
       case inst: IFGT =>
-        val v = stack.popOrAbort()
-        val isGt = compareOps.gt(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isGt) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(compareOps.gt, pc + inst.branchoffset)
       case inst: IFLE =>
-        val v = stack.popOrAbort()
-        val isLe = compareOps.le(v, i32ops.integerLit(0))
-        branchOpsUnit.boolBranch(isLe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCondInst(compareOps.le, pc + inst.branchoffset)
       case inst: IF_ICMPEQ =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isEq = eqOps.equ(v1, v2)
-        branchOpsUnit.boolBranch(isEq) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(eqOps.equ, pc + inst.branchoffset)
       case inst: IF_ICMPNE =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isNe = eqOps.neq(v1, v2)
-        branchOpsUnit.boolBranch(isNe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(eqOps.neq, pc + inst.branchoffset)
       case inst: IF_ICMPLT =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isLt = compareOps.lt(v1, v2)
-        branchOpsUnit.boolBranch(isLt) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(compareOps.lt, pc + inst.branchoffset)
       case inst: IF_ICMPGE =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isGe = compareOps.ge(v1, v2)
-        branchOpsUnit.boolBranch(isGe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(compareOps.ge, pc + inst.branchoffset)
       case inst: IF_ICMPGT =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isGt = compareOps.gt(v1, v2)
-        branchOpsUnit.boolBranch(isGt) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(compareOps.gt, pc + inst.branchoffset)
       case inst: IF_ICMPLE =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isLe = compareOps.le(v1, v2)
-        branchOpsUnit.boolBranch(isLe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(compareOps.le, pc + inst.branchoffset)
       case inst: IF_ACMPEQ =>
-        val(v1, v2) = stack.pop2OrAbort()
-        val isEq = eqOps.equ(v1, v2)
-        branchOpsUnit.boolBranch(isEq){
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(eqOps.equ, pc + inst.branchoffset)
       case inst: IF_ACMPNE =>
-        val (v1, v2) = stack.pop2OrAbort()
-        val isNe = eqOps.neq(v1, v2)
-        branchOpsUnit.boolBranch(isNe) {
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        } { }
+        handleIfCmpInst(eqOps.neq, pc + inst.branchoffset)
         
       // JUMPS opcode 167 - 171
       case inst: GOTO =>
@@ -654,21 +598,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // ifnull, ifnonnull opcode 198 - 199
       case inst: IFNULL =>
-        val v = stack.popOrAbort()
-        val flag = objectOps.isNull(v)
-
-        branchOpsUnit.boolBranch(flag){
-          except.throws(JvmExcept.Jump(pc + inst.branchoffset))
-        }{
-
-        }
+        handleIfInst(objectOps.isNull, pc + inst.branchoffset)
       case inst: IFNONNULL =>
         val v = stack.popOrAbort()
         val flag = objectOps.isNull(v)
-
-        branchOpsUnit.boolBranch(flag){
-
-        }{
+        branchOpsUnit.boolBranch(flag) {} {
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
         }
 
@@ -911,6 +845,25 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     case ValType.F64 => f64ops.floatingLit(0)
     case ValType.Obj => objectOps.makeNull()
     case ValType.Array => objectOps.makeNull()
+
+  // helper function for all if instructions
+  private def handleIfInst(predicate: V => V, target: Int): Unit =
+    val v = stack.popOrAbort()
+    val flag = predicate(v)
+    branchOpsUnit.boolBranch(flag) {
+      except.throws(JvmExcept.Jump(target))
+    } {}
+
+  // helper function for if<cond> instructions
+  // issues a jump to target iff the comparison is successful
+  private def handleIfCondInst(cmpOp: (V, V) => V, target: Int): Unit =
+    handleIfInst(cmpOp(_, i32ops.integerLit(0)), target)
+
+  // helper function for if_icmp<cond> and if_acmp<cond> instructions
+  // issues a jump to target iff the comparison is successful
+  private def handleIfCmpInst(cmpOp: (V, V) => V, target: Int): Unit =
+    val v2 = stack.popOrAbort()
+    handleIfInst(cmpOp(_, v2), target)
 
   def invokeClassMethod(mth: Method, args: Seq[V]): V =
     mth.name match
