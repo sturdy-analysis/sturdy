@@ -27,7 +27,7 @@ import java.net.URL
 // note:
 // this type is only used in this file. this might aid in fixing the type testing warnings
 enum ConcreteRefValues:
-  case nonNullObject[OID, CF, FieldAddr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, FieldAddr])
+  case Object[OID, CF, FieldAddr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, FieldAddr])
   case nonNullArray[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASize)
   case NullValue()
 
@@ -102,7 +102,7 @@ object ConcreteInterpreter extends Interpreter:
           false
     */
     override def instanceOf(v: ConcreteRefValues, target: TypeRep): Boolean = v match
-      case ConcreteRefValues.nonNullObject(_, cf: ClassFile, _) =>
+      case ConcreteRefValues.Object(_, cf: ClassFile, _) =>
         if (target == null)
           false
         else
@@ -137,11 +137,11 @@ object ConcreteInterpreter extends Interpreter:
         store.write(addr, v)
         (name, addr)
       }.toMap
-      ConcreteRefValues.nonNullObject(oid, cfs, fieldAddrs)
+      ConcreteRefValues.Object(oid, cfs, fieldAddrs)
 
     override def getField(obj: RefValue, name: FieldName)(using failure: Failure): V = obj match
       // TODO: find a solution for this warning
-      case ConcreteRefValues.nonNullObject(_, _, fields: Map[FieldName, FieldAddr]) =>
+      case ConcreteRefValues.Object(_, _, fields: Map[FieldName, FieldAddr]) =>
         store.read(fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
       case ConcreteRefValues.NullValue() => throw NullPointerException()
       case _ =>
@@ -149,7 +149,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def setField(obj: RefValue, name: FieldName, v: V): JOptionC[Unit] = obj match
       // TODO: find a solution for this warning
-      case ConcreteRefValues.nonNullObject(_, _, fields: Map[FieldName, FieldAddr]) =>
+      case ConcreteRefValues.Object(_, _, fields: Map[FieldName, FieldAddr]) =>
         if !fields.contains(name) then
           JOptionC.none
         else
@@ -159,7 +159,7 @@ object ConcreteInterpreter extends Interpreter:
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     override def invokeFunctionCorrect(obj: RefValue, mthName: String, sig: MthSig, args: Seq[V])(invoke: (RefValue, Mth, Seq[V]) => V): V = obj match
-      case ConcreteRefValues.nonNullObject(_, cls: ClassFile, _) =>
+      case ConcreteRefValues.Object(_, cls: ClassFile, _) =>
         val mth = AuxillaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
         invoke(obj, mth, args)
       case _ =>
@@ -238,7 +238,7 @@ object ConcreteInterpreter extends Interpreter:
 
   given RefEqOps[AID, OID, ASize]: EqOps[RefValue, Boolean] with
     override def equ(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
-      case (ConcreteRefValues.nonNullObject(oid1, _, _), ConcreteRefValues.nonNullObject(oid2, _, _)) =>
+      case (ConcreteRefValues.Object(oid1, _, _), ConcreteRefValues.Object(oid2, _, _)) =>
         oid1 == oid2
       case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
         aid1 == aid2
@@ -248,7 +248,7 @@ object ConcreteInterpreter extends Interpreter:
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
     override def neq(v1: ConcreteRefValues, v2: ConcreteRefValues): Boolean = (v1, v2) match
-      case (ConcreteRefValues.nonNullObject(oid1, _, _), ConcreteRefValues.nonNullObject(oid2, _, _)) =>
+      case (ConcreteRefValues.Object(oid1, _, _), ConcreteRefValues.Object(oid2, _, _)) =>
         oid1 != oid2
       case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
         aid1 != aid2
