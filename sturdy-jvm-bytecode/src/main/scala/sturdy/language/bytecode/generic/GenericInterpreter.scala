@@ -655,7 +655,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       // ifnull, ifnonnull opcode 198 - 199
       case inst: IFNULL =>
         val v = stack.popOrAbort()
-        val flag = typeOps.instanceOf(v, null)
+        val flag = objectOps.isNull(v)
 
         branchOpsUnit.boolBranch(flag){
           except.throws(JvmExcept.Jump(pc + inst.branchoffset))
@@ -664,7 +664,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         }
       case inst: IFNONNULL =>
         val v = stack.popOrAbort()
-        val flag = typeOps.instanceOf(v, null)
+        val flag = objectOps.isNull(v)
 
         branchOpsUnit.boolBranch(flag){
 
