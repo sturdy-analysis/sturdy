@@ -83,7 +83,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.toString.endsWith("call.wast")
+//    p.toString.endsWith("memory_size.wast")
     p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {

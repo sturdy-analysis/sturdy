@@ -121,13 +121,15 @@ class RelationalMemory
   override def grow(key: Key, deltaPages: ApronExpr[VirtualAddress[Context], Type]): JOptionA[ApronExpr[VirtualAddress[Context], Type]] =
     val Mem(addressRanges, numPages, pageLimit) = memories(key)
     val newNumPages = ApronExpr.intAdd(numPages, deltaPages)
-    memories += key -> Mem(addressRanges, newNumPages, pageLimit)
 
-    apronState.ifThenElse(And(Constraint(le(newNumPages, maxPages)), Constraint(le(newNumPages, pageLimit)))) {
-      JOptionA.Some(numPages)
+    val (resultPages, returnValue) = apronState.ifThenElse(And(Constraint(le(newNumPages, maxPages)), Constraint(le(newNumPages, pageLimit)))) {
+      (newNumPages, JOptionA.Some(numPages))
     } {
-      JOptionA.None[ApronExpr[VirtualAddress[Context], Type]]()
+      (numPages, JOptionA.None[ApronExpr[VirtualAddress[Context], Type]]())
     }
+    memories += key -> Mem(addressRanges, resultPages, pageLimit)
+
+    returnValue
 
   override def putNew(key: Key, initSize: ApronExpr[VirtualAddress[Context], Type], sizeLimit: Option[ApronExpr[VirtualAddress[Context], Type]]): Unit =
     memories += key -> Mem(SortedMap.empty, initSize, sizeLimit.getOrElse(ApronExpr.doubleInterval(0, Double.PositiveInfinity, intType)))

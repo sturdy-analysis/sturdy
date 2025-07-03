@@ -67,31 +67,3 @@ final class RelationalStack
       case ((v1, v2),idx) => combineValues(false, idx, v1, v2).get
     }
     joinedFrame ++ rest
-
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
-
-  private class OperandStackJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = stack
-    private var fStack: List[Val] = _
-
-    override def inbetween(fFailed: Boolean): Unit =
-      fStack = stack
-      stack = snapshot
-
-    override def retainNone(): Unit =
-      stack = snapshot
-    // clearCurrentOperandFrame()
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      stack = fStack
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      stack = joinWith(fStack)
-
-    private def joinWith(first: List[Val]): List[Val] =
-      val firstFrame = first.take(stack.size - framePointer)
-      val (secondFrame, rest) = stack.splitAt(stack.size - framePointer)
-      combineFrames(widen = false, firstFrame, secondFrame).get ++ rest
-  }
