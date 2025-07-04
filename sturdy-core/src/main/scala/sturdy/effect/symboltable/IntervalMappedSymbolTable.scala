@@ -116,7 +116,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
     tables.get(key) match {
       case Some(intervalMap) =>
         // elem bounds check
-        if (entryOffset.low < 0 || entryOffset.high > entries.size || amount.low < 0 || amount.high < 0) {
+        if ((!containsTop(entryOffset) && (entryOffset.low < 0 || entryOffset.high > entries.size)) || (!containsTop(amount) && (amount.low < 0 || amount.high < 0))) {
           return JOptionA.none
         }
         var updatedMap = intervalMap
@@ -164,7 +164,7 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
           case (false, false) =>
             tables += (key -> intervalMap.addInterval(entry, NumericInterval(tableOffset.low, tableOffset.high + amount.high - 1)))
         }
-        JOptionA.some(())
+        if(boundCheck.isEmpty) JOptionA.noneSome(()) else JOptionA.some(())
       case None => JOptionA.none
     }
   }
