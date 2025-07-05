@@ -119,31 +119,44 @@ object ConcreteInterpreter extends Interpreter with Control:
       else
         JOptionC.none
 
-
-    val runtime: Map[String, List[Value] => List[Value]] = Map(
-      "proc_exit" -> { args =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match {
+      case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      },
-      "fd_close" -> { args => f.fail(FileError, s"Mock implementation of fd_close") },
-      "fd_read" -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
-      "fd_seek" -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
-      "fd_write" -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
-      "fd_fdstat_get" -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") },
-      // TODO: Implement hostfunctions with help of WASI libc headers:
-      //  https://github.com/WebAssembly/wasi-libc/blob/main/libc-bottom-half/headers/public/wasi/api.h
-      "args_sizes_get" -> { args => f.fail(MockError, s"Mock implementation of args_sizes_get") },
-      "args_get" -> { args => f.fail(MockError, s"Mock implementation of") },
-      "environ_sizes_get" -> { args => f.fail(MockError, s"Mock implementation of") },
-      "environ_get" -> { args => f.fail(MockError, s"Mock implementation of") },
-      "fd_prestat_get" -> { args => f.fail(FileError, s"Mock implementation of") },
-      "random_get" -> { args => f.fail(MockError, s"Mock implementation of") },
-      "path_open" -> { args => f.fail(MockError, s"Mock implementation of") },
-      "fd_prestat_dir_name" -> { args => f.fail(FileError, s"Mock implementation of") }
-    )
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
-      runtime(hostFunc.name)(args)
+      case "fd_close" | "fd_read" | "fd_seek" | "fd_write" | "fd_fdstat_get" | "fd_prestat_get" | "fd_prestat_dir_name" =>
+        f.fail(FileError, s"Mock implementation of ${hostFunc.name}")
+
+      case "args_sizes_get" | "args_get" | "environ_sizes_get" | "environ_get" | "random_get" | "path_open" =>
+        f.fail(MockError, s"Mock implementation of ${hostFunc.name}")
+
+      case "__VERIFIER_nondet_bool" =>
+        List(Value.Num(NumValue.Int32(scala.util.Random.nextInt(2))))
+
+      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
+        List(Value.Num(NumValue.Int32(scala.util.Random.nextInt(256))))
+
+      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
+        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt(65536))))
+
+      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
+        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt())))
+
+      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
+        List(Value.Num(NumValue.Int64(if (scala.util.Random.nextFloat() < 0.1) 0L else scala.util.Random.nextLong())))
+
+      case "__VERIFIER_nondet_float" =>
+        List(Value.Num(NumValue.Float32(if (scala.util.Random.nextFloat() < 0.1) 0.0f else scala.util.Random.nextFloat())))
+
+      case "__VERIFIER_nondet_double" =>
+        List(Value.Num(NumValue.Float64(if (scala.util.Random.nextFloat() < 0.1) 0.0 else scala.util.Random.nextDouble())))
+
+      case "__blackhole_int" | "__blackhole_int_p" =>
+        args
+
+      case other =>
+        f.fail(MockError, s"Unimplemented host function: $other")
+    }
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
