@@ -50,6 +50,10 @@ class RelationalFloatOpsTest extends FloatOpsTest[Float, ApronExpr[VirtAddr, Typ
           succeed
         else
           fail(s"$iv does not equal [$l,$u]")
+
+      override def NaN: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.NaN, floatType)
+      override def posInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.PositiveInfinity, floatType)
+      override def negInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.NegativeInfinity, floatType)
     }
   }
 )
@@ -84,6 +88,10 @@ class RelationalDoubleOpsTest extends FloatOpsTest[Double, ApronExpr[VirtAddr, T
           succeed
         else
           fail(s"[${iv.inf}:${iv.inf.getClass}, ${iv.sup}: ${iv.sup.getClass}] does not equal [$l,$u]")
+
+      override def NaN: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.NaN, floatType)
+      override def posInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.PositiveInfinity, floatType)
+      override def negInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.NegativeInfinity, floatType)
     }
   }
 )
