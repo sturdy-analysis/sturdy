@@ -108,25 +108,25 @@ class RelationalAnalysisTest(manager: Manager) extends AnyFlatSpec, Matchers:
 
    "The ordering on RelationalVar" should "be Print <= Alloc <= Temp <= Local" in {
      import RelationalAnalysis.given
-     import RelationalAnalysis.RelationalVar.*
+     import RelationalAnalysis.AddrCtx.*
 
-     val printInt = Print(BaseType[Int])
-     val alloc1 = Alloc(IntLabel(1))
+     val input = Input(sturdy.language.tip.Exp.Input())
+     val alloc1 = Alloc(sturdy.language.tip.Exp.Alloc(sturdy.language.tip.Exp.NumLit(1)))
      val tempInt = Temp(FixIn.Eval(sturdy.language.tip.Exp.Var("y")))
      val localX = Local("x","fun")
 
-     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, alloc1) shouldBe -1
-     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, printInt) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, alloc1) shouldBe -1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, input) shouldBe 1
 
-     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, tempInt) shouldBe -1
-     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, printInt) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, input) shouldBe 1
 
-     Ordering[RelationalAnalysis.RelationalVar].compare(printInt, localX) shouldBe -1
-     Ordering[RelationalAnalysis.RelationalVar].compare(localX, printInt) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, localX) shouldBe -1
+     Ordering[RelationalAnalysis.AddrCtx].compare(localX, input) shouldBe 1
 
-     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, tempInt) shouldBe -1
-     Ordering[RelationalAnalysis.RelationalVar].compare(tempInt, alloc1) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, tempInt) shouldBe -1
+     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, alloc1) shouldBe 1
 
-     Ordering[RelationalAnalysis.RelationalVar].compare(alloc1, localX) shouldBe -1
-     Ordering[RelationalAnalysis.RelationalVar].compare(localX, alloc1) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, localX) shouldBe -1
+     Ordering[RelationalAnalysis.AddrCtx].compare(localX, alloc1) shouldBe 1
    }

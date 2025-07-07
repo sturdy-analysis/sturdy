@@ -117,6 +117,8 @@ case class Function(name: String, params: Seq[String], locals: Seq[String], body
     }
     vars
 
+given Ordering[Function] = (f1: Function, f2: Function) => f1.name.compareTo(f2.name)
+
 case class Program(funs: Seq[Function]):
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))

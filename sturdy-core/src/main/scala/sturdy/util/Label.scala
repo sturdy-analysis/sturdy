@@ -6,6 +6,8 @@ case class IntLabel(i: Int) extends Label:
 case class SynLabel(from: Label) extends Label:
   override def toString: String = s"$from$$"
 
+given Ordering[Label] = (l1: Label, l2: Label) => l1.toString.compareTo(l2.toString)
+
 object Labeled:
   private var _next = 0
   def next(): Int =
