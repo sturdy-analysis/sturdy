@@ -1,7 +1,7 @@
 package sturdy.language.bytecode
 
 import scala.util.boundary, boundary.break
-import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
+import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ClassType, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.{Allocator, CAllocatorIntIncrement}
@@ -51,7 +51,7 @@ object ConcreteInterpreter extends Interpreter:
   override type TypeRep = ReferenceType
   //override type NullVal = Null
   override type ObjAddr = (Site, Int)
-  override type FieldName = (ObjectType, String)
+  override type FieldName = (ClassType, String)
   //override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
   override type ArrayAddr = (Site, Int)
   override type AType = ArrayType
@@ -89,7 +89,7 @@ object ConcreteInterpreter extends Interpreter:
         if(target == null)
           false
         else
-          v.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
+          v.cls.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy)
       case v: ConcreteRefValues.nonNullArray[AID, ArrayElemAddr, AType, I32] =>
         if(target == null)
           false
@@ -106,7 +106,7 @@ object ConcreteInterpreter extends Interpreter:
         if (target == null)
           false
         else
-          cf.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy)
+          cf.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy)
       case ConcreteRefValues.nonNullArray(_, _, arrayType: AType, _) =>
         if (target == null)
           false
@@ -282,7 +282,7 @@ object ConcreteInterpreter extends Interpreter:
     val arrayValStore: CStore[ArrayElemAddr, Value] = new CStore(initArrayValStore)
     val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)
 
-    val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr] = scala.collection.mutable.Map()
+    val staticAddrMap: scala.collection.mutable.Map[(ClassType, String), StaticAddr] = scala.collection.mutable.Map()
 
     override val project: Project[URL] = files
     given Project[URL] = project

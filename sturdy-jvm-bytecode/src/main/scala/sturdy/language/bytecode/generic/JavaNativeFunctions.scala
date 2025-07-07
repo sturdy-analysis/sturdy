@@ -1,6 +1,6 @@
 package sturdy.language.bytecode.generic
 
-import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
+import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ClassType, ReferenceType}
 import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
@@ -9,7 +9,7 @@ import sturdy.values.objects.{Object, ObjectOps}
 
 class JavaNativeFunctions[V, FieldAddr, ArrayElemAddr, Idx, OID, AID, ObjRep, TypeRep, J[_] <: MayJoin[_]]
   (bytecodeOps: BytecodeOps[Idx, V, ReferenceType],
-   objectOps: ObjectOps[(ObjectType, String), OID, V, ClassFile, V, _, Method, String, MethodDescriptor, V, J],
+   objectOps: ObjectOps[(ClassType, String), OID, V, ClassFile, V, _, Method, String, MethodDescriptor, V, J],
    arrayOps: ArrayOps[AID, V, V, V, ArrayType, _, J]):
 
 

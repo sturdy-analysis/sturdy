@@ -1,4 +1,4 @@
-import org.opalj.br.{ClassFile, ObjectType}
+import org.opalj.br.{ClassFile, ClassType}
 import org.opalj.br.analyses.Project
 import org.opalj.io.process
 
@@ -24,7 +24,7 @@ object AbstractInterpreterTest extends App:
     process(new DataInputStream(new FileInputStream(simpleMathName))) { in =>
       org.opalj.br.reader.Java17Framework.ClassFile(in)
     }.head
-  val complicatedMath = pWithLibrary.classFile(ObjectType("sturdy/language/bytecode/simple/ComplicatedMath")).get
+  val complicatedMath = pWithLibrary.classFile(ClassType("sturdy/language/bytecode/simple/ComplicatedMath")).get
 
   val testMths = simpleMath.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest").concat(
     complicatedMath.methodsWithBody.filter(mth => mth.actualArgumentsCount == 0).filter(mth => mth.name != "<clinit>").filter(mth => mth.name != "stringBuilderTest")
@@ -44,11 +44,11 @@ object AbstractInterpreterTest extends App:
 //
 //  val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 //  println(interp.invokeExternal(testMths.find(mth => mth.name == "throwTest0").get, true))
-//  val classClassFile = pWithLibrary.allClassFiles.find(cls => cls.thisType == ObjectType("java/lang/Class"))
+//  val classClassFile = pWithLibrary.allClassFiles.find(cls => cls.thisType == ClassType("java/lang/Class"))
 //  println(classClassFile.get.methods.size)
 //  println(classClassFile.get.methodsWithBody.size)
 //  val nativeSource = org.opalj.bytecode.RTJar
-//  val source = javaLibClassFileWrapper(ObjectType("java/lang/Class"))
+//  val source = javaLibClassFileWrapper(ClassType("java/lang/Class"))
 //  val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
 //  println(cfs.methods.size)
 //  println(cfs.methodsWithBody.size)
@@ -60,6 +60,6 @@ object AbstractInterpreterTest extends App:
 //  println(cfs.methodsWithBody.find(elem => elem.name == "<init>").get.parameterTypes)
 //  println(cfs.methods.filter(elem => elem.name == "registerNatives"))
 
-  def javaLibClassFileWrapper(obj: ObjectType): String =
+  def javaLibClassFileWrapper(obj: ClassType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
     source

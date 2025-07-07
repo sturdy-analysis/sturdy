@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ObjectType, ReferenceType}
+import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ClassType, ReferenceType}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.TrySturdy
@@ -96,7 +96,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val project: Project[URL] = files
     override val projectSource: String = path
 
-    override val staticAddrMap: mutable.Map[(ObjectType, String), StaticAddr] = mutable.Map()
+    override val staticAddrMap: mutable.Map[(ClassType, String), StaticAddr] = mutable.Map()
 
     given Project[URL] = project
     private given Failure = failure
@@ -112,7 +112,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
               if (target == null)
                 Topped.Actual(false)
               else
-                Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseObjectType)(project.classHierarchy))
+                Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy))
             case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
               val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
               if (target == null)
@@ -144,8 +144,8 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
 
     override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
-      new LiftedObjectOps[(ObjectType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[(ClassType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin] =
+      new LiftedObjectOps[(ClassType, String), ObjAddr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using objOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
       )
 

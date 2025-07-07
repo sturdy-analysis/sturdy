@@ -11,7 +11,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ClassType, ReferenceType, ShortType}
 import org.opalj.io.process
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.values.arrays.ArrayOps
@@ -29,14 +29,14 @@ import scala.collection.immutable.ArraySeq
 enum JvmExcept[V]:
   case Jump(pc: Int)
   case Ret(pc: V)
-  case Throw(exception: ObjectType)
+  case Throw(exception: ClassType)
   case ThrowObject(exception: V)
 
 // deprecated site types
 // case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
 // case class ArrayElemInitSite(s: InstructionSite, ix: Int)
-// case class FieldInitSite(s: InstructionSite, name: String, cls: ObjectType)
-// case class StaticInitSite(obj: ObjectType, name: String)
+// case class FieldInitSite(s: InstructionSite, name: String, cls: ClassType)
+// case class StaticInitSite(obj: ClassType, name: String)
 
 type InstructionSite = Site
 type ArrayElemInitSite = Site
@@ -65,7 +65,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[(ObjectType, String), ObjAddr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[(ClassType, String), ObjAddr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
   val arrayOps: ArrayOps[ArrayAddr, V, V, V, ArrayType, ArrayElemInitSite, J]
 
   implicit val joinUnit: J[Unit]
@@ -85,7 +85,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V, Unit]
 
-  val staticAddrMap: scala.collection.mutable.Map[(ObjectType, String), StaticAddr]
+  val staticAddrMap: scala.collection.mutable.Map[(ClassType, String), StaticAddr]
 
 
   val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, objFieldStore, arrayValStore, staticVarStore, frame))
@@ -102,13 +102,13 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   val classCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Class.class").head
   val stringCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
 
-  var staticInitialized: Set[ObjectType] = Set()
+  var staticInitialized: Set[ClassType] = Set()
 
-  def javaLibClassFileWrapper(obj: ObjectType): String =
+  def javaLibClassFileWrapper(obj: ClassType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
     source
 
-  def nonJavaLibClassFileWrapper(obj: ObjectType): String =
+  def nonJavaLibClassFileWrapper(obj: ClassType): String =
     val path = projectSource ++ File.separator ++ obj.simpleName ++ ".class"
     path
 
@@ -139,11 +139,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadFloat =>
         stack.push(num.evalNumericOp(inst))
       case inst: LoadClass =>
-        //val obj = createLibraryObj(inst.value.mostPreciseObjectType, site)
-        //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ObjectType("java/lang/Class")))(findMethodOfObj)
-        val cls = createLibraryObj(ObjectType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
+        //val obj = createLibraryObj(inst.value.mostPreciseClassType, site)
+        //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ClassType("java/lang/Class")))(findMethodOfObj)
+        val cls = createLibraryObj(ClassType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
         stack.push(cls)
-//        val cls = findClassFile(inst.value.mostPreciseObjectType)
+//        val cls = findClassFile(inst.value.mostPreciseClassType)
 //        classStack.push(cls)
 
 
@@ -151,8 +151,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
         val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
         val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
-        val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
-        objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
+        val stringObj = createLibraryObj(ClassType("java/lang/String"), site)
+        objectOps.setField(stringObj, (ClassType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
         stringStack.push(inst.value)
 
@@ -167,14 +167,14 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case inst: LoadFloat_W =>
         stack.push(num.evalNumericOp(inst))
       case inst: LoadClass_W =>
-        val cls = createLibraryObj(ObjectType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
+        val cls = createLibraryObj(ClassType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
         stack.push(cls)
       case inst: LoadString_W =>
         val string = inst.value.toCharArray.map(l => l.toInt).toSeq
         val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
         val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
-        val stringObj = createLibraryObj(ObjectType("java/lang/String"), site)
-        objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
+        val stringObj = createLibraryObj(ClassType("java/lang/String"), site)
+        objectOps.setField(stringObj, (ClassType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
         stringStack.push(inst.value)
       case inst: LoadMethodHandle_W =>
@@ -196,7 +196,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         val idx = stack.popOrAbort()
         val array = stack.popOrAbort()
         val v = arrayOps.getVal(array, idx).getOrElse(
-          except.throws(JvmExcept.ThrowObject(createLibraryObj(ObjectType("java/lang/IndexOutOfBoundsException"), site)))
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType("java/lang/IndexOutOfBoundsException"), site)))
         )
         stack.push(v)
 
@@ -211,7 +211,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         val idx = stack.popOrAbort()
         val array = stack.popOrAbort()
         arrayOps.setVal(array, idx, v).getOrElse(
-          except.throws(JvmExcept.ThrowObject(createLibraryObj(ObjectType("java/lang/IndexOutOfBoundsException"), site)))
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType("java/lang/IndexOutOfBoundsException"), site)))
         )
 
       // Manip stack opcode 87 - 95
@@ -444,11 +444,11 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         }
 
       case inst: INVOKEVIRTUAL =>
-        val objectType = inst.declaringClass.mostPreciseObjectType
+        val classType = inst.declaringClass.mostPreciseClassType
         val numArgs = inst.methodDescriptor.parametersCount
         if(inst.name == "println" || inst.name == "print")
           val printString = stack.popOrAbort()
-          val obj = createLibraryObj(ObjectType("java/io/PrintStream"), Site.Instruction(mth, pc, variant = 1))
+          val obj = createLibraryObj(ClassType("java/io/PrintStream"), Site.Instruction(mth, pc, variant = 1))
           val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, Seq(printString))(invokeWrapper)
           if (!inst.methodDescriptor.returnType.isVoidType) {
             stack.push(ret)
@@ -495,7 +495,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
                 eval(LoadString(test4), mth, pc)
               }
 
-              val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+              val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseClassType)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
               val invokedMth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
               val args = stack.popNOrAbort(2)
@@ -505,15 +505,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       /*
       receiver match
         case receiver: InvokeStaticMethodHandle =>
-          if (project.isLibraryType(receiver.receiverType.mostPreciseObjectType)) {
-            val mthTypeSource = javaLibClassFileWrapper(ObjectType("java/lang/invoke/MethodType"))
+          if (project.isLibraryType(receiver.receiverType.mostPreciseClassType)) {
+            val mthTypeSource = javaLibClassFileWrapper(ClassType("java/lang/invoke/MethodType"))
             val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
-            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ObjectType("java/lang/Class"), ObjectType("java/lang/invoke/MethodType")))
-            stack.push(createNativeObj(inst.methodDescriptor.returnType.asObjectType))
-            stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asObjectType))
+            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ClassType("java/lang/Class"), ClassType("java/lang/invoke/MethodType")))
+            stack.push(createNativeObj(inst.methodDescriptor.returnType.asClassType))
+            stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asClassType))
             val mthTypeObj = invoke(mthTypeMth.get, true)
 
-            val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseObjectType)
+            val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseClassType)
             val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
             val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
             invoke(mth, true)
@@ -526,12 +526,12 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // NEW opcode 187
       case inst: NEW =>
-        if (project.isLibraryType(inst.objectType)){
-          val obj = createLibraryObj(inst.objectType, site)
+        if (project.isLibraryType(inst.classType)){
+          val obj = createLibraryObj(inst.classType, site)
           stack.push(obj)
         } else {
-          val cfs = project.classFile(inst.objectType).get
-          val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.objectType, true)(project).map(cfs => cfs.fields).toSeq
+          val cfs = project.classFile(inst.classType).get
+          val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.classType, true)(project).map(cfs => cfs.fields).toSeq
           val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), Site.FieldInitialization(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
           val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
           stack.push(obj)
@@ -619,7 +619,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       case _ if (inst.opcode == 202) =>
         ()
 
-  def findClassFile(objType: ObjectType): ClassFile =
+  def findClassFile(objType: ClassType): ClassFile =
     if (project.isLibraryType(objType)){
       val source = javaLibClassFileWrapper(objType)
       val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
@@ -629,7 +629,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       project.classFile(objType).get
     }
 
-  def ensureInitialization(objType: ObjectType)(using Fixed): Unit =
+  def ensureInitialization(objType: ClassType)(using Fixed): Unit =
     if(!staticInitialized.contains(objType)) {
       if (!staticInitialized.contains(objType)) {
         if (project.isLibraryType(objType)) {
@@ -650,7 +650,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       }
     }
 
-  def createLibraryObj(toLoad: ObjectType, site: InstructionSite): V =
+  def createLibraryObj(toLoad: ClassType, site: InstructionSite): V =
     val cfs = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), Site.FieldInitialization(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
@@ -703,7 +703,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     val newFrameData = 0
 
     if(mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"), "value"))).map(vals => vals.get)
+      val string = arrayOps.getArray(objectOps.getField(args(1), (ClassType("java/lang/String"), "value"))).map(vals => vals.get)
       arrayOps.printString(string)
       i32ops.integerLit(-1)
     else {
@@ -749,15 +749,15 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   def evalNativeStatic(mth: Method, args: Seq[V]): Unit =
     mth.name match
       case "makeConcatWithConstants" =>
-        //val testBase = objectOps.getField(args(0), (ObjectType("java/lang/String"),"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(args.head, (ObjectType("java/lang/String"),"value"))).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(args(1), (ObjectType("java/lang/String"),"value"))).map(vals => vals.get)
+        //val testBase = objectOps.getField(args(0), (ClassType("java/lang/String"),"value")).get
+        val baseString = arrayOps.getArray(objectOps.getField(args.head, (ClassType("java/lang/String"),"value"))).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(args(1), (ClassType("java/lang/String"),"value"))).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
           concattedString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
-        val stringObj = createLibraryObj(ObjectType("java/lang/String"), Site.Instruction(mth, 0))
-        objectOps.setField(stringObj, (ObjectType("java/lang/String"),"value"), stringArray)
+        val stringObj = createLibraryObj(ClassType("java/lang/String"), Site.Instruction(mth, 0))
+        objectOps.setField(stringObj, (ClassType("java/lang/String"),"value"), stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)
@@ -835,7 +835,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
     case opalTypes: DoubleType => ValType.F64
     case opalTypes: BooleanType => ValType.I32
     case opalTypes: CharType => ValType.I32
-    case opalTypes: ObjectType => ValType.Obj
+    case opalTypes: ClassType => ValType.Obj
     case opalTypes: ArrayType => ValType.Array
 
   def defaultValue(ty: ValType): V = ty match
@@ -909,7 +909,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         ???
       case "getPrimitiveClass" =>
         // not in docs
-        val clsObj = createLibraryObj(ObjectType("java/lang/Class"), Site.Instruction(mth, 0))
+        val clsObj = createLibraryObj(ClassType("java/lang/Class"), Site.Instruction(mth, 0))
         clsObj
       case "getProtectionDomain" =>
         // returns protectionDomain of this class

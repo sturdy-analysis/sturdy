@@ -1,4 +1,4 @@
-import org.opalj.br.{ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, ObjectType}
+import org.opalj.br.{ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, ClassType}
 import org.opalj.br.analyses.Project
 import org.opalj.io.process
 

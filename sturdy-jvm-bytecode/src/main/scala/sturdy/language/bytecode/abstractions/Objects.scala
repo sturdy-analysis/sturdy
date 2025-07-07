@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ObjectType, ReferenceType, ShortType, Type}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ClassType, ReferenceType, ShortType, Type}
 import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.EffectStack
@@ -32,7 +32,7 @@ trait Objects extends Interpreter:
   override type StaticAddr = AddrSet
 
   override type ObjType = ClassFile
-  override type FieldName = (ObjectType, String)
+  override type FieldName = (ClassType, String)
 
   type Obj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
   type Arr = Array[ArrayAddr, ArrayElemAddr, AType, Value]
@@ -85,7 +85,7 @@ trait Objects extends Interpreter:
         case DoubleType => Value.Float64(topF64)
         case BooleanType => Value.Int32(topI32)
         case CharType => Value.Int32(topI32)
-        case _: ObjectType => Value.ReferenceValue(topRef)
+        case _: ClassType => Value.ReferenceValue(topRef)
         case _: ArrayType => Value.ReferenceValue(topRef)
         case _ => ??? // TODO: not implemented
 

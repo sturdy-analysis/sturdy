@@ -1,6 +1,6 @@
 package sturdy.language.bytecode.abstractions
 
-import org.opalj.br.ObjectType
+import org.opalj.br.ClassType
 import sturdy.data.*
 import sturdy.data.MayJoin.WithJoin
 import sturdy.values.{Combine, Join, MaybeChanged, Powerset, Widening}
@@ -10,7 +10,7 @@ import sturdy.language.bytecode.generic.JvmExcept
 trait Exceptions:
   case class JvmExceptAbstract[V](jumps: Powerset[Int],
                                   returns: Option[V],
-                                  throws: Powerset[ObjectType],
+                                  throws: Powerset[ClassType],
                                   throwObjects: Option[V])
 
   given exceptionalJvm[V]: Exceptional[JvmExcept[V], JvmExceptAbstract[V], WithJoin] with

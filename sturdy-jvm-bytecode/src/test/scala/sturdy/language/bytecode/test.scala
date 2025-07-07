@@ -51,10 +51,10 @@ object test extends App{
   val convertedTypes = localtypes.map(convertTypes(_))
   println(convertedTypes)*/
 
-  //val cfs = pWithNatives.classFile(ObjectType("SimpleMath")).get
+  //val cfs = pWithNatives.classFile(ClassType("SimpleMath")).get
   val cfs = cfs1.head
-  val cfs2 = pWithLibrary.classFile(ObjectType("sturdy/language/bytecode/simple/ComplicatedMath")).get
-  println(pWithLibrary.classFile(ObjectType("sturdy/language/bytecode/simple/ComplicatedMath")).get.staticInitializer)
+  val cfs2 = pWithLibrary.classFile(ClassType("sturdy/language/bytecode/simple/ComplicatedMath")).get
+  println(pWithLibrary.classFile(ClassType("sturdy/language/bytecode/simple/ComplicatedMath")).get.staticInitializer)
 
   val sourceFile = projectPath
 
@@ -230,7 +230,7 @@ object test extends App{
   val nullTest = cfs.findMethod("nullTest").head
   interp.evalExternal(ACONST_NULL)
   println(interp.invokeExternal(nullTest, true))
-  interp.evalExternal(NEW(ObjectType("sturdy/language/bytecode/simple/SimpleMath")))
+  interp.evalExternal(NEW(ClassType("sturdy/language/bytecode/simple/SimpleMath")))
   println("TEST")
   println(interp.invokeExternal(nullTest, true))
 
@@ -242,7 +242,7 @@ object test extends App{
   val typeTestArray = cfs2.findMethod("typeTestArray").head
   println(absInterp.invokeExternal(typeTestArray, true))
   val typeTest2 = cfs.findMethod("typeTest2").head
-  interp.evalExternal(NEW(ObjectType("sturdy/language/bytecode/simple/SimpleMath")))
+  interp.evalExternal(NEW(ClassType("sturdy/language/bytecode/simple/SimpleMath")))
   println(interp.invokeExternal(typeTest2, true))
   interp.evalExternal(ACONST_NULL)
   println(interp.invokeExternal(typeTest2, true))
