@@ -134,11 +134,16 @@ lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
   .dependsOn(ProjectRef(opal, "BytecodeRepresentation") % "compile->compile")
   .settings(
     name := "sturdy_jvm_bytecode",
-    /* there has been no release that supports class file version 65 as of 7.7.25, so we depend on the commit that introduced support for it.
     libraryDependencies ++= Seq(
-      "de.opal-project" % "framework_2.13" % "5.0.0"
-    )
-    */
+      // there has been no release that supports class file version 65 as of 7.7.25, so we depend on the commit that introduced support for it.
+      // "de.opal-project" % "framework_2.13" % "5.0.0"
+      // testing
+      "org.scalatest" %% "scalatest" % "3.2.19" % "test"
+    ),
+    // resolve conflicts between scala-xml_2.13 and scala-xml_3 by excluding one of them
+    excludeDependencies ++= Seq(
+      ExclusionRule("org.scala-lang.modules", "scala-xml_2.13")
+    ),
   )
 
 //lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
