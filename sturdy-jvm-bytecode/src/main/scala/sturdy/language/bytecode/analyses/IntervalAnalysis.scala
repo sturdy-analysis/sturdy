@@ -72,11 +72,17 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
     override val except = new JoinedExcept()
-    override val objAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Object(site))) // new AAllocatorFromContext(site => ObjAddr(site))
-    override val objFieldAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Field(site, ???, ???))) // new AAllocatorFromContext(fieldSite => FieldAddr(fieldSite.s, fieldSite.name, fieldSite.cls))
-    override val arrayAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Array(site))) // new AAllocatorFromContext(site => ArrayAddr(site))
-    override val arrayValAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.ArrayElement(site, ???))) // new AAllocatorFromContext(elemSite => ArrayElemAddr(elemSite.s, elemSite.ix))
-    override val staticAlloc: Allocator[AddrSet, Site] = new AAllocatorFromContext(site => PowersetAddr(Addr.Static(???))) // new AAllocatorFromContext(site => StaticAddr(site.obj, site.name))
+    override val objAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext(site => PowersetAddr(Addr.Object(site)))
+    override val objFieldAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
+      case Site.FieldInitialization(s, name, cls) => PowersetAddr(Addr.Field(s, name, cls))
+      case _ => ??? // TODO
+    override val arrayAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext(site => PowersetAddr(Addr.Array(site)))
+    override val arrayValAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
+      case Site.ArrayElementInitialization(s, ix) => PowersetAddr(Addr.ArrayElement(s, ix))
+      case _ => ??? // TODO
+    override val staticAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
+      case Site.StaticInitialization(obj, name) => PowersetAddr(Addr.Static(obj, name))
+      case _ => ??? // TODO
     override val objFieldStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initFieldStore)
     override val arrayValStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initArrayVarStore)
     override val staticVarStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initStaticStore)
