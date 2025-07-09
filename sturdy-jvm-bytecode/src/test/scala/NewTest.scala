@@ -55,15 +55,15 @@ class NewTest extends AnyFunSuite:
 
 def InitParams(mth: Method, concreteInterpreter: ConcreteInterpreter.Instance): Seq[ConcreteInterpreter.Value] =
   val args = mth.descriptor.parameterTypes
-  val initArgs = args.map(
-      elem => elem match
-        case IntegerType =>
-          concreteInterpreter.bytecodeOps.i32ops.randomInteger()
-        case LongType =>
-          concreteInterpreter.bytecodeOps.i64ops.randomInteger()
-        case FloatType =>
-          concreteInterpreter.bytecodeOps.f32ops.randomFloat()
-        case DoubleType =>
-          concreteInterpreter.bytecodeOps.f64ops.randomFloat()
-  )
+  val initArgs = args.map:
+    case IntegerType =>
+      concreteInterpreter.bytecodeOps.i32ops.randomInteger()
+    case LongType =>
+      concreteInterpreter.bytecodeOps.i64ops.randomInteger()
+    case FloatType =>
+      concreteInterpreter.bytecodeOps.f32ops.randomFloat()
+    case DoubleType =>
+      concreteInterpreter.bytecodeOps.f64ops.randomFloat()
+    case _ =>
+      ???
   initArgs
