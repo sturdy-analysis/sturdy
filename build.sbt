@@ -107,6 +107,7 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.json4s" %% "json4s-native" % "4.0.4" % "test",
+      "com.github.tototoshi" %% "scala-csv" % "2.0.0" % "test",
       ("org.typelevel" %% "cats-parse" % "1.1.0").cross(CrossVersion.for3Use2_13) % "test",
       "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test",
       ("io.circe" %% "circe-yaml" % "0.16.0").cross(CrossVersion.for3Use2_13) % "test"

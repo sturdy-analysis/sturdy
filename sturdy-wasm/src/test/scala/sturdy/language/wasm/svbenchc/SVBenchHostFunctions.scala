@@ -22,5 +22,8 @@ val svbenchHostFunctions: List[HostFunction] = List(
   HostFunction("__assert_fail", FuncType(Vector(I32, I32, I32, I32), Vector())),
   HostFunction("__blackhole_int", FuncType(Vector(I32), Vector(I32))),
   HostFunction("__blackhole_int_p", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int_p", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int_p_p", FuncType(Vector(I32), Vector(I32))),
 )
 

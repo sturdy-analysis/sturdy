@@ -48,42 +48,26 @@ trait RelationalBaseIntegerOps
 
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv1 = apronState.getInterval(v1)
-    val iv2 = apronState.getInterval(v2)
-    if(iv1.sup.cmp(iv2.inf) <= 0)
+    apronState.ifThenElse(lt(v1, v2)) {
       v2
-    else if(iv2.sup.cmp(iv1.inf) <= 0)
+    } {
       v1
-    else
-      apronState.ifThenElse(lt(v1, v2)) {
-        v2
-      } {
-        v1
-      }
+    }
 
 
   override def min(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv1 = apronState.getInterval(v1)
-    val iv2 = apronState.getInterval(v2)
-    if (iv1.sup.cmp(iv2.inf) <= 0)
+    apronState.ifThenElse(lt(v1, v2)) {
       v1
-    else if (iv2.sup.cmp(iv1.inf) <= 0)
+    } {
       v2
-    else
-      apronState.ifThenElse(lt(v1, v2)) {
-        v1
-      } {
-        v2
-      }
+    }
 
   override def absolute(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv = apronState.getInterval(v)
-    if(iv.inf.sgn() >= 0)
+    apronState.ifThenElse(lt(intLit(0, v._type), v)) {
       v
-    else if(iv.sup.sgn() < 0)
+    } {
       handleOverflow(intNegate(v))
-    else
-      handleOverflow(unary(UnOp.Sqrt, intPow(v, intLit(2, v._type)), typeIntOps.absolute(v._type)))
+    }
 
   override def div(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v2)
@@ -140,16 +124,11 @@ trait RelationalBaseIntegerOps
     val modShift = modulo(shift, intLit(v._type.byteSize * 8, shift._type))
     val ivShift = apronState.getInterval(modShift)
     val resultType = typeIntOps.shiftRight(v._type, shift._type)
-    if(ivV.inf().sgn() >= 0)
+    apronState.ifThenElse(ApronCons.le(intLit(0, v._type), v)) {
       intDiv(v, intPow(intLit(2, v._type), modShift), resultType)
-    else if(ivV.sup().sgn() < 0)
-      intSub(intDiv(intAdd(v,intLit(1,v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
-    else
-      apronState.ifThenElse(ApronCons.le(intLit(0, v._type), v)) {
-        intDiv(v, intPow(intLit(2, v._type), modShift), resultType)
-      } {
-        intSub(intDiv(intAdd(v, intLit(1, v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
-      }
+    } {
+      intSub(intDiv(intAdd(v, intLit(1, v._type)), intPow(intLit(2, v._type), modShift), resultType), intLit(1, resultType))
+    }
 
   override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
@@ -259,19 +238,18 @@ trait RelationalBaseIntegerOps
    * Maps a whole number to a fixed-size integer by folding over- and underflows.
    */
   def handleOverflow(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv = apronState.getInterval(v)
+    val sMin = signedMinValue(v._type.byteSize)
+    val sMax = signedMaxValue(v._type.byteSize)
+    val uMin = unsignedMinValue(v._type.byteSize)
+    val uMax = unsignedMaxValue(v._type.byteSize)
 
-    val sMin = signedMinValue(v._type.byteSize).bigInteger
-    val sMax = signedMaxValue(v._type.byteSize).bigInteger
-    val signedRange = Interval(sMin, sMax)
-    val uMin = unsignedMinValue(v._type.byteSize).bigInteger
-    val uMax = unsignedMaxValue(v._type.byteSize).bigInteger
+    def inSignedRange(v: ApronExpr[Addr, Type]) =
+      And(Constraint(le(bigIntLit(sMin, v._type), v)), Constraint(le(v, bigIntLit(sMax, v._type))))
 
     overflowHandling match
       case OverflowHandling.WrapAround =>
         val fromType = v._type
 
-        inline def inSignedRange(v: ApronExpr[Addr,Type]) = And(Constraint(le(constant(MpqScalar(sMin), v._type), v)), Constraint(le(v, constant(MpqScalar(sMax), v._type))))
 
         apronState.ifThenElse(inSignedRange(v)) {
           v
@@ -279,13 +257,12 @@ trait RelationalBaseIntegerOps
           constant(ApronExpr.topInterval, fromType)
         }
       case OverflowHandling.Fail =>
-        if (! iv.isLeq(signedRange)) {
-          effectStack.joinWithFailure(v) {
-            Failure(IntegerOverflow, s"$v with interval $iv overflows bounds ${signedRange}")
-          }
-        } else {
+        apronState.ifThenElse(inSignedRange(v)) {
           v
+        } {
+          Failure(IntegerOverflow, s"$v overflows bounds [${sMin},${sMax}]")
         }
+
 
 
   inline def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
@@ -294,13 +271,12 @@ trait RelationalBaseIntegerOps
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     val uMax = unsignedMaxValue(fromNumBytes)
-    val resultType = v._type
-    if(iv.inf.sgn() >= 0) { // v >= 0
+    val fromType = v._type
+
+    apronState.ifThenElse(le(intLit(0, fromType), v)) {
       v
-    } else if(iv.sup.sgn() < 0) { // v < 0
-      intAdd(v, bigIntLit(uMax, resultType), resultType)
-    } else { // iv.inf < 0 <= iv.sup
-      intAdd(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType), resultType)
+    } {
+      intAdd(v, bigIntLit(uMax, fromType), fromType)
     }
 
   inline def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
@@ -310,14 +286,14 @@ trait RelationalBaseIntegerOps
     val iv = apronState.getInterval(v)
     val sMax = signedMaxValue(fromNumBytes)
     val uMax = unsignedMaxValue(fromNumBytes)
-    val resultType = v._type
-    if(iv.sup.cmp(MpqScalar(sMax.bigInteger)) <= 0) { // v <= signedMax
+    val fromType = v._type
+
+    apronState.ifThenElse(le(v, bigIntLit(sMax, fromType))) {
       v
-    } else if(iv.inf.cmp(MpqScalar(sMax.bigInteger)) > 0) { // v > signedMax
-      intSub(v, bigIntLit(uMax, resultType), resultType)
-    } else { // iv.inf <= signedMax < iv.sup
-      intSub(v, constant(Interval(MpqScalar(0), MpqScalar(uMax.bigInteger)), resultType), resultType)
+    } {
+      intSub(v, bigIntLit(uMax, fromType), fromType)
     }
+
 
 given RelationalIntOps
   [

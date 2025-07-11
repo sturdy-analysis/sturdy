@@ -92,3 +92,11 @@ def control[Ctx, Dom, Codom, Exc, Node <: ControlFlowGraph.Node]
   (using obsJoin: ObservableJoin, obsExcept: ObservableExcept[Exc])
   : ControlLogger[Ctx, Dom, Codom, Exc, Node] =
   new ControlLogger(contextSensitive, startNode, getDomNode, getCodomNode, obsJoin, obsExcept)
+
+def checkThreadInterrupted[Dom, Codom](combinator: Combinator[Dom, Codom]): CheckThreadInterrupted[Dom, Codom] = CheckThreadInterrupted[Dom, Codom](combinator)
+final class CheckThreadInterrupted[Dom, Codom](phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom]:
+  override def apply(f: Dom => Codom): Dom => Codom = dom =>
+    if(Thread.interrupted())
+      throw new InterruptedException()
+    else
+      phi(f)(dom)

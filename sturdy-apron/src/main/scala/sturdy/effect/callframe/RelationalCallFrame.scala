@@ -95,12 +95,7 @@ final class RelationalCallFrame
     addressCallFrame.getLocalByName(x).flatMap(getByVirt).asInstanceOf
 
   private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
-    virts.reduce {
-      virt =>
-        val v1 = apronState.relationalStore.getMetaData(virt.physical).map((floatSpecials,tpe) => relationalValue.makeRelationalExpr(ApronExpr.Addr(virt, floatSpecials, tpe)))
-        val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
-        Join(v1, v2).get
-    }.toJOptionC
+    apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Val]].toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>

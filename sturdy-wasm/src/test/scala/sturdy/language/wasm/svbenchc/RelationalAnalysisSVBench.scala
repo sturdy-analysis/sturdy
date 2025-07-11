@@ -12,19 +12,24 @@ import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnaly
 import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, wasi_snapshot_preview1}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, abstractions, testCfgDifference}
 import sturdy.values.Topped
-import org.scalatest.exceptions.TestFailedException
+import org.scalatest.exceptions.{TestCanceledException, TestFailedDueToTimeoutException, TestFailedException}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.SpanSugar._
+import org.scalatest.time.SpanSugar.*
 import org.scalatest.Suites
 import apron.*
 import cats.effect.{Blocker, IO}
+import org.scalatest.concurrent.{Signaler, ThreadSignaler}
 import org.scalatest.concurrent.TimeLimits.failAfter
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.validation.Validator
+
+import java.io.File
+import java.nio.file.{Files, Path, Paths}
+import com.github.tototoshi.csv.*
 
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
@@ -39,19 +44,25 @@ class RelationalAnalysisSVBench extends Suites(
   new RelationalAnalysisTest(Box()),
 )
 
+val csvWriter = {
+  val writer = CSVWriter.open(File("relational-svbench.csv"))
+  writer.writeRow(List("suite", "test_case", "abstract_domain", "expected_verdict", "passed", "timed_out"))
+  writer
+}
+
 class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matchers:
   describe(s"Relational Analysis of SV Bench C Benchmarks with ${manager.getClass.getSimpleName}") {
 
     val wasmBinaries = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
-    val includedBenchmarks = Set("recursified_loop-simple")
-//      Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
+    val includedBenchmarks = // Set("recursified_loop-simple")
+      Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "recursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
 
     val stackConfig = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     val entrypoint = "_start"
 
     def isSlow(manager: Manager, script: String): org.scalatest.Tag =
-      val slow = Set("system-with-recursion.wasm", "recursified_dijkstra.wasm", "recursified_dijkstra-u.wasm", "image_filter.wasm", "mea8000.wasm", "recursified_simple_array_index_value_4.i.v+nlh-reducer.wasm")
+      val slow = Set("recursified_bresenham-ll.wasm")
       if(manager.isInstanceOf[Polka] && slow.contains(script))
         SlowTest
       else
@@ -65,16 +76,25 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
              if benchFile.toString.endsWith(".wasm")
         } {
           it(s"Benchmark ${benchFile.getFileName.toString}", isSlow(manager, benchFile.getFileName.toString)) {
-            run(benchFile, entrypoint, stackConfig)(using manager)
+            run(benchDirectory, benchFile, entrypoint, stackConfig)(using manager)
           }
         }
       }
     }
   }
 
-  def run(p: Path, entrypoint: String, stackConfig: StackConfig)(using apronManager: apron.Manager) =
-    val name = p.getFileName
-    val module = Parsing.fromBinary(p)
+  def run(benchmark: Path, testFile: Path, entrypoint: String, stackConfig: StackConfig)(using apronManager: apron.Manager) =
+    val testName = testFile.getFileName
+    val yamlFile = testFile.toString.substring(0,testFile.toString.lastIndexOf(".")) + ".yml"
+    val expectedVerdict = try {
+      unreachableCallExpectedVerdict(Paths.get(yamlFile))
+    } catch {
+      case exc: TestCanceledException =>
+        logTestResult(benchmark, testName, expectedVerdict = None, passed = false, timedOut = false)
+        throw exc
+    }
+
+    val module = Parsing.fromBinary(testFile)
 
     val analysis = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
     analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
@@ -85,23 +105,39 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
       "env" -> svbenchHostFunctions
     )
     val modInst = analysis.initializeModule(module, hostModules = hostModules)
-    val result = failAfter(1 minute) {
-      analysis.failure.fallible {
-        analysis.invokeExported(modInst, entrypoint, List.empty).map(analysis.getInterval)
+    given Signaler = ThreadSignaler
+    val result = try {
+      failAfter(1 minute) {
+        analysis.failure.fallible {
+          analysis.invokeExported(modInst, entrypoint, List.empty).map(analysis.getInterval)
+        }
       }
+    } catch {
+      case exc: TestFailedDueToTimeoutException =>
+        logTestResult(benchmark, testName, expectedVerdict = Some(expectedVerdict), passed = false, timedOut = true)
+        throw exc
     }
 
     val cfg = cfgBuilder.get
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val dotPath = testFile.getParent.resolve(testFile.getFileName.toString + ".dot")
     Files.writeString(dotPath, cfg.toGraphViz)
 
-    val yamlFile = p.toString.substring(0,p.toString.lastIndexOf(".")) + ".yml"
     val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
-    val unreachableCallActualVerdict = !cfg.nodes.exists {
+    val actualVerdict = !cfg.nodes.exists {
       case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
       case _ => false
     }
-    assertResult(unreachableCallExpectedVerdict(Paths.get(yamlFile))) { unreachableCallActualVerdict }
+    try {
+      assertResult(expectedVerdict) { actualVerdict }
+    } catch {
+      case exc: TestFailedException =>
+        logTestResult(benchmark, testName, expectedVerdict = Some(expectedVerdict), passed = false, timedOut = false)
+        throw exc
+    }
+    logTestResult(benchmark, testName, expectedVerdict = Some(expectedVerdict), passed = true, timedOut = false)
+
+  def logTestResult(benchmark: Path, testFile: Path, expectedVerdict: Option[Boolean], passed: Boolean, timedOut: Boolean): Unit =
+    csvWriter.writeRow(List(benchmark.getFileName.toString, testFile.toString, manager.getClass.getSimpleName, expectedVerdict.map(_.toString).getOrElse(""), passed.toString, timedOut.toString))
 
 
   def unreachableCallExpectedVerdict(yamlPath: Path): Boolean =
@@ -110,4 +146,9 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     while (!prop.failed && !prop.as[String].contains("../properties/unreach-call.prp")) {
       prop = prop.up.right.downField("property_file")
     }
-    prop.up.downField("expected_verdict").as[Boolean].getOrElse(throw new IllegalArgumentException("Could not extract verdict from yaml file"))
+    if(prop.as[String].contains("../properties/unreach-call.prp")) {
+      prop.up.downField("expected_verdict").as[Boolean].getOrElse(cancel("No expected verdict for unreachable-call"))
+    } else {
+      cancel("No expected verdict for unreachable-call")
+    }
+

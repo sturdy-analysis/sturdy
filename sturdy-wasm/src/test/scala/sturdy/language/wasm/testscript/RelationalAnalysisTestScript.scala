@@ -7,40 +7,35 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import org.scalatest.Assertions.*
-import org.scalatest.Suites
+import org.scalatest.{BeforeAndAfterAll, Suites}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.apron.{RoundingDir, RoundingMode}
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
+import sturdy.{*, given}
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
-import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.util.Profiler
-import sturdy.values.integer.given
-import sturdy.values.ordering.EqOps
 import sturdy.values.{*, given}
-import sturdy.{*, given}
-import swam.ModuleLoader
-import swam.binary.ModuleParser
+import sturdy.values.integer.given
 import swam.syntax.Module
 import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
-import swam.validation.Validator
 
+import java.io.File
 import java.nio.file.{Files, Path, Paths}
-import scala.util.CommandLineParser
+import com.github.tototoshi.csv.*
 
-//given CommandLineParser.FromString[Array[String]] with
-//  def fromString(s: String): Array[String] = Array()
-//
-//object Main:
-//  @main
-//  def main(args: Array[String]): Unit = org.scalatest.run(new RelationalAnalysisTestScript)
+val csvWriter = {
+  val writer = CSVWriter.open(File("relational-test-script.csv"))
+  writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed"))
+  writer
+}
 
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
@@ -48,7 +43,9 @@ class RelationalAnalysisSoundnessTests extends Suites(
   new RelationalAnalysisTestScript(Polka(true)),
   new RelationalAnalysisTestScript(Octagon()),
   new RelationalAnalysisTestScript(Box()),
-)
+), BeforeAndAfterAll:
+
+  override def afterAll(): Unit = csvWriter.close()
 
 class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matchers:
   behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
@@ -57,7 +54,6 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
   val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
 
   val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
-  val numTestCases = new NumTestCases
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
@@ -78,27 +74,25 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
     val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
-    val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis, numTestCases)
-    interp.run(script)
+    val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis)
+    interp.run(scriptPath.getFileName, script)
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//    p.toString.endsWith("memory_size.wast")
+    //    p.toString.endsWith("i32.wast")
     p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
       if (isSlow(anl.apronManager, p.getFileName.toString))
-        it must s"execute ${p.getFileName} with ${anl}" taggedAs(SlowTest) in {
+        it must s"execute ${p.getFileName} with ${anl}" taggedAs (SlowTest) in {
           runTest(p, anl)
-          println(s"Number of Test Cases: ${numTestCases.n}")
           Profiler.printLastMeasured()
           Profiler.reset()
         }
       else
         it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
-          println(s"Number of Test Cases: ${numTestCases.n}")
           Profiler.printLastMeasured()
           Profiler.reset()
         }
@@ -106,7 +100,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     }
   }
 
-class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: RelationalAnalysis.Instance, numTestCases: NumTestCases, useTop: Boolean = false):
+class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: RelationalAnalysis.Instance, useTop: Boolean = false):
   import aInterp.given
   import sturdy.language.wasm.analyses.RelationalAnalysisSoundness.given
 
@@ -127,6 +121,8 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       constExprToTops
     else
       constExprToAVals
+  val passedTestCases = new NumTestCases
+  val totalTestCases = new NumTestCases
 
   spectest.foreach{ mod =>
     val modInst = cInterp.initializeModule(mod)
@@ -151,10 +147,15 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       case _ => false
     }
 
-  def run(commands: Seq[Command]): Unit =
-    commands.foreach { command =>
-      eval(command)
-      aInterp.garbageCollect()
+  def run(filename: Path, commands: Seq[Command]): Unit =
+    try {
+      commands.foreach { command =>
+        eval(command)
+        aInterp.garbageCollect()
+      }
+    } finally {
+      val percentPassed = if(totalTestCases.n == 0) 100.0d else passedTestCases.n.toDouble / totalTestCases.n.toDouble * 100.0d
+      csvWriter.writeRow(List(filename.toString, aInterp.apronManager.getClass.getSimpleName, passedTestCases.toString, totalTestCases.toString, f"$percentPassed%.1f"))
     }
 
   def getCModule(module: Option[String]): ModuleInstance = module match
@@ -183,6 +184,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     case QuotedModule(id, text) =>
       ???
     case AssertReturn(action, expectedRes) =>
+      totalTestCases.increment()
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       assert(!res.isFailing)
@@ -190,35 +192,39 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
       assert(eqVals(expected, res.get), c.toString + s", expected $expected, but got ${res.get}")
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
-      numTestCases.increment()
+      passedTestCases.increment()
     case AssertReturnCanonicalNaN(action) =>
+      totalTestCases.increment()
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
-      numTestCases.increment()
+      passedTestCases.increment()
     case AssertReturnArithmeticNaN(action) =>
+      totalTestCases.increment()
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       checkNaN(res, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
-      numTestCases.increment()
+      passedTestCases.increment()
     case AssertTrap(action: Action, message: String) =>
+      totalTestCases.increment()
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
-      numTestCases.increment()
+      passedTestCases.increment()
     case AssertModuleTrap(mod,_) =>
+      totalTestCases.increment()
       val aRes = aInstantiate(mod)
       val res = instantiate(mod)
       assert(res.isFailing, c.toString)
       //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
       assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
-      numTestCases.increment()
+      passedTestCases.increment()
     case _: AssertUnlinkable => // skip
     case _: AssertInvalid => // skip
     case _: AssertMalformed => // skip
@@ -358,3 +364,4 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
 class NumTestCases:
   var n: Int = 0
   def increment(): Unit = n += 1
+  override def toString: String = n.toString

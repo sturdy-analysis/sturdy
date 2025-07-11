@@ -324,9 +324,9 @@ final class RelationalStore
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
-  override def setBottom: Unit =
-    _abstract1 = Abstract1(manager, new Environment())
-    nonRelationalStore.setBottom
+  override def setBottom: Unit = {}
+//    _abstract1 = Abstract1(manager, new Environment())
+//    nonRelationalStore.setBottom
 
   inline def copyAbstract1(abstract1: Abstract1): Abstract1 =
     Profiler.addTime("Abstract1.copy") {

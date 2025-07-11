@@ -182,6 +182,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Value.Int64(expr) => expr.addrs.iterator
         case Value.Float32(expr) => expr.addrs.iterator
         case Value.Float64(expr) => expr.addrs.iterator
+        case virts: PowVirtAddr => virts.iterator
         case expr: ApronExpr[VirtAddr,Type] => expr.addrs.iterator
         case excV: ExcV =>
           for(listVals <- excV.values.iterator;
@@ -219,7 +220,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       heapAlloc(rootFrameData))
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
-        (key: Unit, sym: GlobalAddr, tpe: Type) =>
+        (key: Unit, sym: GlobalAddr) =>
           AddrCtx.Global(sym.addr)
     ))
 
@@ -363,7 +364,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       val (contextPreparation, sensitivity) = observedConfig.ctx.make[Value]
       import observedConfig.ctx.finiteCtx
       override protected def contextFree = phi =>
-        fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi))
+        fix.checkThreadInterrupted(fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi)))
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = observedConfig.fix.get
       addContextFreeLogger(domLogger)
