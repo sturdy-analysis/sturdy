@@ -109,19 +109,19 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
       case "__VERIFIER_nondet_bool" =>
-        assignFreshTempVar(ApronExpr.intInterval(0, 1, I32Type))
+        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
       case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
-        assignFreshTempVar(ApronExpr.intInterval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
+        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
       case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
-        assignFreshTempVar(ApronExpr.intInterval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
+        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
       case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
-        assignFreshTempVar(ApronExpr.intInterval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
+        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
       case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
-        assignFreshTempVar(ApronExpr.longInterval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
+        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
       case "__VERIFIER_nondet_float" =>
-        assignFreshTempVar(ApronExpr.doubleInterval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
+        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
       case "__VERIFIER_nondet_double" =>
-        assignFreshTempVar(ApronExpr.doubleInterval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
+        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
       case "__blackhole_int" | "__blackhole_int_p" =>
         args
       case _ =>

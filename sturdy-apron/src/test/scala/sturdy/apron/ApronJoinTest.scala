@@ -130,9 +130,9 @@ class RelationalJoinTest
       val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
       apronState.withTempVars(Type.IntType) {
         case (x, List()) =>
-          apronState.assign(x, ApronExpr.intInterval(0, 10, Type.IntType))
+          apronState.assign(x, ApronExpr.interval(0, 10, Type.IntType))
           val state1 = apronState.effectStack.getState
-          apronState.assign(x, ApronExpr.intInterval(10,20, Type.IntType))
+          apronState.assign(x, ApronExpr.interval(10,20, Type.IntType))
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe true
@@ -148,9 +148,9 @@ class RelationalJoinTest
       val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
       apronState.withTempVars(Type.IntType) {
         case (x, List()) =>
-          apronState.assign(x, ApronExpr.intInterval(0, 20, Type.IntType))
+          apronState.assign(x, ApronExpr.interval(0, 20, Type.IntType))
           val state1 = apronState.effectStack.getState
-          apronState.assign(x, ApronExpr.intInterval(10, 10, Type.IntType))
+          apronState.assign(x, ApronExpr.interval(10, 10, Type.IntType))
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe false
@@ -164,11 +164,11 @@ class RelationalJoinTest
   test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
     withApronState {
       val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
-      apronState.withTempVars(Type.IntType, ApronExpr.intInterval(0, 20, Type.IntType)) {
+      apronState.withTempVars(Type.IntType, ApronExpr.interval(0, 20, Type.IntType)) {
         case (y, List(x)) =>
-          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.intLit(1, Type.IntType), Type.IntType))
+          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(1, Type.IntType), Type.IntType))
           val state1 = apronState.effectStack.getState
-          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.intLit(2, Type.IntType), Type.IntType))
+          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(2, Type.IntType), Type.IntType))
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe true
@@ -191,7 +191,7 @@ class RelationalJoinTest
       val y = apronState.recencyStore.alloc(Ctx.Var("y"))
       val yAddr = ApronExpr.addr(y, Type.IntType)
 
-      apronState.assign(x, ApronExpr.intInterval(0, 10, Type.IntType))
+      apronState.assign(x, ApronExpr.interval(0, 10, Type.IntType))
       apronState.assign(y, xAddr)
 
       val state1 = apronState.effectStack.getState
@@ -201,7 +201,7 @@ class RelationalJoinTest
       val z = apronState.recencyStore.alloc(Ctx.Var("z"))
       val zAddr = ApronExpr.addr(z, Type.IntType)
 
-      apronState.assign(z, ApronExpr.intInterval(10, 20, Type.IntType))
+      apronState.assign(z, ApronExpr.interval(10, 20, Type.IntType))
       apronState.assign(x, zAddr)
 
       val state2 = apronState.effectStack.getState

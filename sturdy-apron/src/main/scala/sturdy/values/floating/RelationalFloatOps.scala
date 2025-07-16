@@ -283,7 +283,7 @@ given RelationalFloatOps
     } else if (iv.sup.sgn() < 0) {
       floatNegate(v, returnSpecials)
     } else {
-      floatSqrt(floatPow(v, intLit(2, v._type), returnSpecials), returnSpecials)
+      floatSqrt(floatPow(v, lit(2, v._type), returnSpecials), returnSpecials)
     }
 
   override def negated(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -433,7 +433,7 @@ given RelationalFloatOps
           apronState.join {
             apronState.assign(result, v)
           } {
-            apronState.assign(result, doubleLit(d, resultType))
+            apronState.assign(result, lit(d, resultType))
           }
           Addr(ApronVar(result), v.floatSpecials, resultType)
         }

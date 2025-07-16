@@ -110,17 +110,17 @@ class RelationalLongOpsTest(using Manager) extends IntegerOpsTest[Long, ApronExp
 
 given RelationalIntInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Int, ApronExpr[VirtAddr, Type]] with
   override def constant(i: Int): ApronExpr[VirtAddr, Type] =
-    apronState.assignTempVar(ApronExpr.intLit(i, Type.IntType))
+    apronState.assignTempVar(ApronExpr.lit(i, Type.IntType))
 
   override def interval(low: Int, high: Int, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    apronState.assignTempVar(ApronExpr.intInterval(low, high, Type.IntType))
+    apronState.assignTempVar(ApronExpr.interval(low, high, Type.IntType))
 
 given RelationalLongInterval(using apronState: ApronState[VirtAddr, Type]): IsInterval[Long, ApronExpr[VirtAddr, Type]] with
   override def constant(i: Long): ApronExpr[VirtAddr, Type] =
-    apronState.assignTempVar(ApronExpr.longLit(i, Type.LongType))
+    apronState.assignTempVar(ApronExpr.lit(i, Type.LongType))
 
   override def interval(low: Long, high: Long, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
-    apronState.assignTempVar(ApronExpr.longInterval(low, high, Type.LongType))
+    apronState.assignTempVar(ApronExpr.interval(low, high, Type.LongType))
 
 class RelationalIntOpsModelsTest extends AnyFunSuite with ScalaCheckPropertyChecks:
   def chooseInt: Gen[Int] = Gen.chooseNum(Integer.MIN_VALUE, Integer.MAX_VALUE)

@@ -35,10 +35,10 @@ given RelationalBooleanOps
     val resultType = typeBooleanOps.or(v1._type, v2._type)
     binary(BinOp.Mod,
       binary(BinOp.Add, v1, v2, resultType),
-      intLit(2, resultType), resultType)
+      lit(2, resultType), resultType)
 
   override def not(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val resultType = typeBooleanOps.not(v._type)
     binary(BinOp.Mod,
-      binary(BinOp.Add, v, intLit(1, resultType), resultType),
-      intLit(2, resultType), resultType)
+      binary(BinOp.Add, v, lit(1, resultType), resultType),
+      lit(2, resultType), resultType)

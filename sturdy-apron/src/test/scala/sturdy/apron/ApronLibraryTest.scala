@@ -93,14 +93,14 @@ class ApronLibraryTest extends AnyFunSuite:
 
     aState.assign(manager, y, ApronExpr.constant(Interval(0, 100), BaseType[Int]).toIntern(env), null)
     aState.assign(manager, x, ApronExpr.addr("y", BaseType[Int]).toIntern(env), null)
-    aState.assign(manager, x, ApronExpr.intAdd(ApronExpr.addr("x", BaseType[Int]), ApronExpr.intLit(1, BaseType[Int]), BaseType[Int]).toIntern(env), null)
+    aState.assign(manager, x, ApronExpr.intAdd(ApronExpr.addr("x", BaseType[Int]), ApronExpr.lit(1, BaseType[Int]), BaseType[Int]).toIntern(env), null)
 
     aState.getBound(manager, x) shouldBe Interval(1, 101)
     aState.getBound(manager, y) shouldBe Interval(0, 100)
     aState.satisfy(manager,
       ApronCons.eq(
         ApronExpr.addr("x", BaseType[Int]),
-        ApronExpr.intAdd(ApronExpr.addr("y", BaseType[Int]), ApronExpr.intLit(1, BaseType[Int]), BaseType[Int])
+        ApronExpr.intAdd(ApronExpr.addr("y", BaseType[Int]), ApronExpr.lit(1, BaseType[Int]), BaseType[Int])
       ).toApron(env)
     ) shouldBe true
   }
@@ -128,7 +128,7 @@ class ApronLibraryTest extends AnyFunSuite:
     val manager: Manager = new Polka(false)
     val a1 = new Abstract1(manager, env)
     def modulo(n: Int, m: Int) =
-      a1.getBound(manager, ApronExpr.intMod(ApronExpr.intLit(n, BaseType[Int]), ApronExpr.intLit(m, BaseType[Int]), BaseType[Int]).toIntern(env))
+      a1.getBound(manager, ApronExpr.intMod(ApronExpr.lit(n, BaseType[Int]), ApronExpr.lit(m, BaseType[Int]), BaseType[Int]).toIntern(env))
 
     modulo(5, 5) shouldBe Interval(0,0)
     modulo(6, 5) shouldBe Interval(1,1)

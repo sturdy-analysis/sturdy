@@ -143,28 +143,33 @@ object ApronExpr:
       case floatIv: sturdy.apron.FloatInterval => Constant(floatIv, floatIv.floatSpecials, _type)
       case _ => Constant(iv, FloatSpecials.Integer, _type)
 
-  inline def intLit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Integer, tpe)
-  inline def longLit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(BigInt(l).bigInteger)), FloatSpecials.Integer, tpe)
-  inline def bigIntLit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] =
-    bigIntLit(i.bigInteger, tpe)
-  inline def bigIntLit[Addr, Type](i: BigInteger, tpe: Type): Constant[Addr, Type] =
-    Constant(new MpqScalar(new Mpz(i)), FloatSpecials.Integer, tpe)
-  inline def doubleLit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] =
-    Constant(new DoubleScalar(d), FloatSpecials.Integer, tpe)
+  inline def lit[Addr, Type](i: Int, tpe: Type): Constant[Addr, Type] = Constant(scalar(i), FloatSpecials.Integer, tpe)
+  inline def lit[Addr, Type](l: Long, tpe: Type): Constant[Addr, Type] = Constant(scalar(l), FloatSpecials.Integer, tpe)
+  inline def lit[Addr, Type](i: BigInt, tpe: Type): Constant[Addr, Type] = Constant(scalar(i), FloatSpecials.Integer, tpe)
+  inline def lit[Addr, Type](i: BigInteger, tpe: Type): Constant[Addr, Type] = Constant(scalar(i), FloatSpecials.Integer, tpe)
+  inline def lit[Addr,Type](d: Double, tpe: Type): Constant[Addr, Type] = Constant(scalar(d), FloatSpecials.Integer, tpe)
+  inline def lit[Addr, Type](d: Double, floatSpecials: FloatSpecials, tpe: Type): Constant[Addr, Type] = Constant(new DoubleScalar(d), floatSpecials, tpe)
 
-  inline def doubleLit[Addr, Type](d: Double, floatSpecials: FloatSpecials, tpe: Type): Constant[Addr, Type] =
-    Constant(new DoubleScalar(d), floatSpecials, tpe)
+  inline def interval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] = Constant(Interval(scalar(lower), scalar(upper)), FloatSpecials.Integer, tpe)
+  inline def interval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] = Constant(Interval(scalar(lower), scalar(upper)), FloatSpecials.Integer, tpe)
+  inline def interval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] = Constant(Interval(scalar(lower), scalar(upper)), FloatSpecials.Integer, tpe)
+  inline def interval[Addr, Type](lower: Double, upper: Double, specials: FloatSpecials, tpe: Type): Constant[Addr, Type] = Constant(Interval(scalar(lower), scalar(upper)), specials, tpe)
 
-  inline def intInterval[Addr, Type](lower: Int, upper: Int, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(lower, upper), FloatSpecials.Integer, tpe)
-  inline def longInterval[Addr, Type](lower: Long, upper: Long, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(new Mpz(BigInt(lower).bigInteger), new Mpz(BigInt(upper).bigInteger)), FloatSpecials.Integer, tpe)
-  inline def doubleInterval[Addr, Type](lower: Double, upper: Double, tpe: Type): Constant[Addr, Type] =
-    doubleInterval[Addr,Type](lower, upper, FloatSpecials.Integer, tpe)
-  inline def doubleInterval[Addr, Type](lower: Double, upper: Double, specials: FloatSpecials, tpe: Type): Constant[Addr, Type] =
-    Constant(Interval(new DoubleScalar(lower), new DoubleScalar(upper)), specials, tpe)
+  inline def scalar(i: Int): Scalar = DoubleScalar(i)
+  inline def scalar(l: Long): Scalar =
+    if(BigDecimal(l) == BigDecimal(l.toDouble))
+      new DoubleScalar(l)
+    else
+      new MpqScalar(new Mpz(BigInteger.valueOf(l)))
+  inline def scalar(i: BigInt): Scalar =
+    if(BigDecimal(i) == BigDecimal(i.toDouble))
+      new DoubleScalar(i.toDouble)
+    else
+      new MpqScalar(new Mpz(i.bigInteger))
+  inline def scalar(i: BigInteger): Scalar = scalar(BigInt(i))
+  inline def scalar(f: Float): Scalar = new DoubleScalar(f)
+  inline def scalar(d: Double): Scalar = new DoubleScalar(d)
+
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, FloatSpecials.Integer, tpe)
@@ -365,8 +370,8 @@ object ApronCons:
   def from[Addr,Type](tpe: Type)(boolean: Topped[Boolean]): ApronCons[Addr,Type] =
     boolean match
       case Topped.Top           => ApronCons.top(tpe)
-      case Topped.Actual(true)  => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(0, tpe))
-      case Topped.Actual(false) => ApronCons(Eq, ApronExpr.intLit(0, tpe), ApronExpr.intLit(1, tpe))
+      case Topped.Actual(true)  => ApronCons(Eq, ApronExpr.lit(0, tpe), ApronExpr.lit(0, tpe))
+      case Topped.Actual(false) => ApronCons(Eq, ApronExpr.lit(0, tpe), ApronExpr.lit(1, tpe))
 
 enum CompareOp:
   case Eq

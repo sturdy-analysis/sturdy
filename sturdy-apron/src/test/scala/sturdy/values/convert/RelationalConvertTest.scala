@@ -7,7 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.IsSound
-import sturdy.apron.ApronExpr.{cast, doubleLit}
+import sturdy.apron.ApronExpr.{cast, lit}
 import sturdy.apron.{*, given}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.{*, given}
@@ -211,7 +211,7 @@ class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[
     assertResult(IsSound.Sound)(
       soundness.isSound(
         cfailure.fallible(ConcreteConvertIntFloat(16777217, Bits.Unsigned)),
-        afailure.fallible(convertOps(ApronExpr.doubleLit(16777217, Type.IntType), Bits.Unsigned))
+        afailure.fallible(convertOps(ApronExpr.lit(16777217, Type.IntType), Bits.Unsigned))
       )
     )
   }

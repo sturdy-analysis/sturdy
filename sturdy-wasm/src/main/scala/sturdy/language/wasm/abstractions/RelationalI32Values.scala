@@ -27,9 +27,9 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       i32 match
         case Left(expr) => expr
         case Right(condition) => apronState.getBoolean(condition) match
-          case Topped.Actual(true) => ApronExpr.intLit(1, I32Type)
-          case Topped.Actual(false) => ApronExpr.intLit(0, I32Type)
-          case Topped.Top => ApronExpr.intInterval(0, 1, I32Type)
+          case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
+          case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
+          case Topped.Top => ApronExpr.interval(0, 1, I32Type)
 
     def asApronExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]]): ApronExpr[VirtAddr, Type] =
       given ApronState[VirtAddr, Type] = lazyApronState.value

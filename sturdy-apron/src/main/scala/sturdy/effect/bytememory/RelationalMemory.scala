@@ -40,8 +40,8 @@ class RelationalMemory
   type MemoryCtx = Context
   type Addr = ApronExpr[VirtualAddress[Context], Type]
   private val intType: Type = typeIntOps.integerLit(0)
-  private val pageSize: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.intLit(ConcreteMemory.pageSize, intType)
-  private val maxPages: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.intLit(ConcreteMemory.maxPageNum, intType)
+  private val pageSize: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.lit(ConcreteMemory.pageSize, intType)
+  private val maxPages: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.lit(ConcreteMemory.maxPageNum, intType)
 
   case class Mem(store: SortedMap[PhysicalAddress[MemoryCtx], MemoryRegion[VirtualAddress[Context], Type, Val]],
                  numPages: ApronExpr[VirtualAddress[Context], Type],
@@ -85,7 +85,7 @@ class RelationalMemory
           }
           .reduce(Join(_,_).get)
 
-    val endAddr = intAdd(addr,intInterval(length, length, addr._type))
+    val endAddr = intAdd(addr,interval(length, length, addr._type))
     apronState.ifThenElse(ApronCons.le(endAddr, intMul(numPages, pageSize))) {
       JOptionA.Some(result)
     } {
@@ -132,7 +132,7 @@ class RelationalMemory
     returnValue
 
   override def putNew(key: Key, initSize: ApronExpr[VirtualAddress[Context], Type], sizeLimit: Option[ApronExpr[VirtualAddress[Context], Type]]): Unit =
-    memories += key -> Mem(SortedMap.empty, initSize, sizeLimit.getOrElse(ApronExpr.doubleInterval(0, Double.PositiveInfinity, intType)))
+    memories += key -> Mem(SortedMap.empty, initSize, sizeLimit.getOrElse(ApronExpr.interval(0d, Double.PositiveInfinity, intType)))
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     memories.values.flatMap(_.addressIterator(valueIterator)).iterator
@@ -192,8 +192,8 @@ case class MemoryRegion[Addr, Type: ApronType, Val](startAddr: ApronExpr[Addr, T
   def endAddr: ApronExpr[Addr, Type] =
     val addrType = startAddr._type
     bytes.storedBytes match
-      case Topped.Actual(bs) => intAdd(startAddr, intLit(bs, addrType), addrType)
-      case Topped.Top => intAdd(startAddr, doubleInterval(0, Double.PositiveInfinity, addrType), addrType)
+      case Topped.Actual(bs) => intAdd(startAddr, lit(bs, addrType), addrType)
+      case Topped.Top => intAdd(startAddr, interval(0d, Double.PositiveInfinity, addrType), addrType)
 
   def contains(addr: ApronExpr[Addr, Type])(using apronState: ApronState[Addr,Type]): Topped[Boolean] =
     apronState.ifThenElse[Topped[Boolean]](

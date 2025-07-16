@@ -15,6 +15,7 @@ lazy val root = (project in file("."))
   .aggregate(
     sturdy_core,
     sturdy_apron,
+    sturdy_apron_bench,
     sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial
@@ -67,6 +68,18 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
 //    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
   )
 
+lazy val sturdy_apron_bench: Project = (project in file("sturdy-apron-bench"))
+  .dependsOn(sturdy_apron % "compile->compile; test->test")
+  .enablePlugins(JmhPlugin)
+  .settings(
+    javaOptions += "-Djava.library.path=/home/sven/sturdy.scala/sturdy-apron/result/lib/",
+    Jmh / sourceDirectory := (Test / sourceDirectory).value,
+    Jmh / classDirectory := (Test / classDirectory).value,
+    Jmh / dependencyClasspath := (Test / dependencyClasspath).value,
+    // rewire tasks, so that 'bench/Jmh/run' automatically invokes 'bench/Jmh/compile' (otherwise a clean 'bench/Jmh/run' would fail)
+    Jmh / compile := (Jmh / compile).dependsOn(Test / compile).value,
+    Jmh / run := (Jmh / run).dependsOn(Jmh / compile).evaluated
+  )
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile")

@@ -88,7 +88,7 @@ object RelationalAnalysis extends Interpreter,
       case Value.IntValue(i) =>
         given Failure = inst.failure
         given EffectStack = inst.effectStack
-        ApronCons.neq[RelAddr, RelType](i, ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
+        ApronCons.neq[RelAddr, RelType](i, ApronExpr.lit[RelAddr, RelType](0, BaseType[Int]))
       case Value.TopValue => topBool
       case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
 
@@ -96,7 +96,7 @@ object RelationalAnalysis extends Interpreter,
     v match
       case Value.BoolValue(bool) =>
         import inst.given
-        BooleanSelection[VBool, VInt](bool, ApronExpr.intLit[RelAddr, RelType](1, BaseType[Int]), ApronExpr.intLit[RelAddr, RelType](0, BaseType[Int]))
+        BooleanSelection[VBool, VInt](bool, ApronExpr.lit[RelAddr, RelType](1, BaseType[Int]), ApronExpr.lit[RelAddr, RelType](0, BaseType[Int]))
       case Value.IntValue(i) => i
       case Value.TopValue => topInt
       case _ => inst.failure(TipFailure.TypeError, s"Expected Int but got $this")
