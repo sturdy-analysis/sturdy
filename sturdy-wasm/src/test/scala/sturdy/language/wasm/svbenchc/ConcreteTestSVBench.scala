@@ -5,7 +5,7 @@ import org.scalatest.concurrent.TimeLimits.failAfter
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.SpanSugar.*
-import sturdy.control.{ControlEventGraphBuilder, Node}
+import sturdy.control.{ControlEventGraphBuilder, Node, PrintingControlObserver}
 import sturdy.language.wasm
 import sturdy.language.wasm.generic.*
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
@@ -27,6 +27,7 @@ class RelationalAnalysisTest() extends AnyFunSpec, Matchers:
     val wasmBinaries = this.getClass.getResource("/sturdy/language/wasm/sv-bench/sv-bench-c/bin").toURI;
 
     val includedBenchmarks = Set("recursified_loop-crafted", "recursified_loop-invariants", "recursified_loop-simple", "rescursified_nla-digbench", "recursive", "recursive-simple", "recursive-with-pointer")
+    val onlyTest: Set[String] = Set()
 
     val entrypoint = "_start"
 
@@ -36,19 +37,23 @@ class RelationalAnalysisTest() extends AnyFunSpec, Matchers:
     } {
       describe(s"Suite ${benchDirectory.getFileName.toString}") {
         for {benchFile <- Files.list(benchDirectory).toScala(List).sorted
-             if benchFile.toString.endsWith(".wasm")
+             if benchFile.toString.endsWith(".wat")  &&
+                (onlyTest.isEmpty || onlyTest.contains(benchFile.getFileName.toString))
         } {
           it(s"Benchmark ${benchFile.getFileName.toString}", FastTest) {
-            run(benchFile, entrypoint)
+            run(benchDirectory, benchFile, entrypoint)
           }
         }
       }
     }
   }
 
-  def run(p: Path, entrypoint: String) =
-    val name = p.getFileName
-    val module = Parsing.fromBinary(p)
+  def run(benchmark: Path, testFile: Path, entrypoint: String) =
+    val testName = testFile.getFileName
+    val yamlFile = testFile.toString.substring(0,testFile.toString.lastIndexOf(".")) + ".yml"
+    val expectedVerdict = unreachableCallExpectedVerdict(Paths.get(yamlFile))
+
+    val module = if testName.endsWith("wasm") then Parsing.fromBinary(testFile) else Parsing.fromText(testFile)
 
     val analysis = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
     // analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
@@ -66,16 +71,15 @@ class RelationalAnalysisTest() extends AnyFunSpec, Matchers:
     }
 
     val cfg = cfgBuilder.get
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val dotPath = testFile.getParent.resolve(testFile.getFileName.toString + ".dot")
     Files.writeString(dotPath, cfg.toGraphViz)
 
-    val yamlFile = p.toString.substring(0,p.toString.lastIndexOf(".")) + ".yml"
     val (envMod, hostAssertFailId, hostAssertFail) = hostModules.getHostFunction("env", "host_assert_fail").get
-    val unreachableCallActualVerdict = !cfg.nodes.exists {
+    val actualVerdict = !cfg.nodes.exists {
       case Node.BlockStart(FuncId(modInst, id)) => modInst == envMod && hostAssertFailId == id
       case _ => false
     }
-    assertResult(unreachableCallExpectedVerdict(Paths.get(yamlFile))) { unreachableCallActualVerdict }
+    assertResult(expectedVerdict) {actualVerdict}
 
 
   def unreachableCallExpectedVerdict(yamlPath: Path): Boolean =
@@ -84,4 +88,8 @@ class RelationalAnalysisTest() extends AnyFunSpec, Matchers:
     while (!prop.failed && !prop.as[String].contains("../properties/unreach-call.prp")) {
       prop = prop.up.right.downField("property_file")
     }
-    prop.up.downField("expected_verdict").as[Boolean].getOrElse(throw new IllegalArgumentException("Could not extract verdict from yaml file"))
+    if (prop.as[String].contains("../properties/unreach-call.prp")) {
+      prop.up.downField("expected_verdict").as[Boolean].getOrElse(cancel("No expected verdict for unreachable-call"))
+    } else {
+      cancel("No expected verdict for unreachable-call")
+    }

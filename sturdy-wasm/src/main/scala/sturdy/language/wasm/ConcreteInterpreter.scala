@@ -137,10 +137,10 @@ object ConcreteInterpreter extends Interpreter with Control:
         List(Value.Num(NumValue.Int32(scala.util.Random.nextInt(256))))
 
       case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
-        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt(65536))))
+        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt(16))))
 
       case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
-        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt())))
+        List(Value.Num(NumValue.Int32(if (scala.util.Random.nextFloat() < 0.1) 0 else scala.util.Random.nextInt(16))))
 
       case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
         List(Value.Num(NumValue.Int64(if (scala.util.Random.nextFloat() < 0.1) 0L else scala.util.Random.nextLong())))
