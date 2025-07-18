@@ -2,6 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
+import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Combinator, Contextual, Fixpoint, HasFixpointCache, Stack, StackConfig, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
@@ -72,7 +73,9 @@ final class Topmost[Dom, Codom, Ctx]
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
-          case stack.PopResult.Stable =>
+          case stack.PopResult.Stable(marker) =>
+            if (stack.height == 0 && !someComponentIsLooping)
+              marker.markStable()
             result
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))

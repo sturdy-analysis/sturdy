@@ -5,7 +5,8 @@ import sturdy.data.MayJoin
 import sturdy.data.finiteUnit
 import sturdy.effect.EffectStack
 import sturdy.fix
-import sturdy.fix.{Combinator, Contextual, StackConfig, Stack}
+import sturdy.fix.StackConfig.StackedStates
+import sturdy.fix.{Combinator, Contextual, Stack, StackConfig}
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -39,9 +40,9 @@ case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig
 object WasmConfig:
   def default = WasmConfig()
 
-case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(StackConfig.StackedStates()), loopUnwinding: Int = 0):
+case class FixpointConfig(stack: StackConfig = StackedStates(), iter: fix.iter.Config = fix.iter.Config.Innermost, loopUnwinding: Int = 0):
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): FixpointConfig =
-    FixpointConfig(iter.withObservers(newObservers))
+    FixpointConfig(stack.withObservers(newObservers), iter, loopUnwinding)
   
   override def toString: String =
     if (loopUnwinding <= 0)
@@ -56,13 +57,13 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost(Stac
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
 
     if (loopUnwinding <= 0)
-      fix.filter(isFunOrLoop, iter.get)
+      fix.filter(isFunOrLoop, iter.get(stack))
     else
       fix.dispatch(isFunOrLoopToIndex, Seq(
         // enter Wasm function
-        iter.get,
+        iter.get(stack),
         // loop
-        fix.unwind(loopUnwinding, iter.get)
+        fix.unwind(loopUnwinding, iter.get(stack))
       ))
 
 sealed trait ContextConfig:

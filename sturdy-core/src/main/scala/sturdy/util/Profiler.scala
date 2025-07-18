@@ -4,6 +4,9 @@ import scala.collection.mutable.ListBuffer
 
 object Profiler:
   private var measuredTimes: Map[String, Long] = Map()
+  
+  private var logPrefix: String = ""
+  private var loggedData: Map[String, Any] = Map()
 
   private var startTimes: Map[String, Long] = Map()
 
@@ -14,7 +17,18 @@ object Profiler:
     try block    // call-by-name
     finally end(name)
   }
+
+  def setLogPrefix(prefix: String): Unit =
+    this.logPrefix = prefix
   
+  def addData[R](name: String, default: R)(f: R => R): Unit = {
+    val key = logPrefix + name
+    loggedData.get(key) match {
+      case Some(value) => loggedData = loggedData + (key -> f(value.asInstanceOf[R]))
+      case None => loggedData = loggedData + (key -> default)
+    }
+  }
+
   def addTimeBestOf[R](name: String, repeat: Int)(block: => R): R = {
     if (measuredTimes.contains(name))
       throw new IllegalArgumentException()
@@ -36,9 +50,21 @@ object Profiler:
   def get(name: String): Option[Long] =
     measuredTimes.get(name)
 
-  def printLastMeasured(): Unit =
-    println("Elapsed times:")
-    measuredTimes.keys.foreach(printByName)
+  def getData(name: String, default: => Any): Any =
+    loggedData.getOrElse(logPrefix + name, default)
+
+  def getAllData: Map[String, Any] = loggedData
+  
+  def printLastMeasured(): Unit = {
+    if (measuredTimes.nonEmpty) {
+      println("Elapsed times:")
+      measuredTimes.keys.foreach(printByName)
+    }
+    if (loggedData.nonEmpty) {
+      println("Logged data:")
+      println(loggedData.toList.sortBy(_._1))
+    }
+  }
 
   def printByName(name: String): Unit =
     println(s"\t$name:${nanoToFormattedSeconds(measuredTimes(name))}")
@@ -58,6 +84,8 @@ object Profiler:
 
   def reset(): Unit =
     measuredTimes = Map()
+    logPrefix = ""
+    loggedData = Map()
     assert(startTimes.isEmpty)
 
 

@@ -180,8 +180,7 @@ class ConstantAnalysisCFGTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysisCFG(path: Path, funName: String, args: List[Value], stackConfig: StackConfig, mostGeneralClient: Boolean = false): AFallible[List[Value]] =
   val module = wasm.Parsing.fromText(path)
 
-  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
-    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(stackConfig)))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

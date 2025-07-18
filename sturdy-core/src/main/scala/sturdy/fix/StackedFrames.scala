@@ -96,7 +96,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: state.In, currentOut: state.Out, invalidate: Boolean): PushResult =
+  def push(dom: Dom, in: state.In, currentOut: state.Out, iterate: Boolean): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
@@ -183,7 +183,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
     } else {
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame:$in <- $codom:$out")
-      PopResult.Stable
+      PopResult.Stable(StableMaker.empty)
     }
     if (dropFrame(frame, newStackHeight) && false) {
       inCache.remove(frame)
@@ -240,7 +240,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
         PopResult.Unstable(newResult.get, Some(newOut.get))
       } else {
         outCacheEntry.stability = Stability.Stable
-        PopResult.Stable
+        PopResult.Stable(StableMaker.empty)
       }
 
 object StackedFrames:

@@ -71,7 +71,9 @@ final class Outermost[Dom, Codom, Ctx]
         val popResult = stack.pop(dom, widenedIn.getOrElse(in), result, out)
         val isOutermost = wasRecurrent && !stack.hasRecurrentCalls
         popResult match
-          case stack.PopResult.Stable =>
+          case stack.PopResult.Stable(marker) =>
+            if (isOutermost && !someComponentIsLooping)
+              marker.markStable()
             (result, isOutermost)
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))

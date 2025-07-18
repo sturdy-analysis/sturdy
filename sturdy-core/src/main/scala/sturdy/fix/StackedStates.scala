@@ -14,9 +14,28 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+
+/**
+  *
+  * @param state
+  * @param inStateWidening
+  * @param readPriorOutput if true, try to find prior cache entry and reuse it instead of recursing
+  * @param storeNonrecursiveOutput if true, store the output of nonrecursive functions in the cache.
+  *                                This does not influence the fixed-point algorithm in any way, but
+  *                                can be useful when using the cache after the fixed-point is computed.
+  * @param storeIntermediateOutput if true, store intermediate output in the cache, even when it is not
+  *                                stable yet. This requires dependency tracking, which may negatively impact
+  *                                the performance. This enables reading temporarily stable output when
+  *                                `readPriorOutput` is true, which may positively impact the performance.
+  * @param observers
+  * @tparam Dom
+  * @tparam Codom
+  * @tparam In
+  * @tparam Out
+  */
 final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
-                                              (inStateWidening: InStateWidening[Dom, state.In],
-                                               readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean,
+                                              (val inStateWidening: InStateWidening[Dom, state.In],
+                                               readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean, storeIntermediateOutput: Boolean,
                                                observers: Iterable[Stack.FixEvent => Unit])
                                               (using Finite[Dom], Join[Codom], Widen[Codom])
   extends Stack[Dom, Codom, In, Out]:
@@ -29,16 +48,25 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
   private var stackHeight: Int = 0
 
   private var dependencyStack: List[ListBuffer[OutCacheEntry]] = List(ListBuffer.empty)
-  private inline def pushDependencyStack(): Unit =
-    dependencyStack = ListBuffer.empty +: dependencyStack
+  private inline def pushDependencyStack(): Unit = {
+    if (storeIntermediateOutput)
+      dependencyStack = ListBuffer.empty +: dependencyStack
+  }
   private inline def popDependencyStack(): List[OutCacheEntry] =
-    val depInfo = dependencyStack.head
-    dependencyStack = dependencyStack.tail
-    depInfo.toList
-  def addParentDependency(out: OutCacheEntry): Unit =
-    if (Fixpoint.DEBUG_PRIOR_OUTPUT)
-      println(s"${stackHeightMinusOneIndent}REGISTER PARENT DEPENDENCY <- $out")
-    dependencyStack.head += out
+    if (storeIntermediateOutput) {
+      val depInfo = dependencyStack.head
+      dependencyStack = dependencyStack.tail
+      depInfo.toList
+    } else {
+      List.empty
+    }
+  private def addParentDependency(out: OutCacheEntry): Unit = {
+    if (storeIntermediateOutput) {
+      if (Fixpoint.DEBUG_PRIOR_OUTPUT)
+        println(s"${stackHeightMinusOneIndent}REGISTER PARENT DEPENDENCY <- $out")
+      dependencyStack.head += out
+    }
+  }
 
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
@@ -50,7 +78,13 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
 
   class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, var dependencies: List[OutCacheEntry]):
     def isStable: Boolean = stability eq Stability.Stable
-    override def toString: String = s"OutCacheEntry($dom, $in)"
+    def mayReadEntry: Boolean = (stability eq Stability.Stable) || storeIntermediateOutput && (stability eq Stability.Unstable)
+    override def toString: String = s"OutCacheEntry($dom, $in, $stability)"
+    def stableMaker: StableMaker = new StableMaker {
+      override def markStable(): Unit =
+        Profiler.addData("fix_stable", 1)(_ + 1)
+        OutCacheEntry.this.stability = Stability.Stable
+    }
 
   object OutCacheEntry:
     def unapply(out: OutCacheEntry): (TrySturdy[Codom], state.Out) = (out.result, out.out)
@@ -86,14 +120,16 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: state.In, currentOut: state.Out, invalidate: Boolean): PushResult =
+  def push(dom: Dom, in: state.In, currentOut: state.Out, iterate: Boolean): PushResult =
     if (Thread.currentThread().isInterrupted)
       throw new InterruptedException
 
     val widenedIn = inStateWidening.push(dom, in).get
     val stateFrame = (dom, widenedIn)
-    if (invalidate)
-      invalidateCache(stateFrame)
+    if (storeIntermediateOutput && iterate) {
+      Profiler.addData("fix_invalidate", 1)(_ + 1)
+      dependencyStack.head.foreach(invalidateCache)
+    }
 
     stack.get(stateFrame) match
       // call is not recurrent
@@ -102,7 +138,8 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
           val outEntry = outCache.get(stateFrame)
           if (Fixpoint.DEBUG_PRIOR_OUTPUT && outEntry.isDefined)
             println(s"${stackHeightIndent}FOUND PRIOR OUTPUT $stateFrame <- $outEntry")
-          if (outEntry.exists(o => o.stability != Stability.Invalid)) {
+          if (outEntry.exists(_.mayReadEntry)) {
+            Profiler.addData("fix_read", 1)(_ + 1)
             // previous input subsumes current input and previous result still stable => return previous result
             val OutCacheEntry(result, out) = outEntry.get
             if (Fixpoint.DEBUG_PRIOR_OUTPUT)
@@ -111,6 +148,8 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             return PushResult.Recurrent(result, Some(out))
           }
         }
+
+        Profiler.addData("fix_push", 1)(_ + 1)
 
         // push call to stack
         val info = new FrameInstanceInfo(stackHeight)
@@ -123,8 +162,10 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
         PushResult.Continue(Some(widenedIn))
 
       case Some(info) =>
+        Profiler.addData("fix_recurrent", 1)(_ + 1)
         // call is recurrent
         corecurrentCalls += info.frameIdWithInStateOfCache.get
+        inStateWidening.pop(dom, in)
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH RECURRENT $stateFrame:$currentOut")
         outCache.get(stateFrame) match
@@ -144,6 +185,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
    * If the frame recurred, updates the cache to store the result of this frame.
    */
   def pop(dom: Dom, in: state.In, result: TrySturdy[Codom], out: state.Out): PopResult =
+    Profiler.addData("fix_pop", 1)(_ + 1)
     val stateFrame = (dom, in)
     inStateWidening.pop(dom, in)
     val previousInfo = stack.remove(stateFrame)
@@ -156,12 +198,18 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     val updatedResult = if (isCorecurrent) {
       storeCorecurrentOutput(stateFrame, result, out, deps)
     } else if (storeNonrecursiveOutput) {
-      storeCorecurrentOutput(stateFrame, result, out, deps)
-      PopResult.Stable
+      storeNonrecurrentOutput(stateFrame, result, out, deps) match {
+        case s@PopResult.Stable(_) => s
+        case PopResult.Unstable(_, _) => PopResult.Stable(StableMaker.empty)
+      }
     } else {
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
-      PopResult.Stable
+      if (storeIntermediateOutput) {
+        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Stable, deps)
+        addParentDependency(outCacheEntry)
+      }
+      PopResult.Stable(StableMaker.empty)
     }
 
     stackHeight = newStackHeight
@@ -179,8 +227,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
-      val currentOut = state.getOutState(frame._1)
-      val newOut = Profiler.addTime("widen"){state.widenOut(frame._1)(previousOut, currentOut)}
+      val newOut = state.widenOut(frame._1)(previousOut, out)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
@@ -191,16 +238,56 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
         outCacheEntry.stability = Stability.Unstable
         outCacheEntry.result = newResult.get
         outCacheEntry.out = newOut.get
-        outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-        addParentDependency(outCacheEntry)
+        if (storeIntermediateOutput) {
+          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+          addParentDependency(outCacheEntry)
+        }
         PopResult.Unstable(newResult.get, Some(newOut.get))
       } else {
-        /* mark as stable */
-        outCacheEntry.stability = Stability.Stable
-        outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-        addParentDependency(outCacheEntry)
-        PopResult.Stable
+        if (storeIntermediateOutput) {
+          // store entry but also track its dependencies to invalidate it when needed
+          outCacheEntry.stability = Stability.Unstable // in case it was invalid
+          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+          addParentDependency(outCacheEntry)
+        }
+        PopResult.Stable(outCacheEntry.stableMaker)
       }
+
+    private def storeNonrecurrentOutput(frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, deps: List[OutCacheEntry]): PopResult = outCache.get(frame) match
+      case None =>
+        val outCacheEntry = OutCacheEntry(frame._1, frame._2, result, out, Stability.Unstable, deps)
+        outCache.put(frame, outCacheEntry)
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- Initial($result):$out")
+        addParentDependency(outCacheEntry)
+        PopResult.Unstable(result, None)
+      case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
+        val newResult: MaybeChanged[TrySturdy[Codom]] = Join(previousResult, result)
+        val newOut = state.joinOut(frame._1)(previousOut, out)
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
+        val changed = newResult.hasChanged || newOut.hasChanged
+        if (changed) {
+          if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
+            throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
+          }
+          outCacheEntry.stability = Stability.Unstable
+          outCacheEntry.result = newResult.get
+          outCacheEntry.out = newOut.get
+          if (storeIntermediateOutput) {
+            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+            addParentDependency(outCacheEntry)
+          }
+          PopResult.Unstable(result, None)
+        } else {
+          if (storeIntermediateOutput) {
+            // store entry but also track its dependencies to invalidate it when needed
+            outCacheEntry.stability = Stability.Unstable // in case it was invalid
+            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+            addParentDependency(outCacheEntry)
+          }
+          PopResult.Stable(outCacheEntry.stableMaker)
+        }
 
   private def invalidateCache(out: OutCacheEntry): Unit =
     if (out.stability != Stability.Invalid) {
@@ -209,16 +296,13 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       out.stability = Stability.Invalid
       out.dependencies.foreach(invalidateCache)
     }
-  private def invalidateCache(frame: (Dom, state.In)): Unit =
-    outCache.get(frame).foreach(invalidateCache)
-
 
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
-                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
+                       (inStateWidening: InStateWidening[Dom, state.In], readPriorOutput: Boolean, storeNonrecursiveOutput: Boolean, storeIntermediateOutput: Boolean, observers: Iterable[Stack.FixEvent => Unit])
                        (using Finite[Dom], Join[Codom], Widen[Codom]): Stack[Dom, Codom, state.In, state.Out] =
-    new StackedStates(state)(inStateWidening, readPriorOutput, storeNonrecursiveOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
+    new StackedStates(state)(inStateWidening, readPriorOutput, storeNonrecursiveOutput, storeIntermediateOutput, observers).asInstanceOf[Stack[Dom, Codom, state.In, state.Out]]
 
 trait InStateWidening[Dom, In]:
   def push(dom: Dom, in: In): MaybeChanged[In]
@@ -229,8 +313,11 @@ class FiniteInStateWidening[Dom, In](using Finite[In]) extends InStateWidening[D
   def pop(dom: Dom, in: In): Unit = ()
 
 class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx, Dom, Codom])(using widenIn: Dom => StackWidening[In]) extends InStateWidening[Dom, In]:
-  class ContextEntry(var in: List[In])
+  class ContextEntry(var in: List[In]):
+    override def toString: String = in.toString()
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
+
+  override def toString: String = s"ContextualInWidening($contexts)"
 
   def push(dom: Dom, in: In): MaybeChanged[In] =
     val ctx =  contextual.getCurrentContext
@@ -239,7 +326,7 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
-        val widenedIn = Profiler.addTime("widen"){widenIn(dom)(ce.in, in)}
+        val widenedIn = widenIn(dom)(ce.in, in)
         ce.in = widenedIn.get :: ce.in
         widenedIn
 

@@ -51,7 +51,7 @@ class ConstantAnalysisTestScript extends AnyFlatSpec, Matchers:
 
   def analyses: IterableOnce[() => ConstantAnalysis.Instance] =
     Iterator(
-      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedStates())), ctx = Insensitive)),
+      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive)),
 //      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedStates())), ctx = Insensitive)),
 //      () => new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),

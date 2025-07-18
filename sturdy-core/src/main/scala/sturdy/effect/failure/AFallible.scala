@@ -54,7 +54,7 @@ given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
     case _ => false
 
 given soundnessAFallible[C,A](using Soundness[C,A]): Soundness[CFallible[C], AFallible[A]] = {
-  case (CFallible.Failing(kind: DivergingKind, _), AFallible.Diverging(_)) => IsSound.Sound
+  case (CFallible.StackOverflow(_), _) => IsSound.Sound
   case (CFallible.Failing(kind,msg), AFallible.Failing(failures)) =>
     IsSound(failures.map(_._1).set.contains(kind), s"Abstract failures ${failures.map(_._1)} do not contain concrete failure ${kind}")
   case (CFallible.Failing(kind,msg), AFallible.MaybeFailing(_,failures)) =>

@@ -50,7 +50,7 @@ class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp,
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val inst = newInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost(stackConfig))))
+    val inst = newInstance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(stack = stackConfig, iter = sturdy.fix.iter.Config.Topmost)))
     inst.addControlObserver(new ControlEventChecker)
     var count = 0
     import sturdy.language.wasm.abstractions.Control.*

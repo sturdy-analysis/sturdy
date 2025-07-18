@@ -11,24 +11,19 @@ import sturdy.values.{Finite, Join, Widen}
 val Property = "iteration strategy"
 
 enum Config:
-  case Innermost(config: StackConfig)
-  case Outermost(config: StackConfig)
-  case Topmost(config: StackConfig)
-
-  def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): Config = this match
-    case Innermost(config) => Innermost(config.withObservers(newObservers))
-    case Outermost(config) => Outermost(config.withObservers(newObservers))
-    case Topmost(config) => Topmost(config.withObservers(newObservers))
+  case Innermost
+  case Outermost
+  case Topmost
 
   override def toString: String = this match
-    case Innermost(config) => s"innermost($config)"
-    case Outermost(config) => s"outermost($config)"
-    case Topmost(config) => s"topmost($config)"
+    case Innermost => s"innermost"
+    case Outermost => s"outermost"
+    case Topmost => s"topmost"
   
-  def get[Dom, Codom, Ctx]
+  def get[Dom, Codom, Ctx](config: StackConfig)
   (using Join[Codom], Widen[Codom], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = this match
-    case Innermost(config) => fix.iter.innermost(config)
-    case Outermost(config) => fix.iter.outermost(config)
-    case Topmost(config) => fix.iter.topmost(config)
+    case Innermost => fix.iter.innermost(config)
+    case Outermost => fix.iter.outermost(config)
+    case Topmost => fix.iter.topmost(config)

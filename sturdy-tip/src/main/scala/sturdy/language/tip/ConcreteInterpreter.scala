@@ -80,7 +80,7 @@ object ConcreteInterpreter extends Interpreter:
           try {
             f(in)
           } catch {
-            case e: StackOverflowError => failure.fail(TipFailure.StackOverflow, e.toString)
+            case e: StackOverflowError => failure.stackOverflow(e)
             case e => throw e
           }
     }

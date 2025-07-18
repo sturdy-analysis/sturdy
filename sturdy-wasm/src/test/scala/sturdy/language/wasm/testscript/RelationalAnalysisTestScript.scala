@@ -59,7 +59,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     Iterator(
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(stackedStates)), ctx = Insensitive)),
-      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(stackedStates)), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(stackedStates)), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
