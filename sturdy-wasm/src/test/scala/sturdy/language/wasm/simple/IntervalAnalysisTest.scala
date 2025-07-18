@@ -172,7 +172,7 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val module = wasm.Parsing.fromText(path)
 
   val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+    WasmConfig(FixpointConfig(stackConfig)))
   val constants = IntervalAnalysis.constantInstructions(interp)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 

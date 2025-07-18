@@ -68,7 +68,8 @@ final class Innermost[Dom, Codom, Ctx]
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
-          case stack.PopResult.Stable =>
+          case stack.PopResult.Stable(marker) =>
+            marker.markStable()
             (result, false)
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))

@@ -96,7 +96,7 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
 
     val module = Parsing.fromBinary(testFile)
 
-    val analysis = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+    val analysis = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(stackConfig)))
     analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
     val cfgBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 

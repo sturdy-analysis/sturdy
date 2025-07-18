@@ -38,7 +38,9 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
-  class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+  class Instance(initEnvironment: Environment, initStore: InitStore, 
+                 stackConfig: StackConfig, callSites: Int, 
+                 iterConfig: fix.iter.Config = fix.iter.Config.Innermost) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
@@ -83,7 +85,7 @@ object IntervalAnalysis extends Interpreter,
         callSiteSensitive(callSites,
           fix.log(cfgLogger.logger,
             fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.innermost(observedStackConfig), fix.iter.innermost(observedStackConfig)
+              iterConfig.get(observedStackConfig), iterConfig.get(observedStackConfig)
             ))
           )
         )
