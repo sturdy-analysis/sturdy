@@ -21,7 +21,7 @@ import scala.util.Try
   * @param inStateWidening
   * @param readPriorOutput if true, try to find prior cache entry and reuse it instead of recursing
   * @param storeNonrecursiveOutput if true, store the output of nonrecursive functions in the cache.
-  *                                This does not influence the fixed-point algorithm in any way, but
+  *                                This may lead to additional cache hits during fixed-pointing, and it
   *                                can be useful when using the cache after the fixed-point is computed.
   * @param storeIntermediateOutput if true, store intermediate output in the cache, even when it is not
   *                                stable yet. This requires dependency tracking, which may negatively impact
@@ -79,7 +79,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
   class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, var dependencies: List[OutCacheEntry]):
     def isStable: Boolean = stability eq Stability.Stable
     def mayReadEntry: Boolean = (stability eq Stability.Stable) || storeIntermediateOutput && (stability eq Stability.Unstable)
-    override def toString: String = s"OutCacheEntry($dom, $in, $stability)"
+    override def toString: String = s"OutCacheEntry($dom, $in, $stability) = $out"
     def stableMaker: StableMaker = new StableMaker {
       override def markStable(): Unit =
         Profiler.addData("fix_stable", 1)(_ + 1)
@@ -93,6 +93,15 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     case Stable
     case Unstable
     case Invalid
+
+
+  private def invalidateCache(out: OutCacheEntry): Unit =
+    if (out.stability == Stability.Unstable) {
+      if (Fixpoint.DEBUG_PRIOR_OUTPUT)
+        println(s"${stackHeightIndent}  INVALIDATE PRIOR OUTPUT $out")
+      out.stability = Stability.Invalid
+      out.dependencies.foreach(invalidateCache)
+    }
 
   /** Set of _active_ stack frames that have recurred.
    *  When a stack frame becomes inactive, it is also removed from this set.
@@ -206,10 +215,12 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
       if (storeIntermediateOutput) {
-        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Stable, deps)
+        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Unstable, deps)
         addParentDependency(outCacheEntry)
+        PopResult.Stable(outCacheEntry.stableMaker)
+      } else {
+        PopResult.Stable(StableMaker.empty)
       }
-      PopResult.Stable(StableMaker.empty)
     }
 
     stackHeight = newStackHeight
@@ -289,13 +300,6 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
           PopResult.Stable(outCacheEntry.stableMaker)
         }
 
-  private def invalidateCache(out: OutCacheEntry): Unit =
-    if (out.stability != Stability.Invalid) {
-      if (Fixpoint.DEBUG_PRIOR_OUTPUT)
-        println(s"${stackHeightIndent}  INVALIDATE PRIOR OUTPUT $out")
-      out.stability = Stability.Invalid
-      out.dependencies.foreach(invalidateCache)
-    }
 
 
 object StackedStates:
