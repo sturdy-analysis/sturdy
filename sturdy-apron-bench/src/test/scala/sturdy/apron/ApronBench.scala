@@ -9,8 +9,8 @@ import scala.annotation.tailrec
 
 @State(Scope.Benchmark)
 @BenchmarkMode(Array(Mode.SampleTime))
-@Warmup(iterations=1, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations=3, time = 10, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations=1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations=3, time = 1, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(value = TimeUnit.MILLISECONDS)
 class ApronBench {
 
