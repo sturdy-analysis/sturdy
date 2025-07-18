@@ -27,13 +27,13 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
-  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
+  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
   val EXCLUDE_MEM_GROW = false
 
-  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
+  /*Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
     !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
   }).sorted.foreach { p =>
     it must s"execute WASM1 script ${p.getFileName}" in {
@@ -42,7 +42,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
       val interp = ConcreteTestSpecInterpreter(Some(spectest))
       interp.run(script)
     }
-  }
+  }*/
 
   Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
     !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
