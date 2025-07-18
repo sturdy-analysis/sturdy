@@ -10,6 +10,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.util.{Bounded, IsInterval}
 import sturdy.values.{Structural, Topped}
 import sturdy.util.GenInterval.{*, given}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.integer.IntegerOps
 
 trait TestingOrderingOps[L,V,B] extends OrderingOps[V,B]:
@@ -76,3 +77,10 @@ class OrderingOpsTest
         s"Abstract boolean $actual does not contain ${expected}",
         s"Abstract boolean $actual contains ${expected}"
       )
+
+  if(Numeric[L].zero.isInstanceOf[Float] || Numeric[L].zero.isInstanceOf[Double]) {
+    test("-inf <= nan == false") {
+      val (ivOps, orderingOps) = makeOrderingOps
+      orderingOps.getBool(orderingOps.le(ivOps.interval(Numeric[L].zero, Numeric[L].zero, FloatSpecials.NegInfinity), ivOps.interval(Numeric[L].one, Numeric[L].one, FloatSpecials.NaN))) should contain(Float.NegativeInfinity <= Float.NaN)
+    }
+  }

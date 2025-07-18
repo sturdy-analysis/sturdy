@@ -100,20 +100,15 @@ trait RelationalBaseIntegerOps
     interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    val iv1 = apronState.getInterval(v1)
-    if(iv1.inf().sgn() >= 0)
+    apronState.ifThenElse(le(lit(0, v1._type), intMod(v1, v2))) {
       intMod(v1, v2)
-    else
-      val iv2 = apronState.getInterval(v2)
-      // We need an absolute without overflow, hence we cannot use this.absolute
-      val absV2 = if(iv2.inf.sgn() >= 0) {
-        v2
-      } else if(iv2.sup.sgn() < 0) {
-        intNegate(v2)
-      } else {
-        unary(UnOp.Sqrt, intPow(v2, lit(2, v2._type)), typeIntOps.absolute(v2._type))
+    } {
+      apronState.ifThenElse(le(lit(0, v2._type), v2)) {
+        intAdd(intMod(v1, v2), v2)
+      } {
+        intAdd(intMod(v1, v2), intNegate(v2))
       }
-      intMod(intAdd(intMod(v1, absV2), absV2), absV2)
+    }
 
   override def shiftLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val numBits = v._type.byteSize * 8
@@ -345,8 +340,7 @@ given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]
 given SoundnessLongApronExpr[Addr, Type](using apronState: ApronState[Addr,Type]): Soundness[Long, ApronExpr[Addr,Type]] with
   override def isSound(c: Long, expr: ApronExpr[Addr, Type]): IsSound =
     val iv = apronState.getInterval(expr)
-    val bc = BigInt(c).bigInteger
-    if(Interval(bc, bc).isLeq(iv))
+    if(Interval(ApronExpr.scalar(c), ApronExpr.scalar(c)).isLeq(iv))
       IsSound.Sound
     else
       IsSound.NotSound(s"$expr with interval $iv does not contain $c")

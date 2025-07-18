@@ -220,7 +220,20 @@ final class RelationalStore
   private final class BottomFailure extends SturdyFailure
 
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
-    val resolvedConstraints = constraints.map(replaceMissingAddrs)
+
+    val resolvedConstraints = constraints
+      .map(replaceMissingAddrs)
+      .filter(cons =>
+        // Comparing NaN to any other number always evaluates to false, e.g. 0 < NaN == false
+        // Therefore, adding such constraints to the abstract domain would be unsound.
+        // For example, x = 0; y = {1, NaN}; if(x < y) { ... } else { [x = 0, y = NaN] }
+        // Adding the negated constraint 0 > {1, NaN} in the else branch causes the abstract domain
+        // to become bottom, which is unsound, because x must be 0.
+        if(cons.e1.floatSpecials != FloatSpecials.Bottom || cons.e2.floatSpecials != FloatSpecials.Bottom)
+          abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment))
+        else
+          true
+      )
 
     val cons = resolvedConstraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
     this._abstract1.meet(manager, cons)

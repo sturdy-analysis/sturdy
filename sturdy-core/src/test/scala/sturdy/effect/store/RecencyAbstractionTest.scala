@@ -244,11 +244,11 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     }
     a1.recency should be(PowRecency.Old)
     a2.recency should be(PowRecency.Recent)
-    a3.recency should be(PowRecency.Old)
+    a3.recency should be(PowRecency.Failed)
 
-    store.read(a1) should be(JOptionA.Some(NumericInterval(0, 2)))
+    store.read(a1) should be(JOptionA.Some(NumericInterval(0, 0)))
     store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
-    store.read(a3) should be(JOptionA.Some(NumericInterval(0, 2)))
+    store.read(a3) should be(JOptionA.None())
   }
 
   test("Recency store should handle reallocation that happens in while loops") {

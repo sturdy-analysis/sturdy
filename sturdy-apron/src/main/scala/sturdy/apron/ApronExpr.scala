@@ -1,7 +1,7 @@
 package sturdy.apron
 
 import apron.*
-import gmp.Mpz
+import gmp.{Mpq, Mpz}
 import sturdy.apron.ApronExpr.topInterval
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.floating.{*, given}
@@ -157,16 +157,20 @@ object ApronExpr:
 
   inline def scalar(i: Int): Scalar = DoubleScalar(i)
   inline def scalar(l: Long): Scalar =
-    if(BigDecimal(l) == BigDecimal(l.toDouble))
-      new DoubleScalar(l)
+    val d = new DoubleScalar(l)
+    val m = new MpqScalar(new Mpq(BigInteger.valueOf(l)))
+    if (d.isEqual(m))
+      d
     else
-      new MpqScalar(new Mpz(BigInteger.valueOf(l)))
-  inline def scalar(i: BigInt): Scalar =
-    if(BigDecimal(i) == BigDecimal(i.toDouble))
-      new DoubleScalar(i.toDouble)
+      m
+  inline def scalar(i: BigInt): Scalar = scalar(i.bigInteger)
+  inline def scalar(i: BigInteger): Scalar =
+    val d = new DoubleScalar(i.doubleValue())
+    val m = new MpqScalar(new Mpq(i))
+    if(d.isEqual(m))
+      d
     else
-      new MpqScalar(new Mpz(i.bigInteger))
-  inline def scalar(i: BigInteger): Scalar = scalar(BigInt(i))
+      m
   inline def scalar(f: Float): Scalar = new DoubleScalar(f)
   inline def scalar(d: Double): Scalar = new DoubleScalar(d)
 

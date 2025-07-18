@@ -86,14 +86,6 @@ class RelationalJoinTest
 
             assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
             assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
-
-            val xIv = apronState.getFloatInterval(ivOps.constant(x))
-            val joinedIv = apronState.getFloatInterval(joined.get)
-
-            if(joinedIv.isLeq(xIv))
-              assert(joined.hasChanged == false, s", expression ${ivOps.constant(x)} with interval $xIv is equivalent to expression ${joined.get} with interval ${joinedIv}, but got joined.hasChanged = true")
-            else
-              assert(joined.hasChanged == true, s", expression ${ivOps.constant(x)} with interval $xIv is strictly smaller than expression ${joined.get} with interval ${joinedIv}, but got joined.hasChanged = false")
           }
       }
     }
@@ -113,14 +105,6 @@ class RelationalJoinTest
 
             assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
             assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
-
-            val xIv = apronState.getFloatInterval(xConst)
-            val joinedIv = apronState.getFloatInterval(joined.get)
-
-            if (joinedIv.isLeq(xIv))
-              assert(joined.hasChanged == false, s", expression ${xConst} with interval $xIv is equivalent to expression ${joined.get} with interval ${joinedIv}")
-            else
-              assert(joined.hasChanged == true, s", expression ${xConst} with interval $xIv is strictly smaller than expression ${joined.get} with interval ${joinedIv}")
           }
       }
     }

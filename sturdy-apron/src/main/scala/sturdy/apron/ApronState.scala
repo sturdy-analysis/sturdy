@@ -114,7 +114,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
 
-  def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
+  inline def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
     getBoolean(v, getFloatInterval(v.e1), getFloatInterval(v.e2))
 
   private def getBoolean(v: ApronCons[Addr, Type], iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
