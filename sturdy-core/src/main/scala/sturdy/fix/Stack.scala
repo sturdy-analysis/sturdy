@@ -21,10 +21,10 @@ object Stack:
   type FixEvent = FixpointControlEvent[Nothing,Nothing,Nothing,Any]
 
 trait StableMaker:
-  def markStable(): Unit
+  def markPermanentlyStable(): Unit
 object StableMaker:
   def empty: StableMaker = new StableMaker {
-    override def markStable(): Unit = ()
+    override def markPermanentlyStable(): Unit = ()
   }
 
 trait Stack[Dom, Codom, In, Out] extends HasFixpointCache[Dom, Codom]:
