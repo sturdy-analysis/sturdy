@@ -85,7 +85,33 @@ object Parsing:
       case e: TimeoutException => throw new WasmParseError(s"Parsing of ${mod.id} timed out")
     }
 
-  def testscript(path: Path): Seq[Command] =
-    val script = _root_.fastparse.parse(new FileInputStream(path.toFile), TestScriptParser.script(_))
+  def offsetToLineCol(input: String, offset: Int): (Int, Int) = {
+    val lines = input.take(offset).split("\n")
+    val line = lines.length
+    val col = if (lines.isEmpty) 1 else lines.last.length + 1
+    (line, col)
+  }
+
+  def testscript(path: Path): Seq[Command] = {
+    import java.nio.file.Files
+    import java.nio.charset.StandardCharsets
+
+    val bytes = Files.readAllBytes(path)
+    val input = new String(bytes, StandardCharsets.UTF_8)
+
+    val script = fastparse.parse(input, TestScriptParser.script(_))
+    script match {
+      case f: fastparse.Parsed.Failure =>
+        println(f.trace().longMsg)
+        val (line, col) = offsetToLineCol(input, f.index)
+        val lines = input.split("\n")
+        val contextLine = lines.lift(line - 1).getOrElse("")
+        val start = (col - 200).max(0)
+        val end = (col + 200).min(contextLine.length)
+        println(s"Context around error (line $line, col $col):")
+        println(contextLine.slice(start, end))
+      case _ =>
+    }
     assert(script.isSuccess)
     script.get.value
+  }
