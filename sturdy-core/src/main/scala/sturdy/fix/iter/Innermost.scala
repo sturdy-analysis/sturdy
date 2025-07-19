@@ -69,7 +69,8 @@ final class Innermost[Dom, Codom, Ctx]
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
           case stack.PopResult.Stable(marker) =>
-            marker.markStable()
+            if (!stack.hasRecurrentCalls)
+              marker.markPermanentlyStable()
             (result, false)
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))

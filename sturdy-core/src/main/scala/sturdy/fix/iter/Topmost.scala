@@ -75,7 +75,7 @@ final class Topmost[Dom, Codom, Ctx]
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
           case stack.PopResult.Stable(marker) =>
             if (stack.height == 0 && !someComponentIsLooping)
-              marker.markStable()
+              marker.markPermanentlyStable()
             result
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))
