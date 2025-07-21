@@ -33,6 +33,7 @@ import sturdy.language.tip.abstractions.isFunOrWhile
 
 import java.net.URI
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
@@ -46,21 +47,34 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.toString.contains("") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
-    var res1: AFallible[Value] = null
-    var res2: AFallible[Value] = null
+    val results: ListBuffer[AFallible[Value]] = ListBuffer.empty
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
-    it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false)" in {
-      res1 = runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false), Outermost)._1
-    }
-    it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true)" in {
-      res2 = runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = true), Outermost)._1
-    }
-    it must s"Compare analysis results ${p.getFileName}" in {
-      assertResult(res1)(res2)
+    for (iter <- fix.iter.Config.values) {
+
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false), $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false), iter)._1
+      }
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true), $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = true), iter)._1
+      }
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true, storeNonrecursiveOutput = true), $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true), iter)._1
+      }
+      it must s"soundly analyze ${p.getFileName} with stacked states minimal, $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStatesMinimal, iter)._1
+      }
+      it must s"Compare analysis results ${p.getFileName}, $iter" in {
+        if (results.size > 1) {
+          val expected = results.head
+          results.tail.foreach { res =>
+            assertResult(expected)(res)
+          }
+        }
+      }
     }
   }
 
