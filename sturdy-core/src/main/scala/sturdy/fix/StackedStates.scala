@@ -79,7 +79,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
   class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, var dependencies: List[OutCacheEntry]) extends StableMaker:
     def isStable: Boolean = stability eq Stability.Stable
     def mayReadEntry: Boolean = (stability eq Stability.Stable) || storeIntermediateOutput && (stability eq Stability.Unstable)
-    override def toString: String = s"OutCacheEntry($dom, $in, $stability) = $out"
+    override def toString: String = s"OutCacheEntry($dom, $in, $stability) = $result:$out"
     override def markPermanentlyStable(): Unit =
       Profiler.addData("fix_stable", 1)(_ + 1)
       OutCacheEntry.this.stability = Stability.Stable
@@ -135,7 +135,9 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     val stateFrame = (dom, widenedIn)
     if (storeIntermediateOutput && iterate) {
       Profiler.addData("fix_invalidate", 1)(_ + 1)
-      dependencyStack.head.foreach(invalidateCache)
+      outCache.get(stateFrame) match
+        case Some(entry) => invalidateCache(entry)
+        case None => dependencyStack.head.foreach(invalidateCache)
     }
 
     stack.get(stateFrame) match

@@ -53,7 +53,7 @@ final class Outermost[Dom, Codom, Ctx]
       } else
         result.getOrThrow
     }
-    apply_(recursive = false)
+    apply_(stack.height == 0)
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
   private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): (TrySturdy[Codom], Boolean) =

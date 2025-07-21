@@ -4,7 +4,11 @@ import sturdy.effect.{CombineTrySturdy, RecurrentCall, TrySturdy}
 import sturdy.values.*
 
 import scala.collection.mutable
+import Stability.*
 
+enum Stability:
+  case Stable
+  case Unstable
 
 trait StackMinimal[In, Out]:
   enum PushResult:
@@ -19,6 +23,8 @@ trait StackMinimal[In, Out]:
   def pop(in: In, out: Out): PopResult
   def height: Int
   def hasRecurrentCalls: Boolean
+
+
 
 def minimalStackToStack[Dom,Codom,In,Out](s: StackMinimal[(Dom,In),(TrySturdy[Codom],Out)]): Stack[Dom,Codom,In,Out] = new Stack {
   override def push(dom: Dom, in: In, currentOut: Out, iterate: Boolean): PushResult =
@@ -56,20 +62,10 @@ final class StackedStatesMinimal[In, Out](val inWidening: InStateWidening[Unit, 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
   private val outCache: mutable.Map[In, OutCacheEntry] = mutable.Map()
 
-  enum Stability:
-    case Stable
-    case Unstable
-  import Stability.*
 
-  class OutCacheEntry(var out: Out, var stability: Stability) extends StableMaker:
+   case class OutCacheEntry(var out: Out, var stability: Stability) extends StableMaker:
     override def toString: String = s"OutCacheEntry($out, $stability)"
     override def markPermanentlyStable(): Unit = this.stability = Stability.Stable
-
-  object OutCacheEntry:
-    def unapply(out: OutCacheEntry): (Out, Stability) = (out.out, out.stability)
-
-  
-
 
   /** Set of _active_ stack frames that have recurred.
    *  When a stack frame becomes inactive, it is also removed from this set.
@@ -102,7 +98,7 @@ final class StackedStatesMinimal[In, Out](val inWidening: InStateWidening[Unit, 
             return PushResult.Recurrent(Some(out))
           case _ => // nothing
         }
-        // push call to stack
+        // push call to stacksdsaads
         if (Fixpoint.DEBUG) println(s"${stackHeightIndent}PUSH $widenedIn")
         stack.put(widenedIn, stack.size)
         PushResult.Continue(widenedIn)
