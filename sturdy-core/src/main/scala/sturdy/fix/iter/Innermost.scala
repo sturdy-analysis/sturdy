@@ -54,7 +54,7 @@ final class Innermost[Dom, Codom, Ctx]
         result.getOrThrow
       }
     }
-    apply_(recursive = false)
+    apply_(stack.height == 0)
 
   private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): (TrySturdy[Codom], Boolean) =
     val in = state.getInState(dom)

@@ -47,13 +47,13 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
     p.toString.contains("") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
-    val results: ListBuffer[AFallible[Value]] = ListBuffer.empty
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     for (iter <- fix.iter.Config.values) {
+      val results: ListBuffer[AFallible[Value]] = ListBuffer.empty
 
       it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false), $iter" in {
         results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false), iter)._1
@@ -101,6 +101,8 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocatorIntIncrement[AllocationSite] = interp.alloc
+      println(cresult)
+      println(aresult)
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
