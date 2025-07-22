@@ -340,6 +340,10 @@ object AddressTranslation:
   def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
 
 case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTranslation[Context]) extends AbstractAddr[VirtualAddress[Context]]:
+
+  if (toString == "r@map_15")
+    println("break")
+
   def physical: PowPhysicalAddress[Context] =
     addressTrans(ctx, n)
   def recency: PowRecency =

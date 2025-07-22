@@ -184,7 +184,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(out@OutCacheEntry(res, previousOut)) =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
+              println(s"${stackHeightIndent}POP RECURRENT ${stateFrame._1},$res:$previousOut")
             fire(FixpointControlEvent.Recurrent(stateFrame))
             PushResult.Recurrent(res, Some(previousOut))
 
@@ -235,33 +235,42 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       addParentDependency(outCacheEntry)
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
-      val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
-      LinearStateOperationCounter.wideningCounter += 1
-      val newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
-      if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
-      val changed = newResult.hasChanged || newOut.hasChanged
-      if (changed) {
-        if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
-          throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
+      try {
+        LinearStateOperationCounter.wideningCounter += 1
+        var newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
+        state.setOutState(frame._1, newOut.get)
+
+        val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
+        newOut = newOut.map(_ => state.getOutState(frame._1))
+
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
+        val changed = newResult.hasChanged || newOut.hasChanged
+        if (changed) {
+          if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
+            throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
+          }
+          outCacheEntry.stability = Stability.Unstable
+          outCacheEntry.result = newResult.get
+          outCacheEntry.out = newOut.get
+          if (storeIntermediateOutput) {
+            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+            addParentDependency(outCacheEntry)
+          }
+          PopResult.Unstable(newResult.get, Some(newOut.get))
+        } else {
+          outCacheEntry.stability = Stability.Unstable // in case it was invalid
+          if (storeIntermediateOutput) {
+            // store entry but also track its dependencies to invalidate it when needed
+            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+            addParentDependency(outCacheEntry)
+          }
+          PopResult.Stable(outCacheEntry)
         }
-        outCacheEntry.stability = Stability.Unstable
-        outCacheEntry.result = newResult.get
-        outCacheEntry.out = newOut.get
-        if (storeIntermediateOutput) {
-          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-          addParentDependency(outCacheEntry)
-        }
-        PopResult.Unstable(newResult.get, Some(newOut.get))
-      } else {
-        outCacheEntry.stability = Stability.Unstable // in case it was invalid
-        if (storeIntermediateOutput) {
-          // store entry but also track its dependencies to invalidate it when needed
-          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-          addParentDependency(outCacheEntry)
-        }
-        PopResult.Stable(outCacheEntry)
+      } finally {
+        state.setOutState(frame._1, out)
       }
+
 
 object StackedStates:
   def apply[Dom, Codom](state: State)

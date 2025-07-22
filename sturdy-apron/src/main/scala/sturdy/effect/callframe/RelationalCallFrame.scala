@@ -100,7 +100,8 @@ final class RelationalCallFrame
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
       val ctx = localVariableAllocator.alloc((variable, d, Some(site)))
-      (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
+      val virt = apronState.recencyStore.alloc(ctx)
+      (variable, Some(PowVirtualAddress(virt)))
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
       for ((variable, exprOption) <- vars; expr <- exprOption)
