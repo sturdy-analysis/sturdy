@@ -76,7 +76,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     m.values.map(_.result).reduce((r1,r2) => Join(r1,r2).get)
   }.toMap
 
-  class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, var dependencies: List[OutCacheEntry]) extends StableMaker:
+  class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, val dependencies: mutable.Set[OutCacheEntry]) extends StableMaker:
     def isStable: Boolean = stability eq Stability.Stable
     def mayReadEntry: Boolean = (stability eq Stability.Stable) || storeIntermediateOutput && (stability eq Stability.Unstable)
     override def toString: String = s"OutCacheEntry($dom, $in, $stability) = $result:$out"
@@ -154,7 +154,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             if (Fixpoint.DEBUG_PRIOR_OUTPUT)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            return PushResult.Recurrent(result, Some(out))
+            return PushResult.Skip(result, Some(out))
           }
         }
 
@@ -181,12 +181,12 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
+            PushResult.Skip(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(out@OutCacheEntry(res, previousOut)) =>
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            PushResult.Recurrent(res, Some(previousOut))
+            PushResult.Skip(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
    *
@@ -214,7 +214,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
       if (storeIntermediateOutput) {
-        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Unstable, deps)
+        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Unstable, mutable.Set() ++ deps)
         addParentDependency(outCacheEntry)
         PopResult.Stable(outCacheEntry)
       } else {
@@ -226,9 +226,9 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     fire(FixpointControlEvent.EndFixpoint())
     updatedResult
 
-  private def storeCorecurrentOutput(widen: Boolean, frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, deps: List[OutCacheEntry]): PopResult = outCache.get(frame) match
+  private def storeCorecurrentOutput(widen: Boolean, frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, deps: Iterable[OutCacheEntry]): PopResult = outCache.get(frame) match
     case None =>
-      val outCacheEntry = OutCacheEntry(frame._1, frame._2, result, out, Stability.Unstable, deps)
+      val outCacheEntry = OutCacheEntry(frame._1, frame._2, result, out, Stability.Unstable, mutable.Set() ++ deps)
       outCache.put(frame, outCacheEntry)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- Initial($result):$out")
@@ -249,7 +249,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
         outCacheEntry.result = newResult.get
         outCacheEntry.out = newOut.get
         if (storeIntermediateOutput) {
-          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+          outCacheEntry.dependencies ++= deps
           addParentDependency(outCacheEntry)
         }
         PopResult.Unstable(newResult.get, Some(newOut.get))
@@ -257,7 +257,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
         outCacheEntry.stability = Stability.Unstable // in case it was invalid
         if (storeIntermediateOutput) {
           // store entry but also track its dependencies to invalidate it when needed
-          outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
+          outCacheEntry.dependencies ++= deps
           addParentDependency(outCacheEntry)
         }
         PopResult.Stable(outCacheEntry)

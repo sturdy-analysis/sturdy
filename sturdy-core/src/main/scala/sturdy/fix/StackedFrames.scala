@@ -116,7 +116,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
             val OutCacheEntry(result, out, _) = outEntry.get
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $frame:$loadedIn <- $result:$out")
-            return PushResult.Recurrent(result, Some(out))
+            return PushResult.Skip(result, Some(out))
           }
         }
 
@@ -209,13 +209,13 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
     case None =>
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP RECURRENT  $frame")
-      PushResult.Recurrent(TrySturdy(throw RecurrentCall(frame)), None)
+      PushResult.Skip(TrySturdy(throw RecurrentCall(frame)), None)
     case Some(OutCacheEntry(result, out, _)) =>
       LinearStateOperationCounter.wideningCounter += 1
       val joinedOut = Profiler.addTime("widen"){state.joinOut(frame.dom)(currentOut, out).get}
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP RECURRENT  $frame <- $result:$joinedOut")
-      PushResult.Recurrent(result, Some(joinedOut))
+      PushResult.Skip(result, Some(joinedOut))
 
   inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom], out: state.Out): PopResult = outCache.get(frame) match
     case None =>

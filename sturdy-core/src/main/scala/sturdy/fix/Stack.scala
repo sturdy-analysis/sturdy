@@ -29,7 +29,7 @@ object StableMaker:
 
 trait Stack[Dom, Codom, In, Out] extends HasFixpointCache[Dom, Codom]:
   enum PushResult:
-    case Recurrent(result: TrySturdy[Codom], widenedOut: Option[Out])
+    case Skip(result: TrySturdy[Codom], widenedOut: Option[Out])
     case Continue(widenedIn: Option[In])
 
   enum PopResult:
