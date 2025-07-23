@@ -30,8 +30,8 @@ def minimalStackToStack[Dom,Codom,In,Out](s: StackMinimal[(Dom,In),(TrySturdy[Co
   override def push(dom: Dom, in: In, currentOut: Out, iterate: Boolean): PushResult =
     s.push((dom, in)) match {
       case s.PushResult.Recurrent(out) => out match {
-        case None => PushResult.Recurrent(TrySturdy(throw RecurrentCall((dom, in))), None)
-        case Some((result, out)) => PushResult.Recurrent(result, Some(out))
+        case None => PushResult.Skip(TrySturdy(throw RecurrentCall((dom, in))), None)
+        case Some((result, out)) => PushResult.Skip(result, Some(out))
       }
       case s.PushResult.Continue((_, in)) => PushResult.Continue(Some(in))
     }
