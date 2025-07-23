@@ -55,13 +55,13 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     for (iter <- fix.iter.Config.values) {
       val results: ListBuffer[AFallible[Value]] = ListBuffer.empty
 
-      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false), $iter" in {
-        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false, storeNonrecursiveOutput = false), iter)._1 
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false, storeNonrecursiveOutput = false), $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false, storeNonrecursiveOutput = false), iter)._1
       }
-      it must s"soundly analyze ${p.getFileName} with stacked states (storeNonrecursiveOutput = true), $iter" in {
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false, storeNonrecursiveOutput = true), $iter" in {
         results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false, storeNonrecursiveOutput = true), iter)._1
       }
-      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true), $iter" in {
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true, storeNonrecursiveOutput = false), $iter" in {
         results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = false), iter)._1
       }
       it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true, storeNonrecursiveOutput = true), $iter" in {
