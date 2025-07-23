@@ -23,6 +23,8 @@ trait Effect:
   /** Overwrite the current internal state of the effect with the given state. */
   def setState(st: State): Unit
 
+  def setStateNonMonotonically(st: State): Unit = setState(st)
+
   /** Sets the effect state to bottom */
   def setBottom: Unit = {}
 

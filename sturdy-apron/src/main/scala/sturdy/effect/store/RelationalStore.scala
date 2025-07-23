@@ -333,13 +333,18 @@ final class RelationalStore
   // RelationalStore mutates abstract1
   override def getState: State =
     RelationalStoreState(copyAbstract1(_abstract1), nonRelationalStore.getState)
+
   override def setState(s: State): Unit =
+    // This ensures that old variables are never forgotten.
+    setStateNonMonotonically(widen(s, getState).get)
+
+  override def setStateNonMonotonically(s: State): Unit =
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
-  override def setBottom: Unit = {}
-//    _abstract1 = Abstract1(manager, new Environment())
-//    nonRelationalStore.setBottom
+  override def setBottom: Unit =
+    _abstract1 = Abstract1(manager, new Environment())
+    nonRelationalStore.setBottom
 
   inline def copyAbstract1(abstract1: Abstract1): Abstract1 =
     Profiler.addTime("Abstract1.copy") {
@@ -374,6 +379,27 @@ final class RelationalStore
           nonRelationalStore.setState(snapshotNonRelStore)
         }
       }
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new RelationalStoreComputationJoiner[A])
+  private final class RelationalStoreComputationJoiner[A] extends ComputationJoiner[A]:
+    val before = getState
+    var afterFirst: State = _
+    var afterSecond: State = _
+
+    override def inbetween(fFailed: Boolean): Unit =
+      afterFirst = getState
+      setStateNonMonotonically(before)
+
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
+      setStateNonMonotonically(afterFirst)
+
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
+
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      afterSecond = getState
+      setStateNonMonotonically(join(afterFirst, afterSecond).get)
+
+    override def retainNone(): Unit = {}
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)

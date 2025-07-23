@@ -50,7 +50,7 @@ class RelationalAnalysisTest(manager: Manager) extends AnyFlatSpec, Matchers:
 
    Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-     p.toString.endsWith("code.tip")
+     p.toString.endsWith("manipulatePointer.tip")
 //    p.endsWith("cfgloop.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {

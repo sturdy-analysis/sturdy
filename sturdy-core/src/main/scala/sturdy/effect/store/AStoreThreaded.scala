@@ -60,3 +60,6 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
           if (s.isNotSound) break(s)
     }
     IsSound.Sound
+
+
+  override def toString: String = getState.toString()

@@ -80,7 +80,6 @@ class ApronLibraryTest extends AnyFunSuite:
     a1.hashCode(manager) shouldEqual (a2.hashCode(manager))
     a2.hashCode(manager) shouldEqual (a1.hashCode(manager))
 
-
   test("{x = y, y ∈ [0,100]}.assign(x, x+1) = { x = y+1, y ∈ [0,100] }") {
 
     val x = ApronVar("x")
@@ -189,4 +188,52 @@ class ApronLibraryTest extends AnyFunSuite:
       compare(manager, a1, a2)
       a1_v3_hashcode shouldBe a2_v3_hashcode
     }
+  }
+
+  test("{x ∈ [1,2], y = x}.unify(z ∈ [2,3], y = z) = [x = y = z = 2]") {
+    val manager: Manager = new Polka(false)
+
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val z = ApronVar("z")
+
+    val env1 = new Environment(Array[Var](x, y), Array[Var]())
+    val abs1 = new Abstract1(manager, env1)
+    abs1.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env1), null)
+    abs1.assign(manager, y, ApronExpr.addr("x", BaseType[Int]).toIntern(env1), null)
+
+
+    val env2 = new Environment(Array[Var](z, y), Array[Var]())
+    val abs2 = new Abstract1(manager, env2)
+    abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
+    abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
+
+    val unified = abs1.unifyCopy(manager, abs2)
+    unified.isBottom(manager) shouldBe false
+  }
+
+
+  test("{x ∈ [1,2], y = x}.join(z ∈ [2,3], y = z) = [x ∈ [1,2], z ∈ [2,3], ]") {
+    val manager: Manager = new Polka(false)
+
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val z = ApronVar("z")
+
+    val env1 = new Environment(Array[Var](x, y), Array[Var]())
+    val abs1 = new Abstract1(manager, env1)
+    abs1.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env1), null)
+    abs1.assign(manager, y, ApronExpr.addr("x", BaseType[Int]).toIntern(env1), null)
+
+
+    val env2 = new Environment(Array[Var](z, y), Array[Var]())
+    val abs2 = new Abstract1(manager, env2)
+    abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
+    abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
+
+    val joined = ApronJoins.combineAbstract1(abs1, abs2, widen=false).get
+
+    joined.getBound(manager, x) shouldBe Interval(1,2)
+    joined.getBound(manager, y) shouldBe Interval(1,3)
+    joined.getBound(manager, z) shouldBe Interval(2,3)
   }

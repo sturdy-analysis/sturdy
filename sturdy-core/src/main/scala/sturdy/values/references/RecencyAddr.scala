@@ -58,6 +58,14 @@ case class RecencyRegion(recent: BitSet, old: BitSet, failed: BitSet):
 
   def isEmpty: Boolean = recent.isEmpty && old.isEmpty
 
+  def combineWithOlder(oldRegion: RecencyRegion): RecencyRegion =
+    val joinedFailed = failed ++ oldRegion.failed
+    RecencyRegion(
+      recent = (recent ++ (oldRegion.recent -- old)) -- joinedFailed,
+      old = (old ++ oldRegion.old) -- joinedFailed,
+      failed = failed ++ joinedFailed
+    )
+
   override def toString: String =
     s"[" +
       (if(recent.isEmpty) "" else s"recent: ${bitSetToRanges(recent).map(rangeToString).mkString(" ")}") +
@@ -90,8 +98,8 @@ given CombineRecencyRegion[W <: Widening]: Combine[RecencyRegion, W] =
     val joinedFailed = region1.failed ++ region2.failed
     val joinedRecent = (region1.recent ++ region2.recent) -- joinedFailed
     val joinedOld = (region1.old ++ region2.old) -- joinedFailed
-    val newRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
-    MaybeChanged(newRegion, newRegion.recency != region1.recency)
+    val joinedRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
+    MaybeChanged(joinedRegion, joinedRegion.recency != region1.recency)
 
 final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) extends Effect:
   var mapping: Map[Context,RecencyRegion] = init
@@ -224,11 +232,12 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
       mapping.get(ctx) match
         case None =>
           mapping += (ctx) -> regionState
-        case Some(regionCurrent) =>
-          mapping += (ctx) -> Join(regionCurrent, regionState).get
+        case Some(regionCurrent) if regionCurrent.combineWithOlder(regionState) != regionCurrent =>
+          mapping += (ctx) -> regionCurrent.combineWithOlder(regionState)
+        case Some(_) /* if regionCurrent.combineWithOlder(regionState) == regionCurrent */ => {}
     }
 
-  def setStateNonMonotonically(st: State): Unit =
+  override def setStateNonMonotonically(st: State): Unit =
     mapping = st.mapping
 
   override def setBottom: Unit = mapping = Map()

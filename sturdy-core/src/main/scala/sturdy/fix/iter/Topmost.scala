@@ -80,4 +80,6 @@ final class Topmost[Dom, Codom, Ctx]
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))
             someComponentIsLooping = true
+            if(iterationCount == 10)
+              println("break")
             newresult
