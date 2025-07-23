@@ -51,6 +51,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Int32(untainted(sz))
 
+    override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] = addr.map(_ + offset)
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>

@@ -254,8 +254,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
-    stack.push(i32ops.integerLit(inst.offset))
-    val addr = valueToAddr(num.evalNumeric(i32.Add))
+    val startAddr = valueToAddr(stack.popOrAbort())
+    val addr = addOffsetToAddr(inst.offset, startAddr)
 
     val memIdx = memoryIndex
     memory.write(memIdx, addr, bytes).getOrElse(
@@ -616,7 +616,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     (funcs.result(), globs.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None, hostModules: HostModules = HostModules(("wasi_snapshot_preview1", wasi_snapshot_preview1))): ModuleInstance = external {
+  def initializeModule(module: Module,
+                       imports: Imports = Map.empty,
+                       moduleId: Option[Any] = None,
+                       hostModules: HostModules = defaultHostModules): ModuleInstance = external {
     initializeThis()
 
     val modInst = new ModuleInstance(moduleId)

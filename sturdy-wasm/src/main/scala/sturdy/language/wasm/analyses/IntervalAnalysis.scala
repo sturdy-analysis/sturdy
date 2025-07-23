@@ -46,11 +46,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+  given ConstantSpecialWasmOperations(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
+
+    override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
+      intOps.add(addr, intOps.integerLit(offset))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32

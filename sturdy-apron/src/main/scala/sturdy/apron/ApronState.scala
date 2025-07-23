@@ -30,6 +30,8 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
         ApronExpr.Addr(result, expr.floatSpecials, tpe)
     }
 
+  def alloc(ctx: Any): Addr
+
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
   def addCondition(condition: ApronBool[Addr,Type]): Unit
@@ -202,6 +204,9 @@ final class ApronRecencyState
     val resultAddr = recencyStore.alloc(resultCtx)
 
     f(resultAddr, tempVars)
+
+  override def alloc(ctx: Any): VirtualAddress[Ctx] =
+    recencyStore.alloc(ctx.asInstanceOf[Ctx])
 
   override def assign(v: VirtualAddress[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Unit =
     relationalStore.write(v.physical,

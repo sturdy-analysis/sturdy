@@ -200,7 +200,7 @@ object ApronExpr:
   inline def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     intAdd(e1, e2, intOps.add(e1._type, e2._type))
 
-  inline def intAdd[L,Addr,Type: ApronType](e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type], tpe: Type): ApronExpr[Addr,Type] =
+  inline def intAdd[Addr,Type: ApronType](e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type], tpe: Type): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, tpe)
 
   inline def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =

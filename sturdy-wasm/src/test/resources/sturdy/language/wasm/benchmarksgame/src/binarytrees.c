@@ -9,11 +9,11 @@
    *reset*
 */
 
-#include <malloc.h>
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
+extern void* malloc(size_t size);
+extern void free(void* ptr);
 
 typedef struct tn {
     struct tn*    left;

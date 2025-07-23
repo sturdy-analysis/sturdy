@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.apron.{ApronExpr, ApronState}
+import sturdy.apron.{ApronExpr, ApronState, ApronVar}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -14,8 +14,9 @@ trait RelationalAddresses extends RelationalTypes:
     case CallFrame(callFramePosition: Int, programPos: Option[FixIn], function: FrameData)
     case Stack(stackPosition: Int, programPosition: FixIn, function: FrameData)
     case Global(addr: Int)
-    case Heap(memoryAddr: MemoryAddr, storeInstruction: FixIn)
-    case StaticString(memoryAddr: MemoryAddr, offset: Int)
+    case DynamicHeapAddress(memoryAddr: MemoryAddr, storeInstruction: FixIn)
+    case StaticHeapAddress(memoryAddr: MemoryAddr, offset: Int)
+    case Alloc(allocSite: FixIn)
     case Temp(programPosition: FixIn, tpe: Type)
 
     override def toString: String =
@@ -23,8 +24,9 @@ trait RelationalAddresses extends RelationalTypes:
         case CallFrame(callFramePosition, Some(programPos), function) => s"L$callFramePosition@$function:$programPos"
         case CallFrame(callFramePosition, None, function) => s"L$callFramePosition@$function"
         case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"
-        case Heap(memoryAddr, storeInstruction) => s"H$storeInstruction@$memoryAddr"
-        case StaticString(memoryAddr, offset) => s"ST$offset@$memoryAddr"
+        case DynamicHeapAddress(memoryAddr, storeInstruction) => s"D$storeInstruction@$memoryAddr"
+        case StaticHeapAddress(memoryAddr, offset) => s"ST$offset@$memoryAddr"
+        case Alloc(FixIn.Eval(_,allocSite)) => s"Alloc@${allocSite}"
         case Global(addr) => s"G$addr"
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
@@ -53,31 +55,38 @@ trait RelationalAddresses extends RelationalTypes:
 
   def heapAlloc[Bytes](rootFrameData: FrameData)(using apronState: ApronState[VirtAddr, Type], domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,ApronExpr[VirtAddr, Type],Bytes), AddrCtx] = AAllocatorFromContext(
     (key, addr, _) =>
-      domLogger.currentDom match
-        case Some(fixIn) => AddrCtx.Heap(key, fixIn)
-        case None =>
-          // Static string initialized at module level
-          val (l,u) = apronState.getIntInterval(addr)
-          if(l == u)
-            AddrCtx.StaticString(key, u)
-          else
-            throw IllegalArgumentException(s"Expected constant address but got $addr")
+      // Static string initialized at module level
+      val (l,u) = apronState.getIntInterval(addr)
+      if(l == u)
+        AddrCtx.StaticHeapAddress(key, u)
+      else
+        addr match
+          case ApronExpr.Addr(ApronVar(VirtualAddress(alloc@AddrCtx.Alloc(site), _, _)), _, _) => alloc
+
+//        domLogger.currentDom match
+//          case Some(fixIn) => AddrCtx.Heap(key, fixIn)
+//          case None =>
+//
+//            else
+//              throw IllegalArgumentException(s"Expected constant address but got $addr")
   )
 
   given Ordering[AddrCtx] = {
     case (AddrCtx.CallFrame(callFramePos1, progPos1, data1), AddrCtx.CallFrame(callFramePos2, progPos2, data2)) => Ordering[(FrameData, Option[FixIn], Int)].compare((data1, progPos1, callFramePos1), (data2, progPos2, callFramePos2))
     case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
-    case (AddrCtx.Heap(memAddr1, storeInst1), AddrCtx.Heap(memAddr2, storeInst2)) => Ordering[(MemoryAddr, FixIn)].compare((memAddr1, storeInst1),(memAddr2, storeInst2))
-    case (AddrCtx.StaticString(memAddr1, offset1), AddrCtx.StaticString(memAddr2, offset2)) => Ordering[(MemoryAddr, Int)].compare((memAddr1, offset1),(memAddr2, offset2))
+    case (AddrCtx.DynamicHeapAddress(memAddr1, storeInst1), AddrCtx.DynamicHeapAddress(memAddr2, storeInst2)) => Ordering[(MemoryAddr, FixIn)].compare((memAddr1, storeInst1),(memAddr2, storeInst2))
+    case (AddrCtx.StaticHeapAddress(memAddr1, offset1), AddrCtx.StaticHeapAddress(memAddr2, offset2)) => Ordering[(MemoryAddr, Int)].compare((memAddr1, offset1),(memAddr2, offset2))
+    case (AddrCtx.Alloc(site1), AddrCtx.Alloc(site2)) => Ordering[FixIn].compare(site1, site2)
     case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
     case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{
       case _: AddrCtx.CallFrame => 1
       case _: AddrCtx.Stack => 2
-      case _: AddrCtx.Heap => 3
-      case _: AddrCtx.StaticString => 4
-      case _: AddrCtx.Global => 5
-      case _: AddrCtx.Temp => 6
+      case _: AddrCtx.DynamicHeapAddress => 3
+      case _: AddrCtx.StaticHeapAddress => 4
+      case _: AddrCtx.Alloc => 5
+      case _: AddrCtx.Global => 6
+      case _: AddrCtx.Temp => 7
     }.compare(ctx1, ctx2)
   }
   given Finite[AddrCtx] with {}

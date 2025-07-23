@@ -48,6 +48,8 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
+    override def addOffsetToAddr(offset: Int, addr: Addr): Addr = BaseType[Int]
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()

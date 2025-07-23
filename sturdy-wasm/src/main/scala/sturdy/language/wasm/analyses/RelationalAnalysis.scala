@@ -6,7 +6,7 @@ import sturdy.apron.ApronExpr.*
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy}
-import sturdy.effect.bytememory.{*,given}
+import sturdy.effect.bytememory.{*, given}
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
@@ -61,7 +61,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = constant(ApronExpr.topInterval, I32Type)
 
-  given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+  given RelationalSpecialWasmOperations(using domLogger: DomLogger[FixIn], f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match
       case Int32(v) => v.asApronExpr
       case TopValue => constant(ApronExpr.topInterval, I32Type)
@@ -78,6 +78,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def sizeToVal(sz: Size): Value =
       Int32(Left(sz))
+
+    override def addOffsetToAddr(offset: Int, addr: Addr): Addr =
+      ApronExpr.intAdd[VirtAddr,Type](addr, ApronExpr.lit[VirtAddr, Type](offset, addr._type), addr._type)
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val expr = ix.asInt32.asApronExpr
@@ -108,6 +111,22 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "proc_exit" =>
         val exitCode = args.head
         f.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "malloc" =>
+        args match
+          case List(Int32(size)) =>
+            val allocSite = domLogger.getDoms(1)
+            val virt = apronState.alloc(AddrCtx.Alloc(allocSite): AddrCtx)
+            println(s"malloc($size) = $virt")
+            apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
+            List(Value.Int32(Left(ApronExpr.addr(virt, I32Type))))
+          case _ => f.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+      case "free" =>
+        args match
+          case List(Int32(ptr)) =>
+            println(s"free($ptr)")
+            List()
+          case _ =>
+            f.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
       case "__VERIFIER_nondet_bool" =>
         assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
       case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
@@ -125,8 +144,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "__blackhole_int" | "__blackhole_int_p" =>
         args
       case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
+        throw new IllegalArgumentException(s"Unknown host function $hostFunc")
 
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:

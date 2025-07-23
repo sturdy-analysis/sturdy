@@ -50,9 +50,11 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
 trait SpecialWasmOperations[V, Addr, Size, FuncIx, J[_] <: MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
-  
+
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
+
+  def addOffsetToAddr(offset: Int, addr: Addr): Addr
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 
