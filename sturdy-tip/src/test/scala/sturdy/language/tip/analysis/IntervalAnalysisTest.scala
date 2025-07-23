@@ -58,6 +58,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = false), $iter" in {
         results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = false), iter)._1
       }
+      it must s"soundly analyze ${p.getFileName} with stacked states (storeNonrecursiveOutput = true), $iter" in {
+        results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeNonrecursiveOutput = true), iter)._1
+      }
       it must s"soundly analyze ${p.getFileName} with stacked states (storeIntermediateOutput = true), $iter" in {
         results += runIntervalAnalysis(p, program, StackConfig.StackedStates(storeIntermediateOutput = true), iter)._1
       }
