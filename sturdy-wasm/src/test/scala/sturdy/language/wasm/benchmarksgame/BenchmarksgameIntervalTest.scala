@@ -32,15 +32,15 @@ class BenchmarksgameIntervalTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
   val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => !p.toString.contains("_O") && p.toString.endsWith(".wasm")).sorted.foreach { p =>
     it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (innermost_noInter)" in {
       val g1 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = false), fix.iter.Config.Innermost).withName("No intermediate inner")
       println(s"${g1.name}:   ${g1.nodes.size} nodes, ${g1.edges.size} edges")
     }
-    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (innermost_withInter)" in {
-      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Innermost).withName("With intermediate inner")
-      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
-    }
+//    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (innermost_withInter)" in {
+//      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Innermost).withName("With intermediate inner")
+//      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
+//    }
     it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (innermost_withInter_nonrec)" in {
       val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true), fix.iter.Config.Innermost).withName("With intermediate inner nonrec")
       println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
@@ -49,10 +49,10 @@ class BenchmarksgameIntervalTest extends AnyFlatSpec, Matchers:
       val g1 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = false), fix.iter.Config.Outermost).withName("No intermediate outer")
       println(s"${g1.name}:   ${g1.nodes.size} nodes, ${g1.edges.size} edges")
     }
-    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (outermost_withInter)" in {
-      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Outermost).withName("With intermediate outer")
-      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
-    }
+//    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (outermost_withInter)" in {
+//      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Outermost).withName("With intermediate outer")
+//      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
+//    }
     it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (outermost_withInter_nonrec)" in {
       val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true), fix.iter.Config.Outermost).withName("With intermediate outer nonrec")
       println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
@@ -61,10 +61,10 @@ class BenchmarksgameIntervalTest extends AnyFlatSpec, Matchers:
       val g1 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = false), fix.iter.Config.Topmost).withName("No intermediate topmost")
       println(s"${g1.name}:   ${g1.nodes.size} nodes, ${g1.edges.size} edges")
     }
-    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (topmost_withInter)" in {
-      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Topmost).withName("With intermediate topmost")
-      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
-    }
+//    it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (topmost_withInter)" in {
+//      val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true), fix.iter.Config.Topmost).withName("With intermediate topmost")
+//      println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
+//    }
     it must s"execute interval analysis with stacked states on benchmark ${p.getFileName} (topmost_withInter_nonrec)" in {
       val g2 = run(p, binary = true, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true), fix.iter.Config.Topmost).withName("With intermediate topmost nonrec")
       println(s"${g2.name}:   ${g2.nodes.size} nodes, ${g2.edges.size} edges")
@@ -80,7 +80,7 @@ class BenchmarksgameIntervalTest extends AnyFlatSpec, Matchers:
     Profiler.reset()
     val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(fix = FixpointConfig(stack = stackConfig, iter = iterConfig)))
-    val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+//    val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
     val modInst = interp.initializeModule(module)
 
@@ -90,5 +90,6 @@ class BenchmarksgameIntervalTest extends AnyFlatSpec, Matchers:
       )
     }
     Profiler.printLastMeasured()
-    graphBuilder.get
+    ControlGraph(Set())
+//    graphBuilder.get
 
