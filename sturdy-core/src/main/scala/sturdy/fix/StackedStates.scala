@@ -90,14 +90,14 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
   enum Stability:
     case Stable
     case Unstable
-    case Invalid
+    case Outdated
 
 
   private def invalidateCache(out: OutCacheEntry): Unit =
     if (out.stability == Stability.Unstable) {
       if (Fixpoint.DEBUG_PRIOR_OUTPUT)
         println(s"${stackHeightIndent}  INVALIDATE PRIOR OUTPUT $out")
-      out.stability = Stability.Invalid
+      out.stability = Stability.Outdated
       out.dependencies.foreach(invalidateCache)
     }
 
@@ -154,6 +154,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             if (Fixpoint.DEBUG_PRIOR_OUTPUT)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
             fire(FixpointControlEvent.Recurrent(stateFrame))
+            inStateWidening.pop(dom, in)
             return PushResult.Skip(result, Some(out))
           }
         }
@@ -238,9 +239,9 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
       val newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
-      if (Fixpoint.DEBUG)
-        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
       val changed = newResult.hasChanged || newOut.hasChanged
+      if (Fixpoint.DEBUG)
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut (changed=$changed)")
       if (changed) {
         if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
           throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
@@ -282,21 +283,28 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
     override def toString: String = in.toString()
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
+  private val DEBUG = false
+
+  private def height: Int = contexts.values.map(_.in.size).sum
+
   override def toString: String = s"ContextualInWidening($contexts)"
 
   def push(dom: Dom, in: In): MaybeChanged[In] =
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None =>
+        if (DEBUG) println(s"${"  " * height}SW push ($dom,$ctx) = ${MaybeChanged.Unchanged(in)}")
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
         val widenedIn = widenIn(dom)(ce.in, in)
+        if (DEBUG) println(s"${"  " * height}SW push ($dom,$ctx) = $widenedIn")
         ce.in = widenedIn.get :: ce.in
         widenedIn
 
   def pop(dom: Dom, in: In): Unit =
     val ctx =  contextual.getCurrentContext
+    if (DEBUG) println(s"${"  " * (height-1)}SW pop  ($dom,$ctx)")
     contexts.get((dom, ctx)) match
       case None => throw new IllegalStateException()
       case Some(ce: ContextEntry) =>
