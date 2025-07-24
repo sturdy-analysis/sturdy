@@ -16,7 +16,8 @@ lazy val root = (project in file("."))
     sturdy_core,
     sturdy_tip,
     sturdy_wasm,
-    sturdy_tutorial
+    sturdy_tutorial,
+    sturdy_llvm
   )
   .settings(skip / publish := true)
 
@@ -78,6 +79,17 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
     name := "sturdy_tutorial",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      "org.typelevel" %% "cats-core" % "2.6.1",
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+lazy val sturdy_llvm = (project in file("sturdy-llvm"))
+  .dependsOn(sturdy_core % "compile->compile")
+  .settings(
+    name := "sturdy_llvm",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
       "org.typelevel" %% "cats-core" % "2.6.1",
