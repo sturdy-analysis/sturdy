@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.apron.{ApronExpr, ApronState, ApronVar}
+import sturdy.apron.{ApronExpr, ApronState, ApronVar, BinOp}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -16,7 +16,7 @@ trait RelationalAddresses extends RelationalTypes:
     case Global(addr: Int)
     case DynamicHeapAddress(memoryAddr: MemoryAddr, storeInstruction: FixIn)
     case StaticHeapAddress(memoryAddr: MemoryAddr, offset: Int)
-    case Alloc(allocSite: FixIn)
+    case Alloc(allocSite: FixIn, offset: Int)
     case Temp(programPosition: FixIn, tpe: Type)
 
     override def toString: String =
@@ -26,7 +26,7 @@ trait RelationalAddresses extends RelationalTypes:
         case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"
         case DynamicHeapAddress(memoryAddr, storeInstruction) => s"D$storeInstruction@$memoryAddr"
         case StaticHeapAddress(memoryAddr, offset) => s"ST$offset@$memoryAddr"
-        case Alloc(FixIn.Eval(_,allocSite)) => s"Alloc@${allocSite}"
+        case Alloc(FixIn.Eval(_,allocSite), offset) => s"Alloc@${allocSite}+${offset}"
         case Global(addr) => s"G$addr"
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
@@ -61,14 +61,8 @@ trait RelationalAddresses extends RelationalTypes:
         AddrCtx.StaticHeapAddress(key, u)
       else
         addr match
-          case ApronExpr.Addr(ApronVar(VirtualAddress(alloc@AddrCtx.Alloc(site), _, _)), _, _) => alloc
-
-//        domLogger.currentDom match
-//          case Some(fixIn) => AddrCtx.Heap(key, fixIn)
-//          case None =>
-//
-//            else
-//              throw IllegalArgumentException(s"Expected constant address but got $addr")
+          case ApronExpr.Addr(ApronVar(VirtualAddress(alloc:AddrCtx.Alloc, _, _)), _, _) => alloc
+          case _ => AddrCtx.DynamicHeapAddress(key, domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)))
   )
 
   given Ordering[AddrCtx] = {
@@ -76,7 +70,7 @@ trait RelationalAddresses extends RelationalTypes:
     case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
     case (AddrCtx.DynamicHeapAddress(memAddr1, storeInst1), AddrCtx.DynamicHeapAddress(memAddr2, storeInst2)) => Ordering[(MemoryAddr, FixIn)].compare((memAddr1, storeInst1),(memAddr2, storeInst2))
     case (AddrCtx.StaticHeapAddress(memAddr1, offset1), AddrCtx.StaticHeapAddress(memAddr2, offset2)) => Ordering[(MemoryAddr, Int)].compare((memAddr1, offset1),(memAddr2, offset2))
-    case (AddrCtx.Alloc(site1), AddrCtx.Alloc(site2)) => Ordering[FixIn].compare(site1, site2)
+    case (AddrCtx.Alloc(site1, offset1), AddrCtx.Alloc(site2, offset2)) => Ordering[(FixIn, Int)].compare((site1,offset1), (site2,offset2))
     case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
     case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{

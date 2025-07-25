@@ -79,8 +79,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def sizeToVal(sz: Size): Value =
       Int32(Left(sz))
 
-    override def addOffsetToAddr(offset: Int, addr: Addr): Addr =
-      ApronExpr.intAdd[VirtAddr,Type](addr, ApronExpr.lit[VirtAddr, Type](offset, addr._type), addr._type)
+    override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
+      addr match
+        case ApronExpr.Addr(ApronVar(VirtualAddress(AddrCtx.Alloc(site,initOffset), n, addrTrans)), specials, tpe) =>
+          val ctx = AddrCtx.Alloc(site, initOffset + newOffset)
+          val virt = apronState.alloc(ctx)
+          apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
+          ApronExpr.addr(virt, tpe)
+        case _ =>
+          ApronExpr.intAdd[VirtAddr,Type](addr, ApronExpr.lit[VirtAddr, Type](newOffset, addr._type), addr._type)
+    }
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val expr = ix.asInt32.asApronExpr
@@ -115,8 +123,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         args match
           case List(Int32(size)) =>
             val allocSite = domLogger.getDoms(1)
-            val virt = apronState.alloc(AddrCtx.Alloc(allocSite): AddrCtx)
-            println(s"malloc($size) = $virt")
+            val virt = apronState.alloc(AddrCtx.Alloc(allocSite,0): AddrCtx)
             apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
             List(Value.Int32(Left(ApronExpr.addr(virt, I32Type))))
           case _ => f.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")

@@ -3,9 +3,13 @@
   (type (;1;) (func))
   (type (;2;) (func (param i32) (result i32)))
   (type (;3;) (func (result i32)))
-  (type (;4;) (func (param i32 i32) (result i32)))
+  (type (;4;) (func (param f64 f64) (result f64)))
+  (type (;5;) (func (param i32 i32) (result i32)))
   (import "env" "malloc" (func $malloc (type 2)))
   (import "env" "free" (func $free (type 0)))
+  (import "env" "__VERIFIER_nondet_int" (func $__VERIFIER_nondet_int (type 3)))
+  (import "env" "ext_pow" (func $ext_pow (type 4)))
+  (import "env" "assert" (func $assert (type 0)))
   (import "wasi_snapshot_preview1" "proc_exit" (func $__wasi_proc_exit (type 0)))
   (func $__wasm_call_ctors (type 1)
     nop)
@@ -80,145 +84,116 @@
     local.get 0
     call $free)
   (func $__original_main (type 3) (result i32)
-    (local i32 i32)
-    i32.const 7
-    call $BottomUpTree
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    drop
-    i32.const 1
+    (local i32 i32 i32 i32 i32 i32 i32 i32 i32)
+    call $__VERIFIER_nondet_int
     local.set 0
-    loop  ;; label = @1
-      i32.const 4
-      call $BottomUpTree
-      local.tee 1
-      call $ItemCheck
-      drop
+    call $__VERIFIER_nondet_int
+    local.tee 1
+    i32.const 2
+    i32.add
+    local.tee 2
+    local.get 0
+    local.get 0
+    local.get 2
+    i32.lt_u
+    select
+    local.tee 3
+    i32.const 1
+    i32.add
+    local.tee 0
+    call $BottomUpTree
+    local.tee 2
+    call $ItemCheck
+    f64.const 0x1p+1 (;=2;)
+    local.get 0
+    f64.convert_i32_u
+    call $ext_pow
+    i32.trunc_sat_f64_s
+    i32.eq
+    call $assert
+    local.get 2
+    call $DeleteTree
+    local.get 3
+    call $BottomUpTree
+    local.set 6
+    local.get 1
+    local.get 3
+    i32.le_u
+    if  ;; label = @1
       local.get 1
-      call $DeleteTree
-      local.get 0
-      i32.const 1
+      local.get 3
       i32.add
-      local.tee 0
-      i32.const 65
-      i32.ne
-      br_if 0 (;@1;)
+      local.set 7
+      loop  ;; label = @2
+        i32.const 1
+        local.set 0
+        i32.const 0
+        local.set 2
+        f64.const 0x1p+1 (;=2;)
+        local.get 7
+        local.get 1
+        i32.sub
+        f64.convert_i32_u
+        call $ext_pow
+        i32.trunc_sat_f64_s
+        local.tee 5
+        i32.const 0
+        i32.gt_s
+        if  ;; label = @3
+          loop  ;; label = @4
+            local.get 1
+            call $BottomUpTree
+            local.tee 4
+            call $ItemCheck
+            local.set 8
+            local.get 4
+            call $DeleteTree
+            local.get 2
+            local.get 8
+            i32.add
+            local.set 2
+            local.get 0
+            local.get 5
+            i32.ne
+            local.set 4
+            local.get 0
+            i32.const 1
+            i32.add
+            local.set 0
+            local.get 4
+            br_if 0 (;@4;)
+          end
+        end
+        f64.const 0x1p+1 (;=2;)
+        local.get 1
+        f64.convert_i32_u
+        call $ext_pow
+        i32.trunc_sat_f64_s
+        local.get 5
+        i32.mul
+        local.get 2
+        i32.eq
+        call $assert
+        local.get 1
+        i32.const 2
+        i32.add
+        local.tee 1
+        local.get 3
+        i32.le_u
+        br_if 0 (;@2;)
+      end
     end
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
+    local.get 6
     call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
-    i32.const 6
-    call $BottomUpTree
-    local.tee 0
-    call $ItemCheck
-    drop
-    local.get 0
-    call $DeleteTree
+    f64.const 0x1p+1 (;=2;)
+    local.get 3
+    f64.convert_i32_u
+    call $ext_pow
+    i32.trunc_sat_f64_s
+    i32.eq
+    call $assert
     i32.const 0)
-  (func $main (type 4) (param i32 i32) (result i32)
+  (func $main (type 5) (param i32 i32) (result i32)
     call $__original_main)
   (func $_start (type 1)
     call $__wasm_call_ctors

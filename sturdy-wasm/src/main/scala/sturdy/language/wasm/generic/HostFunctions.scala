@@ -27,9 +27,11 @@ class HostModules(initModules: (String, List[HostFunction])*):
     } yield ((moduleInst, ix, hostFunction))
 
 
-val malloc: List[HostFunction] = List(
+val stdlib: List[HostFunction] = List(
   HostFunction("malloc", FuncType(Vector(I32), Vector(I32))),
-  HostFunction("free", FuncType(Vector(I32), Vector()))
+  HostFunction("free", FuncType(Vector(I32), Vector())),
+  HostFunction("ext_pow", FuncType(Vector(I32, I32), Vector(I32))),
+  HostFunction("assert", FuncType(Vector(I32), Vector()))
 )
 
 val wasi_snapshot_preview1: List[HostFunction] = List(
@@ -72,6 +74,6 @@ val wasi_snapshot_preview1: List[HostFunction] = List(
 )
 
 val defaultHostModules = HostModules(
-  "env" -> malloc,
+  "env" -> stdlib,
   "wasi_snapshot_preview1" -> wasi_snapshot_preview1
 )

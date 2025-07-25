@@ -9,11 +9,7 @@
    *reset*
 */
 
-#include <math.h>
-#include <stdio.h>
-
-extern void* malloc(size_t size);
-extern void free(void* ptr);
+#include "../../stdlib.h"
 
 typedef struct tn {
     struct tn*    left;
@@ -73,10 +69,9 @@ int main()
     unsigned   N, depth, minDepth, maxDepth, stretchDepth;
     treeNode   *stretchTree, *longLivedTree, *tempTree;
 
-    //N = 15;
-    N = 6;
+    N = __VERIFIER_nondet_int();
 
-    minDepth = 4;
+    minDepth = __VERIFIER_nondet_int();
 
     if ((minDepth + 2) > N)
         maxDepth = minDepth + 2;
@@ -86,12 +81,7 @@ int main()
     stretchDepth = maxDepth + 1;
 
     stretchTree = BottomUpTree(stretchDepth);
-    /*printf
-    (
-        "stretch tree of depth %u\t check: %li\n",
-        stretchDepth,
-        ItemCheck(stretchTree)
-    );*/
+    assert(ItemCheck(stretchTree) == ((long) ext_pow(2,stretchDepth)));
 
     DeleteTree(stretchTree);
 
@@ -101,7 +91,7 @@ int main()
     {
         long    i, iterations, check;
 
-        iterations = pow(2, maxDepth - depth + minDepth);
+        iterations = ext_pow(2, maxDepth - depth + minDepth);
 
         check = 0;
 
@@ -112,21 +102,11 @@ int main()
             DeleteTree(tempTree);
         } /* for(i = 1...) */
 
-        /*printf
-        (
-            "%li\t trees of depth %u\t check: %li\n",
-            iterations,
-            depth,
-            check
-        );*/
+
+        assert((long)ext_pow(2,depth) * iterations == check);
     } /* for(depth = minDepth...) */
 
-    /*printf
-    (
-        "long lived tree of depth %u\t check: %li\n",
-        maxDepth,
-        ItemCheck(longLivedTree)
-    );*/
+    assert(ItemCheck(longLivedTree) == (long)ext_pow(2,maxDepth));
 
     return 0;
 } /* main() */
