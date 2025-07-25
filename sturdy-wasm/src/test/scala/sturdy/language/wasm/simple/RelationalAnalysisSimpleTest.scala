@@ -47,13 +47,14 @@ final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) exte
   val fact = Paths.get(uriFact)
 
   import RelationalAnalysis.Type.*
+  import RelationalAnalysis.RelI32.*
 
-  def i32(expr: ApronExpr[VirtAddr, Type]) = Value.Int32(Left(expr))
+  def i32(expr: ApronExpr[VirtAddr, Type]) = Value.Int32(NumExpr(expr))
   def i64(expr: ApronExpr[VirtAddr, Type]) = Value.Int64(expr)
 
   def iv(lower: Scalar, upper: Scalar, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, FloatSpecials.Bottom), tpe)
   def doubleIv(lower: Double, upper: Double, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, floatSpecials), tpe)
-  val topi32 = Value.Int32(Left(iv(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom, I32Type)))
+  val topi32 = Value.Int32(NumExpr(iv(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom, I32Type)))
   val topi64 = Value.Int64(iv(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom, I64Type))
   val topf32 = Value.Float32(doubleIv(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
   val topf32NoSpecials = Value.Float32(doubleIv(Float.MinValue, Float.MaxValue, FloatSpecials.Bottom, F32Type))

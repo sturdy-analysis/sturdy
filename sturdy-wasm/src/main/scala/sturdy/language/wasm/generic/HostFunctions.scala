@@ -30,7 +30,8 @@ class HostModules(initModules: (String, List[HostFunction])*):
 val stdlib: List[HostFunction] = List(
   HostFunction("malloc", FuncType(Vector(I32), Vector(I32))),
   HostFunction("free", FuncType(Vector(I32), Vector())),
-  HostFunction("ext_pow", FuncType(Vector(I32, I32), Vector(I32))),
+  HostFunction("assert", FuncType(Vector(I32), Vector())),
+  HostFunction("ext_pow", FuncType(Vector(F64, F64), Vector(F64))),
   HostFunction("assert", FuncType(Vector(I32), Vector()))
 )
 
@@ -73,7 +74,31 @@ val wasi_snapshot_preview1: List[HostFunction] = List(
   HostFunction("sched_yield", FuncType(Vector(), Vector(I32)))
 )
 
+
+val svbenchHostFunctions: List[HostFunction] = List(
+  HostFunction("__VERIFIER_nondet_bool", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_char", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_short", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_int", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_long", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_longlong", FuncType(Vector(), Vector(I64))),
+  HostFunction("__VERIFIER_nondet_uchar", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_ushort", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_uint", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_ulong", FuncType(Vector(), Vector(I32))),
+  HostFunction("__VERIFIER_nondet_ulonglong", FuncType(Vector(), Vector(I64))),
+  HostFunction("__VERIFIER_nondet_float", FuncType(Vector(), Vector(F32))),
+  HostFunction("__VERIFIER_nondet_double", FuncType(Vector(), Vector(F64))),
+  HostFunction("host_assert_fail", FuncType(Vector(), Vector())),
+  HostFunction("__assert_fail", FuncType(Vector(I32, I32, I32, I32), Vector())),
+  HostFunction("__blackhole_int", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_int_p", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int_p", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("__blackhole_unsigned_int_p_p", FuncType(Vector(I32), Vector(I32))),
+)
+
 val defaultHostModules = HostModules(
-  "env" -> stdlib,
+  "env" -> (stdlib ++ svbenchHostFunctions),
   "wasi_snapshot_preview1" -> wasi_snapshot_preview1
 )

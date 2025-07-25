@@ -61,16 +61,16 @@ trait RelationalAddresses extends RelationalTypes:
       AddrCtx.Stack(idx, fixIn, callFrame.data)
   )
 
-  def heapAlloc[Bytes](rootFrameData: FrameData)(using apronState: ApronState[VirtAddr, Type], domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,ApronExpr[VirtAddr, Type],Bytes), HeapCtx] = AAllocatorFromContext(
+  def heapAlloc[Bytes](rootFrameData: FrameData)(using apronState: ApronState[VirtAddr, Type], domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,ApronExpr[VirtAddr, Type],Bytes), AddrCtx] = AAllocatorFromContext(
     (key, addr, _) =>
       // Static string initialized at module level
       val (l,u) = apronState.getIntInterval(addr)
       if(l == u)
-        HeapCtx.Static(u)
+        AddrCtx.Heap(HeapCtx.Static(u))
       else
         addr match
-          case ApronExpr.Addr(ApronVar(VirtualAddress(alloc:HeapCtx.Alloc, _, _)), _, _) => alloc
-          case _ => HeapCtx.Dynamic(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)))
+          case ApronExpr.Addr(ApronVar(VirtualAddress(alloc@AddrCtx.Heap(_: HeapCtx.Alloc), _, _)), _, _) => alloc
+          case _ => AddrCtx.Heap(HeapCtx.Dynamic(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))))
   )
 
   given Ordering[AddrCtx] = {

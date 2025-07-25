@@ -442,6 +442,9 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
 
   override def isEmpty: Boolean = addrs.isEmpty
 
+  def union(other: PowVirtualAddress[Context]): PowVirtualAddress[Context] =
+    new PowVirtualAddress(this.addrs ++ other.addrs)
+
   override def isStrong: Boolean = virtualAddresses.forall(addr => addr.isStrong)
 
   override def reduce[A](f: VirtualAddress[Context] => A)(using Join[A]): A =

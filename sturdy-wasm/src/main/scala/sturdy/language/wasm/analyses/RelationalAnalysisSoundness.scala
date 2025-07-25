@@ -35,7 +35,7 @@ object RelationalAnalysisSoundness {
   given valuesSound(using apronState: ApronState[VirtAddr, Type]): Soundness[ConcreteInterpreter.Value, RelationalAnalysis.Value] with
     override def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound =
       (c,a) match
-        case (ConcreteInterpreter.Value.Int32(ci32), RelationalAnalysis.Value.Int32(vi32)) => Soundness.isSound(ci32, vi32.asApronExpr)
+        case (ConcreteInterpreter.Value.Int32(ci32), RelationalAnalysis.Value.Int32(vi32)) => Soundness.isSound(ci32, vi32.asNumExpr)
         case (ConcreteInterpreter.Value.Int64(ci64), RelationalAnalysis.Value.Int64(vi64)) => Soundness.isSound(ci64, vi64)
         case (ConcreteInterpreter.Value.Float32(cf32), RelationalAnalysis.Value.Float32(vf32)) => Soundness.isSound(cf32, vf32)
         case (ConcreteInterpreter.Value.Float64(cf64), RelationalAnalysis.Value.Float64(vf64)) => Soundness.isSound(cf64, vf64)

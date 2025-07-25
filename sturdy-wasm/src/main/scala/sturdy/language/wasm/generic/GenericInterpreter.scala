@@ -240,7 +240,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: LoadInst | LoadNInst): Unit =
-    val addr = effectiveAddr(inst.offset)
+    val startAddr = valueToAddr(stack.popOrAbort())
+    val addr = addOffsetToAddr(inst.offset, startAddr)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
     memory.read(memIdx,addr,length).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory.")) {
