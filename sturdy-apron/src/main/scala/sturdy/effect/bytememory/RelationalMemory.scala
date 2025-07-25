@@ -28,7 +28,8 @@ class RelationalMemory
   ]
   (val
      defaultBytes: Bytes[Val],
-     memLocAllocator: Allocator[Context,(Key,ApronExpr[VirtualAddress[Context], Type],Bytes[Val])]
+     memLocAllocator: Allocator[Context,(Key,ApronExpr[VirtualAddress[Context], Type],Bytes[Val])],
+     matchingRegions: (ApronExpr[VirtualAddress[Context], Type], Mem[Context, Type, Val]) => Iterable[MemoryRegion[VirtualAddress[Context], Type, Val]]
   )
   (using
      apronState: ApronState[VirtualAddress[Context], Type],
@@ -43,39 +44,20 @@ class RelationalMemory
   private val pageSize: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.lit(ConcreteMemory.pageSize, intType)
   private val maxPages: ApronExpr[VirtualAddress[Context], Type] = ApronExpr.lit(ConcreteMemory.maxPageNum, intType)
 
-  case class Mem(store: SortedMap[PhysicalAddress[MemoryCtx], MemoryRegion[VirtualAddress[Context], Type, Val]],
-                 numPages: ApronExpr[VirtualAddress[Context], Type],
-                 pageLimit: ApronExpr[VirtualAddress[Context], Type]):
-    def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
-      store.values.flatMap(_.addressIterator(valueIterator)).iterator ++
-        valueIterator(numPages) ++
-        valueIterator(pageLimit)
-
-    override def equals(obj: Any): Boolean =
-      obj match
-        case other: Mem => MapEquals(this.store, other.store) && this.numPages.equals(other.numPages) && this.pageLimit == other.pageLimit
-        case _ => false
-
-  var memories: Map[Key, Mem] = Map()
+  var memories: Map[Key, Mem[Context, Type, Val]] = Map()
   
   override def read(key: Key, addr: Addr, length: Int): JOptionA[Bytes[Val]] =
-    val Mem(store, numPages, _) = memories(key)
-    val matchingRegions = store
-      .filter((_,region) =>
-        // TODO: Address overlaps with range (use length)
-        region.contains(addr) match
-          case Topped.Actual(true) | Topped.Top => true
-          case Topped.Actual(false) => false
-      )
+    val mem = memories(key)
+    val regions: Iterable[MemoryRegion[VirtualAddress[Context], Type, Val]] = matchingRegions(addr, mem)
 
     val result =
-      if(matchingRegions.isEmpty)
+      if(regions.isEmpty)
         defaultBytes
       else
-        matchingRegions
+        regions
           .map{
-            case (ctx,MemoryRegion(startAddr, StoredBytes(value, storedBytes, storedByteOrder))) =>
-                ReadBytes(
+            case MemoryRegion(startAddr, StoredBytes(value, storedBytes, storedByteOrder)) =>
+                ReadBytes[Val](
                   value = value,
                   storedBytes = storedBytes,
                   storedByteOrder = storedByteOrder,
@@ -86,7 +68,7 @@ class RelationalMemory
           .reduce(Join(_,_).get)
 
     val endAddr = intAdd(addr,interval(length, length, addr._type))
-    apronState.ifThenElse(ApronCons.le(endAddr, intMul(numPages, pageSize))) {
+    apronState.ifThenElse(ApronCons.le(endAddr, intMul(mem.numPages, pageSize))) {
       JOptionA.Some(result)
     } {
       JOptionA.None()
@@ -137,7 +119,7 @@ class RelationalMemory
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     memories.values.flatMap(_.addressIterator(valueIterator)).iterator
 
-  case class RelationalMemoryState(state: Map[Key, Mem]):
+  case class RelationalMemoryState(state: Map[Key, Mem[Context, Type, Val]]):
     override def equals(obj: Any): Boolean =
       obj match
         case other: RelationalMemoryState => MapEquals(this.state, other.state)
@@ -153,22 +135,18 @@ class RelationalMemory
   override def join: Join[State] = (s1: State,s2:State) => Profiler.addTime("RelationalMemoryState.combine") { Join(s1.state,s2.state).map(RelationalMemoryState(_)) }
   override def widen: Widen[State] = (s1: State,s2:State) => Profiler.addTime("RelationalMemoryState.combine") { Widen(s1.state,s2.state).map(RelationalMemoryState(_)) }
 
-  given JoinMem: Join[Mem] with
-    override def apply(v1: Mem, v2: Mem): MaybeChanged[Mem] =
-      for {
-        store <- Join(v1.store, v2.store)
-        numPages <- apronState.join(v1.numPages, v2.numPages)
-        pageLimit <- apronState.join(v1.pageLimit, v2.pageLimit)
-      } yield (Mem(store, numPages, pageLimit))
+case class Mem[Ctx, Type, Val](store: SortedMap[PhysicalAddress[Ctx], MemoryRegion[VirtualAddress[Ctx], Type, Val]],
+                               numPages: ApronExpr[VirtualAddress[Ctx], Type],
+                               pageLimit: ApronExpr[VirtualAddress[Ctx], Type]):
+  def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    store.values.flatMap(_.addressIterator(valueIterator)).iterator ++
+      valueIterator(numPages) ++
+      valueIterator(pageLimit)
 
-  given WidenMem: Widen[Mem] with
-    override def apply(v1: Mem, v2: Mem): MaybeChanged[Mem] =
-      for {
-        store <- Widen(v1.store, v2.store)
-        numPages <- apronState.widen(v1.numPages, v2.numPages)
-        pageLimit <- apronState.widen(v1.pageLimit, v2.pageLimit)
-      } yield (Mem(store, numPages, pageLimit))
-
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: Mem[Ctx, Type, Val] @unchecked => MapEquals(this.store, other.store) && this.numPages.equals(other.numPages) && this.pageLimit == other.pageLimit
+      case _ => false
 
 enum Bytes[Val]:
   case StoredBytes(value: Val, storedBytes: Topped[Int], storedByteOrder: Topped[ByteOrder])
@@ -207,6 +185,22 @@ case class MemoryRegion[Addr, Type: ApronType, Val](startAddr: ApronExpr[Addr, T
 
   def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     valueIterator(startAddr) //++ valueIterator(bytes._value)
+
+given JoinMem[Context: Finite, Type: ApronType, Val: Join](using apronState: ApronState[VirtualAddress[Context], Type]): Join[Mem[Context, Type, Val]] with
+  override def apply(v1: Mem[Context, Type, Val], v2: Mem[Context, Type, Val]): MaybeChanged[Mem[Context, Type, Val]] =
+    for {
+      store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[VirtualAddress[Context], Type, Val], Widening.No](v1.store, v2.store)
+      numPages <- apronState.join(v1.numPages, v2.numPages)
+      pageLimit <- apronState.join(v1.pageLimit, v2.pageLimit)
+    } yield (Mem(store, numPages, pageLimit))
+
+given WidenMem[Context: Finite, Type: ApronType, Val: Widen](using apronState: ApronState[VirtualAddress[Context], Type]): Widen[Mem[Context, Type, Val]] with
+  override def apply(v1: Mem[Context, Type, Val], v2: Mem[Context, Type, Val]): MaybeChanged[Mem[Context, Type, Val]] =
+    for {
+      store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[VirtualAddress[Context], Type, Val], Widening.Yes](v1.store, v2.store)
+      numPages <- apronState.widen(v1.numPages, v2.numPages)
+      pageLimit <- apronState.widen(v1.pageLimit, v2.pageLimit)
+    } yield (Mem(store, numPages, pageLimit))
 
 given CombineBytes[Val, W <: Widening](using combineVal: Combine[Val, W]): Combine[Bytes[Val], W] with
   override def apply(v1: Bytes[Val], v2: Bytes[Val]): MaybeChanged[Bytes[Val]] =

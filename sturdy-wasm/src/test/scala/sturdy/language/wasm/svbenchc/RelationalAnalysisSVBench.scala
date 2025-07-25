@@ -9,7 +9,7 @@ import sturdy.language.wasm
 import sturdy.language.wasm.Parsing.WasmParseError
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, defaultHostModules, malloc}
+import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, defaultHostModules}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, abstractions, testCfgDifference}
 import sturdy.values.Topped
 import org.scalatest.exceptions.{TestCanceledException, TestFailedDueToTimeoutException, TestFailedException}
@@ -101,9 +101,6 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     val cfgBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
     val hostModules = defaultHostModules
-    hostModules.addModule(
-      "env", malloc ++ svbenchHostFunctions
-    )
     val modInst = analysis.initializeModule(module, hostModules = hostModules)
     given Signaler = ThreadSignaler
     val result = try {

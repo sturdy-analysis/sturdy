@@ -43,6 +43,7 @@ import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.{DomLogger, Logger}
+import sturdy.values.references.Recency.Recent
 
 import java.math.BigInteger
 import scala.collection.immutable.List
@@ -81,8 +82,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
       addr match
-        case ApronExpr.Addr(ApronVar(VirtualAddress(AddrCtx.Alloc(site,initOffset), n, addrTrans)), specials, tpe) =>
-          val ctx = AddrCtx.Alloc(site, initOffset + newOffset)
+        case ApronExpr.Addr(ApronVar(VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site,initOffset)), n, addrTrans)), specials, tpe) =>
+          val ctx = AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset))
           val virt = apronState.alloc(ctx)
           apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
           ApronExpr.addr(virt, tpe)
@@ -123,7 +124,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         args match
           case List(Int32(size)) =>
             val allocSite = domLogger.getDoms(1)
-            val virt = apronState.alloc(AddrCtx.Alloc(allocSite,0): AddrCtx)
+            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
             apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
             List(Value.Int32(Left(ApronExpr.addr(virt, I32Type))))
           case _ => f.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
@@ -242,7 +243,18 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Value] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Value](
       Bytes.StoredBytes(Value.TopValue, Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc(rootFrameData))
+      heapAlloc(rootFrameData),
+      (addr, mem) => addr match
+        case ApronExpr.Addr(ApronVar(virt@VirtualAddress(AddrCtx.Alloc(allocSite, offset), _, _)), _, _) =>
+          for {
+            phys <- virt.physical.iterator.toList;
+            region <- mem.store.get(phys)
+          } yield(region)
+        case _ =>
+          val (l,u) = apronState.getLongInterval(addr)
+          if(l == u)
+            mem.store.get(PhysicalAddress(AddrCtx.StaticHeapAddress(), Recent))
+    )
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
         (key: Unit, sym: GlobalAddr) =>
