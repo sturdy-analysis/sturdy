@@ -17,6 +17,7 @@ import sturdy.values.integer.*
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 import sturdy.values.ordering.UnsignedOrderingOps
+import sturdy.values.simd.SIMDOps
 import swam.syntax.{Inst, LoadInst, LoadNInst, MemoryInst, ReferenceInst, StoreInst, StoreNInst}
 
 
@@ -25,6 +26,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
+  val v128ops: SIMDOps[Array[Byte], V]
   val eqOps: EqOps[V, V]
   val compareOps: OrderingOps[V, V]
   val unsignedCompareOps: UnsignedOrderingOps[V, V]

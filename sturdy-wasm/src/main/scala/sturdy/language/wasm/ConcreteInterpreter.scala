@@ -24,6 +24,7 @@ import sturdy.values.references.{*, given}
 import swam.ReferenceType
 import swam.ReferenceType.{ExternRef, FuncRef}
 import sturdy.values.integer.{*, given}
+import sturdy.values.simd.{*, given}
 import sturdy.values.ordering.{*, given}
 
 import java.nio.ByteBuffer
@@ -40,6 +41,7 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type I64 = Long
   override type F32 = Float
   override type F64 = Double
+  override type V128 = Array[Byte]
   override type Bool = Boolean
   override type FuncReference = FunctionInstance
   override type ExternReference = Int
@@ -48,6 +50,7 @@ object ConcreteInterpreter extends Interpreter with Control:
   override def topI64: Long = throw new UnsupportedOperationException
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
+  override def topV128: V128 = throw new UnsupportedOperationException
   override def topFuncRef: FuncReference = throw new UnsupportedOperationException
   override def topExternRef: Int = throw new UnsupportedOperationException
 

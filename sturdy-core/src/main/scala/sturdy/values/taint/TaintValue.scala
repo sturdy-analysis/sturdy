@@ -8,6 +8,7 @@ import sturdy.values.integer.IntegerOps
 import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
+import sturdy.values.simd.SIMDOps
 
 enum Taint:
   case Tainted
@@ -106,6 +107,11 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)
   def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
   def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
+
+given TaintSIMDOps[B, V] (using ops: SIMDOps[B, V]): SIMDOps[B, TaintProduct[V]] with
+  def vectorLit(i: B): TaintProduct[V] = untainted(ops.vectorLit(i))
+
+
 
 given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)

@@ -149,6 +149,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private given Failure = failure
 
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)
+  lazy val simd = new GenericInterpreterSIMD[V, J](stack, wasmOps)
 
   private val labelStack = new LabelStack
   private var memCount = 0
@@ -384,6 +385,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       evalTableInst(inst, loc)
     else if (opcode >= OpCode.RefNull && opcode <= OpCode.RefFunc)
       evalRefInst(inst)
+    else if (opcode == OpCode.VectorOp) {
+      stack.push(simd.evalSIMD(inst))
+    }
     else inst match
       case i: VarInst => evalVarInst(i)
       case i: TableInst => evalTableInst(i, loc)
@@ -505,7 +509,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-        val vars = args.view.map(Some.apply) ++ func.locals.map(ty => Some(num.defaultValue(ty)))
+        val vars = args.view.map(Some.apply) ++ func.locals.map {
+          case VecType.V128 => Some(simd.defaultValue())
+          case ty@(i: ValType) => Some(num.defaultValue(ty))
+        }
         labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))

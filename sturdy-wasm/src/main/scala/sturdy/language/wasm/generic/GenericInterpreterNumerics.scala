@@ -7,9 +7,9 @@ import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.integer.*
 import swam.syntax.*
-import swam.{NumType, ReferenceType, ValType}
+import swam.{NumType, ReferenceType, ValType, VecType}
 
-//noinspection ScalaUnnecessaryParentheses
+
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
   (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
   (using Failure):

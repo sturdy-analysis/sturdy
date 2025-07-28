@@ -21,10 +21,11 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.ReferenceInst
 import swam.syntax.{f32, f64, i32, i64}
-import swam.{FuncType, NumType, ReferenceType, ValType}
+import swam.{FuncType, NumType, ReferenceType, ValType, VecType}
 
 import java.nio.ByteOrder
 import WasmFailure.*
+import sturdy.values.simd.{LiftedSIMDOps, SIMDOps}
 import swam.ReferenceType.*
 
 trait Interpreter:
@@ -33,6 +34,7 @@ trait Interpreter:
   type I64
   type F32
   type F64
+  type V128
   type Bool
   type FuncReference
   type ExternReference
@@ -48,12 +50,15 @@ trait Interpreter:
     case ExternNull
     case FuncRef(f: FuncReference)
     case ExternRef(e: ExternReference)
+    
+  enum VecValue:
+    case Vec128(v: V128)
 
   enum Value:
     case TopValue
     case Num(n: NumValue)
     case Ref(r: RefValue)
-    //case Vec(v: VecValue)
+    case Vec(v: VecValue)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -75,6 +80,11 @@ trait Interpreter:
       case Num(NumValue.Float64(d)) => d
       case TopValue => topF64
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
+      
+    def asVec128(using f: Failure): V128 = this match
+      case Vec(VecValue.Vec128(v)) => v
+      case TopValue => topV128
+      case _ => f.fail(TypeError, s"Expected v128 but got $this")
 
     def asFuncRef(using f: Failure): FuncReference = this match
       case Ref(RefValue.FuncRef(r)) => r
@@ -92,6 +102,7 @@ trait Interpreter:
   def topI64: I64
   def topF32: F32
   def topF64: F64
+  def topV128: V128
   def topFuncRef: FuncReference
   def topExternRef: ExternReference
 
@@ -100,6 +111,7 @@ trait Interpreter:
     case NumType.I64 => Value.Num(NumValue.Int64(topI64))
     case NumType.F32 => Value.Num(NumValue.Float32(topF32))
     case NumType.F64 => Value.Num(NumValue.Float64(topF64))
+    case VecType.V128 => Value.Vec(VecValue.Vec128(topV128))
     case ReferenceType.FuncRef => Value.Ref(RefValue.FuncRef(topFuncRef))
     case ReferenceType.ExternRef => Value.Ref(RefValue.ExternRef(topExternRef))
   
@@ -111,22 +123,26 @@ trait Interpreter:
 
   given Finite[RefValue] with {}
 
-  def applyI32(a:I32): Value.Num ={
+  def applyI32(a:I32): Value.Num = {
     Value.Num(NumValue.Int32.apply(a))
   }
 
-  def applyI64(a:I64): Value.Num ={
+  def applyI64(a:I64): Value.Num = {
     Value.Num(NumValue.Int64.apply(a))
   }
 
-  def applyF32(a:F32): Value.Num ={
+  def applyF32(a:F32): Value.Num = {
     Value.Num(NumValue.Float32.apply(a))
   }
 
-  def applyF64(a:F64): Value.Num ={
+  def applyF64(a:F64): Value.Num = {
     Value.Num(NumValue.Float64.apply(a))
   }
 
+  def applyV128(v: V128): Value.Vec = {
+    Value.Vec(VecValue.Vec128.apply(v))
+  }
+  
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
@@ -150,6 +166,7 @@ trait Interpreter:
      , i64Ops: IntegerOps[Long, I64]
      , f32Ops: FloatOps[Float, F32]
      , f64Ops: FloatOps[Double, F64]
+     , v128Ops: SIMDOps[Array[Byte], V128]
      , i32EqOps: EqOps[I32, Bool]
      , i64EqOps: EqOps[I64, Bool]
      , f32EqOps: EqOps[F32, Bool]
@@ -197,7 +214,9 @@ trait Interpreter:
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, applyI64)
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, applyF32)
     final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, applyF64)
-
+    
+    final val v128ops: SIMDOps[Array[Byte], Value] = new LiftedSIMDOps(_.asVec128, applyV128)
+    
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*
       override def equ(v1: Value, v2: Value): Value = (v1, v2) match

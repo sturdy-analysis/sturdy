@@ -26,6 +26,7 @@ trait ConstantValues extends Interpreter:
   final type I64 = Topped[Long]
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
+  final type V128 = Topped[Array[Byte]]
   final type Bool = Topped[Boolean]
   final type FuncReference = Topped[FunctionInstance]
   final type ExternReference = Topped[Int]
@@ -34,6 +35,7 @@ trait ConstantValues extends Interpreter:
   final def topI64: I64 = Topped.Top
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
+  final def topV128: V128 = Topped.Top
   final def topFuncRef: FuncReference = Topped.Top
   final def topExternRef: ExternReference = Topped.Top
 

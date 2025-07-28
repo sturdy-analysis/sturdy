@@ -25,6 +25,7 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.simd.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.{*, given}

@@ -76,6 +76,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
+      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(v1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(v2))) => v1 sameElements v2
       case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
       case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
       case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
@@ -189,6 +190,7 @@ def constExprToVal(inst: unresolved.Inst): Value =
     case unresolved.i64.Const(l) => Value.Num(ConcreteInterpreter.NumValue.Int64(l))
     case unresolved.f32.Const(f) => Value.Num(ConcreteInterpreter.NumValue.Float32(f))
     case unresolved.f64.Const(d) => Value.Num(ConcreteInterpreter.NumValue.Float64(d))
+    case unresolved.v128.Const(v, _) => Value.Vec(ConcreteInterpreter.VecValue.Vec128(v))
     case unresolved.RefNull(t) => t match {
       case FuncRef => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
       case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
