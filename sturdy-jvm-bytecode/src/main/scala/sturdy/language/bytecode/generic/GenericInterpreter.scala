@@ -404,9 +404,10 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // Load and Store Statics opcode 178 - 179
       case inst: GETSTATIC =>
-        if(inst.name == "out")
-          ()
-        else
+        // TODO: why was this here?
+        // if(inst.name == "out") {
+          // ()
+        // } else
           val objCF = inst.declaringClass
           ensureInitialization(objCF)
           val addr = staticAddrMap((objCF, inst.name))
@@ -706,6 +707,9 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
       val string = arrayOps.getArray(objectOps.getField(args(1), (ClassType("java/lang/String"), "value"))).map(vals => vals.get)
       arrayOps.printString(string)
       i32ops.integerLit(-1)
+    // we are currently unable to properly deal with System.exit
+    else if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
+      failure.fail(AbortEval.Exit(args.head), "System.exit")
     else {
       if (native.nativeFunList.contains(mth.name)) {
         val ret = invokeClassMethod(mth, args)
@@ -988,3 +992,7 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
         arrayOps.arraycopy(src, srcPos, dest, destPos, length)
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
+
+  enum AbortEval extends FailureKind:
+    // abort eval due to System.exit
+    case Exit(v: V)
