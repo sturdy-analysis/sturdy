@@ -5,10 +5,10 @@ import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
-import sturdy.values.simd.SIMDOps
+import sturdy.values.simd.{LaneShape, SIMDOps}
 
 enum Taint:
   case Tainted
@@ -111,6 +111,57 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
 given TaintSIMDOps[B, V] (using ops: SIMDOps[B, V]): SIMDOps[B, TaintProduct[V]] with
   def vectorLit(i: B): TaintProduct[V] = untainted(ops.vectorLit(i))
 
+  def vectorAbs(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorNeg(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorSqrt(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorCeil(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorFloor(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorTrunc(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorNearest(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorPopCount(shape: LaneShape, v: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorAdd(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorSub(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMul(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorDiv(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMin(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMax(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorPMin(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorPMax(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMinU(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMinS(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMaxU(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorMaxS(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorAddSatU(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorAddSatS(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorSubSatU(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorSubSatS(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorAvrgU(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
+
+  def vectorQ15MulrSatS(shape: LaneShape, v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = ???
 
 
 given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with

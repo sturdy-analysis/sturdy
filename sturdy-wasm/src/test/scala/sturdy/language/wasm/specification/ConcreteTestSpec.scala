@@ -17,6 +17,7 @@ import swam.text.*
 import swam.text.unresolved.SomeId
 
 import java.net.URI
+import java.nio.ByteBuffer
 import java.nio.file.{Files, Path, Paths}
 import scala.collection.mutable
 import scala.jdk.StreamConverters.*
@@ -76,7 +77,20 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(v1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(v2))) => v1 sameElements v2
+      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) =>
+        val bb1 = ByteBuffer.wrap(b1)
+        val bb2 = ByteBuffer.wrap(b2)
+        def isF32CanonNaN(i: Int) = (i & 0x7fffffff) == 0x7fc00000
+        def isF64CanonNaN(l: Long) = (l & 0x7fffffffffffffffL) == 0x7ff8000000000000L
+        val eqF32 = (0 until 16 by 4).forall { i =>
+          val x = bb1.getInt(i); val y = bb2.getInt(i)
+          if (isF32CanonNaN(x) && isF32CanonNaN(y)) true else x == y
+        }
+        val eqF64 = (0 until 16 by 8).forall { i =>
+          val x = bb1.getLong(i); val y = bb2.getLong(i)
+          if (isF64CanonNaN(x) && isF64CanonNaN(y)) true else x == y
+        }
+        eqF32 || eqF64
       case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
       case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
       case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
