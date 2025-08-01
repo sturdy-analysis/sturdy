@@ -14,18 +14,12 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.references.ReferenceOps
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
-import swam.syntax.LoadInst
-import swam.syntax.LoadNInst
-import swam.syntax.MemoryInst
-import swam.syntax.StoreInst
-import swam.syntax.StoreNInst
-import swam.syntax.ReferenceInst
-import swam.syntax.{f32, f64, i32, i64}
+import swam.syntax.{LoadInst, LoadNInst, LoadVector, MemoryInst, ReferenceInst, StoreInst, StoreNInst, VectorLoadInst, f32, f64, i32, i64, v128}
 import swam.{FuncType, NumType, ReferenceType, ValType, VecType}
 
 import java.nio.ByteOrder
 import WasmFailure.*
-import sturdy.values.simd.{LiftedSIMDOps, SIMDOps}
+import sturdy.values.simd.{ConvertBytesVec, LiftedSIMDOps, SIMDOps}
 import swam.ReferenceType.*
 
 trait Interpreter:
@@ -166,7 +160,7 @@ trait Interpreter:
      , i64Ops: IntegerOps[Long, I64]
      , f32Ops: FloatOps[Float, F32]
      , f64Ops: FloatOps[Double, F64]
-     , v128Ops: SIMDOps[Array[Byte], V128]
+     , v128Ops: SIMDOps[Array[Byte], V128, Value, Byte]
      , i32EqOps: EqOps[I32, Bool]
      , i64EqOps: EqOps[I64, Bool]
      , f32EqOps: EqOps[F32, Bool]
@@ -197,6 +191,7 @@ trait Interpreter:
      , decodeI64: ConvertBytesLong[Bytes, I64]
      , decodeF32: ConvertBytesFloat[Bytes, F32]
      , decodeF64: ConvertBytesDouble[Bytes, F64]
+     , decodeV128: ConvertBytesVec[Bytes, V128]
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
@@ -215,7 +210,7 @@ trait Interpreter:
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, applyF32)
     final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, applyF64)
     
-    final val v128ops: SIMDOps[Array[Byte], Value] = new LiftedSIMDOps(_.asVec128, applyV128)
+    final val v128ops: SIMDOps[Array[Byte], Value, Value, Byte] = new LiftedSIMDOps(_.asVec128, applyV128)
     
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*
@@ -305,8 +300,8 @@ trait Interpreter:
         case (Value.Num(NumValue.Float64(d)), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
         case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
-    override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst]]:
-      override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst]): Value = conf.t match
+    override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]:
+      override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst | VectorLoadInst]): Value = conf.t match
         case _: i32.Load8S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
         case _: i32.Load8U => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Unsigned)))
         case _: i32.Load16S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
@@ -321,6 +316,7 @@ trait Interpreter:
         case _: i64.Load => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
         case _: f32.Load => Value.Num(NumValue.Float32(decodeF32(from, LITTLE_ENDIAN)))
         case _: f64.Load => Value.Num(NumValue.Float64(decodeF64(from, LITTLE_ENDIAN)))
+        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && LITTLE_ENDIAN)))
 
   type Instance <: GenericInstance
 

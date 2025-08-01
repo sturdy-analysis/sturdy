@@ -149,7 +149,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private given Failure = failure
 
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)
-  lazy val simd = new GenericInterpreterSIMD[V, J](stack, wasmOps)
+  lazy val simd = new GenericInterpreterSIMD[V, Addr, Bytes, J](stack, memory, wasmOps)
 
   private val labelStack = new LabelStack
   private var memCount = 0
@@ -385,15 +385,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       evalTableInst(inst, loc)
     else if (opcode >= OpCode.RefNull && opcode <= OpCode.RefFunc)
       evalRefInst(inst)
-    else if (opcode == OpCode.VectorOp) {
-      stack.push(simd.evalSIMD(inst))
-    }
     else inst match
       case i: VarInst => evalVarInst(i)
       case i: TableInst => evalTableInst(i, loc)
       case i: TableMiscOp => evalTableInst(i, loc)
       case i: MemoryMiscOp => evalMemoryInst(i)
       case i: ReferenceInst => evalRefInst(i)
+      case i: VectorLoadInst =>
+        val memAddr = effectiveAddr(i.offset)
+        simd.evalLoadVector(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
+          bytes =>
+            val v = decode(bytes, SomeCC(i, false))
+            stack.push(v)
+        }
+      case i: VectorInst => stack.push(simd.evalSIMD(i))
       case op: SatConvertop =>
         val v = stack.popOrAbort()
         stack.push(num.evalMiscop(op, v))

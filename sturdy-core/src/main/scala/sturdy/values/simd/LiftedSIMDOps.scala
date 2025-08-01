@@ -1,6 +1,6 @@
 package sturdy.values.simd
 
-class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps[B, I]) extends SIMDOps[B, V] {
+class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps[B, I, V, Byte]) extends SIMDOps[B, V, V, Byte] {
   def vectorLit(i: B): V = inject(ops.vectorLit(i))
 
   def vectorAbs(shape: LaneShape, v: V): V = inject(ops.vectorAbs(shape, extract(v)))
@@ -30,4 +30,23 @@ class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps
   def vectorSubSatS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorSubSatS(shape, extract(v1), extract(v2)))
   def vectorAvrgU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorAvrgU(shape, extract(v1), extract(v2)))
   def vectorQ15MulrSatS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorQ15MulrSatS(shape, extract(v1), extract(v2)))
+
+  def vectorEq(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorEq(shape, extract(v1), extract(v2)))
+  def vectorNe(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorNe(shape, extract(v1), extract(v2)))
+  def vectorLt(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLt(shape, extract(v1), extract(v2)))
+  def vectorLtU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLtU(shape, extract(v1), extract(v2)))
+  def vectorLtS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLtS(shape, extract(v1), extract(v2)))
+  def vectorGt(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGt(shape, extract(v1), extract(v2)))
+  def vectorGtU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGtU(shape, extract(v1), extract(v2)))
+  def vectorGtS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGtS(shape, extract(v1), extract(v2)))
+  def vectorLe(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLe(shape, extract(v1), extract(v2)))
+  def vectorLeU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLeU(shape, extract(v1), extract(v2)))
+  def vectorLeS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorLeS(shape, extract(v1), extract(v2)))
+  def vectorGe(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGe(shape, extract(v1), extract(v2)))
+  def vectorGeU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGeU(shape, extract(v1), extract(v2)))
+  def vectorGeS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGeS(shape, extract(v1), extract(v2)))
+
+  def extractLane(shape: LaneShape, v: V, lane: Byte): V = ops.extractLane(shape, extract(v), lane)
+  def extractLaneU(shape: LaneShape, v: V, lane: Byte): V = ops.extractLaneU(shape, extract(v), lane)
+  def extractLaneS(shape: LaneShape, v: V, lane: Byte): V = ops.extractLaneS(shape, extract(v), lane)
 }

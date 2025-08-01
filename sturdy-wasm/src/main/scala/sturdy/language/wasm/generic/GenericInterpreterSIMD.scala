@@ -1,6 +1,7 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{MayJoin, noJoin}
+import sturdy.data.{JOption, MayJoin, noJoin}
+import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.simd.LaneShape
@@ -9,8 +10,8 @@ import swam.syntax.*
 import scala.reflect.ClassTag
 
 
-class GenericInterpreterSIMD [V, J[_] <: MayJoin[_]]
-  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
+class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
+  (stack: DecidableOperandStack[V], mem: Memory[MemoryAddr, Addr, Bytes, _, J], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
   (using Failure):
   
   import wasmOps.*
@@ -24,7 +25,9 @@ class GenericInterpreterSIMD [V, J[_] <: MayJoin[_]]
         val (v1, v2) = stack.pop2OrAbort()
         evalSIMDBinop(binop, v1, v2)
       case testop: VectorTestop => ???
-      case relop: VectorRelop => ???
+      case relop: VectorRelop => 
+        val (v1, v2) = stack.pop2OrAbort()
+        evalSIMDRelop(relop, v1, v2)
       case convertop: VectorConvertop => ???
       case ternop: VectorTernop => ???
       case shiftop: VectorShiftop => ???
@@ -34,22 +37,34 @@ class GenericInterpreterSIMD [V, J[_] <: MayJoin[_]]
       case dot: VectorDot => ???
       case extmul: VectorExtmul => ???
       case extadd: VectorExtadd => ???
-      case lane: VectorExtractLane => ???
+      case lane: VectorExtractLane =>
+        val v = stack.popOrAbort()
+        lane.operation match {
+          case VecExtractLaneType.ExtractU => v128ops.extractLaneU(getLaneShape(lane.shape), v, lane.lane)
+          case VecExtractLaneType.ExtractS => v128ops.extractLaneS(getLaneShape(lane.shape), v, lane.lane)
+          case VecExtractLaneType.Extract => v128ops.extractLane(getLaneShape(lane.shape), v, lane.lane)
+        }
       case lane: VectorReplaceLane => ???
       case unop: VVectorUnop => ???
       case binop: VVectorBinop => ???
       case testop: VVectorTestop => ???
-      case vector: LoadVector => ???
-      case splat: LoadVectorSplat => ???
-      case zero: LoadVectorZero => ???
-      case lane: LoadVectorLane => ???
-      case vector: StoreVector => ???
-      case lane: StoreVectorLane => ???
-      case v128.Load(align, offset) => ???
+      case storeVec: StoreVector => ???
+      case storeLane: StoreVectorLane => ???
+
       case v128.Const(bytes) => v128ops.vectorLit(bytes)
       case i8x16.Shuffle(lanes) => ???
       case i8x16.Swizzle => ???
       case _ => ???
+    }
+  }
+
+  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
+    inst match {
+      case loadVec: LoadVector => ???
+      case loadSplat: LoadVectorSplat => ???
+      case loadZero: LoadVectorZero => ???
+      case loadLane: LoadVectorLane => ???
+      case v128.Load(align, offset) => mem.read(memIdx, addr, 128 / 8)
     }
   }
 
@@ -113,6 +128,33 @@ class GenericInterpreterSIMD [V, J[_] <: MayJoin[_]]
     }
   }
   
+  inline def evalSIMDRelop(op: VectorRelop, v1: V, v2: V): V = {
+    op match {
+      case relop: IVectorRelop =>
+        relop.operation match {
+          case VecRelopType.IEq => v128ops.vectorEq(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.INe => v128ops.vectorNe(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.ILtU => v128ops.vectorLtU(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.ILtS => v128ops.vectorLtS(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.ILeU => v128ops.vectorLeU(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.ILeS => v128ops.vectorLeS(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.IGtU => v128ops.vectorGtU(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.IGtS => v128ops.vectorGtS(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.IGeU => v128ops.vectorGeU(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.IGeS => v128ops.vectorGeS(getLaneShape(relop.shape), v1, v2)
+        }
+      case relop: FVectorRelop =>
+        relop.operation match {
+          case VecRelopType.FEq => v128ops.vectorEq(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.FNe => v128ops.vectorNe(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.FLt => v128ops.vectorLt(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.FLe => v128ops.vectorLe(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.FGt => v128ops.vectorGt(getLaneShape(relop.shape), v1, v2)
+          case VecRelopType.FGe => v128ops.vectorGe(getLaneShape(relop.shape), v1, v2)
+        }
+    }
+  }
+  
   def defaultValue(): V = {
     evalSIMD(v128.Const(Array.fill(16)(0.toByte)))
   }
@@ -124,4 +166,5 @@ class GenericInterpreterSIMD [V, J[_] <: MayJoin[_]]
     case VectorIShape.i64x2 => LaneShape.I64
     case VectorFShape.f32x4 => LaneShape.F32
     case VectorFShape.f64x2 => LaneShape.F64
+    case _ => throw new IllegalArgumentException(s"Unsupported vector shape: $shape")
   }

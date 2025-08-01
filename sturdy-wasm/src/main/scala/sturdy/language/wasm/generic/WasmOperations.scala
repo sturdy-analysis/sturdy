@@ -1,24 +1,16 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.JOption
-import sturdy.data.MayJoin
-import sturdy.language.wasm.ConcreteInterpreter.FuncReference
-import sturdy.language.wasm.ConcreteInterpreter.ExternReference
-import sturdy.language.wasm.abstractions.CfgNode.Instruction
-import sturdy.values.Topped
+import sturdy.data.{JOption, MayJoin}
 import sturdy.values.booleans.BooleanBranching
-import swam.{FuncType, GlobalIdx, ReferenceType, TableIdx}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
-import sturdy.values.references.{ReferenceOps, given}
 import sturdy.values.integer.*
-import sturdy.values.ordering.OrderingOps
-import sturdy.values.ordering.EqOps
-import sturdy.values.ordering.UnsignedOrderingOps
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.simd.SIMDOps
-import swam.syntax.{Inst, LoadInst, LoadNInst, MemoryInst, ReferenceInst, StoreInst, StoreNInst}
+import swam.syntax.*
+import swam.{FuncType, ReferenceType}
 
 
 trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
@@ -26,7 +18,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
-  val v128ops: SIMDOps[Array[Byte], V]
+  val v128ops: SIMDOps[Array[Byte], V, V, Byte]
   val eqOps: EqOps[V, V]
   val compareOps: OrderingOps[V, V]
   val unsignedCompareOps: UnsignedOrderingOps[V, V]
@@ -44,7 +36,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
-  val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
+  val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
   val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]

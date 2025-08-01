@@ -69,6 +69,11 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type FunV = FunctionInstance
   override type RefV = RefValue
   
+  given Conversion[Int, Value] = v => Value.Num(NumValue.Int32(v))
+  given Conversion[Long, Value] = v => Value.Num(NumValue.Int64(v))
+  given Conversion[Float, Value] = v => Value.Num(NumValue.Float32(v))
+  given Conversion[Double, Value] = v => Value.Num(NumValue.Float64(v))
+  
   given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, NoJoin] with
     override def valToAddr(v: Value): Int = v.asInt32
     override def valToIdx(v: Value): Int = v.asInt32
