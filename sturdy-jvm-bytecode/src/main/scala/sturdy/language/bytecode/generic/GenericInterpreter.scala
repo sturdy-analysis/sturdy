@@ -589,7 +589,8 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
 
       // WIDE opcode 196
       case inst: WIDE.type =>
-        ()
+        // TODO: implement; ignoring it cause stack to overflow
+        failure.fail(AbortEval.UnSupportedInstruction(inst), "wide instruction not implemented")
 
       // multianewarray opcode 197
       case inst: MULTIANEWARRAY =>
@@ -996,3 +997,4 @@ trait GenericInterpreter[V, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, 
   enum AbortEval extends FailureKind:
     // abort eval due to System.exit
     case Exit(v: V)
+    case UnSupportedInstruction(i: Instruction)
