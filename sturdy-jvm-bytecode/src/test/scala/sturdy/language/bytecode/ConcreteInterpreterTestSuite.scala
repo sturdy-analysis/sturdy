@@ -32,7 +32,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
   val resourcePath = "./sturdy-jvm-bytecode/src/test/resources/"
   // newline-separated regexes of file names to ignore
   // basic comment lines using "//" are supported
-  val ignoreFileName = "ignored-files"
+  val ignoreFileName = "ignored-files.txt"
 
   val ignoreRegexes: Seq[Regex] = Files.lines(Paths.get(resourcePath + ignoreFileName)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
   val cfTable: TableFor1[Path] = Table("path") ++ Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !ignoreRegexes.exists(_.matches(f.toString))).toSeq
