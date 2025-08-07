@@ -149,61 +149,61 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case FCMPL =>
       val isLt = compareOps.lt(v1, v2)
       branchOpsV.boolBranch(isLt) {
-        f32ops.floatingLit(-1)
+        i32ops.integerLit(-1)
       } {
         val isGt = compareOps.gt(v1, v2)
         branchOpsV.boolBranch(isGt) {
-          f32ops.floatingLit(1)
+          i32ops.integerLit(1)
         } {
-          f32ops.floatingLit(0)
+          i32ops.integerLit(0)
         }
       }
     case FCMPG =>
       val isLt = compareOps.lt(v1, v2)
       branchOpsV.boolBranch(isLt) {
-        f32ops.floatingLit(-1)
+        i32ops.integerLit(-1)
       } {
         val isGt = compareOps.gt(v1, v2)
         branchOpsV.boolBranch(isGt) {
-          f32ops.floatingLit(1)
+          i32ops.integerLit(1)
         } {
-          f32ops.floatingLit(0)
+          i32ops.integerLit(0)
         }
       }
     case DCMPL =>
       val isLt = compareOps.lt(v1, v2)
       branchOpsV.boolBranch(isLt) {
-        f64ops.floatingLit(-1)
+        i32ops.integerLit(-1)
       } {
         val isGt = compareOps.gt(v1, v2)
         branchOpsV.boolBranch(isGt) {
-          f64ops.floatingLit(1)
+          i32ops.integerLit(1)
         } {
-          f64ops.floatingLit(0)
+          i32ops.integerLit(0)
         }
       }
     case DCMPG =>
       val isLt = compareOps.lt(v1, v2)
       branchOpsV.boolBranch(isLt) {
-        f64ops.floatingLit(-1)
+        i32ops.integerLit(-1)
       } {
         val isGt = compareOps.gt(v1, v2)
         branchOpsV.boolBranch(isGt) {
-          f64ops.floatingLit(1)
+          i32ops.integerLit(1)
         } {
-          f64ops.floatingLit(0)
+          i32ops.integerLit(0)
         }
       }
     case LCMP =>
       val isLt = compareOps.lt(v1, v2)
       branchOpsV.boolBranch(isLt) {
-        i64ops.integerLit(-1)
+        i32ops.integerLit(-1)
       } {
         val isGt = compareOps.gt(v1, v2)
         branchOpsV.boolBranch(isGt) {
-          i64ops.integerLit(1)
+          i32ops.integerLit(1)
         } {
-          i64ops.integerLit(0)
+          i32ops.integerLit(0)
         }
       }
 
@@ -239,8 +239,3 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
       v
     case I2S =>
       v
-
-
-    
-  
-
