@@ -2,18 +2,18 @@ package sturdy.values.floating
 
 import apron.*
 import org.scalacheck.Gen
-import org.scalatest.Assertion
+import org.scalatest.{Assertion, Suites}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import sturdy.apron.{*, given}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
-import sturdy.effect.{EffectStack, Stateless}
-import sturdy.util.{Lazy, lazily}
-import sturdy.utils.TestContexts.{*, given}
-import sturdy.utils.TestTypes.{*, given}
+import sturdy.effect.{EffectList, EffectStack, Stateless}
+import sturdy.util.{*, given}
+import sturdy.util.TestContexts.{*, given}
+import sturdy.util.TestTypes.{*, given}
 import sturdy.values.*
 import sturdy.values.ordering.*
 import sturdy.values.references.{*, given}
@@ -22,76 +22,80 @@ import sturdy.values.types.{BaseType, given}
 type VirtAddr = VirtualAddress[Ctx]
 type PhysAddr = PhysicalAddress[Ctx]
 
-class RelationalFloatOpsTest extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
-  minValue = Float.MinValue,
-  maxValue = Float.MaxValue,
-  makeFloatOps = {
-    given apronManager: Manager = new Octagon
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    val floatType: Type = Type.FloatType(BaseType[Float])
-    new RelationalFloatOps[Float, VirtAddr, Type] with TestingFloatOps[Float, ApronExpr[VirtAddr, Type]] {
-      override def floatLit(i: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
-      override def interval(low: Float, high: Float): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
-      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Float): Assertion =
-        val iv = apronState.getInterval(expr)
-        if(Interval(DoubleScalar(m),DoubleScalar(m)).isLeq(iv))
-          succeed
-        else
-          fail(s"$iv does not include $m")
-      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Float, u: Float): Assertion =
-        val iv = apronState.getInterval(expr)
-        if(Interval(DoubleScalar(l), DoubleScalar(u)).isEqual(iv))
-          succeed
-        else
-          fail(s"$iv does not equal [$l,$u]")
+class RelationalFloatingOpsTest extends Suites(
+  new PolyhedraFloatingOpsTests,
+  new OctagonFloatingOpsTests,
+  new BoxFloatingOpsTests
+)
+class PolyhedraFloatingOpsTests extends RelationalFloatingOpsTests(Polka(true))
+class OctagonFloatingOpsTests extends RelationalFloatingOpsTests(Octagon())
+class BoxFloatingOpsTests extends RelationalFloatingOpsTests(Box())
 
-      override def NaN: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.NaN, floatType)
-      override def posInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.PositiveInfinity, floatType)
-      override def negInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Float.NegativeInfinity, floatType)
-    }
-  }
+class RelationalFloatingOpsTests(manager: Manager) extends Suites(
+  RelationalFloatOpsTest(using manager),
+  RelationalDoubleOpsTest(using manager),
 )
 
-class RelationalDoubleOpsTest extends FloatOpsTest[Double, ApronExpr[VirtAddr, Type]](
-  minValue = Double.MinValue,
-  maxValue = Double.MaxValue,
-  makeFloatOps = {
-    given apronManager: Manager = new Octagon
-    var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]] = null
-    given effectStack: EffectStack = new EffectStack(
-      RecencyClosure(apronState.recencyStore)
-    )
-    apronState = RecencyRelationalStore[Ctx, Type]
-    given ApronState[VirtAddr, Type] = apronState
-    val lazyApronState: Lazy[ApronState[VirtAddr, Type]] = lazily(apronState)
-    val floatType: Type = Type.DoubleType(BaseType[Double])
-    new RelationalFloatOps[Double, VirtAddr, Type] with TestingFloatOps[Double, ApronExpr[VirtAddr, Type]] {
-      override def floatLit(i: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(i, floatType)
-      override def interval(low: Double, high: Double): ApronExpr[VirtAddr, Type] = ApronExpr.doubleInterval(low, high, floatType)
-
-      override def shouldContain(expr: ApronExpr[VirtAddr, Type], m: Double): Assertion =
-        val iv = apronState.getInterval(expr)
-        if (Interval(DoubleScalar(m), DoubleScalar(m)).isLeq(iv))
-          succeed
-        else
-          fail(s"[${iv.inf}:${iv.inf.getClass}, ${iv.sup}:${iv.inf.getClass}] does not include $m")
-
-      override def shouldEqual(expr: ApronExpr[VirtAddr, Type], l: Double, u: Double): Assertion =
-        val iv = apronState.getInterval(expr)
-        if (Interval(DoubleScalar(l), DoubleScalar(u)).isEqual(iv))
-          succeed
-        else
-          fail(s"[${iv.inf}:${iv.inf.getClass}, ${iv.sup}: ${iv.sup.getClass}] does not equal [$l,$u]")
-
-      override def NaN: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.NaN, floatType)
-      override def posInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.PositiveInfinity, floatType)
-      override def negInfinity: ApronExpr[VirtAddr, Type] = ApronExpr.doubleLit(Double.NegativeInfinity, floatType)
-    }
+class RelationalFloatOpsTest(using Manager) extends FloatOpsTest[Float, ApronExpr[VirtAddr, Type]](
+  specials = List(Float.MinValue, -0.5f, 0.0f, 0.5f, Float.MaxValue),
+  makeFloatOps = withApronState {
+    (RelationalFloatIsInterval, RelationalFloatOps[Float, VirtAddr, Type], SoundnessFloatApronExpr[VirtAddr,Type])
   }
+)(using
+  implicitly,
+  implicitly,
+  implicitly,
+  ord = implicitly,
+  fractional = implicitly,
+  concreteFloatOps = new WithNearestRoundingModeFloatingOps(ConcreteFloatOps)
 )
+
+class RelationalDoubleOpsTest(using Manager) extends FloatOpsTest[Double, ApronExpr[VirtAddr, Type]](
+  specials = List(Double.MinValue, -0.5d, 0.0d, 0.5d, Double.MaxValue),
+  makeFloatOps = withApronState {
+    (RelationalDoubleIsInterval, RelationalFloatOps[Double, VirtAddr, Type], SoundnessDoubleApronExpr[VirtAddr,Type])
+  }
+)(using
+  implicitly,
+  implicitly,
+  implicitly,
+  ord = implicitly,
+  fractional = implicitly,
+  concreteFloatOps = new WithNearestRoundingModeFloatingOps(ConcreteDoubleOps)
+)
+
+given RelationalFloatIsInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Float, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Float): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(FloatingLit[Float, VirtAddr, Type](i, Type.FloatType))
+
+  override def interval(low: Float, high: Float, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(ApronExpr.floatConstant(Interval(low, high), floatSpecials, Type.FloatType))
+
+
+given RelationalDoubleIsInterval(using apronState: ApronState[VirtAddr,Type]): IsInterval[Double, ApronExpr[VirtAddr, Type]] with
+  override def constant(i: Double): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(FloatingLit[Double, VirtAddr, Type](i, Type.DoubleType))
+
+  override def interval(low: Double, high: Double, floatSpecials: FloatSpecials): ApronExpr[VirtAddr, Type] =
+    apronState.assignTempVar(ApronExpr.floatConstant(Interval(low, high), floatSpecials, Type.DoubleType))
+
+final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) extends FloatOps[B,V]:
+  override def floatingLit(f: B): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floatingLit(f) }
+  override def NaN: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.NaN }
+  override def posInfinity: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.posInfinity }
+  override def negInfinity: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.negInfinity }
+  override def randomFloat(): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.randomFloat() }
+  override def add(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.add(v1,v2) }
+  override def sub(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.sub(v1,v2) }
+  override def mul(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.mul(v1,v2) }
+  override def div(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.div(v1,v2) }
+  override def min(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.min(v1,v2) }
+  override def max(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.max(v1,v2) }
+  override def absolute(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.absolute(v) }
+  override def negated(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.negated(v) }
+  override def sqrt(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.sqrt(v) }
+  override def ceil(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.ceil(v) }
+  override def floor(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floor(v) }
+  override def truncate(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.truncate(v) }
+  override def nearest(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.nearest(v) }
+  override def copysign(v: V, sign: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.copysign(v, sign) }

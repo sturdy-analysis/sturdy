@@ -8,10 +8,11 @@ import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, Topped, config}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 
 import scala.util.Random
 import java.lang.Float as JFloat
+import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -54,7 +55,10 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
     else {
       val r = v1 % v2
       if (r < 0)
-        r + v2
+        if(v2 >= 0)
+          r + v2
+        else
+          r - v2
       else
         r
     }
@@ -93,7 +97,7 @@ given OrderingOps[Int, Boolean] with
   def lt(v1: Int, v2: Int): Boolean = v1 < v2
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
 
-given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
+given ConcreteConvertIntLong(using failure: Failure): ConvertIntLong[Int, Long] with
   /*
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
@@ -101,8 +105,8 @@ given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
   def apply(i: Int, conf: config.Bits): Long = conf match
     case config.Bits.Signed => i.toLong
     case config.Bits.Unsigned => i & 0X00000000FFFFFFFFL
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
-
+    case _ =>
+      unsupportedConfiguration(conf, this)
 given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
   /*
    * Most conversion rules have been copied from:
@@ -125,9 +129,9 @@ given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
   def apply(i: Int, conf: config.Bits): Double = conf match
     case config.Bits.Signed => i.toDouble
     case config.Bits.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case config.Bits.Raw => JDouble.longBitsToDouble(i)
 
-given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
+given ConcreteConvertIntBytes(using failure: Failure): ConvertIntBytes[Int, Seq[Byte]] with
   override def apply(from: Int, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =
     val buf = ByteBuffer.allocate(conf.c1.bytes)
     buf.order(conf.c2.t)
@@ -135,10 +139,10 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
       case config.BytesSize.Byte => buf.put(0, (from % (1 << 8)).toByte)
       case config.BytesSize.Short => buf.putShort(0, (from % (1 << 16)).toShort)
       case config.BytesSize.Int => buf.putInt(0, from)
-      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+      case _ => unsupportedConfiguration(conf, this)
     collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
-given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
+given ConcreteConvertBytesInt(using failue:Failure): ConvertBytesInt[Seq[Byte], Int] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
     val buf = ByteBuffer.wrap(from.toArray)
     buf.order(conf.c1.c2.t)
@@ -148,7 +152,7 @@ given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
       case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt
       case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
       case (config.BytesSize.Int, _) => buf.getInt
-      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+      case _ => unsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteIntUnsignedOrderingOps: UnsignedOrderingOps[Int, Boolean] with
   override def ltUnsigned(v1: Int, v2: Int): Boolean = Integer.compareUnsigned(v1, v2) < 0

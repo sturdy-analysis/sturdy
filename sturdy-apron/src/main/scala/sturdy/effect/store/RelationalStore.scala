@@ -1,24 +1,22 @@
+
 package sturdy.effect.store
 
 import apron.*
-import sturdy.apron.{Abstract1Join, Abstract1Widen, ApronCons, ApronExpr, ApronRepresentation, ApronType, ApronVar, CompareOp}
+import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
-import sturdy.effect.allocation.Allocator
-import sturdy.effect.{ComputationJoiner, EffectStack, Stateless, SturdyFailure, TrySturdy}
-import sturdy.values.integer.IntegerOps
+import sturdy.effect.{*, given}
+import sturdy.util.Profiler
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.given
 import sturdy.values.references.{*, given}
-import sturdy.values.{*, given}
-import sturdy.{IsSound, Soundness}
+import sturdy.values.{Topped, *, given}
 
-import scala.collection.immutable.{HashMap, IntMap}
-import scala.collection.mutable
-import math.Ordered.orderingToOrdered
 import scala.reflect.ClassTag
 
 /**
 Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
  **/
-trait RelationalStore
+final class RelationalStore
   [
     Context: Ordering: Finite,
     Type : ApronType : Join: Widen,
@@ -27,89 +25,113 @@ trait RelationalStore
   ]
   (val manager: Manager,
    initialState: Abstract1,
-   initialTypeEnv: Map[PhysicalAddress[Context], Type])
+   initialMetaData: Map[PhysicalAddress[Context], (FloatSpecials,Type)])
+  (using
+    relationalValue: RelationalExpr[Val, PhysicalAddress[Context], Type]
+  )
   extends Store[PowAddr, Val, WithJoin]:
 
-  def getRelationalVal(v: Val): Option[ApronExpr[PhysicalAddress[Context], Type]]
-  def makeRelationalVal(expr: ApronExpr[PhysicalAddress[Context], Type]): Val
-
-  type TypeEnv = Map[PhysicalAddress[Context], Type]
+  type MetaData = Map[PhysicalAddress[Context], (FloatSpecials, Type)]
 
   private var _abstract1 : Abstract1 = initialState
-  private var typeEnv: TypeEnv = initialTypeEnv
   val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(Map())
 
-  def abstract1: Abstract1 = _abstract1
+  inline def abstract1: Abstract1 = _abstract1
 
-  def getType(powAddr: PowAddr): JOptionA[Type] =
-    powAddr.reduce(addr => JOptionA(typeEnv.get(addr)))
+  inline def getType(powAddr: PowAddr): JOptionA[Type] =
+    getMetaData(powAddr).map(_._2)
+
+  inline def getMetaData(phys: PhysicalAddress[Context]): JOptionA[(FloatSpecials, Type)] =
+    getMetaData(PowersetAddr(phys).asInstanceOf[PowAddr])
+
+  inline def getMetaData(powAddr: PowAddr): JOptionA[(FloatSpecials, Type)] =
+    for {
+      value <- nonRelationalStore.read(powAddr);
+      expr <- JOptionA(relationalValue.getRelationalExpr(value))
+    } yield((expr.floatSpecials, expr._type))
 
   override def read(powAddr: PowAddr): JOptionA[Val] =
-    if(powAddr.isEmpty)
-      JOptionA.None()
-    else {
-      val v1 = powAddr.reduce(addr =>
-        val vAddr = ApronVar(addr)
-        if (_abstract1.getEnvironment().hasVar(vAddr)) {
-          JOptionA.Some(makeRelationalVal(ApronExpr.Addr(vAddr, typeEnv(addr))))
-        } else {
-          JOptionA.None()
-        }
-      )
-      val v2 = nonRelationalStore.read(powAddr)
-      (v1,v2) match
-        case (JOptionA.None(), _) => v2
-        case (_, JOptionA.None()) => v1
-        case (_,_) => Join(v1,v2).get
+    val v1 = getMetaData(powAddr).flatMap((floatSpecials, tpe) =>
+      JOptionA.Some(powAddr.reduce(addr => relationalValue.makeRelationalExpr(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe))))
+    )
+    val v2 = nonRelationalStore.read(powAddr)
+    Join(v1,v2).get
+
+  override def write(powAddr: PowAddr, v: Val): Unit =
+    relationalValue.getRelationalExpr(v) match
+      case Some(exp) => write(powAddr, replaceMissingAddrs(exp))
+      case None => nonRelationalStore.write(powAddr, v)
+
+  private def write(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
+    for(toAddr <- powAddr.iterator) {
+      writeMetaData(toAddr, physExpr)
+      val to = ApronVar(toAddr)
+
+      toAddr.recency match
+        case Recency.Recent =>
+          val hasVariable = extendAbstract1(toAddr, physExpr)
+          if (hasVariable) {
+            _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+          }
+        case Recency.Old =>
+          val to = ApronVar(toAddr)
+          writeMetaData(toAddr, physExpr)
+          val envBefore = _abstract1.getEnvironment
+          val hasVariable = extendAbstract1(toAddr, physExpr)
+          if (!envBefore.hasVar(to)) {
+            if (hasVariable)
+              _abstract1.assign(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+          } else {
+            if (hasVariable) {
+              val assigned = _abstract1.assignCopy(manager, to, physExpr.toIntern(_abstract1.getEnvironment), null)
+              Profiler.addTime("Abstract1.combine") {
+                _abstract1.join(manager, assigned)
+              }
+            }
+          }
+        case Recency.Failed => throw new IllegalArgumentException("Cannot assign to physical address on failed branch")
     }
 
-  override def write(powAddr: PowAddr, v : Val): Unit =
-    getRelationalVal(v) match
-      case Some(exp) =>
-        if(powAddr.isEmpty) {
-          // nothing
-        } else if (powAddr.isStrong) {
-          powAddr.reduce(toAddr =>
-            addAddrToEnvs(toAddr, exp)
-            val to = ApronVar(toAddr)
-            val env = _abstract1.getEnvironment
-            assert(env.hasVar(to), s"environment ${env} does not have variable ${to}")
-            val aexp : apron.Texpr1Intern = exp.toIntern(_abstract1.getEnvironment)
-            _abstract1.assign(manager, to, aexp, null)
-          )
-        } else /* if(powAddr.isWeak) */ {
-          // weak update implemented as join
-          powAddr.reduce(toAddr =>
-            addAddrToEnvs(toAddr, exp)
-            val to = ApronVar(toAddr)
-            if (! _abstract1.getEnvironment.hasVar(to)) {
-              _abstract1.assign(manager, to, exp.toIntern(_abstract1.getEnvironment), null)
-            } else {
-              _abstract1.join(manager,
-                _abstract1.assignCopy(manager, to, exp.toIntern(_abstract1.getEnvironment), null))
-            }
-          )
-        }
-      case None =>
-        nonRelationalStore.write(powAddr, v)
+  private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Unit =
+    nonRelationalStore.write(PowersetAddr(addr).asInstanceOf[PowAddr],
+      relationalValue.makeRelationalExpr(ApronExpr.floatConstant(ApronExpr.bottomInterval, expr.floatSpecials, expr._type)))
+
+  private def extendAbstract1(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]): Boolean =
+    if(getBound(expr).isBottom) {
+      // Don't extend the environment in case the assigned expression is bottom.
+      // Such a case happens in case of floating-point special values.
+      // Assigning a bottom expression would cause _abstract1 to become bottom, which is unsound.
+      false
+    } else {
+      val variable = ApronVar(addr)
+      val tpe = expr._type
+      var env = _abstract1.getEnvironment
+      if (!env.hasVar(variable)) {
+        tpe.apronRepresentation match
+          case ApronRepresentation.Int =>
+            env = env.add(Array[apron.Var](variable), Array[apron.Var]())
+          case ApronRepresentation.Real =>
+            env = env.add(Array[apron.Var](), Array[apron.Var](variable))
+        _abstract1.changeEnvironment(manager, env, false)
+      }
+      true
+    }
 
   override def move(fromPow: PowAddr, toPow: PowAddr): Unit =
-    nonRelationalStore.move(fromPow, toPow)
-
     if (fromPow.isStrong && fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
+      nonRelationalStore.move(fromPow, toPow)
+
       val from = fromPow.iterator.next()
       val to = toPow.iterator.next()
 
-      (typeEnv.get(from), typeEnv.get(to)) match
-        case (Some(fromType), Some(toType)) =>
-          typeEnv += to -> Join(toType, fromType).get
-          typeEnv -= from
+      val env = _abstract1.getEnvironment
+      (env.hasVar(from), env.hasVar(to)) match
+        case (true, true) =>
           _abstract1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
-        case (Some(fromType), None) =>
-          typeEnv += to -> fromType
-          typeEnv -= from
+        case (true, false) =>
           _abstract1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
-        case (None, Some(_)) | (None, None) => // Nothing to do
+        case (false, true) | (false, false) => // Nothing to do
+
     } else {
       copy(fromPow, toPow)
       free(fromPow)
@@ -131,109 +153,229 @@ trait RelationalStore
     val fromSet = fromPow.iterator.map(ApronVar(_)).toSet.diff(toSet)
 
     for (from <- fromSet; to <- toSet) {
-      (typeEnv.get(from.addr), typeEnv.get(to.addr)) match
-        case (Some(fromType), Some(toType)) =>
-          if(fromType.apronRepresentation == toType.apronRepresentation) {
-            typeEnv += to.addr -> Join(typeEnv(to.addr), typeEnv(from.addr)).get
-            _abstract1.join(manager,
-              _abstract1.assignCopy(manager, to, ApronExpr.Addr(from, typeEnv(from.addr)).toIntern(env), null))
-          } else {
-            throw new IllegalStateException(
-              s"Cannot copy address ${from.addr} of type ${fromType} represented by ${fromType.apronRepresentation}" +
-                s"to address ${to.addr} of type ${toType} represented by ${toType.apronRepresentation}")
-          }
 
-        case (Some(fromType), None) =>
-          typeEnv += to.addr -> typeEnv(from.addr)
+      (env.hasVar(from), env.hasVar(to)) match
+        case (true, true) =>
+          val (fromSpecials, fromType) = getMetaData(from).toOption.get
+          val assigned = _abstract1.assignCopy(manager, to, ApronExpr.Addr(from, fromSpecials, fromType).toIntern(env), null)
+          _abstract1.join(manager, assigned)
+        case (true, false) =>
           _abstract1.expand(manager, from, Array[Var](to))
-
-        case (None, Some(_)) | (None, None) =>
-          // from is not bound. There is nothing to do.
+        case (false, true) | (false, false) =>
+          // Nothing to do
     }
 
-  override def free(powAddr: PowAddr): Unit =
-    nonRelationalStore.free(powAddr)
+  /**
+   * Does not actually delete addresses from store.
+   * This is important, because addresses may still be referenced from somewhere.
+   * Instead, it moves addresses from the relational store into the non-relational store.
+   * This reduces the size of the relational store, which improves performance.
+   */
+  override inline def free(powAddr: PowAddr): Unit =
+    Profiler.addTime("RelationalStore.free") {
+      moveToNonRelationalStore(powAddr)
+    }
 
-    if (powAddr.isStrong) {
-      powAddr.reduce(addr =>
-        val dest = ApronVar(addr)
-        val env = _abstract1.getEnvironment()
-        if(env.hasVar(dest)) {
-          typeEnv -= dest.addr
-//          _abstract1.forget(manager, dest, false)
-          _abstract1.changeEnvironment(manager, env.remove(Array[Var](dest)), false)
-        }
+  def moveToNonRelationalStore(powAddr: PowAddr): Unit =
+    val env = _abstract1.getEnvironment
+
+    for(addr <- powAddr.iterator;
+        (specials, tpe) <- getMetaData(addr).toOption) {
+
+      // Create non-relational value from address
+      val iv = getBound(ApronExpr.addr(addr, tpe))
+      val newVal = JOptionA.Some(relationalValue.makeRelationalExpr(ApronExpr.floatConstant(iv, specials, tpe)))
+
+      // Join value into non-relational store.
+      val paddr = PowersetAddr(addr).asInstanceOf[PowAddr]
+      val oldVal = nonRelationalStore.read(paddr)
+      val resVal = Join(oldVal, newVal).get.toOption.getOrElse(throw new IllegalStateException(s"no value to write at address $addr to the non-relational store"))
+      nonRelationalStore.write(paddr, resVal)
+      val res = nonRelationalStore.read(paddr)
+    }
+
+    // Remove addresses from relational abstract domain
+    val addrArray = powAddr.iterator.map(ApronVar[PhysicalAddress[Context]](_)).filter(env.hasVar(_)).toArray[Var]
+    _abstract1.forget(manager, addrArray, false)
+    _abstract1.changeEnvironment(manager, env.remove(addrArray), false)
+
+  def isUnconstrained(powAddr: PowAddr): Boolean =
+    val env = _abstract1.getEnvironment
+    powAddr.iterator.map(ApronVar(_)).forall(x =>
+      env.hasVar(x) && _abstract1.isDimensionUnconstrained(manager, x)
+    )
+
+  private def moveUnconstrainedToNonRelationalStore(): Unit =
+    val env = _abstract1.getEnvironment
+    val unconstrainedVars = env
+      .getVars
+      .map{ case ApronVar(addr) => addr.asInstanceOf[PhysicalAddress[Any]] }
+      .filter { phys => isUnconstrained(PowersetAddr(phys).asInstanceOf[PowAddr]) }
+      .toSet
+    moveToNonRelationalStore(PowersetAddr(unconstrainedVars).asInstanceOf[PowAddr])
+
+  inline def optimize(): Unit =
+    moveUnconstrainedToNonRelationalStore()
+
+  private final class BottomFailure extends SturdyFailure
+
+  def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
+
+    val resolvedConstraints = constraints
+      .map(replaceMissingAddrs)
+      .filter(cons =>
+        // Comparing NaN to any other number always evaluates to false, e.g. 0 < NaN == false
+        // Therefore, adding such constraints to the abstract domain would be unsound.
+        // For example, x = 0; y = {1, NaN}; if(x < y) { ... } else { [x = 0, y = NaN] }
+        // Adding the negated constraint 0 > {1, NaN} in the else branch causes the abstract domain
+        // to become bottom, which is unsound, because x must be 0.
+        if(cons.e1.floatSpecials != FloatSpecials.Bottom || cons.e2.floatSpecials != FloatSpecials.Bottom)
+          abstract1.satisfy(manager, cons.toApron(_abstract1.getEnvironment))
+        else
+          true
       )
+
+    val cons = resolvedConstraints.map(_.toApron(_abstract1.getEnvironment)).toArray[Tcons1]
+    this._abstract1.meet(manager, cons)
+
+    // Inequality constraints `x != y` are imprecise on polyhedra.
+    // The workaround is to take the join `state[x < y] U state[x > y]` (https://github.com/antoinemine/apron/issues/37)
+    val inequalityConstraints = resolvedConstraints.filter { case ApronCons(CompareOp.Neq, _, _) => true; case _ => false }
+    if(inequalityConstraints.nonEmpty) {
+      val state1 = this._abstract1.meetCopy(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
+        ApronCons(CompareOp.Lt, e1, e2).toApron(this._abstract1.getEnvironment)
+      }.toArray[Tcons1])
+      this._abstract1.meet(manager, inequalityConstraints.map{ case ApronCons(_, e1, e2) =>
+        ApronCons(CompareOp.Gt, e1, e2).toApron(this._abstract1.getEnvironment)
+      }.toArray[Tcons1])
+      this._abstract1.join(manager, state1)
     }
 
-  class BottomFailure extends SturdyFailure
-
-  def addConstraint(constraint: ApronCons[PhysicalAddress[Context], Type]): Unit =
-    val constraints: Array[Tcons1] = Array(constraint.toApron(_abstract1.getEnvironment))
-    this._abstract1.meet(manager, constraints)
-    if (this._abstract1.isBottom(manager))
+    if (isBottom)
       throw new BottomFailure
 
-  def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
-    _abstract1.getBound(_abstract1.getCreationManager, expr.toIntern(_abstract1.getEnvironment))
-
-  private def addAddrToEnvs(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type]) =
-    var env = _abstract1.getEnvironment()
-    val variable = ApronVar(addr)
-    val tpe = expr._type
-    if (!env.hasVar(variable)) {
-      tpe.apronRepresentation match
-        case ApronRepresentation.Int =>
-          env = env.add(Array[apron.Var](variable), Array[apron.Var]())
-        case ApronRepresentation.Real =>
-          env = env.add(Array[apron.Var](), Array[apron.Var](variable))
-      _abstract1.changeEnvironment(manager, env, false)
-      typeEnv += addr -> tpe
-    } else {
-      if (typeEnv(addr).apronRepresentation == tpe.apronRepresentation) {
-        typeEnv += addr -> Join(typeEnv(addr), tpe).get
-      } else {
-        throw new IllegalStateException(
-          s"Cannot assign ${expr} of type ${tpe} represented by ${tpe.apronRepresentation}" +
-            s"to address ${addr} of type ${typeEnv(addr)} represented by ${typeEnv(addr).apronRepresentation}")
-      }
-    }
-
   def isBottom: Boolean =
-    _abstract1.isBottom(manager)
+    this._abstract1.isBottom(manager)
 
-  case class RelationalStoreState(tenv: TypeEnv, abs1: Abstract1, nonRelationalStoreState: nonRelationalStore.State):
+  def satisfies(cons: ApronCons[PhysicalAddress[Context], Type]): Topped[Boolean] =
+    val resolvedCons = replaceMissingAddrs(cons)
+    if(_abstract1.satisfy(manager, resolvedCons.toApron(_abstract1.getEnvironment)))
+      Topped.Actual(true)
+    else if(_abstract1.satisfy(manager, resolvedCons.negated.toApron(_abstract1.getEnvironment)))
+      Topped.Actual(false)
+    else
+      Topped.Top
+
+  def getBound(expr: ApronExpr[PhysicalAddress[Context], Type]): Interval =
+    val env = _abstract1.getEnvironment
+    val expr1 = replaceMissingAddrs(expr)
+    val addrs = expr1.addrs
+    if(addrs.forall(env.hasVar(_)))
+      _abstract1.getBound(_abstract1.getCreationManager, expr1.toIntern(_abstract1.getEnvironment))
+    else
+      throw IllegalArgumentException(s"Expression $expr1 contains unbound variables ${addrs.filterNot(env.hasVar(_))}")
+
+  def getFloatBound(expr: ApronExpr[PhysicalAddress[Context], Type]): sturdy.apron.FloatInterval =
+    val iv = getBound(expr)
+    new sturdy.apron.FloatInterval(iv.inf, iv.sup, expr.floatSpecials)
+
+
+  private def replaceMissingAddrs(cons: ApronCons[PhysicalAddress[Context], Type]): ApronCons[PhysicalAddress[Context], Type] =
+    cons.mapExprs(replaceMissingAddrs)
+
+  private def replaceMissingAddrs(expr: ApronExpr[PhysicalAddress[Context], Type]): ApronExpr[PhysicalAddress[Context], Type] =
+    expr.mapAddrSame(replaceMissingAddrs)
+
+  private def replaceMissingAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type): ApronExpr[PhysicalAddress[Context], Type] =
+    _var match
+      case ApronVar(PhysicalAddress(ctx, Recency.Failed)) => ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+      case ApronVar(phys) =>
+        readApronExprFromNonRelationalStore(phys) match
+          case Some(e) =>
+            val env = _abstract1.getEnvironment
+            if(env.hasVar(_var)) {
+              if (e.isBottom == Topped.Actual(true))
+                ApronExpr.Addr(_var, specials, tpe)
+              else if (e.isTop == Topped.Actual(true))
+                e
+              else
+                ApronExpr.Constant(
+                  Join(abstract1.getBound(manager, _var), abstract1.getBound(manager, _var)).get, specials, tpe)
+            } else {
+              e
+            }
+          case None =>
+            throw new IllegalArgumentException(s"No metadata for $phys store")
+//            ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+
+
+
+
+  private def readApronExprFromNonRelationalStore(phys: PhysicalAddress[Context]): Option[ApronExpr[PhysicalAddress[Context], Type]] =
+    nonRelationalStore.read(PowersetAddr(phys).asInstanceOf[PowAddr]).toOption.flatMap(relationalValue.getRelationalExpr)
+
+  case class RelationalStoreState(abs1: Abstract1, nonRelationalStoreState: nonRelationalStore.State):
     override def equals(obj: Any): Boolean =
       obj match
-        case RelationalStoreState(tenv2, abs2, nonRel2) =>
-          tenv.equals(tenv2) && abs1.isEqual(manager, abs2) && MapEquals(nonRelationalStoreState,nonRel2)
+        case RelationalStoreState(abs2, nonRel2) =>
+          MapEquals(nonRelationalStoreState,nonRel2) && abs1.getEnvironment.isEqual(abs2.getEnvironment) && Profiler.addTime("Abstract1.equals") { abs1.isEqual(manager, abs2) }
         case _ =>
           false
-    override def hashCode(): Int = (tenv, abs1.hashCode(manager), nonRelationalStoreState).hashCode()
+    override def hashCode: Int =
+      val abs1Hash = Profiler.addTime("Abstract1.hashCode") { abs1.hashCode(manager) }
+      (abs1Hash, nonRelationalStoreState).hashCode()
+
+    override def toString: String = s"RelationalStoreState($hashCode, ${abs1.getEnvironment}, $abs1, $nonRelationalStoreState)"
 
   override type State = RelationalStoreState
 
   // It is important to copy abstract1 when getting and setting a state, because
   // RelationalStore mutates abstract1
   override def getState: State =
-    RelationalStoreState(typeEnv, copyAbstract1(_abstract1), nonRelationalStore.getState)
-  override def setState(s: State) =
-    typeEnv = s.tenv
+    RelationalStoreState(copyAbstract1(_abstract1), nonRelationalStore.getState)
+  override def setState(s: State): Unit =
     _abstract1 = copyAbstract1(s.abs1)
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
-  def copyAbstract1(abstract1: Abstract1): Abstract1 = new Abstract1(manager, abstract1)
+  override def setBottom: Unit = {}
+//    _abstract1 = Abstract1(manager, new Environment())
+//    nonRelationalStore.setBottom
 
-  override def join: Join[State] = combineRelationalStoreState
-  override def widen: Widen[State] = combineRelationalStoreState
+  inline def copyAbstract1(abstract1: Abstract1): Abstract1 =
+    Profiler.addTime("Abstract1.copy") {
+      new Abstract1(manager, abstract1)
+    }
 
-  def combineRelationalStoreState[W <: Widening](using combineTypeEnv: Combine[TypeEnv,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
+  override def join: Join[State] = combineRelationalStoreState(widen = false)
+  override def widen: Widen[State] = combineRelationalStoreState(widen = true)
+
+  def combineRelationalStoreState[W <: Widening](widen: Boolean)(using combineTypeEnv: Combine[MetaData,W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[RelationalStoreState, W] =
     (s1: RelationalStoreState, s2: RelationalStoreState) =>
-      val joinedTypeEnv = combineTypeEnv(s1.tenv, s2.tenv)
-      val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
-      val joinedNonRelationalStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
-      val res = MaybeChanged(
-        RelationalStoreState(joinedTypeEnv.get, joinedAbs1.get, joinedNonRelationalStore.get),
-        joinedTypeEnv.hasChanged || joinedAbs1.hasChanged || joinedNonRelationalStore.hasChanged
-      )
-      res
+      Profiler.addTime("RelationalStoreState.combine") {
+        val state = getState
+        val snapshotAbs1 = state.abs1
+        val snapshotNonRelStore = state.nonRelationalStoreState
+        try {
+          val joinedAbs1 = combineAbs1(s1.abs1, s2.abs1)
+          _abstract1 = copyAbstract1(joinedAbs1.get)
+          val joinedNonRelStore = combineNonRelStore(s1.nonRelationalStoreState, s2.nonRelationalStoreState)
+
+          val joinedState = RelationalStoreState(copyAbstract1(_abstract1), joinedNonRelStore.get)
+
+          val res = MaybeChanged(
+            joinedState,
+            joinedAbs1.hasChanged || joinedNonRelStore.hasChanged
+          )
+
+          res
+
+        } finally {
+          _abstract1 = snapshotAbs1
+          nonRelationalStore.setState(snapshotNonRelStore)
+        }
+      }
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    nonRelationalStore.addressIterator(valueIterator)
+
+  override def toString: String = _abstract1.toString

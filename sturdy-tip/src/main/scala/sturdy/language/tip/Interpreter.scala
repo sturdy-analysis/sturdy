@@ -4,13 +4,14 @@ import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.tip.*
 import sturdy.values.MaybeChanged
+import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.booleans.*
-import sturdy.values.{Finite, Top, Combine, Widening}
-import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
+import sturdy.values.{Combine, Finite, Top, Widening}
+import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
-import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.ordering.{OrderingOps, EqOps, LiftedOrderingOps}
+import sturdy.values.references.{LiftedReferenceOps, ReferenceOps}
+import sturdy.values.ordering.{EqOps, LiftedOrderingOps, OrderingOps}
 
 /**
  * Trait [[Interpreter]] allows sharing code between concrete and abstract interpreters.
@@ -73,6 +74,7 @@ trait Interpreter:
   given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case _ if v1 eq v2 => Unchanged(v1)
       case (IntValue(i1), IntValue(i2)) => Combine[VInt, W](i1, i2).map(IntValue.apply)
       case (FunValue(funs1), FunValue(funs2)) => Combine[VFun, W](funs1, funs2).map(FunValue.apply)
       case (RefValue(addrs1), RefValue(addrs2)) => Combine[VRef, W](addrs1, addrs2).map(RefValue.apply)

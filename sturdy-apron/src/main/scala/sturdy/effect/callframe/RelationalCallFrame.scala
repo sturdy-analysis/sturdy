@@ -2,32 +2,35 @@ package sturdy.effect.callframe
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
-import sturdy.effect.store.{RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
 import scala.collection.immutable.{ArraySeq, HashMap}
+import scala.reflect.ClassTag
 
-trait RelationalCallFrame
+final class RelationalCallFrame
   [
     Data,
     Var: Ordering,
+    Val: Join: Widen,
     CallSite,
-    Ctx: Ordering: Finite,
-    Type: ApronType: Join: Widen,
-    Val: Join: Widen
+    Ctx: Ordering : Finite,
+    Type: ApronType : Join : Widen,
   ]
   (
     initData: Data,
     initVars: Iterable[(Var, Option[Val])],
-    val localVariableAllocator: Allocator[Ctx, Var],
+    val localVariableAllocator: Allocator[Ctx, (Var,Data,Option[CallSite])],
     val apronState: ApronRecencyState[Ctx, Type, Val]
+  )(using
+    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
      with DecidableCallFrame[Data, Var, Val, CallSite]:
@@ -39,9 +42,7 @@ trait RelationalCallFrame
   final type ApronExprVirtAddr = ApronExpr[VirtualAddress[Ctx],Type]
   final type ApronExprPhysAddr = ApronExpr[PhysicalAddress[Ctx],Type]
 
-  def makeRelationalVal(expr: ApronExprVirtAddr): Val
-
-  val addressCallFrame: JoinableDecidableCallFrame[Data, Var, VirtAddr, CallSite] =
+  val addressCallFrame: JoinableDecidableCallFrame[Data, Var, PowVirtAddr, CallSite] =
     JoinableDecidableCallFrame(
       initData,
       Iterable.empty
@@ -54,8 +55,8 @@ trait RelationalCallFrame
   def setVars(newVars: Iterable[(Var, Option[Val])]) =
     addressCallFrame.setVars(
       newVars.map((variable, _) =>
-        val ctx = localVariableAllocator.alloc(variable)
-        (variable, Some(apronState.recencyStore.alloc(ctx)))
+        val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data, addressCallFrame.callSite))
+        (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
       )
     )
 
@@ -74,8 +75,12 @@ trait RelationalCallFrame
     }
 
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
-    addressCallFrame.getLocal(idx).map(virt =>
-      apronState.recencyStore.write(PowVirtualAddress(virt), v)
+    addressCallFrame.getLocal(idx).map(_virts =>
+      val name = findName(idx)
+      val ctx = localVariableAllocator.alloc((name, addressCallFrame.data, addressCallFrame.callSite))
+      val freshVirt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
+      addressCallFrame.setLocal(idx, freshVirt)
+      apronState.recencyStore.write(freshVirt, v)
     )
 
   override def setLocalByName(x: Var, v: Val): JOptionC[Unit] =
@@ -89,17 +94,13 @@ trait RelationalCallFrame
   override def getLocalByName(x: Var): JOptionC[Val] =
     addressCallFrame.getLocalByName(x).flatMap(getByVirt).asInstanceOf
 
-  private def getByVirt(virt: VirtAddr): JOptionC[Val] =
-    val v1 = for {
-      tpe <- apronState.relationalStore.getType(virt.physical)
-    } yield makeRelationalVal(ApronExpr.addr(virt, tpe))
-    val v2 = apronState.relationalStore.nonRelationalStore.read(virt.physical)
-    Join(v1, v2).get.toJOptionC
+  private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
+    apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Val]].toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, _) =>
-      val ctx = localVariableAllocator.alloc(variable)
-      (variable, Some(apronState.recencyStore.alloc(ctx)))
+      val ctx = localVariableAllocator.alloc((variable, d, Some(site)))
+      (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
       for ((variable, exprOption) <- vars; expr <- exprOption)
@@ -107,6 +108,10 @@ trait RelationalCallFrame
       f
     }
 
+  private def findName(idx: Int): Var =
+    addressCallFrame.getFrameNames.find((name,idx2) => idx == idx2)
+      .getOrElse(throw new IllegalStateException(s"No name bound to index $idx not bound in call frame $this"))
+      ._1
 
   override type State = addressCallFrame.State
 
@@ -116,14 +121,21 @@ trait RelationalCallFrame
   override def setState(state: State): Unit =
     addressCallFrame.setState(state)
 
+  override def setBottom: Unit =
+    addressCallFrame.setBottom
+
   override def join: Join[State] = implicitly[Join[State]]
   override def widen: Widen[State] = implicitly[Widen[State]]
   override def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
+//      Unchanged(call)
       if(stack.contains(call))
         Unchanged(call)
       else
         Changed(call)
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    addressCallFrame.getState.iterator.flatMap(valueIterator)
 
   def isSound[cData, cVal](c: ConcreteCallFrame[cData, Var, cVal, CallSite])(using vSoundness: Soundness[cVal, Val], dSoundness: Soundness[cData, Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.data, data)
@@ -134,6 +146,8 @@ trait RelationalCallFrame
     val cVals: Array[cVal] = c.getVars
     val aVals: ArraySeq[Val] = getVars
     seqIsSound.isSound(cVals, aVals)
+
+  override def toString: String = s"$addressCallFrame, ${apronState.recencyStore.addressTranslation}, ${apronState.relationalStore}"
 
 object RelationalCallFrame:
 
@@ -148,13 +162,11 @@ object RelationalCallFrame:
      initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx], Type]])]
    )(using
      temporaryVariableAllocator: Allocator[Ctx, Type],
-     localVariableAllocator: Allocator[Ctx, Var],
+     localVariableAllocator: Allocator[Ctx, (Var, Data, Option[CallSite])],
      apronManager: Manager,
      effectStack: EffectStack
-   ): (RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
+   ): (RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val state = RecencyRelationalStore[Ctx,Type]
     given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)
-    val callFrame = new RelationalCallFrame[Data, Var, CallSite, Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]](initData, initVars, localVariableAllocator, state):
-      override def makeRelationalVal(expr: ApronExprVirtAddr): ApronExpr[VirtualAddress[Ctx], Type] = expr
-
+    val callFrame = new RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type](initData, initVars, localVariableAllocator, state)
     (callFrame, state)

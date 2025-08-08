@@ -91,7 +91,7 @@ trait GenericInterpreterFirstShot[V, J[_] <: MayJoin[_]]:
 
   // joining of computations requires all effect components to participate in the join.
   // We achieve this by using an effect stack containing all effect components of the language.
-  final val effectStack: EffectStack = new EffectStack(EffectList(store, failure))
+  final val effectStack: EffectStack = EffectStack(store, failure)
   given EffectStack = effectStack
   given Failure = failure
 

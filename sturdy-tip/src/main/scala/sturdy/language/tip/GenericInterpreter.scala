@@ -3,26 +3,22 @@ package sturdy.language.tip
 import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, MutableCallFrame}
-import sturdy.effect.environment.Environment
+import sturdy.effect.callframe.{DecidableCallFrame, MutableCallFrame}
 import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
 import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
-import sturdy.util.Label
-import sturdy.values.*
-import sturdy.values.booleans.{BooleanBranching, BooleanOps}
-import sturdy.values.integer.IntegerOps
-import sturdy.values.functions.FunctionOps
-import sturdy.values.records.RecordOps
-import sturdy.values.ordering.{EqOps, OrderingOps}
-import sturdy.fix
-import sturdy.data.unit
 import sturdy.effect.{Effect, EffectList, EffectStack}
+import sturdy.fix
+import sturdy.language.tip.TipFailure.*
+import sturdy.util.{Label, given}
+import sturdy.values.*
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.functions.FunctionOps
+import sturdy.values.integer.IntegerOps
+import sturdy.values.ordering.{EqOps, OrderingOps}
+import sturdy.values.records.RecordOps
 import sturdy.values.references.ReferenceOps
-
-import scala.collection.mutable.ListBuffer
-import TipFailure.*
 
 enum AllocationSite:
   case Alloc(e: Exp.Alloc)
@@ -58,6 +54,12 @@ enum FixOut[V]:
 
 given finiteFixIn: Finite[FixIn] with {}
 //given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
+
+given Ordering[FixIn] = {
+  case (FixIn.Eval(e1), FixIn.Eval(e2)) => Ordering[Label].compare(e1.label, e2.label)
+  case (FixIn.Run(s1), FixIn.Run(s2)) => Ordering[Label].compare(s1.label, s2.label)
+  case (FixIn.EnterFunction(f1), FixIn.EnterFunction(f2)) => Ordering[Function].compare(f1,f2)
+}
 
 given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
   override def apply(out1: FixOut[V], out2: FixOut[V]): MaybeChanged[FixOut[V]] = (out1, out2) match
@@ -179,7 +181,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Stm.Output(e) =>
       print(eval(e))
     case a@Stm.Assert(e) =>
-      assert(eval(e), a)  
+      assert(eval(e), a)
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
 

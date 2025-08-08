@@ -95,7 +95,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
     val config = WasmConfig(
-      fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig)),
+      fix = FixpointConfig(stack = stackConfig),
       ctx = Insensitive
     )
     val bestOf = 5

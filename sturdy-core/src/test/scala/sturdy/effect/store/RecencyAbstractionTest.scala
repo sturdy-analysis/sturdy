@@ -2,11 +2,11 @@ package sturdy.effect.store
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.*
-
 import sturdy.values.references.Recency.*
 import org.scalatest.matchers.should.Matchers.*
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
+import sturdy.effect.failure.{AFallible, CollectedFailures, FailureKind, RuntimeFailure}
 import sturdy.effect.store.RecencyStore
 import sturdy.effect.store.given
 import sturdy.values.{*, given}
@@ -150,7 +150,6 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
       a2 = store.alloc(ctx1)
       store.write(a2, NumericInterval(1, 2))
     } {
-      // a1 should be old, since a3 is a more recent allocation of ctx1
       a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
       store.read(a1) should be(JOptionA.Some(NumericInterval(3,4)))
 
@@ -221,6 +220,37 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.read(a1) should be(JOptionA.Some(NumericInterval(1, 6)))
   }
 
+
+  test("Failing Branch") {
+    val store = emptyStore
+    given Finite[RuntimeFailure.type] with {}
+    val failure = CollectedFailures[RuntimeFailure.type]
+    val effectStack: EffectStack = EffectStack(
+      RecencyClosure(store, failure)
+    )
+
+    val ctx1 = "ctx1"
+    val a1 = store.alloc(ctx1)
+    var a2: VirtualAddress[Ctx] = null
+    var a3: VirtualAddress[Ctx] = null
+    store.write(a1, NumericInterval(0, 0))
+    effectStack.joinComputations {
+      a2 = store.alloc(ctx1)
+      store.write(a2, NumericInterval(1, 1))
+    }{
+      a3 = store.alloc(ctx1)
+      store.write(a3, NumericInterval(2, 2))
+      failure.fail(RuntimeFailure, "Fail")
+    }
+    a1.recency should be(PowRecency.Old)
+    a2.recency should be(PowRecency.Recent)
+    a3.recency should be(PowRecency.Failed)
+
+    store.read(a1) should be(JOptionA.Some(NumericInterval(0, 0)))
+    store.read(a2) should be(JOptionA.Some(NumericInterval(1, 1)))
+    store.read(a3) should be(JOptionA.None())
+  }
+
   test("Recency store should handle reallocation that happens in while loops") {
     val store = emptyStore
     val effectStack: EffectStack = EffectStack(
@@ -279,9 +309,9 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, VAddr, NumericInte
     store.write(a3, NumericInterval(3, 4))
     val state2 = (store.getState, store.getAddressTranslation.getState)
     val joinStore = store.join(state1._1, state2._1)
-    val joinAddrTrans = store.getAddressTranslation.join(state1._2, state2._2)
+    val joinAddrTrans = store.getAddressTranslation.join(state1._2.asInstanceOf, state2._2.asInstanceOf)
     store.setState(joinStore.get)
-    store.getAddressTranslation.setState(joinAddrTrans.get)
+    store.getAddressTranslation.setState(joinAddrTrans.get.asInstanceOf)
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent), PhysicalAddress(ctx1, Old))

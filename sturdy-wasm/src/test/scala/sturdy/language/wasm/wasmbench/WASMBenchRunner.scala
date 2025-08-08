@@ -135,7 +135,7 @@ object AnalysisConfig:
     "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = Insensitive,
-      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
+      fix = FixpointConfig(StackConfig.StackedStates())),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
     "saveResultsToDir" -> RunnerConfig.rootDir.resolve("results"),
@@ -148,7 +148,7 @@ object AnalysisConfig:
     "timeLimit" -> new GrainOfTime(timeout).seconds,
     "wasmConfig" -> WasmConfig(
       ctx = CallSites(1),
-      fix = FixpointConfig(fix.iter.Config.Innermost(StackConfig.StackedStates()))),
+      fix = FixpointConfig(StackConfig.StackedStates())),
     "scope" -> AnalysisScope.MostGeneralClient,
     "warmup" -> false, // default: true
     "saveResultsToDir" -> RunnerConfig.rootDir.resolve("results"),

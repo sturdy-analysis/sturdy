@@ -12,12 +12,12 @@ import scala.util.control.NonFatal
 case object AFailureCollectException extends SturdyFailure
 
 class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Monotone:
-  protected var failureKinds: Set[FailureKind] = Set()
-  protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
+  protected var failures: Map[FailureKind, Set[String]] = Map()
 
   override def fail(kind: FailureKind, msg: String): Nothing =
-    failureKinds += kind
-    failures += ((kind, msg))
+    failures.get(kind) match
+      case Some(msgs) => failures += kind -> (msgs + msg)
+      case None       => failures += kind -> Set(msg)
     throw AFailureCollectException
   
   def fallible[A](f: => A): AFallible[A] =
@@ -26,9 +26,11 @@ class CollectedFailures[K <: FailureKind](using Finite[K]) extends Failure, Mono
       if (failures.isEmpty)
         AFallible.Unfailing(res)
       else
-        AFallible.MaybeFailing(res, Powerset(failures.toSet))
+        AFallible.MaybeFailing(res, Powerset(failureSet))
     } catch {
-      case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
+      case _: SturdyFailure => AFallible.Failing(Powerset(failureSet))
       case recur: RecurrentCall => AFallible.Diverging(recur)
       case ex => throw ex
     }
+
+  private def failureSet: Set[(FailureKind, String)] = failures.iterator.flatMap((k, msgs) => msgs.map((k,_))).toSet

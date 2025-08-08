@@ -1,10 +1,10 @@
 package sturdy.values.floating
 
-import sturdy.values.convert.*
+import sturdy.values.convert.{&&, *}
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 
@@ -70,13 +70,6 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
         d.toInt
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (d.isNaN)
-        f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Int.MinValue.toDouble * 2.0d || d <= -1.0)
-        f.fail(ConversionFailure, s"double $d out of integer range")
-      else
-        d.toLong.toInt
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (d.isNaN)
         0
@@ -86,6 +79,13 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         Int.MinValue
       else
         d.toInt
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+      if (d.isNaN)
+        f.fail(ConversionFailure, s"double $d cannot be converted")
+      else if (d >= -Int.MinValue.toDouble * 2.0d || d <= -1.0d)
+        f.fail(ConversionFailure, s"double $d out of integer range")
+      else
+        d.toLong.toInt
     case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
       if (d.isNaN)
         0
@@ -95,7 +95,7 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         0
       else
         d.toLong.toInt
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ => unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Long] with
@@ -114,15 +114,6 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         f.fail(ConversionFailure, s"double $d out of long range")
       else
         d.toLong
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (d.isNaN)
-        f.fail(ConversionFailure, s"double $d cannot be converted")
-      else if (d >= -Long.MinValue.toDouble * 2.0d || d <= -1.0d)
-        f.fail(ConversionFailure, s"double $d out of long range")
-      else if (d >= -Long.MinValue.toDouble)
-        (d - 9223372036854775808.0d).toLong | Long.MinValue
-      else
-        d.toLong
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (d.isNaN)
         0
@@ -130,6 +121,15 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         Long.MaxValue
       else if (d < Long.MinValue.toDouble)
         Long.MinValue
+      else
+        d.toLong
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+      if (d.isNaN)
+        f.fail(ConversionFailure, s"double $d cannot be converted")
+      else if (d >= -Long.MinValue.toDouble * 2.0d || d <= -1.0d)
+        f.fail(ConversionFailure, s"double $d out of long range")
+      else if (d >= -Long.MinValue.toDouble)
+        (d - 9223372036854775808.0d).toLong | Long.MinValue
       else
         d.toLong
     case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
@@ -143,7 +143,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         (d - 9223372036854775808.0d).toLong | Long.MinValue
       else
         d.toLong
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ => unsupportedConfiguration(conf, this)
 
 given ConcreteConvertDoubleFloat: ConvertDoubleFloat[Double, Float] with
   /*

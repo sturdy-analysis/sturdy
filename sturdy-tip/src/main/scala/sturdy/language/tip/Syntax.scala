@@ -1,9 +1,11 @@
 package sturdy.language.tip
 
 import sturdy.util.Labeled
-import sturdy.values.{Structural, Finite}
-
+import sturdy.values.{Finite, Structural}
 import cats.Monoid
+import org.eclipse.collections.impl.factory.Multimaps
+
+import scala.annotation.tailrec
 
 enum Exp extends Labeled:
   case NumLit(n: Int)
@@ -107,12 +109,51 @@ case class Function(name: String, params: Seq[String], locals: Seq[String], body
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combine(fun(this), m.combine(body.fold, ret.fold))
 
+  def loopVars: Set[String] =
+    val loops = body.fold(using {case w: Stm.While => Set(w); case _ => Set()}, _ => Set())
+    val loopAssigns = loops.flatMap(_.fold(using {case a: Stm.Assign => Set(a); case _ => Set()}, _ => Set()))
+    val vars = loopAssigns.collect {
+      case Stm.Assign(Assignable.AVar(v), _) => v
+    }
+    vars
+
+given Ordering[Function] = (f1: Function, f2: Function) => f1.name.compareTo(f2.name)
+
 case class Program(funs: Seq[Function]):
   def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
     m.combineAll(funs.map(_.fold))
 
   def intLiterals: Set[Int] = fold(using _ => Set(), _ => Set(), {case Exp.NumLit(n) => Set(n); case _ => Set()})
   def assertions: Set[Stm.Assert] = fold(using _ => Set(), {case a: Stm.Assert => Set(a); case _ => Set()}, _ => Set())
+
+  lazy val functions: Map[String, Function] = funs.map(f => f.name -> f).toMap
+  /** The direct function dependencies. Functions that invoke first-class functions are assumed to depend on all functions in the program. */
+  lazy val functionDeps: Map[String, Set[String]] =
+    functions.view.mapValues { f =>
+      val locals = f.params ++ f.locals
+      val calls: Set[Exp.Call] = f.fold(using _ => Set(), _ => Set(), {case c: Exp.Call => Set(c); case _ => Set()})
+      calls.flatMap {
+        case Exp.Call(Exp.Var(g), _) if !locals.contains(g) => functions.get(g).map(_.name).toSeq
+        case Exp.Call(_, _) => funs.map(_.name)
+      }
+    }.toMap
+
+  private def addTransitive[A, B](s: Set[(A, B)]) =
+    s ++ (for ((x1, y1) <- s; (x2, y2) <- s if y1 == x2) yield (x1, y2))
+  @tailrec
+  private def transitiveClosure[A, B](s: Set[(A, B)]): Set[(A, B)] = {
+    val t = addTransitive(s)
+    if (t.size == s.size) s else transitiveClosure(t)
+  }
+  lazy val functionDepsTransitive: Map[String, Set[String]] =
+    val tuples = functionDeps.flatMap(kv => kv._2.map(to => kv._1 -> to)).toSet
+    val closure = transitiveClosure(tuples).groupMap(_._1)(_._2)
+//    val recs = funs.foreach(f => if (closure.get(f.name).exists(_.contains(f.name))) println(s"$f is recursive") else println(s"$f is NOT recursive"))
+    closure
+  def isRecursive(f: String): Boolean =
+    functionDepsTransitive.get(f).exists(_.contains(f))
+
+
 
 given StructuralFunction: Structural[Function] with {}
 given FiniteFunction: Finite[Function] with {}

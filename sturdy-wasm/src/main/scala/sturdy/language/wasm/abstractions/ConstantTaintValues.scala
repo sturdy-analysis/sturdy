@@ -1,9 +1,9 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{CombineEquiList, noJoin}
+import sturdy.data.{*, given}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.effect.operandstack.OperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
@@ -81,9 +81,10 @@ trait ConstantTaintValues extends Interpreter:
     analysis.fixpoint.addContextFreeLogger(constants)
     constants
 
-  class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
+  class ConstantInstructionsLogger(stack: OperandStack[Value, NoJoin])(using Failure) extends InstructionResultLogger[Value, Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(TaintProduct(Taint.Untainted, Topped.Actual(0)))
+    override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
       case Value.TopValue => false
@@ -107,7 +108,7 @@ trait ConstantTaintValues extends Interpreter:
     logger
   }
 
-  class TaintedMemoryAccessLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionLogger[Powerset[Value], Value]:
+  class TaintedMemoryAccessLogger(stack: OperandStack[Value, MayJoin.NoJoin])(using Failure) extends InstructionLogger[Powerset[Value], Value]:
     def memoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo
     def taintedMemoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo.filter(_._2.set.nonEmpty)
     

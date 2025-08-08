@@ -3,8 +3,8 @@ package sturdy.values.floating
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config
-import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.convert.*
+import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.convert.{&&, *}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 
@@ -42,7 +42,7 @@ given ConcreteFloatOps: FloatOps[Float, Float] with
     if (v.isInfinite || v.isNaN || v.isWhole)
       v
     else
-      Math.copySign((Math.round(v / 2) * 2).toFloat, v)
+       Math.copySign((Math.round(v / 2) * 2).toFloat, v)
   def copysign(v: Float, sign: Float): Float = Math.copySign(v, sign)
 
 
@@ -70,13 +70,6 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
         f.toInt
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (f.isNaN)
-        fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (f >= -Int.MinValue.toDouble * 2.0d || f <= -1.0f)
-        fa.fail(ConversionFailure, s"float $f out of integer range")
-      else
-        f.toLong.toInt
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (f.isNaN)
         0
@@ -86,6 +79,13 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
         Int.MinValue
       else
         f.toInt
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+      if (f.isNaN)
+        fa.fail(ConversionFailure, s"float $f cannot be converted")
+      else if (f >= -Int.MinValue.toDouble * 2.0d || f <= -1.0f)
+        fa.fail(ConversionFailure, s"float $f out of integer range")
+      else
+        f.toLong.toInt
     case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
       if (f.isNaN)
         0
@@ -95,7 +95,7 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
         0
       else
         f.toLong.toInt
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ => unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long] with
@@ -113,15 +113,6 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         fa.fail(ConversionFailure, s"float $f out of long range")
       else
         f.toLong
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
-      if (f.isNaN)
-        fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (f >= -Long.MinValue.toFloat * 2.0d || f <= -1.0d)
-        fa.fail(ConversionFailure, s"float $f out of long range")
-      else if (f >= -Long.MinValue.toFloat)
-        (f - 9223372036854775808.0d).toLong | Long.MinValue
-      else
-        f.toLong
     case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (f.isNaN)
         0
@@ -129,6 +120,15 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         Long.MaxValue
       else if (f < Long.MinValue.toFloat)
         Long.MinValue
+      else
+        f.toLong
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+      if (f.isNaN)
+        fa.fail(ConversionFailure, s"float $f cannot be converted")
+      else if (f >= -Long.MinValue.toFloat * 2.0d || f <= -1.0d)
+        fa.fail(ConversionFailure, s"float $f out of long range")
+      else if (f >= -Long.MinValue.toFloat)
+        (f - 9223372036854775808.0d).toLong | Long.MinValue
       else
         f.toLong
     case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
@@ -142,7 +142,7 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         (f - 9223372036854775808.0d).toLong | Long.MinValue
       else
         f.toLong
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ => unsupportedConfiguration(conf, this)
 
 
 given ConcreteConvertFloatDouble: ConvertFloatDouble[Float, Double] with

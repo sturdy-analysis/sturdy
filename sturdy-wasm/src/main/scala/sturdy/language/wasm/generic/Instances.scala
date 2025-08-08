@@ -13,9 +13,12 @@ import sturdy.values.Structural
 import sturdy.values.concretePO
 import sturdy.values.concreteAbstractly
 
-case class TableAddr(addr: Int) extends AnyVal
-case class MemoryAddr(addr: Int) extends AnyVal
-case class GlobalAddr(addr: Int) extends AnyVal
+case class TableAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
+case class MemoryAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
+case class GlobalAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
 
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}
@@ -25,6 +28,7 @@ given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
 given Structural[FunctionInstance] with {}
+given Ordering[MemoryAddr] = Ordering.by[MemoryAddr,Int](_.addr)
 
 class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
   override def equals(obj: Any): Boolean = obj match
@@ -102,6 +106,8 @@ class ModuleInstance(val id: Option[Any] = None):
     case Some(id) => id.toString
     case None => Integer.toHexString(super.hashCode())
 
+given Ordering[ModuleInstance] = Ordering.by[ModuleInstance, Int](_.hashCode())
+
 given Structural[Func] with {}
 given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
@@ -110,6 +116,10 @@ enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
 
+  def funcIdx: FuncIdx = this match
+    case Wasm(_, funcIx, _, _) => funcIx
+    case Host(_, funcIx, _) => funcIx
+
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
     case Host(_, _, hf) => hf.funcType
@@ -117,6 +127,14 @@ enum FunctionInstance:
   def module: ModuleInstance = this match
     case Wasm(mod, _, _, _) => mod
     case Host(mod, _, _) => mod
+
+  override def toString: String =
+    this match
+      case Wasm(_, funcIx,_, tpe) => s"f$funcIx: ${toString(tpe)}"
+      case Host(_, _, hostFun) => s"${hostFun.name}: ${toString(hostFun.funcType)}"
+
+  private def toString(tpe: FuncType): String =
+    s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"
 
 enum ExternalValue:
   case Function(addr: Int)

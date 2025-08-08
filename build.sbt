@@ -15,6 +15,7 @@ lazy val root = (project in file("."))
   .aggregate(
     sturdy_core,
     sturdy_apron,
+    sturdy_apron_bench,
     sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial,
@@ -65,9 +66,21 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
         java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
+//    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
   )
 
+lazy val sturdy_apron_bench: Project = (project in file("sturdy-apron-bench"))
+  .dependsOn(sturdy_apron % "compile->compile; test->test")
+  .enablePlugins(JmhPlugin)
+  .settings(
+    javaOptions += "-Djava.library.path=/home/sven/sturdy.scala/sturdy-apron/result/lib/",
+    Jmh / sourceDirectory := (Test / sourceDirectory).value,
+    Jmh / classDirectory := (Test / classDirectory).value,
+    Jmh / dependencyClasspath := (Test / dependencyClasspath).value,
+    // rewire tasks, so that 'bench/Jmh/run' automatically invokes 'bench/Jmh/compile' (otherwise a clean 'bench/Jmh/run' would fail)
+    Jmh / compile := (Jmh / compile).dependsOn(Test / compile).value,
+    Jmh / run := (Jmh / run).dependsOn(Jmh / compile).evaluated
+  )
 
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile")
@@ -75,8 +88,8 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
   .settings(
     name := "sturdy_tip",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      "org.typelevel" %% "cats-core" % "2.6.1",
+      "org.typelevel" %% "cats-parse" % "1.1.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
@@ -87,8 +100,8 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   .settings(
     name := "sturdy_pcf",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      "org.typelevel" %% "cats-core" % "2.6.1",
+      "org.typelevel" %% "cats-parse" % "1.1.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
@@ -108,8 +121,10 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.json4s" %% "json4s-native" % "4.0.4" % "test",
-      ("org.typelevel" %% "cats-parse" % "0.3.4").cross(CrossVersion.for3Use2_13) % "test",
-      "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test"
+      "com.github.tototoshi" %% "scala-csv" % "2.0.0" % "test",
+      ("org.typelevel" %% "cats-parse" % "1.1.0").cross(CrossVersion.for3Use2_13) % "test",
+      "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test",
+      ("io.circe" %% "circe-yaml" % "0.16.0").cross(CrossVersion.for3Use2_13) % "test"
     )
   )
 
@@ -118,8 +133,8 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
   .settings(
     name := "sturdy_tutorial",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      "org.typelevel" %% "cats-core" % "2.6.1",
+      "org.typelevel" %% "cats-parse" % "1.1.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )

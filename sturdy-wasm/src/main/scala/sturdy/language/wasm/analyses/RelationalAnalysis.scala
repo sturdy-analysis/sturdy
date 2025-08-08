@@ -1,172 +1,374 @@
-//package sturdy.language.wasm.analyses
-//
-//import cats.effect.ContextShift
-//import cats.effect.IO
-//import sturdy.data.{*, given}
-//import sturdy.effect.bytememory.ConstantAddressMemory
-//import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
-//import sturdy.effect.bytememory.IntervalAddressMemory
-//import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame}
-//import sturdy.effect.except.JoinedExcept
-//import sturdy.effect.failure.{*, given}
-//import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-//import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-//import sturdy.effect.symboltable.IntervalSymbolTable
-//import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, ConstantSymbolTable}
-//import sturdy.effect.EffectStack
-//import sturdy.fix
-//import sturdy.fix.context.Sensitivity
-//import sturdy.language.wasm.abstractions.*
-//import sturdy.language.wasm.abstractions.Fix.{*, given}
-//import sturdy.language.wasm.generic.{*, given}
-//import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
-//import sturdy.values.booleans.{*, given}
-//import sturdy.values.config.BytesSize
-//import sturdy.values.convert.{*, given}
-//import sturdy.values.exceptions.{*, given}
-//import sturdy.values.floating.{*, given}
-//import sturdy.values.functions.{*, given}
-//import sturdy.values.integer.{*, given}
-//import sturdy.values.ordering.{*, given}
-//import sturdy.values.{*, given}
-//import swam.FuncType
-//import swam.syntax.*
-//import swam.traversal.Traverser
-//
-//import java.nio.{ByteOrder, ByteBuffer}
-//import scala.collection.IndexedSeqView
-//import WasmFailure.*
-//
-//object RelationalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow:
-//  type J[A] = WithJoin[A]
-//  type Addr = I32
-//  type Bytes = Seq[NumericInterval[Byte]]
-//  type Size = Topped[Int]
-//  type FuncIx = I32
-//  type FunV = Powerset[FunctionInstance]
-//
-//  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
-//    override def valueToAddr(v: Value): Addr = v.asInt32
-//    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
-//    override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
-//    override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
-//
-//    override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
-//      val NumericInterval(l, h) = ix.asInt32
-//      val elems = for (i <- l.max(0) to h.min(vec.size - 1))
-//        yield vec(i)
-//      if (elems.isEmpty) {
-//        // no elems in range
-//        JOptionPowerset.None()
-//      } else if (h < vec.size) {
-//        // all indices in range
-//        JOptionPowerset.Some(Powerset(elems.toSet))
-//      } else {
-//        // some indices in range, but not all
-//        JOptionPowerset.NoneSome(Powerset(elems.toSet))
-//      }
-//
-//    override def invokeHostFunction(hostFunc: HostFunction, args: List[RelationalAnalysis.Value]): List[RelationalAnalysis.Value] = hostFunc match
-//      case HostFunction.proc_exit =>
-//        val exitCode = args.head
-//        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-//      case _ =>
-//        val result = hostFunc.funcType.t.map(typedTop).toList
-//        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-//
-//  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
-//    override def apply(c: ConcreteInterpreter.Value): Value = c match
-//      case ConcreteInterpreter.Value.TopValue => Value.TopValue
-//      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval.constant(i))
-//      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval.constant(l))
-//      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-//      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
-//
-//  class Instance(config: WasmConfig) extends
-//      GenericInstance
-////      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
-//      :
-//    private given Instance = this
-//
-//    var dummy: List[Value] = List()
-//
-//    override def jvUnit: WithJoin[Unit] = implicitly
-//    override def jvV: WithJoin[Value] = implicitly
-//    override def jvFunV: WithJoin[FunV] = implicitly
-////    override def widenState: Widen[State] = implicitly
-//
-//    val rangeLimit = 100
-//    val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
-//    val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
-//    val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-//    val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
-//    val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
-//    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-//    val failure: CollectedFailures[WasmFailure] = new CollectedFailures
-//    private given Failure = failure
-//
-//    given ConvertIntFloat[I32, F32] =
-//      new TransitiveConvert(using ConvertNumericIntervalToConstant, summon[ConvertIntFloat[Topped[Int], F32]]).adaptConfig(NilCC && _)
-//    given ConvertIntDouble[I32, F64] =
-//      new TransitiveConvert(using ConvertNumericIntervalToConstant, summon[ConvertIntDouble[Topped[Int], F64]]).adaptConfig(NilCC && _)
-//    given ConvertLongFloat[I64, F32] =
-//      new TransitiveConvert(using ConvertNumericIntervalToConstant, summon[ConvertLongFloat[Topped[Long], F32]]).adaptConfig(NilCC && _)
-//    given ConvertLongDouble[I64, F64] =
-//      new TransitiveConvert(using ConvertNumericIntervalToConstant, summon[ConvertLongDouble[Topped[Long], F64]]).adaptConfig(NilCC && _)
-//    given ConvertFloatInt[F32, I32] =
-//      new TransitiveConvert(using summon[ConvertFloatInt[F32, Topped[Int]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
-//    given ConvertFloatLong[F32, I64] =
-//      new TransitiveConvert(using summon[ConvertFloatLong[F32, Topped[Long]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
-//    given ConvertDoubleInt[F64, I32] =
-//      new TransitiveConvert(using summon[ConvertDoubleInt[F64, Topped[Int]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
-//    given ConvertDoubleLong[F64, I64] =
-//      new TransitiveConvert(using summon[ConvertDoubleLong[F64, Topped[Long]]], ConvertConstantToNumericInterval).adaptConfig(_ && NilCC)
-//    given ConvertFloatBytes[F32, Bytes] with
-//      def apply(from: Topped[Float], conf: BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[Byte]] =
-//        val bytes: Seq[Topped[Byte]] = Convert(from, conf)
-//        bytes.map(Convert.apply(_, NilCC))
-//    given ConvertBytesFloat[Bytes, F32] with
-//      override def apply(from: Seq[NumericInterval[Byte]], conf: SomeCC[ByteOrder]): Topped[Float] = {
-//        val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
-//        Convert(bytes, conf)
-//      }
-//    given ConvertDoubleBytes[F64, Bytes] with
-//      def apply(from: Topped[Double], conf: BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[Byte]] =
-//        val bytes: Seq[Topped[Byte]] = Convert(from, conf)
-//        bytes.map(Convert.apply(_, NilCC))
-//    given ConvertBytesDouble[Bytes, F64] with
-//      override def apply(from: Seq[NumericInterval[Byte]], conf: SomeCC[ByteOrder]): Topped[Double] = {
-//        val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
-//        Convert(bytes, conf)
-//      }
-//
-//    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
-//
-//    var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
-//    var longIntervalBounds: Set[Long] = Set(-1, 0, 1)
-//    given Widen[I32] = new NumericIntervalWiden[Int](intIntervalBounds, Int.MinValue, Int.MaxValue)
-//    given Widen[I64] = new NumericIntervalWiden[Long](longIntervalBounds, Long.MinValue, Long.MaxValue)
-//    given Widen[NumericInterval[Byte]] = new NumericIntervalWiden[Byte](Set(), Byte.MinValue, Byte.MaxValue)
-//
-//    private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
-//    private val boundCollector = new Traverser[IO, Unit]() {
-//      override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
-//      override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
-//    }
-//    override def initializeModule(module: Module, imports: Imports): ModuleInstance = {
-//      module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
-//      module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-//      super.initializeModule(module, imports)
-//    }
-//
-//    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[RelationalAnalysis.Value]] = new fix.ContextualFixpoint {
-//      override type Ctx = config.ctx.Ctx
-//      val (contextPreparation, sensitivity) = config.ctx.make[RelationalAnalysis.Value]
-//      import config.ctx.finiteCtx
-//      override protected def contextFree = contextPreparation
-//      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-//      override protected def contextSensitive = config.fix.get
-//    }
-//
-//    override val fixpointSuper = fixpoint
-//    override def toString: String = s"constant $config"
+package sturdy.language.wasm.analyses
+
+import apron.*
+import sturdy.apron.{*, given}
+import sturdy.apron.ApronExpr.*
+import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
+import sturdy.data.{*, given}
+import sturdy.effect.{EffectList, EffectStack, TrySturdy}
+import sturdy.effect.bytememory.{*,given}
+import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
+import sturdy.effect.except.JoinedExcept
+import sturdy.effect.failure.{*, given}
+import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
+import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable}
+import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
+import sturdy.fix
+import sturdy.fix.context.Sensitivity
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.abstractions.*
+import sturdy.language.wasm.abstractions.Fix.{*, given}
+import sturdy.language.wasm.generic.{*, given}
+import sturdy.language.wasm.abstractions.Control.Exc
+import sturdy.values.{*, given}
+import sturdy.values.booleans.{*, given}
+import sturdy.values.config.{*, given}
+import sturdy.values.convert.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.ordering.{*, given}
+import sturdy.values.references.{*, given}
+import sturdy.values.types.{*, given}
+import sturdy.util.{*, given}
+import swam.syntax.*
+import swam.{FuncType, OpCode, syntax}
+
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import scala.collection.{IndexedSeqView, mutable}
+import WasmFailure.*
+import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
+import sturdy.effect.stack.RelationalStack
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
+import sturdy.fix.{DomLogger, Logger}
+
+import java.math.BigInteger
+import scala.collection.immutable.List
+import scala.math
+
+object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalBytes, ExceptionByTarget, Control:
+  final type J[A] = WithJoin[A]
+  final type Addr = ApronExpr[VirtAddr, Type]
+  final type Size = ApronExpr[VirtAddr, Type]
+  final type FuncIx = apron.Interval
+  final type FunV = Powerset[FunctionInstance]
+
+  import Value.*
+  import Type.*
+
+  val topSize: Top[Size] = new Top[Size]:
+    override def top: Size = constant(ApronExpr.topInterval, I32Type)
+
+  given RelationalSpecialWasmOperations(using f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+    override def valueToAddr(v: Value): Addr = v match
+      case Int32(v) => v.asApronExpr
+      case TopValue => constant(ApronExpr.topInterval, I32Type)
+      case _ => f.fail(TypeError, s"Expected i32 but got $this")
+
+    override def valueToFuncIx(v: Value): FuncIx =
+      val expr = v.asInt32.asApronExpr
+      apronState.getInterval(expr)
+
+    override def valToSize(v: Value): Size = v match
+      case Int32(v) => v.asApronExpr
+      case TopValue => constant(ApronExpr.topInterval, I32Type)
+      case _ => f.fail(TypeError, s"Expected i32 but got $this")
+
+    override def sizeToVal(sz: Size): Value =
+      Int32(Left(sz))
+
+    override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
+      val expr = ix.asInt32.asApronExpr
+      val (l,h) = apronState.getIntInterval(expr)
+      val elems = for (i <- l.max(0) to h.min(vec.size - 1))
+        yield vec(i)
+      if (elems.isEmpty) {
+        // no elems in range
+        JOptionPowerset.None()
+      } else if (h < vec.size) {
+        // all indices in range
+        JOptionPowerset.Some(Powerset(elems.toSet))
+      } else {
+        // some indices in range, but not all
+        JOptionPowerset.NoneSome(Powerset(elems.toSet))
+      }
+
+    def assignFreshTempVar(expr: ApronExpr[VirtAddr, Type]): List[Value] =
+      List(apronState.withTempVars(expr._type)((v, _) =>
+        apronState.assign(v, expr)
+        Value.Int32(Left(ApronExpr.addr(v, expr._type)))
+      ))
+
+    def signedMin(numBytes: Int): BigInt = - BigInt(2).pow(8 * numBytes - 1)
+    def signedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes - 1) - 1
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "__VERIFIER_nondet_bool" =>
+        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
+      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
+      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
+      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
+      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
+      case "__VERIFIER_nondet_float" =>
+        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
+      case "__VERIFIER_nondet_double" =>
+        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
+      case "__blackhole_int" | "__blackhole_int_p" =>
+        args
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
+
+  class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+    private given Instance = this
+
+    var dummy: List[Value] = List()
+
+    override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvV: WithJoin[Value] = implicitly
+    override def jvFunV: WithJoin[FunV] = implicitly
+    //    override def widenState: Widen[State] = implicitly
+
+    val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
+    var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
+    var apronState: ApronRecencyState[AddrCtx, Type, Value] = null
+    given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+    given Lazy[ApronExprConverter[AddrCtx, Type, Value]] = Lazy(exprConverter)
+    given Join[ApronExpr[VirtAddr, Type]] = JoinApronExpr[VirtAddr, Type]
+    given Widen[ApronExpr[VirtAddr, Type]] = WidenApronExpr[VirtAddr, Type]
+
+    given RelationalExpr[Value, VirtAddr, Type] with
+      override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, Type]] =
+        v match
+          case Value.Int32(i32: I32) => Some(i32.asApronExprLazy)
+          case Value.Int64(expr) => Some(expr)
+          case Value.Float32(expr) => Some(expr)
+          case Value.Float64(expr) => Some(expr)
+          case Value.TopValue => None
+
+      override def makeRelationalExpr(expr: ApronExpr[VirtAddr, Type]): Value =
+        expr._type match
+          case I32Type => Value.Int32(Left(expr))
+          case I64Type => Value.Int64(expr)
+          case F32Type => Value.Float32(expr)
+          case F64Type => Value.Float64(expr)
+
+    given domLogger: DomLogger[FixIn] = new DomLogger
+
+    val relationalStore: RelationalStore[AddrCtx, Type, PowPhysAddr, Value] = new RelationalStore[AddrCtx, Type, PowPhysAddr, Value](
+      manager = apronManager,
+      initialState = apron.Abstract1(apronManager, new apron.Environment()),
+      initialMetaData = Map()
+    )
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
+    exprConverter = ApronExprConverter(recencyStore, relationalStore)
+    apronState = new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+    given ApronRecencyState[AddrCtx, Type, Value] = apronState
+
+    def addressIterator: Iterator[VirtAddr] =
+      def valueIterator(value: Any): Iterator[VirtAddr] = value match
+        case Value.Int32(Left(expr)) => expr.addrs.iterator
+        case Value.Int32(Right(cons)) => cons.addrs.iterator
+        case Value.Int64(expr) => expr.addrs.iterator
+        case Value.Float32(expr) => expr.addrs.iterator
+        case Value.Float64(expr) => expr.addrs.iterator
+        case virts: PowVirtAddr => virts.iterator
+        case expr: ApronExpr[VirtAddr,Type] => expr.addrs.iterator
+        case excV: ExcV =>
+          for(listVals <- excV.values.iterator;
+              value <- listVals.iterator;
+              addr <- valueIterator(value))
+            yield(addr)
+        case physAddr: PhysAddr => Iterator.empty
+        case _ =>
+          throw IllegalArgumentException("Unknown Value "+value)
+
+      effectStack.addressIterator[VirtAddr](valueIterator)
+
+    def garbageCollect(): Unit =
+      val alive = PowVirtualAddress(this.addressIterator)
+      val dead = recencyStore.addressTranslation.deadPhysicalAddresses(alive)
+      val stateBefore = effectStack.getState
+      recencyStore.collectGarbage(alive)
+      val stateAfter = effectStack.getState
+      println(s"Alive: $alive")
+      println(s"Dead: $dead")
+      println(s"State Before: $stateBefore")
+      println(s"State After: $stateAfter")
+
+    val callFrame: RelationalCallFrame[FrameData, Int, Value, InstLoc, AddrCtx, Type] = new RelationalCallFrame(
+      initData = rootFrameData,
+      initVars = Iterable.empty,
+      localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
+      apronState
+    )
+
+    val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
+
+    val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Value] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Value](
+      Bytes.StoredBytes(Value.TopValue, Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+      heapAlloc(rootFrameData))
+
+    val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
+        (key: Unit, sym: GlobalAddr) =>
+          AddrCtx.Global(sym.addr)
+    ))
+
+    val funTable: IntervalSymbolTable[TableAddr, FuncIx, Powerset[FunctionInstance]] = new IntervalSymbolTable
+
+    val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
+    private given Failure = failure
+
+    def getInterval(v: Value): Value =
+      v match
+        case Value.Int32(i32) =>
+          val expr = i32.asApronExpr
+          Value.Int32(
+            Left(ApronExpr.constant(
+              apronState.getFloatInterval(expr).meet(
+                sturdy.apron.FloatInterval(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom)
+              ),
+              expr._type
+            )
+            )
+          )
+        case Value.Int64(expr) =>
+          Value.Int64(
+            ApronExpr.constant(
+              apronState.getFloatInterval(expr).meet(
+                sturdy.apron.FloatInterval(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom)
+              ),
+              expr._type
+            )
+          )
+        case Value.Float32(expr) =>
+          Value.Float32(ApronExpr.constant(
+            apronState.getFloatInterval(expr).meet(
+              sturdy.apron.FloatInterval(Float.MinValue, Float.MaxValue, FloatSpecials.Top)
+            ), expr._type))
+        case Value.Float64(expr) =>
+          Value.Float64(ApronExpr.constant(
+            apronState.getFloatInterval(expr).meet(
+              sturdy.apron.FloatInterval(Double.MinValue, Double.MaxValue, FloatSpecials.Top)
+            ), expr._type))
+        case Value.TopValue => Value.TopValue
+
+    def constantInstructions: ConstantInstructionsLogger =
+      val constants = new ConstantInstructionsLogger
+      this.fixpoint.addContextFreeLogger(constants)
+      constants
+
+    extension(expr: ApronExpr[VirtAddr,Type])
+      def isConstant: Boolean =
+        val iv = apronState.getInterval(expr)
+        iv.inf().isEqual(iv.sup())
+
+
+    class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
+      val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
+
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.EnterWasmFunction(id,_,FuncType(params,_)) =>
+            val args = params.indices.map {
+              i =>
+                val v = callFrame.getLocal(i).get
+                (v, getInterval(v))
+            }
+            val state = effectStack.getState
+            print("  ".repeat(stack.size))
+            println(s"CALL   f${id.funcIx}(${args.mkString(",")} @ ${state.hashCode()}")
+            stack.push((dom,args,state))
+          case _ => {}
+
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
+        dom match
+          case FixIn.EnterWasmFunction(id, _, ft) =>
+            val (_,args,inState) = stack.pop
+            val result =
+              codom.map{
+                case FixOut.ExitWasmFunction(returns) =>  FixOut.ExitWasmFunction(returns.map(v => (v, getInterval(v))))
+                case FixOut.ExitHostFunction(returns) =>  FixOut.ExitHostFunction(returns.map(v => (v, getInterval(v))))
+                case FixOut.Eval() =>  FixOut.Eval()
+                case FixOut.MostGeneralClient() => FixOut.MostGeneralClient()
+              }
+            val outState = effectStack.getState
+            print("  ".repeat(stack.size))
+            println(s"RETURN f${id.funcIx}(${args.mkString(",")} @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+          case _ => {}
+
+
+    class ConstantInstructionsLogger extends InstructionResultLogger[Interval, Value](stack):
+      override def boolValue(v: Value): Value = boolean(asBoolean(v))
+
+      override def dummyValue: Value = Value.Int32(Left(ApronExpr.constant(Interval(0, 0), I32Type)))
+      
+      def getInfo(value: Value): Interval = value match
+        case Value.TopValue => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
+        case Value.Int32(Left(v)) => apronState.getInterval(v)
+        case Value.Int32(Right(v)) =>
+          apronState.getBoolean(v) match
+            case Topped.Actual(true)  => Interval(1,1)
+            case Topped.Actual(false) => Interval(0,0)
+            case Topped.Top           => Interval(0,1)
+        case Value.Int64(v) => apronState.getInterval(v)
+        case Value.Float32(v) => apronState.getInterval(v)
+        case Value.Float64(v) => apronState.getInterval(v)
+
+
+      def get: Map[InstLoc, List[Interval]] = instructionInfo.filter(_._2.forall (
+        iv => iv.inf.isEqual(iv.sup)
+      ))
+
+      def grouped: Map[String, Map[InstLoc, List[Interval]]] =
+        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
+
+      def groupedCount: Map[String, Int] =
+        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
+
+
+    override def newEffectStack: EffectStack =
+      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except, failure))
+      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, funTable, callFrame))
+      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame))
+      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, failure))
+      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, funTable, callFrame, except))
+
+      new EffectStack(allEffects,
+        {
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => inEffectsFunction
+          case _: FixIn.Eval => inEffectsEval
+        }, {
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => outEffectsFunction
+          case _: FixIn.Eval => outEffectsEval
+        }
+      )
+
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+
+    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
+
+    override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint[FixIn, FixOut[Value]] {
+      override type Ctx = observedConfig.ctx.Ctx
+      val (contextPreparation, sensitivity) = observedConfig.ctx.make[Value]
+      import observedConfig.ctx.finiteCtx
+      override protected def contextFree = phi =>
+        fix.checkThreadInterrupted(fix.log(controlEventLogger(Instance.this, effectStack, except), contextPreparation(phi)))
+      override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
+      override protected def contextSensitive = observedConfig.fix.get
+      addContextFreeLogger(domLogger)
+      addContextFreeLogger(new FunctionCallLogger)
+    }
+
+    override def toString: String = s"constant $config"

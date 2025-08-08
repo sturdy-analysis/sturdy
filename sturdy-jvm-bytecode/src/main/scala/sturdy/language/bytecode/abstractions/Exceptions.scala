@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.ClassType
-import sturdy.data.*
+import sturdy.data.{CombineOption, *}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.values.{Combine, Join, MaybeChanged, Powerset, Widening}
 import sturdy.values.exceptions.Exceptional
@@ -26,13 +26,13 @@ trait Exceptions:
         e.returns.map(v => () => f(JvmExcept.Ret(v))) ++
         e.throws.set.map(exception => () => f(JvmExcept.Throw(exception))) ++
         e.throwObjects.map(v => () => f(JvmExcept.ThrowObject(v)))
-      
+
       mapJoin(computations, comp => comp())
 
   given CombineJvmExceptAbstract[V, W <: Widening](using Combine[V, W]): Combine[JvmExceptAbstract[V], W] with
     override def apply(v1: JvmExceptAbstract[V], v2: JvmExceptAbstract[V]): MaybeChanged[JvmExceptAbstract[V]] = {
-      val jret = CombineOption()(v1.returns, v2.returns)
-      val jthrow = CombineOption()(v1.throwObjects, v2.throwObjects)
+      val jret = CombineOption(v1.returns, v2.returns)
+      val jthrow = CombineOption(v1.throwObjects, v2.throwObjects)
       val exc = JvmExceptAbstract(
         v1.jumps ++ v2.jumps,
         jret.get,

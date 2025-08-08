@@ -2,14 +2,15 @@ package sturdy.language.tutorial
 
 import sturdy.values.{Changed, Combine, Finite, Join, MayMust, MaybeChanged, Unchanged, Widening}
 import sturdy.data.{MayJoin, WithJoin}
-import sturdy.values.{CombineMayMust}
-import sturdy.data.{CombineUnit, JoinMap, CombineFiniteKeyMap, finiteUnit}
+import sturdy.values.CombineMayMust
+import sturdy.data.{CombineFiniteKeyMap, CombineUnit, JoinMap, finiteUnit}
 import sturdy.IsSound
 import sturdy.fix
 import sturdy.Soundness
 
 import scala.collection.mutable.ListBuffer
 import GenericInterpreter.*
+import sturdy.control.ControlObservable
 import sturdy.fix.{Fixpoint, StackConfig}
 
 /*
@@ -17,7 +18,7 @@ import sturdy.fix.{Fixpoint, StackConfig}
  * configuring a fixpoint algorithm. We extend ContextInsensitive in order to implement a context insensitive
  * fixpoint algorithm.
  */
-class SignInterpreter extends GenericInterpreter[Sign, WithJoin]:
+class SignInterpreter extends GenericInterpreter[Sign, WithJoin], ControlObservable:
   // value components
   override val numericOps: SignNumericOps = new SignNumericOps
   override val branching: SignBranching[Unit] = new SignBranching[Unit]

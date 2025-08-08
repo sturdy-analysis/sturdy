@@ -14,6 +14,7 @@ trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Sit
 
 abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
   protected var _data: Data = initData
+  protected var _callSite: Option[Site] = None
   protected var vars: Array[V] = _
   protected var names: Map[Var, Int] = _
 
@@ -35,6 +36,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
   def data: Data = _data
   def setData(d: Data): Unit =
     _data = d
+  def callSite: Option[Site] = _callSite
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
@@ -69,6 +71,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
     val snapNames = this.names
     val snapVars = this.vars
     this._data = d
+    this._callSite = Some(site)
     setVars(vars)
     try f finally {
       this._data = snapData
@@ -92,9 +95,11 @@ class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(
 
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
   override type State = List[V]
-  override def getState: State = vars.toList
+  override def getState: State = if(vars == null) List() else vars.toList
   override def setState(s: State): Unit =
-    s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+    if(vars == null) vars = s.toArray
+    else  s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+  override def setBottom: Unit = vars = null
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
 
@@ -108,7 +113,7 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
       vars = snapshot
 
     override def retainNone(): Unit =
-      vars = snapshot
+      setBottom
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       vars = fVars
@@ -120,3 +125,6 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
         throw IllegalStateException()
       vars = vars.zip(fVars).map(Join[V](_,_).get)
   }
+
+  override def toString: String =
+    getState.toString

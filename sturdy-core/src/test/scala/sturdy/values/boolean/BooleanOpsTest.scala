@@ -7,7 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import sturdy.utils.GenBoolean.{*,given}
+import sturdy.util.GenBoolean.{*,given}
 import sturdy.values.{Structural, Topped}
 import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps

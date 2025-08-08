@@ -21,14 +21,14 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
   val addrTrans = analysis.apronState.recencyStore.addressTranslation
   val apronState = analysis.apronState
 
-  given Abstractly[ConcreteInterpreter.Addr, RelationalVar] = {
-    case (AllocationSite.Alloc(e),_) => RelationalVar.Alloc(e.label)
-    case (AllocationSite.Record(r),_) => RelationalVar.Alloc(r.label)
+  given Abstractly[ConcreteInterpreter.Addr, AddrCtx] = {
+    case (AllocationSite.Alloc(e),_) => AddrCtx.Alloc(e)
+    case (AllocationSite.Record(r),_) => AddrCtx.Alloc(r)
   }
 
   given Abstractly[ConcreteInterpreter.Addr, Addr] =
     (cAddr: ConcreteInterpreter.Addr) =>
-      val ctx = Abstractly[ConcreteInterpreter.Addr, RelationalVar](cAddr)
+      val ctx = Abstractly[ConcreteInterpreter.Addr, AddrCtx](cAddr)
       addrTrans.mapping.get(ctx) match
         case None => throw new IllegalStateException(s"Address Translation $addrTrans does not contain context $ctx")
         case Some(region) =>

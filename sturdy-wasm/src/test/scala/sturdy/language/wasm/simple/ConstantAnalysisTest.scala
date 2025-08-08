@@ -183,7 +183,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val module = wasm.Parsing.fromText(path)
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
-    WasmConfig(FixpointConfig(fix.iter.Config.Innermost(stackConfig))))
+    WasmConfig(FixpointConfig(stackConfig)))
   val constants = ConstantAnalysis.constantInstructions(interp)
 
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)

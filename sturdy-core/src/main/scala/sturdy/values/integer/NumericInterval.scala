@@ -1,9 +1,10 @@
 package sturdy.values.integer
 
+import sturdy.{IsSound, Soundness}
 import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
-import sturdy.values.{Topped, *}
+import sturdy.values.*
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
@@ -1322,3 +1323,14 @@ given ConvertBytesToNumericInterval[From, To, I]
 //    println(s"$bytes => $byteIntervals => ($lowBytes, $highBytes) => ${(low, high)}   ($conf)")
     val value = NumericInterval.safe(low, high)
     value
+
+given SoundnessNumericInterval[L: Ordering]: Soundness[L, NumericInterval[L]] with
+  override def isSound(l: L, n: NumericInterval[L]): IsSound =
+      if(n.low <= l && l <= n.high)
+        IsSound.Sound
+      else
+        IsSound.NotSound(s"$n does not contain $l")
+
+given NumericIntervalRange: IntervalRange[NumericInterval[Int]] with
+  override def range(iv: NumericInterval[Int]): Option[Range] =
+    Some(Range.inclusive(iv.low, iv.high))

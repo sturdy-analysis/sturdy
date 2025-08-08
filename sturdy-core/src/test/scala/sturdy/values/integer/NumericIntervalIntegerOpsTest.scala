@@ -1,49 +1,39 @@
 package sturdy.values.integer
 
 import org.scalatest.Assertion
-import org.scalatest.matchers.should.Matchers.{fail, succeed}
+import org.scalatest.Assertions.{fail, succeed}
 import sturdy.data.NoJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
+import sturdy.util.{*, given}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.{Finite, Top}
 
-given failure: Failure = new CollectedFailures[FailureKind]
-given Finite[FailureKind] with {}
-given effectState: EffectStack = EffectStack(failure)
+import math.Ordered.orderingToOrdered
 
-class NumericIntervalTestingIntegerOps[I]
-  (using 
-   ordering: Ordering[I], 
-   ops: IntegerOps[I, I],
-   strict: StrictIntegerOps[I, I, NoJoin], 
-   num: Numeric[I], 
-   t: Top[NumericInterval[I]])
-  extends NumericIntervalIntegerOps[I](20)
-    with TestingIntegerOps[I, NumericInterval[I]]:
-  override def integerLit(i: I): NumericInterval[I] = NumericInterval(i, i)
+given NumericIntervalIsInterval[I: Ordering]: IsInterval[I, NumericInterval[I]] with
+  override def constant(i: I): NumericInterval[I] = NumericInterval(i, i)
+  override def interval(low: I, high: I, floatSpecials: FloatSpecials): NumericInterval[I] = NumericInterval(low, high)
 
-  override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low, high)
-
-  override def shouldContain(n: NumericInterval[I], m: I): Assertion =
-    if (n.containsNum(m))
-      succeed
-    else
-      fail(s"$n does not include $m")
-
-  override def shouldEqual(n: NumericInterval[I], l: I, u: I): Assertion =
-    if (n.low == l && n.high == u)
-      succeed
-    else 
-      fail(s"$n does not equal [$l,$u]")
+given IntegerOps[Int, Int] = ConcreteIntegerOps(using new ConcreteFailure())
+given IntegerOps[Long, Long] = ConcreteLongOps(using new ConcreteFailure())
 
 class NumericIntervalIntIntegerOpsTest extends IntegerOpsTest[Int,NumericInterval[Int]](
-  minValue = Integer.MIN_VALUE,
-  maxValue = Integer.MAX_VALUE,
-  makeIntegerOps = new NumericIntervalTestingIntegerOps
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
+  makeIntegerOps = () => {
+    given failure: Failure = new CollectedFailures[FailureKind]
+    given Finite[FailureKind] with {}
+    given effectState: EffectStack = EffectStack(failure)
+    (NumericIntervalIsInterval[Int], new NumericIntervalIntegerOps[Int](20), SoundnessNumericInterval)
+  }
 )
 
 class NumericIntervalLongIntegerOpsTest extends IntegerOpsTest[Long,NumericInterval[Long]](
-  minValue = Long.MinValue,
-  maxValue = Long.MaxValue,
-  makeIntegerOps = new NumericIntervalTestingIntegerOps
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  makeIntegerOps = () => {
+    given failure: Failure = new CollectedFailures[FailureKind]
+    given Finite[FailureKind] with {}
+    given effectState: EffectStack = EffectStack(failure)
+    (NumericIntervalIsInterval[Long], new NumericIntervalIntegerOps[Long](20), SoundnessNumericInterval)
+  }
 )

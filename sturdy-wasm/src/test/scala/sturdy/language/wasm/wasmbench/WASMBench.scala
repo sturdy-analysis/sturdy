@@ -64,15 +64,13 @@ class WASMBench extends AnyFlatSpec:
     val hashes = resStore.retrieve(_ => true).map(r => r.hash.split('.')(0))
 
     val store = mkMdStore
-    val export_start = store.retrieve(wb => {
-      wb match
-        case WASMBenchBinary(md, ex) =>
-          ex.exists {
-            case FuncDef(_, _, Some("_start")) => true
-            case _ => false
-          }
-        case _ => false
-    })
+    val export_start = store.retrieve {
+      case WASMBenchBinary(md, ex) =>
+        ex.exists {
+          case FuncDef(_, _, Some("_start")) => true
+          case _ => false
+        }
+    }
     val ofWhichJacarte = export_start.filter(p => {
       p.md.files.exists(p => {
         p.absolutePath.contains("Jacarte/CROW_tmp/rosetta")
@@ -101,7 +99,6 @@ class WASMBench extends AnyFlatSpec:
     val nonJacarteResults = resStore.retrieve(r => {
       !ofWhichPassed.exists{
         case WASMBenchBinary(Metadata(hash,_,_,_,_,_,_), _) => hash == r.hash.split('.')(0)
-        case _ => false
       }
     })
 
@@ -250,10 +247,10 @@ class WASMBench extends AnyFlatSpec:
 
     for {
       (hash, md) <- json.obj
-      JObject(fields) <- md
-      JField("wasm_validate_no_extensions", v) <- fields
-      JField("wasm_validate", w) <- fields
-      JField("instruction_count", bi) <- fields
+      case JObject(fields) <- md
+      case JField("wasm_validate_no_extensions", v) <- fields
+      case JField("wasm_validate", w) <- fields
+      case JField("instruction_count", bi) <- fields
       if !exclude.contains(hash)
       if v == JBool(true)
       if w != JNull
@@ -278,11 +275,11 @@ class WASMBench extends AnyFlatSpec:
           acc ~ ("files", files)
         case ("producers", prod) =>
           val langs: List[(String, JValue)] = for {
-            JObject(fields) <- prod \\ "language"
+            case JObject(fields) <- prod \\ "language"
             (lang, version) <- fields
           } yield (lang, version)
           val procs: List[(String, JValue)] = for {
-            JObject(fields) <- prod \\ "processed-by"
+            case JObject(fields) <- prod \\ "processed-by"
             (lang, version) <- fields
           } yield (lang, version)
           acc ~ ("processors" -> procs) ~ ("languages" -> langs)
@@ -291,7 +288,7 @@ class WASMBench extends AnyFlatSpec:
       })
     }
 
-  def prepareMetadata(source: Path, out: Path) =
+  def prepareMetadata(source: Path, out: Path): Map[String, Metadata] =
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.read
 
@@ -313,7 +310,7 @@ class WASMBench extends AnyFlatSpec:
     outStream.flush(); outStream.close()
     read[Map[String, Metadata]](output)
 
-  def extractFuncDefsScript() =
+  def extractFuncDefsScript(): Unit =
 
     import org.json4s.native.Serialization
     import org.json4s.native.Serialization.{read,write}

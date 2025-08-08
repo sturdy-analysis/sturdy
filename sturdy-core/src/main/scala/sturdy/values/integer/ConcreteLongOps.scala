@@ -6,8 +6,7 @@ import sturdy.data.MayJoin.NoJoin
 import scala.util.Random
 import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, Topped, config}
-import sturdy.values.config.Bits
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{Bits, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 
@@ -57,7 +56,10 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
     else {
       val r = v1 % v2
       if (r < 0)
-        r + v2
+        if(v2 >= 0)
+          r + v2
+        else
+          r - v2
       else
         r
     }
@@ -103,7 +105,7 @@ given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
    */
   def apply(l: Long, conf: NilCC.type): Int = (l % (1L << 32)).toInt
 
-given ConcreteConvertLongFloat: ConvertLongFloat[Long, Float] with
+given ConcreteConvertLongFloat(using failure: Failure): ConvertLongFloat[Long, Float] with
   private val convC = JFloat.parseFloat("0x1p12")
   override def apply(l: Long, conf: Bits): Float = conf match
     case config.Bits.Signed =>
@@ -120,7 +122,7 @@ given ConcreteConvertLongFloat: ConvertLongFloat[Long, Float] with
         val r = if ((l & 0XFFFL) == 0L) 0L else 1L
         ((l >>> 12) | r).toFloat * convC
       }
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    case _ => unsupportedConfiguration(conf, this)
 
 given ConcreteConvertLongDouble: ConvertLongDouble[Long, Double] with
   override def apply(l: Long, conf: Bits): Double = conf match
@@ -143,7 +145,7 @@ given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
       case config.BytesSize.Long => buf.putLong(0, from)
     collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
-given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
+given ConcreteConvertBytesLong(using failure: Failure): ConvertBytesLong[Seq[Byte], Long] with
   override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Long =
     val buf = ByteBuffer.wrap(from.toArray)
     buf.order(conf.c1.c2.t)
@@ -155,7 +157,7 @@ given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
       case (config.BytesSize.Int, config.Bits.Signed) => buf.getInt.toLong
       case (config.BytesSize.Int, config.Bits.Unsigned) => buf.getInt & 0xFFFFFFFFL
       case (config.BytesSize.Long, _) => buf.getLong()
-      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+      case _ => unsupportedConfiguration(conf, this)
 
 given ConcreteLongUnsignedOrderingOps: UnsignedOrderingOps[Long, Boolean] with
   override def ltUnsigned(v1: Long, v2: Long): Boolean = JLong.compareUnsigned(v1, v2) < 0

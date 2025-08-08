@@ -8,6 +8,7 @@ import sturdy.effect.Concrete
 import sturdy.effect.TrySturdy
 import sturdy.values.*
 
+import scala.reflect.ClassTag
 import scala.util.boundary, boundary.break
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
@@ -45,6 +46,12 @@ class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[
   override def setState(st: State): Unit = tables = st
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    for(tab <- tables.values.iterator;
+        entry <- tab.values.iterator;
+        addr <- valueIterator(entry))
+      yield(addr)
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
   class SymbolTableJoiner[A] extends ComputationJoiner[A] {

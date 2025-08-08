@@ -2,6 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
+import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Combinator, Contextual, Fixpoint, HasFixpointCache, Stack, StackConfig, StackedFrames, State}
 import sturdy.values.Finite
 import sturdy.values.MaybeChanged
@@ -40,10 +41,10 @@ final class Topmost[Dom, Codom, Ctx]
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     @tailrec
-    def apply_(recursive: Boolean)(dom: Dom): Codom =
+    def apply_(dom: Dom): Codom =
       if (stack.height == 0) {
         val allState: state.All = state.getAllState
-        val result = step(f, dom, recursive)
+        val result = step(f, dom, true)
         if (someComponentIsLooping) {
           if (Fixpoint.DEBUG) {
             iterationCount += 1
@@ -51,20 +52,20 @@ final class Topmost[Dom, Codom, Ctx]
           }
           someComponentIsLooping = false
           state.setAllState(allState)
-          apply_(recursive = true)(dom)
+          apply_(dom)
         } else
           result.getOrThrow
       } else {
-        step(f, dom, recursive).getOrThrow
+        step(f, dom, false).getOrThrow
       }
-    apply_(recursive = false)
+    apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom, recursive: Boolean): TrySturdy[Codom] =
+  private def step(f: Dom => Codom, dom: Dom, iterate: Boolean): TrySturdy[Codom] =
     val in = state.getInState(dom)
     val outBefore = state.getOutState(dom)
-    stack.push(dom, in, outBefore, recursive) match
-      case stack.PushResult.Recurrent(result, widenedOut) =>
+    stack.push(dom, in, outBefore, iterate) match
+      case stack.PushResult.Skip(result, widenedOut) =>
         widenedOut.foreach(state.setOutState(dom, _))
         result
       case stack.PushResult.Continue(widenedIn) =>
@@ -72,7 +73,9 @@ final class Topmost[Dom, Codom, Ctx]
         val result = TrySturdy(f(dom))
         val out = state.getOutState(dom)
         stack.pop(dom, widenedIn.getOrElse(in), result, out) match
-          case stack.PopResult.Stable =>
+          case stack.PopResult.Stable(marker) =>
+            if (stack.height == 0 && !someComponentIsLooping)
+              marker.markPermanentlyStable()
             result
           case stack.PopResult.Unstable(newresult, newout) =>
             newout.foreach(state.setOutState(dom, _))

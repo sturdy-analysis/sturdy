@@ -3,14 +3,16 @@ package sturdy.effect.store
 import sturdy.{IsSound, Soundness}
 import sturdy.data.{JOption, JOptionA, WithJoin, given}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.{ComputationJoiner, Effect, EffectListJoiner, Stateless, TrySturdy}
+import sturdy.effect.{ComputationJoiner, Effect, EffectList, EffectListJoiner, Stateless, TrySturdy}
+import sturdy.util.Profiler
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
-import scala.collection.immutable.{HashMap, IntMap}
+import scala.collection.immutable.{ArraySeq, BitSet, HashMap, IntMap}
 import scala.collection.{MapView, mutable}
 import scala.reflect.ClassTag
-import scala.util.boundary, boundary.break
+import scala.util.boundary
+import boundary.break
 
 class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V]
   (val initStore: Store[PowPhysicalAddress[Context], V, WithJoin],
@@ -39,11 +41,9 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
     val pa = virtToPhys(vs)
     store.write(pa, v)
 
-  override def free(vs: Virt): Unit = {}
-//    val pa = virtToPhys(vs)
-//    store.free(pa)
-//    if (vs.isStrong)
-//      vs.reduce(v => addressTranslation -= ((v.ctx,v.n)))
+  override def free(vs: Virt): Unit =
+    val pa = virtToPhys(vs)
+    store.free(pa)
 
   def alloc(ctx: Context): VirtualAddress[Context] =
     store.move(
@@ -51,10 +51,11 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
       PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
     addressTranslation.alloc(ctx)
 
-  def joinRecentIntoOld(virt: Virt) =
+  def joinRecentIntoOld(mapping: Map[Context, RecencyRegion], virt: Virt): Unit =
     virt.iterator.foreach(
       v =>
-        if(v.recency == PowRecency.Recent || v.recency == PowRecency.RecentOld) {
+        val recency = addressTranslation.recency(mapping, v.ctx, v.n)
+        if (recency == PowRecency.Recent || recency == PowRecency.RecentOld) {
           val (ctx, _) = v.identifier
           store.copy(
             PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
@@ -63,39 +64,25 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
         }
     )
 
-  override type State = RecencyStoreState
+  inline def joinRecentIntoOld(virt: Virt): Unit =
+    joinRecentIntoOld(addressTranslation.mapping, virt)
 
-  case class RecencyStoreState(addrTrans: addressTranslation.State, store: initStore.State):
-    override def equals(obj: Any): Boolean =
-      obj match
-        case other: RecencyStoreState =>
-          this.store.equals(other.store)
-    override def hashCode(): Int =
-      this.store.hashCode()
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    store.addressIterator(valueIterator)
 
-  override def getState: RecencyStoreState =
-    RecencyStoreState(this.addressTranslation.getState, this.store.getState.asInstanceOf)
+  def collectGarbage(alive: PowVirtualAddress[Context]): Unit =
+    Profiler.addTime("RecencyStore.free") {
+      val deadPhysicals = addressTranslation.deadPhysicalAddresses(alive)
+      store.free(deadPhysicals)
+    }
 
-  override inline def setState(st: RecencyStoreState): Unit =
-    this.addressTranslation.setState(st.addrTrans)
-    store.setState(st.store.asInstanceOf)
-
-  override def join: Join[RecencyStoreState] = new CombineRecencyStoreState(addressTranslation.join, initStore.join)
-  override def widen: Widen[RecencyStoreState] = new CombineRecencyStoreState(addressTranslation.widen, initStore.widen)
-  override def stackWiden: StackWidening[RecencyStoreState] =
-    (stack: List[State], call: State) =>
-      val joinedInnerStore = initStore.widen(stack.head.store, call.store)
-      joinedInnerStore.map(RecencyStoreState(call.addrTrans, _))
-
-  private class CombineRecencyStoreState[W <: Widening](combineAddrTrans: Combine[addressTranslation.State, W], combineStore: Combine[initStore.State, W]) extends Combine[RecencyStoreState, W]:
-    override def apply(state1: RecencyStoreState, state2: RecencyStoreState): MaybeChanged[RecencyStoreState] =
-      val combinedAddrTrans = combineAddrTrans(state1.addrTrans, state2.addrTrans)
-      val combinedStores = combineStore(state1.store, state2.store)
-      MaybeChanged(RecencyStoreState(combinedAddrTrans.get, combinedStores.get),
-        hasChanged = combinedAddrTrans.hasChanged || combinedStores.hasChanged)
-
-
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](List(addressTranslation, store)))
+  override type State = initStore.State
+  override inline def getState: State = this.store.getState
+  override inline def setState(st: State): Unit = store.setState(st.asInstanceOf)
+  override def setBottom: Unit = this.store.setBottom
+  override def join: Join[State] = initStore.join
+  override def widen: Widen[State] = initStore.widen
+  override def stackWiden: StackWidening[State] = initStore.stackWiden
 
   def virtualAddresses: PowVirtualAddress[Context] =
     addressTranslation.virtualAddresses
@@ -126,17 +113,61 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
     IsSound.Sound
 
 case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V](recencyStore: RecencyStore[Context, Virt, V], effect: Effect) extends Effect:
-
   override type State = RecencyClosureState[Context, Virt, V, effect.State]
+
   override def getState: State =
-    RecencyClosureState(recencyStore, recencyStore.getState, effect.getState)
+    RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, recencyStore.getState, effect.getState)
 
   override def setState(st: State): Unit =
+    recencyStore.addressTranslation.setState(st.addrTransState.asInstanceOf)
     recencyStore.setState(st.recencyStoreState.asInstanceOf)
     effect.setState(st.effectState)
 
-  override def join: Join[State] = combine(recencyStore.join, effect.join)
-  override def widen: Widen[State] = combine(recencyStore.widen, effect.widen)
+  override def setBottom: Unit =
+    recencyStore.addressTranslation.setBottom
+    recencyStore.setBottom
+    effect.setBottom
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    recencyStore.addressIterator(valueIterator) ++ effect.addressIterator(valueIterator)
+
+  override def join: Join[State] = combine(recencyStore.addressTranslation.join, recencyStore.join, effect.join)
+  override def widen: Widen[State] = combine(recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen)
+  def combine[W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W]): Combine[State, W] =
+    (v1: State, v2: State) =>
+      if(v1 == v2) {
+        // Performance optimization: Avoid joining if the states are equal.
+        Unchanged(v1)
+      } else {
+        val addrTrans = recencyStore.addressTranslation
+        val snapshotMapping = addrTrans.mapping
+        val snapshotOtherMapping = addrTrans.otherMapping
+        val snapshotStore = recencyStore.store.getState
+        try {
+          val joinedAddrTrans = combineAddrTrans(v1.addrTransState.asInstanceOf, v2.addrTransState.asInstanceOf)
+          addrTrans.mapping = joinedAddrTrans.get.mapping
+          addrTrans.otherMapping = None
+
+          var joinedRecencyStore = combineRecencyStore(v1.recencyStoreState.asInstanceOf, v2.recencyStoreState.asInstanceOf)
+          recencyStore.setState(joinedRecencyStore.get)
+
+          // Joining the states v1 and v2 has the side effect of allocating new virtual addresses and mutate the recency store.
+          // Hence, we need to join the current state of the address translation and recency store afterwards to avoid forgetting these addresses.
+          val joinedEffectState = combineState(v1.effectState, v2.effectState)
+          joinedRecencyStore = joinedRecencyStore.flatMap(combineRecencyStore(_, recencyStore.getState))
+
+          MaybeChanged(
+            RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRecencyStore.get, joinedEffectState.get),
+            joinedRecencyStore.hasChanged || joinedEffectState.hasChanged
+          )
+        } finally {
+          addrTrans.mapping = snapshotMapping
+          addrTrans.otherMapping = snapshotOtherMapping
+          recencyStore.store.setState(snapshotStore)
+        }
+      }
+
+
   override def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
       val addrTrans = recencyStore.addressTranslation
@@ -144,70 +175,66 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
       val snapshotOtherMapping = addrTrans.otherMapping
       val snapshotStore = recencyStore.store.getState
       try {
-        addrTrans.mapping = stack.head.recencyStoreState.addrTrans
-        addrTrans.otherMapping = Some(call.recencyStoreState.addrTrans)
-        recencyStore.store.setState(stack.head.recencyStoreState.store.asInstanceOf)
-        val j1 = effect.stackWiden(stack.map(_.effectState), call.effectState)
-        val j2 = recencyStore.stackWiden(stack.map(state => state.recencyStoreState.asInstanceOf[recencyStore.State]), call.recencyStoreState.asInstanceOf[recencyStore.State])
-        MaybeChanged(RecencyClosureState(recencyStore, j2.get, j1.get), j1.hasChanged || j2.hasChanged)
+        val initMapping = stack.foldLeft(call.addrTransState.asInstanceOf[addrTrans.State])((accum, state) => addrTrans.join(accum, state.addrTransState.asInstanceOf).get)
+        addrTrans.mapping = initMapping.mapping
+        addrTrans.otherMapping = None
+
+        val stackRecencyStoreStates = stack.map(state => state.recencyStoreState.asInstanceOf[recencyStore.State])
+        var joinedRecencyStore = recencyStore.stackWiden(stackRecencyStoreStates, call.recencyStoreState.asInstanceOf[recencyStore.State])
+        recencyStore.setState(joinedRecencyStore.get)
+
+        val joinedEffectState = effect.stackWiden(stack.map(state => state.effectState), call.effectState)
+        joinedRecencyStore = joinedRecencyStore.flatMap(joinedStore => recencyStore.stackWiden(joinedStore :: stackRecencyStoreStates, recencyStore.getState))
+
+        val newAddrs = addrTrans.getState.difference(initMapping)
+        val newAddrTransState = recencyStore.addressTranslation.join(call.addrTransState.asInstanceOf, newAddrs.asInstanceOf).get
+
+        MaybeChanged(
+          RecencyClosureState(recencyStore, newAddrTransState, joinedRecencyStore.get, joinedEffectState.get),
+          joinedRecencyStore.hasChanged || joinedEffectState.hasChanged
+        )
       } finally {
         addrTrans.mapping = snapshotMapping
         addrTrans.otherMapping = snapshotOtherMapping
         recencyStore.store.setState(snapshotStore)
       }
 
-  def combine[W <: Widening](combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W]): Combine[State, W] =
-    (v1: State, v2: State) =>
-      val addrTrans = recencyStore.addressTranslation
-      val snapshotMapping = addrTrans.mapping
-      val snapshotOtherMapping = addrTrans.otherMapping
-      val snapshotStore = recencyStore.store.getState
-      try {
-        addrTrans.mapping = v1.recencyStoreState.addrTrans
-        addrTrans.otherMapping = Some(v2.recencyStoreState.addrTrans)
-        recencyStore.store.setState(v1.recencyStoreState.store.asInstanceOf)
-        val j1 = combineState(v1.effectState, v2.effectState)
-        val j2 = combineRecencyStore(recencyStore.getState, v2.recencyStoreState.asInstanceOf)
-        MaybeChanged(RecencyClosureState(recencyStore, j2.get, j1.get), j1.hasChanged || j2.hasChanged)
-      } finally {
-        addrTrans.mapping = snapshotMapping
-        addrTrans.otherMapping = snapshotOtherMapping
-        recencyStore.store.setState(snapshotStore)
-      }
-
-
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(EffectListJoiner[A](List(recencyStore, effect)))
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = EffectList(recencyStore.addressTranslation, recencyStore, effect).makeComputationJoiner[A]
 
 object RecencyClosure:
   def apply[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V](recencyStore: RecencyStore[Context, Virt, V]): RecencyClosure[Context, Virt, V] = new RecencyClosure(recencyStore, new Stateless {})
 
-final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V, EffectState](val recencyStore: RecencyStore[Context, Virt, V], val recencyStoreState: recencyStore.State, val effectState: EffectState):
+private final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V, EffectState](val recencyStore: RecencyStore[Context, Virt, V], val addrTransState: recencyStore.addressTranslation.State, val recencyStoreState: recencyStore.State, val effectState: EffectState):
   val addrTrans = recencyStore.addressTranslation
 
   override def equals(obj: Any): Boolean =
     obj match
-      case other: RecencyClosureState[Context @unchecked, Virt @unchecked, V @unchecked, EffectState @unchecked] =>
-        val snapshotMapping = addrTrans.mapping
-        val snapshotOtherMapping = addrTrans.otherMapping
-        try {
-          addrTrans.mapping = this.recencyStoreState.addrTrans
-          addrTrans.otherMapping = Some(other.recencyStoreState.addrTrans)
-          this.recencyStoreState.equals(other.recencyStoreState)
-          this.effectState.equals(other.effectState)
-        } finally {
-          addrTrans.mapping = snapshotMapping
-          addrTrans.otherMapping = snapshotOtherMapping
-        }
+      case other: RecencyClosureState[Context @unchecked, Virt @unchecked, V @unchecked, EffectState @unchecked]
+        if this.hash == other.hash =>
+          val snapshotMapping = addrTrans.mapping
+          val snapshotOtherMapping = addrTrans.otherMapping
+          try {
+            addrTrans.mapping = this.addrTransState.mapping
+            addrTrans.otherMapping = Some(other.addrTransState.mapping)
+            this.addrTransState.equals(other.addrTransState) &&
+              this.recencyStoreState.equals(other.recencyStoreState) &&
+              this.effectState.equals(other.effectState)
+          } finally {
+            addrTrans.mapping = snapshotMapping
+            addrTrans.otherMapping = snapshotOtherMapping
+          }
       case _ => false
 
-  override def hashCode(): Int =
+  lazy val hash = {
     val snapshotMapping = addrTrans.mapping
     try {
-      addrTrans.mapping = this.recencyStoreState.addrTrans
-      (recencyStoreState, effectState).hashCode()
+      addrTrans.mapping = this.addrTransState.mapping
+      (addrTransState, recencyStoreState, effectState).hashCode()
     } finally {
       addrTrans.mapping = snapshotMapping
     }
+  }
+  override def hashCode(): Int = hash
 
   override def toString: String =
-    f"RecencyClosureState(${hashCode()}, ${recencyStoreState}, ${effectState})"
+    f"RecencyClosureState(${hashCode()}, ${addrTransState}, ${recencyStoreState}, ${effectState})"

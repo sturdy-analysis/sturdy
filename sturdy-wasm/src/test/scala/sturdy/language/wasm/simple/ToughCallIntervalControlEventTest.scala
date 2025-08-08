@@ -130,7 +130,7 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
     val module = if (binary) Parsing.fromBinary(p) else Parsing.fromText(p)
 
     val interp = new IntervalAnalysis.Instance(FrameData.empty, Iterable.empty,
-      WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Innermost(stackConfig))))
+      WasmConfig(fix = FixpointConfig(stack = stackConfig)))
 
     val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
 

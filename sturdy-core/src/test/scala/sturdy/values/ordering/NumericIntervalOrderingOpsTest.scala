@@ -6,22 +6,19 @@ import sturdy.effect.failure.{*, given}
 import sturdy.values.{Finite, Structural, Top, Topped}
 import sturdy.values.integer.{IntegerOps, NumericInterval, NumericIntervalOrderingOps, StrictIntegerOps, given}
 import sturdy.values.ordering.{*, given}
+import sturdy.util.{*, given}
 
 class NumericIntervalTestingOrderingOps[I](using ordering: Ordering[I])
   extends NumericIntervalOrderingOps[I]
     with TestingOrderingOps[I, NumericInterval[I], Topped[Boolean]]:
-  override def integerLit(i: I): NumericInterval[I] = NumericInterval(i,i)
-  override def interval(low: I, high: I): NumericInterval[I] = NumericInterval(low,high)
   override def getBool(b: Topped[Boolean]): Topped[Boolean] = b
 
 class NumericIntervalIntOrderingOpsTest extends OrderingOpsTest[Int, NumericInterval[Int], Topped[Boolean]](
-  minValue = Integer.MIN_VALUE,
-  maxValue = Integer.MAX_VALUE,
-  makeOrderingOps = new NumericIntervalTestingOrderingOps
+  specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
+  makeOrderingOps = (NumericIntervalIsInterval[Int], new NumericIntervalTestingOrderingOps)
 )
 
 class NumericIntervalLongOrderingOpsTest extends OrderingOpsTest[Long, NumericInterval[Long], Topped[Boolean]](
-  minValue = Long.MinValue,
-  maxValue = Long.MaxValue,
-  makeOrderingOps = new NumericIntervalTestingOrderingOps
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  makeOrderingOps = (NumericIntervalIsInterval[Long], new NumericIntervalTestingOrderingOps)
 )

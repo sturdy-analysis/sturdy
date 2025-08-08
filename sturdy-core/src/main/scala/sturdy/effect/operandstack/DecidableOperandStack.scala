@@ -1,20 +1,22 @@
 package sturdy.effect.operandstack
 
-import sturdy.data.{NoJoin, unit, JOptionC, CombineEquiList}
+import sturdy.data.{CombineEquiList, JOptionC, NoJoin, unit}
 import sturdy.effect.Concrete
 import sturdy.values.*
 import sturdy.*
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 
+import scala.reflect.ClassTag
+
 trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
-  def push(v: V): Unit =
+  override def push(v: V): Unit =
     stack = v :: stack
 
-  def pop(): JOptionC[V] =
+  override def pop(): JOptionC[V] =
     if (stack.isEmpty)
       JOptionC.none
     else
@@ -22,7 +24,7 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
       stack = stack.tail
       JOptionC.some(v)
   
-  def peek(): JOptionC[V] =
+  override def peek(): JOptionC[V] =
     if (stack.isEmpty)
       JOptionC.none
     else
@@ -37,7 +39,7 @@ trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   def size: Int = stack.size
   def frameSize: Int = stack.size - framePointer
   
-  def withNewStack[A](f: => A): A =
+  override def withNewStack[A](f: => A): A =
     val snapshot = stack
     val snapshotFramePointer = framePointer
     stack = Nil
@@ -76,6 +78,9 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
   override def setState(s: State): Unit =
     clearCurrentOperandFrame()
     this.stack = s ++ this.stack
+
+  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+    stack.iterator.flatMap(valueIterator)
 
   def combineFrames(ops1: List[V], ops2: List[V], comb: (V, V) => MaybeChanged[V]): MaybeChanged[List[V]] =
     var hasChanged = false
@@ -126,7 +131,7 @@ class JoinableDecidableOperandStack[V](using Join[V], Widen[V]) extends Decidabl
         retainNone()
   }
 
-  private def joinWith(other: List[V]): List[V] =
+  protected def joinWith(other: List[V]): List[V] =
     val (frame, rest) = stack.splitAt(stack.size - framePointer)
     val otherFrame = other.take(stack.size - framePointer)
     val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {

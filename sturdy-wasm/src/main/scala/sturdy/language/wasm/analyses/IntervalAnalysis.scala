@@ -100,7 +100,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: IntervalSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new IntervalSymbolTable(rangeLimit)
+    val funTable: IntervalSymbolTable[TableAddr, NumericInterval[Int], Powerset[FunctionInstance]] = new IntervalSymbolTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
@@ -154,10 +154,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
       override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
     }
-    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any]): ModuleInstance = {
+    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any], hostModules: HostModules): ModuleInstance = {
       module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-      super.initializeModule(module, imports, moduleId)
+      super.initializeModule(module, imports, moduleId, hostModules)
     }
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
