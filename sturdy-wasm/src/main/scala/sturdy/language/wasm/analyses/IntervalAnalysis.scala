@@ -104,6 +104,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvBytes: WithJoin[Bytes] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
     override def jvRefV: WithJoin[RefV] = implicitly

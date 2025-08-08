@@ -11,8 +11,12 @@ class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps
   def vectorTrunc(shape: LaneShape, v: V): V = inject(ops.vectorTrunc(shape, extract(v)))
   def vectorNearest(shape: LaneShape, v: V): V = inject(ops.vectorNearest(shape, extract(v)))
   def vectorPopCount(shape: LaneShape, v: V): V = inject(ops.vectorPopCount(shape, extract(v)))
-  
+  def vectorNot(shape: LaneShape, v: V): V = inject(ops.vectorNot(shape, extract(v)))
+  def vectorBitmask(shape: LaneShape, v: V): V = ops.vectorBitmask(shape, extract(v))
+
   def vectorAdd(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorAdd(shape, extract(v1), extract(v2)))
+  def vectorExtAddU(shape: LaneShape, v1: V): V = inject(ops.vectorExtAddU(shape, extract(v1)))
+  def vectorExtAddS(shape: LaneShape, v1: V): V = inject(ops.vectorExtAddS(shape, extract(v1)))
   def vectorSub(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorSub(shape, extract(v1), extract(v2)))
   def vectorMul(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorMul(shape, extract(v1), extract(v2)))
   def vectorDiv(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorDiv(shape, extract(v1), extract(v2)))
@@ -30,6 +34,7 @@ class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps
   def vectorSubSatS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorSubSatS(shape, extract(v1), extract(v2)))
   def vectorAvrgU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorAvrgU(shape, extract(v1), extract(v2)))
   def vectorQ15MulrSatS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorQ15MulrSatS(shape, extract(v1), extract(v2)))
+  def vectorDotS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorDotS(shape, extract(v1), extract(v2)))
 
   def vectorEq(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorEq(shape, extract(v1), extract(v2)))
   def vectorNe(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorNe(shape, extract(v1), extract(v2)))
@@ -45,8 +50,39 @@ class LiftedSIMDOps[B, V, I](extract: V => I, inject: I => V)(using ops: SIMDOps
   def vectorGe(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGe(shape, extract(v1), extract(v2)))
   def vectorGeU(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGeU(shape, extract(v1), extract(v2)))
   def vectorGeS(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorGeS(shape, extract(v1), extract(v2)))
+  def vectorAnd(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorAnd(shape, extract(v1), extract(v2)))
+  def vectorAndNot(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorAndNot(shape, extract(v1), extract(v2)))
+  def vectorOr(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorOr(shape, extract(v1), extract(v2)))
+  def vectorXor(shape: LaneShape, v1: V, v2: V): V = inject(ops.vectorXor(shape, extract(v1), extract(v2)))
+
+  def vectorShiftLeft(shape: LaneShape, v: V, shift: V): V = inject(ops.vectorShiftLeft(shape, extract(v), shift))
+  def vectorShiftRightU(shape: LaneShape, v: V, shift: V): V = inject(ops.vectorShiftRightU(shape, extract(v), shift))
+  def vectorShiftRightS(shape: LaneShape, v: V, shift: V): V = inject(ops.vectorShiftRightS(shape, extract(v), shift))
+
+  def vectorBitselect(shape: LaneShape, v1: V, v2: V, mask: V): V = inject(ops.vectorBitselect(shape, extract(v1), extract(v2), extract(mask)))
+
+  def vectorConvertU(shape: LaneShape, v: V): V = inject(ops.vectorConvertU(shape, extract(v)))
+  def vectorConvertS(shape: LaneShape, v: V): V = inject(ops.vectorConvertS(shape, extract(v)))
+  def vectorConvertLowU(shape: LaneShape, v: V): V = inject(ops.vectorConvertLowU(shape, extract(v)))
+  def vectorConvertLowS(shape: LaneShape, v: V): V = inject(ops.vectorConvertLowS(shape, extract(v)))
+  def vectorTruncSatU(shape: LaneShape, mode: TruncMode, v: V): V = inject(ops.vectorTruncSatU(shape, mode, extract(v)))
+  def vectorTruncSatS(shape: LaneShape, mode: TruncMode, v: V): V = inject(ops.vectorTruncSatS(shape, mode, extract(v)))
+  def vectorDemoteZero(shape: LaneShape, v: V): V = inject(ops.vectorDemoteZero(shape, extract(v)))
+  def vectorPromoteLow(shape: LaneShape, v: V): V = inject(ops.vectorPromoteLow(shape, extract(v)))
+  def vectorNarrowU(from: LaneShape, to: LaneShape, a: V, b: V): V = inject(ops.vectorNarrowU(from, to, extract(a), extract(b)))
+  def vectorNarrowS(from: LaneShape, to: LaneShape, a: V, b: V): V = inject(ops.vectorNarrowS(from, to, extract(a), extract(b)))
+  def vectorExtendU(from: LaneShape, to: LaneShape, half: Half, v: V): V = inject(ops.vectorExtendU(from, to, half, extract(v)))
+  def vectorExtendS(from: LaneShape, to: LaneShape, half: Half, v: V): V = inject(ops.vectorExtendS(from, to, half, extract(v)))
 
   def extractLane(shape: LaneShape, v: V, lane: Byte): V = ops.extractLane(shape, extract(v), lane)
   def extractLaneU(shape: LaneShape, v: V, lane: Byte): V = ops.extractLaneU(shape, extract(v), lane)
   def extractLaneS(shape: LaneShape, v: V, lane: Byte): V = ops.extractLaneS(shape, extract(v), lane)
+  def replaceLane(shape: LaneShape, v: V, lane: Byte, value: V): V = inject(ops.replaceLane(shape, extract(v), lane, value))
+  def shuffleLanes(shape: LaneShape, v1: V, v2: V, lanes: B): V = inject(ops.shuffleLanes(shape, extract(v1), extract(v2), lanes))
+  def swizzleLanes(shape: LaneShape, a: V, s: V): V = inject(ops.swizzleLanes(shape, extract(a), extract(s)))
+  def splat(shape: LaneShape, v: V): V = inject(ops.splat(shape, v))
+  def zeroPad(shape: LaneShape, v: V): V = inject(ops.zeroPad(shape, v))
+
+  def vectorAllTrue(shape: LaneShape, v: V): V = ops.vectorAllTrue(shape, extract(v))
+  def vectorAnyTrue(shape: LaneShape, v: V): V = ops.vectorAnyTrue(shape, extract(v))
 }

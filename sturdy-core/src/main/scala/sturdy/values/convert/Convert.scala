@@ -37,3 +37,6 @@ inline def safeConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(u
   else
     res
 
+trait Bijection[A, B]:
+  def apply(a: A): B
+  def unapply(b: B)(using Failure): A

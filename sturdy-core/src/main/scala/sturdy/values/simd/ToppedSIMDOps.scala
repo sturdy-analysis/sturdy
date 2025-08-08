@@ -2,7 +2,7 @@ package sturdy.values.simd
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
-import sturdy.values.config.BytesSize
+import sturdy.values.config.{Bits, BytesSize, Padding}
 import sturdy.values.convert.{&&, SomeCC}
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
 
@@ -27,7 +27,15 @@ given ToppedSIMDOps[B, Vec, V](using f: Failure): SIMDOps[B, Topped[Vec], V, Byt
 
   def vectorPopCount(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
 
+  def vectorNot(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorBitmask(shape: LaneShape, v: Topped[Vec]): V = ???
+
   def vectorAdd(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorExtAddU(shape: LaneShape, v1: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorExtAddS(shape: LaneShape, v1: Topped[Vec]): Topped[Vec] = ???
 
   def vectorSub(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
 
@@ -63,6 +71,8 @@ given ToppedSIMDOps[B, Vec, V](using f: Failure): SIMDOps[B, Topped[Vec], V, Byt
 
   def vectorQ15MulrSatS(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
 
+  def vectorDotS(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
   def vectorEq(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
 
   def vectorNe(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
@@ -91,13 +101,70 @@ given ToppedSIMDOps[B, Vec, V](using f: Failure): SIMDOps[B, Topped[Vec], V, Byt
 
   def vectorGeS(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
 
+  def vectorAnd(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorAndNot(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorOr(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorXor(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorShiftLeft(shape: LaneShape, v: Topped[Vec], shift: V): Topped[Vec] = ???
+
+  def vectorShiftRightU(shape: LaneShape, v: Topped[Vec], shift: V): Topped[Vec] = ???
+
+  def vectorShiftRightS(shape: LaneShape, v: Topped[Vec], shift: V): Topped[Vec] = ???
+
+  def vectorBitselect(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec], mask: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorConvertU(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorConvertS(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorConvertLowU(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorConvertLowS(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorTruncSatU(shape: LaneShape, mode: TruncMode, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorTruncSatS(shape: LaneShape, mode: TruncMode, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorDemoteZero(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorPromoteLow(shape: LaneShape, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorNarrowU(from: LaneShape, to: LaneShape, a: Topped[Vec], b: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorNarrowS(from: LaneShape, to: LaneShape, a: Topped[Vec], b: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorExtendU(from: LaneShape, to: LaneShape, half: Half, v: Topped[Vec]): Topped[Vec] = ???
+
+  def vectorExtendS(from: LaneShape, to: LaneShape, half: Half, v: Topped[Vec]): Topped[Vec] = ???
+
   def extractLane(shape: LaneShape, v: Topped[Vec], lane: Byte): V = ???
 
   def extractLaneU(shape: LaneShape, v: Topped[Vec], lane: Byte): V = ???
 
   def extractLaneS(shape: LaneShape, v: Topped[Vec], lane: Byte): V = ???
 
+  def replaceLane(shape: LaneShape, v: Topped[Vec], lane: Byte, value: V): Topped[Vec] = ???
 
-given ToppedConvertIntervalBytesVector: ConvertBytesVec[Seq[NumericInterval[Byte]], Topped[Array[Byte]]] with
-  def apply(from: Seq[NumericInterval[Byte]], conf: BytesSize && SomeCC[ByteOrder]): Topped[Array[Byte]] = ???
+  def shuffleLanes(shape: LaneShape, v1: Topped[Vec], v2: Topped[Vec], lanes: B): Topped[Vec] = ???
 
+  def swizzleLanes(shape: LaneShape, a: Topped[Vec], s: Topped[Vec]): Topped[Vec] = ???
+
+  def splat(shape: LaneShape, v: V): Topped[Vec] = ???
+
+  def zeroPad(shape: LaneShape, v: V): Topped[Vec] = ???
+
+  def vectorAllTrue(shape: LaneShape, v: Topped[Vec]): V = ???
+
+  def vectorAnyTrue(shape: LaneShape, v: Topped[Vec]): V = ???
+
+
+given ToppedConvertIntervalBytesVector: ConvertBytesVec[Seq[NumericInterval[Byte]], Topped[Array[Byte]]] with 
+  def apply(from: Seq[NumericInterval[Byte]], conf: BytesSize && Padding && Bits && SomeCC[ByteOrder]): Topped[Array[Byte]] = ???
+
+
+given ToppedConvertIntervalVectorBytes: ConvertVecBytes[Topped[Array[Byte]], Seq[NumericInterval[Byte]]] with
+  def apply(from: Topped[Array[Byte]], conf: BytesSize && SomeCC[ByteOrder]): Seq[NumericInterval[Byte]] = ???

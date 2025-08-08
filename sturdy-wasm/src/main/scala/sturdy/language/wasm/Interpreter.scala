@@ -14,12 +14,12 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.references.ReferenceOps
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
-import swam.syntax.{LoadInst, LoadNInst, LoadVector, MemoryInst, ReferenceInst, StoreInst, StoreNInst, VectorLoadInst, f32, f64, i32, i64, v128}
+import swam.syntax.{LoadInst, LoadNInst, LoadVector, MemoryInst, ReferenceInst, StoreInst, StoreNInst, StoreVectorLane, VectorLoadInst, VectorStoreInst, f32, f64, i32, i64, v128}
 import swam.{FuncType, NumType, ReferenceType, ValType, VecType}
 
 import java.nio.ByteOrder
 import WasmFailure.*
-import sturdy.values.simd.{ConvertBytesVec, LiftedSIMDOps, SIMDOps}
+import sturdy.values.simd.*
 import swam.ReferenceType.*
 
 trait Interpreter:
@@ -136,7 +136,20 @@ trait Interpreter:
   def applyV128(v: V128): Value.Vec = {
     Value.Vec(VecValue.Vec128.apply(v))
   }
-  
+
+  given Bijection[I32, Value] with
+    def apply(i: I32): Value = applyI32(i)
+    def unapply(v: Value)(using f: Failure): I32 = v.asInt32 
+  given Bijection[I64, Value] with
+    def apply(l: I64): Value = applyI64(l)
+    def unapply(v: Value)(using f: Failure): I64 = v.asInt64
+  given Bijection[F32, Value] with
+    def apply(f: F32): Value = applyF32(f)
+    def unapply(v: Value)(using f: Failure): F32 = v.asFloat32
+  given Bijection[F64, Value] with
+    def apply(d: F64): Value = applyF64(d)
+    def unapply(v: Value)(using f: Failure): F64 = v.asFloat64
+
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W]): Combine[Value, W] with
     import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
@@ -187,6 +200,7 @@ trait Interpreter:
      , encodeI64: ConvertLongBytes[I64, Bytes]
      , encodeF32: ConvertFloatBytes[F32, Bytes]
      , encodeF64: ConvertDoubleBytes[F64, Bytes]
+     , encodeV128: ConvertVecBytes[V128, Bytes]
      , decodeI32: ConvertBytesInt[Bytes, I32]
      , decodeI64: ConvertBytesLong[Bytes, I64]
      , decodeF32: ConvertBytesFloat[Bytes, F32]
@@ -287,18 +301,24 @@ trait Interpreter:
     final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, applyF32)
 
     val LITTLE_ENDIAN = SomeCC(ByteOrder.LITTLE_ENDIAN, false)
-    override final val encode = new Convert[Value, Seq[Byte], Value, Bytes, SomeCC[StoreInst | StoreNInst]]:
-      override def apply(from: Value, conf: SomeCC[StoreInst | StoreNInst]): Bytes = (from, conf.t) match
+    override final val encode = new Convert[Value, Seq[Byte], Value, Bytes, SomeCC[StoreInst | StoreNInst | VectorStoreInst]]:
+      override def apply(from: Value, conf: SomeCC[StoreInst | StoreNInst | VectorStoreInst]): Bytes = (from, conf.t) match
         case (Value.Num(NumValue.Int32(i)), _: i32.Store8) => encodeI32(i, config.BytesSize.Byte && LITTLE_ENDIAN)
+        case (Value.Num(NumValue.Int32(i)), _: v128.Store8Lane) => encodeI32(i, config.BytesSize.Byte && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int32(i)), _: i32.Store16) => encodeI32(i, config.BytesSize.Short && LITTLE_ENDIAN)
+        case (Value.Num(NumValue.Int32(i)), _: v128.Store16Lane) => encodeI32(i, config.BytesSize.Short && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int32(i)), _: i32.Store) => encodeI32(i, config.BytesSize.Int && LITTLE_ENDIAN)
+        case (Value.Num(NumValue.Int32(i)), _: v128.Store32Lane) => encodeI32(i, config.BytesSize.Int && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int64(l)), _: i64.Store8) => encodeI64(l, config.BytesSize.Byte && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int64(l)), _: i64.Store16) => encodeI64(l, config.BytesSize.Short && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int64(l)), _: i64.Store32) => encodeI64(l, config.BytesSize.Int && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Int64(l)), _: i64.Store) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
+        case (Value.Num(NumValue.Int64(l)), _: v128.Store64Lane) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Float32(f)), _: f32.Store) => encodeF32(f, config.BytesSize.Float && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Float64(d)), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
+        case (Value.Vec(VecValue.Vec128(v)), _: VectorStoreInst) => encodeV128(v, config.BytesSize.Byte && LITTLE_ENDIAN)
         case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+
 
     override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]:
       override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst | VectorLoadInst]): Value = conf.t match
@@ -316,7 +336,23 @@ trait Interpreter:
         case _: i64.Load => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
         case _: f32.Load => Value.Num(NumValue.Float32(decodeF32(from, LITTLE_ENDIAN)))
         case _: f64.Load => Value.Num(NumValue.Float64(decodeF64(from, LITTLE_ENDIAN)))
-        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && LITTLE_ENDIAN)))
+        case _: v128.Load8Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load16Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load32Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load64Lane => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load8Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load16Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load32Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load64Splat => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load32Zero => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load64Zero => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.ZeroShort && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.ZeroShort && config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.Padding.ZeroInt && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.Padding.ZeroInt && config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.Padding.ZeroLong && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.Padding.ZeroLong &&  config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.Raw &&  config.Bits.Raw && LITTLE_ENDIAN)))
 
   type Instance <: GenericInstance
 

@@ -80,16 +80,19 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) =>
         val bb1 = ByteBuffer.wrap(b1)
         val bb2 = ByteBuffer.wrap(b2)
-        def isF32CanonNaN(i: Int) = (i & 0x7fffffff) == 0x7fc00000
-        def isF64CanonNaN(l: Long) = (l & 0x7fffffffffffffffL) == 0x7ff8000000000000L
+
         val eqF32 = (0 until 16 by 4).forall { i =>
-          val x = bb1.getInt(i); val y = bb2.getInt(i)
-          if (isF32CanonNaN(x) && isF32CanonNaN(y)) true else x == y
+          val x = java.lang.Float.intBitsToFloat(bb1.getInt(i))
+          val y = java.lang.Float.intBitsToFloat(bb2.getInt(i))
+          if (x.isNaN && y.isNaN) true else bb1.getInt(i) == bb2.getInt(i)
         }
+
         val eqF64 = (0 until 16 by 8).forall { i =>
-          val x = bb1.getLong(i); val y = bb2.getLong(i)
-          if (isF64CanonNaN(x) && isF64CanonNaN(y)) true else x == y
+          val x = java.lang.Double.longBitsToDouble(bb1.getLong(i))
+          val y = java.lang.Double.longBitsToDouble(bb2.getLong(i))
+          if (x.isNaN && y.isNaN) true else bb1.getLong(i) == bb2.getLong(i)
         }
+
         eqF32 || eqF64
       case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
       case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true

@@ -1,42 +1,68 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{JOption, MayJoin, noJoin}
+import sturdy.data.{JOption, JOptionC, MayJoin, noJoin}
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.values.simd.LaneShape
+import sturdy.values.convert.SomeCC
+import sturdy.values.simd.LaneShape.*
+import sturdy.values.simd.{Half, LaneShape, TruncMode}
 import swam.syntax.*
 
 import scala.reflect.ClassTag
+import scala.util.boundary
+import scala.util.boundary.break
 
 
 class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
-  (stack: DecidableOperandStack[V], mem: Memory[MemoryAddr, Addr, Bytes, _, J], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
+  (stack: DecidableOperandStack[V], mem: Memory[MemoryAddr, Addr, Bytes, _, J], wasmOps: WasmOps[V, Addr, Bytes, _, _, _, _, _, J])
   (using Failure):
   
   import wasmOps.*
   
   def evalSIMD(inst: Inst): V = {
     inst match {
-      case unop: VectorUnop =>
-        val v = stack.popOrAbort()
-        evalSIMDUnop(unop, v)
+      case unop: VectorUnop => evalSIMDUnop(unop, stack.popOrAbort())
       case binop: VectorBinop =>
         val (v1, v2) = stack.pop2OrAbort()
         evalSIMDBinop(binop, v1, v2)
-      case testop: VectorTestop => ???
+      case testop: VectorTestop => v128ops.vectorAllTrue(getLaneShape(testop.shape), stack.popOrAbort())
       case relop: VectorRelop => 
         val (v1, v2) = stack.pop2OrAbort()
         evalSIMDRelop(relop, v1, v2)
-      case convertop: VectorConvertop => ???
-      case ternop: VectorTernop => ???
-      case shiftop: VectorShiftop => ???
-      case splat: VectorSplat => ???
-      case narrow: VectorNarrow => ???
-      case bitmask: VectorBitmask => ???
-      case dot: VectorDot => ???
-      case extmul: VectorExtmul => ???
-      case extadd: VectorExtadd => ???
+      case convertop: VectorConvertop => evalSIMDConvertop(convertop, stack.popOrAbort())
+      case ternop: VectorTernop =>
+        val c = stack.popOrAbort()
+        val v2 = stack.popOrAbort()
+        val v1 = stack.popOrAbort()
+        ternop match {
+          case v128.BitSelect => v128ops.vectorBitselect(V128, v1, v2, c)
+        }
+      case shiftop: VectorShiftop =>
+        val (v, shift) = stack.pop2OrAbort()
+        shiftop.operation match {
+          case VecShiftopType.IShl => v128ops.vectorShiftLeft(getLaneShape(shiftop.shape), v, shift)
+          case VecShiftopType.IShrU => v128ops.vectorShiftRightU(getLaneShape(shiftop.shape), v, shift)
+          case VecShiftopType.IShrS => v128ops.vectorShiftRightS(getLaneShape(shiftop.shape), v, shift)
+        }
+      case splat: VectorSplat => v128ops.splat(getLaneShape(splat.shape), stack.popOrAbort())
+      case bitmask: VectorBitmask => v128ops.vectorBitmask(getLaneShape(bitmask.shape), stack.popOrAbort())
+      case dot: VectorDot =>
+        val (v1, v2) = stack.pop2OrAbort()
+        dot match {
+          case i32x4.DotI16x8S => v128ops.vectorDotS(LaneShape.I16, v1, v2)
+        }
+      case extmul: VectorExtmul =>
+        val (v1, v2) = stack.pop2OrAbort()
+        evalExtmul(extmul, v1, v2)
+      case extadd: VectorExtadd =>
+        val v = stack.popOrAbort()
+        extadd match {
+          case i16x8.ExtaddPairwiseI8x16S => v128ops.vectorExtAddS(LaneShape.I8, v)
+          case i16x8.ExtaddPairwiseI8x16U => v128ops.vectorExtAddU(LaneShape.I8, v)
+          case i32x4.ExtaddPairwiseI16x8S => v128ops.vectorExtAddS(LaneShape.I16, v)
+          case i32x4.ExtaddPairwiseI16x8U => v128ops.vectorExtAddU(LaneShape.I16, v)
+        }
       case lane: VectorExtractLane =>
         val v = stack.popOrAbort()
         lane.operation match {
@@ -44,27 +70,94 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecExtractLaneType.ExtractS => v128ops.extractLaneS(getLaneShape(lane.shape), v, lane.lane)
           case VecExtractLaneType.Extract => v128ops.extractLane(getLaneShape(lane.shape), v, lane.lane)
         }
-      case lane: VectorReplaceLane => ???
-      case unop: VVectorUnop => ???
-      case binop: VVectorBinop => ???
-      case testop: VVectorTestop => ???
-      case storeVec: StoreVector => ???
-      case storeLane: StoreVectorLane => ???
-
+      case lane: VectorReplaceLane => 
+        val (v, value) = stack.pop2OrAbort()
+        v128ops.replaceLane(getLaneShape(lane.shape), v, lane.lane, value)
+      case unop: VVectorUnop =>
+        unop match {
+          case v128.Not => v128ops.vectorNot(V128, stack.popOrAbort())
+        }
+      case binop: VVectorBinop =>
+        val (v1, v2) = stack.pop2OrAbort()
+        binop match {
+          case v128.And => v128ops.vectorAnd(V128, v1, v2)
+          case v128.AndNot => v128ops.vectorAndNot(V128, v1, v2)
+          case v128.Or => v128ops.vectorOr(V128, v1, v2)
+          case v128.Xor => v128ops.vectorXor(V128, v1, v2)
+        }
+      case testop: VVectorTestop => v128ops.vectorAnyTrue(V128, stack.popOrAbort())
       case v128.Const(bytes) => v128ops.vectorLit(bytes)
-      case i8x16.Shuffle(lanes) => ???
-      case i8x16.Swizzle => ???
+      case i8x16.Shuffle(lanes) =>
+        val (a, b) = stack.pop2OrAbort()
+        v128ops.shuffleLanes(LaneShape.I8, a, b, lanes.toArray)
+      case i8x16.Swizzle =>
+        val (a, s) = stack.pop2OrAbort()
+        v128ops.swizzleLanes(LaneShape.I8, a, s)
       case _ => ???
     }
   }
 
-  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
+  def evalLoadVectorBytes(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
     inst match {
-      case loadVec: LoadVector => ???
-      case loadSplat: LoadVectorSplat => ???
-      case loadZero: LoadVectorZero => ???
-      case loadLane: LoadVectorLane => ???
-      case v128.Load(align, offset) => mem.read(memIdx, addr, 128 / 8)
+      case v128.Load(_, _) => mem.read(memIdx, addr, 128 / 8)
+    }
+  }
+
+  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionC[V] =
+    boundary:
+      inst match
+        case loadLane: LoadVectorLane =>
+          val v = stack.popOrAbort()
+          val shape = loadLane.laneWidth match
+            case 8 => LaneShape.I8
+            case 16 => LaneShape.I16
+            case 32 => LaneShape.I32
+            case 64 => LaneShape.I64
+          val bytes = mem.read(memIdx, addr, loadLane.laneWidth / 8).getOrElse(break(JOptionC.none))
+          val vec = v128ops.replaceLane(shape, v, loadLane.lane, decode(bytes, SomeCC(loadLane, false)))
+          JOptionC.some(vec)
+        case loadSplat: LoadVectorSplat =>
+          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8).getOrElse(break(JOptionC.none))
+          val numV = decode(bytes, SomeCC(loadSplat, false))
+          val vec = loadSplat.shape match {
+            case VectorSplatShape.i8_splat => v128ops.splat(I8, numV)
+            case VectorSplatShape.i16_splat => v128ops.splat(I16, numV)
+            case VectorSplatShape.i32_splat => v128ops.splat(I32, numV)
+            case VectorSplatShape.i64_splat => v128ops.splat(I64, numV)
+          }
+          JOptionC.some(vec)
+        case loadZero: LoadVectorZero =>
+          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8).getOrElse(break(JOptionC.none))
+          val numV = decode(bytes, SomeCC(loadZero, false))
+          val vec = loadZero.shape match {
+            case VectorZeroShape.i32_zero => v128ops.zeroPad(I32, numV)
+            case VectorZeroShape.i64_zero => v128ops.zeroPad(I64, numV)
+          }
+          JOptionC.some(vec)
+        case loadExtend: LoadVector =>
+          val bytes = mem.read(memIdx, addr, 8).getOrElse(break(JOptionC.none))
+          val vec = decode(bytes, SomeCC(loadExtend, false))
+          JOptionC.some(vec)
+
+  def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Unit] = {
+    inst match {
+      case storeVec: StoreVector =>
+        val v = stack.popOrAbort()
+        val bytes = encode(v, SomeCC(storeVec, false))
+        mem.write(memIdx, addr, bytes)
+      case storeVecLane: StoreVectorLane =>
+        val v = stack.popOrAbort()
+        val shape = storeVecLane.laneWidth match {
+          case 8  => LaneShape.I8
+          case 16 => LaneShape.I16
+          case 32 => LaneShape.I32
+          case 64 => LaneShape.I64
+        }
+        val bytes = if storeVecLane.laneWidth <= 16 then
+          encode(v128ops.extractLaneU(shape, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+        else
+          encode(v128ops.extractLane(shape, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+        mem.write(memIdx, addr, bytes)
     }
   }
 
@@ -152,6 +245,54 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecRelopType.FGt => v128ops.vectorGt(getLaneShape(relop.shape), v1, v2)
           case VecRelopType.FGe => v128ops.vectorGe(getLaneShape(relop.shape), v1, v2)
         }
+    }
+  }
+
+  inline def evalExtmul(op: VectorExtmul, v1: V, v2: V): V = {
+    op match {
+      case i16x8.ExtmulLowI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtendS(I8, I16, Half.Low, v1), v128ops.vectorExtendS(I8, I16, Half.Low, v2))
+      case i16x8.ExtmulHighI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtendS(I8, I16, Half.High, v1), v128ops.vectorExtendS(I8, I16, Half.High, v2))
+      case i16x8.ExtmulLowI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtendU(I8, I16, Half.Low, v1), v128ops.vectorExtendU(I8, I16, Half.Low, v2))
+      case i16x8.ExtmulHighI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtendU(I8, I16, Half.High, v1), v128ops.vectorExtendU(I8, I16, Half.High, v2))
+      case i32x4.ExtmulLowI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtendS(I16, I32, Half.Low, v1), v128ops.vectorExtendS(I16, I32, Half.Low, v2))
+      case i32x4.ExtmulHighI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtendS(I16, I32, Half.High, v1), v128ops.vectorExtendS(I16, I32, Half.High, v2))
+      case i32x4.ExtmulLowI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtendU(I16, I32, Half.Low, v1), v128ops.vectorExtendU(I16, I32, Half.Low, v2))
+      case i32x4.ExtmulHighI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtendU(I16, I32, Half.High, v1), v128ops.vectorExtendU(I16, I32, Half.High, v2))
+      case i64x2.ExtmulLowI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtendS(I32, I64, Half.Low, v1), v128ops.vectorExtendS(I32, I64, Half.Low, v2))
+      case i64x2.ExtmulHighI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtendS(I32, I64, Half.High, v1), v128ops.vectorExtendS(I32, I64, Half.High, v2))
+      case i64x2.ExtmulLowI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtendU(I32, I64, Half.Low, v1), v128ops.vectorExtendU(I32, I64, Half.Low, v2))
+      case i64x2.ExtmulHighI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtendU(I32, I64, Half.High, v1), v128ops.vectorExtendU(I32, I64, Half.High, v2))
+    }
+  }
+
+  inline def evalSIMDConvertop(op: VectorConvertop, v: V): V = {
+    op match {
+      case i8x16.NarrowI16x8S => v128ops.vectorNarrowS(LaneShape.I16, LaneShape.I8, v, stack.popOrAbort())
+      case i8x16.NarrowI16x8U => v128ops.vectorNarrowU(LaneShape.I16, LaneShape.I8, v, stack.popOrAbort())
+      case i16x8.ExtendLowI8x16S => v128ops.vectorExtendS(LaneShape.I8, LaneShape.I16, Half.Low, v)
+      case i16x8.ExtendHighI8x16S => v128ops.vectorExtendS(LaneShape.I8, LaneShape.I16, Half.High, v)
+      case i16x8.ExtendLowI8x16U => v128ops.vectorExtendU(LaneShape.I8, LaneShape.I16, Half.Low, v)
+      case i16x8.ExtendHighI8x16U => v128ops.vectorExtendU(LaneShape.I8, LaneShape.I16, Half.High, v)
+      case i16x8.NarrowI32x4S => v128ops.vectorNarrowS(LaneShape.I32, LaneShape.I16, v, stack.popOrAbort())
+      case i16x8.NarrowI32x4U => v128ops.vectorNarrowU(LaneShape.I32, LaneShape.I16, v, stack.popOrAbort())
+      case i32x4.ExtendLowI16x8S => v128ops.vectorExtendS(LaneShape.I16, LaneShape.I32, Half.Low, v)
+      case i32x4.ExtendHighI16x8S => v128ops.vectorExtendS(LaneShape.I16, LaneShape.I32, Half.High, v)
+      case i32x4.ExtendLowI16x8U => v128ops.vectorExtendU(LaneShape.I16, LaneShape.I32, Half.Low, v)
+      case i32x4.ExtendHighI16x8U => v128ops.vectorExtendU(LaneShape.I16, LaneShape.I32, Half.High, v)
+      case i32x4.TruncSatF32x4S => v128ops.vectorTruncSatS(LaneShape.F32, TruncMode.Sat, v)
+      case i32x4.TruncSatF32x4U => v128ops.vectorTruncSatU(LaneShape.F32, TruncMode.Sat, v)
+      case i32x4.TruncSatF64x2SZero => v128ops.vectorTruncSatS(LaneShape.F64, TruncMode.SatZero, v)
+      case i32x4.TruncSatF64x2UZero => v128ops.vectorTruncSatU(LaneShape.F64, TruncMode.SatZero, v)
+      case i64x2.ExtendLowI32x4S => v128ops.vectorExtendS(LaneShape.I32, LaneShape.I64, Half.Low, v)
+      case i64x2.ExtendHighI32x4S => v128ops.vectorExtendS(LaneShape.I32, LaneShape.I64, Half.High, v)
+      case i64x2.ExtendLowI32x4U => v128ops.vectorExtendU(LaneShape.I32, LaneShape.I64, Half.Low, v)
+      case i64x2.ExtendHighI32x4U => v128ops.vectorExtendU(LaneShape.I32, LaneShape.I64, Half.High, v)
+      case f32x4.ConvertI32x4S => v128ops.vectorConvertS(LaneShape.I32, v)
+      case f32x4.ConvertI32x4U => v128ops.vectorConvertU(LaneShape.I32, v)
+      case f32x4.DemoteF64x2Zero => v128ops.vectorDemoteZero(LaneShape.F64, v)
+      case f64x2.ConvertLowI32x4S => v128ops.vectorConvertLowS(LaneShape.I32, v)
+      case f64x2.ConvertLowI32x4U => v128ops.vectorConvertLowU(LaneShape.I32, v)
+      case f64x2.PromoteLowF32x4 => v128ops.vectorPromoteLow(LaneShape.F32, v)
     }
   }
   

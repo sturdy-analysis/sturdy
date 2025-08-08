@@ -112,6 +112,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   // joins
   implicit def jvUnit: J[Unit]
+  implicit def jvBytes: J[Bytes]
 
   implicit def jvV: J[V]
   implicit def jvRefV: J[RefV]
@@ -277,6 +278,51 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case RefExtern(_) =>
       fail(UnboundFunctionIndex, "Cannot call extern reference")
   }
+  
+  def evalVectorInst(inst: Inst): Unit = inst match {
+    case i: VectorLoadInst =>
+      i match {
+        case vector: LoadVector => 
+          val memAddr = effectiveAddr(vector.offset)
+          simd.evalLoadVector(vector, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
+            v => stack.push(v)
+          }
+        case splat: LoadVectorSplat =>
+          val memAddr = effectiveAddr(splat.offset)
+          simd.evalLoadVector(splat, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector splat at address $memAddr")) {
+            v => stack.push(v)
+          }
+        case zero: LoadVectorZero =>
+          val memAddr = effectiveAddr(zero.offset)
+          simd.evalLoadVector(zero, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector zero at address $memAddr")) {
+            v => stack.push(v)
+          }
+        case lane: LoadVectorLane =>
+          val v = stack.popOrAbort()
+          val memAddr = effectiveAddr(i.offset)
+          stack.push(v)
+          simd.evalLoadVector(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector lane at address $memAddr")) {
+            v => stack.push(v)
+          }
+        case v128.Load(align, offset) =>
+          val memAddr = effectiveAddr(i.offset)
+          simd.evalLoadVectorBytes(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
+            bytes =>
+              val v = decode(bytes, SomeCC(i, false))
+              stack.push(v)
+          }
+      }
+    case i: VectorStoreInst =>
+      val v = stack.popOrAbort()
+      val memAddr = effectiveAddr(i.offset)
+      stack.push(v)
+      simd.evalStoreVector(i, memoryIndex, memAddr).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${effectiveAddr(i.offset)}"))
+    case i: VectorInst => stack.push(simd.evalSIMD(i))
+    case op: SatConvertop =>
+      val v = stack.popOrAbort()
+      stack.push(num.evalMiscop(op, v))
+  }
+    
 
   val pageSize: Int = 65536
   val maxPageNum: Int = 65536
@@ -391,17 +437,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case i: TableMiscOp => evalTableInst(i, loc)
       case i: MemoryMiscOp => evalMemoryInst(i)
       case i: ReferenceInst => evalRefInst(i)
-      case i: VectorLoadInst =>
-        val memAddr = effectiveAddr(i.offset)
-        simd.evalLoadVector(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
-          bytes =>
-            val v = decode(bytes, SomeCC(i, false))
-            stack.push(v)
-        }
-      case i: VectorInst => stack.push(simd.evalSIMD(i))
-      case op: SatConvertop =>
-        val v = stack.popOrAbort()
-        stack.push(num.evalMiscop(op, v))
+      case i: VectorInst => evalVectorInst(i)      
       case Drop => stack.popOrAbort()
       case Select | SelectReturns(_) =>
         val isZero = num.evalNumeric(i32.Eqz)
@@ -656,7 +692,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   /** add offset to base address (which is already on the stack) */
   def effectiveAddr(offset: Int): Addr =
     val v1 = i32ops.integerLit(offset)
-    val v2 = stack.popOrAbort()
+    val v2 = stack.popOrFail()
     val res = i32ops.add(v1, v2)
     val cmp = unsignedCompareOps.ltUnsigned(res, v1)
     val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
