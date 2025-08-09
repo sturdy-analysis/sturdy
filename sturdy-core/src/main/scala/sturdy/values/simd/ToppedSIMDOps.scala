@@ -2,7 +2,7 @@ package sturdy.values.simd
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
-import sturdy.values.config.{Bits, BytesSize, Padding}
+import sturdy.values.config.{Bits, BytesSize, BytePadding}
 import sturdy.values.convert.{&&, SomeCC}
 import sturdy.values.integer.{IntegerDivisionByZero, NumericInterval}
 
@@ -163,7 +163,7 @@ given ToppedSIMDOps[B, Vec, V](using f: Failure): SIMDOps[B, Topped[Vec], V, Byt
 
 
 given ToppedConvertIntervalBytesVector: ConvertBytesVec[Seq[NumericInterval[Byte]], Topped[Array[Byte]]] with 
-  def apply(from: Seq[NumericInterval[Byte]], conf: BytesSize && Padding && Bits && SomeCC[ByteOrder]): Topped[Array[Byte]] = ???
+  def apply(from: Seq[NumericInterval[Byte]], conf: BytesSize && BytePadding && Bits && SomeCC[ByteOrder]): Topped[Array[Byte]] = ???
 
 
 given ToppedConvertIntervalVectorBytes: ConvertVecBytes[Topped[Array[Byte]], Seq[NumericInterval[Byte]]] with

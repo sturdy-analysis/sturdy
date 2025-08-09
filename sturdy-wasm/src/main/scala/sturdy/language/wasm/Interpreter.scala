@@ -346,13 +346,13 @@ trait Interpreter:
         case _: v128.Load64Splat => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
         case _: v128.Load32Zero => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
         case _: v128.Load64Zero => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.ZeroShort && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.ZeroShort && config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.Padding.ZeroInt && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.Padding.ZeroInt && config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.Padding.ZeroLong && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.Padding.ZeroLong &&  config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.Padding.Raw &&  config.Bits.Raw && LITTLE_ENDIAN)))
+        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong && config.Bits.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong &&  config.Bits.Unsigned && LITTLE_ENDIAN)))
+        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.None &&  config.Bits.Raw && LITTLE_ENDIAN)))
 
   type Instance <: GenericInstance
 

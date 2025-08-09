@@ -23,11 +23,11 @@ enum BytesSize(val bytes: Int) extends ConvertConfig[BytesSize]:
   def bits: Int = this.bytes * 8
   def canFail: Boolean = false
 
-enum Padding(val zeroBytes: Int, val wrappingBytes: Int) extends ConvertConfig[Padding]:
-  case ZeroShort extends Padding(2, 1)
-  case ZeroInt extends Padding(4, 2)
-  case ZeroLong extends Padding(8, 4)
-  case Raw extends Padding(0, 0)
+enum BytePadding(val totalBytes: Int, val wrapBytes: Int) extends ConvertConfig[BytePadding]:
+  case ZeroShort extends BytePadding(2, 1)
+  case ZeroInt extends BytePadding(4, 2)
+  case ZeroLong extends BytePadding(8, 4)
+  case None extends BytePadding(0, 0)
   def canFail: Boolean = false
 
 object BytesSize:

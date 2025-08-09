@@ -207,5 +207,5 @@ given DummySIMDOps[B, Vec, V, LaneIdx]: SIMDOps[B, Vec, V, LaneIdx] with {
 }
 
 
-type ConvertBytesVec[VFrom, VTo] = Convert[Seq[Byte], Seq[Byte], VFrom, VTo, config.BytesSize && config.Padding && config.Bits && SomeCC[ByteOrder]]
+type ConvertBytesVec[VFrom, VTo] = Convert[Seq[Byte], Seq[Byte], VFrom, VTo, config.BytesSize && config.BytePadding && config.Bits && SomeCC[ByteOrder]]
 type ConvertVecBytes[VFrom, VTo] = Convert[Seq[Byte], Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]

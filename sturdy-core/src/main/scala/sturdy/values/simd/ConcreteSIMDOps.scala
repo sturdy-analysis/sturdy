@@ -1,8 +1,8 @@
 package sturdy.values.simd
 
 import sturdy.effect.failure.Failure
-import sturdy.values.config.Padding.Raw
-import sturdy.values.config.{Bits, BytesSize, Padding}
+import sturdy.values.config.BytePadding.None
+import sturdy.values.config.{Bits, BytesSize, BytePadding}
 import sturdy.values.convert.{&&, Bijection, SomeCC}
 import sturdy.values.integer.IntegerDivisionByZero
 
@@ -519,322 +519,177 @@ given ConcreteSIMDOps[V]
   }
 
   // Conversion operations
-  private def convertI32ToF32(v: Array[Byte], signed: Boolean): Array[Byte] = {
-    val in = ByteBuffer.wrap(v)
-    val out = ByteBuffer.allocate(16)
-    val codec = summon[LaneCodec[Int]]
-    val outCodec = summon[LaneCodec[Float]]
+  private def transformLanes[A, B](v: Array[Byte], inOffset: Int, lanes: Int)(using inCodec: LaneCodec[A], outCodec: LaneCodec[B])(f: A => B): Array[Byte] = {
+    val in = ByteBuffer.wrap(v, inOffset, lanes * inCodec.bytes)
+    val out = ByteBuffer.allocate(lanes * outCodec.bytes)
     var i = 0
-    while (i < 4) {
-      val value = codec.get(in)
-      val float = if signed then value.toFloat else (value.toLong & 0xFFFFFFFFL).toFloat
-      outCodec.put(out, float)
+    while (i < lanes) {
+      outCodec.put(out, f(inCodec.get(in)))
       i += 1
     }
     out.array()
   }
 
   def vectorConvertU(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.I32 => convertI32ToF32(v, signed = false)
+    case LaneShape.I32 => transformLanes[Int, Float](v, 0, 4)(using summon[LaneCodec[Int]], summon[LaneCodec[Float]])(v => (v.toLong & 0xFFFFFFFFL).toFloat)
   }
 
   def vectorConvertS(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.I32 => convertI32ToF32(v, signed = true)
+    case LaneShape.I32 => transformLanes[Int, Float](v, 0, 4)(using summon[LaneCodec[Int]], summon[LaneCodec[Float]])(_.toFloat)
   }
 
-  private def convertLowI32ToF64(v: Array[Byte], signed: Boolean): Array[Byte] = {
-    val in = ByteBuffer.wrap(v, 8, 8)
-    val out = ByteBuffer.allocate(16)
-    val inCodec = summon[LaneCodec[Int]]
-    val outCodec = summon[LaneCodec[Double]]
+  def vectorConvertLowU(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
+    case LaneShape.I32 => transformLanes[Int, Double](v, 8, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Double]]) (v => (v.toLong & 0xFFFFFFFFL).toDouble)
+  }
+
+  def vectorConvertLowS(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
+    case LaneShape.I32 => transformLanes[Int, Double](v, 8, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Double]])(_.toDouble)
+  }
+
+  private def clampFloatToI32(d: Double, signed: Boolean): Int =
+    if d.isNaN then 0
+    else if signed then
+      if d >= Int.MaxValue.toDouble then Int.MaxValue
+      else if d <= Int.MinValue.toDouble then Int.MinValue
+      else d.toInt
+    else if d >= 4294967295.0 then 0xFFFFFFFF
+    else if d <= 0.0 then 0
+    else d.toLong.toInt
+
+  private def truncSatFloatToI32(v: Array[Byte], signed: Boolean, mode: TruncMode): Array[Byte] = mode match
+    case TruncMode.Sat =>
+      transformLanes[Float, Int](v, 0, 4)(using summon[LaneCodec[Float]], summon[LaneCodec[Int]]) { f =>
+        clampFloatToI32(f.toDouble, signed)
+      }
+
+    case TruncMode.SatZero =>
+      val out = ByteBuffer.allocate(16)
+      val outCodec = summon[LaneCodec[Int]]
+      var i = 0
+      while (i < 2) {
+        outCodec.put(out, 0); i += 1
+      }
+      val high = transformLanes[Double, Int](v, 0, 2)(using summon[LaneCodec[Double]], summon[LaneCodec[Int]]) { d =>
+        clampFloatToI32(d, signed)
+      }
+      out.put(high)
+      out.array()
+
+  def vectorTruncSatU(shape: LaneShape, mode: TruncMode, v: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.F32 | LaneShape.F64 => truncSatFloatToI32(v, signed = false, mode)
+
+  def vectorTruncSatS(shape: LaneShape, mode: TruncMode, v: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.F32 | LaneShape.F64 => truncSatFloatToI32(v, signed = true, mode)
+
+  def vectorDemoteZero(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.F64 =>
+      val out = ByteBuffer.allocate(16)
+      val outCodec = summon[LaneCodec[Float]]
+      var i = 0
+      while (i < 2) {
+        outCodec.put(out, outCodec.allZeroes); i += 1
+      }
+      val low = transformLanes[Double, Float](v, 0, 2)(using summon[LaneCodec[Double]], summon[LaneCodec[Float]])(_.toFloat)
+      out.put(low)
+      out.array()
+
+  def vectorPromoteLow(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.F32 => transformLanes[Float, Double](v, 0, 2)(using summon[LaneCodec[Float]], summon[LaneCodec[Double]])(_.toDouble)
+
+  private def narrow[I, O](a: Array[Byte], b: Array[Byte], lanes: Int)(using inCodec: LaneCodec[I], outCodec: LaneCodec[O])(f: I => O): Array[Byte] = {
+    val inA = ByteBuffer.wrap(a)
+    val inB = ByteBuffer.wrap(b)
+    val out = ByteBuffer.allocate(lanes * 2 * outCodec.bytes)
     var i = 0
-    while (i < 2) {
-      val value = inCodec.get(in)
-      val dbl = if signed then value.toDouble else (value.toLong & 0xFFFFFFFFL).toDouble
-      outCodec.put(out, dbl)
+    while (i < lanes) {
+      outCodec.put(out, f(inCodec.get(inA)))
+      i += 1
+    }
+    i = 0
+    while (i < lanes) {
+      outCodec.put(out, f(inCodec.get(inB)))
       i += 1
     }
     out.array()
   }
 
-  def vectorConvertLowU(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.I32 => convertLowI32ToF64(v, signed = false)
-  }
-
-  def vectorConvertLowS(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.I32 => convertLowI32ToF64(v, signed = true)
-  }
-
-  private def truncSatFloatToI32(v: Array[Byte], signed: Boolean, mode: TruncMode): Array[Byte] = {
-    val in = ByteBuffer.wrap(v)
-    val out = ByteBuffer.allocate(16)
-    val outCodec = summon[LaneCodec[Int]]
-
-    mode match {
-      case TruncMode.Sat =>
-        val inCodec = summon[LaneCodec[Float]]
-        var i = 0
-        while (i < 4) {
-          val f = inCodec.get(in)
-          val i32 =
-            if f.isNaN then 0
-            else if signed then
-              if f >= Int.MaxValue.toFloat then Int.MaxValue
-              else if f <= Int.MinValue.toFloat then Int.MinValue
-              else f.toInt
-            else if f >= (1L << 32).toFloat then 0xFFFFFFFF
-            else if f <= 0 then 0
-            else f.toLong.toInt
-          outCodec.put(out, i32)
-          i += 1
-        }
-
-      case TruncMode.SatZero =>
-        val inCodec = summon[LaneCodec[Double]]
-        var i = 0
-        while (i < 2) {
-          outCodec.put(out, 0)
-          i += 1
-        }
-        while (i < 4) {
-          val f = inCodec.get(in)
-          val i32 =
-            if f.isNaN then 0
-            else if signed then {
-              if (f.isNaN) 0
-              else if (f >= Int.MaxValue.toDouble) Int.MaxValue
-              else if (f <= Int.MinValue.toDouble) Int.MinValue
-              else f.toInt
-            } else {
-              if (f.isNaN) 0
-              else if (f >= 4294967295.0) 0xFFFFFFFF
-              else if (f <= 0) 0
-              else f.toLong.toInt
-            }
-          outCodec.put(out, i32)
-          i += 1
-        }
-    }
-
-    out.array()
-  }
-
-  def vectorTruncSatU(shape: LaneShape, mode: TruncMode, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.F32 | LaneShape.F64 => truncSatFloatToI32(v, signed = false, mode)
-  }
-
-  def vectorTruncSatS(shape: LaneShape, mode: TruncMode, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.F32 | LaneShape.F64 => truncSatFloatToI32(v, signed = true, mode)
-  }
-
-  def vectorDemoteZero(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.F64 =>
-      val in = ByteBuffer.wrap(v)
-      val out = ByteBuffer.allocate(16)
-
-      val inCodec = summon[LaneCodec[Double]]
-      val outCodec = summon[LaneCodec[Float]]
-
-      var i = 0
-      while (i < 2) {
-        outCodec.put(out, outCodec.allZeroes)
-        i += 1
-      }
-      while (i < 4) {
-        val value = inCodec.get(in)
-        outCodec.put(out, value.toFloat)
-        i += 1
-      }
-
-      out.array()
-  }
-
-  def vectorPromoteLow(shape: LaneShape, v: Array[Byte]): Array[Byte] = shape match {
-    case LaneShape.F32 =>
-      val in = ByteBuffer.wrap(v)
-      val out = ByteBuffer.allocate(16)
-
-      val inCodec = summon[LaneCodec[Float]]
-      val outCodec = summon[LaneCodec[Double]]
-
-      var i = 0
-      while (i < 2) {
-        val value = inCodec.get(in)
-        outCodec.put(out, value.toDouble)
-        i += 1
-      }
-
-      out.array()
-  }
-
-  private def narrow[I, O](a: Array[Byte], b: Array[Byte], lanes: Int, inCodec: LaneCodec[I], outCodec: LaneCodec[O], out: ByteBuffer, f: I => O): Unit = {
-    val inA = ByteBuffer.wrap(a)
-    val inB = ByteBuffer.wrap(b)
-    for (_ <- 0 until lanes) {
-      val v = f(inCodec.get(inA))
-      outCodec.put(out, v)
-    }
-    for (_ <- 0 until lanes) {
-      val v = f(inCodec.get(inB))
-      outCodec.put(out, v)
-    }
-  }
-
-  def vectorNarrowU(from: LaneShape, to: LaneShape, a: Array[Byte], b: Array[Byte]): Array[Byte] = (from, to) match {
+  def vectorNarrowU(from: LaneShape, to: LaneShape, a: Array[Byte], b: Array[Byte]): Array[Byte] = (from, to) match
     case (LaneShape.I16, LaneShape.I8) =>
-      val inCodec = summon[LaneCodec[Short]]
-      val outCodec = summon[LaneCodec[Byte]]
-      val out = ByteBuffer.allocate(16)
-
-      def saturate(v: Short): Byte = Math.min(255, Math.max(0, v)).toByte
-
-      narrow(a, b, 8, inCodec, outCodec, out, saturate)
-      out.array()
+      narrow[Short, Byte](a, b, 8)(using summon[LaneCodec[Short]], summon[LaneCodec[Byte]]) { s =>
+        Math.min(255, Math.max(0, s.toInt)).toByte
+      }
 
     case (LaneShape.I32, LaneShape.I16) =>
-      val inCodec = summon[LaneCodec[Int]]
-      val outCodec = summon[LaneCodec[Short]]
-      val out = ByteBuffer.allocate(16)
+      narrow[Int, Short](a, b, 4)(using summon[LaneCodec[Int]], summon[LaneCodec[Short]]) { i =>
+        Math.min(65535, Math.max(0, i)).toShort
+      }
 
-      def saturate(v: Int): Short = Math.min(65535, Math.max(0, v)).toShort
-
-      narrow(a, b, 4, inCodec, outCodec, out, saturate)
-      out.array()
-
-    case _ =>
-      throw new IllegalArgumentException(s"Unsupported lane shapes for unsigned narrowing: $from to $to")
-  }
-
-  def vectorNarrowS(from: LaneShape, to: LaneShape, a: Array[Byte], b: Array[Byte]): Array[Byte] = (from, to) match {
+  def vectorNarrowS(from: LaneShape, to: LaneShape, a: Array[Byte], b: Array[Byte]): Array[Byte] = (from, to) match
     case (LaneShape.I16, LaneShape.I8) =>
-      val inCodec = summon[LaneCodec[Short]]
-      val outCodec = summon[LaneCodec[Byte]]
-      val out = ByteBuffer.allocate(16)
-
-      def saturate(v: Short): Byte = saturateSigned(v, -128, 127).toByte
-
-      narrow(a, b, 8, inCodec, outCodec, out, saturate)
-      out.array()
+      narrow[Short, Byte](a, b, 8)(using summon[LaneCodec[Short]], summon[LaneCodec[Byte]]) { s =>
+        saturateSigned(s.toInt, -128, 127).toByte
+      }
 
     case (LaneShape.I32, LaneShape.I16) =>
-      val inCodec = summon[LaneCodec[Int]]
-      val outCodec = summon[LaneCodec[Short]]
-      val out = ByteBuffer.allocate(16)
-
-      def saturate(v: Int): Short = saturateSigned(v, -32768, 32767).toShort
-
-      narrow(a, b, 4, inCodec, outCodec, out, saturate)
-      out.array()
-
-    case _ =>
-      throw new IllegalArgumentException(s"Unsupported lane shapes for signed narrowing: $from to $to")
-  }
-
-  private def extend[T, U](v: Array[Byte], fromCodec: LaneCodec[T], toCodec: LaneCodec[U], count: Int, pos: Int, extend: T => U): Array[Byte] = {
-    val in = ByteBuffer.wrap(v)
-    in.position(pos)
-    val out = ByteBuffer.allocate(count * toCodec.bytes)
-    for (_ <- 0 until count) {
-      val value = fromCodec.get(in)
-      toCodec.put(out, extend(value))
-    }
-    out.array()
-  }
+      narrow[Int, Short](a, b, 4)(using summon[LaneCodec[Int]], summon[LaneCodec[Short]]) { i =>
+        saturateSigned(i, -32768, 32767).toShort
+      }
 
   def vectorExtendU(from: LaneShape, to: LaneShape, half: Half, v: Array[Byte]): Array[Byte] = (from, to, half) match {
     case (LaneShape.I8, LaneShape.I16, Half.Low) =>
-      extend(v, summon[LaneCodec[Byte]], summon[LaneCodec[Short]], 8, 8, (x: Byte) => (x & 0xFF).toShort)
+      transformLanes[Byte, Short](v, 8, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])((x: Byte) => (x & 0xFF).toShort)
     case (LaneShape.I8, LaneShape.I16, Half.High) =>
-      extend(v, summon[LaneCodec[Byte]], summon[LaneCodec[Short]], 8, 0, (x: Byte) => (x & 0xFF).toShort)
+      transformLanes[Byte, Short](v, 0, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])((x: Byte) => (x & 0xFF).toShort)
 
     case (LaneShape.I16, LaneShape.I32, Half.Low) =>
-      extend(v, summon[LaneCodec[Short]], summon[LaneCodec[Int]], 4, 8, (x: Short) => x & 0xFFFF)
+      transformLanes[Short, Int](v, 8, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])((x: Short) => x & 0xFFFF)
     case (LaneShape.I16, LaneShape.I32, Half.High) =>
-      extend(v, summon[LaneCodec[Short]], summon[LaneCodec[Int]], 4, 0, (x: Short) => x & 0xFFFF)
+      transformLanes[Short, Int](v, 0, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])((x: Short) => x & 0xFFFF)
 
     case (LaneShape.I32, LaneShape.I64, Half.Low) =>
-      extend(v, summon[LaneCodec[Int]], summon[LaneCodec[Long]], 2, 8, (x: Int) => x & 0xFFFFFFFFL)
+      transformLanes[Int, Long](v, 8, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Long]])((x: Int) => x & 0xFFFFFFFFL)
     case (LaneShape.I32, LaneShape.I64, Half.High) =>
-      extend(v, summon[LaneCodec[Int]], summon[LaneCodec[Long]], 2, 0, (x: Int) => x & 0xFFFFFFFFL)
+      transformLanes[Int, Long](v, 0, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Long]])((x: Int) => x & 0xFFFFFFFFL)
   }
 
   def vectorExtendS(from: LaneShape, to: LaneShape, half: Half, v: Array[Byte]): Array[Byte] = (from, to, half) match {
     case (LaneShape.I8, LaneShape.I16, Half.Low) =>
-      extend(v, summon[LaneCodec[Byte]], summon[LaneCodec[Short]], 8, 8, _.toShort)
+      transformLanes[Byte, Short](v, 8, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])((x: Byte) => x.toShort)
     case (LaneShape.I8, LaneShape.I16, Half.High) =>
-      extend(v, summon[LaneCodec[Byte]], summon[LaneCodec[Short]], 8, 0, _.toShort)
+      transformLanes[Byte, Short](v, 0, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])((x: Byte) => x.toShort)
 
     case (LaneShape.I16, LaneShape.I32, Half.Low) =>
-      extend(v, summon[LaneCodec[Short]], summon[LaneCodec[Int]], 4, 8, _.toInt)
+      transformLanes[Short, Int](v, 8, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])(_.toInt)
     case (LaneShape.I16, LaneShape.I32, Half.High) =>
-      extend(v, summon[LaneCodec[Short]], summon[LaneCodec[Int]], 4, 0, _.toInt)
+      transformLanes[Short, Int](v, 0, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])(_.toInt)
 
     case (LaneShape.I32, LaneShape.I64, Half.Low) =>
-      extend(v, summon[LaneCodec[Int]], summon[LaneCodec[Long]], 2, 8, _.toLong)
+      transformLanes[Int, Long](v, 8, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Long]])(_.toLong)
     case (LaneShape.I32, LaneShape.I64, Half.High) =>
-      extend(v, summon[LaneCodec[Int]], summon[LaneCodec[Long]], 2, 0, _.toLong)
+      transformLanes[Int, Long](v, 0, 2)(using summon[LaneCodec[Int]], summon[LaneCodec[Long]])(_.toLong)
   }
 
-  def vectorExtAddU(shape: LaneShape, v1: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.I8 =>
-        val inCodec = summon[LaneCodec[Byte]]
-        val outCodec = summon[LaneCodec[Short]]
-        val in = ByteBuffer.wrap(v1)
-        val out = ByteBuffer.allocate(16)
+  private def extAddGeneric[A, B](v: Array[Byte], pairs: Int)(using inCodec: LaneCodec[A], outCodec: LaneCodec[B])(toInt: A => Int, fromInt: Int => B): Array[Byte] = {
+    val in = ByteBuffer.wrap(v)
+    val out = ByteBuffer.allocate(16)
+    var i = 0
+    while (i < pairs) {
+      val a = toInt(inCodec.get(in))
+      val b = toInt(inCodec.get(in))
+      outCodec.put(out, fromInt(a + b))
+      i += 1
+    }
+    out.array()
+  }
 
-        for (_ <- 0 until 8) {
-          val a = inCodec.get(in) & 0xFF
-          val b = inCodec.get(in) & 0xFF
-          outCodec.put(out, (a + b).toShort)
-        }
+  def vectorExtAddU(shape: LaneShape, v1: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.I8 => extAddGeneric[Byte, Short](v1, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])(b => b & 0xFF, s => s.toShort)
+    case LaneShape.I16 => extAddGeneric[Short, Int](v1, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])(s => s & 0xFFFF, i => i)
 
-        out.array()
+  def vectorExtAddS(shape: LaneShape, v1: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.I8 => extAddGeneric[Byte, Short](v1, 8)(using summon[LaneCodec[Byte]], summon[LaneCodec[Short]])(_.toInt, s => s.toShort)
+    case LaneShape.I16 => extAddGeneric[Short, Int](v1, 4)(using summon[LaneCodec[Short]], summon[LaneCodec[Int]])(_.toInt, i => i)
 
-      case LaneShape.I16 =>
-        val inCodec = summon[LaneCodec[Short]]
-        val outCodec = summon[LaneCodec[Int]]
-        val in = ByteBuffer.wrap(v1)
-        val out = ByteBuffer.allocate(16)
-
-        for (_ <- 0 until 4) {
-          val a = inCodec.get(in) & 0xFFFF
-          val b = inCodec.get(in) & 0xFFFF
-          outCodec.put(out, a + b)
-        }
-
-        out.array()
-
-  def vectorExtAddS(shape: LaneShape, v1: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.I8 =>
-        val inCodec = summon[LaneCodec[Byte]]
-        val outCodec = summon[LaneCodec[Short]]
-        val in = ByteBuffer.wrap(v1)
-        val out = ByteBuffer.allocate(16)
-
-        for (_ <- 0 until 8) {
-          val a = inCodec.get(in).toInt
-          val b = inCodec.get(in).toInt
-          outCodec.put(out, (a + b).toShort)
-        }
-
-        out.array()
-
-      case LaneShape.I16 =>
-        val inCodec = summon[LaneCodec[Short]]
-        val outCodec = summon[LaneCodec[Int]]
-        val in = ByteBuffer.wrap(v1)
-        val out = ByteBuffer.allocate(16)
-
-        for (_ <- 0 until 4) {
-          val a = inCodec.get(in).toInt
-          val b = inCodec.get(in).toInt
-          outCodec.put(out, a + b)
-        }
-
-        out.array()
-  
   // Lane operations
   def extractLane(shape: LaneShape, v: Array[Byte], lane: Byte): V =
     shape match {
@@ -1020,16 +875,16 @@ given ConcreteSIMDOps[V]
     bb.array()
 
 given ConcreteConvertBytesVector: ConvertBytesVec[Seq[Byte], Array[Byte]] with
-  override def apply(from: Seq[Byte], conf: BytesSize && Padding && Bits && SomeCC[ByteOrder]): Array[Byte] = {
+  override def apply(from: Seq[Byte], conf: BytesSize && BytePadding && Bits && SomeCC[ByteOrder]): Array[Byte] = {
     val padding = conf.c1.c1.c2
     val signed = conf.c1.c2 match {
       case Bits.Signed => true
       case _ => false
     }
-    val wrappingBytes = padding.wrappingBytes
-    val zeroBytes = padding.zeroBytes
+    val wrappingBytes = padding.wrapBytes
+    val zeroBytes = padding.totalBytes
 
-    if (padding == Raw) {
+    if (padding == None) {
       return if conf.c2.t == ByteOrder.LITTLE_ENDIAN then from.toArray.reverse else from.toArray
     }
 
