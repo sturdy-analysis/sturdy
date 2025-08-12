@@ -395,29 +395,34 @@ enum CompareOp:
 
 enum ApronBool[Addr, Type]:
   case Constraint(cons: ApronCons[Addr, Type])
+  case Constant(boolean: Boolean)
   case And(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
   case Or(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
 
   def addrs: Set[Addr] =
     this match
       case Constraint(cons) => cons.addrs
+      case Constant(_) => Set()
       case And(e1, e2) => e1.addrs ++ e2.addrs
       case Or(e1, e2) => e1.addrs ++ e2.addrs
 
   def negated: ApronBool[Addr,Type] =
     this match
       case Constraint(cons) => Constraint(cons.negated)
+      case Constant(b) => Constant(!b)
       case And(e1, e2) => Or(e1.negated, e2.negated)
       case Or(e1, e2) => And(e1.negated, e2.negated)
 
   def constraint: Iterable[ApronCons[Addr, Type]] =
     this match
       case Constraint(cons) => Iterable(cons)
+      case Constant(b) => Iterable()
       case And(e1, e2) => e1.constraint ++ e2.constraint
       case Or(e1, e2) => e1.constraint ++ e2.constraint
 
   override def toString: String =
     this match
       case Constraint(cons) => cons.toString
+      case Constant(b) => b.toString
       case And(e1, e2) => s"$e1 ∧ $e2"
       case Or(e1, e2) => s"$e1 ∨ $e2"

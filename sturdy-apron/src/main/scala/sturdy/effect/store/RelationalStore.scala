@@ -290,29 +290,27 @@ final class RelationalStore
     _var match
       case ApronVar(PhysicalAddress(ctx, Recency.Failed)) => ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
       case ApronVar(phys) =>
-        readApronExprFromNonRelationalStore(phys) match
+        nonRelationalStore.read(PowersetAddr(phys).asInstanceOf[PowAddr]).toOption match
           case Some(e) =>
-            val env = _abstract1.getEnvironment
-            if(env.hasVar(_var)) {
-              if (e.isBottom == Topped.Actual(true))
-                ApronExpr.Addr(_var, specials, tpe)
-              else if (e.isTop == Topped.Actual(true))
-                e
-              else
-                ApronExpr.Constant(
-                  Join(abstract1.getBound(manager, _var), abstract1.getBound(manager, _var)).get, specials, tpe)
-            } else {
-              e
-            }
+            relationalValue.getRelationalExpr(e) match
+              case Some(expr) =>
+                val env = _abstract1.getEnvironment
+                if(env.hasVar(_var)) {
+                  if (expr.isBottom == Topped.Actual(true))
+                    ApronExpr.Addr(_var, specials, tpe)
+                  else if (expr.isTop == Topped.Actual(true))
+                    expr
+                  else
+                    ApronExpr.Constant(
+                      Join(abstract1.getBound(manager, _var), abstract1.getBound(manager, _var)).get, specials, tpe)
+                } else {
+                  expr
+                }
+              case None => ApronExpr.Addr(_var, specials, tpe)
           case None =>
             throw new IllegalArgumentException(s"No metadata for $phys store")
 //            ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
 
-
-
-
-  private def readApronExprFromNonRelationalStore(phys: PhysicalAddress[Context]): Option[ApronExpr[PhysicalAddress[Context], Type]] =
-    nonRelationalStore.read(PowersetAddr(phys).asInstanceOf[PowAddr]).toOption.flatMap(relationalValue.getRelationalExpr)
 
   case class RelationalStoreState(abs1: Abstract1, nonRelationalStoreState: nonRelationalStore.State):
     override def equals(obj: Any): Boolean =
@@ -343,7 +341,7 @@ final class RelationalStore
     nonRelationalStore.setState(s.nonRelationalStoreState)
 
   override def setBottom: Unit =
-    _abstract1 = Abstract1(manager, new Environment())
+    _abstract1.meet(manager, Tcons1(_abstract1.getEnvironment, Tcons1.EQ, Texpr1CstNode(DoubleScalar(1))))
     nonRelationalStore.setBottom
 
   inline def copyAbstract1(abstract1: Abstract1): Abstract1 =

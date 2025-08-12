@@ -22,7 +22,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
-    case AllocationSites(sites: PowVirtAddr)
+    case AllocationSites(sites: PowVirtAddr, size: ApronExpr[VirtAddr, Type])
   import RelI32.*
 
   final type I32 = RelI32
@@ -36,7 +36,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
-        case AllocationSites(sites) => ApronExpr.top(I32Type)
+        case AllocationSites(sites, _) => ApronExpr.top(I32Type)
 
     def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]]): ApronExpr[VirtAddr, Type] =
       given ApronState[VirtAddr, Type] = lazyApronState.value
@@ -45,13 +45,37 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
   final override def boolean(b: Bool): Value = Value.Int32(BoolExpr(b))
 
+  var nullAddrVirt: VirtAddr = null
+  private def nullAddr(using apronState: ApronState[VirtAddr,Type]): VirtAddr =
+    if(nullAddrVirt == null) {
+      val nullAddrVirt = apronState.alloc(AddrCtx.Heap(HeapCtx.Static(0)))
+      apronState.assign(nullAddrVirt, ApronExpr.lit(0, Type.I32Type))
+      nullAddrVirt
+    } else {
+      nullAddrVirt
+    }
+
+  private def containsNull(addrs: PowVirtAddr): Boolean =
+    addrs.iterator.exists(virt =>
+      virt.ctx == AddrCtx.Heap(HeapCtx.Static(0))
+    )
+
   given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronState: Lazy[ApronState[VirtAddr,Type]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
       (v1, v2) match
         case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
-        case (AllocationSites(sites1), AllocationSites(sites2)) =>
+        case (AllocationSites(sites1, size1), AllocationSites(sites2, size2)) =>
           val union = sites1.union(sites2)
-          MaybeChanged(AllocationSites(union), sites1.physicalAddresses.size < union.physicalAddresses.size)
+          val joinedSize = combineApronExpr(size1,size2)
+          MaybeChanged(AllocationSites(union,joinedSize.get), joinedSize.hasChanged || sites1.physicalAddresses.size < union.physicalAddresses.size)
+        case (NumExpr(expr), _ : (BoolExpr | AllocationSites)) if expr.isBottom == Topped.Actual(true) => Changed(v2)
+        case (_ : (BoolExpr | AllocationSites), NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
+        case (NumExpr(expr), AllocationSites(sites, size)) if apronState.value.getInterval(expr).isZero =>
+          given ApronState[VirtAddr,Type] = apronState.value
+          Changed(AllocationSites(sites.add(nullAddr), size))
+        case (AllocationSites(sites, size), NumExpr(expr)) if apronState.value.getInterval(expr).isZero =>
+          given ApronState[VirtAddr, Type] = apronState.value
+          MaybeChanged(AllocationSites(sites.add(nullAddr), size), containsNull(sites))
         case (_, _) => combineApronExpr(v1.asNumExprLazy, v2.asNumExprLazy).map(NumExpr.apply)
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
@@ -72,6 +96,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
     override def equ(v1: I32, v2: I32): Bool =
       (v1, v2) match
+        case (AllocationSites(sites, _), NumExpr(expr)) =>
+          if(apronState.getInterval(expr).isZero)
+            ApronBool.Constant(containsNull(sites))
+          else
+            equ(NumExpr(v1.asNumExpr), v2)
+        case (_: NumExpr, _: AllocationSites) =>
+          equ(v2, v1)
         case (BoolExpr(c1), NumExpr(i2@ApronExpr.Constant(coeff, _, tpe))) =>
           val c1ContainsNaN = c1.constraint.exists { case ApronCons(_, e1, e2) => e1.floatSpecials.nan || e2.floatSpecials.nan }
           if (coeff.isEqual(0) && !c1ContainsNaN)

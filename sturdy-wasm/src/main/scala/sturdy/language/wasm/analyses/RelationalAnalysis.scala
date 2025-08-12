@@ -49,10 +49,8 @@ import java.math.BigInteger
 import scala.collection.immutable.List
 import scala.math
 
-object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalBytes, ExceptionByTarget, Control:
+object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalMemory, RelationalConvert, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
-  final type Addr = ApronExpr[VirtAddr, Type]
-  final type Size = ApronExpr[VirtAddr, Type]
   final type FuncIx = apron.Interval
   final type FunV = Powerset[FunctionInstance]
 
@@ -65,8 +63,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
   given RelationalSpecialWasmOperations(using domLogger: DomLogger[FixIn], f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v match
-      case Int32(v) => v.asNumExpr
-      case TopValue => constant(ApronExpr.topInterval, I32Type)
+      case Int32(n@NumExpr(_)) => n
+      case Int32(a@AllocationSites(_, _)) => a
+      case Int32(b@BoolExpr(_)) => NumExpr(b.asNumExpr)
+      case TopValue => NumExpr(constant(ApronExpr.topInterval, I32Type))
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
     override def valueToFuncIx(v: Value): FuncIx =
@@ -83,14 +83,19 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
       addr match
-        case ApronExpr.Addr(ApronVar(VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site,initOffset)), n, addrTrans)), specials, tpe) =>
-          val ctx = AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset))
-          val virt = apronState.alloc(ctx)
-          apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
-          ApronExpr.addr(virt, tpe)
-        case _ if newOffset == 0 => addr
+        case AllocationSites(sites, size) =>
+          AllocationSites(PowVirtualAddress(sites.iterator.map {
+            case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site,initOffset)), n, addrTrans) =>
+              apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
+            case v@VirtualAddress(AddrCtx.Heap(HeapCtx.Static(0)), n, addrTrans) =>
+              v
+            case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
+          }), size)
+        case _ if newOffset == 0 =>
+          addr
         case _ =>
-          ApronExpr.intAdd[VirtAddr,Type](addr, ApronExpr.lit[VirtAddr, Type](newOffset, addr._type), addr._type)
+          val expr = addr.asNumExpr
+          NumExpr(ApronExpr.intAdd[VirtAddr,Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type))
     }
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
@@ -127,8 +132,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Int32(size)) =>
             val allocSite = domLogger.getDoms(1)
             val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            apronState.assign(virt, ApronExpr.constant(ApronExpr.topInterval, I32Type))
-            List(Value.Int32(AllocationSites(PowVirtualAddress(virt))))
+            List(Value.Int32(AllocationSites(PowVirtualAddress(virt), size.asNumExpr)))
           case _ => f.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "free" =>
         args match
@@ -180,7 +184,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         v match
           case Value.Int32(NumExpr(expr)) => Some(expr)
           case Value.Int32(BoolExpr(_)) => None
-          case Value.Int32(AllocationSites(_)) => None
+          case Value.Int32(AllocationSites(_, _)) => None
           case Value.Int64(expr) => Some(expr)
           case Value.Float32(expr) => Some(expr)
           case Value.Float64(expr) => Some(expr)
@@ -245,26 +249,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
-    val memory: RelationalMemory[MemoryAddr, AddrCtx, Type, Value] = new RelationalMemory[MemoryAddr, AddrCtx, Type, Value](
+    val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       Bytes.StoredBytes(Value.TopValue, Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc(rootFrameData),
-      (addr, mem) => addr match
-        case ApronExpr.Addr(ApronVar(virt@VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(allocSite, offset)), _, _)), _, _) =>
-          // We assume that each malloc addresses is allocated in their own isolated part of the heap.
-          // Hence, a malloc address does not overlap with a static address
-          for {
-            phys <- virt.physical.iterator.toList;
-            region <- mem.store.get(phys)
-          } yield(region)
-        case _ =>
-          val (l,u) = apronState.getIntInterval(addr)
-          var readRegions:List[MemoryRegion[VirtAddr, Type, Value]] = List()
-          if(l == u)
-            readRegions ++= mem.store.get(PhysicalAddress(AddrCtx.Heap(HeapCtx.Static(l)), Recent))
-          else
-            throw new NotImplementedError("Currently does not handle the case that addresses are imprecise")
-
-          readRegions
+      heapAlloc(rootFrameData)
     )
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(

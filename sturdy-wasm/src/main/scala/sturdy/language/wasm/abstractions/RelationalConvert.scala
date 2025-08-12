@@ -1,19 +1,23 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.apron.{ApronBool, ApronExpr, ApronState}
+import sturdy.apron.{ApronBool, ApronExpr, ApronState, ApronVar}
+import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.bytememory
 import sturdy.effect.bytememory.Bytes.*
-import sturdy.values.Topped
+import sturdy.fix.DomLogger
+import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
+import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
 import sturdy.values.config.{Bits, BytesSize}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.references.VirtualAddress
+import sturdy.values.{Combine, MaybeChanged, Topped, Widening}
 
 import java.nio.ByteOrder
 
-trait RelationalBytes extends RelationalValues:
-
-  final type Bytes = sturdy.effect.bytememory.Bytes[Value]
+trait RelationalConvert extends RelationalMemory:
+  import RelI32.*
 
   private final class ConvertToBytes[From, FromV](inject: FromV => Value)
     extends Convert[From, Seq[Byte], FromV, Bytes, BytesSize && SomeCC[ByteOrder]]:
@@ -38,12 +42,11 @@ trait RelationalBytes extends RelationalValues:
     override def apply(from: Bytes, conf: BytesSize && SomeCC[ByteOrder] && Bits): VTo =
       val toByteSize && SomeCC(toByteOrder, _) && bits = conf
       from match
-        case ReadBytes(extract(v), Topped.Actual(storedBytes), Topped.Actual(fromByteOrder), readOffset, Topped.Actual(readBytes))
+        case ReadBytes(extract(v), Topped.Actual(storedBytes), Topped.Actual(fromByteOrder), Topped.Actual(true), Topped.Actual(readBytes))
           if (storedBytes == expectedByteSize
             && readBytes == expectedByteSize
             && toByteSize.bytes == expectedByteSize
             && fromByteOrder == toByteOrder
-            && readOffset.isZero
             && bits == Bits.Signed) => v
         case _ => top
 
@@ -70,11 +73,10 @@ trait RelationalBytes extends RelationalValues:
     override def apply(from: Bytes, conf: SomeCC[ByteOrder]): VTo =
       val SomeCC(toByteOrder, _) = conf
       from match
-        case ReadBytes(extract(v), Topped.Actual(storedBytes), Topped.Actual(fromByteOrder), readOffset, Topped.Actual(readBytes))
+        case ReadBytes(extract(v), Topped.Actual(storedBytes), Topped.Actual(fromByteOrder), Topped.Actual(true), Topped.Actual(readBytes))
           if (storedBytes == expectedByteSize
             && readBytes == expectedByteSize
-            && fromByteOrder == toByteOrder
-            && readOffset.isZero) => v
+            && fromByteOrder == toByteOrder) => v
         case _ => top
 
 
