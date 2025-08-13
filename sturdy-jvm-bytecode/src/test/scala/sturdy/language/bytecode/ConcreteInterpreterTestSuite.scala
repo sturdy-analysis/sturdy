@@ -35,7 +35,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
   val ignoreFileName = "ignored-files.txt"
 
   val ignoreRegexes: Seq[Regex] = Files.lines(Paths.get(resourcePath + ignoreFileName)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
-  val cfTable: TableFor1[Path] = Table("path") ++ Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !ignoreRegexes.exists(_.matches(f.toString))).toSeq
+  val cfTable: TableFor1[Path] = Table("path") ++ Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !f.equals(Paths.get(resourcePath + ignoreFileName)) && !ignoreRegexes.exists(_.matches(f.toString))).toSeq
 
   def testClassFile(path: Path): Assertion =
     // logic taken from the existing tests
