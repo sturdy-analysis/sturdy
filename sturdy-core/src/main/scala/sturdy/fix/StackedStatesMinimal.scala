@@ -12,7 +12,7 @@ enum Stability:
 
 trait StackMinimal[In, Out]:
   enum PushResult:
-    case Recurrent(out: Option[Out])
+    case Skip(out: Option[Out])
     case Continue(in: In)
 
   enum PopResult:
@@ -29,9 +29,9 @@ trait StackMinimal[In, Out]:
 def minimalStackToStack[Dom,Codom,In,Out](s: StackMinimal[(Dom,In),(TrySturdy[Codom],Out)]): Stack[Dom,Codom,In,Out] = new Stack {
   override def push(dom: Dom, in: In, currentOut: Out, iterate: Boolean): PushResult =
     s.push((dom, in)) match {
-      case s.PushResult.Recurrent(out) => out match {
-        case None => PushResult.Recurrent(TrySturdy(throw RecurrentCall((dom, in))), None)
-        case Some((result, out)) => PushResult.Recurrent(result, Some(out))
+      case s.PushResult.Skip(out) => out match {
+        case None => PushResult.Skip(TrySturdy(throw RecurrentCall((dom, in))), None)
+        case Some((result, out)) => PushResult.Skip(result, Some(out))
       }
       case s.PushResult.Continue((_, in)) => PushResult.Continue(Some(in))
     }
@@ -95,7 +95,8 @@ final class StackedStatesMinimal[In, Out](val inWidening: InStateWidening[Unit, 
         outCache.get(widenedIn) match {
           case Some(OutCacheEntry(out, Stable)) =>
             if (Fixpoint.DEBUG) println(s"${stackHeightIndent}READ PRIOR OUTPUT $widenedIn <- $out")
-            return PushResult.Recurrent(Some(out))
+            inWidening.pop((), in)
+            return PushResult.Skip(Some(out))
           case _ => // nothing
         }
         // push call to stacksdsaads
@@ -110,10 +111,10 @@ final class StackedStatesMinimal[In, Out](val inWidening: InStateWidening[Unit, 
         outCache.get(widenedIn) match
           case None =>
             if (Fixpoint.DEBUG) println(s"${stackHeightIndent}RECURRENT $widenedIn")
-            PushResult.Recurrent(None)
+            PushResult.Skip(None)
           case Some(OutCacheEntry(previousOut, _)) =>
             if (Fixpoint.DEBUG) println(s"${stackHeightIndent}RECURRENT $widenedIn <- $previousOut")
-            PushResult.Recurrent(Some(previousOut))
+            PushResult.Skip(Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
    *

@@ -76,7 +76,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     m.values.map(_.result).reduce((r1,r2) => Join(r1,r2).get)
   }.toMap
 
-  class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, var dependencies: List[OutCacheEntry]) extends StableMaker:
+  class OutCacheEntry(dom: Dom, in: state.In, var result: TrySturdy[Codom], var out: state.Out, var stability: Stability, val dependencies: mutable.Set[OutCacheEntry]) extends StableMaker:
     def isStable: Boolean = stability eq Stability.Stable
     def mayReadEntry: Boolean = (stability eq Stability.Stable) || storeIntermediateOutput && (stability eq Stability.Unstable)
     override def toString: String = s"OutCacheEntry($dom, $in, $stability) = $result:$out"
@@ -90,14 +90,14 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
   enum Stability:
     case Stable
     case Unstable
-    case Invalid
+    case Outdated
 
 
   private def invalidateCache(out: OutCacheEntry): Unit =
     if (out.stability == Stability.Unstable) {
       if (Fixpoint.DEBUG_PRIOR_OUTPUT)
         println(s"${stackHeightIndent}  INVALIDATE PRIOR OUTPUT $out")
-      out.stability = Stability.Invalid
+      out.stability = Stability.Outdated
       out.dependencies.foreach(invalidateCache)
     }
 
@@ -154,7 +154,8 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             if (Fixpoint.DEBUG_PRIOR_OUTPUT)
               println(s"${stackHeightIndent}READ PRIOR OUTPUT $stateFrame <- $result:$out")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            return PushResult.Recurrent(result, Some(out))
+            inStateWidening.pop(dom, in)
+            return PushResult.Skip(result, Some(out))
           }
         }
 
@@ -181,12 +182,12 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
             if (Fixpoint.DEBUG)
               println(s"${stackHeightIndent}POP RECURRENT  $stateFrame")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            PushResult.Recurrent(TrySturdy(throw RecurrentCall(stateFrame)), None)
+            PushResult.Skip(TrySturdy(throw RecurrentCall(stateFrame)), None)
           case Some(out@OutCacheEntry(res, previousOut)) =>
             if (Fixpoint.DEBUG)
-              println(s"${stackHeightIndent}POP RECURRENT ${stateFrame._1},$res:$previousOut")
+              println(s"${stackHeightIndent}POP RECURRENT  $stateFrame <- $res:$previousOut")
             fire(FixpointControlEvent.Recurrent(stateFrame))
-            PushResult.Recurrent(res, Some(previousOut))
+            PushResult.Skip(res, Some(previousOut))
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
    *
@@ -214,7 +215,7 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $stateFrame:$in \n${stackHeightIndent}  <- $result:$out")
       if (storeIntermediateOutput) {
-        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Unstable, deps)
+        val outCacheEntry = OutCacheEntry(dom, in, result, out, Stability.Unstable, mutable.Set() ++ deps)
         addParentDependency(outCacheEntry)
         PopResult.Stable(outCacheEntry)
       } else {
@@ -226,51 +227,42 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
     fire(FixpointControlEvent.EndFixpoint())
     updatedResult
 
-  private def storeCorecurrentOutput(widen: Boolean, frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, deps: List[OutCacheEntry]): PopResult = outCache.get(frame) match
+  private def storeCorecurrentOutput(widen: Boolean, frame: (Dom, state.In), result: TrySturdy[Codom], out: state.Out, deps: Iterable[OutCacheEntry]): PopResult = outCache.get(frame) match
     case None =>
-      val outCacheEntry = OutCacheEntry(frame._1, frame._2, result, out, Stability.Unstable, deps)
+      val outCacheEntry = OutCacheEntry(frame._1, frame._2, result, out, Stability.Unstable, mutable.Set() ++ deps)
       outCache.put(frame, outCacheEntry)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- Initial($result):$out")
       addParentDependency(outCacheEntry)
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
-      try {
-        LinearStateOperationCounter.wideningCounter += 1
-        var newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
-        state.setOutState(frame._1, newOut.get)
-
-        val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
-        newOut = newOut.map(_ => state.getOutState(frame._1))
-
-        if (Fixpoint.DEBUG)
-          println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut")
-        val changed = newResult.hasChanged || newOut.hasChanged
-        if (changed) {
-          if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
-            throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
-          }
-          outCacheEntry.stability = Stability.Unstable
-          outCacheEntry.result = newResult.get
-          outCacheEntry.out = newOut.get
-          if (storeIntermediateOutput) {
-            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-            addParentDependency(outCacheEntry)
-          }
-          PopResult.Unstable(newResult.get, Some(newOut.get))
-        } else {
-          outCacheEntry.stability = Stability.Unstable // in case it was invalid
-          if (storeIntermediateOutput) {
-            // store entry but also track its dependencies to invalidate it when needed
-            outCacheEntry.dependencies = (outCacheEntry.dependencies ++ deps).distinct
-            addParentDependency(outCacheEntry)
-          }
-          PopResult.Stable(outCacheEntry)
+      val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
+      LinearStateOperationCounter.wideningCounter += 1
+      val newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
+      val changed = newResult.hasChanged || newOut.hasChanged
+      if (Fixpoint.DEBUG)
+        println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut (changed=$changed)")
+      if (changed) {
+        if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
+          throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
         }
-      } finally {
-        state.setOutState(frame._1, out)
+        outCacheEntry.stability = Stability.Unstable
+        outCacheEntry.result = newResult.get
+        outCacheEntry.out = newOut.get
+        if (storeIntermediateOutput) {
+          outCacheEntry.dependencies ++= deps
+          addParentDependency(outCacheEntry)
+        }
+        PopResult.Unstable(newResult.get, Some(newOut.get))
+      } else {
+        outCacheEntry.stability = Stability.Unstable // in case it was invalid
+        if (storeIntermediateOutput) {
+          // store entry but also track its dependencies to invalidate it when needed
+          outCacheEntry.dependencies ++= deps
+          addParentDependency(outCacheEntry)
+        }
+        PopResult.Stable(outCacheEntry)
       }
-
 
 object StackedStates:
   def apply[Dom, Codom](state: State)
@@ -291,21 +283,28 @@ class ContextualInStateWidening[Ctx, Dom, In, Codom](contextual: Contextual[Ctx,
     override def toString: String = in.toString()
   private var contexts: Map[(Dom, Ctx), ContextEntry] = Map()
 
+  private val DEBUG = false
+
+  private def height: Int = contexts.values.map(_.in.size).sum
+
   override def toString: String = s"ContextualInWidening($contexts)"
 
   def push(dom: Dom, in: In): MaybeChanged[In] =
     val ctx =  contextual.getCurrentContext
     contexts.get((dom, ctx)) match
       case None =>
+        if (DEBUG) println(s"${"  " * height}SW push ($dom,$ctx) = ${MaybeChanged.Unchanged(in)}")
         contexts += ((dom, ctx) -> new ContextEntry(List(in)))
         MaybeChanged.Unchanged(in)
       case Some(ce: ContextEntry) =>
         val widenedIn = widenIn(dom)(ce.in, in)
+        if (DEBUG) println(s"${"  " * height}SW push ($dom,$ctx) = $widenedIn")
         ce.in = widenedIn.get :: ce.in
         widenedIn
 
   def pop(dom: Dom, in: In): Unit =
     val ctx =  contextual.getCurrentContext
+    if (DEBUG) println(s"${"  " * (height-1)}SW pop  ($dom,$ctx)")
     contexts.get((dom, ctx)) match
       case None => throw new IllegalStateException()
       case Some(ce: ContextEntry) =>
