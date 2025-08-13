@@ -3,6 +3,7 @@
   (type (;1;) (func))
   (type (;2;) (func (result i32)))
   (type (;3;) (func (param i32 i32) (result i32)))
+  (import "env" "__VERIFIER_nondet_int" (func $__VERIFIER_nondet_int (type 2)))
   (import "wasi_snapshot_preview1" "proc_exit" (func $__wasi_proc_exit (type 0)))
   (func $__wasm_call_ctors (type 1)
     nop)
@@ -258,16 +259,145 @@
       end
     end)
   (func $__original_main (type 2) (result i32)
-    i32.const 1112
-    i32.const 2
-    i32.store
-    i32.const 1104
-    i64.const 4294967296
-    i64.store
+    (local i32 i32 i32 i32 i32 i32)
     i32.const 1168
-    i32.const 3
+    call $__VERIFIER_nondet_int
+    local.tee 2
     i32.store
-    i32.const 3
+    block  ;; label = @1
+      local.get 2
+      i32.const 0
+      i32.le_s
+      br_if 0 (;@1;)
+      local.get 2
+      i32.const 8
+      i32.ge_u
+      if  ;; label = @2
+        local.get 2
+        i32.const 2147483640
+        i32.and
+        local.set 4
+        loop  ;; label = @3
+          local.get 0
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 0
+          i32.store
+          local.get 0
+          i32.const 1
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 2
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 3
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 4
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 5
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 6
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 7
+          i32.or
+          local.tee 1
+          i32.const 2
+          i32.shl
+          i32.const 1104
+          i32.add
+          local.get 1
+          i32.store
+          local.get 0
+          i32.const 8
+          i32.add
+          local.set 0
+          local.get 3
+          i32.const 8
+          i32.add
+          local.tee 3
+          local.get 4
+          i32.ne
+          br_if 0 (;@3;)
+        end
+      end
+      local.get 2
+      i32.const 7
+      i32.and
+      local.tee 5
+      i32.eqz
+      br_if 0 (;@1;)
+      i32.const 0
+      local.set 3
+      loop  ;; label = @2
+        local.get 0
+        i32.const 2
+        i32.shl
+        i32.const 1104
+        i32.add
+        local.get 0
+        i32.store
+        local.get 0
+        i32.const 1
+        i32.add
+        local.set 0
+        local.get 3
+        i32.const 1
+        i32.add
+        local.tee 3
+        local.get 5
+        i32.ne
+        br_if 0 (;@2;)
+      end
+    end
+    local.get 2
     call $tk
     i32.const 0)
   (func $main (type 3) (param i32 i32) (result i32)

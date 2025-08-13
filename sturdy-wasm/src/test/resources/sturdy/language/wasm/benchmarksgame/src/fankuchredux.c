@@ -5,9 +5,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include "../../stdlib.h"
 
 /* this depends highly on the platform.  It might be faster to use
    char type on 32-bit systems; it might be faster to use unsigned. */
@@ -81,7 +79,7 @@ int main()
    }
    */
 
-   max_n = 3; //atoi(v[1]);
+   max_n = __VERIFIER_nondet_int();
    /*if (max_n < 3 || max_n > 15) {
       //fprintf(stderr, "range: must be 3 <= n <= 12\n");
       exit(1);
