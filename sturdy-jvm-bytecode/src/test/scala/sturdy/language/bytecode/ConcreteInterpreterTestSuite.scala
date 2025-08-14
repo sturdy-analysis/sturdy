@@ -5,14 +5,11 @@ import org.opalj.br.reader.Java17Framework
 import org.opalj.br.{ArrayType, ClassType, ReferenceType}
 import org.opalj.bytecode
 import org.opalj.io.process
-import org.scalatest.Inspectors.forEvery
 import org.scalatest.ParallelTestExecution
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableFor1
-import org.scalatest.prop.Tables.Table
 import org.scalatest.time.{Seconds, Span}
 import sturdy.effect.failure.CFailureException
 import sturdy.language.bytecode.ConcreteRefValues.{NullValue, nonNullArray}
@@ -20,6 +17,7 @@ import sturdy.language.bytecode.abstractions.Site
 
 import java.io.{DataInputStream, FileInputStream}
 import java.nio.file.{Files, Path, Paths}
+import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
 
@@ -27,7 +25,7 @@ enum TestedMethodType:
   case Main
   case Run
 
-class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
+object FileTable:
   // path to the bytecode files
   val resourcePath = "./sturdy-jvm-bytecode/src/test/resources/"
   // newline-separated regexes of file names to ignore
@@ -35,8 +33,9 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
   val ignoreFileName = "ignored-files.txt"
 
   val ignoreRegexes: Seq[Regex] = Files.lines(Paths.get(resourcePath + ignoreFileName)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
-  val cfTable: TableFor1[Path] = Table("path") ++ Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !f.equals(Paths.get(resourcePath + ignoreFileName)) && !ignoreRegexes.exists(_.matches(f.toString))).toSeq
+  val cfTable: ArraySeq[Path] = ArraySeq.from(Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !f.equals(Paths.get(resourcePath + ignoreFileName)) && !ignoreRegexes.exists(_.matches(f.toString))))
 
+class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   def testClassFile(path: Path): Assertion =
     // logic taken from the existing tests
     val project = Project(path.toFile, bytecode.RTJar)
@@ -73,12 +72,11 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
     assert(v.asInt32(using concreteInterpreter.failure) === getExpectedValue(mType))
 
-  forEvery(cfTable):
-    path =>
-      test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
-        // TODO: this seems to only work partially
-        cancelAfter(Span(10, Seconds)):
-          testClassFile(path)
+  FileTable.cfTable.foreach: path =>
+    test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
+      // TODO: fix cancelAfter
+      cancelAfter(Span(10, Seconds)):
+        testClassFile(path)
 
 def getExpectedValue(mType: TestedMethodType): Int = mType match
   case TestedMethodType.Main => 95
