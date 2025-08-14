@@ -374,7 +374,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         handleIfCmpInst(eqOps.equ, pc + inst.branchoffset)
       case inst: IF_ACMPNE =>
         handleIfCmpInst(eqOps.neq, pc + inst.branchoffset)
-        
+
       // JUMPS opcode 167 - 171
       case inst: GOTO =>
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
@@ -630,25 +630,23 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     }
 
   def ensureInitialization(objType: ClassType)(using Fixed): Unit =
-    if(!staticInitialized.contains(objType)) {
-      if (!staticInitialized.contains(objType)) {
-        if (project.isLibraryType(objType)) {
-          staticInitialized += objType
-          val source = javaLibClassFileWrapper(objType)
-          val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-          val void = invoke(cfs.staticInitializer.get, Seq())
-        }
-        else {
-          staticInitialized += objType
-          val source = nonJavaLibClassFileWrapper(objType)
-          val cfs: List[ClassFile] =
-            process(new DataInputStream(new FileInputStream(source))) { in =>
-              org.opalj.br.reader.Java8Framework.ClassFile(in)
-            }
-          val void = invoke(cfs.head.staticInitializer.get, Seq())
-        }
-      }
-    }
+    if staticInitialized.contains(objType) then return;
+    import org.opalj.br.reader.Java8Framework;
+    val cfs = if project.isLibraryType(objType) then
+      // TODO: this case causes issues in the concreteInterpreter tests, fix
+      val source = javaLibClassFileWrapper(objType)
+      Java8Framework.ClassFile(nativeSource, source)
+    else
+      // TODO: this yields <parent path to classfile>/<class name>.class/<class name>.class, why was this there?
+      // val source = nonJavaLibClassFileWrapper(objType)
+      val source = projectSource
+      process(DataInputStream(FileInputStream(source))):
+        Java8Framework.ClassFile
+    staticInitialized += objType
+    // not every cf has a static initializer, need to only invoke it if it exists
+    val _ = cfs.headOption.flatMap:
+      _.staticInitializer.map:
+        invoke(_, Seq())
 
   def createLibraryObj(toLoad: ClassType, site: InstructionSite): V =
     val cfs = findClassFile(toLoad)
@@ -823,7 +821,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 //    if(currInst.isSimpleConditionalBranchInstruction)
 //      println("test")
     evalFix(currInst, mth, pc)
-    
+
     if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
       val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
       runBody(nextPC, mth)
