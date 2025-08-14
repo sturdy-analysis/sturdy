@@ -68,7 +68,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       concreteInterpreter.invokeExternal(method, true)
     catch
       case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
-      case e: UnsupportedOperationException => cancel(e.getMessage)
+      case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(e.getMessage)
     // alternative invocation
     // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
     assert(v.asInt32(using concreteInterpreter.failure) === getExpectedValue(mType))

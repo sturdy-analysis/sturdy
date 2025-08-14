@@ -588,7 +588,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // WIDE opcode 196
       case inst: WIDE.type =>
         // TODO: implement; ignoring it causes stack to overflow
-        throw UnsupportedOperationException("wide instruction is not supported")
+        throw UnsupportedOperationException("unsupported instruction: wide")
 
       // multianewarray opcode 197
       case inst: MULTIANEWARRAY =>
