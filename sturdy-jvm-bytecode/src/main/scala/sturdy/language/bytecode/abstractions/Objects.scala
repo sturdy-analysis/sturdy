@@ -9,9 +9,8 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.Store
 import sturdy.language.bytecode.{AuxillaryFunctions, Interpreter}
-import sturdy.language.bytecode.generic.{BytecodeFailure, FieldInitSite}
 import sturdy.values.arrays.{Array, ArrayOps}
-import sturdy.values.{Combine, Finite, Join, MaybeChanged, Structural, Topped, Widening}
+import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening}
 import sturdy.values.integer.NumericInterval
 import sturdy.values.objects.{Object, ObjectOps}
 
@@ -83,7 +82,7 @@ trait Objects extends Interpreter:
         case _: ArrayType => Value.ReferenceValue(topRef)
         case _ => ??? // TODO: not implemented
 
-    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] {
+    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, WithJoin] {
       override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
         val fieldAddrs = vals.map { (v, site, name) =>
           val addr = alloc(site)
@@ -156,7 +155,7 @@ trait Objects extends Interpreter:
       JOptionA.some(())
 
 trait ConstantObjects extends Objects, Numbers:
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.none, JOptionA.some(Value.TopValue), Topped.Actual.apply)
 
   given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
@@ -209,7 +208,7 @@ trait ConstantObjects extends Objects, Numbers:
       println(letters.map(l => l.get.toChar))
 
 trait IntervalObjects extends Objects, IntervalNumbers:
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.some(Value.TopValue), JOptionA.none, NumericInterval.constant)
 
   given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with

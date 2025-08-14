@@ -32,17 +32,6 @@ enum JvmExcept[V]:
   case Throw(exception: ClassType)
   case ThrowObject(exception: V)
 
-// deprecated site types
-// case class InstructionSite(mth: Method, pc: Int, variant: Int = 0)
-// case class ArrayElemInitSite(s: InstructionSite, ix: Int)
-// case class FieldInitSite(s: InstructionSite, name: String, cls: ClassType)
-// case class StaticInitSite(obj: ClassType, name: String)
-
-type InstructionSite = Site
-type ArrayElemInitSite = Site
-type FieldInitSite = Site
-type StaticInitSite = Site
-
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
   case Jump(pc: Int, mth: Method)
@@ -65,8 +54,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[(ClassType, String), Addr, V, ClassFile, V, FieldInitSite, Method, String, MethodDescriptor, V, J]
-  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, ArrayElemInitSite, J]
+  val objectOps: ObjectOps[(ClassType, String), Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, J]
+  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -74,11 +63,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   val stack: DecidableOperandStack[V]
   val failure: Failure
   val except: Except[JvmExcept[V], ExcV, J]
-  val objAlloc: Allocator[Addr, InstructionSite]
-  val objFieldAlloc: Allocator[Addr, FieldInitSite]
-  val arrayAlloc: Allocator[Addr, InstructionSite]
-  val arrayValAlloc: Allocator[Addr, ArrayElemInitSite]
-  val staticAlloc: Allocator[Addr, StaticInitSite]
+  val objAlloc: Allocator[Addr, Site]
+  val objFieldAlloc: Allocator[Addr, Site]
+  val arrayAlloc: Allocator[Addr, Site]
+  val arrayValAlloc: Allocator[Addr, Site]
+  val staticAlloc: Allocator[Addr, Site]
   val store: Store[Addr, V, J]
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V, Unit]
@@ -648,14 +637,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       _.staticInitializer.map:
         invoke(_, Seq())
 
-  def createLibraryObj(toLoad: ClassType, site: InstructionSite): V =
+  def createLibraryObj(toLoad: ClassType, site: Site): V =
     val cfs = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), Site.FieldInitialization(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
     val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
     obj
 
-  def createArray(size: V, compType: ArrayType, site: InstructionSite): V =
+  def createArray(size: V, compType: ArrayType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
       .zipWithIndex.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2)))
@@ -663,7 +652,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     array
 
   private var counter = 0
-  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: InstructionSite): V =
+  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: Site): V =
     val (mth, pc, _) = site.deconstructInstruction()
     if (numDims == 2)
       val counterSnap = counter
@@ -682,7 +671,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       val array = arrayOps.makeArray(arrayAlloc(Site.Instruction(mth, pc, counterSnap)), temp2, compType, dims(numDims-1))
       array
 
-  def create2DArray(size: V, compType: ArrayType, site: InstructionSite): V =
+  def create2DArray(size: V, compType: ArrayType, site: Site): V =
     val (mth, pc, _) = site.deconstructInstruction()
     val counterSnap = counter
     //println("2D: " + counterSnap)
