@@ -25,23 +25,20 @@ trait Interpreter:
   type F32
   type F64
   type Bool
-  
+
+  type Addr
+
   type Mth
   type MthName
   type MthSig
-  type FieldAddr
-  type ArrayElemAddr
-  type StaticAddr
   type Idx
   
   type TypeRep
   //type NullVal
   type FieldName
-  type ObjAddr
   type ObjType
   //type ObjRep
 
-  type ArrayAddr
   type AType
   //type ArrayRep
 
@@ -286,4 +283,4 @@ trait Interpreter:
     //final val f64compare: OrderingOps[Value, Value] = new LiftedOrderingOps(_.asFloat64, Value.Int32.apply)
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, FieldAddr, ArrayElemAddr, StaticAddr, Idx, ObjAddr, ArrayAddr, ObjType, RefValue, TypeRep, ExcV, J]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, ObjType, RefValue, TypeRep, ExcV, J]

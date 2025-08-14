@@ -43,11 +43,10 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
   given Widen[I32] = new NumericIntervalWiden[Int](intIntervalBounds, Int.MinValue, Int.MaxValue)
   given Widen[I64] = new NumericIntervalWiden[Long](longIntervalBounds, Long.MinValue, Long.MaxValue)
 
-  type arrayVarStore = Map[Addr, Value]
-  type fieldStore = Map[Addr, Value]
-  type staticStore = Map[Addr, Value]
+  type singleAddr = sturdy.language.bytecode.abstractions.Addr
+  type InitialStore = Map[singleAddr, Value]
 
-  class Instance(files: Project[URL], path: String, initArrayVarStore: arrayVarStore, initFieldStore: fieldStore, initStaticStore: staticStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initStore: InitialStore) extends GenericInstance:
 
     private given Instance = this
 
@@ -83,14 +82,12 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val staticAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
       case Site.StaticInitialization(obj, name) => PowersetAddr(Addr.Static(obj, name))
       case _ => ??? // TODO
-    override val objFieldStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initFieldStore)
-    override val arrayValStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initArrayVarStore)
-    override val staticVarStore: AStoreThreaded[Addr, AddrSet, Value] = new AStoreThreaded(initStaticStore)
+    override val store: AStoreThreaded[singleAddr, AddrSet, Value] = new AStoreThreaded(initStore)
     override val frame = new JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
 
-    override val staticAddrMap: mutable.Map[(ClassType, String), IntervalAnalysis.StaticAddr] = mutable.Map()
+    override val staticAddrMap: mutable.Map[(ClassType, String), Addr] = mutable.Map()
     
     given Project[URL] = project
     private given Failure = failure
@@ -126,13 +123,13 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
           val tmp = v.get
           tmp match
             case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
-              val obj: Object[ObjAddr, ClassFile, FieldAddr, FieldName] = tmp.obj
+              val obj: Object[Addr, ClassFile, Addr, FieldName] = tmp.obj
               if (target == null)
                 Topped.Actual(false)
               else
                 Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy))
             case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
-              val array: Array[ArrayAddr, ArrayElemAddr, AType, Value] = tmp.array
+              val array: Array[Addr, Addr, AType, Value] = tmp.array
               if (target == null)
                 Topped.Actual(false)
               else
@@ -162,12 +159,12 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     override val bytecodeOps: BytecodeOps[Idx, Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[(ClassType, String), ObjAddr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin] =
-      new LiftedObjectOps[(ClassType, String), ObjAddr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using objOps(using objFieldAlloc, objFieldStore, project, failure, effectStack)
+    override val objectOps: ObjectOps[(ClassType, String), Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin] =
+      new LiftedObjectOps[(ClassType, String), Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, FieldInitSite, Method, String, MethodDescriptor, IntervalAnalysis.Value, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+        using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 
-    override val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using new constArrayOps(using arrayValAlloc, arrayValStore, jvV)
+    override val arrayOps: ArrayOps[Addr, Value, Value, Value, ArrayType, Site, WithJoin] =
+      new LiftedArrayOps[Addr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+        using new constArrayOps(using arrayValAlloc, store, jvV)
       )

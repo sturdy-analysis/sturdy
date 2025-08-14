@@ -33,9 +33,9 @@ class AbstractInterpreterTest extends AnyFunSuite:
     println("Abstract Analysis Test Results")
     println("- - - - - - - - - - - - - - -")
     for(mth <- testMths){
-      val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
-      val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
-      val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+      val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
+      val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
+      val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map())
       println("Executing Method: " ++ mth.name)
       println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
       println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)

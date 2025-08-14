@@ -41,25 +41,21 @@ object ConcreteInterpreter extends Interpreter:
   override type F64 = Double
   override type Bool = Boolean
 
+  override type Addr = (Site, Int)
+
   override type Mth = Method
   override type MthName = String
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
-  override type FieldAddr = (Site, Int)
-  override type StaticAddr = (Site, Int)
   override type Idx = Int
   override type TypeRep = ReferenceType
   //override type NullVal = Null
-  override type ObjAddr = (Site, Int)
   override type FieldName = (ClassType, String)
   //override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
-  override type ArrayAddr = (Site, Int)
   override type AType = ArrayType
   //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
-  override type ArrayElemAddr = (Site, Int)
 
   override type RefValue = ConcreteRefValues
-
 
   override type ExcV = JvmExcept[Value]
 
@@ -172,7 +168,7 @@ object ConcreteInterpreter extends Interpreter:
       case _ => 0
 
   given ConcreteArrayOps[AID, V, AType, Site]
-    (using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, V, NoJoin]): ArrayOps[AID, Int, V, RefValue, AType, Site, NoJoin] with
+    (using alloc: Allocator[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, RefValue, AType, Site, NoJoin] with
     override def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): RefValue =
       val valAddrs = vals.map{(v, site) =>
         val addr = alloc(site)
@@ -183,7 +179,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def getVal(array: RefValue, idx: Int): JOption[NoJoin, V] = array match
       // TODO: find a solution for this warning
-      case ConcreteRefValues.nonNullArray(_, vals: Vector[ArrayElemAddr], _, _) =>
+      case ConcreteRefValues.nonNullArray(_, vals: Vector[Addr], _, _) =>
         if idx >= vals.size then
           JOptionC.none
         else
@@ -193,7 +189,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def setVal(array: RefValue, idx: Int, v: V): JOptionC[Unit] = array match
       // TODO: find a solution for this warning
-      case ConcreteRefValues.nonNullArray(_, vals: Vector[ArrayElemAddr], _, _) =>
+      case ConcreteRefValues.nonNullArray(_, vals: Vector[Addr], _, _) =>
         if (idx >= vals.size)
           JOptionC.none
         else {
@@ -214,7 +210,7 @@ object ConcreteInterpreter extends Interpreter:
       Seq.fill(size){}
 
     override def arraycopy(src: RefValue, srcPos: Int, dest: RefValue, destPos: Int, length: Int): JOption[MayJoin.NoJoin, Unit] = (src, dest) match
-      case (ConcreteRefValues.nonNullArray(_, srcVals: Vector[ArrayElemAddr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Vector[ArrayElemAddr], _, _)) =>
+      case (ConcreteRefValues.nonNullArray(_, srcVals: Vector[Addr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Vector[Addr], _, _)) =>
         boundary:
           for (i <- 0 until length) do
             if srcPos+i >= srcVals.size || destPos+i >= destVals.size then
@@ -257,11 +253,9 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw new IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
-  private type varStore = Map[FieldAddr, Value]
-  private type elemStore = Map[ArrayElemAddr, Value]
-  private type StaticStore = Map[StaticAddr, Value]
+  private type InitialStore = Map[Addr, Value]
 
-  class Instance(files: Project[URL], path: String, initStore: varStore, initArrayValStore: elemStore, initStaticStore: StaticStore) extends GenericInstance:
+  class Instance(files: Project[URL], path: String, initStore: InitialStore) extends GenericInstance:
     val newFrameData: FrameData = 0
     val args: List[Value] = List()
 
@@ -273,16 +267,14 @@ object ConcreteInterpreter extends Interpreter:
     // TODO: () was inserted as a quick solution to achieve compilation
     val frame: ConcreteCallFrame[FrameData, Int, Value, Unit] = new ConcreteCallFrame[FrameData, Int, Value, Unit](newFrameData, args.view.zipWithIndex.map((x,y) => (y, Some(x))))
     val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
-    val objAlloc: Allocator[ObjAddr, Site] = new CAllocatorIntIncrement
+    val objAlloc: Allocator[Addr, Site] = new CAllocatorIntIncrement
     val objFieldAlloc: CAllocatorIntIncrement[Site] = new CAllocatorIntIncrement
     val arrayAlloc: CAllocatorIntIncrement[Site] = new CAllocatorIntIncrement
     val arrayValAlloc: CAllocatorIntIncrement[Site] = new CAllocatorIntIncrement
     val staticAlloc: CAllocatorIntIncrement[Site] = new CAllocatorIntIncrement
-    val objFieldStore: CStore[FieldAddr, Value] = new CStore(initStore)
-    val arrayValStore: CStore[ArrayElemAddr, Value] = new CStore(initArrayValStore)
-    val staticVarStore: CStore[StaticAddr, Value] = new CStore(initStaticStore)
+    override val store: CStore[Addr, Value] = new CStore(initStore)
 
-    val staticAddrMap: scala.collection.mutable.Map[(ClassType, String), StaticAddr] = scala.collection.mutable.Map()
+    val staticAddrMap: scala.collection.mutable.Map[(ClassType, String), Addr] = scala.collection.mutable.Map()
 
     override val project: Project[URL] = files
     given Project[URL] = project
@@ -291,13 +283,13 @@ object ConcreteInterpreter extends Interpreter:
     private given Failure = failure
 
     val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
-    val objectOps: ObjectOps[FieldName, ObjAddr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
-      new LiftedObjectOps[FieldName, ObjAddr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using new TestConcObjectOps(using objFieldAlloc, objFieldStore, project)
+    val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
+      new LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+        using new TestConcObjectOps(using objFieldAlloc, store, project)
       )
-    val arrayOps: ArrayOps[ArrayAddr, Value, Value, Value, AType, Site, MayJoin.NoJoin] =
-      new LiftedArrayOps[ArrayAddr, Value, Value, Value, AType, Site, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using new ConcreteArrayOps(using arrayValAlloc, arrayValStore)
+    val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin] =
+      new LiftedArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+        using new ConcreteArrayOps(using arrayValAlloc, store)
       )
 
     val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut]

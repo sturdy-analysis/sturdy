@@ -53,7 +53,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 
     val allowField = (ClassType("java/lang/System"), "allowSecurityManager")
     val allowAddr = (Site.StaticInitialization(allowField._1, allowField._2), 1)
-    val concreteInterpreter = new ConcreteInterpreter.Instance(project, path.toString, Map(), Map(), Map(
+    val concreteInterpreter = new ConcreteInterpreter.Instance(project, path.toString, Map(
       // removed due to the entry then still missing from staticAddrMap, would need to be set separately
       allowAddr -> ConcreteInterpreter.Value.Int32(1)
     ))

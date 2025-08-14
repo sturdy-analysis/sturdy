@@ -51,11 +51,11 @@ class test extends AnyFunSuite:
 
     val sourceFile = projectPath
 
-    val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+    val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
 
-    val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+    val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
 
-    val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
+    val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map())
 
     //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
 

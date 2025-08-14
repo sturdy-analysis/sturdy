@@ -25,24 +25,18 @@ enum AbstractReferenceValue[A, O]:
   case NullValue()
 
 trait Objects extends Interpreter:
-  override type ArrayAddr = AddrSet
-  override type ArrayElemAddr = AddrSet
-  override type ObjAddr = AddrSet
-  override type FieldAddr = AddrSet
-  override type StaticAddr = AddrSet
+  override type Addr = AddrSet
 
   override type ObjType = ClassFile
   override type FieldName = (ClassType, String)
 
-  type Obj = Object[ObjAddr, ObjType, FieldAddr, FieldName]
-  type Arr = Array[ArrayAddr, ArrayElemAddr, AType, Value]
+  type Obj = Object[Addr, ObjType, Addr, FieldName]
+  type Arr = Array[Addr, Addr, AType, Value]
   override type RefValue = Topped[AbstractReferenceValue[Arr, Obj]]
   override type TypeRep = ReferenceType
   override type AType = ArrayType
 
   override final def topRef: RefValue = Topped.Top
-
-  given FiniteFieldAddr: Finite[FieldAddr] with {}
 
   // TODO: are these needed?
   final type NullVal = Null
@@ -89,8 +83,8 @@ trait Objects extends Interpreter:
         case _: ArrayType => Value.ReferenceValue(topRef)
         case _ => ??? // TODO: not implemented
 
-    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] = new ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] {
-      override def makeObject(oid: ObjAddr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
+    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, interpreter.I32, WithJoin] {
+      override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
         val fieldAddrs = vals.map { (v, site, name) =>
           val addr = alloc(site)
           store.write(addr, v)
@@ -137,7 +131,7 @@ trait Objects extends Interpreter:
           case Topped.Actual(_) => ???
     }
 
-    def makeArray(aid: ArrayAddr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value)(using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): RefValue =
+    def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
         store.write(addr, v)
@@ -151,7 +145,7 @@ trait Objects extends Interpreter:
         case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => array.arraySize
         case Topped.Actual(_) => ???
 
-    def copyArray(src: Arr, srcPos: Int, dest: Arr, destPos: Int, length: Int)(using store: Store[ArrayElemAddr, Value, WithJoin])(using WithJoin[Value]): JOptionA[Unit] =
+    def copyArray(src: Arr, srcPos: Int, dest: Arr, destPos: Int, length: Int)(using store: Store[Addr, Value, WithJoin])(using WithJoin[Value]): JOptionA[Unit] =
       boundary:
         for (i <- 0 until length)
           if (srcPos + i >= src.vals.size || destPos + i >= dest.vals.size)
@@ -162,11 +156,11 @@ trait Objects extends Interpreter:
       JOptionA.some(())
 
 trait ConstantObjects extends Objects, Numbers:
-  given objOps(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.none, JOptionA.some(Value.TopValue), Topped.Actual.apply)
 
-  given constArrayOps(using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
-    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
+  given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
+    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
       // TODO: can this be curried better?
       Helper.makeArray(aid, vals, arrayType, arraySize)
 
@@ -215,11 +209,11 @@ trait ConstantObjects extends Objects, Numbers:
       println(letters.map(l => l.get.toChar))
 
 trait IntervalObjects extends Objects, IntervalNumbers:
-  given objOps(using alloc: Allocator[FieldAddr, Site], store: Store[FieldAddr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, ObjAddr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, FieldInitSite, Method, String, MethodDescriptor, I32, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.some(Value.TopValue), JOptionA.none, NumericInterval.constant)
 
-  given constArrayOps(using alloc: Allocator[ArrayElemAddr, Site], store: Store[ArrayElemAddr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[ArrayAddr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
-    override def makeArray(aid: ArrayAddr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
+  given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
+    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
       Helper.makeArray(aid, vals, arrayType, arraySize)
 
     override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
