@@ -50,7 +50,9 @@ class IntervalSymbolTable[Value, Key: Finite, Symbol: IntervalRange, Entry: Join
   override def putNew(key: Key): Unit =
     constantSymbolTable.putNew(key)
 
-  override def putNew(key: Key, limit: Limit[Size]): Unit = ???
+  override def putNew(key: Key, limit: Limit[Size]): Unit =
+    // TODO: currently ignores limit.
+    constantSymbolTable.putNew(key)
 
   override def size(key: Key): Size = ???
 

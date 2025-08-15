@@ -8,6 +8,7 @@ import sturdy.effect.bytememory.Bytes.*
 import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
+import sturdy.values.addresses.AddressLimits
 import sturdy.values.{*, given}
 import sturdy.values.references.{PhysicalAddress, VirtualAddress}
 
@@ -18,8 +19,9 @@ trait RelationalMemory extends RelationalValues:
   final type Size = ApronExpr[VirtAddr, Type]
   final type Bytes = sturdy.effect.bytememory.Bytes[Addr,Value]
 
-  given RelationalAlignedMemoryAddress(using apronState: ApronState[VirtAddr, Type]): AlignedMemoryAddress[HeapCtx, Addr, Size] with
-    override def ifAddrLeSize[A: Join](addr: Addr, size: Size)(f: => A): JOptionA[A] =
+  given RelationalAddressLimits(using apronState: ApronState[VirtAddr, Type]): AddressLimits[Addr, Size, WithJoin] with
+    override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =
+      given Join[A] = implicitly[WithJoin[A]].j
       addr match
         case NumExpr(addrExpr) =>
           apronState.ifThenElse(ApronCons.le(addrExpr, size)) {
@@ -30,7 +32,12 @@ trait RelationalMemory extends RelationalValues:
         case _: AllocationSites =>
           JOptionA.Some(f)
 
-    override def matchingRegions[Val](addr: Addr, mem: Mem[HeapCtx, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)] =
+    override def ifSizeLeLimit[A: WithJoin](size: ApronExpr[VirtAddr, Type], limit: ApronExpr[VirtAddr, Type])(ifTrue: => A)(ifFalse: => A): A =
+      given Join[A] = implicitly[WithJoin[A]].j
+      apronState.ifThenElse(ApronCons.le(size, limit))(ifTrue)(ifFalse)
+
+  given RelationalMatchRegions(using apronState: ApronState[VirtAddr, Type]): MatchRegions[HeapCtx, Addr, Size] with
+    override def apply[Val](addr: Addr, mem: Mem[HeapCtx, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)] =
       addr match
         case AllocationSites(sites, size) =>
           // We assume that each malloc addresses is allocated in their own isolated part of the heap.
@@ -58,10 +65,6 @@ trait RelationalMemory extends RelationalValues:
       ctx match
         case (AddrCtx.Heap(heapCtx: (HeapCtx.Alloc | HeapCtx.Static))) => Some(heapCtx)
         case _ => None
-
-  given RelationalAlignedMemorySize(using apronState: ApronState[VirtAddr, Type]): AlignedMemorySize[Size] with
-    override def ifSizeLeLimit[A: Join](size: ApronExpr[VirtAddr, Type], limit: ApronExpr[VirtAddr, Type])(ifTrue: => A)(ifFalse: => A): A =
-      apronState.ifThenElse(ApronCons.le(size, limit))(ifTrue)(ifFalse)
 
   given CombineAddr[W <: Widening](using combineI32: Combine[I32, W]): Combine[Addr, W] with
     def apply(v1: Addr, v2: Addr): MaybeChanged[Addr] = combineI32(v1, v2).map(_.asInstanceOf[Addr])

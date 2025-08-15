@@ -17,14 +17,13 @@ import sturdy.effect.failure.{AFallible, CFallible, given}
 import sturdy.{*, given}
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
-import ConcreteInterpreter.eqVals
+import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
 import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import sturdy.values.integer.given
-
 import swam.syntax.Module
 import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
@@ -53,7 +52,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
   behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
+  val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
 
   val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
 

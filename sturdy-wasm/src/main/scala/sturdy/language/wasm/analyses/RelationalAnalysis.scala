@@ -123,7 +123,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def makeNullRefV(t: ReferenceType): RefV = ???
+    override def makeNullRefV(t: ReferenceType): RefV = Powerset(RefValue.ExternNull)
     override def isNullRef(r: Value): Value = ???
     override def funcInstToFunV(f: FunctionInstance): FunV = ???
     override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???

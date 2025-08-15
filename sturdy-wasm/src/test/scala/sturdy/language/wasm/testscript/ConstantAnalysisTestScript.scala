@@ -23,6 +23,7 @@ import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
+import sturdy.language.wasm.ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
 import sturdy.language.wasm.analyses.IntervalAnalysis
 import swam.ModuleLoader
 import swam.binary.ModuleParser
@@ -107,16 +108,6 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
 
   type CResult = CFallible[List[CValue]]
   type AResult = AFallible[List[AValue]]
-
-  def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
-    vs1.size == vs2.size && vs1.zip(vs2).forall {
-      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
-      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
-      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
-      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      // TODO: Handle cases for Ref and Vec
-      case _ => false
-    }
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
@@ -285,14 +276,14 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
 
   def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
-      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
-      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
-      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
+      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))
+      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))
+      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(Topped.Top))
+      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(Topped.Top))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =
     value match
-      case ConcreteInterpreter.Value.Float32(f) => f.isNaN
-      case ConcreteInterpreter.Value.Float64(d) => d.isNaN
+      case ConstantAnalysis.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => f.isNaN
+      case ConstantAnalysis.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => d.isNaN
       case _ => false

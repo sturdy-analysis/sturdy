@@ -8,7 +8,9 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import Bytes.*
 import sturdy.data
+import sturdy.effect.EffectStack
 import sturdy.util.Profiler
+import sturdy.values.addresses.AddressLimits
 
 import java.nio.ByteOrder
 import scala.collection.immutable.SortedMap
@@ -28,12 +30,8 @@ enum AlignedRead:
       case Unaligned => Topped.Actual(false)
       case MaybeAligned => Topped.Top
 
-trait AlignedMemoryAddress[Context, Addr, Size]:
-  def ifAddrLeSize[A: Join](addr: Addr, size: Size)(f: => A): JOptionA[A]
-  def matchingRegions[Val](addr: Addr, mems: Mem[Context, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)]
-
-trait AlignedMemorySize[Size]:
-  def ifSizeLeLimit[A: Join](size: Size, limit: Size)(ifTrue: => A)(ifFalse: => A): A
+trait MatchRegions[Context, Addr, Size]:
+  def apply[Val](addr: Addr, mems: Mem[Context, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)]
 
 final class AlignedMemory
   [
@@ -48,9 +46,10 @@ final class AlignedMemory
    memLocAllocator: Allocator[IterableOnce[Context],(Key,Addr,Bytes[Addr,Val])]
   )
   (using
-   memoryAddr: AlignedMemoryAddress[Context, Addr, Size],
-   memorySize: AlignedMemorySize[Size],
-   sizeIntOps: IntegerOps[Int, Size]
+   matchRegions: MatchRegions[Context, Addr, Size],
+   addressLimits: AddressLimits[Addr, Size, WithJoin],
+   sizeIntOps: IntegerOps[Int, Size],
+   effectStack: EffectStack
   )
   extends Memory[Key, Addr, Bytes[Addr,Val], Size, WithJoin]:
 
@@ -60,9 +59,9 @@ final class AlignedMemory
 
   var memories: Map[Key, Mem[Context, Addr, Size, Val]] = Map()
 
-  override def read(key: Key, readAddr: Addr, length: Int): JOptionA[Bytes[Addr,Val]] =
+  override def read(key: Key, readAddr: Addr, length: Int): JOption[WithJoin, Bytes[Addr,Val]] =
     val mem = memories(key)
-    val regions = memoryAddr.matchingRegions(readAddr, mem).iterator
+    val regions = matchRegions(readAddr, mem).iterator
 
     val result =
       if(! regions.hasNext)
@@ -81,11 +80,11 @@ final class AlignedMemory
           }
           .reduce(Join(_,_).get)
 
-    memoryAddr.ifAddrLeSize(readAddr, sizeIntOps.sub(sizeIntOps.mul(mem.numPages, pageSize), sizeIntOps.integerLit(length))) {
+    addressLimits.ifAddrLeSize(readAddr, sizeIntOps.sub(sizeIntOps.mul(mem.numPages, pageSize), sizeIntOps.integerLit(length))) {
       result
     }
 
-  override def write(key: Key, addr: Addr, bytes: Bytes[Addr,Val]): JOptionA[Unit] =
+  override def write(key: Key, addr: Addr, bytes: Bytes[Addr,Val]): JOption[WithJoin, Unit] =
     bytes match
       case bs: StoredBytes[Addr,Val] =>
         val Mem(store, numPages, pageLimit) = memories(key)
@@ -95,7 +94,7 @@ final class AlignedMemory
           case Topped.Actual(len) => sizeIntOps.integerLit(len)
           case Topped.Top => Join(sizeIntOps.integerLit(1), sizeIntOps.integerLit(Int.MaxValue)).get
 
-        memoryAddr.ifAddrLeSize(newRegion.startAddr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), storedSize)) {
+        addressLimits.ifAddrLeSize(newRegion.startAddr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), storedSize)) {
           var newStore = store
           for(ctx <- ctxs) {
             newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
@@ -117,11 +116,11 @@ final class AlignedMemory
   override def size(key: Key): Size =
     memories(key).numPages
 
-  override def grow(key: Key, deltaPages: Size): JOptionA[Size] =
+  override def grow(key: Key, deltaPages: Size): JOption[WithJoin, Size] =
     val Mem(addressRanges, numPages, pageLimit) = memories(key)
     val newNumPages = sizeIntOps.add(numPages, deltaPages)
 
-    val (resultPages, returnValue) = memorySize.ifSizeLeLimit(numPages, sizeIntOps.min(maxPages, pageLimit)) {
+    val (resultPages, returnValue) = addressLimits.ifSizeLeLimit(numPages, sizeIntOps.min(maxPages, pageLimit)) {
       (newNumPages, JOptionA.Some(numPages))
     } {
       (numPages, JOptionA.None[Size]())
