@@ -5,9 +5,10 @@ import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
+import sturdy.values.simd.{LaneShape, SIMDOps}
 
 enum Taint:
   case Tainted
@@ -106,6 +107,7 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)
   def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
   def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
+
 
 given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)

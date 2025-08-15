@@ -110,10 +110,11 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
 
   def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
-      case (ConcreteInterpreter.Value.Int32(i1), ConcreteInterpreter.Value.Int32(i2)) => i1 == i2
-      case (ConcreteInterpreter.Value.Int64(l1), ConcreteInterpreter.Value.Int64(l2)) => l1 == l2
-      case (ConcreteInterpreter.Value.Float32(f1), ConcreteInterpreter.Value.Float32(f2)) => f1.isNaN && f2.isNaN || f1 == f2
-      case (ConcreteInterpreter.Value.Float64(d1), ConcreteInterpreter.Value.Float64(d2)) => d1.isNaN && d2.isNaN || d1 == d2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
+      case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
+      // TODO: Handle cases for Ref and Vec
       case _ => false
     }
 
@@ -273,18 +274,6 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
     assert(resClean.size == 1, clue)
     val h = resClean.head
     assert(isNaN(h), clue)
-
-
-  def constExprToVals(e: unresolved.Expr): List[ConcreteInterpreter.Value] =
-    e.map(constExprToVal).toList
-
-  def constExprToVal(inst: unresolved.Inst): ConcreteInterpreter.Value =
-    inst match
-      case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Int32(i)
-      case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Int64(l)
-      case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Float32(f)
-      case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
-      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
     e.map(constExprToAVal).toList

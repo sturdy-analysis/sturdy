@@ -7,6 +7,7 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import Bytes.*
+import sturdy.data
 import sturdy.util.Profiler
 
 import java.nio.ByteOrder
@@ -108,6 +109,10 @@ final class AlignedMemory
         }
       case bs: ReadBytes[Addr,Val] =>
         throw IllegalArgumentException(s"Can only store StoredBytes, but got $bytes")
+
+  override def copy(key: Key, srcAddr: Addr, dstAddr: Addr, byteAmount: Size): JOptionA[Unit] = ???
+  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Addr, Val]): JOptionA[Unit] = ???
+  override def init(key: Key, tableAddr: Addr, dataAddr: Addr, byteAmount: Size, dataBytes: Bytes[Addr, Val]): JOptionA[Unit] = ???
 
   override def size(key: Key): Size =
     memories(key).numPages

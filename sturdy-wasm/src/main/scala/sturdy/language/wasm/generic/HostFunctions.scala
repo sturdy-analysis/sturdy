@@ -1,9 +1,9 @@
 package sturdy.language.wasm.generic
 
 import sturdy.values.Structural
-import swam.{FuncType, ValType}
+import swam.{FuncType, NumType}
 
-import ValType.*
+import NumType.*
 
 case class HostFunction(name: String, funcType: FuncType):
   override def toString: String = name

@@ -51,6 +51,40 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
       JOptionC.none
     }
 
+  override def fill(key: Key, addr: Int, size: Int, value: Seq[Byte]): JOptionC[Unit] =
+    val mem = memories(key)
+    if (addr >= 0 && addr + size <= mem.size && value.size == 1 && size >= 0) {
+      for (i <- 0 until size) {
+        mem.bytes(addr + i) = value.head
+      }
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
+
+  override def copy(key: Key, srcAddr: Int, dstAddr: Int, size: Int): JOptionC[Unit] =
+    val mem = memories(key)
+    if (srcAddr >= 0 && dstAddr >= 0 && srcAddr + size <= mem.size && dstAddr + size <= mem.size && size >= 0) {
+      Array.copy(mem.bytes, srcAddr, mem.bytes, dstAddr, size)
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
+
+  override def init(key: Key, tableAddr: Int, dataAddr: Int, byteAmount: Int, dataBytes: Seq[Byte]): JOption[NoJoin, Unit] =
+    val mem = memories(key)
+    if (tableAddr >= 0 && dataAddr >= 0 && byteAmount >= 0 && tableAddr + byteAmount <= mem.size && dataAddr + byteAmount <= dataBytes.size) {
+      if (!mem.sizeLimit.forall(lim => tableAddr + byteAmount <= lim * pageSize && dataAddr + byteAmount <= lim * pageSize)) {
+        return JOptionC.none
+      }
+      for (i <- 0 until byteAmount) {
+        mem.bytes(tableAddr + i) = dataBytes(dataAddr + i)
+      }
+      memories(key) = mem
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
 
   override def putNew(key: Key, initSize: Int, sizeLimit: scala.Option[Int]): Unit =
     memories(key) = Mem(Array.ofDim[Byte](initSize*pageSize), sizeLimit)

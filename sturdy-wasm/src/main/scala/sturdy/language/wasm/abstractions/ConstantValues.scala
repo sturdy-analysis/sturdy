@@ -6,9 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.{OperandStack}
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.FixIn
-import sturdy.language.wasm.generic.FixOut
-import sturdy.language.wasm.generic.InstLoc
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.Finite
 import sturdy.values.Join
@@ -28,20 +26,26 @@ trait ConstantValues extends Interpreter:
   final type I64 = Topped[Long]
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
+  final type V128 = Topped[Array[Byte]]
   final type Bool = Topped[Boolean]
+  final type FuncReference = Topped[FunctionInstance]
+  final type ExternReference = Topped[Int]
 
   final def topI32: I32 = Topped.Top
   final def topI64: I64 = Topped.Top
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
+  final def topV128: V128 = Topped.Top
+  final def topFuncRef: FuncReference = Topped.Top
+  final def topExternRef: ExternReference = Topped.Top
 
   final def asBoolean(v: Value)(using Failure): Bool = v.asInt32 match
     case Topped.Top => Topped.Top
     case Topped.Actual(i) => Topped.Actual(i != 0)
   final def boolean(b: Bool): Value = b match
-    case Topped.Top => Value.Int32(topI32)
-    case Topped.Actual(true) => Value.Int32(Topped.Actual(1))
-    case Topped.Actual(false) => Value.Int32(Topped.Actual(0))
+    case Topped.Top => Value.Num(NumValue.Int32(topI32))
+    case Topped.Actual(true) => Value.Num(NumValue.Int32(Topped.Actual(1)))
+    case Topped.Actual(false) => Value.Num(NumValue.Int32(Topped.Actual(0)))
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
@@ -50,15 +54,15 @@ trait ConstantValues extends Interpreter:
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, MayJoin.NoJoin])(using Failure) extends InstructionResultLogger[Value,Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
-    override def dummyValue: Value = Value.Int32(Topped.Actual(0))
+    override def dummyValue: Value = Value.Num(NumValue.Int32(Topped.Actual(0)))
     override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
       case Value.TopValue => false
-      case Value.Int32(v) => v.isActual
-      case Value.Int64(v) => v.isActual
-      case Value.Float32(v) => v.isActual
-      case Value.Float64(v) => v.isActual
+      case Value.Num(NumValue.Int32(v)) => v.isActual
+      case Value.Num(NumValue.Int64(v)) => v.isActual
+      case Value.Num(NumValue.Float32(v)) => v.isActual
+      case Value.Num(NumValue.Float64(v)) => v.isActual
     })
 
     def grouped: Map[String, Map[InstLoc, List[Value]]] =

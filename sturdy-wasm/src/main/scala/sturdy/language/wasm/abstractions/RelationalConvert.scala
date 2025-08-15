@@ -7,17 +7,21 @@ import sturdy.effect.bytememory.Bytes.*
 import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
-import sturdy.values.config.{Bits, BytesSize}
+import sturdy.values.config.{Bits, BytePadding, BytesSize}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.references.VirtualAddress
+import sturdy.values.simd.{*, given}
 import sturdy.values.{Combine, MaybeChanged, Topped, Widening}
 
 import java.nio.ByteOrder
 
 trait RelationalConvert extends RelationalMemory:
   import RelI32.*
+  import Value.*
+  import NumValue.*
+  import VecValue.*
 
   private final class ConvertToBytes[From, FromV](inject: FromV => Value)
     extends Convert[From, Seq[Byte], FromV, Bytes, BytesSize && SomeCC[ByteOrder]]:
@@ -29,10 +33,11 @@ trait RelationalConvert extends RelationalMemory:
         storedByteOrder = Topped.Actual(byteOrder)
       )
 
-  given ConvertI32Bytes: ConvertIntBytes[I32, Bytes] = ConvertToBytes[Int, I32](Value.Int32(_))
-  given ConvertI64Bytes: ConvertLongBytes[I64, Bytes] = ConvertToBytes[Long, I64](Value.Int64(_))
-  given ConvertF32Bytes: ConvertFloatBytes[F32, Bytes] = ConvertToBytes[Float, F32](Value.Float32(_))
-  given ConvertF64Bytes: ConvertDoubleBytes[F64, Bytes] = ConvertToBytes[Double, F64](Value.Float64(_))
+  given ConvertI32Bytes: ConvertIntBytes[I32, Bytes] = ConvertToBytes[Int, I32](n => Num(Int32(n)))
+  given ConvertI64Bytes: ConvertLongBytes[I64, Bytes] = ConvertToBytes[Long, I64](n => Num(Int64(n)))
+  given ConvertF32Bytes: ConvertFloatBytes[F32, Bytes] = ConvertToBytes[Float, F32](n => Num(Float32(n)))
+  given ConvertF64Bytes: ConvertDoubleBytes[F64, Bytes] = ConvertToBytes[Double, F64](n => Num(Float64(n)))
+  given ConvertV128Bytes: ConvertVecBytes[V128, Bytes] = ConvertToBytes[Seq[Byte], V128](n => Vec(Vec128(n)))
 
   private trait ExtractFromVal[VTo]:
     def unapply(v: Value): Option[VTo]
@@ -54,7 +59,7 @@ trait RelationalConvert extends RelationalMemory:
     expectedByteSize = 4,
     top = topI32,
     extract = {
-      case Value.Int32(v) => Some(v)
+      case Num(Int32(v)) => Some(v)
       case _ => None
     }
   )
@@ -63,7 +68,7 @@ trait RelationalConvert extends RelationalMemory:
     expectedByteSize = 8,
     top = topI64,
     extract = {
-      case Value.Int64(v) => Some(v)
+      case Num(Int64(v)) => Some(v)
       case _ => None
     }
   )
@@ -84,7 +89,7 @@ trait RelationalConvert extends RelationalMemory:
     expectedByteSize = 4,
     top = topF32,
     extract = {
-      case Value.Float32(v) => Some(v)
+      case Num(Float32(v)) => Some(v)
       case _ => None
     }
   )
@@ -93,7 +98,11 @@ trait RelationalConvert extends RelationalMemory:
     expectedByteSize = 8,
     top = topF64,
     extract = {
-      case Value.Float64(v) => Some(v)
+      case Num(Float64(v)) => Some(v)
       case _ => None
     }
   )
+
+  given ConvertBytesV128: ConvertBytesVec[Bytes, V128] with
+    override def apply(from: Bytes, conf: BytesSize && BytePadding && Bits && SomeCC[ByteOrder]): V128 =
+      Topped.Top

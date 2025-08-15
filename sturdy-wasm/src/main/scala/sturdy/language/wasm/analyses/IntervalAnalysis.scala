@@ -11,8 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -28,8 +27,10 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
+import sturdy.values.simd.{*, given}
 import sturdy.values.{*, given}
-import swam.FuncType
+
+import swam.{FuncType, ReferenceType}
 import swam.syntax.*
 import swam.traversal.Traverser
 
@@ -43,14 +44,25 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type Addr = I32
   type Bytes = Seq[NumericInterval[Byte]]
   type Size = Topped[Int]
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
+  type RefV = Powerset[RefValue]
 
-  given ConstantSpecialWasmOperations(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given ConstantSpecialWasmOperations(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
-    override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
+    override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
+    // TODO: implement this for the IntervalAnalysis
+    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
+    override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
+    override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
+    override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
+    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
+    override def isNullRef(r: Value): IntervalAnalysis.Value = ???
 
     override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
       intOps.add(addr, intOps.integerLit(offset))
@@ -81,10 +93,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval.constant(i))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval.constant(l))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i)) => Value.Num(NumValue.Int32(NumericInterval.constant(i)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(NumericInterval.constant(l)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -95,15 +107,17 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvBytes: WithJoin[Bytes] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: IntervalSymbolTable[TableAddr, NumericInterval[Int], Powerset[FunctionInstance]] = new IntervalSymbolTable
+    val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](rangeLimit, (v: Value) => v.asInt32)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
@@ -143,8 +157,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
         Convert(bytes, conf)
       }
-
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
     var longIntervalBounds: Set[Long] = Set(-1, 0, 1)

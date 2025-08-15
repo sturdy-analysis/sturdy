@@ -19,6 +19,7 @@ given ConcreteReferenceOps[Trg] (using f: Failure): ReferenceOps[Trg, Option[Trg
   def mkManagedRef(trg: Trg): Option[Trg] = Some(trg)
   def deref(v: Option[Trg]): Trg = v.getOrElse(f.fail(NullDereference, ""))
 
+
 given PowersetReferenceOps[Trg, V](using ops: ReferenceOps[Trg, V], j: EffectStack): ReferenceOps[Powerset[Trg], Powerset[V]] with
   override def mkNullRef: Powerset[V] = Powerset(ops.mkNullRef)
   override def mkRef(trg: Powerset[Trg]): Powerset[V] = trg.mapJoin(ops.mkRef)

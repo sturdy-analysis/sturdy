@@ -3,7 +3,6 @@ package sturdy.language.wasm.generic
 import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.values.booleans.BooleanBranching
-import swam.{FuncType, GlobalIdx}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
@@ -12,17 +11,16 @@ import sturdy.values.integer.*
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 import sturdy.values.ordering.UnsignedOrderingOps
-import swam.syntax.LoadInst
-import swam.syntax.LoadNInst
-import swam.syntax.MemoryInst
-import swam.syntax.StoreInst
-import swam.syntax.StoreNInst
+import sturdy.values.simd.SIMDOps
+import swam.{FuncType, GlobalIdx, ReferenceType}
+import swam.syntax.*
 
-trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
+trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]
   val f64ops: FloatOps[Double, V]
+  val v128ops: SIMDOps[Array[Byte], V, V, Byte]
   val eqOps: EqOps[V, V]
   val compareOps: OrderingOps[V, V]
   val unsignedCompareOps: UnsignedOrderingOps[V, V]
@@ -39,20 +37,42 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]:
   val convert_f64_i64: ConvertDoubleLong[V, V]
   val convert_f64_f32: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-  val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
-  val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
+  val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst | VectorStoreInst]]
+  val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, J]
+  val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, J[_] <: MayJoin[_]]:
-  def valueToAddr(v: V): Addr
-  def valueToFuncIx(v: V): FuncIx
-
+trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
+  def valToAddr(v: V): Addr
+  def valToIdx(v: V): Index
+  def valToRef(v: V, funcs: Vector[FunctionInstance]): RefV
+  def refToVal(r: RefV): V
+  def liftBytes(b: Seq[Byte]): Bytes
   def valToSize(v: V): Size
+
+  /**
+   * Convert a Size to a value.
+   * @param sz the size to convert
+   * @return sz wrapped in a i32 value
+   */
   def sizeToVal(sz: Size): V
+  def refVToFunV(r: RefV): FunV
+
+  def makeNullRefV(t: ReferenceType): RefV
+  def funVToRefV(i: FunV): RefV
+
+  /**
+   * Check if a reference is null.
+   * @param r the reference to check
+   * @return Boolean WASM value indicating if the reference is null (0=false for non-null, 1=true for null)
+   */
+  def isNullRef(r: V): V
+
+  def funcInstToFunV(f: FunctionInstance): FunV
+  def funVToFuncInst(f: FunV): FunctionInstance
 
   def addOffsetToAddr(offset: Int, addr: Addr): Addr
 

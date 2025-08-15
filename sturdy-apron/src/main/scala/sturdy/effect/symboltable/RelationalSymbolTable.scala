@@ -28,11 +28,12 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
       apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Entry]].toJOptionC
     }.asInstanceOf[JOptionC[Entry]]
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOptionC[Unit] =
     val ctx = symbolTableAllocator.alloc((key,symbol))
     val virt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
     apronState.recencyStore.write(virt, newEntry)
     table.set(key, symbol, virt)
+    
 
   override def putNew(key: Key): Unit =
     table.putNew(key)

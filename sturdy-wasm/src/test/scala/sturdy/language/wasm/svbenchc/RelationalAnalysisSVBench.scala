@@ -35,9 +35,6 @@ import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
 import scala.language.postfixOps
 
-object SlowTest extends org.scalatest.Tag("SlowTest")
-object FastTest extends org.scalatest.Tag("FastTest")
-
 class RelationalAnalysisSVBench extends Suites(
 //  new RelationalAnalysisTest(Polka(true)),
   new RelationalAnalysisTest(Octagon()),

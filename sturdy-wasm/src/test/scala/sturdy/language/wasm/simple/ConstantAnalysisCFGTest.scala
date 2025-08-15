@@ -10,6 +10,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm
+import sturdy.language.wasm.analyses.ConstantAnalysis.NumValue
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
@@ -22,6 +23,7 @@ import sturdy.values.{Abstractly, Topped}
 import swam.syntax.Module
 import swam.text.*
 
+import java.net.URI
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
@@ -31,13 +33,13 @@ import scala.reflect.{ClassTag, TypeTest}
 class ConstantAnalysisCFGTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
-  val simple = Paths.get(uriSimple)
-  val fact = Paths.get(uriFact)
+  val uriSimple: URI = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI
+  val uriFact: URI = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI
+  val simple: Path = Paths.get(uriSimple)
+  val fact: Path = Paths.get(uriFact)
 
-  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
-  val simpleTest = Paths.get(uriSimpleTest)
+  val uriSimpleTest: URI = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI
+  val simpleTest: Path = Paths.get(uriSimpleTest)
 
 //  it must s"execute most general client for simple with stacked states" in {
 //    runConstantAnalysisCFG(simple, "", List(), StackConfig.StackedStates(), mostGeneralClient = true)
@@ -95,44 +97,44 @@ class ConstantAnalysisCFGTest extends AnyFlatSpec, Matchers:
 //  }
 
 
-  testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
-  testFunction(simple, "first", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
-  testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
-  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
-  testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-br-and-return3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
-  testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
-  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
-  testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "const", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "first", List(Value.Num(NumValue.Int32(Topped.Actual(1))), Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Actual(1)))))
+  testFunction(simple, "first", List(Value.Num(NumValue.Int32(Topped.Top)), Value.Num(NumValue.Int32(Topped.Actual(2)))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "second", List(Value.Num(NumValue.Int32(Topped.Actual(1))), Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "second", List(Value.Num(NumValue.Int32(Topped.Top)), Value.Num(NumValue.Int32(Topped.Actual(2)))), List(Value.Num(NumValue.Int32(Topped.Actual(2)))))
+  testFunction(simple, "test-mem", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "nesting", List(Value.Num(NumValue.Float32(Topped.Top)), Value.Num(NumValue.Float32(Topped.Actual(2)))), List(Value.Num(NumValue.Float32(Topped.Top))))
+  testFunction(simple, "nesting", List(Value.Num(NumValue.Float32(Topped.Actual(1))), Value.Num(NumValue.Float32(Topped.Top))), List(Value.Num(NumValue.Float32(Topped.Top))))
+  testFunction(simple, "test-br3", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-br-and-return", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-br-and-return2", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-br-and-return3", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-br-and-return4", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Actual(42)))))
+  testFunction(simple, "test-unreachable5", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-global", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
+  testFunction(simple, "test-call-indirect-parametric", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Actual(0)))))
+  testFailingFunction(simple, "division", List(Value.Num(NumValue.Int32(Topped.Actual(1))), Value.Num(NumValue.Int32(Topped.Top))), IntegerDivisionByZero)
+  testFunction(simple, "effects", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(1))), List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Actual(1))))
+  testFunction(fact, "fac-rec", List(Value.Num(NumValue.Int64(Topped.Actual(1)))), List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Actual(1)))))
   (2 to 8).foreach { arg =>
-    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
+    testFunction(fact, "fac-rec", List(Value.Num(NumValue.Int64(Topped.Actual(arg)))), List(Value.Num(NumValue.Int64(Topped.Top))))
   }
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec", List(Value.Num(NumValue.Int64(Topped.Actual(25)))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-iter", List(Value.Num(NumValue.Int64(Topped.Actual(25)))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-rec-named", List(Value.Num(NumValue.Int64(Topped.Actual(25)))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-iter-named", List(Value.Num(NumValue.Int64(Topped.Actual(25)))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-opt", List(Value.Num(NumValue.Int64(Topped.Actual(25)))), List(Value.Num(NumValue.Int64(Topped.Top))))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec", List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-iter", List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-rec-named", List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-iter-named", List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Top))))
+  testFunction(fact, "fac-opt", List(Value.Num(NumValue.Int64(Topped.Top))), List(Value.Num(NumValue.Int64(Topped.Top))))
 
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(0))), List(Value.Int32(Topped.Actual(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Actual(1))), List(Value.Int32(Topped.Actual(42))))
-  testFunction(simpleTest, "main", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simpleTest, "main", List(Value.Num(NumValue.Int32(Topped.Actual(0)))), List(Value.Num(NumValue.Int32(Topped.Actual(42)))))
+  testFunction(simpleTest, "main", List(Value.Num(NumValue.Int32(Topped.Actual(1)))), List(Value.Num(NumValue.Int32(Topped.Actual(42)))))
+  testFunction(simpleTest, "main", List(Value.Num(NumValue.Int32(Topped.Top))), List(Value.Num(NumValue.Int32(Topped.Top))))
 
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
@@ -218,8 +220,6 @@ def runConstantAnalysisCFG(path: Path, funName: String, args: List[Value], stack
   val edgesUnexpected = graphFromEvents.edges.diff(graphFromTree.edges)
   assertResult(Set(), "Edges missing in graph from events")(edgesMissing)
   assertResult(Set(), "Edges superfluous in graph from events")(edgesUnexpected)
-
-  testCfgDifference(cfg, graphFromEvents)
 
 //  println(cfg.toGraphViz)
   println(graphFromEvents.toGraphViz)

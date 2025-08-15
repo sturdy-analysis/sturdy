@@ -7,7 +7,7 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, UpperBoundSymbolTable}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -17,16 +17,18 @@ import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.floating.FloatOps
 import swam.syntax.*
-import swam.FuncType
+import swam.{FuncType, ReferenceType}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
+import sturdy.values.simd.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.references.{ReferenceOps, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -39,14 +41,26 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
-  type FuncIx = I32
+  type Index = I32
   type FunV = Powerset[FunctionInstance]
+  type RefV = Powerset[RefValue]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
-    override def sizeToVal(sz: Size): Value = Value.Int32(sz)
+    override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
+
+    // TODO: implement this for the TypeAnalysis
+    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
+    override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
+    override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = ???
+    override def makeNullRefV(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
+    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
+    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
+    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
+    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
+    override def isNullRef(r: Value): TypeAnalysis.Value = ???
 
     override def addOffsetToAddr(offset: Int, addr: Addr): Addr = BaseType[Int]
 
@@ -82,18 +96,20 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     }
 
     override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvBytes: WithJoin[Bytes] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
+    val tables: SizedUpperBoundSymbolTable[Value, TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     given Failure = failure
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     override def toString: String = s"type $config"

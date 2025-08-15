@@ -18,6 +18,8 @@ import java.nio.ByteOrder
 
 trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Type.*
+  import Value.*
+  import NumValue.*
 
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
@@ -43,7 +45,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       i32.asNumExpr
 
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
-  final override def boolean(b: Bool): Value = Value.Int32(BoolExpr(b))
+  final override def boolean(b: Bool): Value = Num(Int32(BoolExpr(b)))
 
   var nullAddrVirt: VirtAddr = null
   private def nullAddr(using apronState: ApronState[VirtAddr,Type]): VirtAddr =

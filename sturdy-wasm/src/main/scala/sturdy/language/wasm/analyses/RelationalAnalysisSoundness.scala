@@ -8,6 +8,7 @@ import sturdy.language.wasm.generic.{FunctionInstance, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.{*, given}
+import sturdy.effect.symboltable.{*, given}
 import sturdy.{*, given}
 
 object RelationalAnalysisSoundness {
@@ -35,10 +36,10 @@ object RelationalAnalysisSoundness {
   given valuesSound(using apronState: ApronState[VirtAddr, Type]): Soundness[ConcreteInterpreter.Value, RelationalAnalysis.Value] with
     override def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound =
       (c,a) match
-        case (ConcreteInterpreter.Value.Int32(ci32), RelationalAnalysis.Value.Int32(vi32)) => Soundness.isSound(ci32, vi32.asNumExpr)
-        case (ConcreteInterpreter.Value.Int64(ci64), RelationalAnalysis.Value.Int64(vi64)) => Soundness.isSound(ci64, vi64)
-        case (ConcreteInterpreter.Value.Float32(cf32), RelationalAnalysis.Value.Float32(vf32)) => Soundness.isSound(cf32, vf32)
-        case (ConcreteInterpreter.Value.Float64(cf64), RelationalAnalysis.Value.Float64(vf64)) => Soundness.isSound(cf64, vf64)
+        case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(ci32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int32(vi32))) => Soundness.isSound(ci32, vi32.asNumExpr)
+        case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(ci64)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int64(vi64))) => Soundness.isSound(ci64, vi64)
+        case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(cf32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(vf32))) => Soundness.isSound(cf32, vf32)
+        case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(cf64)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(vf64))) => Soundness.isSound(cf64, vf64)
         case (_, RelationalAnalysis.Value.TopValue) => IsSound.Sound
         case (_, _) => IsSound.NotSound(s"abstract value $a with interval does not overapproximate concrete value $c")
 
@@ -59,11 +60,12 @@ object RelationalAnalysisSoundness {
   given Soundness[ConcreteInterpreter.Instance, RelationalAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound =
       import a.given
+      import a.tables.given
 
       // soundness for stack, memory, symbol tables, call frame
       a.stack.operandStackIsSound(c.stack) &&
         // a.memory.memoryIsSound(c.memory) &&   (Top-Memory is trivially sound)
         a.globals.tableIsSound(c.globals) &&
-        a.funTable.tableIsSound(c.funTable) &&
+        a.tables.tableIsSound(c.tables) &&
         a.callFrame.isSound(c.callFrame)
 }

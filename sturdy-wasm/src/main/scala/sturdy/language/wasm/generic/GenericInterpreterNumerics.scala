@@ -1,31 +1,23 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
+import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.{DecidableOperandStack, OperandStack}
 import sturdy.values.config
 import sturdy.values.convert.*
-import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.values.ordering.*
-import swam.ValType
 import swam.syntax.*
+import swam.{NumType, ReferenceType, ValType, VecType}
+
 
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
-  (stack: OperandStack[V,MayJoin.NoJoin], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
+  (stack: OperandStack[V,MayJoin.NoJoin], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
   (using Failure):
 
   import wasmOps.*
-  import eqOps.*
   import compareOps.*
+  import eqOps.*
   import unsignedCompareOps.*
-  import convert_i32_i64.*
-  import convert_i32_f64.*
-  import convert_i64_f64.*
-  import convert_i32_f32.*
-  import convert_i64_f32.*
-  import convert_f32_f64.*
 
   def evalNumeric(inst: Inst): V =
     inst match
@@ -249,7 +241,8 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case i64.TruncSatUF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
 
   def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => evalNumeric(i32.Const(0))
-    case ValType.I64 => evalNumeric(i64.Const(0))
-    case ValType.F32 => evalNumeric(f32.Const(0))
-    case ValType.F64 => evalNumeric(f64.Const(0))
+    case NumType.I32 => evalNumeric(i32.Const(0))
+    case NumType.I64 => evalNumeric(i64.Const(0))
+    case NumType.F32 => evalNumeric(f32.Const(0))
+    case NumType.F64 => evalNumeric(f64.Const(0))
+    case ReferenceType.FuncRef => evalNumeric(i32.Const(0))

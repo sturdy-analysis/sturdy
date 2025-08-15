@@ -33,6 +33,12 @@ class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using 
   override def grow(key: Key, delta: Topped[Int]): JOption[WithJoin, Topped[Int]] =
     constantAddressMemory.grow(key, delta)
 
+  override def fill(key: Key, addr: NumericInterval[Int], size: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] = ???
+
+  override def copy(key: Key, srcAddr: NumericInterval[Int], dstAddr: NumericInterval[Int], size: Topped[Int]): JOption[WithJoin, Unit] = ???
+
+  override def init(key: Key, tableAddr: NumericInterval[Int], dataAddr: NumericInterval[Int], size: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = ???
+
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     constantAddressMemory.putNew(key, initSize, sizeLimit)
 

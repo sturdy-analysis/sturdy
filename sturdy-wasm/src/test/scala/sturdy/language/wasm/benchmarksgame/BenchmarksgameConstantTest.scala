@@ -77,6 +77,10 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
         interp.invokeExported(modInst, funcName, List.empty)
       )
     }
-    Profiler.printLastMeasured()
-    graphBuilder.get
+    
+    val newCfg = graphBuilder.get
+    val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".constant.dot")
+    Files.writeString(dotPath2, newCfg.toGraphViz)
 
+    Profiler.printLastMeasured()
+    newCfg

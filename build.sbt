@@ -106,14 +106,14 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
     )
   )
 
-val swamCommit = "580bdb83208e63cbdb2bcec86fc5432db288fd21"
+val swamCommit = "6fff041929eb5cd9733b2c95da80bcacc117f69b"
 val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .dependsOn(sturdy_apron % "compile->compile")
   .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
-  .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
+  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile;test->test")
   .settings(
     name := "sturdy_wasm",
     libraryDependencies ++= Seq(

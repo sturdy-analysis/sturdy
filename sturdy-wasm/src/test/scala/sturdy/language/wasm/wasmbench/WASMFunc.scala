@@ -32,10 +32,10 @@ enum WASMType:
     case F64 => "F64"
 
   def toAnalysisValue[T <: Interpreter](analysis: T) = this match
-    case I32 => analysis.Value.Int32(analysis.topI32)
-    case I64 => analysis.Value.Int64(analysis.topI64)
-    case F32 => analysis.Value.Float32(analysis.topF32)
-    case F64 => analysis.Value.Float64(analysis.topF64)
+    case I32 => analysis.Value.Num(analysis.NumValue.Int32(analysis.topI32))
+    case I64 => analysis.Value.Num(analysis.NumValue.Int64(analysis.topI64))
+    case F32 => analysis.Value.Num(analysis.NumValue.Float32(analysis.topF32))
+    case F64 => analysis.Value.Num(analysis.NumValue.Float64(analysis.topF64))
 
 
 
@@ -66,28 +66,28 @@ object WASMType:
   import WASMType.*
 
   def toTaintAnalysisValue(wty: WASMType): ConstantTaintAnalysis.Value = wty match
-    case I32 => ConstantTaintAnalysis.Value.Int32(ConstantTaintAnalysis.topI32)
-    case I64 => ConstantTaintAnalysis.Value.Int64(ConstantTaintAnalysis.topI64)
-    case F32 => ConstantTaintAnalysis.Value.Float32(ConstantTaintAnalysis.topF32)
-    case F64 => ConstantTaintAnalysis.Value.Float64(ConstantTaintAnalysis.topF64)
+    case I32 => ConstantTaintAnalysis.Value.Num(ConstantTaintAnalysis.NumValue.Int32(ConstantTaintAnalysis.topI32))
+    case I64 => ConstantTaintAnalysis.Value.Num(ConstantTaintAnalysis.NumValue.Int64(ConstantTaintAnalysis.topI64))
+    case F32 => ConstantTaintAnalysis.Value.Num(ConstantTaintAnalysis.NumValue.Float32(ConstantTaintAnalysis.topF32))
+    case F64 => ConstantTaintAnalysis.Value.Num(ConstantTaintAnalysis.NumValue.Float64(ConstantTaintAnalysis.topF64))
 
   def toTypeAnalysisValue(wty: WASMType): TypeAnalysis.Value = wty match
-    case I32 => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
-    case I64 => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
-    case F32 => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
-    case F64 => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+    case I32 => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int32(TypeAnalysis.topI32))
+    case I64 => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Int64(TypeAnalysis.topI64))
+    case F32 => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float32(TypeAnalysis.topF32))
+    case F64 => TypeAnalysis.Value.Num(TypeAnalysis.NumValue.Float64(TypeAnalysis.topF64))
 
   def toConstantAnalysisValue(wty: WASMType): ConstantAnalysis.Value= wty match
-    case I32 => ConstantAnalysis.Value.Int32(Topped.Top)
-    case I64 => ConstantAnalysis.Value.Int64(Topped.Top)
-    case F32 => ConstantAnalysis.Value.Float32(Topped.Top)
-    case F64 => ConstantAnalysis.Value.Float64(Topped.Top)
+    case I32 => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))
+    case I64 => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))
+    case F32 => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(Topped.Top))
+    case F64 => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(Topped.Top))
 
   def toIntervalAnalysisValue(wty: WASMType): IntervalAnalysis.Value= wty match
-    case I32 => IntervalAnalysis.Value.Int32(NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE))
-    case I64 => IntervalAnalysis.Value.Int64(NumericInterval(Long.MinValue, Long.MaxValue))
-    case F32 => IntervalAnalysis.Value.Float32(Topped.Top)
-    case F64 => IntervalAnalysis.Value.Float64(Topped.Top)
+    case I32 => IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Int32(NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)))
+    case I64 => IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Int64(NumericInterval(Long.MinValue, Long.MaxValue)))
+    case F32 => IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Float32(Topped.Top))
+    case F64 => IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Float64(Topped.Top))
 
 enum Label:
   case Numeric(i: Int)
