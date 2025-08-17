@@ -11,7 +11,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.values.booleans.BooleanBranching
 import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ClassType, ReferenceType, ShortType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ReferenceType, ShortType}
 import org.opalj.io.process
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.values.arrays.ArrayOps
@@ -421,71 +421,64 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
 
       // Invoke Functions opcode 182 - 186
-      case inst: INVOKESTATIC =>
-        val cfs = findClassFile(inst.declaringClass)
-        val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-        val numArgs = inst.methodDescriptor.parametersCount
+      case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
+        val cf = findClassFile(declaringClass)
+        val mth = cf.findMethod(name, methodDescriptor).get
+        val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val ret = invoke(mth, args)
-        if(!inst.methodDescriptor.returnType.isVoidType){
+        if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
-        }
 
-      case inst: INVOKEVIRTUAL =>
-        val classType = inst.declaringClass.mostPreciseClassType
-        val numArgs = inst.methodDescriptor.parametersCount
-        if(inst.name == "println" || inst.name == "print")
+      case INVOKEVIRTUAL(_, name, methodDescriptor) =>
+        val numArgs = methodDescriptor.parametersCount
+        // TODO: remove this special case
+        val (obj, args) = if name == "println" || name == "print" then
           val printString = stack.popOrAbort()
           val obj = createLibraryObj(ClassType("java/io/PrintStream"), Site.Instruction(mth, pc, variant = 1))
-          val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, Seq(printString))(invokeWrapper)
-          if (!inst.methodDescriptor.returnType.isVoidType) {
-            stack.push(ret)
-          }
+          (obj, Seq(printString))
         else
           val args = stack.popNOrAbort(numArgs)
           val obj = stack.popOrAbort()
-          val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
-          if (!inst.methodDescriptor.returnType.isVoidType){
-            stack.push(ret)
-          }
+          (obj, args)
+        val ret = objectOps.invokeFunctionCorrect(obj, name, methodDescriptor, args)(invokeWrapper)
+        if !methodDescriptor.returnType.isVoidType then
+          stack.push(ret)
 
-      case inst: INVOKESPECIAL =>
-        val cfs = findClassFile(inst.declaringClass)
-        val mth = cfs.findMethod(inst.name, inst.methodDescriptor).get
-        val numArgs = inst.methodDescriptor.parametersCount
+      case INVOKESPECIAL(declaringClass, _, name, methodDescriptor) =>
+        val cf = findClassFile(declaringClass)
+        val mth = cf.findMethod(name, methodDescriptor).get
+        val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
         val ret = invoke(mth, obj +: args)
-        if (!inst.methodDescriptor.returnType.isVoidType) {
+        if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
-        }
 
-      case inst: INVOKEINTERFACE =>
-        val numArgs = inst.methodDescriptor.parametersCount
+      case INVOKEINTERFACE(_, name, methodDescriptor) =>
+        val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(obj, inst.name, inst.methodDescriptor, args)(invokeWrapper)
-        if(!inst.methodDescriptor.returnType.isVoidType){
+        val ret = objectOps.invokeFunctionCorrect(obj, name, methodDescriptor, args)(invokeWrapper)
+        if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
-        }
 
       case inst: INVOKEDYNAMIC =>
-        val test = inst.bootstrapMethod
-        val test1 = inst.name
-        val test2 = inst.methodDescriptor
-        val receiver = inst.bootstrapMethod.handle
+        // TODO: this is only implemented for methods named "makeConcatWithConstants"
+        val (bootstrapMethod, name, _) = INVOKEDYNAMIC.unapply(inst).value
+        val receiver = bootstrapMethod.handle
         receiver match
-          case receiver: InvokeStaticMethodHandle =>
-            if (inst.name == "makeConcatWithConstants"){
+          case InvokeStaticMethodHandle(receiverType, _, name, methodDescriptor) =>
+            if (name == "makeConcatWithConstants"){
               if(stack.size < 2){
-                val test3 = inst.bootstrapMethod.arguments.head.toJava
+                val test3 = bootstrapMethod.arguments.head.toJava
                 val test4 = test3.drop(2).dropRight(1)
                 eval(LoadString(test4), mth, pc)
               }
 
-              val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseClassType)
+              val source = javaLibClassFileWrapper(receiverType.mostPreciseClassType)
               val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              val invokedMth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
+              val invokedMth = cfs.findMethod(name, methodDescriptor).get
               val args = stack.popNOrAbort(2)
               evalNativeStatic(invokedMth, args)
             }
@@ -683,60 +676,39 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     array
 
   def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
-
     invoke(mth, obj +: args)
 
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
-
+    // TODO: remove this special case
     if(mth.name == "println" || mth.name == "print")
       val string = arrayOps.getArray(objectOps.getField(args(1), (ClassType("java/lang/String"), "value"))).map(vals => vals.get)
       arrayOps.printString(string)
-      i32ops.integerLit(-1)
+      return i32ops.integerLit(-1)
     // we are currently unable to properly deal with System.exit
-    else if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
+    if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
       failure.fail(AbortEval.Exit(args.head), "System.exit")
-    else {
-      if (native.nativeFunList.contains(mth.name)) {
-        val ret = invokeClassMethod(mth, args)
-        if (!mth.descriptor.returnType.isVoidType) {
-          ret
-        }
-        else{
+    if native.nativeFunList.contains(mth.name) then
+      val ret = invokeClassMethod(mth, args)
+      return if mth.descriptor.returnType.isVoidType then i32ops.integerLit(-1) else ret
+
+    val locals = if mth.body.get.localVariableTable.isDefined then
+      mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes)
+    else
+      ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+
+    val argsAndLocals = args.view ++ locals.map(defaultValue)
+
+    stack.withNewFrame(0):
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map((x,y) => (y, Some(x))), ()):
+        run(0, mth)
+        if mth.descriptor.returnType.isVoidType then
           i32ops.integerLit(-1)
-        }
-      }
-      else {
-        val locals = if (mth.body.get.localVariableTable.isDefined) {
-          mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes)
-        }
-        else {
-          ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
-        }
-
-        val argsAndLocals = args.view ++ locals.map(defaultValue)
-
-//        println(s"Stack before call ${stack.getState}")
-//        try
-        stack.withNewFrame(0) {
-          frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map((x,y) => (y, Some(x))), ()) {
-            run(0, mth)
-            if (!mth.descriptor.returnType.isVoidType) {
-//              if (stack.size != 1)
-//                throw new IllegalStateException(s"Stack must have exactly one value after non-void method return: ${stack.frameSize}, ${stack.size}, ${stack.getState}.")
-              stack.popOrAbort()
-            } else {
-              i32ops.integerLit(-1)
-            }
-          }
-        }
-//        finally println(s"Stack after call ${stack.getState}")
-
-
-      }
-    }
+        else
+          stack.popOrAbort()
 
   def evalNativeStatic(mth: Method, args: Seq[V]): Unit =
+    // TODO: better handling
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ClassType("java/lang/String"),"value")).get
@@ -752,24 +724,24 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       case _ =>
         native.evalNative(mth, args)
 
-  def invokeExternal(mth: Method, isStatic: Boolean): V = external {
+  def invokeExternal(mth: Method, isStatic: Boolean): V = external:
     val args = stack.popNOrAbort(stack.size)
     invoke(mth, args)
-  }
-  def evalExternal(inst: Instruction): Unit = external {
+
+  def evalExternal(inst: Instruction): Unit = external:
     eval(inst, null, 0)
-  }
+
   inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using rec: Fixed): FixOut =
     rec(FixIn.Eval(inst, mth, pc))
 
-  private def fixed: Fixed = fixpointSuper {
+  private def fixed: Fixed = fixpointSuper:
     case FixIn.Eval(inst, mth, pc) =>
       eval(inst, mth, pc)
       FixOut.Eval()
     case FixIn.Jump(pc, mth) =>
       run_open(pc, mth)
       FixOut.Jump()
-  }
+
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
   def run(pc: Int, mth: Method)(using fixed: Fixed): Unit =
