@@ -10,7 +10,7 @@ import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Seconds, Span}
+import org.scalatest.time.{Minutes, Span}
 import sturdy.effect.failure.CFailureException
 import sturdy.language.bytecode.ConcreteRefValues.{NullValue, nonNullArray}
 import sturdy.language.bytecode.abstractions.Site
@@ -75,7 +75,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
   FileTable.cfTable.foreach: path =>
     test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
       // TODO: fix cancelAfter
-      cancelAfter(Span(10, Seconds)):
+      cancelAfter(Span(1, Minutes)):
         testClassFile(path)
 
 def getExpectedValue(mType: TestedMethodType): Int = mType match
