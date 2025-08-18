@@ -42,7 +42,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     val classFiles = process(DataInputStream(FileInputStream(path.toString)))(Java17Framework.ClassFile)
     println(s"testing $path")
 
-    // we can safely call head and get here as there should be exactly one class file
+    // we can safely call head here as there should be exactly one class file
     val method = classFiles.head.methods.find(m => m.name == "main" || m.name == "run").getOrElse:
       fail(s"no suitable method found.\navailable methods: ${classFiles.head.methods.map(_.name)}")
 

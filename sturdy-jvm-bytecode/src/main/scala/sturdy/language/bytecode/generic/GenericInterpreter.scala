@@ -9,9 +9,8 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocator
 import sturdy.values.booleans.BooleanBranching
-import BytecodeFailure.*
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, ReferenceType, ShortType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, PCAndInstruction, ReferenceType, ShortType}
 import org.opalj.io.process
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.values.arrays.ArrayOps
@@ -24,6 +23,7 @@ import sturdy.values.{Finite, Join, MaybeChanged}
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.net.URL
+import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 
 enum JvmExcept[V]:
@@ -47,7 +47,6 @@ given Finite[FixIn] with {}
 given Finite[FixOut] with {}
 
 trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
-
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
   type Fixed = FixIn => FixOut
@@ -175,7 +174,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // load Local variable opcode 21 - 45
       case inst: LoadLocalVariableInstruction =>
-        val v = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+        val v = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
         stack.push(v)
 
       //load from array opcode opcode 46 - 53
@@ -190,7 +189,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // store local variable opcode 54 - 78
       case inst: StoreLocalVariableInstruction =>
         val v1 = stack.popOrAbort()
-        frame.setLocalOrElse(inst.lvIndex, v1, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+        frame.setLocalOrElse(inst.lvIndex, v1, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
       // store in array opcode 79 - 86
       case _ if (79 <= inst.opcode && inst.opcode <= 86) =>
@@ -321,8 +320,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // iinc opcode 132
       case inst: IINC =>
-        val toInc = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
-        frame.setLocalOrElse(inst.lvIndex, i32ops.add(toInc, i32ops.integerLit(inst.constValue)), fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+        val toInc = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+        frame.setLocalOrElse(inst.lvIndex, i32ops.add(toInc, i32ops.integerLit(inst.constValue)), fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
       // Conversions opcode 133 - 147
       case _ if (133 <= inst.opcode && inst.opcode <= 147) =>
@@ -371,7 +370,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         stack.push(i32ops.integerLit(pc))
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
       case inst: RET =>
-        val index = frame.getLocalOrElse(inst.lvIndex, fail(UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
+        val index = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
         except.throws(JvmExcept.Ret(index))
       case inst: TABLESWITCH =>
         val index = stack.popOrAbort()
@@ -398,7 +397,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           val objCF = inst.declaringClass
           ensureInitialization(objCF)
           val addr = staticAddrMap((objCF, inst.name))
-          val v = store.readOrElse(addr, fail(UnboundStaticVar, inst.name))
+          val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, inst.name))
           stack.push(v)
 
       case inst: PUTSTATIC =>
@@ -451,6 +450,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
+        // why are we not using object ops here?
         val ret = invoke(mth, obj +: args)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
@@ -463,7 +463,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
-      case inst: INVOKEDYNAMIC =>
+      case _: INVOKEDYNAMIC =>
+        throw UnsupportedOperationException("unsupported instruction: invokedynamic")
+      /*
         // TODO: this is only implemented for methods named "makeConcatWithConstants"
         val (bootstrapMethod, name, _) = INVOKEDYNAMIC.unapply(inst).value
         val receiver = bootstrapMethod.handle
@@ -483,6 +485,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
               evalNativeStatic(invokedMth, args)
             }
           case _ => ??? // TODO: not implemented
+      */
       /*
       receiver match
         case receiver: InvokeStaticMethodHandle =>
@@ -678,6 +681,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
     invoke(mth, obj +: args)
 
+  // every invoke instruction will call this function
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     // TODO: remove this special case
@@ -724,6 +728,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       case _ =>
         native.evalNative(mth, args)
 
+  // external entrypoint to invoke a function, expecting its arguments on the stack
   def invokeExternal(mth: Method, isStatic: Boolean): V = external:
     val args = stack.popNOrAbort(stack.size)
     invoke(mth, args)
@@ -731,8 +736,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   def evalExternal(inst: Instruction): Unit = external:
     eval(inst, null, 0)
 
-  inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using rec: Fixed): FixOut =
-    rec(FixIn.Eval(inst, mth, pc))
+  // wraps eval in fixed
+  inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using fixed: Fixed): FixOut =
+    fixed(FixIn.Eval(inst, mth, pc))
 
   private def fixed: Fixed = fixpointSuper:
     case FixIn.Eval(inst, mth, pc) =>
@@ -744,6 +750,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
+  // wraps run_pen in fixed
   def run(pc: Int, mth: Method)(using fixed: Fixed): Unit =
     fixed(FixIn.Jump(pc, mth)) match
       case FixOut.Jump() => ()
@@ -774,19 +781,19 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         run(handler.handlerPC, mth)
     }
 
-  def runBody(pc: Int, mth: Method)(using Fixed): Unit =
-    val instructionMap = mth.body.get.iterator.map(c => c.pc -> c.instruction).toMap
+  // evaluates each instruction of the given method's body, starting with pc
+  @tailrec private def runBody(pc: Int, mth: Method)(using Fixed): Unit =
+    // TODO: maybe handle nonexistent body differently
+    val body = mth.body.get
+    // get is safe to call as unapply always returns Some here
+    val instructionMap = body.iterator.map(PCAndInstruction.unapply(_).get).toMap
     val currInst = instructionMap(pc)
     frame.setData(pc)
-    //println(currInst)
-//    if(currInst.isSimpleConditionalBranchInstruction)
-//      println("test")
     evalFix(currInst, mth, pc)
 
-    if (currInst.nextInstructions(pc)(mth.body.get).nonEmpty) {
-      val nextPC = currInst.indexOfNextInstruction(pc)(mth.body.get)
+    if currInst.nextInstructions(pc)(body).nonEmpty then
+      val nextPC = currInst.indexOfNextInstruction(pc)(body)
       runBody(nextPC, mth)
-    }
 
   def convertTypes(opalTypes: FieldType): ValType = opalTypes match
     case opalTypes: ByteType => ValType.I32
