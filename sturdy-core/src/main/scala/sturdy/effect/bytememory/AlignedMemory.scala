@@ -10,7 +10,7 @@ import Bytes.*
 import sturdy.data
 import sturdy.effect.EffectStack
 import sturdy.util.Profiler
-import sturdy.values.addresses.AddressLimits
+import sturdy.values.addresses.{AddressLimits, AddressOffset}
 
 import java.nio.ByteOrder
 import scala.collection.immutable.SortedMap
@@ -38,20 +38,21 @@ final class AlignedMemory
     Key: Finite,
     Context: Ordering: Finite,
     Addr: Join: Widen,
-    Val: Join: Widen,
+    Val: ClassTag: Join: Widen,
     Size: Join: Widen
   ]
   (val
-   defaultBytes: Bytes[Addr,Val],
-   memLocAllocator: Allocator[IterableOnce[Context],(Key,Addr,Bytes[Addr,Val])]
+   defaultBytes: ReadBytes[Val],
+   memLocAllocator: Allocator[IterableOnce[Context],(Key,Addr,Val)]
   )
   (using
    matchRegions: MatchRegions[Context, Addr, Size],
+   addressOffset: AddressOffset[Addr],
    addressLimits: AddressLimits[Addr, Size, WithJoin],
    sizeIntOps: IntegerOps[Int, Size],
    effectStack: EffectStack
   )
-  extends Memory[Key, Addr, Bytes[Addr,Val], Size, WithJoin]:
+  extends Memory[Key, Addr, Bytes[Val], Size, WithJoin]:
 
   type MemoryCtx = Context
   private val pageSize: Size = sizeIntOps.integerLit(ConcreteMemory.pageSize)
@@ -59,59 +60,122 @@ final class AlignedMemory
 
   var memories: Map[Key, Mem[Context, Addr, Size, Val]] = Map()
 
-  override def read(key: Key, readAddr: Addr, length: Int): JOption[WithJoin, Bytes[Addr,Val]] =
+  override def read(key: Key, readAddr: Addr, length: Int): JOption[WithJoin, Bytes[Val]] =
     val mem = memories(key)
+
     val regions = matchRegions(readAddr, mem).iterator
 
-    val result =
+    val readBytes: Bytes[Val] =
       if(! regions.hasNext)
         defaultBytes
       else
         regions
           .map{
-            case (MemoryRegion(storedAddr, StoredBytes(value, storedBytes, storedByteOrder)), alignedRead) =>
-              ReadBytes[Addr,Val](
-                value = value,
-                storedBytes = storedBytes,
-                storedByteOrder = storedByteOrder,
-                readAligned = alignedRead.toToppedBoolean,
-                readBytes = Topped.Actual(length)
+            case (MemoryRegion(_, value, Topped.Actual(byteSize), byteOrder), AlignedRead.Aligned) =>
+              ReadBytes[Val](
+                value = Topped.Actual(List((value,byteSize))),
+                byteOrder = byteOrder
+              )
+            case _ =>
+              ReadBytes[Val](
+                value = Topped.Top,
+                byteOrder = Topped.Top
               )
           }
           .reduce(Join(_,_).get)
 
-    addressLimits.ifAddrLeSize(readAddr, sizeIntOps.sub(sizeIntOps.mul(mem.numPages, pageSize), sizeIntOps.integerLit(length))) {
-      result
-    }
-
-  override def write(key: Key, addr: Addr, bytes: Bytes[Addr,Val]): JOption[WithJoin, Unit] =
-    bytes match
-      case bs: StoredBytes[Addr,Val] =>
-        val Mem(store, numPages, pageLimit) = memories(key)
-        val ctxs = memLocAllocator(key,addr,bytes)
-        val newRegion = MemoryRegion(addr, bs)
-        val storedSize = bs.storedBytes match
-          case Topped.Actual(len) => sizeIntOps.integerLit(len)
-          case Topped.Top => Join(sizeIntOps.integerLit(1), sizeIntOps.integerLit(Int.MaxValue)).get
-
-        addressLimits.ifAddrLeSize(newRegion.startAddr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), storedSize)) {
-          var newStore = store
-          for(ctx <- ctxs) {
-            newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
-            for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-              newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
-            }
+    readBytes.byteSize match
+      case Topped.Actual(byteSize) =>
+        if(length - byteSize <= 0) {
+          addressLimits.ifAddrLeSize(readAddr, sizeIntOps.sub(sizeIntOps.mul(mem.numPages, pageSize), sizeIntOps.integerLit(length))) {
+            readBytes
           }
-          memories += key -> Mem(newStore, numPages, pageLimit)
-
-          ()
+        } else {
+          read(key = key, readAddr = readAddr, length - byteSize).map { readBytes ++ _ }
         }
-      case bs: ReadBytes[Addr,Val] =>
+      case Topped.Top =>
+        JOptionA.NoneSome(ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top))
+
+
+
+  override def write(key: Key, addr: Addr, bytes: Bytes[Val]): JOption[WithJoin, Unit] =
+    bytes match
+      case StoredBytes((value, byteSize) :: rest, byteOrder) =>
+        val Mem(store, numPages, pageLimit) = memories(key)
+
+        val newRegion = MemoryRegion(
+          startAddr = addr,
+          value = value,
+          byteSize = Topped.Actual(byteSize),
+          byteOrder = byteOrder
+        )
+
+        var newStore = store
+        for (ctx <- memLocAllocator(key, addr, value)) {
+          newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
+          for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+            newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
+          }
+        }
+        memories += key -> Mem(newStore, numPages, pageLimit)
+
+        if(rest.isEmpty) {
+          addressLimits.ifAddrLeSize(addr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), sizeIntOps.integerLit(byteSize))) {
+            ()
+          }
+        } else {
+          write(
+            key = key,
+            addr = addressOffset.addOffsetToAddr(byteSize, addr),
+            bytes = StoredBytes(rest, byteOrder)
+          )
+        }
+
+
+      case bs: ReadBytes[Val] =>
         throw IllegalArgumentException(s"Can only store StoredBytes, but got $bytes")
 
   override def copy(key: Key, srcAddr: Addr, dstAddr: Addr, byteAmount: Size): JOptionA[Unit] = ???
-  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Addr, Val]): JOptionA[Unit] = ???
-  override def init(key: Key, tableAddr: Addr, dataAddr: Addr, byteAmount: Size, dataBytes: Bytes[Addr, Val]): JOptionA[Unit] = ???
+  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Val]): JOptionA[Unit] = ???
+  override def init(key: Key, targetAddr: Addr, sourceAddr: Addr, byteAmount: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
+    dataBytes match
+      case StoredBytes(valueArray, byteOrder) =>
+        addressLimits.ifSizeLeLimit(byteAmount, sizeIntOps.integerLit(0)) {
+          // if byteAmount is 0, we are done writing.
+          JOptionA.Some(())
+        } {
+          addressLimits.ifAddrLeSize(sourceAddr, sizeIntOps.integerLit(0)) {
+            if(valueArray.isEmpty) {
+              throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
+            } else {
+              val atom@(value, byteSize) = valueArray.head
+
+              write(key, targetAddr, StoredBytes(List(atom), byteOrder)).flatMap(_ =>
+                init(
+                  key = key,
+                  targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr),
+                  sourceAddr = sourceAddr,
+                  byteAmount = sizeIntOps.sub(byteAmount, sizeIntOps.integerLit(byteSize)),
+                  dataBytes = StoredBytes(valueArray.tail, byteOrder)
+                )
+              ).asInstanceOf[JOptionA[Unit]]
+            }
+          }.orElseAndThen[JOptionA[Unit]] {
+            // if sourceAddr > 0
+            if (valueArray.isEmpty) {
+              throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
+            } else {
+              val atom@(_, byteSize) = valueArray.head
+              init(
+                key = key,
+                targetAddr = targetAddr,
+                sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr),
+                byteAmount = byteAmount,
+                dataBytes = StoredBytes(valueArray.tail, byteOrder)
+              ).asInstanceOf[JOptionA[Unit]]
+            }
+          } { opt => opt }
+        }
 
   override def size(key: Key): Size =
     memories(key).numPages
@@ -164,67 +228,86 @@ case class Mem[Ctx, Addr, Size, Val](store: SortedMap[PhysicalAddress[Ctx], Memo
       case other: Mem[Ctx, Addr, Size, Val] @unchecked => MapEquals(this.store, other.store) && this.numPages.equals(other.numPages) && this.pageLimit == other.pageLimit
       case _ => false
 
-case class MemoryRegion[Addr, Val](startAddr: Addr, bytes: StoredBytes[Addr,Val]):
+case class MemoryRegion[Addr, Val](startAddr: Addr, value: Val, byteSize: Topped[Int], byteOrder: Topped[ByteOrder]):
   def endAddr(using addrIntOps: IntegerOps[Int,Addr], joinAddr: Join[Addr]): Addr =
-    bytes.storedBytes match
+    byteSize match
       case Topped.Actual(bs) => addrIntOps.add(startAddr, addrIntOps.integerLit(bs))
       case Topped.Top => addrIntOps.add(startAddr, joinAddr(addrIntOps.integerLit(0), addrIntOps.integerLit(Int.MaxValue)).get)
 
   def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
-    valueIterator(startAddr) //++ valueIterator(bytes._value)
+    valueIterator(startAddr) ++ valueIterator(value)
 
-enum Bytes[Addr, Val]:
-  case StoredBytes(value: Val, storedBytes: Topped[Int], storedByteOrder: Topped[ByteOrder])
-  case ReadBytes(value: Val, storedBytes: Topped[Int], storedByteOrder: Topped[ByteOrder], readAligned: Topped[Boolean], readBytes: Topped[Int])
+enum Bytes[Val]:
+  case StoredBytes(value: List[(Val,Int)], byteOrder: Topped[ByteOrder])
+  case ReadBytes(value: Topped[List[(Val,Int)]], byteOrder: Topped[ByteOrder])
 
-  def _value: Val =
+  def byteSize: Topped[Int] =
     this match
-      case bytes: StoredBytes[Addr, Val] => bytes.value
-      case bytes: ReadBytes[Addr, Val] => bytes.value
+      case StoredBytes(valueArray, _) => Topped.Actual(valueArray.map(_._2).sum)
+      case ReadBytes(Topped.Actual(valueArray), _) => Topped.Actual(valueArray.map(_._2).sum)
+      case _ => Topped.Top
+
+  def ++(other: Bytes[Val]): Bytes[Val] =
+    (this, other) match
+      case (ReadBytes(Topped.Actual(valueList1), byteOrder1), ReadBytes(Topped.Actual(valueList2), byteOrder2)) =>
+        ReadBytes(Topped.Actual(valueList1 ++ valueList2), Join(byteOrder1, byteOrder2).get)
+      case (_, _) =>
+        ReadBytes(Topped.Top, Topped.Top)
 
   override def toString: String =
     this match
-      case bytes: StoredBytes[Addr, Val] => s"${bytes.value}[${bytes.storedBytes}]"
-      case bytes: ReadBytes[Addr, Val] =>
-        if (bytes.storedBytes == bytes.readBytes)
-          s"${bytes.value}"
-        else
-          s"ReadBytes(${bytes.value}, ${bytes.storedBytes}, ${bytes.storedByteOrder}, ${bytes.readAligned}, ${bytes.readBytes})"
+      case bytes: StoredBytes[Val] => s"${bytes.value}"
+      case bytes: ReadBytes[Val] => s"${bytes.value}"
 
 given CombineMem[Context: Finite, Addr, Size, Val, W <: Widening](using combineAddr: Combine[Addr,W], combineSize: Combine[Size,W], combineVal: Combine[Val,W]): Combine[Mem[Context, Addr, Size, Val], W] with
   override def apply(v1: Mem[Context, Addr, Size, Val], v2: Mem[Context, Addr, Size, Val]): MaybeChanged[Mem[Context, Addr, Size, Val]] =
-    for {
-      store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Val], W](v1.store, v2.store)
-      numPages <- combineSize(v1.numPages, v2.numPages)
-      pageLimit <- combineSize(v1.pageLimit, v2.pageLimit)
-    } yield (Mem(store, numPages, pageLimit))
+    if(v1 eq v2)
+      Unchanged(v1)
+    else
+      for {
+        store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Val], W](v1.store, v2.store)
+        numPages <- combineSize(v1.numPages, v2.numPages)
+        pageLimit <- combineSize(v1.pageLimit, v2.pageLimit)
+      } yield (Mem(store, numPages, pageLimit))
 
-given CombineRegion[Addr, Val, W <: Widening](using combineAddr: Combine[Addr, W], combineBytes: Combine[Bytes[Addr, Val], W]): Combine[MemoryRegion[Addr, Val], W] with
+given CombineRegion[Addr, Val, W <: Widening](using combineAddr: Combine[Addr, W], combineVal: Combine[Val,W]): Combine[MemoryRegion[Addr, Val], W] with
   override def apply(v1: MemoryRegion[Addr, Val], v2: MemoryRegion[Addr, Val]): MaybeChanged[MemoryRegion[Addr, Val]] =
     if (v1 eq v2)
       Unchanged(v1)
     else
       for {
         startAddr <- combineAddr(v1.startAddr, v2.startAddr)
-        bytes <- combineBytes(v1.bytes, v2.bytes)
-      } yield (MemoryRegion(startAddr, bytes.asInstanceOf[StoredBytes[Addr, Val]]))
+        value <- combineVal(v1.value, v2.value)
+        byteSize <- Join(v1.byteSize, v2.byteSize)
+        byteOrder <- Join(v1.byteOrder, v2.byteOrder)
+      } yield (MemoryRegion(startAddr, value, byteSize, byteOrder))
 
-given CombineBytes[Addr, Val, W <: Widening](using combineVal: Combine[Val, W]): Combine[Bytes[Addr, Val], W] with
-  override def apply(v1: Bytes[Addr, Val], v2: Bytes[Addr, Val]): MaybeChanged[Bytes[Addr, Val]] =
+given CombineBytes[Addr, Val, W <: Widening](using combineVal: Combine[Val, W]): Combine[Bytes[Val], W] with
+  override def apply(v1: Bytes[Val], v2: Bytes[Val]): MaybeChanged[Bytes[Val]] =
     (v1, v2) match
       case (_,_) if(v1 eq v2) => Unchanged(v1)
-      case (StoredBytes(val1, storedBytes1, byteOrder1), StoredBytes(val2, storedBytes2, byteOrder2)) =>
+      case (ReadBytes(val1, byteOrder1), ReadBytes(val2, byteOrder2)) =>
         for {
-          value <- Combine(val1, val2)
-          storedBytes <- Join(storedBytes1, storedBytes2)
+          value <- combineListOfValues(val1, val2)
           byteOrder <- Join(byteOrder1, byteOrder2)
-        } yield (StoredBytes(value, storedBytes, byteOrder))
-      case (ReadBytes(val1, storedBytes1, byteOrder1, readOffset1, readBytes1), ReadBytes(val2, storedBytes2, byteOrder2, readOffset2, readBytes2)) =>
-        for {
-          value <- Combine(val1, val2)
-          storedBytes <- Join(storedBytes1, storedBytes2)
-          byteOrder <- Join(byteOrder1, byteOrder2)
-          readOffset <- Join(readOffset1, readOffset2)
-          readBytes <- Join(readBytes1, readBytes2)
-        } yield (ReadBytes(value, storedBytes, byteOrder, readOffset, readBytes))
-      case (_,_) => throw new IllegalArgumentException(s"Cannot join read bytes and stored bytes: $v1 ⊔ $v2")
+        } yield (ReadBytes(value, byteOrder))
+      case _ => throw IllegalArgumentException(s"Can only join ReadBytes, but got ($v1, $v2)")
+
+  def combineListOfValues(v1: Topped[List[(Val,Int)]], v2: Topped[List[(Val,Int)]]): MaybeChanged[Topped[List[(Val,Int)]]] =
+    (v1, v2) match
+      case (Topped.Top, _) => Unchanged(v1)
+      case (_, Topped.Top) => Changed(v2)
+      case (Topped.Actual(l1), Topped.Actual(l2)) =>
+        if(l1.length != l2.length)
+          Changed(Topped.Top)
+        else if(! l1.zip(l2).forall{case ((_,byteSize1), (_,byteSize2)) => byteSize1 == byteSize2})
+          Changed(Topped.Top)
+        else
+          var changed = false
+          val joined = l1.zip(l2).map {
+            case ((b1, byteSize1), (b2,_)) =>
+              val joinedVals = Combine(b1,b2)
+              changed |= joinedVals.hasChanged
+              (joinedVals.get,byteSize1)
+          }
+          MaybeChanged(Topped.Actual(joined), changed)

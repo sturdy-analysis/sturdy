@@ -44,8 +44,6 @@ import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
 import sturdy.fix.{DomLogger, Logger}
-import sturdy.language.wasm.analyses.ConstantAnalysis.RefV
-import sturdy.values.references.Recency.Recent
 
 import java.math.BigInteger
 import scala.collection.immutable.List
@@ -69,7 +67,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   override def topFuncRef: FuncReference = ???
   override def topV128: V128 = ???
 
-  given RelationalSpecialWasmOperations(using domLogger: DomLogger[FixIn], f: Failure, eff: EffectStack, apronState: ApronState[VirtAddr, Type]): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
+  given RelationalSpecialWasmOperations
+      (using domLogger: DomLogger[FixIn],
+             f: Failure,
+             effectStack: EffectStack,
+             apronState: ApronState[VirtAddr, Type],
+             integerOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]],
+             unsignedOrderingOps: UnsignedOrderingOps[I32, Bool],
+             joinExpr: Join[ApronExpr[VirtAddr, Type]]
+      ): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
+
     override def valToAddr(v: Value): Addr = v match
       case Num(Int32(n@NumExpr(_))) => n
       case Num(Int32(a@AllocationSites(_, _))) => a
@@ -92,6 +99,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
       addr match
+        case _ if newOffset == 0 =>
+          addr
         case AllocationSites(sites, size) =>
           AllocationSites(PowVirtualAddress(sites.iterator.map {
             case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site,initOffset)), n, addrTrans) =>
@@ -100,11 +109,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               v
             case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
           }), size)
-        case _ if newOffset == 0 =>
-          addr
         case _ =>
           val expr = addr.asNumExpr
-          NumExpr(ApronExpr.intAdd[VirtAddr,Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type))
+          val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
+          NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
+            f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
+          } {
+            addr match
+              case NumExpr(ApronExpr.Constant(_,floatSpecials,tpe)) => ApronExpr.Constant(apronState.getInterval(resAddr), floatSpecials, tpe)
+              case _ => resAddr
+          })
     }
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
@@ -131,7 +145,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def refVToFunV(r: RefV): FunV = ???
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV = ???
     override def refToVal(r: RefV): Value = ???
-    override def liftBytes(b: Seq[Byte]): Bytes = ???
+    override def liftBytes(b: Seq[Byte]): Bytes =
+      Bytes.StoredBytes(
+        value = b.map(x => (Num(Int32(NumExpr(ApronExpr.lit(x.toInt, I32Type)))), 1)).toList,
+        byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN)
+      )
 
     def assignFreshTempVar(expr: ApronExpr[VirtAddr, Type]): List[Value] =
       List(apronState.withTempVars(expr._type)((v, _) =>
@@ -232,13 +250,19 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     def addressIterator: Iterator[VirtAddr] =
       def valueIterator(value: Any): Iterator[VirtAddr] = value match
-        case Num(Int32(NumExpr(expr))) => expr.addrs.iterator
-        case Num(Int32(NumExpr(cons))) => cons.addrs.iterator
-        case Num(Int64(expr)) => expr.addrs.iterator
-        case Num(Float32(expr)) => expr.addrs.iterator
-        case Num(Float64(expr)) => expr.addrs.iterator
+        case TopValue => Iterator.empty
+        case Num(n) => valueIterator(n)
+        case Int32(n) => valueIterator(n)
+        case NumExpr(n) => valueIterator(n)
+        case BoolExpr(n) => valueIterator(n)
+        case AllocationSites(sites, size) => valueIterator(sites) ++ valueIterator(size)
+        case Int64(n) => valueIterator(n)
+        case Float32(n) => valueIterator(n)
+        case Float64(n) => valueIterator(n)
         case virts: PowVirtAddr => virts.iterator
-        case expr: ApronExpr[VirtAddr,Type] => expr.addrs.iterator
+        case expr: ApronExpr[VirtAddr,Type] @unchecked => expr.addrs.iterator
+        case cons: ApronCons[VirtAddr,Type] @unchecked => cons.addrs.iterator
+        case bool: ApronBool[VirtAddr,Type] @unchecked => bool.addrs.iterator
         case excV: ExcV =>
           for(listVals <- excV.values.iterator;
               value <- listVals.iterator;
@@ -271,7 +295,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
-      Bytes.StoredBytes(Value.TopValue, Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+      Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
       heapAlloc(rootFrameData)
     )
 

@@ -141,7 +141,12 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def funcInstToFunV(f: FunctionInstance): FunctionInstance = f
     override def funVToFuncInst(f: FunctionInstance): FunctionInstance = f
 
-    override def addOffsetToAddr(offset: Int, addr: Int): Int = addr + offset
+    override def addOffsetToAddr(offset: Int, addr: Int): Int =
+      val resultAddr = addr + offset
+      if(Integer.compareUnsigned(resultAddr, offset) < 0)
+        f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+      else
+        resultAddr
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32

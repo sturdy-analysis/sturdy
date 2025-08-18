@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.JOption
 import sturdy.data.MayJoin
+import sturdy.values.addresses.AddressOffset
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
@@ -45,7 +46,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]] extends AddressOffset[Addr]:
   def valToAddr(v: V): Addr
   def valToIdx(v: V): Index
   def valToRef(v: V, funcs: Vector[FunctionInstance]): RefV
@@ -73,8 +74,6 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
 
   def funcInstToFunV(f: FunctionInstance): FunV
   def funVToFuncInst(f: FunV): FunctionInstance
-
-  def addOffsetToAddr(offset: Int, addr: Addr): Addr
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 

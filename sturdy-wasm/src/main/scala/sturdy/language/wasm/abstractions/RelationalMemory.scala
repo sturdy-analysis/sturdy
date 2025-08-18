@@ -14,17 +14,20 @@ import sturdy.values.references.{PhysicalAddress, VirtualAddress}
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
+  import ApronCons.*
+  import ApronExpr.*
+  import ApronBool.*
 
   final type Addr = NumExpr | AllocationSites
   final type Size = ApronExpr[VirtAddr, Type]
-  final type Bytes = sturdy.effect.bytememory.Bytes[Addr,Value]
+  final type Bytes = sturdy.effect.bytememory.Bytes[Value]
 
   given RelationalAddressLimits(using apronState: ApronState[VirtAddr, Type]): AddressLimits[Addr, Size, WithJoin] with
     override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =
       given Join[A] = implicitly[WithJoin[A]].j
       addr match
         case NumExpr(addrExpr) =>
-          apronState.ifThenElse(ApronCons.le(addrExpr, size)) {
+          apronState.ifThenElse(And(Constraint(le(ApronExpr.lit(0, Type.I32Type), addrExpr)), Constraint(le(addrExpr, size)))) {
             JOptionA.Some(f)
           } {
             JOptionA.None[A]()
@@ -34,7 +37,7 @@ trait RelationalMemory extends RelationalValues:
 
     override def ifSizeLeLimit[A: WithJoin](size: ApronExpr[VirtAddr, Type], limit: ApronExpr[VirtAddr, Type])(ifTrue: => A)(ifFalse: => A): A =
       given Join[A] = implicitly[WithJoin[A]].j
-      apronState.ifThenElse(ApronCons.le(size, limit))(ifTrue)(ifFalse)
+      apronState.ifThenElse(And(Constraint(le(lit(0, Type.I32Type), size)), Constraint(le(size, limit))))(ifTrue)(ifFalse)
 
   given RelationalMatchRegions(using apronState: ApronState[VirtAddr, Type]): MatchRegions[HeapCtx, Addr, Size] with
     override def apply[Val](addr: Addr, mem: Mem[HeapCtx, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)] =
