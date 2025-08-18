@@ -25,15 +25,44 @@ enum TestedMethodType:
   case Main
   case Run
 
-object FileTable:
+object TestCases:
   // path to the bytecode files
   val resourcePath = "./sturdy-jvm-bytecode/src/test/resources/"
   // newline-separated regexes of file names to ignore
   // basic comment lines using "//" are supported
   val ignoreFileName = "ignored-files.txt"
+  // used by selective test, comments allowed as well
+  val includeFileName = "included-files.txt"
 
-  val ignoreRegexes: Seq[Regex] = Files.lines(Paths.get(resourcePath + ignoreFileName)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
-  val cfTable: ArraySeq[Path] = ArraySeq.from(Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(f => Files.isRegularFile(f) && !f.equals(Paths.get(resourcePath + ignoreFileName)) && !ignoreRegexes.exists(_.matches(f.toString))))
+  val ignoreRegexes: Seq[Regex] = readRegexesFromFile(ignoreFileName)
+  val includeRegexes: Seq[Regex] = readRegexesFromFile(includeFileName)
+
+  // excludes the regex files
+  val allFiles: ArraySeq[Path] = ArraySeq.from(Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(
+    f => Files.isRegularFile(f)
+      && !f.equals(Paths.get(resourcePath + ignoreFileName))
+      && !f.equals(Paths.get(resourcePath + includeFileName))
+  ))
+
+  // all tests that are not ignored
+  val fullTests: ArraySeq[Path] = allFiles.filterNot: f =>
+    ignoreRegexes.exists(_.matches(f.toString))
+
+  // all explicitly included tests
+  val includedTests: ArraySeq[Path] = allFiles.filter: f =>
+    includeRegexes.exists(_.matches(f.toString))
+
+  // parsing for the files defining the tests to include/exclude
+  private def readRegexesFromFile(filename: String) =
+    Files.lines(Paths.get(resourcePath + filename)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
+
+// run all tests
+class FullSuite extends ConcreteInterpreterTestSuite:
+  runTestFiles(TestCases.fullTests)
+
+// run only the tests defined in the included test cases
+class SelectiveSuite extends ConcreteInterpreterTestSuite:
+  runTestFiles(TestCases.includedTests)
 
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   def testClassFile(path: Path): Assertion =
@@ -72,11 +101,12 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
     assert(v.asInt32(using concreteInterpreter.failure) === getExpectedValue(mType))
 
-  FileTable.cfTable.foreach: path =>
-    test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
-      // TODO: fix cancelAfter
-      cancelAfter(Span(1, Minutes)):
-        testClassFile(path)
+  def runTestFiles(paths: Seq[Path]): Unit =
+    paths.foreach: path =>
+      test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
+        // TODO: fix cancelAfter
+        cancelAfter(Span(1, Minutes)):
+          testClassFile(path)
 
 def getExpectedValue(mType: TestedMethodType): Int = mType match
   case TestedMethodType.Main => 95
