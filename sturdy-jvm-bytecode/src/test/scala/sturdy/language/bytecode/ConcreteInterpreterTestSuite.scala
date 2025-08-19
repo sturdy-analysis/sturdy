@@ -49,7 +49,7 @@ object TestCases:
     ignoreRegexes.exists(_.matches(f.toString))
 
   // all explicitly included tests
-  val includedTests: ArraySeq[Path] = allFiles.filter: f =>
+  val includedTests: ArraySeq[Path] = fullTests.filter: f =>
     includeRegexes.exists(_.matches(f.toString))
 
   // parsing for the files defining the tests to include/exclude
