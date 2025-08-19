@@ -11,7 +11,7 @@ import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableD
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -316,7 +316,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           AddrCtx.Global(sym.addr)
     ))
 
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = ???
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem]
     val tables: IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
