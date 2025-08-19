@@ -622,9 +622,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       val source = javaLibClassFileWrapper(objType)
       Java8Framework.ClassFile(nativeSource, source)
     else
-      // TODO: this yields <parent path to classfile>/<class name>.class/<class name>.class, why was this there?
-      // val source = nonJavaLibClassFileWrapper(objType)
-      val source = projectSource
+      val source = if projectSource.endsWith(".class") then projectSource else nonJavaLibClassFileWrapper(objType)
       process(DataInputStream(FileInputStream(source))):
         Java8Framework.ClassFile
     staticInitialized += objType

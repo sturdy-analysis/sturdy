@@ -1,10 +1,8 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.reader.Java17Framework
 import org.opalj.br.{ArrayType, ClassType, ReferenceType}
 import org.opalj.bytecode
-import org.opalj.io.process
 import org.scalatest.ParallelTestExecution
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
@@ -15,7 +13,6 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.bytecode.ConcreteRefValues.{NullValue, nonNullArray}
 import sturdy.language.bytecode.abstractions.Site
 
-import java.io.{DataInputStream, FileInputStream}
 import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.*
@@ -24,6 +21,10 @@ import scala.util.matching.Regex
 enum TestedMethodType:
   case Main
   case Run
+
+  def getExpectedValue: Int = this match
+    case TestedMethodType.Main => 95
+    case TestedMethodType.Run => 0
 
 object TestCases:
   // path to the bytecode files
@@ -37,20 +38,33 @@ object TestCases:
   val ignoreRegexes: Seq[Regex] = readRegexesFromFile(ignoreFileName)
   val includeRegexes: Seq[Regex] = readRegexesFromFile(includeFileName)
 
-  // excludes the regex files
-  val allFiles: ArraySeq[Path] = ArraySeq.from(Files.walk(Paths.get(resourcePath)).iterator().asScala.filter(
-    f => Files.isRegularFile(f)
-      && !f.equals(Paths.get(resourcePath + ignoreFileName))
-      && !f.equals(Paths.get(resourcePath + includeFileName))
-  ))
-
   // all tests that are not ignored
-  val fullTests: ArraySeq[Path] = allFiles.filterNot: f =>
+  val fullTests: ArraySeq[Path] = allTestCases.filterNot: f =>
     ignoreRegexes.exists(_.matches(f.toString))
 
-  // all explicitly included tests
-  val includedTests: ArraySeq[Path] = fullTests.filter: f =>
+  // all explicitly included tests that are not ignored
+  val includedTests: ArraySeq[Path] = allTestCases.filter: f =>
     includeRegexes.exists(_.matches(f.toString))
+
+  // all test cases
+  def allTestCases: ArraySeq[Path] =
+    ArraySeq.from:
+      // flatten nested files
+      Files.list(testRootPath).flatMap:
+        Files.list(_).flatMap:
+          Files.list
+      .iterator().asScala
+    .sorted
+
+  // path where the test hierarchy is located
+  def testRootPath: Path =
+    var path = Paths.get(resourcePath)
+    // walk directory tree until we hit the test cases
+    while Files.list(path).filter(Files.isDirectory(_)).count() == 1 do
+      // safe as the loop head checks that at least one element exists
+      val subDir = Files.list(path).filter(Files.isDirectory(_)).findFirst().get()
+      path = subDir
+    path
 
   // parsing for the files defining the tests to include/exclude
   private def readRegexesFromFile(filename: String) =
@@ -58,56 +72,75 @@ object TestCases:
 
 // run all tests
 class FullSuite extends ConcreteInterpreterTestSuite:
-  runTestFiles(TestCases.fullTests)
+  runTestCases(TestCases.fullTests)
 
 // run only the tests defined in the included test cases
 class SelectiveSuite extends ConcreteInterpreterTestSuite:
-  runTestFiles(TestCases.includedTests)
+  runTestCases(TestCases.includedTests)
 
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
-  def testClassFile(path: Path): Assertion =
-    // logic taken from the existing tests
-    val project = Project(path.toFile, bytecode.RTJar)
-    val classFiles = process(DataInputStream(FileInputStream(path.toString)))(Java17Framework.ClassFile)
-    println(s"testing $path")
+  def assertCase(testCase: Path): Assertion =
+    val project = Project(testCase.toFile, bytecode.RTJar)
+    println(s"testing $testCase")
+    val name = testCase.getFileName.toString
 
-    // we can safely call head here as there should be exactly one class file
-    val method = classFiles.head.methods.find(m => m.name == "main" || m.name == "run").getOrElse:
-      cancel(s"no suitable method found.\navailable methods: ${classFiles.head.methods.map(_.name)}")
+    val rootCf = project.projectClassFilesWithSources.map(_._1).find:
+      _.thisType.simpleName == name
+    .getOrElse:
+      cancel("invalid layout")
+    val mains = rootCf.methods.filter:
+      _.name == "main"
+    if mains.size != 1 then cancel(s"unexpected amount of main methods: ${mains.size}")
+    val runs = rootCf.methods.filter:
+      _.name == "run"
+    if mains.size != 1 then cancel(s"unexpected amount of run methods: ${runs.size}")
 
-    val mType = method.name match
-      case "main" => TestedMethodType.Main
-      case "run" => TestedMethodType.Run
+    // checked above
+    val run = runs.head
+    // if run doesn't have a body, failing the test is fine
+    val methods = if run.body.get.exists: p =>
+      p.instruction.isInvocationInstruction && p.instruction.asInvocationInstruction.name == "runPositive"
+    then
+      // bypass reflections by collecting all run methods
+      val cfs = project.projectClassFilesWithSources.filterNot: (cf, source) =>
+        cf.thisType.simpleName == name || cf.thisType.simpleName.endsWith("n") || TestCases.ignoreRegexes.exists(_.matches(source.toString))
+      cfs.flatMap(_._1.methods.filter(_.name == "run"))
+    else
+      Seq(run)
 
-    val allowField = (ClassType("java/lang/System"), "allowSecurityManager")
-    val allowAddr = (Site.StaticInitialization(allowField._1, allowField._2), 1)
-    val concreteInterpreter = new ConcreteInterpreter.Instance(project, path.toString, Map(
-      // removed due to the entry then still missing from staticAddrMap, would need to be set separately
-      allowAddr -> ConcreteInterpreter.Value.Int32(1)
-    ))
-    concreteInterpreter.staticAddrMap += (allowField -> allowAddr)
-    // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("String")), 0)))
-    if mType == TestedMethodType.Run then
-      // push System.out (null as a replacement)
-      concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(NullValue()))
+    // TODO: improve this structure
+    methods.foreach: method =>
+      val mType = method.name match
+        case "main" => TestedMethodType.Main
+        case "run" => TestedMethodType.Run
 
-    val v: ConcreteInterpreter.Value = try
-      concreteInterpreter.invokeExternal(method, true)
-    catch
-      case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
-      case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(e.getMessage)
-    // alternative invocation
-    // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
-    assert(v.asInt32(using concreteInterpreter.failure) === getExpectedValue(mType))
+      // TODO: clean this up since System.exit is bypassed
+      val allowField = (ClassType("java/lang/System"), "allowSecurityManager")
+      val allowAddr = (Site.StaticInitialization(allowField._1, allowField._2), 1)
+      val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map(
+        // removed due to the entry then still missing from staticAddrMap, would need to be set separately
+        allowAddr -> ConcreteInterpreter.Value.Int32(1)
+      ))
+      concreteInterpreter.staticAddrMap += (allowField -> allowAddr)
+      // args for invocation of main
+      concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("String")), 0)))
+      if mType == TestedMethodType.Run then
+        // push System.out (null as a replacement)
+        concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(NullValue()))
 
-  def runTestFiles(paths: Seq[Path]): Unit =
-    paths.foreach: path =>
-      test(path.subpath(path.getNameCount - 4, path.getNameCount).toString.dropRight(6)):
+      val v: ConcreteInterpreter.Value = try
+        concreteInterpreter.invokeExternal(method, true)
+      catch
+        case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
+        case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(e.getMessage)
+      // alternative invocation
+      // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
+      assert(v.asInt32(using concreteInterpreter.failure) === mType.getExpectedValue)
+    succeed
+
+  def runTestCases(testCases: Seq[Path]): Unit =
+    testCases.foreach: path =>
+      test(path.subpath(path.getNameCount - 3, path.getNameCount).toString):
         // TODO: fix cancelAfter
         cancelAfter(Span(1, Minutes)):
-          testClassFile(path)
-
-def getExpectedValue(mType: TestedMethodType): Int = mType match
-  case TestedMethodType.Main => 95
-  case TestedMethodType.Run => 0
+          assertCase(path)
