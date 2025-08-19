@@ -16,14 +16,18 @@ case class MemoryAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
 case class GlobalAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
+case class ElemAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
 
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}
 given Finite[GlobalAddr] with {}
+given Finite[ElemAddr] with {}
 given Finite[FunctionInstance] with {}
 given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
+given Structural[ElemAddr] with {}
 given Structural[FunctionInstance] with {}
 given Ordering[MemoryAddr] = Ordering.by[MemoryAddr,Int](_.addr)
 
@@ -61,11 +65,10 @@ class ModuleInstance(val id: Option[Any] = None):
         registerBlockSizes(BlockId(funcId), loc, func.body)
       case _: FunctionInstance.Host => // nothing
 
+  var globalTypes: Vector[GlobalType] = Vector.empty
+  var globalAddrs: Vector[GlobalAddr] = Vector.empty
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
-  var globalAddrs: Vector[GlobalAddr] = Vector.empty
-  var globalTypes: Vector[GlobalType] = Vector.empty
-  var elements: Vector[ElemInstance] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
@@ -113,7 +116,7 @@ given Structural[DataInstance] with {}
 enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
-  case Null()
+  case Null
 
   def funcIdx: FuncIdx = this match
     case Wasm(_, funcIx, _, _) => funcIx
@@ -122,12 +125,12 @@ enum FunctionInstance:
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
     case Host(_, _, hf) => hf.funcType
-    case Null() => FuncType(Vector.empty, Vector.empty)
+    case Null => FuncType(Vector.empty, Vector.empty)
 
   def module: ModuleInstance = this match
     case Wasm(mod, _, _, _) => mod
     case Host(mod, _, _) => mod
-    case Null() => ModuleInstance()
+    case Null => ModuleInstance()
 
   override def toString: String =
     this match
@@ -155,11 +158,10 @@ given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
     val tabSound = summon[Soundness[Vector[TableAddr], Vector[TableAddr]]].isSound(c.tableAddrs, a.tableAddrs)
     val memSound = summon[Soundness[Vector[MemoryAddr], Vector[MemoryAddr]]].isSound(c.memoryAddrs, a.memoryAddrs)
     val globSound = summon[Soundness[Vector[GlobalAddr], Vector[GlobalAddr]]].isSound(c.globalAddrs, a.globalAddrs)
-    val elemSound = seqIsSound(using elemInstanceIsSound(using functionInstanceIsSoundFlat)).isSound(c.elements, a.elements)
-    val datSound = summon[Soundness[Vector[DataInstance], Vector[DataInstance]]].isSound(c.data, a.data)
+    val dataSound = summon[Soundness[Vector[DataInstance], Vector[DataInstance]]].isSound(c.data, a.data)
     val expSound = summon[Soundness[Vector[(String,ExternalValue)], Vector[(String,ExternalValue)]]].isSound(c.exports, a.exports)
 
-    ftSound && fSound && tabSound && memSound && globSound && elemSound && datSound && expSound
+    ftSound && fSound && tabSound && memSound && globSound && dataSound && expSound
     //ftSound && fSound && tabSound && memSound && globSound && datSound && expSound
 
 given functionInstanceIsSound: Soundness[FunctionInstance, FunctionInstance] with
@@ -185,7 +187,7 @@ given functionInstancePO: PartialOrder[FunctionInstance] with
       cFunc == aFunc && cFt == aFt
     case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) =>
       chf == ahf
-    case (FunctionInstance.Null(), FunctionInstance.Null()) =>
+    case (FunctionInstance.Null, FunctionInstance.Null) =>
       true
     case _ =>
       false

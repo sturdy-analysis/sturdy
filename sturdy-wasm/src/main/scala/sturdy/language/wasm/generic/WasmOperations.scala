@@ -63,7 +63,6 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
   def refVToFunV(r: RefV): FunV
 
   def makeNullRefV(t: ReferenceType): RefV
-  def funVToRefV(i: FunV): RefV
 
   /**
    * Check if a reference is null.
@@ -72,8 +71,7 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
    */
   def isNullRef(r: V): V
 
-  def funcInstToFunV(f: FunctionInstance): FunV
-  def funVToFuncInst(f: FunV): FunctionInstance
+  def funcInstToRefV(f: FunctionInstance): RefV
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
 

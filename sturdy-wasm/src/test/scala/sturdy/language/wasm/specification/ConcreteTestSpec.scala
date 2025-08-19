@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
-import sturdy.language.wasm.ConcreteInterpreter.Value
+import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value, constExprToVals, eqVals}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
@@ -70,36 +70,6 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   }
 
   type Result = CFallible[List[Value]]
-
-  def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
-    vs1.size == vs2.size && vs1.zip(vs2).forall {
-      case (Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
-      case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
-      case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
-      case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) =>
-        val bb1 = ByteBuffer.wrap(b1)
-        val bb2 = ByteBuffer.wrap(b2)
-
-        val eqF32 = (0 until 16 by 4).forall { i =>
-          val x = java.lang.Float.intBitsToFloat(bb1.getInt(i))
-          val y = java.lang.Float.intBitsToFloat(bb2.getInt(i))
-          if (x.isNaN && y.isNaN) true else bb1.getInt(i) == bb2.getInt(i)
-        }
-
-        val eqF64 = (0 until 16 by 8).forall { i =>
-          val x = java.lang.Double.longBitsToDouble(bb1.getLong(i))
-          val y = java.lang.Double.longBitsToDouble(bb2.getLong(i))
-          if (x.isNaN && y.isNaN) true else bb1.getLong(i) == bb2.getLong(i)
-        }
-
-        eqF32 || eqF64
-      case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
-      case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
-      case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
-      case (Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
-      case _ => false
-    }
 
   def run(commands: Seq[Command]): Unit =
     commands.foreach(c => {println(c); eval(c)})
@@ -197,31 +167,6 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
     val h = resClean.head
     assert(isNaN(h), clue)
 
-
-def constExprToVals(e: unresolved.Expr): List[Value] =
-  e.map(constExprToVal).toList
-
-def constExprToVal(inst: unresolved.Inst): Value =
-  inst match
-    case unresolved.i32.Const(i) => Value.Num(ConcreteInterpreter.NumValue.Int32(i))
-    case unresolved.i64.Const(l) => Value.Num(ConcreteInterpreter.NumValue.Int64(l))
-    case unresolved.f32.Const(f) => Value.Num(ConcreteInterpreter.NumValue.Float32(f))
-    case unresolved.f64.Const(d) => Value.Num(ConcreteInterpreter.NumValue.Float64(d))
-    case unresolved.v128.Const(v, _) => Value.Vec(ConcreteInterpreter.VecValue.Vec128(v))
-    case unresolved.RefNull(t) => t match {
-      case FuncRef => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-      case ExternRef => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
-    }
-    case unresolved.RefFunc(x) => x match {
-      case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
-      case _ => Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-    }
-    case unresolved.RefExtern(x) => x match {
-      case Left(r) => Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
-      case _ => Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
-    }
-
-    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 def isNaN(value: Value): Boolean =
   value match

@@ -36,6 +36,7 @@ trait RelationalAddresses extends RelationalTypes:
         case Dynamic(storeInstruction) => s"$storeInstruction"
         case Static(offset) => s"$offset"
         case Alloc(FixIn.Eval(_,allocSite), offset) => s"Alloc@${allocSite}+${offset}"
+        case Alloc(in, offset) => s"Alloc@${in}+${offset}"
 
 
   final type VirtAddr = VirtualAddress[AddrCtx]

@@ -11,7 +11,7 @@ import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableD
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -52,8 +52,6 @@ import scala.math
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalMemory, RelationalConvert, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
   final type Index = NumericInterval[Int]
-  final type FunV = Powerset[FunctionInstance]
-  final type RefV = Powerset[RefValue]
 
   import Value.*
   import NumValue.*
@@ -63,8 +61,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = constant(ApronExpr.topInterval, I32Type)
 
-  override def topExternRef: ExternReference = ???
-  override def topFuncRef: FuncReference = ???
   override def topV128: V128 = ???
 
   given RelationalSpecialWasmOperations
@@ -137,13 +133,26 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def makeNullRefV(t: ReferenceType): RefV = Powerset(RefValue.ExternNull)
-    override def isNullRef(r: Value): Value = ???
-    override def funcInstToFunV(f: FunctionInstance): FunV = ???
-    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
-    override def funVToRefV(i: FunV): RefV = ???
+    override def makeNullRefV(t: ReferenceType): RefV = Powerset(ExternReference.Null)
+    override def isNullRef(r: Value): Value =
+      r match
+        case Value.Ref(RefValue.RefValue(f)) =>
+          if(f.set.contains(ExternReference.Null))
+            if(f.size == 1)
+              makeBool(ApronBool.Constant(Topped.Actual(true)))
+            else
+              makeBool(ApronBool.Constant(Topped.Top))
+          else
+            makeBool(ApronBool.Constant(Topped.Actual(false)))
+
+    override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
     override def refVToFunV(r: RefV): FunV = ???
-    override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV = ???
+    override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV =
+      v match
+        case Value.Ref(RefValue.RefValue(f)) => f
+        case Value.TopValue => Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
+        case _ => f.fail(TypeError, s"Expected reference, but got $v")
+
     override def refToVal(r: RefV): Value = ???
     override def liftBytes(b: Seq[Byte]): Bytes =
       Bytes.StoredBytes(
@@ -208,6 +217,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def jvFunV: WithJoin[FunV] = implicitly
     override def jvBytes: WithJoin[Bytes] = implicitly
     override def jvRefV: WithJoin[RefV] = implicitly
+    override def jvElem: WithJoin[Elem] = implicitly
     //    override def widenState: Widen[State] = implicitly
 
     val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
@@ -227,6 +237,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(Int64(expr)) => Some(expr)
           case Num(Float32(expr)) => Some(expr)
           case Num(Float64(expr)) => Some(expr)
+          case Value.Vec(_) => None
+          case Value.Ref(_) => None
           case Value.TopValue => None
 
       override def makeRelationalExpr(expr: ApronExpr[VirtAddr, Type]): Value =
@@ -259,16 +271,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Int64(n) => valueIterator(n)
         case Float32(n) => valueIterator(n)
         case Float64(n) => valueIterator(n)
-        case virts: PowVirtAddr => virts.iterator
+        case virts: PowVirtAddr @unchecked => virts.iterator
         case expr: ApronExpr[VirtAddr,Type] @unchecked => expr.addrs.iterator
         case cons: ApronCons[VirtAddr,Type] @unchecked => cons.addrs.iterator
         case bool: ApronBool[VirtAddr,Type] @unchecked => bool.addrs.iterator
-        case excV: ExcV =>
+        case excV: ExcV @unchecked =>
           for(listVals <- excV.values.iterator;
               value <- listVals.iterator;
               addr <- valueIterator(value))
             yield(addr)
-        case physAddr: PhysAddr => Iterator.empty
+        case physAddr: PhysAddr @unchecked => Iterator.empty
         case _ =>
           throw IllegalArgumentException("Unknown Value "+value)
 
@@ -304,8 +316,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           AddrCtx.Global(sym.addr)
     ))
 
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = ???
     val tables: IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]
-
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
@@ -342,18 +354,17 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             apronState.getFloatInterval(expr).meet(
               sturdy.apron.FloatInterval(Double.MinValue, Double.MaxValue, FloatSpecials.Top)
             ), expr._type)))
-        case Value.TopValue => Value.TopValue
+        case Value.Vec(_) | Value.Ref(_) | Value.TopValue => v
 
     def constantInstructions: ConstantInstructionsLogger =
       val constants = new ConstantInstructionsLogger
       this.fixpoint.addContextFreeLogger(constants)
       constants
 
-    extension(expr: ApronExpr[VirtAddr,Type])
-      def isConstant: Boolean =
-        val iv = apronState.getInterval(expr)
-        iv.inf().isEqual(iv.sup())
-
+//    extension(expr: ApronExpr[VirtAddr,Type])
+//      def isConstant: Boolean =
+//        val iv = apronState.getInterval(expr)
+//        iv.inf().isEqual(iv.sup())
 
     class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
       val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
@@ -390,21 +401,23 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
 
     class ConstantInstructionsLogger extends InstructionResultLogger[Interval, Value](stack):
-      override def boolValue(v: Value): Value = boolean(asBoolean(v))
+      override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
       override def dummyValue: Value = Num(Int32(NumExpr(ApronExpr.constant(Interval(0, 0), I32Type))))
       
       def getInfo(value: Value): Interval = value match
-        case Value.TopValue => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
-        case Num(Int32(NumExpr(v))) => apronState.getInterval(v)
-        case Num(Int32(BoolExpr(v))) =>
-          apronState.getBoolean(v) match
-            case Topped.Actual(true)  => Interval(1,1)
-            case Topped.Actual(false) => Interval(0,0)
-            case Topped.Top           => Interval(0,1)
+        case Num(Int32(v32)) => v32 match
+          case NumExpr(v) => apronState.getInterval(v)
+          case BoolExpr(v) =>
+            apronState.getBoolean(v) match
+              case Topped.Actual(true)  => Interval(1,1)
+              case Topped.Actual(false) => Interval(0,0)
+              case Topped.Top           => Interval(0,1)
+          case AllocationSites(_, _) => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
         case Num(Int64(v)) => apronState.getInterval(v)
         case Num(Float32(v)) => apronState.getInterval(v)
         case Num(Float64(v)) => apronState.getInterval(v)
+        case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
 
 
       def get: Map[InstLoc, List[Interval]] = instructionInfo.filter(_._2.forall (

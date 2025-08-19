@@ -28,28 +28,24 @@ import swam.syntax.StoreNInst
 
 import scala.collection.MapView
 
-trait TypeValues extends Interpreter:
+trait TypeValues extends Interpreter with PowersetReference:
   final type I32 = BaseType[Int]
   final type I64 = BaseType[Long]
   final type F32 = BaseType[Float]
   final type F64 = BaseType[Double]
   final type V128 = BaseType[Array[Byte]]
   final type Bool = BaseType[Boolean]
-  final type FuncReference = BaseType[Int]
-  final type ExternReference = BaseType[Int]
 
   final def topI32: I32 = BaseType[Int]
   final def topI64: I64 = BaseType[Long]
   final def topF32: F32 = BaseType[Float]
   final def topF64: F64 = BaseType[Double]
   final def topV128: V128 = BaseType[Array[Byte]]
-  final def topFuncRef: FuncReference = BaseType[Int]
-  final def topExternRef: ExternReference = BaseType[Int]
 
   final def asBoolean(v: Value)(using Failure): Bool =
     val _ = v.asInt32
     BaseType[Boolean]
-  final def boolean(b: Bool): Value =
+  final def booleanToVal(b: Bool): Value =
     Value.Num(NumValue.Int32(topI32))
 
   def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match

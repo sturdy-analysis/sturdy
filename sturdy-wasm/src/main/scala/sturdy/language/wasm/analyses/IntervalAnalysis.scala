@@ -11,7 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -29,7 +29,6 @@ import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.values.{*, given}
-
 import swam.{FuncType, ReferenceType}
 import swam.syntax.*
 import swam.traversal.Traverser
@@ -45,8 +44,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
   type Bytes = Seq[NumericInterval[Byte]]
   type Size = Topped[Int]
   type Index = I32
-  type FunV = Powerset[FunctionInstance]
-  type RefV = Powerset[RefValue]
 
   given ConstantSpecialWasmOperations(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
@@ -54,15 +51,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
     // TODO: implement this for the IntervalAnalysis
-    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
-    override def refToVal(r: Powerset[IntervalAnalysis.RefValue]): IntervalAnalysis.Value = ???
+    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = ???
+    override def refToVal(r: RefV): IntervalAnalysis.Value = ???
     override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
-    override def makeNullRefV(t: ReferenceType): Powerset[IntervalAnalysis.RefValue] = ???
-    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[IntervalAnalysis.RefValue] = ???
-    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
-    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
+    override def makeNullRefV(t: ReferenceType): RefV = ???
+    override def refVToFunV(r: RefV): FunV = ???
     override def isNullRef(r: Value): IntervalAnalysis.Value = ???
+
+    override def funcInstToRefV(f: FunctionInstance): RefV = ???
 
     override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
       intOps.add(addr, intOps.integerLit(offset))
@@ -111,12 +107,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
     override def jvRefV: WithJoin[RefV] = implicitly
+    override def jvElem: WithJoin[Elem] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = ???
     val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](rangeLimit, (v: Value) => v.asInt32)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

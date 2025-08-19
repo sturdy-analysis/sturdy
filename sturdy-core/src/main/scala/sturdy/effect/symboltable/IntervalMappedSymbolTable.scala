@@ -301,7 +301,6 @@ class IntervalMappedSymbolTable[Value, Key, Entry](using Finite[Key], Join[Entry
         }
       }
       IsSound.Sound
-
 }
 
 object IntervalMappedSymbolTable:

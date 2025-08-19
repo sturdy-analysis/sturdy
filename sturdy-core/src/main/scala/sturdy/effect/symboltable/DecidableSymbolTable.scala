@@ -105,7 +105,9 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
     IsSound.Sound
 
 
-class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], Concrete
+class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], SymbolTableWithDrop[Key, Symbol, Entry, NoJoin], Concrete:
+  override def drop(key: Key, symbol: Symbol): Unit =
+    tables += key -> (tables(key) - symbol)
 
 class ConcreteSizedTable[Value, Key, Entry](val extractor: Value => Int) extends SizedDecidableSymbolTable[Value, Key, Entry], Concrete {
   private def inBounds(offset: Int, amount: Int, table: Key): Boolean = offset >= 0 && offset + amount <= this.size(table)

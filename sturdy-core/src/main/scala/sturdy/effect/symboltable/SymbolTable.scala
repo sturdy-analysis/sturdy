@@ -19,7 +19,6 @@ import sturdy.values.{Join, MaybeChanged}
 trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
   def get(key: Key, symbol: Symbol): JOption[J, Entry]
   def set(key: Key, symbol: Symbol, newEntry: Entry): JOption[J, Unit]
-
   def putNew(key: Key): Unit
 
   final def getOrElse(key: Key, symbol: Symbol, default: => Entry)(using J[Entry]): Entry =
@@ -55,7 +54,8 @@ trait SizedSymbolTable[Value, Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] exte
   def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[J, Unit]
   def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[J, Unit]
 
-  
+trait SymbolTableWithDrop[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
+  def drop(key: Key, symbol: Symbol): Unit
   
 object SizedSymbolTable:  
   case class Limit[Size](min: Size, max: Option[Size]) {}

@@ -7,17 +7,14 @@ import sturdy.effect.operandstack.OperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.values.Finite
-import sturdy.values.Topped
+import sturdy.values.{Finite, Powerset, Structural, Topped, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
 import sturdy.values.integer.given
-import sturdy.values.given
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
-import sturdy.values.Powerset
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
 
@@ -32,16 +29,19 @@ trait ConstantTaintValues extends Interpreter:
   final type F64 = TaintProduct[Topped[Double]]
   final type V128 = TaintProduct[Topped[Array[Byte]]]
   final type Bool = TaintProduct[Topped[Boolean]]
-  final type FuncReference = TaintProduct[Topped[Int]]
-  final type ExternReference = TaintProduct[Topped[Int]]
+
+  enum ExternReference:
+    case ExternValue
+    case Null
+  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]]
+  final type RefV = Reference
+  final type FunV = Powerset[FunctionInstance]
 
   final def topI32: I32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topI64: I64 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF32: F32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF64: F64 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topV128: V128 = TaintProduct(Taint.TopTaint, Topped.Top)
-  final def topFuncRef: FuncReference = TaintProduct(Taint.TopTaint, Topped.Top)
-  final def topExternRef: ExternReference = TaintProduct(Taint.TopTaint, Topped.Top)
 
   def getTaint(v: Value): Taint = v match
     case Value.TopValue => Taint.TopTaint
@@ -49,12 +49,14 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Num(NumValue.Int64(tp)) => tp.taint
     case Value.Num(NumValue.Float32(tp)) => tp.taint
     case Value.Num(NumValue.Float64(tp)) => tp.taint
+    case Value.Ref(RefValue.RefValue(tp)) => tp.taint
+    case Value.Vec(VecValue.Vec128(tp)) => tp.taint
 
   final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.map {
     case Topped.Top => Topped.Top
     case Topped.Actual(i) => Topped.Actual(i != 0)
   }
-  final def boolean(b: Bool): Value = Value.Num(NumValue.Int32(b.map {
+  final def booleanToVal(b: Bool): Value = Value.Num(NumValue.Int32(b.map {
     case Topped.Top => Topped.Top
     case Topped.Actual(true) => Topped.Actual(1)
     case Topped.Actual(false) => Topped.Actual(0)
@@ -89,16 +91,18 @@ trait ConstantTaintValues extends Interpreter:
     constants
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, NoJoin])(using Failure) extends InstructionResultLogger[Value, Value](stack):
-    override def boolValue(v: Value): Value = boolean(asBoolean(v))
+    override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
     override def dummyValue: Value = Value.Num(NumValue.Int32((TaintProduct(Taint.Untainted, Topped.Actual(0)))))
     override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
       case Value.TopValue => false
-      case Value.Num(NumValue.Int32(TaintProduct(_, Topped.Top))) => false
-      case Value.Num(NumValue.Int64(TaintProduct(_, Topped.Top))) => false
-      case Value.Num(NumValue.Float32(TaintProduct(_, Topped.Top))) => false
-      case Value.Num(NumValue.Float64(TaintProduct(_, Topped.Top))) => false
+      case Value.Num(NumValue.Int32(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Int64(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Float32(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Float64(TaintProduct(_, v))) => v.isActual
+      case Value.Ref(RefValue.RefValue(TaintProduct(_, v))) => v.size == 1
+      case Value.Vec(VecValue.Vec128(TaintProduct(_, v))) => v.isActual
       case _ => true
     })
 

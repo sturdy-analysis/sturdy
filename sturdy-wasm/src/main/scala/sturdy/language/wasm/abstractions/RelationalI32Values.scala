@@ -45,7 +45,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       i32.asNumExpr
 
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
-  final override def boolean(b: Bool): Value = Num(Int32(BoolExpr(b)))
+  final override def booleanToVal(b: Bool): Value = Num(Int32(BoolExpr(b)))
 
   var nullAddrVirt: VirtAddr = null
   private def nullAddr(using apronState: ApronState[VirtAddr,Type]): VirtAddr =
@@ -100,7 +100,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       (v1, v2) match
         case (AllocationSites(sites, _), NumExpr(expr)) =>
           if(apronState.getInterval(expr).isZero)
-            ApronBool.Constant(containsNull(sites))
+            ApronBool.Constant(Topped.Actual(containsNull(sites)))
           else
             equ(NumExpr(v1.asNumExpr), v2)
         case (_: NumExpr, _: AllocationSites) =>

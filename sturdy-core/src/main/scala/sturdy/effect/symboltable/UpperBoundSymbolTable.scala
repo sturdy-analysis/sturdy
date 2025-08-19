@@ -18,7 +18,7 @@ class SizedUpperBoundSymbolTable[Value, Key, Symbol, Entry](emptyEntry: Entry)(u
   override def grow(key: Key, newSize: BaseType[Int], initEntry: Entry): JOption[WithJoin, BaseType[Int]] = ???
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[BaseType[Int]]): Unit = ???
-
+  
   override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
 
   override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
@@ -40,7 +40,6 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
     JOptionA.some(())
   }
-
 
   override def putNew(key: Key): Unit =
     tables += key -> emptyEntry

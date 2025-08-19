@@ -113,7 +113,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def getBoolean(v: ApronBool[Addr, Type]): Topped[Boolean] =
     v match
       case ApronBool.Constraint(cons) => getBoolean(cons)
-      case ApronBool.Constant(b) => Topped.Actual(b)
+      case ApronBool.Constant(b) => b
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
 
@@ -221,11 +221,10 @@ final class ApronRecencyState
   override def addCondition(condition: ApronBool[VirtualAddress[Ctx], Type]): Unit =
     condition match
       case ApronBool.Constraint(constraint) => addConstraints(constraint)
-      case ApronBool.Constant(b) =>
-        if(b == false) {
+      case ApronBool.Constant(Topped.Actual(false)) =>
           relationalStore.setBottom
           relationalStore.addConstraints()
-        }
+      case ApronBool.Constant(Topped.Actual(true)) | ApronBool.Constant(Topped.Top) => {}
       case ApronBool.And(e1, e2) => addCondition(e1); addCondition(e2)
       case ApronBool.Or(e1, e2) =>
         effectStack.joinComputations {

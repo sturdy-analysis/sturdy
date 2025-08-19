@@ -17,28 +17,24 @@ import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import scala.collection.MapView
 
-trait IntervalValues extends Interpreter:
+trait IntervalValues extends Interpreter with PowersetReference:
   final type I32 = NumericInterval[Int]
   final type I64 = NumericInterval[Long]
   final type F32 = Topped[Float]
   final type F64 = Topped[Double]
   final type V128 = Topped[Array[Byte]]
   final type Bool = Topped[Boolean]
-  final type FuncReference = Topped[FunctionInstance]
-  final type ExternReference = Topped[FunctionInstance]
 
   final def topI32: I32 = NumericInterval(Integer.MIN_VALUE, Integer.MAX_VALUE)
   final def topI64: I64 = NumericInterval(Long.MinValue, Long.MaxValue)
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
   final def topV128: V128 = Topped.Top
-  final def topFuncRef: FuncReference = Topped.Top
-  final def topExternRef: ExternReference = Topped.Top
 
   final def asBoolean(v: Value)(using Failure): Bool =
     v.asInt32.toBoolean
 
-  final def boolean(b: Bool): Value = b match
+  final def booleanToVal(b: Bool): Value = b match
     case Topped.Top => Value.Num(NumValue.Int32(NumericInterval(0, 1)))
     case Topped.Actual(true) => Value.Num(NumValue.Int32(NumericInterval(1, 1)))
     case Topped.Actual(false) => Value.Num(NumValue.Int32(NumericInterval(0, 0)))
@@ -49,7 +45,7 @@ trait IntervalValues extends Interpreter:
     constants
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, MayJoin.NoJoin])(using Failure) extends InstructionResultLogger[Value,Value](stack):
-    override def boolValue(v: Value): Value = boolean(asBoolean(v))
+    override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
     override def dummyValue: Value = Value.Num(NumValue.Int32(NumericInterval(0, 0)))
     override def getInfo(v: Value): Value = v
 
@@ -59,6 +55,8 @@ trait IntervalValues extends Interpreter:
       case Value.Num(NumValue.Int64(v)) => v.isConstant
       case Value.Num(NumValue.Float32(v)) => v.isActual
       case Value.Num(NumValue.Float64(v)) => v.isActual
+      case Value.Ref(RefValue.RefValue(v)) => v.size == 1
+      case Value.Vec(VecValue.Vec128(v)) => v.isActual
     })
 
     def grouped: Map[String, Map[InstLoc, List[Value]]] =

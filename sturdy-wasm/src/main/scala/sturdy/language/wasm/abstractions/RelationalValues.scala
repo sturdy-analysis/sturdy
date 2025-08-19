@@ -4,16 +4,16 @@ import sturdy.apron.{*, given}
 import sturdy.apron.ApronExpr.*
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.effect.failure.{*, given}
-import sturdy.values.{Abstractly, Topped}
+import sturdy.language.wasm.generic.FunctionInstance
+import sturdy.values.{Abstractly, Powerset, Topped}
 import sturdy.values.floating.{FloatSpecials, FloatingLit}
 import sturdy.util.{*, given}
 
-trait RelationalValues extends RelationalI32Values:
+trait RelationalValues extends RelationalI32Values with PowersetReference:
   override final type I64 = ApronExpr[VirtAddr, Type]
   override final type F32 = ApronExpr[VirtAddr, Type]
   override final type F64 = ApronExpr[VirtAddr, Type]
   override final type V128 = Topped[Array[Byte]]
-
 
   import Type.*
   import Value.*
@@ -25,13 +25,10 @@ trait RelationalValues extends RelationalI32Values:
   final override def topF64: F64 = ApronExpr.floatConstant(ApronExpr.topInterval, FloatSpecials.Top, F64Type)
 
   final override def asBoolean(v: Value)(using failure: Failure): Bool =
-    v match
-      case Num(Int32(NumExpr(i))) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, lit(0, i._type)))
-      case Num(Int32(BoolExpr(cons))) => cons
-      case Num(Int64(l)) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](l, lit(0, l._type)))
-      case Num(Float32(f)) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](f, lit(0, f._type)))
-      case Num(Float64(d)) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](d, lit(0, d._type)))
-      case TopValue => ApronBool.Constraint(ApronCons.top(I32Type))
+    v.asInt32 match
+      case NumExpr(i) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, lit(0, i._type)))
+      case BoolExpr(cons) => cons
+      case AllocationSites(_,_) => ApronBool.Constant(Topped.Top)
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
@@ -40,3 +37,6 @@ trait RelationalValues extends RelationalI32Values:
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Num(Int64(lit(l, I64Type)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Num(Float32(FloatingLit(f, F32Type)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Num(Float64(FloatingLit(d, F64Type)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(func : FunctionInstance)) => Ref(RefValue.RefValue(Powerset(func)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(0 : Int)) => Ref(RefValue.RefValue(Powerset(ExternReference.Null)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(extern: Int)) => Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))

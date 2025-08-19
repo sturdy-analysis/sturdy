@@ -9,9 +9,8 @@ import sturdy.{IsSound, Soundness, fix}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.effect.symboltable.{DecidableSymbolTable, SizedSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.{DecidableSymbolTable, JoinableDecidableSymbolTable, SizedSymbolTable, SymbolTable, SymbolTableWithDrop}
 import sturdy.effect.{EffectList, EffectStack}
-import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.values.{*, given}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
@@ -146,6 +145,8 @@ given finiteFixIn: Finite[FixIn] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
 
+  type Elem = Seq[V]
+
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
@@ -153,11 +154,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   // joins
   implicit def jvUnit: J[Unit]
   implicit def jvBytes: J[Bytes]
-
   implicit def jvV: J[V]
   implicit def jvRefV: J[RefV]
-
   implicit def jvFunV: J[FunV]
+  implicit def jvElem: J[Elem]
 
   // value components
   val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J]
@@ -169,6 +169,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   val stack: OperandStack[V, MayJoin.NoJoin]
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
+  val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J]
   val tables: SizedSymbolTable[V, TableAddr, Index, RefV, Size, J]
   val callFrame: MutableCallFrame[FrameData, Int, V, InstLoc, MayJoin.NoJoin]
   val except: Except[WasmException[V], ExcV, J]
@@ -178,12 +179,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   // effect stack
   def newEffectStack: EffectStack =
-    new EffectStack(EffectList(stack, memory, globals, tables, callFrame, except, failure), {
-      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, memory, globals, callFrame)
-      case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame)
+    new EffectStack(EffectList(stack, memory, globals, elems, tables, callFrame, except, failure), {
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(elems, tables, memory, globals, callFrame)
+      case _: FixIn.Eval => EffectList(elems, tables, stack, memory, globals, callFrame)
     }, {
-      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(tables, stack, memory, globals, failure)
-      case _: FixIn.Eval => EffectList(tables, stack, memory, globals, callFrame, except)
+      case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(elems, tables, stack, memory, globals, failure)
+      case _: FixIn.Eval => EffectList(elems, tables, stack, memory, globals, callFrame, except)
     })
 
   val effectStack: EffectStack = newEffectStack
@@ -270,39 +271,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        // assert unsigned s + n <= tabYSize && d + n <= tabXSize
-        val tabYSize = tables.size(toTableAddr(y))
-        val tabXSize = tables.size(toTableAddr(x))
-        val yTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), sizeToVal(tabYSize))
-        val xTableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tabXSize))
-        val check = num.evalIBinop(i32.Or, yTableCheck, xTableCheck)
-        branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.copy access")) {
-          tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
-        }
-      case TableInit(el, ix) =>
-        val elem = module.elements.lift(el).getOrElse(fail(ElementSegmentOutOfBounds, el.toString))
+        tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
+      case TableInit(elementIndex, tableIndex) =>
+        val elem = elems.get((), ElemAddr(elementIndex)).getOrElse(fail(TableAccessOutOfBounds, s"Element at index $elementIndex could not be found"))
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        // assert unsigned s + n <= elemSize && d + n <= tableSize
-        val tableSize = tables.size(toTableAddr(ix))
-        val tableCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), sizeToVal(tableSize))
-        val elemCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), i32ops.integerLit(elem.functions.size))
-        val check = num.evalIBinop(i32.Or, tableCheck, elemCheck)
-        branchOpsUnit.boolBranch(check) (fail(TableAccessOutOfBounds, "Invalid table.init access")) {
-          val elemRefVs = elem.functions.map {
-            case f@FunctionInstance.Wasm(_, _, _, _) => funVToRefV(funcInstToFunV(f))
-            case f@FunctionInstance.Host(_, _, _) => funVToRefV(funcInstToFunV(f))
-            case FunctionInstance.Null() => elem.referenceType match {
-              case FuncRef => makeNullRefV(FuncRef)
-              case ExternRef => makeNullRefV(ExternRef)
-            }
-          }
-          tables.init(toTableAddr(ix), elemRefVs.toVector, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
-        }
+        val refs = elem.map(funcIx =>
+          tables.getOrElse(module.tableAddrs(tableIndex), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+        ).toVector
+        tables.init(toTableAddr(tableIndex), refs, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
+
       case ElemDrop(el) =>
-        val elem = module.elements.lift(el).getOrElse(fail(TableAccessOutOfBounds, el.toString))
-        module.elements = module.elements.updated(el, ElemInstance(Vector.empty, elem.referenceType, elem.elemMode))
+        elems.drop((), ElemAddr(el))
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
@@ -315,8 +296,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val ref = stack.popOrAbort()
       stack.push(isNullRef(ref))
     case RefFunc(funcIdx) =>
-      val funV = functionOps.funValue(module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString)))
-      stack.push(refToVal(funVToRefV(funV)))
+      val funInst = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
+      stack.push(refToVal(funcInstToRefV(funInst)))
     case RefExtern(_) =>
       fail(UnboundFunctionIndex, "Cannot call extern reference")
   }
@@ -532,8 +513,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
       val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-      val nullRef = isNullRef(refToVal(fRef))
-      branchOpsUnit.boolBranch(nullRef) {
+      branchOpsUnit.boolBranch(isNullRef(refToVal(fRef))) {
         fail(UnboundFunctionIndex, s"Cannot call function with null reference $fRef.")
       } {
         val funV = refVToFunV(fRef)
@@ -821,14 +801,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val (funcImports, globImports, globTypes, tabImports, memImpors) = resolveImports(module, imports, hostModules)
 
     var loc = InstLoc.InInit(modInst, 0)
-    loc = initializeGlobals(module, modInst, globImports, loc)
     initializeGlobalTypes(modInst, globTypes)
     initializeFunctions(module, modInst, funcImports)
     initializeTables(module, modInst, tabImports)
-    initializeMemory(module, modInst, memImpors)
-    loc = initializeData(module, modInst, loc)
     initializeExports(module, modInst)
-    initializeElements(module, modInst, loc)
+    callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
+      loc = initializeGlobals(module, modInst, globImports, loc)
+      initializeElements(module, modInst, loc)
+    }
+    callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
+      initializeMemory(module, modInst, memImpors)
+      loc = initializeData(module, modInst, loc)
+    }
     invokeStartFunction(module, modInst)
     modInst
   }
@@ -842,8 +826,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
 
   private inline def initializeExports(module: Module, modInst: ModuleInstance): Unit = {
-    // we don't need elems currently
-    // exports
     modInst.exports = module.exports.map {
       case Export(fieldName, kind, index) =>
         kind match {
@@ -902,11 +884,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val tabAddr = TableAddr(tabCount)
         tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(i32ops.integerLit(min)), max.map(m => valToSize(i32ops.integerLit(m)))))
         tabCount += 1
-        var i = 0
-        while (i < min) {
-          tables.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
-          i += 1
-        }
         tabAddr
     }
   }
@@ -952,21 +929,21 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   private inline def initializeElements(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc =
     var loc = initLoc
-    var elemInstances: Vector[ElemInstance] = Vector.empty
-    module.elem.foreach {
-      case elem@Elem(_, init, mode) =>
-        // resolve all init functions
-        val id = BlockId(elem)
-        val functions = init.map(expr => {
-          loc = modInst.registerBlockSizes(id, loc, expr)
-          funVToFuncInst(refVToFunV(valToRef(evalInstructionSequence(id, expr, modInst, loc), modInst.functions)))
-        })
-        elemInstances = elemInstances :+ ElemInstance(functions, elem.reftype, mode)
-    }
-    modInst.elements = elemInstances
+    elems.putNew(())
 
-    modInst.elements.zipWithIndex.foreach {
-      case (elem@ElemInstance(_, _, mode), i) =>
+
+    module.elem.zipWithIndex.foreach {
+      case (elem, i) =>
+        val id = BlockId(elem)
+        val elemRefs = elem.init.map(expr => {
+          loc = modInst.registerBlockSizes(id, loc, expr)
+          evalInstructionSequence(id, expr, modInst, loc)
+        })
+        elems.set((), ElemAddr(i), elemRefs)
+    }
+
+    module.elem.zipWithIndex.foreach {
+      case (elem@Elem(_, init, mode),i) =>
         mode match {
           case ElemMode.Passive() => ()
           case ElemMode.Declarative() =>
@@ -980,12 +957,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               val baseIdx = evalInstructionSequence(id, offset, modInst, loc)
               stack.push(baseIdx)
               stack.push(num.evalNumeric(i32.Const(0)))
-              stack.push(num.evalNumeric(i32.Const(elem.functions.length)))
+              stack.push(num.evalNumeric(i32.Const(elem.init.length)))
               evalTableInst(TableInit(i, tableIdx), loc)
               evalTableInst(ElemDrop(i), loc)
             }
         }
     }
+
     loc
 
 

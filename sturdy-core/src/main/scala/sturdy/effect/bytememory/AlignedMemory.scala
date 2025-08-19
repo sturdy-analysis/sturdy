@@ -13,6 +13,7 @@ import sturdy.util.Profiler
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 
 import java.nio.ByteOrder
+import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 
@@ -96,8 +97,7 @@ final class AlignedMemory
       case Topped.Top =>
         JOptionA.NoneSome(ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top))
 
-
-
+  @tailrec
   override def write(key: Key, addr: Addr, bytes: Bytes[Val]): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
@@ -131,24 +131,25 @@ final class AlignedMemory
           )
         }
 
+      case StoredBytes(Nil, byteOrder) =>
+        JOptionA.Some(())
 
-      case bs: ReadBytes[Val] =>
-        throw IllegalArgumentException(s"Can only store StoredBytes, but got $bytes")
+      case bs: ReadBytes[Val] => throw IllegalArgumentException(s"Expected StoredBytes, but got $bytes")
 
   override def copy(key: Key, srcAddr: Addr, dstAddr: Addr, byteAmount: Size): JOptionA[Unit] = ???
   override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Val]): JOptionA[Unit] = ???
   override def init(key: Key, targetAddr: Addr, sourceAddr: Addr, byteAmount: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
     dataBytes match
-      case StoredBytes(valueArray, byteOrder) =>
+      case StoredBytes(valueList, byteOrder) =>
         addressLimits.ifSizeLeLimit(byteAmount, sizeIntOps.integerLit(0)) {
           // if byteAmount is 0, we are done writing.
           JOptionA.Some(())
         } {
           addressLimits.ifAddrLeSize(sourceAddr, sizeIntOps.integerLit(0)) {
-            if(valueArray.isEmpty) {
+            if(valueList.isEmpty) {
               throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
             } else {
-              val atom@(value, byteSize) = valueArray.head
+              val atom@(value, byteSize) = valueList.head
 
               write(key, targetAddr, StoredBytes(List(atom), byteOrder)).flatMap(_ =>
                 init(
@@ -156,26 +157,28 @@ final class AlignedMemory
                   targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr),
                   sourceAddr = sourceAddr,
                   byteAmount = sizeIntOps.sub(byteAmount, sizeIntOps.integerLit(byteSize)),
-                  dataBytes = StoredBytes(valueArray.tail, byteOrder)
+                  dataBytes = StoredBytes(valueList.tail, byteOrder)
                 )
               ).asInstanceOf[JOptionA[Unit]]
             }
           }.orElseAndThen[JOptionA[Unit]] {
             // if sourceAddr > 0
-            if (valueArray.isEmpty) {
+            if (valueList.isEmpty) {
               throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
             } else {
-              val atom@(_, byteSize) = valueArray.head
+              val atom@(_, byteSize) = valueList.head
               init(
                 key = key,
                 targetAddr = targetAddr,
                 sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr),
                 byteAmount = byteAmount,
-                dataBytes = StoredBytes(valueArray.tail, byteOrder)
+                dataBytes = StoredBytes(valueList.tail, byteOrder)
               ).asInstanceOf[JOptionA[Unit]]
             }
           } { opt => opt }
         }
+
+      case bs: ReadBytes[Val] => throw IllegalArgumentException(s"Expected StoredBytes, but got $bs")
 
   override def size(key: Key): Size =
     memories(key).numPages

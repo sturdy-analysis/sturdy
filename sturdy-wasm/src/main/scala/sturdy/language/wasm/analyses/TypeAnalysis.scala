@@ -7,7 +7,7 @@ import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, UpperBoundSymbolTable}
+import sturdy.effect.symboltable.{JoinableDecidableSymbolTable, SizedSymbolTable, SizedUpperBoundSymbolTable, SymbolTableWithDrop, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -42,8 +42,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
   type Index = I32
-  type FunV = Powerset[FunctionInstance]
-  type RefV = Powerset[RefValue]
 
   given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
     override def valToAddr(v: Value): Addr = v.asInt32
@@ -52,14 +50,12 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
 
     // TODO: implement this for the TypeAnalysis
-    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
-    override def refToVal(r: Powerset[TypeAnalysis.RefValue]): TypeAnalysis.Value = ???
+    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = ???
+    override def refToVal(r: RefV): TypeAnalysis.Value = ???
     override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = ???
-    override def makeNullRefV(t: ReferenceType): Powerset[TypeAnalysis.RefValue] = ???
-    override def funVToRefV(i: Powerset[FunctionInstance]): Powerset[TypeAnalysis.RefValue] = ???
-    override def refVToFunV(r: Powerset[RefValue]): Powerset[FunctionInstance] = ???
-    override def funcInstToFunV(f: FunctionInstance): Powerset[FunctionInstance] = ???
-    override def funVToFuncInst(f: Powerset[FunctionInstance]): FunctionInstance = ???
+    override def makeNullRefV(t: ReferenceType):RefV = ???
+    override def refVToFunV(r: RefV): FunV = ???
+    override def funcInstToRefV(f: FunctionInstance): RefV = ???
     override def isNullRef(r: Value): TypeAnalysis.Value = ???
 
     override def addOffsetToAddr(offset: Int, addr: Addr): Addr = BaseType[Int]
@@ -100,10 +96,12 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
     override def jvRefV: WithJoin[RefV] = implicitly
+    override def jvElem: WithJoin[Elem] = implicitly
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
+    val elems: SymbolTableWithDrop[Unit, ElemAddr,Elem, J] = ???
     val tables: SizedUpperBoundSymbolTable[Value, TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

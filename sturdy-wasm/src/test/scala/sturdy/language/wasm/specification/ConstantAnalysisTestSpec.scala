@@ -24,8 +24,7 @@ import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis
-import ConcreteInterpreter.eqVals
-
+import ConcreteInterpreter.{VecValue, constExprToVal, constExprToVals, eqVals, topI32}
 import swam.ModuleLoader
 import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.binary.ModuleParser
@@ -287,30 +286,6 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
     val h = resClean.head
     assert(isNaN(h), clue)
 
-
-  def constExprToVals(e: unresolved.Expr): List[ConcreteInterpreter.Value] =
-    e.map(constExprToVal).toList
-
-  def constExprToVal(inst: unresolved.Inst): ConcreteInterpreter.Value =
-    inst match
-      case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i))
-      case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l))
-      case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f))
-      case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d))
-      case unresolved.RefNull(t) => t match {
-        case FuncRef => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-        case ExternRef => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
-      }
-      case unresolved.RefFunc(x) => x match {
-        case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
-        case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)
-      }
-      case unresolved.RefExtern(x) => x match {
-        case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
-        case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
-      }
-      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
-
   def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
     e.map(constExprToAVal).toList
 
@@ -320,16 +295,16 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
     e.map(constExprToTop).toList
 
   def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
-    inst match
-      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))
-      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(Topped.Top))
-      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(Topped.Top))
-      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(Topped.Top))
-      case unresolved.RefFunc(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncRef(Topped.Top))
-      case unresolved.RefExtern(_) => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternRef(Topped.Top))
-      case unresolved.RefNull(t) => t match
-        case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
-        case ExternRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+    import ConstantAnalysis.Value.*
+    import ConstantAnalysis.NumValue.*
+    import ConstantAnalysis.VecValue.*
+    constExprToVal(inst) match
+      case Num(Int32(_)) => ConstantAnalysis.makeI32(ConstantAnalysis.topI32)
+      case Num(Int64(_)) => ConstantAnalysis.makeI64(ConstantAnalysis.topI64)
+      case Num(Float32(_)) => ConstantAnalysis.makeF32(ConstantAnalysis.topF32)
+      case Num(Float64(_)) => ConstantAnalysis.makeF64(ConstantAnalysis.topF64)
+      case Vec(Vec128(_)) => ConstantAnalysis.makeV128(ConstantAnalysis.topV128)
+      case Ref(_) => TopValue
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =

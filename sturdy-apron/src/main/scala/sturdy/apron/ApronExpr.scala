@@ -66,7 +66,7 @@ enum ApronExpr[Addr, Type]:
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
-      case Addr(ApronVar(addr), specials, _type) => Addr(ApronVar(f(addr)), specials, _type)
+      case Addr(addr, specials, _type) => Addr(ApronVar(f(addr.addr)), specials, _type)
       case Constant(coeff, specials, _type) => Constant(coeff, specials, _type)
       case Unary(op, expr, roundingType, roundingDir, specials, _type) =>
         Unary(op, expr.mapAddr(f), roundingType, roundingDir, specials, _type)
@@ -395,7 +395,7 @@ enum CompareOp:
 
 enum ApronBool[Addr, Type]:
   case Constraint(cons: ApronCons[Addr, Type])
-  case Constant(boolean: Boolean)
+  case Constant(boolean: Topped[Boolean])
   case And(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
   case Or(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
 
@@ -409,7 +409,7 @@ enum ApronBool[Addr, Type]:
   def negated: ApronBool[Addr,Type] =
     this match
       case Constraint(cons) => Constraint(cons.negated)
-      case Constant(b) => Constant(!b)
+      case Constant(b) => Constant(b.map(!_))
       case And(e1, e2) => Or(e1.negated, e2.negated)
       case Or(e1, e2) => And(e1.negated, e2.negated)
 

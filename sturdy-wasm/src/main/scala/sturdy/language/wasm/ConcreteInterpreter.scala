@@ -8,7 +8,7 @@ import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.{ConcreteSizedTable, ConcreteSymbolTable, DecidableSymbolTable, SizedSymbolTable}
+import sturdy.effect.symboltable.{ConcreteSizedTable, ConcreteSymbolTable, DecidableSymbolTable, SizedSymbolTable, SymbolTable}
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -23,7 +23,6 @@ import sturdy.values.references.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.values.ordering.{*, given}
-
 import swam.text.*
 import swam.syntax.*
 import swam.ReferenceType
@@ -45,31 +44,27 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type F64 = Double
   override type V128 = Array[Byte]
   override type Bool = Boolean
-  override type FuncReference = FunctionInstance
-  override type ExternReference = Int
-
-  override def topI32: Int = throw new UnsupportedOperationException
-  override def topI64: Long = throw new UnsupportedOperationException
-  override def topF32: Float = throw new UnsupportedOperationException
-  override def topF64: Double = throw new UnsupportedOperationException
-  override def topV128: V128 = throw new UnsupportedOperationException
-  override def topFuncRef: FuncReference = throw new UnsupportedOperationException
-  override def topExternRef: Int = throw new UnsupportedOperationException
-
-  override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
-  override def boolean(b: Boolean): Value =
-    if (b)
-      Value.Num(NumValue.Int32(1))
-    else
-      Value.Num(NumValue.Int32(0))
-
+  override type Reference = FunctionInstance | Int
+  override type FunV = FunctionInstance
+  override type RefV = RefValue
   override type Addr = Int
   override type Bytes = Seq[Byte]
   override type Size = Int
   override type ExcV = WasmException[Value]
   override type Index = Int
-  override type FunV = FunctionInstance
-  override type RefV = RefValue
+
+  override def topI32: I32 = throw new UnsupportedOperationException
+  override def topI64: I64 = throw new UnsupportedOperationException
+  override def topF32: F32 = throw new UnsupportedOperationException
+  override def topF64: F64 = throw new UnsupportedOperationException
+  override def topV128: V128 = throw new UnsupportedOperationException
+
+  override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
+  override def booleanToVal(b: Boolean): Value =
+    if (b)
+      Value.Num(NumValue.Int32(1))
+    else
+      Value.Num(NumValue.Int32(0))
 
   def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
@@ -77,10 +72,24 @@ object ConcreteInterpreter extends Interpreter with Control:
       case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (Value.Ref(RefValue.FuncNull), Value.Ref(RefValue.FuncNull)) => true
-      case (Value.Ref(RefValue.ExternNull), Value.Ref(RefValue.ExternNull)) => true
-      case (Value.Ref(RefValue.FuncRef(r1)), Value.Ref(RefValue.FuncRef(r2))) => r1 == r2
-      case (Value.Ref(RefValue.ExternRef(r1)), Value.Ref(RefValue.ExternRef(r2))) => r1 == r2
+      case (Value.Ref(RefValue.RefValue(r1)), Value.Ref(RefValue.RefValue(r2))) => r1 == r2
+      case (Value.Vec(VecValue.Vec128(b1)), Value.Vec(VecValue.Vec128(b2))) =>
+        val bb1 = ByteBuffer.wrap(b1)
+        val bb2 = ByteBuffer.wrap(b2)
+
+        val eqF32 = (0 until 16 by 4).forall { i =>
+          val x = java.lang.Float.intBitsToFloat(bb1.getInt(i))
+          val y = java.lang.Float.intBitsToFloat(bb2.getInt(i))
+          if (x.isNaN && y.isNaN) true else bb1.getInt(i) == bb2.getInt(i)
+        }
+
+        val eqF64 = (0 until 16 by 8).forall { i =>
+          val x = java.lang.Double.longBitsToDouble(bb1.getLong(i))
+          val y = java.lang.Double.longBitsToDouble(bb2.getLong(i))
+          if (x.isNaN && y.isNaN) true else bb1.getLong(i) == bb2.getLong(i)
+        }
+
+        eqF32 || eqF64
       case _ => false
     }
 
@@ -93,6 +102,19 @@ object ConcreteInterpreter extends Interpreter with Control:
       case unresolved.i64.Const(l) => Value.Num(NumValue.Int64(l))
       case unresolved.f32.Const(f) => Value.Num(NumValue.Float32(f))
       case unresolved.f64.Const(d) => Value.Num(NumValue.Float64(d))
+      case unresolved.v128.Const(v, _) => Value.Vec(ConcreteInterpreter.VecValue.Vec128(v))
+      case unresolved.RefNull(t) =>
+        t match
+          case ReferenceType.FuncRef => makeRef(FunctionInstance.Null)
+          case ReferenceType.ExternRef => makeRef(0)
+      case unresolved.RefFunc(x) => x match {
+        case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
+        case _ => Value.Ref(RefValue.RefValue(0))
+      }
+      case unresolved.RefExtern(x) => x match {
+        case Left(r) => Value.Ref(RefValue.RefValue(r))
+        case _ => Value.Ref(RefValue.RefValue(0))
+      }
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, NoJoin] with
@@ -101,47 +123,37 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
 
-    override def valToRef(v: ConcreteInterpreter.Value, funcs: Vector[FunctionInstance]): ConcreteInterpreter.RefValue = v match {
+    override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefValue = v match {
       case Value.Ref(ref) => ref
       case _ => f.fail(TypeError, s"Expected a reference value, but got $v")
     }
     
-    override def refToVal(r: ConcreteInterpreter.RefValue): ConcreteInterpreter.Value = Value.Ref(r)
+    override def refToVal(r: RefV): Value = Value.Ref(r)
     
     override def liftBytes(b: Seq[Byte]): Seq[Byte] = b
-    
-    override def refVToFunV(r: ConcreteInterpreter.RefValue): FunctionInstance = 
+
+    override def funcInstToRefV(f: FunctionInstance): RefV =
+      RefValue.RefValue(f)
+
+    override def refVToFunV(r: RefV): FunV =
       r match {
-        case RefValue.FuncRef(f) => f
-        case RefValue.ExternRef(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $r")
-        case RefValue.FuncNull | RefValue.ExternNull => FunctionInstance.Null()
+        case RefValue.RefValue(f : FunctionInstance) => f
+        case RefValue.RefValue(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $r")
       }
     
-    override def makeNullRefV(t: ReferenceType): ConcreteInterpreter.RefValue =
-      t match {
-        case FuncRef => ConcreteInterpreter.RefValue.FuncNull
-        case ExternRef => ConcreteInterpreter.RefValue.ExternNull
-      }
-
-    override def funVToRefV(f: FunV): ConcreteInterpreter.RefValue =
-        f match {
-          case FunctionInstance.Wasm(_, _, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
-          case FunctionInstance.Host(_, _, _) => ConcreteInterpreter.RefValue.FuncRef(f)
-          case _ => ConcreteInterpreter.RefValue.FuncNull
-        }
-
+    override def makeNullRefV(t: ReferenceType): RefValue =
+      t match
+        case FuncRef => RefValue.RefValue(FunctionInstance.Null)
+        case ExternRef => RefValue.RefValue(0)
     
-    override def isNullRef(r: ConcreteInterpreter.Value): ConcreteInterpreter.Value =
+    override def isNullRef(r: Value): Value =
       r match {
-        case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull) => Value.Num(ConcreteInterpreter.NumValue.Int32(1))
-        case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull) => Value.Num(ConcreteInterpreter.NumValue.Int32(1))
-        case _ => Value.Num(ConcreteInterpreter.NumValue.Int32(0))
+        case Value.Ref(RefValue.RefValue(FunctionInstance.Null)) => Value.Num(NumValue.Int32(1))
+        case Value.Ref(RefValue.RefValue(0)) => Value.Num(NumValue.Int32(1))
+        case _ => Value.Num(NumValue.Int32(0))
       }
 
-    override def funcInstToFunV(f: FunctionInstance): FunctionInstance = f
-    override def funVToFuncInst(f: FunctionInstance): FunctionInstance = f
-
-    override def addOffsetToAddr(offset: Int, addr: Int): Int =
+    override def addOffsetToAddr(offset: Int, addr: Addr): Int =
       val resultAddr = addr + offset
       if(Integer.compareUnsigned(resultAddr, offset) < 0)
         f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
@@ -202,23 +214,24 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def jvV: NoJoin[Value] = implicitly
     override def jvFunV: NoJoin[FunV] = implicitly
     override def jvRefV: NoJoin[RefV] = implicitly
+    override def jvElem: NoJoin[Elem] = implicitly
 
-    val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
-    val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
-    val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32.toInt)
-    val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
+    override val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
+    override val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
+    override val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
+    override val elems: ConcreteSymbolTable[Unit, ElemAddr, Elem] = new ConcreteSymbolTable
+    override val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32.toInt)
+    override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,
         rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)
       )
-    val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
-    val failure: ConcreteFailure = new ConcreteFailure
+    override val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
+    override val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
 
-    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
 
-    val fixpoint = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Value]] {
+    override val fixpoint = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)
     }
-

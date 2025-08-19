@@ -467,7 +467,7 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
 
   override def equals(obj: Any): Boolean =
     obj match
-      case other: PowVirtualAddress[Context] =>
+      case other: PowVirtualAddress[Context] @unchecked =>
         addressTranslation match
           case Some(addrMap) =>
             val mapping = addrMap.mapping
