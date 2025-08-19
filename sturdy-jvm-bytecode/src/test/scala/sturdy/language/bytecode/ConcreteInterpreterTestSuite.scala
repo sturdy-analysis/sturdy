@@ -73,7 +73,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 
     // we can safely call head here as there should be exactly one class file
     val method = classFiles.head.methods.find(m => m.name == "main" || m.name == "run").getOrElse:
-      fail(s"no suitable method found.\navailable methods: ${classFiles.head.methods.map(_.name)}")
+      cancel(s"no suitable method found.\navailable methods: ${classFiles.head.methods.map(_.name)}")
 
     val mType = method.name match
       case "main" => TestedMethodType.Main
