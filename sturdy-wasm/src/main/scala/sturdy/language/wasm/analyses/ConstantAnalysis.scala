@@ -1,44 +1,35 @@
 package sturdy.language.wasm.analyses
 
+import sturdy.control.{ControlEvent, ControlObservable}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.bytememory.ConstantAddressMemory
-import sturdy.effect.bytememory.ConstantAddressMemory
-import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
-import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.SizedConstantTable.CombineTable
+import sturdy.effect.operandstack.JoinableDecidableOperandStack
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
-import sturdy.language.wasm.abstractions.Fix.{*, given}
-import sturdy.language.wasm.generic.{*, given}
-import sturdy.values.floating.FloatOps
-import swam.syntax.*
-import swam.{FuncType, ReferenceType}
-import swam.ReferenceType.{ExternRef, FuncRef}
-import sturdy.values.booleans.{*, given}
-import sturdy.values.convert.{*, given}
-import sturdy.values.exceptions.{*, given}
-import sturdy.values.functions.{*, given}
-import sturdy.values.references.{*, given}
-import sturdy.values.floating.{*, given}
-import sturdy.values.integer.{*, given}
-import sturdy.values.simd.{*, given}
-import sturdy.values.ordering.{*, given}
-import sturdy.values.{*, given}
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import scala.collection.IndexedSeqView
-import WasmFailure.*
-import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.language.wasm.abstractions.Control.Exc
+import sturdy.language.wasm.abstractions.Fix.given
+import sturdy.language.wasm.generic.WasmFailure.*
+import sturdy.language.wasm.generic.{*, given}
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.values.booleans.given
+import sturdy.values.convert.{*, given}
+import sturdy.values.exceptions.given
+import sturdy.values.floating.{*, given}
+import sturdy.values.functions.given
+import sturdy.values.integer.{*, given}
+import sturdy.values.ordering.given
+import sturdy.values.references.given
+import sturdy.values.simd.given
+import sturdy.values.{*, given}
+import swam.ReferenceType
+import swam.ReferenceType.{ExternRef, FuncRef}
+import swam.syntax.*
 
 object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -180,6 +171,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
           case FunctionInstance.Wasm(_, _, _, _) => Value.Ref(RefValue.FuncRef(Topped.Actual(f)))
           case _ => Value.Ref(RefValue.FuncNull)
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(f)) => Value.Ref(RefValue.ExternRef(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(v)) => Value.Vec(VecValue.Vec128(Topped.Actual(v)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -195,6 +187,42 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvFunV: WithJoin[FunV] = implicitly
     override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
+    
+    given Bijection[Int, Value] with {
+      def apply(a: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(a)))
+      def unapply(b: Value)(using f: Failure): Int = b match {
+        case Value.Num(NumValue.Int32(Topped.Actual(i))) => i
+        case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Int")
+        case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Int")
+      }
+    }
+    
+    given Bijection[Long, Value] with {
+      def apply(a: Long): Value = Value.Num(NumValue.Int64(Topped.Actual(a)))
+      def unapply(b: Value)(using f: Failure): Long = b match {
+        case Value.Num(NumValue.Int64(Topped.Actual(l))) => l
+        case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Long")
+        case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Long")
+      }
+    }
+    
+    given Bijection[Float, Value] with {
+      def apply(a: Float): Value = Value.Num(NumValue.Float32(Topped.Actual(a)))
+      def unapply(b: Value)(using f: Failure): Float = b match {
+        case Value.Num(NumValue.Float32(Topped.Actual(f))) => f
+        case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Float")
+        case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Float")
+      }
+    }
+    
+    given Bijection[Double, Value] with {
+      def apply(a: Double): Value = Value.Num(NumValue.Float64(Topped.Actual(a)))
+      def unapply(b: Value)(using f: Failure): Double = b match {
+        case Value.Num(NumValue.Float64(Topped.Actual(d))) => d
+        case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Double")
+        case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Double")
+      }
+    }
 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))

@@ -1,6 +1,6 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{JOption, JOptionC, MayJoin, noJoin}
+import sturdy.data.{given, *}
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
@@ -154,37 +154,80 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     }
   }
 
-  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionC[V] =
+  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionA[V] =
     boundary:
       inst match
         case loadLane: LoadVectorLane =>
           val v = stack.popOrAbort()
           val shape = laneWidthToLaneShape(loadLane.laneWidth)
-          val bytes = mem.read(memIdx, addr, loadLane.laneWidth / 8).getOrElse(break(JOptionC.none))
-          val vec = v128ops.replaceLane(shape, v, loadLane.lane, decode(bytes, SomeCC(loadLane, false)))
-          JOptionC.some(vec)
+          val bytes = mem.read(memIdx, addr, loadLane.laneWidth / 8)
+          var noneSome = false
+          val vecBytes = bytes match {
+            case JOptionA.Some(vec) => vec
+            case JOptionC.Some(vec) => vec
+            case JOptionA.NoneSome(vec) =>
+              noneSome = true
+              vec
+            case JOptionA.None() => break(JOptionA.none)
+            case JOptionC.None() => break(JOptionA.none)
+          }
+          val vec = v128ops.replaceLane(shape, v, loadLane.lane, decode(vecBytes, SomeCC(loadLane, false)))
+          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+
         case loadSplat: LoadVectorSplat =>
-          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8).getOrElse(break(JOptionC.none))
-          val numV = decode(bytes, SomeCC(loadSplat, false))
+          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8)
+          var noneSome = false
+          val vecBytes = bytes match {
+            case JOptionA.Some(vec) => vec
+            case JOptionC.Some(vec) => vec
+            case JOptionA.NoneSome(vec) =>
+              noneSome = true
+              vec
+            case JOptionA.None() => break(JOptionA.none)
+            case JOptionC.None() => break(JOptionA.none)
+          }
+          val numV = decode(vecBytes, SomeCC(loadSplat, false))
           val vec = loadSplat.shape match {
             case VectorSplatShape.i8_splat => v128ops.splat(I8, numV)
             case VectorSplatShape.i16_splat => v128ops.splat(I16, numV)
             case VectorSplatShape.i32_splat => v128ops.splat(I32, numV)
             case VectorSplatShape.i64_splat => v128ops.splat(I64, numV)
           }
-          JOptionC.some(vec)
+          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+
         case loadZero: LoadVectorZero =>
-          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8).getOrElse(break(JOptionC.none))
-          val numV = decode(bytes, SomeCC(loadZero, false))
+          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8)
+          var noneSome = false
+          val vecBytes = bytes match {
+            case JOptionA.Some(vec) => vec
+            case JOptionC.Some(vec) => vec
+            case JOptionA.NoneSome(vec) =>
+              noneSome = true
+              vec
+            case JOptionA.None() => break(JOptionA.none)
+            case JOptionC.None() => break(JOptionA.none)
+          }
+          val numV = decode(vecBytes, SomeCC(loadZero, false))
           val vec = loadZero.shape match {
             case VectorZeroShape.i32_zero => v128ops.zeroPad(I32, numV)
             case VectorZeroShape.i64_zero => v128ops.zeroPad(I64, numV)
           }
-          JOptionC.some(vec)
+          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+
         case loadExtend: LoadVector =>
-          val bytes = mem.read(memIdx, addr, 8).getOrElse(break(JOptionC.none))
-          val vec = decode(bytes, SomeCC(loadExtend, false))
-          JOptionC.some(vec)
+          val bytes = mem.read(memIdx, addr, 8)
+          var noneSome = false
+          val vecBytes = bytes match {
+            case JOptionA.Some(vec) => vec
+            case JOptionC.Some(vec) => vec
+            case JOptionA.NoneSome(vec) =>
+              noneSome = true
+              vec
+            case JOptionA.None() => break(JOptionA.none)
+            case JOptionC.None() => break(JOptionA.none)
+          }
+          val vec = decode(vecBytes, SomeCC(loadExtend, false))
+          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
 
   def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Unit] = {
     inst match {
@@ -282,10 +325,10 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
         relop.operation match {
           case VecRelopType.FEq => v128ops.vectorEq(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.FNe => v128ops.vectorNe(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FLt => v128ops.vectorLt(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FLe => v128ops.vectorLe(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FGt => v128ops.vectorGt(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FGe => v128ops.vectorGe(relop.shape.toLaneShape, v1, v2)
+          case VecRelopType.FLt => v128ops.vectorLtS(relop.shape.toLaneShape, v1, v2)
+          case VecRelopType.FLe => v128ops.vectorLeS(relop.shape.toLaneShape, v1, v2)
+          case VecRelopType.FGt => v128ops.vectorGtS(relop.shape.toLaneShape, v1, v2)
+          case VecRelopType.FGe => v128ops.vectorGeS(relop.shape.toLaneShape, v1, v2)
         }
     }
   }

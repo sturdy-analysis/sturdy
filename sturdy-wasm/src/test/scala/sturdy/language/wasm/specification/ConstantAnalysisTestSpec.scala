@@ -48,6 +48,7 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
   val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
+  val uriSIMD: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
@@ -64,36 +65,26 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
 
   Fixpoint.DEBUG = false
   val EXCLUDE_MEM_GROW = true
-  Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
-    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
-  }).sorted.foreach { p =>
-    for (aInterp <- analyses) {
-      it must s"execute WASM1 script ${p.getFileName} with ${aInterp()}" in {
-        println(s"Executing TestScript constant analysis on WASM1 script ${p.getFileName}")
-        val script = Parsing.testscript(p)
-        val interp = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp())
-        interp.run(script)
-        val interpTop = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
-        interpTop.run(script)
+
+  def runTests(uri: URI, msg: String => String): Unit =
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
+      !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
+    }).sorted.foreach { p =>
+      for (aInterp <- analyses) {
+        it must msg(p.getFileName.toString) in {
+          println(s"Executing TestScript constant analysis on script ${p.getFileName}")
+          val script = Parsing.testscript(p)
+          val interp = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp())
+          //interp.run(script)
+          val interpTop = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
+          interpTop.run(script)
+        }
       }
     }
-  }
 
-  Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
-    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
-  }).sorted.foreach { p =>
-    for (aInterp <- analyses) {
-      it must s"execute WASM2 script ${p.getFileName} with ${aInterp()}" in {
-        println(s"Executing TestScript constant analysis on WASM2 script ${p.getFileName}")
-        val script = Parsing.testscript(p)
-        val interp = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp())
-        interp.run(script)
-        val interpTop = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
-        interpTop.run(script)
-      }
-    }
-  }
-
+  runTests(uriWasm1, s => s"execute WASM1 script $s")
+  runTests(uriWasm2, s => s"execute WASM2 script $s")
+  runTests(uriSIMD, s => s"execute SIMD script $s")
 
 class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val aInterp: ConstantAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
@@ -139,6 +130,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
       case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
       case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
       case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
+      case (ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
       case _ => false
     }
 
@@ -320,6 +312,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
         case Left(r) => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r))
         case _ => ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)
       }
+      case unresolved.v128.Const(i, _) => ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(i))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
@@ -341,6 +334,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
       case unresolved.RefNull(t) => t match
         case FuncRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.FuncNull)
         case ExternRef => ConstantAnalysis.Value.Ref(ConstantAnalysis.RefValue.ExternNull)
+      case unresolved.v128.Const(_, _) => ConstantAnalysis.Value.Vec(ConstantAnalysis.VecValue.Vec128(Topped.Top))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =

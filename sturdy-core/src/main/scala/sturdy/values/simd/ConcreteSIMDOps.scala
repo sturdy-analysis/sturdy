@@ -326,11 +326,6 @@ given ConcreteSIMDOps[V]
       case LaneShape.F32 => vectorRelop[Float](v1, v2)((a, b) => canonicalNaN(a) != canonicalNaN(b))
       case LaneShape.F64 => vectorRelop[Double](v1, v2)((a, b) => canonicalNaN(a) != canonicalNaN(b))
 
-  def vectorLt(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ < _)
-      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ < _)
-
   def vectorLtU(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
     shape match
       case LaneShape.I8 => vectorRelop[Byte](v1, v2)((a, b) => (a & 0xFF) < (b & 0xFF))
@@ -343,11 +338,8 @@ given ConcreteSIMDOps[V]
       case LaneShape.I16 => vectorRelop[Short](v1, v2)(_ < _)
       case LaneShape.I32 => vectorRelop[Int](v1, v2)(_ < _)
       case LaneShape.I64 => vectorRelop[Long](v1, v2)(_ < _)
-
-  def vectorGt(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ > _)
-      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ > _)
+      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ < _)
+      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ < _)
 
   def vectorGtU(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
     shape match
@@ -361,11 +353,8 @@ given ConcreteSIMDOps[V]
       case LaneShape.I16 => vectorRelop[Short](v1, v2)(_ > _)
       case LaneShape.I32 => vectorRelop[Int](v1, v2)(_ > _)
       case LaneShape.I64 => vectorRelop[Long](v1, v2)(_ > _)
-
-  def vectorLe(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ <= _)
-      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ <= _)
+      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ > _)
+      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ > _)
 
   def vectorLeU(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
     shape match
@@ -379,11 +368,8 @@ given ConcreteSIMDOps[V]
       case LaneShape.I16 => vectorRelop[Short](v1, v2)(_ <= _)
       case LaneShape.I32 => vectorRelop[Int](v1, v2)(_ <= _)
       case LaneShape.I64 => vectorRelop[Long](v1, v2)(_ <= _)
-
-  def vectorGe(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
-    shape match
-      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ >= _)
-      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ >= _)
+      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ <= _)
+      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ <= _)
 
   def vectorGeU(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
     shape match
@@ -397,6 +383,8 @@ given ConcreteSIMDOps[V]
       case LaneShape.I16 => vectorRelop[Short](v1, v2)(_ >= _)
       case LaneShape.I32 => vectorRelop[Int](v1, v2)(_ >= _)
       case LaneShape.I64 => vectorRelop[Long](v1, v2)(_ >= _)
+      case LaneShape.F32 => vectorRelop[Float](v1, v2)(_ >= _)
+      case LaneShape.F64 => vectorRelop[Double](v1, v2)(_ >= _)
 
   def vectorAnd(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] =
     shape match {
@@ -420,102 +408,52 @@ given ConcreteSIMDOps[V]
 
   // Shift operations
   def vectorShiftLeft(shape: LaneShape, v: Array[Byte], shiftV: V): Array[Byte] =
-    shape match {
-      case LaneShape.I8 =>
-        shiftLeft(v, bijectionI32.unapply(shiftV) % 8)(using summon[LaneCodec[Byte]])
-
-      case LaneShape.I16 =>
-        shiftLeft(v, bijectionI32.unapply(shiftV) % 16)(using summon[LaneCodec[Short]])
-
-      case LaneShape.I32 =>
-        shiftLeft(v, bijectionI32.unapply(shiftV) % 32)(using summon[LaneCodec[Int]])
-
-      case LaneShape.I64 =>
-        shiftLeft(v, bijectionI32.unapply(shiftV) % 64)(using summon[LaneCodec[Long]])
-    }
-
-  private def shiftLeft[T](v: Array[Byte], shift: Int)(using codec: LaneCodec[T]): Array[Byte] = {
-    val in = ByteBuffer.wrap(v)
-    val out = ByteBuffer.allocate(v.length)
-
-    while (in.remaining() >= codec.bytes) {
-      val value = codec.get(in)
-      val shifted: T = (value match
-        case b: Byte => (((b & 0xFF) << shift) & 0xFF).toByte
-        case s: Short => (((s & 0xFFFF) << shift) & 0xFFFF).toShort
-        case i: Int => i << shift
-        case l: Long => l << shift
-        ).asInstanceOf[T]
-
-      codec.put(out, shifted)
-    }
-    out.array()
-  }
+    genericShift(shape, v, shiftV, bijectionI32.unapply, shiftLeftOp)
 
   def vectorShiftRightU(shape: LaneShape, v: Array[Byte], shiftV: V): Array[Byte] =
-    shape match {
-      case LaneShape.I8 =>
-        shiftRightUnsigned(v, bijectionI32.unapply(shiftV) % 8)(using summon[LaneCodec[Byte]])
-
-      case LaneShape.I16 =>
-        shiftRightUnsigned(v, bijectionI32.unapply(shiftV) % 16)(using summon[LaneCodec[Short]])
-
-      case LaneShape.I32 =>
-        shiftRightUnsigned(v, bijectionI32.unapply(shiftV) % 32)(using summon[LaneCodec[Int]])
-
-      case LaneShape.I64 =>
-        shiftRightUnsigned(v, bijectionI32.unapply(shiftV) % 64)(using summon[LaneCodec[Long]])
-    }
+    genericShift(shape, v, shiftV, bijectionI32.unapply, shiftRightUnsignedOp)
 
   def vectorShiftRightS(shape: LaneShape, v: Array[Byte], shiftV: V): Array[Byte] =
+    genericShift(shape, v, shiftV, bijectionI32.unapply, shiftRightSignedOp)
+
+  def genericShift(shape: LaneShape, v: Array[Byte], shiftV: V, extraction: V => Int, op: (Any, Int) => Any): Array[Byte] =
     shape match {
-      case LaneShape.I8 =>
-        shiftRightSigned(v, bijectionI32.unapply(shiftV) % 8)(using summon[LaneCodec[Byte]])
-
-      case LaneShape.I16 =>
-        shiftRightSigned(v, bijectionI32.unapply(shiftV) % 16)(using summon[LaneCodec[Short]])
-
-      case LaneShape.I32 =>
-        shiftRightSigned(v, bijectionI32.unapply(shiftV) % 32)(using summon[LaneCodec[Int]])
-
-      case LaneShape.I64 =>
-        shiftRightSigned(v, bijectionI32.unapply(shiftV) % 64)(using summon[LaneCodec[Long]])
+      case LaneShape.I8 => shift(v, extraction(shiftV) % 8, op)(using summon[LaneCodec[Byte]])
+      case LaneShape.I16 => shift(v, extraction(shiftV) % 16, op)(using summon[LaneCodec[Short]])
+      case LaneShape.I32 => shift(v, extraction(shiftV) % 32, op)(using summon[LaneCodec[Int]])
+      case LaneShape.I64 => shift(v, extraction(shiftV) % 64, op)(using summon[LaneCodec[Long]])
     }
 
-  private def shiftRightUnsigned[T](v: Array[Byte], shift: Int)(using codec: LaneCodec[T]): Array[Byte] = {
+  def shift[T](v: Array[Byte], shift: Int, op: (Any, Int) => Any)(using codec: LaneCodec[T]): Array[Byte] = {
     val in = ByteBuffer.wrap(v)
     val out = ByteBuffer.allocate(v.length)
-
     while (in.remaining() >= codec.bytes) {
       val raw = codec.get(in)
-      val shifted: T = (raw match
-        case b: Byte => ((b & 0xFF) >>> shift).toByte
-        case s: Short => ((s & 0xFFFF) >>> shift).toShort
-        case i: Int => (i >>> shift)
-        case l: Long => (l >>> shift)
-        ).asInstanceOf[T]
-
+      val shifted = op(raw, shift).asInstanceOf[T]
       codec.put(out, shifted)
     }
     out.array()
   }
 
-  private def shiftRightSigned[T](v: Array[Byte], shift: Int)(using codec: LaneCodec[T]): Array[Byte] = {
-    val in = ByteBuffer.wrap(v)
-    val out = ByteBuffer.allocate(v.length)
+  val shiftLeftOp: (Any, Int) => Any = {
+    case (b: Byte, s) => (((b & 0xFF) << s) & 0xFF).toByte
+    case (s: Short, sh) => (((s & 0xFFFF) << sh) & 0xFFFF).toShort
+    case (i: Int, sh) => i << sh
+    case (l: Long, sh) => l << sh
+  }
 
-    while (in.remaining() >= codec.bytes) {
-      val raw = codec.get(in)
-      val shifted: T = (raw match
-        case b: Byte => (b >> shift).toByte
-        case s: Short => (s >> shift).toShort
-        case i: Int => i >> shift
-        case l: Long => l >> shift
-        ).asInstanceOf[T]
+  val shiftRightUnsignedOp: (Any, Int) => Any = {
+    case (b: Byte, s) => ((b & 0xFF) >>> s).toByte
+    case (s: Short, sh) => ((s & 0xFFFF) >>> sh).toShort
+    case (i: Int, sh) => i >>> sh
+    case (l: Long, sh) => l >>> sh
+  }
 
-      codec.put(out, shifted)
-    }
-    out.array()
+  val shiftRightSignedOp: (Any, Int) => Any = {
+    case (b: Byte, s) => (b >> s).toByte
+    case (s: Short, sh) => (s >> sh).toShort
+    case (i: Int, sh) => i >> sh
+    case (l: Long, sh) => l >> sh
   }
 
   // Conversion operations

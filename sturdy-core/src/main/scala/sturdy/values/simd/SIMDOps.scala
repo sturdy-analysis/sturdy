@@ -70,16 +70,12 @@ trait SIMDOps[B, Vec, V, LaneIdx]:
   // Relational operations
   def vectorEq(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorNe(shape: LaneShape, v1: Vec, v2: Vec): Vec
-  def vectorLt(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorLtU(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorLtS(shape: LaneShape, v1: Vec, v2: Vec): Vec
-  def vectorGt(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorGtU(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorGtS(shape: LaneShape, v1: Vec, v2: Vec): Vec
-  def vectorLe(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorLeU(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorLeS(shape: LaneShape, v1: Vec, v2: Vec): Vec
-  def vectorGe(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorGeU(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorGeS(shape: LaneShape, v1: Vec, v2: Vec): Vec
   
@@ -157,16 +153,12 @@ given DummySIMDOps[B, Vec, V, LaneIdx]: SIMDOps[B, Vec, V, LaneIdx] with {
   def vectorDotS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorEq(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorNe(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
-  def vectorLt(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorLtU(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorLtS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
-  def vectorGt(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorGtU(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorGtS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
-  def vectorLe(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorLeU(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorLeS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
-  def vectorGe(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorGeU(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorGeS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   def vectorAnd(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
