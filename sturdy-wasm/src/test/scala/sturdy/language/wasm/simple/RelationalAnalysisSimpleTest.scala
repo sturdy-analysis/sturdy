@@ -153,7 +153,7 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val cfg = interp.addControlObserver(new ControlEventGraphBuilder)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible {
     interp.invokeExported(modInst, funName, args).map(interp.getInterval)
   }

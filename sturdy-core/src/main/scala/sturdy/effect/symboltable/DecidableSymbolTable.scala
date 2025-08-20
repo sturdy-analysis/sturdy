@@ -9,44 +9,40 @@ import scala.reflect.ClassTag
 import scala.util.boundary
 import scala.util.boundary.break
 
-trait SizedDecidableSymbolTable[Value, Key, Entry] extends SizedSymbolTable[Value, Key, Int, Entry, Int, NoJoin]:
+trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, Entry, Int, NoJoin]:
   var tables: Map[Key, Table] = Map()
 
   def entries: Map[Key, Table] = tables
 
-  override def get(key: Key, symbol: Int): JOptionC[Entry] = {
-    if (!inBounds(key, symbol))
-      return JOptionC.none
+  override def putNew(key: Key, limit: SizedSymbolTable.Limit[Int] = SizedSymbolTable.Limit(0, None)): Unit =
+    tables += key -> Table(Map(), limit)
+
+  override def get(key: Key, symbol: Int): JOptionC[Entry] =
     JOptionC(tables(key).entries.get(symbol))
-  }
 
   override def set(key: Key, symbol: Int, newEntry: Entry): JOptionC[Unit] = {
-    if (!inBounds(key, symbol))
-      return JOptionC.none
     val tab = tables(key)
-    val newTable = Table(tab.entries + (symbol -> newEntry), tab.limit)
-    tables += key -> newTable
-    JOptionC.some(())
+    if(0 <= symbol && symbol <= tab.limit.min) {
+      val newTable = Table(tab.entries + (symbol -> newEntry), tab.limit)
+      tables += key -> newTable
+      JOptionC.some(())
+    } else {
+      JOptionC.none
+    }
   }
 
   override def size(key: Key): Int =
-    tables(key).entries.size
+    tables(key).limit.min
 
   override def grow(key: Key, newSize: Int, initEntry: Entry): JOptionC[Int] =
     val oldTable = tables(key)
-    val oldSize = oldTable.entries.size
-    val upperLimit = oldTable.limit.max
-    if (upperLimit.isDefined && newSize > upperLimit.get)
-      JOptionC.none
-    else
-      val added = (oldSize until newSize).map(i => i -> initEntry).toMap
-      val newTable = Table(oldTable.entries ++ added, oldTable.limit)
-
-      tables += key -> newTable
-      JOptionC.Some(oldSize)
-
-  override def putNew(key: Key, limit: SizedSymbolTable.Limit[Int] = SizedSymbolTable.Limit(0, None)): Unit =
-    tables += key -> Table(Map(), limit)
+    oldTable.limit.max match
+      case Some(upperLimit) if newSize > upperLimit => JOptionC.none
+      case _ =>
+        val newLimit = SizedSymbolTable.Limit(newSize, oldTable.limit.max)
+        tables += key -> Table(oldTable.entries, newLimit)
+        fill(key, initEntry, oldTable.limit.min, newSize - oldTable.limit.min)
+        JOptionC.Some(oldTable.limit.min)
 
   override def putNew(key: Key): Unit =
     putNew(key, SizedSymbolTable.Limit(0, None))
@@ -62,11 +58,6 @@ trait SizedDecidableSymbolTable[Value, Key, Entry] extends SizedSymbolTable[Valu
           break(eSound)
     }
     IsSound.Sound*/
-
-  private def inBounds(key: Key, symbol: Int): Boolean =
-    val tab = tables(key)
-    val length = math.max(tab.entries.size, tab.limit.min)
-    !(symbol >= length || symbol < 0)
 
   case class Table(entries: Map[Int, Entry], limit: SizedSymbolTable.Limit[Int])
 
@@ -109,59 +100,39 @@ class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
   override def drop(key: Key, symbol: Symbol): Unit =
     tables += key -> (tables(key) - symbol)
 
-class ConcreteSizedTable[Value, Key, Entry](val extractor: Value => Int) extends SizedDecidableSymbolTable[Value, Key, Entry], Concrete {
-  private def inBounds(offset: Int, amount: Int, table: Key): Boolean = offset >= 0 && offset + amount <= this.size(table)
+class ConcreteSizedTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entry], Concrete {
+  override def init(key: Key, entries: Seq[Entry], entryOffset: Int, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =
+    if(entryOffset >= 0 && entryOffset + amount <= entries.size && tableOffset >= 0 && tableOffset + amount <= size(key)) {
+      val newEntries = entries.slice(entryOffset, entryOffset + amount)
+      for ((entry, index) <- newEntries.zipWithIndex) {
+        this.set(key, tableOffset + index, entry)
+      }
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
 
-  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[NoJoin, Unit] = init(key, entries, extractor(entryOffset), extractor(tableOffset), extractor(amount))
+  override def fill(key: Key, entry: Entry, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =
+    val Table(_, limit) = tables(key)
+    if (tableOffset + amount <= limit.min) {
+      for (index <- tableOffset until tableOffset + amount) {
+        this.set(key, index, entry)
+      }
+      JOptionC.some(())
+    } else {
+      JOptionC.none
+    }
 
-  def init(key: Key, entries: Vector[Entry], entryOffset: Int, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =
-    // elem bounds check
-    if (entryOffset < 0 || entryOffset + amount > entries.size) {
-      return JOptionC.none
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Int, srcOffset: Int, amount: Int): JOption[NoJoin, Unit] =
+    val srcTab = tables(srcKey)
+    val dstTab = tables(dstKey)
+    if(srcOffset >= 0 && srcOffset + amount <= size(srcKey) && dstOffset >= 0 && dstOffset + amount <= size(srcKey)) {
+      val srcEntries = srcTab.entries.slice(srcOffset, srcOffset + amount)
+      tables += dstKey -> Table(dstTab.entries ++ srcEntries.map((idx, entry) => (idx - srcOffset + dstOffset, entry)), dstTab.limit)
+      JOptionC.some(())
+    } else {
+      JOptionC.none
     }
-    // table bounds check
-    if (!inBounds(tableOffset, amount, key)) {
-      return JOptionC.none
-    }
-    val newEntries = entries.slice(entryOffset, entryOffset + amount)
-    for ((entry, index) <- newEntries.zipWithIndex) {
-      this.set(key, tableOffset + index, entry)
-    }
-    JOptionC.some(())
-
-  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[NoJoin, Unit] = fillTable(key, entry, extractor(tableOffset), extractor(amount))
-
-  def fillTable(key: Key, entry: Entry, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =
-    // table bounds check
-    if (!inBounds(tableOffset, amount, key)) {
-      return JOptionC.none
-    }
-    for (index <- tableOffset until tableOffset + amount) {
-      this.set(key, index, entry)
-    }
-    JOptionC.some(())
-
-  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[NoJoin, Unit] = copy(dstKey, srcKey, extractor(dstOffset), extractor(srcOffset), extractor(amount))
-
-  def copy(dstKey: Key, srcKey: Key, dstOffset: Int, srcOffset: Int, amount: Int): JOption[NoJoin, Unit] =
-    // dst table bounds check
-    if (!inBounds(dstOffset, amount, dstKey)) {
-      return JOptionC.none
-    }
-    // src table bounds check
-    if (!inBounds(srcOffset, amount, srcKey)) {
-      return JOptionC.none
-    }
-    // copy entries to Vector
-    var entries: Vector[Entry] = Vector.empty
-    for (index <- 0 until amount) {
-      val entry = this.get(srcKey, srcOffset + index).getOrElse(return JOptionC.none)
-      entries = entries :+ entry
-    }
-    for ((entry, index) <- entries.zipWithIndex) {
-      this.set(dstKey, dstOffset + index, entry)
-    }
-    JOptionC.some(())
 }
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:

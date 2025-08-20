@@ -175,7 +175,7 @@ def runIntervalAnalysis(path: Path, funName: String, args: List[Value], stackCon
   val constants = IntervalAnalysis.constantInstructions(interp)
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

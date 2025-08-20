@@ -63,7 +63,7 @@ class ConcreteTestSVBench() extends AnyFunSpec, Matchers:
       "wasi_snapshot_preview1" -> wasi_snapshot_preview1,
       "env" -> svbenchHostFunctions
     )
-    val modInst = analysis.initializeModule(module, hostModules = hostModules)
+    val modInst = analysis.instantiateModule(module, hostModules = hostModules)
     val result = failAfter(1 minute) {
       analysis.failure.fallible {
         analysis.invokeExported(modInst, entrypoint, List.empty)

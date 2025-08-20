@@ -119,7 +119,8 @@ object ConcreteInterpreter extends Interpreter with Control:
 
   given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, NoJoin] with
     override def valToAddr(v: Value): Int = v.asInt32
-    override def valToIdx(v: Value): Int = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
+
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
 
@@ -220,7 +221,7 @@ object ConcreteInterpreter extends Interpreter with Control:
     override val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     override val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
     override val elems: ConcreteSymbolTable[Unit, ElemAddr, Elem] = new ConcreteSymbolTable
-    override val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32.toInt)
+    override val tables: ConcreteSizedTable[TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[TableAddr, RefValue]
     override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

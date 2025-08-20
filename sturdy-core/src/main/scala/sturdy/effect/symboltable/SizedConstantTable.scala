@@ -13,7 +13,7 @@ import scala.util.boundary
 import boundary.break
 
 
-class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Value, Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
+class SizedConstantTable[Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
 
   protected var tables: Map[Key, Either[Table[Int, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -273,11 +273,11 @@ class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) exte
         }
         IsSound.Sound
 
-  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def init(key: Key, entries: Seq[Entry], entryOffset: Topped[Int], tableOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def fill(key: Key, entry: Entry, tableOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Topped[Int], srcOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
 
 object SizedConstantTable:

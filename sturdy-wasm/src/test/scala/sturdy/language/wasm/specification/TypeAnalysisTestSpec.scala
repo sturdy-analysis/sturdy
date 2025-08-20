@@ -85,11 +85,11 @@ class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: B
       constExprToAVals
 
   spectest.foreach{ mod =>
-    val modInst = cInterp.initializeModule(mod)
+    val modInst = cInterp.instantiateModule(mod)
     cCurrent = modInst
     cImports += "spectest" -> modInst
 
-    val amodInst = aInterp.initializeModule(mod)
+    val amodInst = aInterp.instantiateModule(mod)
     aCurrent = amodInst
     aImports += "spectest" -> amodInst
   }
@@ -175,12 +175,12 @@ class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: B
       case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =
-    val cModInst = cInterp.initializeModule(mod, cImports)
+    val cModInst = cInterp.instantiateModule(mod, cImports)
     id match
       case None => // nothing
       case Some(name) => cModules += name -> cModInst
     cCurrent = cModInst
-    val aModInst = aInterp.initializeModule(mod, aImports)
+    val aModInst = aInterp.instantiateModule(mod, aImports)
     id match
       case None => // nothing
       case Some(name) => aModules += name -> aModInst
@@ -193,7 +193,7 @@ class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: B
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
         cInterp.failure.fallible {
-          cInterp.initializeModule(mod, cImports)
+          cInterp.instantiateModule(mod, cImports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
@@ -203,7 +203,7 @@ class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: B
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
         aInterp.failure.fallible {
-          aInterp.initializeModule(mod, aImports)
+          aInterp.instantiateModule(mod, aImports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")

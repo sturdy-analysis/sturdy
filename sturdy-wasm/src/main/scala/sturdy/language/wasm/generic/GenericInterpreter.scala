@@ -145,7 +145,7 @@ given finiteFixIn: Finite[FixIn] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]:
 
-  type Elem = Seq[V]
+  type Elem = Seq[RefV]
 
   // fixpoint
   val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[V]]
@@ -170,7 +170,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   val memory: Memory[MemoryAddr, Addr, Bytes, Size, J]
   val globals: DecidableSymbolTable[Unit, GlobalAddr, V]
   val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J]
-  val tables: SizedSymbolTable[V, TableAddr, Index, RefV, Size, J]
+  val tables: SizedSymbolTable[TableAddr, Index, RefV, Size, J]
   val callFrame: MutableCallFrame[FrameData, Int, V, InstLoc, MayJoin.NoJoin]
   val except: Except[WasmException[V], ExcV, J]
   val failure: Failure
@@ -265,22 +265,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val tableSize = tables.size(toTableAddr(ix))
         val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, offset, n), sizeToVal(tableSize))
         branchOpsUnit.boolBranch(offsetCheck)(fail(TableAccessOutOfBounds, "Invalid table.fill access")) {
-          tables.fillTable(toTableAddr(ix), valToRef(ref, module.functions), offset, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
+          tables.fill(toTableAddr(ix), valToRef(ref, module.functions), valToIdx(offset), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.fill access"))
         }
       case TableCopy(x, y) =>
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        tables.copy(toTableAddr(x), toTableAddr(y), d, s, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
+        tables.copy(toTableAddr(x), toTableAddr(y), valToIdx(d), valToIdx(s), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.copy access"))
       case TableInit(elementIndex, tableIndex) =>
         val elem = elems.get((), ElemAddr(elementIndex)).getOrElse(fail(TableAccessOutOfBounds, s"Element at index $elementIndex could not be found"))
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        val refs = elem.map(funcIx =>
-          tables.getOrElse(module.tableAddrs(tableIndex), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
-        ).toVector
-        tables.init(toTableAddr(tableIndex), refs, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
+        tables.init(toTableAddr(tableIndex), elem, valToIdx(s), valToIdx(d), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
 
       case ElemDrop(el) =>
         elems.drop((), ElemAddr(el))
@@ -586,6 +583,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterHostFunction(FuncId(mod, ix), hostFunc)
         }))
+      case FunctionInstance.Null =>
+        fail(WasmFailure.InvocationError, "Cannot invoke \"null\" function")
 
   private def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
@@ -791,29 +790,33 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     (funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
-  def initializeModule(module: Module,
-                       imports: Imports = Map.empty,
-                       moduleId: Option[Any] = None,
-                       hostModules: HostModules = defaultHostModules): ModuleInstance = external {
+  def instantiateModule(module: Module,
+                        imports: Imports = Map.empty,
+                        moduleId: Option[Any] = None,
+                        hostModules: HostModules = defaultHostModules): ModuleInstance = external {
     initializeThis()
 
     val modInst = new ModuleInstance(moduleId)
     val (funcImports, globImports, globTypes, tabImports, memImpors) = resolveImports(module, imports, hostModules)
 
+    // First allocate exports
+    allocExports(module, modInst)
+
+    // Then allocate data of current module
+    allocFunctions(module, modInst, funcImports)
+    allocTables(module, modInst, tabImports)
+    allocMemory(module, modInst, memImpors)
+
+    // Push initial frame to stack
     var loc = InstLoc.InInit(modInst, 0)
-    initializeGlobalTypes(modInst, globTypes)
-    initializeFunctions(module, modInst, funcImports)
-    initializeTables(module, modInst, tabImports)
-    initializeExports(module, modInst)
     callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-      loc = initializeGlobals(module, modInst, globImports, loc)
-      initializeElements(module, modInst, loc)
+      loc = instantiateGlobals(module, modInst, globImports, globTypes, loc)
+      instantiateElements(module, modInst, loc)
+      loc = instantiateData(module, modInst, loc)
     }
-    callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-      initializeMemory(module, modInst, memImpors)
-      loc = initializeData(module, modInst, loc)
-    }
+
     invokeStartFunction(module, modInst)
+
     modInst
   }
 
@@ -825,7 +828,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       initialized = true
     }
 
-  private inline def initializeExports(module: Module, modInst: ModuleInstance): Unit = {
+  private inline def allocExports(module: Module, modInst: ModuleInstance): Unit = {
     modInst.exports = module.exports.map {
       case Export(fieldName, kind, index) =>
         kind match {
@@ -837,7 +840,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
   }
 
-  private inline def initializeFunctions[J[_] <: MayJoin[_], FunV, FuncIx, ExcV, Size, Bytes, Addr, V](module: Module, modInst: ModuleInstance, funcImports: Vector[FunctionInstance]): Unit = {
+  private inline def allocFunctions(module: Module, modInst: ModuleInstance, funcImports: Vector[FunctionInstance]): Unit = {
     // types
     modInst.functionTypes = module.types
 
@@ -849,13 +852,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }.foreach(modInst.addFunction)
   }
 
-  private inline def initializeGlobalTypes(modInst: ModuleInstance, globTypes: Vector[GlobalType]): Unit =
+  private inline def allocGlobalTypes(modInst: ModuleInstance, globTypes: Vector[GlobalType]): Unit =
     modInst.globalTypes = globTypes
 
-  private inline def initializeGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], initLoc: InstLoc)(using Fixed): InstLoc = {
+  private inline def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc = {
     var loc = initLoc
 
     modInst.globalAddrs = globImports
+    modInst.globalTypes = globImportsTypes
+
     val globValues = module.globals.map { glob =>
       val id = BlockId(glob)
       loc = modInst.registerBlockSizes(id, loc, glob.init)
@@ -877,18 +882,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     loc
   }
 
-  private inline def initializeTables(module: Module, modInst: ModuleInstance, tabImports: Vector[TableAddr]): Unit = {
+  private inline def allocTables(module: Module, modInst: ModuleInstance, tabImports: Vector[TableAddr]): Unit = {
     // tables
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
         tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(i32ops.integerLit(min)), max.map(m => valToSize(i32ops.integerLit(m)))))
+        tables.fill(tabAddr, makeNullRefV(ty), valToIdx(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min)))
         tabCount += 1
         tabAddr
     }
   }
 
-  private inline def initializeMemory(module: Module, modInst: ModuleInstance, memImports: Vector[MemoryAddr]): Unit = {
+  private inline def allocMemory(module: Module, modInst: ModuleInstance, memImports: Vector[MemoryAddr]): Unit = {
     // memory
     modInst.memoryAddrs = memImports ++ module.mems.map {
       case MemType(Limits(min, max)) =>
@@ -896,12 +902,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val sizeLimit = max.map(i => valToSize(i32ops.integerLit(i)))
         val memAddr = MemoryAddr(memCount)
         memory.putNew(memAddr, initSize, sizeLimit)
+        memory.fill(memAddr, valToAddr(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min * 65536)), liftBytes(Seq(0)))
         memCount += 1
         memAddr
     }
   }
 
-  private inline def initializeData(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc = {
+  private inline def instantiateData(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc = {
     var loc = initLoc
     modInst.data = module.data.map {
       case Data(init, _) => DataInstance(init.toByteVector)
@@ -913,31 +920,28 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case DataMode.Active(memoryIdx, offset) =>
             val id = BlockId(data)
             loc = modInst.registerBlockSizes(id, loc, offset)
-            callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-              val baseAddr = evalInstructionSequence(id, offset, modInst, loc)
-              stack.push(baseAddr)
-              stack.push(num.evalNumeric(i32.Const(0)))
-              stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
-              evalMemoryInst(MemoryInit(i))
-              evalMemoryInst(DataDrop(i))
-            }
+            val baseAddr = evalInstructionSequence(id, offset, modInst, loc)
+            stack.push(baseAddr)
+            stack.push(num.evalNumeric(i32.Const(0)))
+            stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
+            evalMemoryInst(MemoryInit(i))
+            evalMemoryInst(DataDrop(i))
         }
     }
 
     loc
   }
 
-  private inline def initializeElements(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc =
+  private inline def instantiateElements(module: Module, modInst: ModuleInstance, initLoc: InstLoc)(using Fixed): InstLoc =
     var loc = initLoc
     elems.putNew(())
-
 
     module.elem.zipWithIndex.foreach {
       case (elem, i) =>
         val id = BlockId(elem)
         val elemRefs = elem.init.map(expr => {
           loc = modInst.registerBlockSizes(id, loc, expr)
-          evalInstructionSequence(id, expr, modInst, loc)
+          valToRef(evalInstructionSequence(id, expr, modInst, loc), modInst.functions)
         })
         elems.set((), ElemAddr(i), elemRefs)
     }
@@ -947,20 +951,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         mode match {
           case ElemMode.Passive() => ()
           case ElemMode.Declarative() =>
-            callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-              evalTableInst(ElemDrop(i), loc)
-            }
+            evalTableInst(ElemDrop(i), loc)
           case ElemMode.Active(tableIdx, offset) =>
             val id = BlockId(module.elem(i))
             loc = modInst.registerBlockSizes(id, loc, offset)
-            callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-              val baseIdx = evalInstructionSequence(id, offset, modInst, loc)
-              stack.push(baseIdx)
-              stack.push(num.evalNumeric(i32.Const(0)))
-              stack.push(num.evalNumeric(i32.Const(elem.init.length)))
-              evalTableInst(TableInit(i, tableIdx), loc)
-              evalTableInst(ElemDrop(i), loc)
-            }
+            val baseIdx = evalInstructionSequence(id, offset, modInst, loc)
+            stack.push(baseIdx)
+            stack.push(num.evalNumeric(i32.Const(0)))
+            stack.push(num.evalNumeric(i32.Const(elem.init.length)))
+            evalTableInst(TableInit(i, tableIdx), loc)
+            evalTableInst(ElemDrop(i), loc)
         }
     }
 

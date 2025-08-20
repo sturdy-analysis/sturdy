@@ -23,7 +23,7 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   val module = Parsing.fromText(path)
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   interp.failure.fallible(
     interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))))
   )

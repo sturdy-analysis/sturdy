@@ -174,7 +174,7 @@ class IntervalAnalysisCFGTest extends AnyFlatSpec, Matchers:
     val oldCfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
-    val modInst = interp.initializeModule(module, moduleId = Some("mod"))
+    val modInst = interp.instantiateModule(module, moduleId = Some("mod"))
     val result = interp.failure.fallible(
       interp.invokeExported(modInst, funName, args)
     )
@@ -190,7 +190,7 @@ class IntervalAnalysisCFGTest extends AnyFlatSpec, Matchers:
     val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty,
       WasmConfig(FixpointConfig(stack = stackConfig, iter = fix.iter.Config.Innermost)))
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
-    val modInst = interp.initializeModule(module, moduleId = Some("mod"))
+    val modInst = interp.instantiateModule(module, moduleId = Some("mod"))
     val constArgs: List[ConstantAnalysis.Value] = args.map {
       case Value.TopValue => ConstantAnalysis.Value.TopValue
       case Value.Num(IntervalAnalysis.NumValue.Int32(iv)) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(iv.toConstant))

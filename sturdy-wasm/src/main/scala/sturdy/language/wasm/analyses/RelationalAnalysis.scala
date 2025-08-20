@@ -133,7 +133,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def makeNullRefV(t: ReferenceType): RefV = Powerset(ExternReference.Null)
+    override def makeNullRefV(t: ReferenceType): RefV =
+      t match
+        case ReferenceType.FuncRef => Powerset(FunctionInstance.Null)
+        case ReferenceType.ExternRef => Powerset(ExternReference.Null)
+
     override def isNullRef(r: Value): Value =
       r match
         case Value.Ref(RefValue.RefValue(f)) =>
@@ -144,16 +148,21 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               makeBool(ApronBool.Constant(Topped.Top))
           else
             makeBool(ApronBool.Constant(Topped.Actual(false)))
+        case Value.TopValue => makeBool(ApronBool.Constant(Topped.Top))
+        case _ => makeBool(ApronBool.Constant(Topped.Actual(false)))
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
-    override def refVToFunV(r: RefV): FunV = ???
+    override def refVToFunV(r: RefV): FunV = Powerset[FunctionInstance](r.set.flatMap {
+      case f: FunctionInstance => Iterable(f)
+      case _: ExternReference => Iterable.empty
+    })
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV =
       v match
         case Value.Ref(RefValue.RefValue(f)) => f
         case Value.TopValue => Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
-    override def refToVal(r: RefV): Value = ???
+    override def refToVal(r: RefV): Value = Ref(RefValue.RefValue(r))
     override def liftBytes(b: Seq[Byte]): Bytes =
       Bytes.StoredBytes(
         value = b.map(x => (Num(Int32(NumExpr(ApronExpr.lit(x.toInt, I32Type)))), 1)).toList,
@@ -316,8 +325,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           AddrCtx.Global(sym.addr)
     ))
 
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem]
-    val tables: IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure

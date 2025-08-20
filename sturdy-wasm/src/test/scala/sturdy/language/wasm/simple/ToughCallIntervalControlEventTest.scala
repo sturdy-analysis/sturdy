@@ -141,7 +141,7 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
     val res = interp.failure.fallible {
       interp.initializeThis()
       host.foreach(_._2(interp.globals))
-      val modInst = interp.initializeModule(module, host.map(m => "host" -> m._1).toMap)
+      val modInst = interp.instantiateModule(module, host.map(m => "host" -> m._1).toMap)
       if (modInst.exportedFunctions.contains("main")) {
         interp.invokeExported(modInst, "main", List())
       } else {

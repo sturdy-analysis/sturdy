@@ -101,8 +101,8 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem]
-    val tables: SizedUpperBoundSymbolTable[Value, TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: SizedUpperBoundSymbolTable[TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

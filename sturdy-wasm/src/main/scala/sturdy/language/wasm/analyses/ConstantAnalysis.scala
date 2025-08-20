@@ -158,14 +158,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem]
-    val tables: ConstantIntervalMappedSymbolTable[Value, TableAddr, RefV] = new ConstantIntervalMappedSymbolTable[Value, TableAddr, RefV](extractor = (v: Value) => {
-      val i32Val = v.asInt32
-      i32Val match {
-        case Topped.Actual(i) => NumericInterval(i, i)
-        case Topped.Top => NumericInterval(Int.MinValue, Int.MaxValue)
-      }
-    })
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: ConstantIntervalMappedSymbolTable[TableAddr, RefV] = new ConstantIntervalMappedSymbolTable[TableAddr, RefV]
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)

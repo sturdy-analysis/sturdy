@@ -60,6 +60,7 @@ final class AlignedMemory
   private val maxPages: Size = sizeIntOps.integerLit(ConcreteMemory.maxPageNum)
 
   var memories: Map[Key, Mem[Context, Addr, Size, Val]] = Map()
+  var fillBytes: Option[Bytes[Val]] = None
 
   override def read(key: Key, readAddr: Addr, length: Int): JOption[WithJoin, Bytes[Val]] =
     val mem = memories(key)
@@ -68,7 +69,7 @@ final class AlignedMemory
 
     val readBytes: Bytes[Val] =
       if(! regions.hasNext)
-        defaultBytes
+        fillBytes.get
       else
         regions
           .map{
@@ -101,7 +102,7 @@ final class AlignedMemory
   override def write(key: Key, addr: Addr, bytes: Bytes[Val]): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
-        val Mem(store, numPages, pageLimit) = memories(key)
+        val Mem(store, fillBytes, numPages, pageLimit) = memories(key)
 
         val newRegion = MemoryRegion(
           startAddr = addr,
@@ -117,7 +118,7 @@ final class AlignedMemory
             newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
           }
         }
-        memories += key -> Mem(newStore, numPages, pageLimit)
+        memories += key -> Mem(newStore, fillBytes, numPages, pageLimit)
 
         if(rest.isEmpty) {
           addressLimits.ifAddrLeSize(addr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), sizeIntOps.integerLit(byteSize))) {
@@ -137,7 +138,14 @@ final class AlignedMemory
       case bs: ReadBytes[Val] => throw IllegalArgumentException(s"Expected StoredBytes, but got $bytes")
 
   override def copy(key: Key, srcAddr: Addr, dstAddr: Addr, byteAmount: Size): JOptionA[Unit] = ???
-  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Val]): JOptionA[Unit] = ???
+
+  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Val]): JOption[WithJoin, Unit] =
+    val Mem(store, fillBytes, numPages, pageLimit) = memories(key)
+    addressLimits.ifAddrLeSize(addr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), byteAmount)) {
+      memories += key -> Mem(store, Join(fillBytes, Some(value)).get, numPages, pageLimit)
+      ()
+    }
+
   override def init(key: Key, targetAddr: Addr, sourceAddr: Addr, byteAmount: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
     dataBytes match
       case StoredBytes(valueList, byteOrder) =>
@@ -184,7 +192,7 @@ final class AlignedMemory
     memories(key).numPages
 
   override def grow(key: Key, deltaPages: Size): JOption[WithJoin, Size] =
-    val Mem(addressRanges, numPages, pageLimit) = memories(key)
+    val Mem(addressRanges, fillBytes, numPages, pageLimit) = memories(key)
     val newNumPages = sizeIntOps.add(numPages, deltaPages)
 
     val (resultPages, returnValue) = addressLimits.ifSizeLeLimit(numPages, sizeIntOps.min(maxPages, pageLimit)) {
@@ -192,12 +200,12 @@ final class AlignedMemory
     } {
       (numPages, JOptionA.None[Size]())
     }
-    memories += key -> Mem(addressRanges, resultPages, pageLimit)
+    memories += key -> Mem(addressRanges, fillBytes, resultPages, pageLimit)
 
     returnValue
 
   override def putNew(key: Key, initSize: Size, sizeLimit: Option[Size]): Unit =
-    memories += key -> Mem[Context,Addr,Size,Val](SortedMap.empty, initSize, sizeLimit.getOrElse(Join(sizeIntOps.integerLit(0), maxPages).get))
+    memories += key -> Mem[Context,Addr,Size,Val](SortedMap.empty, None, initSize, sizeLimit.getOrElse(Join(sizeIntOps.integerLit(0), maxPages).get))
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     memories.values.flatMap(_.addressIterator(valueIterator)).iterator
@@ -219,6 +227,7 @@ final class AlignedMemory
   override def widen: Widen[State] = (s1: State,s2:State) => Profiler.addTime("RelationalMemoryState.combine") { Widen(s1.state,s2.state).map(RelationalMemoryState(_)) }
 
 case class Mem[Ctx, Addr, Size, Val](store: SortedMap[PhysicalAddress[Ctx], MemoryRegion[Addr, Val]],
+                                     fillBytes: Option[Bytes[Val]],
                                      numPages: Size,
                                      pageLimit: Size):
   def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
@@ -269,9 +278,10 @@ given CombineMem[Context: Finite, Addr, Size, Val, W <: Widening](using combineA
     else
       for {
         store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Val], W](v1.store, v2.store)
+        fillBytes <- Combine(v1.fillBytes, v2.fillBytes)
         numPages <- combineSize(v1.numPages, v2.numPages)
         pageLimit <- combineSize(v1.pageLimit, v2.pageLimit)
-      } yield (Mem(store, numPages, pageLimit))
+      } yield (Mem(store, fillBytes, numPages, pageLimit))
 
 given CombineRegion[Addr, Val, W <: Widening](using combineAddr: Combine[Addr, W], combineVal: Combine[Val,W]): Combine[MemoryRegion[Addr, Val], W] with
   override def apply(v1: MemoryRegion[Addr, Val], v2: MemoryRegion[Addr, Val]): MaybeChanged[MemoryRegion[Addr, Val]] =

@@ -43,7 +43,7 @@ class TaintRunnable(set: Either[Throwable, RRecord] => Unit,
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     interp.failure.fallible({
       scope match
         case AnalysisScope.SingleFunction(id) =>
@@ -95,7 +95,7 @@ class TypeRunnable(set: Either[Throwable, RRecord] => Unit,
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     interp.failure.fallible({
       scope match
         case AnalysisScope.SingleFunction(id) =>
@@ -187,7 +187,7 @@ class IntervalRunnable(set: Either[Throwable, RRecord] => Unit,
     val cfg = IntervalAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = IntervalAnalysis.constantInstructions(interp)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     interp.failure.fallible({
       scope match
         case AnalysisScope.SingleFunction(id) =>
@@ -291,7 +291,7 @@ class ConstantRunnable(set: Either[Throwable, RRecord] => Unit,
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     interp.failure.fallible({
       scope match
         case AnalysisScope.SingleFunction(id) =>
