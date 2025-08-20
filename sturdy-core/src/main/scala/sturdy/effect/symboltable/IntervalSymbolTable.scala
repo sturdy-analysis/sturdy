@@ -3,8 +3,7 @@ package sturdy.effect.symboltable
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{*, given}
-import sturdy.effect.ComputationJoiner
-import sturdy.effect.Effect
+import sturdy.effect.{ComputationJoiner, Effect, EffectStack}
 import sturdy.effect.symboltable.SizedConstantTable.Tables
 import sturdy.effect.symboltable.SizedSymbolTable.Limit
 import sturdy.values.*
@@ -14,25 +13,25 @@ import sturdy.values.integer.{IntegerOps, IntervalRange}
 import scala.util.boundary
 import scala.util.boundary.break
 
-class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size]
+class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size: IntervalRange](using EffectStack)
     extends SizedSymbolTable[Key, Symbol, Entry, Size, WithJoin], Effect:
 
   private val constantSymbolTable: SizedConstantTable[Key, Entry] = new SizedConstantTable()
 
-  override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
-    IntervalRange(symbol) match
+  override def get(key: Key, symbol: Symbol): JOption[WithJoin, Entry] =
+    IntervalRange[Symbol].range(symbol) match
       case Some(range) =>
         val symbols = constantSymbolTable.symbols(key)
         if(symbols.isEmpty)
           constantSymbolTable.get(key, Topped.Top)
         else
           intersect(range,Range.inclusive(symbols.min,symbols.max)).foldLeft(JOptionA.none)(
-            (res, i) => Join(res, constantSymbolTable.get(key, Topped.Actual(i))).get
+            (res, i) => Join(res, constantSymbolTable.get(key, Topped.Actual(i)).asInstanceOf[JOptionA[Entry]]).get
           )
       case None => constantSymbolTable.get(key, Topped.Top)
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOptionA[Unit] = {
-    IntervalRange(symbol) match
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOption[WithJoin, Unit] = {
+    IntervalRange[Symbol].range(symbol) match
       case Some(range) => range.foreach(
         i => constantSymbolTable.set(key, Topped.Actual(i), newEntry)
       )
@@ -48,12 +47,13 @@ class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size]
     // TODO: currently ignores limit.
     constantSymbolTable.putNew(key)
 
-  override def size(key: Key): Size = ???
+  override def size(key: Key): Size =
+    IntervalRange[Size].fromTop(constantSymbolTable.size(key))
 
   override def grow(key: Key, newSize: Size, initEntry: Entry): JOption[WithJoin, Size] = ???
 
   override def init(key: Key, entries: Seq[Entry], entryOffset: Symbol, tableOffset: Symbol, amount: Size): JOption[WithJoin, Unit] =
-    (IntervalRange(entryOffset), IntervalRange(tableOffset)) match
+    (IntervalRange[Symbol].range(entryOffset), IntervalRange[Symbol].range(tableOffset)) match
       case (_, None) | (None, _) =>
         for(entry <- entries)
           constantSymbolTable.set(key, Topped.Top, entry)
@@ -71,7 +71,19 @@ class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size]
 
 
   override def fill(key: Key, entry: Entry, tableOffset: Symbol, amount: Size): JOption[WithJoin, Unit] =
-    constantSymbolTable.set(key, Topped.Top, entry)
+    (IntervalRange[Symbol].range(tableOffset), IntervalRange[Size].range(amount)) match
+      case (_, None) | (None, _) =>
+        constantSymbolTable.set(key, Topped.Top, entry)
+      case (Some(tableOffsetRange), Some(amountRange)) =>
+        if (tableOffsetRange.size == 1 && amountRange.size == 1) {
+          tableOffsetRange.start.until(tableOffsetRange.start + amountRange.start).toList.foreach { idx =>
+            constantSymbolTable.set(key, Topped.Actual(idx), entry)
+          }
+        } else {
+          constantSymbolTable.set(key, Topped.Top, entry)
+        }
+
+    JOptionA.Some(()) // TODO: Return None, when tableOffset + amount > tableSize
 
   override def copy(dstKey: Key, srcKey: Key, dstOffset: Symbol, srcOffset: Symbol, amount: Size): JOption[WithJoin, Unit] = ???
 

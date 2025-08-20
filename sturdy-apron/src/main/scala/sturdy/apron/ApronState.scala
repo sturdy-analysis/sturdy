@@ -13,7 +13,7 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.data.{*, given}
 import sturdy.util.Lazy
-import sturdy.values.integer.NumericInterval
+import sturdy.values.integer.{IntervalRange, NumericInterval}
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -337,3 +337,17 @@ final class ApronRecencyState
 
   override def toString: String =
     relationalStore.abstract1.toString
+
+given ApronExprIntervalRange[Addr, Type: ApronType](using apronState: ApronState[Addr, Type]): IntervalRange[ApronExpr[Addr,Type]] with
+  var tpe: Type = _
+
+  override def range(expr: ApronExpr[Addr, Type]): Option[Range] =
+    tpe = expr._type
+    IntervalRange[Interval].range(apronState.getInterval(expr))
+
+  override def fromInt(l: Int, h: Int): ApronExpr[Addr, Type] = ApronExpr.interval(l, h, tpe)
+
+  override def fromTop(t: Topped[Int]): ApronExpr[Addr, Type] =
+    t match
+      case Topped.Actual(x) => ApronExpr.interval(x, x, tpe)
+      case Topped.Top => ApronExpr.top(tpe)
