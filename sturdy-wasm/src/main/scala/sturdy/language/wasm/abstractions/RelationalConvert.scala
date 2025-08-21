@@ -7,7 +7,7 @@ import sturdy.effect.bytememory.Bytes.*
 import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
-import sturdy.values.config.{Bits, BytePadding, BytesSize}
+import sturdy.values.config.{BitSign, BytePadding, BytesSize}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
@@ -42,15 +42,15 @@ trait RelationalConvert extends RelationalMemory:
     def unapply(v: List[(Value,Int)]): Option[(VTo,Int)]
 
   private final class ConvertBytesInteger[To, VTo](expectedByteSize: Int, top: VTo, extract: ExtractFromVal[VTo])
-    extends Convert[Seq[Byte], To, Bytes, VTo, BytesSize && SomeCC[ByteOrder] && Bits]:
-    override def apply(from: Bytes, conf: BytesSize && SomeCC[ByteOrder] && Bits): VTo =
+    extends Convert[Seq[Byte], To, Bytes, VTo, BytesSize && SomeCC[ByteOrder] && BitSign]:
+    override def apply(from: Bytes, conf: BytesSize && SomeCC[ByteOrder] && BitSign): VTo =
       val toByteSize && SomeCC(toByteOrder, _) && bits = conf
       from match
         case ReadBytes(Topped.Actual(extract((v,fromByteSize))), Topped.Actual(fromByteOrder))
           if (fromByteSize == expectedByteSize
             && toByteSize.bytes == expectedByteSize
             && fromByteOrder == toByteOrder
-            && bits == Bits.Signed) => v
+            && bits == BitSign.Signed) => v
         case _ => top
 
   given ConvertBytesI32: ConvertBytesInt[Bytes, I32] = ConvertBytesInteger[Int, I32](
@@ -109,5 +109,5 @@ trait RelationalConvert extends RelationalMemory:
   )
 
   given ConvertBytesV128: ConvertBytesVec[Bytes, V128] with
-    override def apply(from: Bytes, conf: BytesSize && BytePadding && Bits && SomeCC[ByteOrder]): V128 =
+    override def apply(from: Bytes, conf: BytesSize && BytePadding && BitSign && SomeCC[ByteOrder]): V128 =
       Topped.Top

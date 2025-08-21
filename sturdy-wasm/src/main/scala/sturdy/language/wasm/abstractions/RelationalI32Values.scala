@@ -7,7 +7,7 @@ import sturdy.effect.failure.Failure
 import sturdy.language.wasm.Interpreter
 import sturdy.data.{*,given}
 import sturdy.util.Lazy
-import sturdy.values.config.{Bits, BytesSize, Overflow}
+import sturdy.values.config.{BitSign, BytesSize, Overflow}
 import sturdy.values.convert.{&&, Convert, LiftedConvert, NilCC, SomeCC}
 import sturdy.values.floating.{ConvertDoubleInt, ConvertFloatInt}
 import sturdy.values.integer.{*, given}
@@ -129,19 +129,19 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     LiftedUnsignedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asNumExpr, inject = ApronBool.Constraint(_))
 
   given I32ConvertIntLong(using ApronState[VirtAddr, Type], ConvertIntLong[ApronExpr[VirtAddr, Type], I64]): ConvertIntLong[I32, I64] =
-    LiftedConvert[Int, Long, I32, I64, ApronExpr[VirtAddr, Type], I64, Bits](extract = _.asNumExpr, inject = x => x)
+    LiftedConvert[Int, Long, I32, I64, ApronExpr[VirtAddr, Type], I64, BitSign](extract = _.asNumExpr, inject = x => x)
 
   given I32ConvertIntFloat(using ApronState[VirtAddr, Type], ConvertIntFloat[ApronExpr[VirtAddr, Type], F32]): ConvertIntFloat[I32, F32] =
-    LiftedConvert[Int, Float, I32, F32, ApronExpr[VirtAddr, Type], F32, Bits](extract = _.asNumExpr, inject = x => x)
+    LiftedConvert[Int, Float, I32, F32, ApronExpr[VirtAddr, Type], F32, BitSign](extract = _.asNumExpr, inject = x => x)
 
   given I32ConvertIntDouble(using ApronState[VirtAddr, Type], ConvertIntDouble[ApronExpr[VirtAddr, Type], F64]): ConvertIntDouble[I32, F64] =
-    LiftedConvert[Int, Double, I32, F64, ApronExpr[VirtAddr, Type], F64, Bits](extract = _.asNumExpr, inject = x => x)
+    LiftedConvert[Int, Double, I32, F64, ApronExpr[VirtAddr, Type], F64, BitSign](extract = _.asNumExpr, inject = x => x)
 
   given I32ConvertLongInt(using ApronState[VirtAddr, Type], ConvertLongInt[I64, ApronExpr[VirtAddr, Type]]): ConvertLongInt[I64, I32] =
     LiftedConvert[Long, Int, I64, I32, I64, ApronExpr[VirtAddr, Type], NilCC.type](extract = x => x, inject = NumExpr(_))
 
   given I32ConvertFloatInt(using ApronState[VirtAddr, Type], ConvertFloatInt[F32, ApronExpr[VirtAddr, Type]]): ConvertFloatInt[F32, I32] =
-    LiftedConvert[Float, Int, F32, I32, F32, ApronExpr[VirtAddr, Type], Overflow && Bits](extract = x => x, inject = NumExpr(_))
+    LiftedConvert[Float, Int, F32, I32, F32, ApronExpr[VirtAddr, Type], Overflow && BitSign](extract = x => x, inject = NumExpr(_))
 
   given I32ConvertDoubleInt(using ApronState[VirtAddr, Type], ConvertDoubleInt[F64, ApronExpr[VirtAddr, Type]]): ConvertDoubleInt[F64, I32] =
-    LiftedConvert[Double, Int, F64, I32, F64, ApronExpr[VirtAddr, Type], Overflow && Bits](extract = x => x, inject = NumExpr(_))
+    LiftedConvert[Double, Int, F64, I32, F64, ApronExpr[VirtAddr, Type], Overflow && BitSign](extract = x => x, inject = NumExpr(_))

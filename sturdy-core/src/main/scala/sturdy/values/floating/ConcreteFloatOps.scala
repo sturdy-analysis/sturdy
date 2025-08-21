@@ -3,7 +3,7 @@ package sturdy.values.floating
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config
-import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{BitSign, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.{&&, *}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
@@ -109,7 +109,7 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         fa.fail(ConversionFailure, s"float $f out of long range")
       else
         f.toLong
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Signed) =>
       if (f.isNaN)
         0
       else if (f >= -Long.MinValue.toFloat)

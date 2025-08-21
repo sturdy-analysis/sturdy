@@ -30,7 +30,7 @@ trait SizedDecidableSymbolTable[Value, Key, Entry] extends SizedSymbolTable[Valu
   }
 
   override def size(key: Key): Int =
-    tables(key).entries.size
+    tables(key).limit.min
 
   override def grow(key: Key, newSize: Int, initEntry: Entry): JOptionC[Int] =
     val oldTable = tables(key)

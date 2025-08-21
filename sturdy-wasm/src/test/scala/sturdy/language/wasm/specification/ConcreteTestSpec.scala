@@ -73,10 +73,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
       case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
-      case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
-      case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
-      case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
-      case (Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
+      case (Value.Ref(ConcreteInterpreter.RefValue.RefValue(r1)), Value.Ref(ConcreteInterpreter.RefValue.RefValue(r2))) => r1 == r2
       case _ => false
     }
 

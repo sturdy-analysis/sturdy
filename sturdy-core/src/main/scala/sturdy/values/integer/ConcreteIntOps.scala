@@ -102,7 +102,7 @@ given ConcreteConvertIntLong(using failure: Failure): ConvertIntLong[Int, Long] 
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(i: Int, conf: config.Bits): Long = conf match
+  def apply(i: Int, conf: config.BitSign): Long = conf match
     case config.BitSign.Signed => i.toLong
     case config.BitSign.Unsigned => i & 0X00000000FFFFFFFFL
     case _ =>
@@ -126,7 +126,7 @@ given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(i: Int, conf: config.Bits): Double = conf match
+  def apply(i: Int, conf: config.BitSign): Double = conf match
     case config.BitSign.Signed => i.toDouble
     case config.BitSign.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
     case config.BitSign.Raw => JDouble.longBitsToDouble(i)

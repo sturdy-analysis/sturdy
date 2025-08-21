@@ -127,10 +127,7 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
-      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
-      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
-      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
+      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r2))) => r1 == r2
       case (ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
       case _ => false
     }

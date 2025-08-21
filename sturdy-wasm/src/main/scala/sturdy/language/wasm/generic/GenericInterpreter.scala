@@ -278,8 +278,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val n = stack.popOrAbort()
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
-        val refs = elem.map(funcIx =>
-          tables.getOrElse(module.tableAddrs(tableIndex), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+        val refs = elem.map(refV =>
+          valToRef(refV, module.functions)
         ).toVector
         tables.init(toTableAddr(tableIndex), refs, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
 
@@ -884,6 +884,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
         tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(i32ops.integerLit(min)), max.map(m => valToSize(i32ops.integerLit(m)))))
+        for (i <- 0 until min)
+          tables.set(tabAddr, valToIdx(num.evalNumeric(i32.Const(i))), makeNullRefV(ty))
         tabCount += 1
         tabAddr
     }

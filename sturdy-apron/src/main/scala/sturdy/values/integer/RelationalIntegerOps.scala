@@ -15,7 +15,7 @@ import ApronBool.*
 import sturdy.effect.EffectStack
 import sturdy.util.Lazy
 import sturdy.{IsSound, Soundness}
-import sturdy.values.config.{Bits, UnsupportedConfiguration}
+import sturdy.values.config.{BitSign, UnsupportedConfiguration}
 import sturdy.values.integer.OverflowHandling.WrapAround
 
 enum OverflowHandling:

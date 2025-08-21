@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.language.wasm.generic.WasmFailure
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.config.{Bits, Overflow}
+import sturdy.values.config.{BitSign, Overflow}
 import sturdy.values.convert.{&&, LiftedConvert, NilCC}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
@@ -103,26 +103,26 @@ trait RelationalTypes:
 
   given BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _ => BaseType[Boolean], inject = _ => Type.I32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asI32, inject = _ => Type.I64Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], BitSign](extract = _.asI32, inject = _ => Type.I64Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntFloat[Type, Type] = LiftedConvert[Int, Float, Type, Type, BaseType[Int], BaseType[Float], Bits](extract = _.asI32, inject = _ => Type.F32Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntFloat[Type, Type] = LiftedConvert[Int, Float, Type, Type, BaseType[Int], BaseType[Float], BitSign](extract = _.asI32, inject = _ => Type.F32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntDouble[Type, Type] = LiftedConvert[Int, Double, Type, Type, BaseType[Int], BaseType[Double], Bits](extract = _.asI32, inject = _ => Type.F64Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntDouble[Type, Type] = LiftedConvert[Int, Double, Type, Type, BaseType[Int], BaseType[Double], BitSign](extract = _.asI32, inject = _ => Type.F64Type)
 
   given (using failure: Failure, effectStack: EffectStack): ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asI64, inject = _ => Type.I32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertLongFloat[Type, Type] = LiftedConvert[Long, Float, Type, Type, BaseType[Long], BaseType[Float], Bits](extract = _.asI64, inject = _ => Type.F32Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertLongFloat[Type, Type] = LiftedConvert[Long, Float, Type, Type, BaseType[Long], BaseType[Float], BitSign](extract = _.asI64, inject = _ => Type.F32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertLongDouble[Type, Type] = LiftedConvert[Long, Double, Type, Type, BaseType[Long], BaseType[Double], Bits](extract = _.asI64, inject = _ => Type.F64Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertLongDouble[Type, Type] = LiftedConvert[Long, Double, Type, Type, BaseType[Long], BaseType[Double], BitSign](extract = _.asI64, inject = _ => Type.F64Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertFloatInt[Type, Type] = LiftedConvert[Float, Int, Type, Type, BaseType[Float], BaseType[Int], Overflow && Bits](extract = _.asF32, inject = _ => Type.I32Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatInt[Type, Type] = LiftedConvert[Float, Int, Type, Type, BaseType[Float], BaseType[Int], Overflow && BitSign](extract = _.asF32, inject = _ => Type.I32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asF32, inject = _ => Type.I64Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && BitSign](extract = _.asF32, inject = _ => Type.I64Type)
 
   given (using failure: Failure, effectStack: EffectStack): ConvertFloatDouble[Type, Type] = LiftedConvert[Float, Double, Type, Type, BaseType[Float], BaseType[Double], NilCC.type](extract = _.asF32, inject = _ => Type.F64Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && Bits](extract = _.asF64, inject = _ => Type.I32Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && BitSign](extract = _.asF64, inject = _ => Type.I32Type)
 
-  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && Bits](extract = _.asF64, inject = _ => Type.I64Type)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && BitSign](extract = _.asF64, inject = _ => Type.I64Type)
 
   given (using failure: Failure, effectStack: EffectStack): ConvertDoubleFloat[Type, Type] = LiftedConvert[Double, Float, Type, Type, BaseType[Double], BaseType[Float], NilCC.type](extract = _.asF64, inject = _ => Type.F32Type)

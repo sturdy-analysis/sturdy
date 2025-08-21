@@ -4,7 +4,7 @@ import sturdy.values.convert.{&&, *}
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
-import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{BitSign, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 
@@ -110,7 +110,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         f.fail(ConversionFailure, s"double $d out of long range")
       else
         d.toLong
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Signed) =>
       if (d.isNaN)
         0
       else if (d >= -Long.MinValue.toDouble)

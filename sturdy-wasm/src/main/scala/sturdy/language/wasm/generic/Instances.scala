@@ -136,6 +136,7 @@ enum FunctionInstance:
     this match
       case Wasm(_, funcIx,_, tpe) => s"f$funcIx: ${toString(tpe)}"
       case Host(_, _, hostFun) => s"${hostFun.name}: ${toString(hostFun.funcType)}"
+      case Null => "Null FunctionInstance"
 
   private def toString(tpe: FuncType): String =
     s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"

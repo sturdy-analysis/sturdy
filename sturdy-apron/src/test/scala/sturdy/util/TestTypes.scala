@@ -4,7 +4,7 @@ import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
 import sturdy.values.booleans.{BooleanOps, LiftedBooleanOps}
-import sturdy.values.config.{Bits, Overflow}
+import sturdy.values.config.{BitSign, Overflow}
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.{*, given}
@@ -103,18 +103,18 @@ object TestTypes:
   given (using failure: Failure, effectStack: EffectStack): OrderingOps[Type, Type] = LiftedOrderingOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
   given (using failure: Failure, effectStack: EffectStack): EqOps[Type, Type] = LiftedEqOps[Type, Type, BaseType[Int], BaseType[Boolean]](extract = _.asInt, inject = _ => Type.BoolType)
   given (using failure: Failure, effectStack: EffectStack): BooleanOps[Type] = LiftedBooleanOps[Type, BaseType[Boolean]](extract = _.asBool, inject = _ => Type.BoolType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], Bits](extract = _.asInt, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntLong[Type, Type] = LiftedConvert[Int, Long, Type, Type, BaseType[Int], BaseType[Long], BitSign](extract = _.asInt, inject = _ => Type.LongType)
   given (using failure: Failure, effectStack: EffectStack): ConvertLongInt[Type, Type] = LiftedConvert[Long, Int, Type, Type, BaseType[Long], BaseType[Int], NilCC.type](extract = _.asLong, inject = _ => Type.IntType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && Bits](extract = _.asFloat, inject = _ => Type.LongType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertFloatInt[Type, Type] = LiftedConvert[Float, Int, Type, Type, BaseType[Float], BaseType[Int], Overflow && Bits](extract = _.asFloat, inject = _ => Type.IntType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && Bits](extract = _.asDouble, inject = _ => Type.LongType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && Bits](extract = _.asDouble, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatLong[Type, Type] = LiftedConvert[Float, Long, Type, Type, BaseType[Float], BaseType[Long], Overflow && BitSign](extract = _.asFloat, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertFloatInt[Type, Type] = LiftedConvert[Float, Int, Type, Type, BaseType[Float], BaseType[Int], Overflow && BitSign](extract = _.asFloat, inject = _ => Type.IntType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && BitSign](extract = _.asDouble, inject = _ => Type.LongType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertDoubleInt[Type, Type] = LiftedConvert[Double, Int, Type, Type, BaseType[Double], BaseType[Int], Overflow && BitSign](extract = _.asDouble, inject = _ => Type.IntType)
   given (using failure: Failure, effectStack: EffectStack): ConvertDoubleFloat[Type, Type] = LiftedConvert[Double, Float, Type, Type, BaseType[Double], BaseType[Float], NilCC.type](extract = _.asDouble, inject = _ => Type.FloatType)
   given (using failure: Failure, effectStack: EffectStack): ConvertFloatDouble[Type, Type] = LiftedConvert[Float, Double, Type, Type, BaseType[Float], BaseType[Double], NilCC.type](extract = _.asFloat, inject = _ => Type.DoubleType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntFloat[Type, Type] = LiftedConvert[Int, Float, Type, Type, BaseType[Int], BaseType[Float], Bits](extract = _.asInt, inject = _ => Type.FloatType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertIntDouble[Type, Type] = LiftedConvert[Int, Double, Type, Type, BaseType[Int], BaseType[Double], Bits](extract = _.asInt, inject = _ => Type.DoubleType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertLongFloat[Type, Type] = LiftedConvert[Long, Float, Type, Type, BaseType[Long], BaseType[Float], Bits](extract = _.asLong, inject = _ => Type.FloatType)
-  given (using failure: Failure, effectStack: EffectStack): ConvertLongDouble[Type, Type] = LiftedConvert[Long, Double, Type, Type, BaseType[Long], BaseType[Double], Bits](extract = _.asLong, inject = _ => Type.DoubleType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntFloat[Type, Type] = LiftedConvert[Int, Float, Type, Type, BaseType[Int], BaseType[Float], BitSign](extract = _.asInt, inject = _ => Type.FloatType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertIntDouble[Type, Type] = LiftedConvert[Int, Double, Type, Type, BaseType[Int], BaseType[Double], BitSign](extract = _.asInt, inject = _ => Type.DoubleType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertLongFloat[Type, Type] = LiftedConvert[Long, Float, Type, Type, BaseType[Long], BaseType[Float], BitSign](extract = _.asLong, inject = _ => Type.FloatType)
+  given (using failure: Failure, effectStack: EffectStack): ConvertLongDouble[Type, Type] = LiftedConvert[Long, Double, Type, Type, BaseType[Long], BaseType[Double], BitSign](extract = _.asLong, inject = _ => Type.DoubleType)
 
   given ApronType[Type] with
     extension (tpe: Type)
