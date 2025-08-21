@@ -3,6 +3,7 @@ package sturdy.language.bytecode
 import org.opalj.br.analyses.Project
 import org.opalj.br.{ArrayType, ClassType, IntegerType, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
+import org.scalatest.Inspectors.forEvery
 import org.scalatest.ParallelTestExecution
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
@@ -120,19 +121,12 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       Seq(run)
 
     // TODO: improve this structure
-    methods.foreach: method =>
+    forEvery(methods): method =>
       val mType = method.name match
         case "main" => TestedMethodType.Main
         case "run" => TestedMethodType.Run
 
-      // TODO: clean this up since System.exit is bypassed
-      val allowField = (ClassType("java/lang/System"), "allowSecurityManager")
-      val allowAddr = (Site.StaticInitialization(allowField._1, allowField._2), 1)
-      val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map(
-        // removed due to the entry then still missing from staticAddrMap, would need to be set separately
-        allowAddr -> ConcreteInterpreter.Value.Int32(1)
-      ))
-      concreteInterpreter.staticAddrMap += (allowField -> allowAddr)
+      val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map())
       // args for invocation of main
       concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("String")), 0)))
       if mType == TestedMethodType.Run then
@@ -144,10 +138,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       catch
         case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
         case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(e.getMessage)
-      // alternative invocation
-      // val v = concreteInterpreter.external(concreteInterpreter.invoke(main, Seq(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1,Vector(), ArrayType(ReferenceType("String")), 0)))))
       assert(v.asInt32(using concreteInterpreter.failure) === mType.getExpectedValue)
-    succeed
 
   def runTestCases(testCases: Seq[Path]): Unit =
     testCases.foreach: path =>
