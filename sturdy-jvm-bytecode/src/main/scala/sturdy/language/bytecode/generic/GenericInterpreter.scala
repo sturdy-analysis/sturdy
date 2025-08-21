@@ -694,10 +694,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       val ret = invokeClassMethod(mth, args)
       return if mth.descriptor.returnType.isVoidType then i32ops.integerLit(-1) else ret
 
-    val locals = if mth.body.get.localVariableTable.isDefined then
-      mth.body.get.localVariableTable.get.map(_.fieldType).map(convertTypes)
+    val body = mth.body.getOrElse:
+      throw UnsupportedOperationException(s"body of ${mth.toString} is empty")
+    val locals = if body.localVariableTable.isDefined then
+      body.localVariableTable.get.map(_.fieldType).map(convertTypes)
     else
-      ArraySeq.fill(mth.body.get.maxLocals)(0).map(_ => ValType.I32)
+      ArraySeq.fill(body.maxLocals)(0).map(_ => ValType.I32)
 
     val argsAndLocals = args.view ++ locals.map(defaultValue)
 

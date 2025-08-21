@@ -1,7 +1,7 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassType, ReferenceType}
+import org.opalj.br.{ArrayType, ClassType, IntegerType, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
 import org.scalatest.ParallelTestExecution
 import org.scalatest.compatible.Assertion
@@ -91,20 +91,31 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     val mains = rootCf.methods.filter:
       _.name == "main"
     if mains.size != 1 then cancel(s"unexpected amount of main methods: ${mains.size}")
-    val runs = rootCf.methods.filter:
-      _.name == "run"
-    if mains.size != 1 then cancel(s"unexpected amount of run methods: ${runs.size}")
+    val runs = rootCf.methods.filter: m =>
+      // this should find the correct run method, it has signature (String[] x PrintStream) -> int
+      m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType("java/lang/String")), ClassType("java/io/PrintStream")), IntegerType)
+    if runs.size != 1 then
+      cancel(s"unexpected amount of run methods:\n" + runs.mkString("\n"))
 
     // checked above
     val run = runs.head
     // if run doesn't have a body, failing the test is fine
-    val methods = if run.body.get.exists: p =>
+    val methods = if run.body.getOrElse:
+      fail(s"method has no body:\n$run")
+    .exists: p =>
       p.instruction.isInvocationInstruction && p.instruction.asInvocationInstruction.name == "runPositive"
     then
       // bypass reflections by collecting all run methods
       val cfs = project.projectClassFilesWithSources.filterNot: (cf, source) =>
         cf.thisType.simpleName == name || cf.thisType.simpleName.endsWith("n") || TestCases.ignoreRegexes.exists(_.matches(source.toString))
       cfs.flatMap(_._1.methods.filter(_.name == "run"))
+    else if run.body.get.exists: p =>
+      p.instruction.isInvocationInstruction && p.instruction.asInvocationInstruction.name == "loadNegative"
+    then
+      // loading uses reflections so we ignore those tests for now
+      val targets = run.body.get.flatMap: p =>
+        Option.when(p.instruction.isInvocationInstruction)(p.instruction.asInvocationInstruction)
+      cancel("loading/instantiating tests are currently ignored. this test contains the following invocation instructions:\n" + targets.mkString("\n"))
     else
       Seq(run)
 
