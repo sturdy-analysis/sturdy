@@ -98,9 +98,9 @@ given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(i: Int, conf: config.Bits): Long = conf match
-    case config.Bits.Signed => i.toLong
-    case config.Bits.Unsigned => i & 0X00000000FFFFFFFFL
+  def apply(i: Int, conf: config.BitSign): Long = conf match
+    case config.BitSign.Signed => i.toLong
+    case config.BitSign.Unsigned => i & 0X00000000FFFFFFFFL
     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
@@ -108,23 +108,23 @@ given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(i: Int, conf: config.Bits): Float = conf match
-    case config.Bits.Signed => i.toFloat
-    case config.Bits.Unsigned =>
+  def apply(i: Int, conf: config.BitSign): Float = conf match
+    case config.BitSign.Signed => i.toFloat
+    case config.BitSign.Unsigned =>
       if (i >= 0)
         i.toFloat
       else
         ((i >>> 1) | (i & 1)).toFloat * 2.0f
-    case config.Bits.Raw => JFloat.intBitsToFloat(i)
+    case config.BitSign.Raw => JFloat.intBitsToFloat(i)
 
 given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
   /*
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(i: Int, conf: config.Bits): Double = conf match
-    case config.Bits.Signed => i.toDouble
-    case config.Bits.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
+  def apply(i: Int, conf: config.BitSign): Double = conf match
+    case config.BitSign.Signed => i.toDouble
+    case config.BitSign.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
@@ -139,14 +139,14 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
     collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
-  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
+  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.BitSign): Int =
     val buf = ByteBuffer.wrap(from.toArray)
     buf.order(conf.c1.c2.t)
     (conf.c1.c1, conf.c2) match
-      case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toInt
-      case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFF
-      case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt
-      case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
+      case (config.BytesSize.Byte, config.BitSign.Signed) => buf.get.toInt
+      case (config.BytesSize.Byte, config.BitSign.Unsigned) => buf.get & 0xFF
+      case (config.BytesSize.Short, config.BitSign.Signed) => buf.getShort.toInt
+      case (config.BytesSize.Short, config.BitSign.Unsigned) => buf.getShort & 0xFFFF
       case (config.BytesSize.Int, _) => buf.getInt
       case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 

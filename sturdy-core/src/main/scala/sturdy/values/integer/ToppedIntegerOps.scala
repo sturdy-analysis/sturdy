@@ -5,7 +5,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Join, Topped}
 import sturdy.values.config
-import sturdy.values.config.Bits
+import sturdy.values.config.BitSign
 import sturdy.values.config.BytesSize
 import sturdy.values.config.UnsupportedConfiguration
 

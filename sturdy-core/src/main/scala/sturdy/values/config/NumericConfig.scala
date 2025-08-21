@@ -8,7 +8,7 @@ enum Overflow extends ConvertConfig[Overflow]:
   case JumpToBounds
   def canFail: Boolean = this == Fail
 
-enum Bits extends ConvertConfig[Bits]:
+enum BitSign extends ConvertConfig[BitSign]:
   case Signed
   case Unsigned
   case Raw

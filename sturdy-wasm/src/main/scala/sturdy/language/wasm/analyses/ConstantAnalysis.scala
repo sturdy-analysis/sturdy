@@ -188,36 +188,36 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def jvRefV: WithJoin[RefV] = implicitly
 //    override def widenState: Widen[State] = implicitly
     
-    given Bijection[Int, Value] with {
-      def apply(a: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(a)))
-      def unapply(b: Value)(using f: Failure): Int = b match {
+    given GaloisConnection[Int, Value] with {
+      def asAbstract(a: Int): Value = Value.Num(NumValue.Int32(Topped.Actual(a)))
+      def concretize(b: Value)(using f: Failure): Int = b match {
         case Value.Num(NumValue.Int32(Topped.Actual(i))) => i
         case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Int")
         case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Int")
       }
     }
     
-    given Bijection[Long, Value] with {
-      def apply(a: Long): Value = Value.Num(NumValue.Int64(Topped.Actual(a)))
-      def unapply(b: Value)(using f: Failure): Long = b match {
+    given GaloisConnection[Long, Value] with {
+      def asAbstract(a: Long): Value = Value.Num(NumValue.Int64(Topped.Actual(a)))
+      def concretize(b: Value)(using f: Failure): Long = b match {
         case Value.Num(NumValue.Int64(Topped.Actual(l))) => l
         case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Long")
         case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Long")
       }
     }
     
-    given Bijection[Float, Value] with {
-      def apply(a: Float): Value = Value.Num(NumValue.Float32(Topped.Actual(a)))
-      def unapply(b: Value)(using f: Failure): Float = b match {
+    given GaloisConnection[Float, Value] with {
+      def asAbstract(a: Float): Value = Value.Num(NumValue.Float32(Topped.Actual(a)))
+      def concretize(b: Value)(using f: Failure): Float = b match {
         case Value.Num(NumValue.Float32(Topped.Actual(f))) => f
         case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Float")
         case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Float")
       }
     }
     
-    given Bijection[Double, Value] with {
-      def apply(a: Double): Value = Value.Num(NumValue.Float64(Topped.Actual(a)))
-      def unapply(b: Value)(using f: Failure): Double = b match {
+    given GaloisConnection[Double, Value] with {
+      def asAbstract(a: Double): Value = Value.Num(NumValue.Float64(Topped.Actual(a)))
+      def concretize(b: Value)(using f: Failure): Double = b match {
         case Value.Num(NumValue.Float64(Topped.Actual(d))) => d
         case Value.TopValue => f.fail(ConversionFailure, s"Cannot unapply $b to Double")
         case _ => f.fail(ConversionFailure, s"Cannot unapply $b to Double")

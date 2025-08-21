@@ -1,12 +1,14 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.{given, *}
+import sturdy.data.{*, given}
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.values.config.BitSign.*
+import sturdy.values.config.Overflow.*
 import sturdy.values.convert.SomeCC
 import sturdy.values.simd.LaneShape.*
-import sturdy.values.simd.{Half, LaneShape, TruncMode}
+import sturdy.values.simd.{Half, LaneShape, ShiftDirection, TruncMode}
 import swam.syntax.*
 
 import scala.reflect.ClassTag
@@ -89,9 +91,9 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
   private def evalShiftop(shiftop: VectorShiftop): V = {
     val (v, shift) = stack.pop2OrAbort()
     shiftop.operation match {
-      case VecShiftopType.IShl => v128ops.vectorShiftLeft(shiftop.shape.toLaneShape, v, shift)
-      case VecShiftopType.IShrU => v128ops.vectorShiftRightU(shiftop.shape.toLaneShape, v, shift)
-      case VecShiftopType.IShrS => v128ops.vectorShiftRightS(shiftop.shape.toLaneShape, v, shift)
+      case VecShiftopType.IShl => v128ops.vectorShift(shiftop.shape.toLaneShape, ShiftDirection.Left, Raw, v, shift)
+      case VecShiftopType.IShrU => v128ops.vectorShift(shiftop.shape.toLaneShape, ShiftDirection.Right, Unsigned, v, shift)
+      case VecShiftopType.IShrS => v128ops.vectorShift(shiftop.shape.toLaneShape, ShiftDirection.Right, Signed, v, shift)
     }
   }
 
@@ -110,19 +112,19 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
   private def evalExtadd(extadd: VectorExtadd): V = {
     val v = stack.popOrAbort()
     extadd match {
-      case i16x8.ExtaddPairwiseI8x16S => v128ops.vectorExtAddS(LaneShape.I8, v)
-      case i16x8.ExtaddPairwiseI8x16U => v128ops.vectorExtAddU(LaneShape.I8, v)
-      case i32x4.ExtaddPairwiseI16x8S => v128ops.vectorExtAddS(LaneShape.I16, v)
-      case i32x4.ExtaddPairwiseI16x8U => v128ops.vectorExtAddU(LaneShape.I16, v)
+      case i16x8.ExtaddPairwiseI8x16S => v128ops.vectorExtAdd(LaneShape.I8, Signed, v)
+      case i16x8.ExtaddPairwiseI8x16U => v128ops.vectorExtAdd(LaneShape.I8, Unsigned, v)
+      case i32x4.ExtaddPairwiseI16x8S => v128ops.vectorExtAdd(LaneShape.I16, Signed, v)
+      case i32x4.ExtaddPairwiseI16x8U => v128ops.vectorExtAdd(LaneShape.I16, Unsigned, v)
     }
   }
 
   private def evalExtractLane(lane: VectorExtractLane): V = {
     val v = stack.popOrAbort()
     lane.operation match {
-      case VecExtractLaneType.ExtractU => v128ops.extractLaneU(lane.shape.toLaneShape, v, lane.lane)
-      case VecExtractLaneType.ExtractS => v128ops.extractLaneS(lane.shape.toLaneShape, v, lane.lane)
-      case VecExtractLaneType.Extract => v128ops.extractLane(lane.shape.toLaneShape, v, lane.lane)
+      case VecExtractLaneType.ExtractU => v128ops.extractLane(lane.shape.toLaneShape, Unsigned, v, lane.lane)
+      case VecExtractLaneType.ExtractS => v128ops.extractLane(lane.shape.toLaneShape, Signed,  v, lane.lane)
+      case VecExtractLaneType.Extract => v128ops.extractLane(lane.shape.toLaneShape, Raw, v, lane.lane)
     }
   }
 
@@ -151,9 +153,11 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
   def evalLoadVectorBytes(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
     inst match {
       case v128.Load(_, _) => mem.read(memIdx, addr, VecBytes)
+      case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")
     }
   }
 
+  // TODO: Refactor method
   def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionA[V] =
     boundary:
       inst match
@@ -228,6 +232,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           }
           val vec = decode(vecBytes, SomeCC(loadExtend, false))
           if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+        case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")
 
   def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Unit] = {
     inst match {
@@ -239,10 +244,11 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
         val v = stack.popOrAbort()
         val shape = laneWidthToLaneShape(storeVecLane.laneWidth)
         val bytes = if storeVecLane.laneWidth <= VecBytes then
-          encode(v128ops.extractLaneU(shape, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+          encode(v128ops.extractLane(shape, Unsigned, v, storeVecLane.lane), SomeCC(storeVecLane, false))
         else
-          encode(v128ops.extractLane(shape, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+          encode(v128ops.extractLane(shape, Raw, v, storeVecLane.lane), SomeCC(storeVecLane, false))
         mem.write(memIdx, addr, bytes)
+      case _ => throw new IllegalArgumentException(s"Unsupported SIMD store instruction: $inst")
     }
   }
 
@@ -253,6 +259,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecUnopType.IAbs => v128ops.vectorAbs(unop.shape.toLaneShape, v)
           case VecUnopType.INeg => v128ops.vectorNeg(unop.shape.toLaneShape, v)
           case VecUnopType.IPopCnt => v128ops.vectorPopCount(unop.shape.toLaneShape, v)
+          case _ => throw new IllegalArgumentException(s"Unsupported integer vector unop: ${unop.operation}")
         }
       case unop: FVectorUnop =>
         unop.operation match {
@@ -263,6 +270,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecUnopType.FFloor => v128ops.vectorFloor(unop.shape.toLaneShape, v)
           case VecUnopType.FTrunc => v128ops.vectorTrunc(unop.shape.toLaneShape, v)
           case VecUnopType.FNearest => v128ops.vectorNearest(unop.shape.toLaneShape, v)
+          case _ => throw new IllegalArgumentException(s"Unsupported float vector unop: ${unop.operation}")
         }
       case i8x16.Popcnt => v128ops.vectorPopCount(LaneShape.I8, v)
     }
@@ -272,115 +280,126 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     op match {
       case minMaxop: VectorMinMaxop =>
         minMaxop.operation match {
-          case VecBinopType.IMinU => v128ops.vectorMinU(minMaxop.shape.toLaneShape, v1, v2)
-          case VecBinopType.IMinS => v128ops.vectorMinS(minMaxop.shape.toLaneShape, v1, v2)
-          case VecBinopType.IMaxU => v128ops.vectorMaxU(minMaxop.shape.toLaneShape, v1, v2)
-          case VecBinopType.IMaxS => v128ops.vectorMaxS(minMaxop.shape.toLaneShape, v1, v2)
+          case VecBinopType.IMinU => v128ops.vectorMin(minMaxop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecBinopType.IMinS => v128ops.vectorMin(minMaxop.shape.toLaneShape, Signed, v1, v2)
+          case VecBinopType.IMaxU => v128ops.vectorMax(minMaxop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecBinopType.IMaxS => v128ops.vectorMax(minMaxop.shape.toLaneShape, Signed, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported vector min/max operation: ${minMaxop.operation}")
         }
       case binop: VectorSatBinop =>
         binop.operation match {
-          case VecBinopType.IAddSatU => v128ops.vectorAddSatU(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.IAddSatS => v128ops.vectorAddSatS(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.ISubSatU => v128ops.vectorSubSatU(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.ISubSatS => v128ops.vectorSubSatS(binop.shape.toLaneShape, v1, v2)
+          case VecBinopType.IAddSatU => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds && Unsigned, v1, v2)
+          case VecBinopType.IAddSatS => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds && Signed, v1, v2)
+          case VecBinopType.ISubSatU => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds && Unsigned, v1, v2)
+          case VecBinopType.ISubSatS => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds && Signed, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported vector sat binop: ${binop.operation}")
         }
       case binop: IVectorBinop =>
         binop.operation match {
-          case VecBinopType.IAdd => v128ops.vectorAdd(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.ISub => v128ops.vectorSub(binop.shape.toLaneShape, v1, v2)
+          case VecBinopType.IAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow && Raw, v1, v2)
+          case VecBinopType.ISub => v128ops.vectorSub(binop.shape.toLaneShape, Allow && Raw, v1, v2)
           case VecBinopType.IMul => v128ops.vectorMul(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.IAvrgU => v128ops.vectorAvrgU(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.IQ15MulrSatS => v128ops.vectorQ15MulrSatS(binop.shape.toLaneShape, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported integer vector binop: ${binop.operation}")
         }
       case binop: FVectorBinop =>
         binop.operation match {
-          case VecBinopType.FAdd => v128ops.vectorAdd(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.FSub => v128ops.vectorSub(binop.shape.toLaneShape, v1, v2)
+          case VecBinopType.FAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow && Raw, v1, v2)
+          case VecBinopType.FSub => v128ops.vectorSub(binop.shape.toLaneShape, Allow && Raw, v1, v2)
           case VecBinopType.FMul => v128ops.vectorMul(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.FDiv => v128ops.vectorDiv(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.FMin => v128ops.vectorMin(binop.shape.toLaneShape, v1, v2)
-          case VecBinopType.FMax => v128ops.vectorMax(binop.shape.toLaneShape, v1, v2)
+          case VecBinopType.FMin => v128ops.vectorMin(binop.shape.toLaneShape, Raw, v1, v2)
+          case VecBinopType.FMax => v128ops.vectorMax(binop.shape.toLaneShape, Raw, v1, v2)
           case VecBinopType.FPMin => v128ops.vectorPMin(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.FPMax => v128ops.vectorPMax(binop.shape.toLaneShape, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported float vector binop: ${binop.operation}")
         }
     }
   }
 
-  inline def evalSIMDRelop(op: VectorRelop, v1: V, v2: V): V = {
-    op match {
+  inline def evalSIMDRelop(op: VectorRelop, v1: V, v2: V): V =
+    op match
       case relop: IVectorRelop =>
-        relop.operation match {
+        relop.operation match
           case VecRelopType.IEq => v128ops.vectorEq(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.INe => v128ops.vectorNe(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.ILtU => v128ops.vectorLtU(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.ILtS => v128ops.vectorLtS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.ILeU => v128ops.vectorLeU(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.ILeS => v128ops.vectorLeS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.IGtU => v128ops.vectorGtU(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.IGtS => v128ops.vectorGtS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.IGeU => v128ops.vectorGeU(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.IGeS => v128ops.vectorGeS(relop.shape.toLaneShape, v1, v2)
-        }
+          case VecRelopType.ILtU => v128ops.vectorLt(relop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecRelopType.ILtS => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.ILeU => v128ops.vectorLe(relop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecRelopType.ILeS => v128ops.vectorLe(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.IGtU => v128ops.vectorGt(relop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecRelopType.IGtS => v128ops.vectorGt(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.IGeU => v128ops.vectorGe(relop.shape.toLaneShape, Unsigned, v1, v2)
+          case VecRelopType.IGeS => v128ops.vectorGe(relop.shape.toLaneShape, Signed, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported integer vector relop: ${relop.operation}")
+
       case relop: FVectorRelop =>
-        relop.operation match {
+        relop.operation match
           case VecRelopType.FEq => v128ops.vectorEq(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.FNe => v128ops.vectorNe(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FLt => v128ops.vectorLtS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FLe => v128ops.vectorLeS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FGt => v128ops.vectorGtS(relop.shape.toLaneShape, v1, v2)
-          case VecRelopType.FGe => v128ops.vectorGeS(relop.shape.toLaneShape, v1, v2)
-        }
-    }
-  }
+          case VecRelopType.FLt => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.FLe => v128ops.vectorLe(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.FGt => v128ops.vectorGt(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.FGe => v128ops.vectorGe(relop.shape.toLaneShape, Signed, v1, v2)
+          case _ => throw new IllegalArgumentException(s"Unsupported float vector relop: ${relop.operation}")
 
-  inline def evalExtmul(op: VectorExtmul, v1: V, v2: V): V = {
-    op match {
-      case i16x8.ExtmulLowI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtendS(I8, I16, Half.Low, v1), v128ops.vectorExtendS(I8, I16, Half.Low, v2))
-      case i16x8.ExtmulHighI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtendS(I8, I16, Half.High, v1), v128ops.vectorExtendS(I8, I16, Half.High, v2))
-      case i16x8.ExtmulLowI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtendU(I8, I16, Half.Low, v1), v128ops.vectorExtendU(I8, I16, Half.Low, v2))
-      case i16x8.ExtmulHighI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtendU(I8, I16, Half.High, v1), v128ops.vectorExtendU(I8, I16, Half.High, v2))
-      case i32x4.ExtmulLowI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtendS(I16, I32, Half.Low, v1), v128ops.vectorExtendS(I16, I32, Half.Low, v2))
-      case i32x4.ExtmulHighI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtendS(I16, I32, Half.High, v1), v128ops.vectorExtendS(I16, I32, Half.High, v2))
-      case i32x4.ExtmulLowI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtendU(I16, I32, Half.Low, v1), v128ops.vectorExtendU(I16, I32, Half.Low, v2))
-      case i32x4.ExtmulHighI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtendU(I16, I32, Half.High, v1), v128ops.vectorExtendU(I16, I32, Half.High, v2))
-      case i64x2.ExtmulLowI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtendS(I32, I64, Half.Low, v1), v128ops.vectorExtendS(I32, I64, Half.Low, v2))
-      case i64x2.ExtmulHighI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtendS(I32, I64, Half.High, v1), v128ops.vectorExtendS(I32, I64, Half.High, v2))
-      case i64x2.ExtmulLowI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtendU(I32, I64, Half.Low, v1), v128ops.vectorExtendU(I32, I64, Half.Low, v2))
-      case i64x2.ExtmulHighI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtendU(I32, I64, Half.High, v1), v128ops.vectorExtendU(I32, I64, Half.High, v2))
-    }
-  }
+  inline def evalExtmul(op: VectorExtmul, v1: V, v2: V): V =
+    op match
+      case i16x8.ExtmulLowI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtend(I8, I16, Half.Low, Signed, v1), v128ops.vectorExtend(I8, I16, Half.Low, Signed, v2))
+      case i16x8.ExtmulHighI8x16S => v128ops.vectorMul(I16, v128ops.vectorExtend(I8, I16, Half.High, Signed, v1), v128ops.vectorExtend(I8, I16, Half.High, Signed, v2))
+      case i16x8.ExtmulLowI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtend(I8, I16, Half.Low, Unsigned, v1), v128ops.vectorExtend(I8, I16, Half.Low, Unsigned, v2))
+      case i16x8.ExtmulHighI8x16U => v128ops.vectorMul(I16, v128ops.vectorExtend(I8, I16, Half.High, Unsigned, v1), v128ops.vectorExtend(I8, I16, Half.High, Unsigned, v2))
 
-  inline def evalSIMDConvertop(op: VectorConvertop, v: V): V = {
-    op match {
-      case i8x16.NarrowI16x8S => v128ops.vectorNarrowS(LaneShape.I16, LaneShape.I8, v, stack.popOrAbort())
-      case i8x16.NarrowI16x8U => v128ops.vectorNarrowU(LaneShape.I16, LaneShape.I8, v, stack.popOrAbort())
-      case i16x8.ExtendLowI8x16S => v128ops.vectorExtendS(LaneShape.I8, LaneShape.I16, Half.Low, v)
-      case i16x8.ExtendHighI8x16S => v128ops.vectorExtendS(LaneShape.I8, LaneShape.I16, Half.High, v)
-      case i16x8.ExtendLowI8x16U => v128ops.vectorExtendU(LaneShape.I8, LaneShape.I16, Half.Low, v)
-      case i16x8.ExtendHighI8x16U => v128ops.vectorExtendU(LaneShape.I8, LaneShape.I16, Half.High, v)
-      case i16x8.NarrowI32x4S => v128ops.vectorNarrowS(LaneShape.I32, LaneShape.I16, v, stack.popOrAbort())
-      case i16x8.NarrowI32x4U => v128ops.vectorNarrowU(LaneShape.I32, LaneShape.I16, v, stack.popOrAbort())
-      case i32x4.ExtendLowI16x8S => v128ops.vectorExtendS(LaneShape.I16, LaneShape.I32, Half.Low, v)
-      case i32x4.ExtendHighI16x8S => v128ops.vectorExtendS(LaneShape.I16, LaneShape.I32, Half.High, v)
-      case i32x4.ExtendLowI16x8U => v128ops.vectorExtendU(LaneShape.I16, LaneShape.I32, Half.Low, v)
-      case i32x4.ExtendHighI16x8U => v128ops.vectorExtendU(LaneShape.I16, LaneShape.I32, Half.High, v)
-      case i32x4.TruncSatF32x4S => v128ops.vectorTruncSatS(LaneShape.F32, TruncMode.Sat, v)
-      case i32x4.TruncSatF32x4U => v128ops.vectorTruncSatU(LaneShape.F32, TruncMode.Sat, v)
-      case i32x4.TruncSatF64x2SZero => v128ops.vectorTruncSatS(LaneShape.F64, TruncMode.SatZero, v)
-      case i32x4.TruncSatF64x2UZero => v128ops.vectorTruncSatU(LaneShape.F64, TruncMode.SatZero, v)
-      case i64x2.ExtendLowI32x4S => v128ops.vectorExtendS(LaneShape.I32, LaneShape.I64, Half.Low, v)
-      case i64x2.ExtendHighI32x4S => v128ops.vectorExtendS(LaneShape.I32, LaneShape.I64, Half.High, v)
-      case i64x2.ExtendLowI32x4U => v128ops.vectorExtendU(LaneShape.I32, LaneShape.I64, Half.Low, v)
-      case i64x2.ExtendHighI32x4U => v128ops.vectorExtendU(LaneShape.I32, LaneShape.I64, Half.High, v)
-      case f32x4.ConvertI32x4S => v128ops.vectorConvertS(LaneShape.I32, v)
-      case f32x4.ConvertI32x4U => v128ops.vectorConvertU(LaneShape.I32, v)
+      case i32x4.ExtmulLowI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtend(I16, I32, Half.Low, Signed, v1), v128ops.vectorExtend(I16, I32, Half.Low, Signed, v2))
+      case i32x4.ExtmulHighI16x8S => v128ops.vectorMul(I32, v128ops.vectorExtend(I16, I32, Half.High, Signed, v1), v128ops.vectorExtend(I16, I32, Half.High, Signed, v2))
+      case i32x4.ExtmulLowI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtend(I16, I32, Half.Low, Unsigned, v1), v128ops.vectorExtend(I16, I32, Half.Low, Unsigned, v2))
+      case i32x4.ExtmulHighI16x8U => v128ops.vectorMul(I32, v128ops.vectorExtend(I16, I32, Half.High, Unsigned, v1), v128ops.vectorExtend(I16, I32, Half.High, Unsigned, v2))
+
+      case i64x2.ExtmulLowI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtend(I32, I64, Half.Low, Signed, v1), v128ops.vectorExtend(I32, I64, Half.Low, Signed, v2))
+      case i64x2.ExtmulHighI32x4S => v128ops.vectorMul(I64, v128ops.vectorExtend(I32, I64, Half.High, Signed, v1), v128ops.vectorExtend(I32, I64, Half.High, Signed, v2))
+      case i64x2.ExtmulLowI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtend(I32, I64, Half.Low, Unsigned, v1), v128ops.vectorExtend(I32, I64, Half.Low, Unsigned, v2))
+      case i64x2.ExtmulHighI32x4U => v128ops.vectorMul(I64, v128ops.vectorExtend(I32, I64, Half.High, Unsigned, v1), v128ops.vectorExtend(I32, I64, Half.High, Unsigned, v2))
+
+  inline def evalSIMDConvertop(op: VectorConvertop, v: V): V =
+    op match
+      case i8x16.NarrowI16x8S => v128ops.vectorNarrow(LaneShape.I16, LaneShape.I8, Signed, v, stack.popOrAbort())
+      case i8x16.NarrowI16x8U => v128ops.vectorNarrow(LaneShape.I16, LaneShape.I8, Unsigned, v, stack.popOrAbort())
+
+      case i16x8.ExtendLowI8x16S => v128ops.vectorExtend(LaneShape.I8, LaneShape.I16, Half.Low, Signed, v)
+      case i16x8.ExtendHighI8x16S => v128ops.vectorExtend(LaneShape.I8, LaneShape.I16, Half.High, Signed, v)
+      case i16x8.ExtendLowI8x16U => v128ops.vectorExtend(LaneShape.I8, LaneShape.I16, Half.Low, Unsigned, v)
+      case i16x8.ExtendHighI8x16U => v128ops.vectorExtend(LaneShape.I8, LaneShape.I16, Half.High, Unsigned, v)
+
+      case i16x8.NarrowI32x4S => v128ops.vectorNarrow(LaneShape.I32, LaneShape.I16, Signed, v, stack.popOrAbort())
+      case i16x8.NarrowI32x4U => v128ops.vectorNarrow(LaneShape.I32, LaneShape.I16, Unsigned, v, stack.popOrAbort())
+
+      case i32x4.ExtendLowI16x8S => v128ops.vectorExtend(LaneShape.I16, LaneShape.I32, Half.Low, Signed, v)
+      case i32x4.ExtendHighI16x8S => v128ops.vectorExtend(LaneShape.I16, LaneShape.I32, Half.High, Signed, v)
+      case i32x4.ExtendLowI16x8U => v128ops.vectorExtend(LaneShape.I16, LaneShape.I32, Half.Low, Unsigned, v)
+      case i32x4.ExtendHighI16x8U => v128ops.vectorExtend(LaneShape.I16, LaneShape.I32, Half.High, Unsigned, v)
+
+      case i32x4.TruncSatF32x4S     => v128ops.vectorTruncSat(LaneShape.F32, TruncMode.Sat, Signed, v)
+      case i32x4.TruncSatF32x4U     => v128ops.vectorTruncSat(LaneShape.F32, TruncMode.Sat, Unsigned, v)
+      case i32x4.TruncSatF64x2SZero => v128ops.vectorTruncSat(LaneShape.F64, TruncMode.SatZero, Signed, v)
+      case i32x4.TruncSatF64x2UZero => v128ops.vectorTruncSat(LaneShape.F64, TruncMode.SatZero, Unsigned, v)
+
+
+      case i64x2.ExtendLowI32x4S => v128ops.vectorExtend(LaneShape.I32, LaneShape.I64, Half.Low, Signed, v)
+      case i64x2.ExtendHighI32x4S => v128ops.vectorExtend(LaneShape.I32, LaneShape.I64, Half.High, Signed, v)
+      case i64x2.ExtendLowI32x4U => v128ops.vectorExtend(LaneShape.I32, LaneShape.I64, Half.Low, Unsigned, v)
+      case i64x2.ExtendHighI32x4U => v128ops.vectorExtend(LaneShape.I32, LaneShape.I64, Half.High, Unsigned, v)
+
+      case f32x4.ConvertI32x4S => v128ops.vectorConvert(LaneShape.I32, Signed, v)
+      case f32x4.ConvertI32x4U => v128ops.vectorConvert(LaneShape.I32, Unsigned, v)
+
       case f32x4.DemoteF64x2Zero => v128ops.vectorDemoteZero(LaneShape.F64, v)
-      case f64x2.ConvertLowI32x4S => v128ops.vectorConvertLowS(LaneShape.I32, v)
-      case f64x2.ConvertLowI32x4U => v128ops.vectorConvertLowU(LaneShape.I32, v)
+
+      case f64x2.ConvertLowI32x4S => v128ops.vectorConvertLow(LaneShape.I32, Signed, v)
+      case f64x2.ConvertLowI32x4U => v128ops.vectorConvertLow(LaneShape.I32, Unsigned, v)
+
       case f64x2.PromoteLowF32x4 => v128ops.vectorPromoteLow(LaneShape.F32, v)
-    }
-  }
-  
+
   def defaultValue(): V = {
     evalSIMD(v128.Const(Array.fill(VecBytes)(0.toByte)))
   }

@@ -37,6 +37,6 @@ inline def safeConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(u
   else
     res
 
-trait Bijection[A, B]:
-  def apply(a: A): B
-  def unapply(b: B)(using Failure): A
+trait GaloisConnection[A, B]:
+  def asAbstract(a: A): B
+  def concretize(b: B)(using Failure): A
