@@ -122,14 +122,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
           else
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
@@ -166,6 +158,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     private given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[ConstantAnalysis.Value]] = new fix.ContextualFixpoint {

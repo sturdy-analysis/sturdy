@@ -37,6 +37,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.language.wasm.analyses.IntervalAnalysis.typedTop
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -77,14 +78,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         // some indices in range, but not all
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
@@ -173,6 +166,14 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
       super.instantiateModule(module, imports, moduleId, hostModules)
     }
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {

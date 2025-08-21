@@ -44,8 +44,19 @@ class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size:
     constantSymbolTable.putNew(key)
 
   override def putNew(key: Key, limit: Limit[Size]): Unit =
-    // TODO: currently ignores limit.
-    constantSymbolTable.putNew(key)
+    constantSymbolTable.putNew(key, limitToTopped(limit))
+
+  private def limitToTopped(limit: Limit[Size]): Limit[Topped[Int]] =
+    Limit(min = sizeToTopped(limit.min), max = limit.max.map(sizeToTopped))
+
+  private def sizeToTopped(size: Size): Topped[Int] =
+    IntervalRange[Size].range(size) match
+      case Some(range) =>
+        if(range.size == 1)
+          Topped.Actual(range.start)
+        else
+          Topped.Top
+      case None => Topped.Top
 
   override def size(key: Key): Size =
     IntervalRange[Size].fromTop(constantSymbolTable.size(key))

@@ -230,7 +230,7 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case f64.ConvertUI64 => convert_i64_f64(v, config.Bits.Unsigned)
     case f64.ReinterpretI64 => convert_i64_f64(v, config.Bits.Raw)
 
-  inline def evalMiscop(op: Miscop, v: V): V = op match
+  inline def evalSatConvertop(op: SatConvertop, v: V): V = op match
     case i32.TruncSatSF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
     case i32.TruncSatUF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
     case i32.TruncSatSF64 => convert_f64_i32(v, (config.Overflow.JumpToBounds && config.Bits.Signed))

@@ -102,6 +102,7 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
   def negated(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.negated)
   def sqrt(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.sqrt)
+  def pow(base: TaintProduct[V], exponent: TaintProduct[V]): TaintProduct[V] = base.binary(ops.pow, exponent)
   def ceil(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.ceil)
   def floor(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.floor)
   def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)

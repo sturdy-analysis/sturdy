@@ -61,6 +61,7 @@ given BaseTypeFloatOps[B: ClassTag](using Fractional[B]): FloatOps[B, BaseType[B
   def absolute(v: BaseType[B]): BaseType[B] = BaseType[B]
   def negated(v: BaseType[B]): BaseType[B] = BaseType[B]
   def sqrt(v: BaseType[B]): BaseType[B] = BaseType[B]
+  def pow(base: BaseType[B], exponent: BaseType[B]): BaseType[B] = BaseType[B]
   def ceil(v: BaseType[B]): BaseType[B] = BaseType[B]
   def floor(v: BaseType[B]): BaseType[B] = BaseType[B]
   def truncate(v: BaseType[B]): BaseType[B] = BaseType[B]

@@ -60,7 +60,6 @@ final class AlignedMemory
   private val maxPages: Size = sizeIntOps.integerLit(ConcreteMemory.maxPageNum)
 
   var memories: Map[Key, Mem[Context, Addr, Size, Val]] = Map()
-  var fillBytes: Option[Bytes[Val]] = None
 
   override def read(key: Key, readAddr: Addr, length: Int): JOption[WithJoin, Bytes[Val]] =
     val mem = memories(key)
@@ -69,7 +68,7 @@ final class AlignedMemory
 
     val readBytes: Bytes[Val] =
       if(! regions.hasNext)
-        fillBytes.get
+        mem.fillBytes.get
       else
         regions
           .map{

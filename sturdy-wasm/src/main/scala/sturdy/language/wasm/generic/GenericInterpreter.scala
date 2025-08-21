@@ -299,6 +299,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       fail(UnboundFunctionIndex, "Cannot call extern reference")
   }
 
+  def evalSatConvertOp(op: SatConvertop): Unit =
+    val v = stack.popOrAbort()
+    stack.push(num.evalSatConvertop(op, v))
+
   def evalVectorInst(inst: Inst): Unit = inst match {
     case i: VectorLoadInst =>
       i match {
@@ -338,11 +342,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(v)
       simd.evalStoreVector(i, memoryIndex, memAddr).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${effectiveAddr(i.offset)}"))
     case i: VectorInst => stack.push(simd.evalSIMD(i))
-    case op: SatConvertop =>
-      val v = stack.popOrAbort()
-      stack.push(num.evalMiscop(op, v))
   }
-
 
   val pageSize: Int = 65536
   val maxPageNum: Int = 65536
@@ -457,6 +457,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case i: TableInst => evalTableInst(i, loc)
       case i: TableMiscOp => evalTableInst(i, loc)
       case i: MemoryMiscOp => evalMemoryInst(i)
+      case i: SatConvertop => evalSatConvertOp(i)
       case i: ReferenceInst => evalRefInst(i)
       case i: VectorInst => evalVectorInst(i)
       case Drop => stack.popOrAbort()
@@ -586,6 +587,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case FunctionInstance.Null =>
         fail(WasmFailure.InvocationError, "Cannot invoke \"null\" function")
 
+  def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
+
   private def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
     tryCatch {
@@ -711,15 +714,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
       stack.popOrAbort()
     }))
-
-  /** add offset to base address (which is already on the stack) */
-  def effectiveAddr(offset: Int): Addr =
-    val v1 = i32ops.integerLit(offset)
-    val v2 = stack.popOrAbort()
-    val res = i32ops.add(v1, v2)
-    val cmp = unsignedCompareOps.ltUnsigned(res, v1)
-    val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
-    valToAddr(v)
 
   def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =

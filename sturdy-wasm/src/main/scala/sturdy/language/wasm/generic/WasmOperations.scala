@@ -74,5 +74,3 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
   def funcInstToRefV(f: FunctionInstance): RefV
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]
-
-  def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

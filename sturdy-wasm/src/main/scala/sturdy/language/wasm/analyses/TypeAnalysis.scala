@@ -35,6 +35,7 @@ import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.language.wasm.analyses.TypeAnalysis.typedTop
 
 object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -65,14 +66,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
         JOptionPowerset.None()
       else
         JOptionPowerset.NoneSome(Powerset(vec.toSet))
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[TypeAnalysis.Value]): List[TypeAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -109,5 +102,13 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     given Failure = failure
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[TypeAnalysis.Value]): List[TypeAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     override def toString: String = s"type $config"

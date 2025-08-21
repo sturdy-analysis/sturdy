@@ -22,6 +22,7 @@ given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] w
   def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)
   def negated(v: Topped[T]): Topped[T] = v.unary(ops.negated)
   def sqrt(v: Topped[T]): Topped[T] = v.unary(ops.sqrt)
+  def pow(base: Topped[T], exponent: Topped[T]): Topped[T] = base.binary(ops.pow, exponent)
   def ceil(v: Topped[T]): Topped[T] = v.unary(ops.ceil)
   def floor(v: Topped[T]): Topped[T] = v.unary(ops.floor)
   def truncate(v: Topped[T]): Topped[T] = v.unary(ops.truncate)

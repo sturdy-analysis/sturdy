@@ -77,14 +77,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
@@ -120,5 +112,13 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     given Failure = failure
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     override def toString: String = s"constant-taint $config"
