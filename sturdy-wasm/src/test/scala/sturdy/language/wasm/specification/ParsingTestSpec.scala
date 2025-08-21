@@ -90,7 +90,7 @@ class ParsingTestSpec extends AnyFlatSpec, Matchers:
               val module = Parsing.fromBinary(p)
 
               testInterp.interp.failure.fallible {
-                testInterp.interp.initializeModule(module, testInterp.imports)
+                testInterp.interp.instantiateModule(module, testInterp.imports)
               } match {
                 case CFallible.Failing(_, _) =>
                   throw new Exception(s"Instantiation failure")
@@ -102,7 +102,7 @@ class ParsingTestSpec extends AnyFlatSpec, Matchers:
           it must s"parse binary file ${p.getFileName} in directory ${dir.getFileName}" in {
             println(s"Parsing binary file ${p.getFileName} in directory ${dir.getFileName}")
             val module = Parsing.fromBinary(p)
-            val instantiatedModule = testInterp.interp.initializeModule(module, testInterp.imports)
+            val instantiatedModule = testInterp.interp.instantiateModule(module, testInterp.imports)
             if (exports.contains(p.getFileName.toString)) {
               // add module to interpreter imports
               testInterp.imports += exports(p.getFileName.toString) -> instantiatedModule

@@ -11,7 +11,7 @@ import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableD
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -68,7 +68,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
              f: Failure,
              effectStack: EffectStack,
              apronState: ApronState[VirtAddr, Type],
-             integerOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]],
              unsignedOrderingOps: UnsignedOrderingOps[I32, Bool],
              joinExpr: Join[ApronExpr[VirtAddr, Type]]
       ): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
@@ -133,7 +132,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def makeNullRefV(t: ReferenceType): RefV = Powerset(ExternReference.Null)
+    override def makeNullRefV(t: ReferenceType): RefV =
+      t match
+        case ReferenceType.FuncRef => Powerset(FunctionInstance.Null)
+        case ReferenceType.ExternRef => Powerset(ExternReference.Null)
+
     override def isNullRef(r: Value): Value =
       r match
         case Value.Ref(RefValue.RefValue(f)) =>
@@ -144,67 +147,26 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               makeBool(ApronBool.Constant(Topped.Top))
           else
             makeBool(ApronBool.Constant(Topped.Actual(false)))
+        case Value.TopValue => makeBool(ApronBool.Constant(Topped.Top))
+        case _ => makeBool(ApronBool.Constant(Topped.Actual(false)))
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
-    override def refVToFunV(r: RefV): FunV = ???
+    override def refVToFunV(r: RefV): FunV = Powerset[FunctionInstance](r.set.flatMap {
+      case f: FunctionInstance => Iterable(f)
+      case _: ExternReference => Iterable.empty
+    })
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV =
       v match
         case Value.Ref(RefValue.RefValue(f)) => f
         case Value.TopValue => Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
-    override def refToVal(r: RefV): Value = ???
+    override def refToVal(r: RefV): Value = Ref(RefValue.RefValue(r))
     override def liftBytes(b: Seq[Byte]): Bytes =
       Bytes.StoredBytes(
         value = b.map(x => (Num(Int32(NumExpr(ApronExpr.lit(x.toInt, I32Type)))), 1)).toList,
         byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN)
       )
-
-    def assignFreshTempVar(expr: ApronExpr[VirtAddr, Type]): List[Value] =
-      List(apronState.withTempVars(expr._type)((v, _) =>
-        apronState.assign(v, expr)
-        Num(Int32(NumExpr(ApronExpr.addr(v, expr._type))))
-      ))
-
-    def signedMin(numBytes: Int): BigInt = - BigInt(2).pow(8 * numBytes - 1)
-    def signedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes - 1) - 1
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case "malloc" =>
-        args match
-          case List(Num(Int32(size))) =>
-            val allocSite = domLogger.getDoms(1)
-            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            List(Num(Int32(AllocationSites(PowVirtualAddress(virt), size.asNumExpr))))
-          case _ => f.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
-      case "free" =>
-        args match
-          case List(Num(Int32(ptr))) =>
-            println(s"free($ptr)")
-            List()
-          case _ =>
-            f.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
-      case "__VERIFIER_nondet_bool" =>
-        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
-      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
-      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
-      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
-      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
-      case "__VERIFIER_nondet_float" =>
-        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
-      case "__VERIFIER_nondet_double" =>
-        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
-      case "__blackhole_int" | "__blackhole_int_p" =>
-        args
-      case _ =>
-        throw new IllegalArgumentException(s"Unknown host function $hostFunc")
 
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
@@ -316,8 +278,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           AddrCtx.Global(sym.addr)
     ))
 
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = ???
-    val tables: IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[Value, TableAddr, Index, RefV, Size]
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
@@ -449,6 +411,67 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       )
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "malloc" =>
+        args match
+          case List(Num(Int32(size))) =>
+            val allocSite = domLogger.getDoms(1)
+            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
+            List(Num(Int32(AllocationSites(PowVirtualAddress(virt), size.asNumExpr))))
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+      case "free" =>
+        args match
+          case List(Num(Int32(ptr))) =>
+            println(s"free($ptr)")
+            List()
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
+      case "ext_pow" =>
+        args match
+          case List(base, exponent) =>
+            List(wasmOps.f64ops.pow(base, exponent))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+      case "assert" =>
+        args match
+          case List(v@Num(Int32(_))) =>
+            given BooleanBranching[Value,Unit] = wasmOps.branchOpsUnit
+            assert(v.asInstanceOf[Value], domLogger.currentDom)
+            List()
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+      case "__VERIFIER_nondet_bool" =>
+        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
+      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
+      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
+      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
+      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
+      case "__VERIFIER_nondet_float" =>
+        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
+      case "__VERIFIER_nondet_double" =>
+        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
+      case "__blackhole_int" | "__blackhole_int_p" =>
+        args
+      case _ =>
+        throw new IllegalArgumentException(s"Unknown host function $hostFunc")
+
+    private def assignFreshTempVar(expr: ApronExpr[VirtAddr, Type]): List[Value] =
+      List(apronState.withTempVars(expr._type)((v, _) =>
+        apronState.assign(v, expr)
+        Num(Int32(NumExpr(ApronExpr.addr(v, expr._type))))
+      ))
+
+    private def signedMin(numBytes: Int): BigInt = -BigInt(2).pow(8 * numBytes - 1)
+
+    private def signedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes - 1) - 1
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
 

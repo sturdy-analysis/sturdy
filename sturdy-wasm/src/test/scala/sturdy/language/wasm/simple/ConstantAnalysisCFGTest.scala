@@ -192,7 +192,7 @@ def runConstantAnalysisCFG(path: Path, funName: String, args: List[Value], stack
   val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 //  interp.addControlObserver(new PrintingControlObserver()(println))
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible(
     if (!mostGeneralClient)
       interp.invokeExported(modInst, funName, args)

@@ -12,18 +12,18 @@ import sturdy.values.types.BaseType
 import scala.util.boundary
 import boundary.break
 
-class SizedUpperBoundSymbolTable[Value, Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry), SizedSymbolTable[Value, Key, Symbol, Entry, BaseType[Int], WithJoin] {
+class SizedUpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry), SizedSymbolTable[Key, Symbol, Entry, BaseType[Int], WithJoin] {
   override def size(key: Key): BaseType[Int] = ???
 
   override def grow(key: Key, newSize: BaseType[Int], initEntry: Entry): JOption[WithJoin, BaseType[Int]] = ???
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[BaseType[Int]]): Unit = ???
   
-  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def init(key: Key, entries: Seq[Entry], entryOffset: Symbol, tableOffset: Symbol, amount: BaseType[Int]): JOption[WithJoin, Unit] = ???
 
-  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def fill(key: Key, entry: Entry, tableOffset: Symbol, amount: BaseType[Int]): JOption[WithJoin, Unit] = ???
 
-  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Symbol, srcOffset: Symbol, amount: BaseType[Int]): JOption[WithJoin, Unit] = ???
 }
 
 class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry], Widen[Entry], Finite[Key]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effect:

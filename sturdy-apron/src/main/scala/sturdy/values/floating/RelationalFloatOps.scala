@@ -325,6 +325,21 @@ given RelationalFloatOps
       )
     )
 
+  override def pow(base: ApronExpr[Addr, Type], exponent: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = {
+    val baseSpecials = base.floatSpecials
+    val exponentSpecials = exponent.floatSpecials
+    checkForNewFloatSpecials(
+      floatPow(base, exponent,
+        FloatSpecials(
+          negInfinity = baseSpecials.posInfinity || baseSpecials.negInfinity || exponentSpecials.posInfinity || exponentSpecials.negInfinity,
+          posInfinity = baseSpecials.posInfinity || baseSpecials.negInfinity || exponentSpecials.posInfinity || exponentSpecials.negInfinity,
+          negZero = true,
+          nan = baseSpecials.nan || exponentSpecials.nan
+        )
+      )
+    )
+  }
+
   override def ceil(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     // ceil(-∞  ) = -∞
     // ceil( ∞  ) =  ∞

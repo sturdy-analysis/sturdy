@@ -91,7 +91,7 @@ def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[I
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val recorder = interp.addControlObserver(new RecordingControlObserver)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val b: CFallible[Iterable[Value]] = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

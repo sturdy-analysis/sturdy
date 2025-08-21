@@ -59,7 +59,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   var imports: Map[String, ModuleInstance] = Map()
   
   spectest.foreach{ mod => 
-    val modInst = interp.initializeModule(mod)
+    val modInst = interp.instantiateModule(mod)
     current = modInst
     imports += "spectest" -> modInst
   }
@@ -127,7 +127,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
     case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =
-    val modInst = interp.initializeModule(mod, imports)
+    val modInst = interp.instantiateModule(mod, imports)
     id match
       case None => // nothing
       case Some(name) => modules += name -> modInst
@@ -138,7 +138,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
         interp.failure.fallible {
-          interp.initializeModule(mod, imports)
+          interp.instantiateModule(mod, imports)
         }
       case BinaryModule(id, s) => throw new SwamException("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new SwamException("instantiation of quoted modules not yet implemented.")

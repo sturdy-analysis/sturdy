@@ -30,6 +30,7 @@ given ConcreteDoubleOps: FloatOps[Double, Double] with
   def absolute(v: Double): Double = Math.abs(v)
   def negated(v: Double): Double = -v
   def sqrt(v: Double): Double = Math.sqrt(v)
+  def pow(base:  Double, exponent: Double): Double = Math.pow(base, exponent)
   def ceil(v: Double): Double = v.ceil
   def floor(v: Double): Double = v.floor
   def truncate(v: Double): Double = if (v < 0) v.ceil else v.floor

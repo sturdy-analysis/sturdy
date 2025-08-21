@@ -30,6 +30,7 @@ given ConcreteFloatOps: FloatOps[Float, Float] with
   def absolute(v: Float): Float = Math.abs(v)
   def negated(v: Float): Float = -v
   def sqrt(v: Float): Float = Math.sqrt(v).toFloat
+  def pow(base: Float, exponent: Float): Float = throw new UnsupportedOperationException("pow only defined on doubles")
   def ceil(v: Float): Float = v.ceil
   def floor(v: Float): Float = v.floor
   def truncate(v: Float): Float = if (v < 0) v.ceil else v.floor

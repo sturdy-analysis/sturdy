@@ -59,8 +59,8 @@ given Top[Interval] with
     iv.setTop()
     iv
 
-given IntervalRange[Interval] =
-  (iv: Interval) =>
+given IntervalRange[Interval] with
+  override def range(iv: Interval): Option[Range] =
     val maybeLower =
       if (iv.inf().isInfty() != 0)
         None
@@ -88,3 +88,13 @@ given IntervalRange[Interval] =
     for(lower <- maybeLower;
         upper <- maybeUpper)
       yield(Range.inclusive(lower,upper))
+
+  override def fromInt(l: Int, h: Int): Interval = Interval(l,h)
+
+  override def fromTop(t: Topped[Int]): Interval =
+    t match
+      case Topped.Actual(i) => Interval(i,i)
+      case Topped.Top =>
+        val iv = Interval()
+        iv.setTop()
+        iv

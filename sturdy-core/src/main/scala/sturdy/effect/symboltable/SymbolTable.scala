@@ -27,7 +27,7 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effect:
 /**
  * Note: Value is guaranteed to be a I32 type
  */
-trait SizedSymbolTable[Value, Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
+trait SizedSymbolTable[Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
 
   def putNew(key: Key, limit: SizedSymbolTable.Limit[Size]): Unit
   def size(key: Key): Size
@@ -50,9 +50,9 @@ trait SizedSymbolTable[Value, Key, Symbol, Entry, Size, J[_] <: MayJoin[_]] exte
    * @param amount the number of entries to write
    * @return JOption containing Unit if successful, or None if boundaries are exceeded
    */
-  def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[J, Unit]
-  def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[J, Unit]
-  def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[J, Unit]
+  def init(key: Key, entries: Seq[Entry], entryOffset: Symbol, tableOffset: Symbol, amount: Size): JOption[J, Unit]
+  def fill(key: Key, entry: Entry, tableOffset: Symbol, amount: Size): JOption[J, Unit]
+  def copy(dstKey: Key, srcKey: Key, dstOffset: Symbol, srcOffset: Symbol, amount: Size): JOption[J, Unit]
 
 trait SymbolTableWithDrop[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends SymbolTable[Key, Symbol, Entry, J]:
   def drop(key: Key, symbol: Symbol): Unit

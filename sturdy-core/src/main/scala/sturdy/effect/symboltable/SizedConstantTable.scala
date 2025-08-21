@@ -1,19 +1,17 @@
 package sturdy.effect.symboltable
 
 import sturdy.data.{*, given}
-import sturdy.effect.Effect
+import sturdy.effect.{ComputationJoiner, Effect, EffectStack, TrySturdy}
 import sturdy.values.{*, given}
 import SizedConstantTable.*
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.ComputationJoiner
-import sturdy.effect.TrySturdy
+import sturdy.values.addresses.{*, given}
 
 import scala.util.boundary
 import boundary.break
 
-
-class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) extends SizedSymbolTable[Value, Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
+class SizedConstantTable[Key, Entry](using Finite[Key], Join[Entry], EffectStack) extends SizedSymbolTable[Key, Topped[Int], Entry, Topped[Int], WithJoin], Effect:
 
   protected var tables: Map[Key, Either[Table[Int, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -33,133 +31,62 @@ class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) exte
       case Topped.Top => None
     case Topped.Top => None
 
-  override def get(key: Key, symbol: Topped[Int]): JOptionA[Entry] = {
-    val negative = isNegative(symbol)
-    if (negative.isDefined && negative.get)
-      return JOptionA.none
-    val length = size(key)
-    val outOfBounds = largerEqualThan(symbol, length)
-    if (outOfBounds.isDefined && outOfBounds.get)
-      return JOptionA.none
-
-    tables(key) match
-      case Right(entry) => JOptionA.NoneSome(entry)
-      case Left(tab) => symbol match
-        case Topped.Top =>
-          if (tab.underlying.isEmpty)
-            JOptionA.none
-          else
-            JOptionA.NoneSome(tab.entries.reduce(Join(_, _).get))
-        case Topped.Actual(sym) => tab.underlying.get(sym) match
-          case None => JOptionA.None()
-          case Some(MayMust.Must(entry)) => {
-            if(negative.isDefined && outOfBounds.isDefined) {
-              JOptionA.some(entry)
-            } else {
-              JOptionA.noneSome(entry)
-            }
-          }
-          case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
-  }
+  override def get(key: Key, symbol: Topped[Int]): JOption[WithJoin, Entry] =
+    AddressLimits[Topped[Int], Topped[Int], WithJoin].ifAddrLeSize(symbol, size(key)) {
+      tables(key) match
+        case Right(entry) => JOptionA.NoneSome(entry)
+        case Left(tab) => symbol match
+          case Topped.Top =>
+            if (tab.underlying.isEmpty)
+              JOptionA.none
+            else
+              JOptionA.NoneSome(tab.entries.reduce(Join(_, _).get))
+          case Topped.Actual(sym) => tab.underlying.get(sym) match
+            case None => JOptionA.None()
+            case Some(MayMust.Must(entry)) => JOptionA.some(entry)
+            case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
+    }.flatMap(opt => opt)
 
   override def set(key: Key, symbol: Topped[Int], newEntry: Entry): JOption[WithJoin, Unit] =
-    val negative = isNegative(symbol)
-    if (negative.isDefined && negative.get)
-      return JOptionA.none
-    val length = size(key)
-    val outOfBounds = largerEqualThan(symbol, length)
-    if (outOfBounds.isDefined && outOfBounds.get)
-      return JOptionA.none
-
-    dirtyTables += key
-    var encounteredTop = false
-    tables(key) match
-      case Right(entry) =>
-        Join(entry, newEntry).ifChanged(tables += key -> Right(_))
-        encounteredTop = true
-      case Left(tab) => symbol match
-        case Topped.Top =>
-          encounteredTop = true
-          tables += key -> Right((tab.entries + newEntry).reduce(Join(_, _).get))
-        case Topped.Actual(sym) =>
-          tables += key -> Left(tab.updated(sym, newEntry))
-
-    if (negative.isDefined && outOfBounds.isDefined && !encounteredTop) {
-      JOptionA.some(())
-    } else {
-      JOptionA.noneSome(())
+    AddressLimits.apply.ifAddrLeSize(symbol, size(key)) {
+      dirtyTables += key
+      tables(key) match
+        case Right(entry) =>
+          Join(entry, newEntry).ifChanged(tables += key -> Right(_))
+        case Left(tab) => symbol match
+          case Topped.Top =>
+            tables += key -> Right((tab.entries + newEntry).reduce(Join(_, _).get))
+          case Topped.Actual(sym) =>
+            tables += key -> Left(tab.updated(sym, newEntry))
     }
 
-  override def size(key: Key): Topped[Int] = tables(key) match
-    case Left(table) =>
-      table.limit.min match {
-        case Topped.Actual(min) =>
-          if(table.isAllMust) {
-            Topped.Actual(math.max(min, table.underlying.size))
-          } else {
-            // precision is lost here, because size is handled as a Topped and not as an internal Int
-            Topped.Top
-          }
-        case Topped.Top => Topped.Top
-      }
-    case _ => Topped.Top
+
+  override def size(key: Key): Topped[Int] =
+    tables(key) match
+      case Left(table) => table.limit.min
+      case _ => Topped.Top
 
   override def grow(key: Key, newSize: Topped[Int], initEntry: Entry): JOption[WithJoin, Topped[Int]] = {
-    val length = size(key)
-    tables(key) match {
-      case Right(entry) =>
-        // case: table is a single (joined) entry
-        Join(entry, initEntry).ifChanged(tables += key -> Right(_))
-        return JOptionA.noneSome(length)
-      case Left(tab) =>
-        newSize match {
-          case Topped.Top => {
-            // case: newSize is Top
-            // TODO: this looses precision
-            tables += key -> Right((tab.entries + initEntry).reduce(Join(_, _).get))
-            return JOptionA.noneSome(length)
-          }
-          case Topped.Actual(newSz) =>
-            // case: newSize is a concrete value
-            length match {
-              case Topped.Top => {
-                // case: length is Top
-                // TODO: this might lose precision
-                tables += key -> Right((tab.entries + initEntry).reduce(Join(_, _).get))
-                return JOptionA.noneSome(Topped.Top)
-              }
-              case Topped.Actual(len) =>
-                // case: length is a concrete value
-                tab.limit.max match {
-                  case Some(Topped.Top) =>
-                    // case: max is Top
-                    // TODO: this might lose precision
-                    tables += key -> Right((tab.entries + initEntry).reduce(Join(_, _).get))
-                    return JOptionA.noneSome(Topped.Top)
-                  case Some(Topped.Actual(maxLimit)) =>
-                    // case: max is a concrete value
-                    if (newSz > maxLimit) {
-                      return JOptionA.none
-                    }
-                    var updatedTab = tab
-                    for (i <- len until newSz) {
-                      updatedTab = updatedTab.updated(i, initEntry)
-                    }
-                    tables += key -> Left(updatedTab)
-                    return JOptionA.some(length)
-                  case None =>
-                    // case: there is no max limit
-                    var updatedTab = tab
-                    for (i <- len until newSz) {
-                      updatedTab = updatedTab.updated(i, initEntry)
-                    }
-                    tables += key -> Left(updatedTab)
-                    return JOptionA.some(length)
-                }
+    tables(key) match
+      case Left(table) =>
+        table.limit.max match
+          case Some(maxSize) =>
+            AddressLimits[Topped[Int], Topped[Int], WithJoin].ifSizeLeLimit(newSize, maxSize) {
+              tables += key -> Left(table.copy (limit = table.limit.copy ( min = newSize ) ))
+              fill(key, initEntry, Topped.Actual(0), newSize.binary(_ + _, table.limit.min))
+              JOptionA.Some(table.limit.min)
+            } {
+              JOptionA.None()
             }
-        }
+          case None =>
+            tables += key -> Left(table.copy(limit = table.limit.copy ( min = newSize ) ))
+            fill(key, initEntry, Topped.Actual(0), newSize.binary(_ + _, table.limit.min))
+            JOptionA.Some(table.limit.min)
+      case Right(_) =>
+        set(key, Topped.Top, initEntry)
+        JOptionA.NoneSome(Topped.Top)
     }
-  }
+
 
   override def putNew(key: Key, limit: SizedSymbolTable.Limit[Topped[Int]] = SizedSymbolTable.Limit(Topped.Actual(0), None)): Unit =
     tables += key -> Left(Table(Map(), Set(), limit))
@@ -273,11 +200,11 @@ class SizedConstantTable[Value, Key, Entry](using Finite[Key], Join[Entry]) exte
         }
         IsSound.Sound
 
-  override def init(key: Key, entries: Vector[Entry], entryOffset: Value, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def init(key: Key, entries: Seq[Entry], entryOffset: Topped[Int], tableOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def fillTable(key: Key, entry: Entry, tableOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def fill(key: Key, entry: Entry, tableOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def copy(dstKey: Key, srcKey: Key, dstOffset: Value, srcOffset: Value, amount: Value): JOption[WithJoin, Unit] = ???
+  override def copy(dstKey: Key, srcKey: Key, dstOffset: Topped[Int], srcOffset: Topped[Int], amount: Topped[Int]): JOption[WithJoin, Unit] = ???
 
 
 object SizedConstantTable:

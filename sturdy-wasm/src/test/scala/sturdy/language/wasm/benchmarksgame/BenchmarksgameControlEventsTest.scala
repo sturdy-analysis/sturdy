@@ -64,7 +64,7 @@ class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp,
     val graphBuilder = inst.addControlObserver(new ControlEventGraphBuilder)
 //    val printingControlObserver = inst.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
-    val modInst = inst.initializeModule(module)
+    val modInst = inst.instantiateModule(module)
 
     println(s"Running analysis on ${p.getFileName}")
     val res = Profiler.addTime("analysis") {

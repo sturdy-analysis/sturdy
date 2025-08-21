@@ -95,7 +95,7 @@ def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AF
 //  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
   //    val constants = ConstantTaintAnalysis.constantInstructions(interp)
   val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

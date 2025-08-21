@@ -97,7 +97,7 @@ def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[L
   val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

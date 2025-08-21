@@ -11,7 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, SymbolTableWithDrop}
+import sturdy.effect.symboltable.{ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -37,6 +37,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.language.wasm.analyses.IntervalAnalysis.typedTop
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -78,14 +79,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
-
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
@@ -114,8 +107,8 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = ???
-    val tables: IntervalMappedSymbolTable[Value, TableAddr, RefV] = new IntervalMappedSymbolTable[Value, TableAddr, RefV](rangeLimit, (v: Value) => v.asInt32)
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: IntervalMappedSymbolTable[TableAddr, RefV] = new IntervalMappedSymbolTable[TableAddr, RefV](rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
@@ -168,11 +161,19 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
       override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
     }
-    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any], hostModules: HostModules): ModuleInstance = {
+    override def instantiateModule(module: Module, imports: Imports, moduleId: Option[Any], hostModules: HostModules): ModuleInstance = {
       module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-      super.initializeModule(module, imports, moduleId, hostModules)
+      super.instantiateModule(module, imports, moduleId, hostModules)
     }
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {

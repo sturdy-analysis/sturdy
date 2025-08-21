@@ -1334,3 +1334,4 @@ given SoundnessNumericInterval[L: Ordering]: Soundness[L, NumericInterval[L]] wi
 given NumericIntervalRange: IntervalRange[NumericInterval[Int]] with
   override def range(iv: NumericInterval[Int]): Option[Range] =
     Some(Range.inclusive(iv.low, iv.high))
+  override def fromInt(l: Int, h: Int): NumericInterval[Int] = NumericInterval(l, h)

@@ -119,7 +119,8 @@ object ConcreteInterpreter extends Interpreter with Control:
 
   given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, NoJoin] with
     override def valToAddr(v: Value): Int = v.asInt32
-    override def valToIdx(v: Value): Int = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
+
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
 
@@ -167,16 +168,42 @@ object ConcreteInterpreter extends Interpreter with Control:
       else
         JOptionC.none
 
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+
+    override def jvUnit: NoJoin[Unit] = implicitly
+    override def jvBytes: NoJoin[Bytes] = implicitly
+    override def jvV: NoJoin[Value] = implicitly
+    override def jvFunV: NoJoin[FunV] = implicitly
+    override def jvRefV: NoJoin[RefV] = implicitly
+    override def jvElem: NoJoin[Elem] = implicitly
+
+    override val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
+    override val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
+    override val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
+    override val elems: ConcreteSymbolTable[Unit, ElemAddr, Elem] = new ConcreteSymbolTable
+    override val tables: ConcreteSizedTable[TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[TableAddr, RefValue]
+    override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
+      new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
+        rootFrameData,
+        rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)
+      )
+    override val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
+    override val failure: ConcreteFailure = new ConcreteFailure
+    private given Failure = failure
+
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
+
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match {
       case "proc_exit" =>
         val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
 
       case "fd_close" | "fd_read" | "fd_seek" | "fd_write" | "fd_fdstat_get" | "fd_prestat_get" | "fd_prestat_dir_name" =>
-        f.fail(FileError, s"Mock implementation of ${hostFunc.name}")
+        failure.fail(FileError, s"Mock implementation of ${hostFunc.name}")
 
       case "args_sizes_get" | "args_get" | "environ_sizes_get" | "environ_get" | "random_get" | "path_open" =>
-        f.fail(MockError, s"Mock implementation of ${hostFunc.name}")
+        failure.fail(MockError, s"Mock implementation of ${hostFunc.name}")
 
       case "__VERIFIER_nondet_bool" =>
         List(Value.Num(NumValue.Int32(scala.util.Random.nextInt(2))))
@@ -203,34 +230,8 @@ object ConcreteInterpreter extends Interpreter with Control:
         args
 
       case other =>
-        f.fail(MockError, s"Unimplemented host function: $other")
+        failure.fail(MockError, s"Unimplemented host function: $other")
     }
-
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
-    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
-
-    override def jvUnit: NoJoin[Unit] = implicitly
-    override def jvBytes: NoJoin[Bytes] = implicitly
-    override def jvV: NoJoin[Value] = implicitly
-    override def jvFunV: NoJoin[FunV] = implicitly
-    override def jvRefV: NoJoin[RefV] = implicitly
-    override def jvElem: NoJoin[Elem] = implicitly
-
-    override val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
-    override val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
-    override val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    override val elems: ConcreteSymbolTable[Unit, ElemAddr, Elem] = new ConcreteSymbolTable
-    override val tables: ConcreteSizedTable[ConcreteInterpreter.Value, TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[Value, TableAddr, RefValue](_.asInt32.toInt)
-    override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
-      new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
-        rootFrameData,
-        rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)
-      )
-    override val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
-    override val failure: ConcreteFailure = new ConcreteFailure
-    private given Failure = failure
-
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
 
     override val fixpoint = new fix.ContextInsensitiveFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive = fix.log(controlEventLogger(Instance.this, NoJoinsToObserve, except), fix.identity)

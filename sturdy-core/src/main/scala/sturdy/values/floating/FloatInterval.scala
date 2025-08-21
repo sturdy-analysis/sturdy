@@ -74,6 +74,7 @@ trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def absolute(v: FloatInterval): FloatInterval = ???
   def negated(v: FloatInterval): FloatInterval = ???
   def sqrt(v: FloatInterval): FloatInterval = ???
+  def pow(base: FloatInterval, exponent: FloatInterval): FloatInterval = ???
   def ceil(v: FloatInterval): FloatInterval = ???
   def floor(v: FloatInterval): FloatInterval = ???
   def truncate(v: FloatInterval): FloatInterval = ???

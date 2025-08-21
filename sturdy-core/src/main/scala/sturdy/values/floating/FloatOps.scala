@@ -18,7 +18,8 @@ trait FloatOps[B, V]:
 
   def absolute(v: V): V 
   def negated(v: V): V 
-  def sqrt(v: V): V 
+  def sqrt(v: V): V
+  def pow(base: V, exponent: V): V
   def ceil(v: V): V 
   def floor(v: V): V 
   def truncate(v: V): V 

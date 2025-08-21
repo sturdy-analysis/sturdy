@@ -98,7 +98,7 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     val cfgBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
     val hostModules = defaultHostModules
-    val modInst = analysis.initializeModule(module, hostModules = hostModules)
+    val modInst = analysis.instantiateModule(module, hostModules = hostModules)
     given Signaler = ThreadSignaler
     val result = try {
       failAfter(1 minute) {
