@@ -28,33 +28,28 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
 
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
-  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
+  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
+  val uriSIMD: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
 
   val EXCLUDE_MEM_GROW = false
 
-  /*Files.list(Paths.get(uriWasm1)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
-    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
-  }).sorted.foreach { p =>
-    it must s"execute WASM1 script ${p.getFileName}" in {
-      println(s"Executing TestScript interpreter on WASM1 script ${p.getFileName}")
-      val script = Parsing.testscript(p)
-      val interp = ConcreteTestSpecInterpreter(Some(spectest))
-      interp.run(script)
+  def runTests(uri: URI, msg: String => String): Unit =
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
+      !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
+    }).sorted.foreach { p =>
+      it must msg(p.getFileName.toString) in {
+        println(s"Executing TestScript interpreter on script ${p.getFileName}")
+        val script = Parsing.testscript(p)
+        val interp = ConcreteTestSpecInterpreter(Some(spectest))
+        interp.run(script)
+      }
     }
-  }*/
 
-  Files.list(Paths.get(uriWasm2)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
-    !(EXCLUDE_MEM_GROW && p.getFileName.toString.contains("memory_grow.wast"))
-  }).sorted.foreach { p =>
-    it must s"execute WASM2 script ${p.getFileName}" in {
-      println(s"Executing TestScript interpreter on WASM2 script ${p.getFileName}")
-      val script = Parsing.testscript(p)
-      val interp = ConcreteTestSpecInterpreter(Some(spectest))
-      interp.run(script)
-    }
-  }
+  runTests(uriWasm1, s => s"execute WASM1 script $s")
+  runTests(uriWasm2, s => s"execute WASM2 script $s")
+  runTests(uriSIMD, s => s"execute SIMD script $s")
 
 class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
@@ -71,6 +66,20 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
 
   type Result = CFallible[List[Value]]
 
+  def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
+    vs1.size == vs2.size && vs1.zip(vs2).forall {
+      case (Value.Num(ConcreteInterpreter.NumValue.Int32(i1)), Value.Num(ConcreteInterpreter.NumValue.Int32(i2))) => i1 == i2
+      case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
+      case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
+      case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
+      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
+      case (Value.Ref(ConcreteInterpreter.RefValue.FuncNull), Value.Ref(ConcreteInterpreter.RefValue.FuncNull)) => true
+      case (Value.Ref(ConcreteInterpreter.RefValue.ExternNull), Value.Ref(ConcreteInterpreter.RefValue.ExternNull)) => true
+      case (Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.FuncRef(r2))) => r1 == r2
+      case (Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r1)), Value.Ref(ConcreteInterpreter.RefValue.ExternRef(r2))) => r1 == r2
+      case _ => false
+    }
+
   def run(commands: Seq[Command]): Unit =
     commands.foreach(c => {println(c); eval(c)})
 
@@ -79,46 +88,46 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
     case Some(name) => modules(name)
 
   def eval(c: Command): Unit = c match
-      case ValidModule(m) =>
-        // validate and compile module
-        val mod = Parsing.fromUnresolved(m)
-        val id = m.id match
-          case SomeId(name) => Some(name)
-          case _ => None
-        loadModule(id, mod)
-      case Register(s, id) =>
-        imports += s -> getModule(id)
-      case BinaryModule(id, bytes) =>
-        val mod = Parsing.fromBytes(bytes)
-        loadModule(id, mod)
-      case QuotedModule(id, text) =>
-        ???
-      case AssertReturn(action, expectedRes) =>
-        val res = runAction(action)
-        assert(!res.isFailing, s"$action failed $res")
-        val expected = constExprToVals(expectedRes)
-        assert(eqVals(expected, res.get), c.toString + s" but expected $expected != actual ${res.get}")
-      case AssertReturnCanonicalNaN(action) =>
-        val res = runAction(action)
-        checkNaN(res, c.toString)
-      case AssertReturnArithmeticNaN(action) =>
-        val res = runAction(action)
-        checkNaN(res, c.toString)
-      case AssertTrap(action: Action, message: String) =>
-        val res = runAction(action)
-        assert(res.isFailing, c.toString)
-      case AssertModuleTrap(mod,_) =>
-        val res = instantiate(mod)
-        assert(res.isFailing, c.toString)
-      case _: AssertUnlinkable => // skip
-      case AssertInvalid(m, _) =>
-        assertThrows[SwamException] {
-          instantiate(m)
-        }
-      case _: AssertMalformed => // skip
-      case _: AssertExhaustion => // skip
-      case action: Action => runAction(action)
-      case _: Meta => // skip
+    case ValidModule(m) =>
+      // validate and compile module
+      val mod = Parsing.fromUnresolved(m)
+      val id = m.id match
+        case SomeId(name) => Some(name)
+        case _ => None
+      loadModule(id, mod)
+    case Register(s, id) =>
+      imports += s -> getModule(id)
+    case BinaryModule(id, bytes) =>
+      val mod = Parsing.fromBytes(bytes)
+      loadModule(id, mod)
+    case QuotedModule(id, text) =>
+      ???
+    case AssertReturn(action, expectedRes) =>
+      val res = runAction(action)
+      assert(!res.isFailing, s"$action failed $res")
+      val expected = constExprToVals(expectedRes)
+      assert(eqVals(expected, res.get), c.toString + s" but expected $expected != actual ${res.get}")
+    case AssertReturnCanonicalNaN(action) =>
+      val res = runAction(action)
+      checkNaN(res, c.toString)
+    case AssertReturnArithmeticNaN(action) =>
+      val res = runAction(action)
+      checkNaN(res, c.toString)
+    case AssertTrap(action: Action, message: String) =>
+      val res = runAction(action)
+      assert(res.isFailing, c.toString)
+    case AssertModuleTrap(mod, _) =>
+      val res = instantiate(mod)
+      assert(res.isFailing, c.toString)
+    case _: AssertUnlinkable => // skip
+    case AssertInvalid(m, _) =>
+      assertThrows[SwamException] {
+        instantiate(m)
+      }
+    case _: AssertMalformed => // skip
+    case _: AssertExhaustion => // skip
+    case action: Action => runAction(action)
+    case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =
     val modInst = interp.initializeModule(mod, imports)
@@ -134,7 +143,7 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
         interp.failure.fallible {
           interp.initializeModule(mod, imports)
         }
-      case BinaryModule(id,s) => throw new SwamException("instantiation of binary modules not yet implemented.")
+      case BinaryModule(id, s) => throw new SwamException("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new SwamException("instantiation of quoted modules not yet implemented.")
 
   def runAction(a: Action): Result = a match {
@@ -173,3 +182,21 @@ def isNaN(value: Value): Boolean =
     case Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => f.isNaN
     case Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => d.isNaN
     case _ => false
+
+def eqVecs(b1: Array[Byte], b2: Array[Byte]): Boolean =
+  val bb1 = ByteBuffer.wrap(b1)
+  val bb2 = ByteBuffer.wrap(b2)
+
+  val eqF32 = (0 until 16 by 4).forall { i =>
+    val x = java.lang.Float.intBitsToFloat(bb1.getInt(i))
+    val y = java.lang.Float.intBitsToFloat(bb2.getInt(i))
+    if (x.isNaN && y.isNaN) true else bb1.getInt(i) == bb2.getInt(i)
+  }
+
+  val eqF64 = (0 until 16 by 8).forall { i =>
+    val x = java.lang.Double.longBitsToDouble(bb1.getLong(i))
+    val y = java.lang.Double.longBitsToDouble(bb2.getLong(i))
+    if (x.isNaN && y.isNaN) true else bb1.getLong(i) == bb2.getLong(i)
+  }
+
+  eqF32 || eqF64

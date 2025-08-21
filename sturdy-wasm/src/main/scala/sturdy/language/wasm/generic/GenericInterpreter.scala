@@ -15,6 +15,7 @@ import sturdy.values.{*, given}
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.convert.*
 import sturdy.{IsSound, Soundness, fix}
+import sturdy.data.given 
 import swam.*
 import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.syntax.*

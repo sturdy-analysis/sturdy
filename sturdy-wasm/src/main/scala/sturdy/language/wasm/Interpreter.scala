@@ -124,18 +124,18 @@ trait Interpreter:
   def makeV128(v: V128): Value.Vec =
     Value.Vec(VecValue.Vec128.apply(v))
 
-  given Bijection[I32, Value] with
-    def apply(i: I32): Value = makeI32(i)
-    def unapply(v: Value)(using f: Failure): I32 = v.asInt32
-  given Bijection[I64, Value] with
-    def apply(l: I64): Value = makeI64(l)
-    def unapply(v: Value)(using f: Failure): I64 = v.asInt64
-  given Bijection[F32, Value] with
-    def apply(f: F32): Value = makeF32(f)
-    def unapply(v: Value)(using f: Failure): F32 = v.asFloat32
-  given Bijection[F64, Value] with
-    def apply(d: F64): Value = makeF64(d)
-    def unapply(v: Value)(using f: Failure): F64 = v.asFloat64
+  given GaloisConnection[I32, Value] with
+    def asAbstract(i: I32): Value = makeI32(i)
+    def concretize(v: Value)(using f: Failure): I32 = v.asInt32
+  given GaloisConnection[I64, Value] with
+    def asAbstract(l: I64): Value = makeI64(l)
+    def concretize(v: Value)(using f: Failure): I64 = v.asInt64
+  given GaloisConnection[F32, Value] with
+    def asAbstract(f: F32): Value = makeF32(f)
+    def concretize(v: Value)(using f: Failure): F32 = v.asFloat32
+  given GaloisConnection[F64, Value] with
+    def asAbstract(d: F64): Value = makeF64(d)
+    def concretize(v: Value)(using f: Failure): F64 = v.asFloat64
 
   given CombineValue[W <: Widening]
       (using
@@ -318,37 +318,37 @@ trait Interpreter:
 
     override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]:
       override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst | VectorLoadInst]): Value = conf.t match
-        case _: i32.Load8S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i32.Load8U => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Unsigned)))
-        case _: i32.Load16S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i32.Load16U => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Unsigned)))
-        case _: i32.Load => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i64.Load8S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i64.Load8U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Unsigned)))
-        case _: i64.Load16S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i64.Load16U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Unsigned)))
-        case _: i64.Load32S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: i64.Load32U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Unsigned)))
-        case _: i64.Load => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
+        case _: i32.Load8S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i32.Load8U => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Unsigned)))
+        case _: i32.Load16S => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i32.Load16U => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Unsigned)))
+        case _: i32.Load => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i64.Load8S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i64.Load8U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Unsigned)))
+        case _: i64.Load16S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i64.Load16U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Unsigned)))
+        case _: i64.Load32S => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: i64.Load32U => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Unsigned)))
+        case _: i64.Load => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
         case _: f32.Load => Value.Num(NumValue.Float32(decodeF32(from, LITTLE_ENDIAN)))
         case _: f64.Load => Value.Num(NumValue.Float64(decodeF64(from, LITTLE_ENDIAN)))
-        case _: v128.Load8Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load16Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load32Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load64Lane => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load8Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load16Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load32Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load64Splat => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load32Zero => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load64Zero => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed)))
-        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong && config.Bits.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong &&  config.Bits.Unsigned && LITTLE_ENDIAN)))
-        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.None &&  config.Bits.Raw && LITTLE_ENDIAN)))
+        case _: v128.Load8Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load16Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load32Lane => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load64Lane => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load8Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load16Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load32Splat => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load64Splat => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load32Zero => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load64Zero => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
+        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Unsigned && LITTLE_ENDIAN)))
+        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong && config.BitSign.Signed && LITTLE_ENDIAN)))
+        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong &&  config.BitSign.Unsigned && LITTLE_ENDIAN)))
+        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.None &&  config.BitSign.Raw && LITTLE_ENDIAN)))
 
   type Instance <: GenericInstance
 

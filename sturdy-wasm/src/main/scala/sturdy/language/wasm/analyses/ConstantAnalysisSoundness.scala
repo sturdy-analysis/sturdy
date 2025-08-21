@@ -1,6 +1,6 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.{*,given}
+import sturdy.{*, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.generic.{FunctionInstance, given}
 import ConstantAnalysis.*
@@ -11,8 +11,10 @@ import sturdy.values.Topped
 import sturdy.values.toppedPartialOrder
 import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
-import sturdy.values.floating.{*,given}
+import sturdy.values.floating.{*, given}
 import sturdy.effect.symboltable.IntervalMappedSymbolTable.{*, given}
+
+import java.nio.ByteBuffer
 
 object ConstantAnalysisSoundness {
 
@@ -32,6 +34,7 @@ object ConstantAnalysisSoundness {
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[F32].lteq(f1, f2)
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[F64].lteq(d1, d2)
       case (Value.Ref(RefValue.RefValue(r1)), Value.Ref(RefValue.RefValue(r2))) => PartialOrder[Reference].lteq(r1, r2)
+      case (Value.Vec(VecValue.Vec128(v1)), Value.Vec(VecValue.Vec128(v2))) => lteqVecs(v1, v2)
       case _ => false
     
   given [C,A](using aValue: Abstractly[C,A]): Abstractly[List[C], List[A]] with
@@ -63,3 +66,24 @@ object ConstantAnalysisSoundness {
         a.tables.tableIsSound(c.tables) &&
         a.callFrame.isSound(c.callFrame)
 }
+
+  def lteqVecs(b1: Topped[Array[Byte]], b2: Topped[Array[Byte]]): Boolean =
+    if (b1.isTop) return false
+    if (b2.isTop) return true
+
+    val bb1 = ByteBuffer.wrap(b1.get)
+    val bb2 = ByteBuffer.wrap(b2.get)
+
+    val eqF32 = (0 until 16 by 4).forall { i =>
+      val x = java.lang.Float.intBitsToFloat(bb1.getInt(i))
+      val y = java.lang.Float.intBitsToFloat(bb2.getInt(i))
+      if (x.isNaN && y.isNaN) true else bb1.getInt(i) == bb2.getInt(i)
+    }
+
+    val eqF64 = (0 until 16 by 8).forall { i =>
+      val x = java.lang.Double.longBitsToDouble(bb1.getLong(i))
+      val y = java.lang.Double.longBitsToDouble(bb2.getLong(i))
+      if (x.isNaN && y.isNaN) true else bb1.getLong(i) == bb2.getLong(i)
+    }
+
+    eqF32 || eqF64

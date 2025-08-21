@@ -6,7 +6,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.booleans.*
-import sturdy.values.config.Bits
+import sturdy.values.config.BitSign
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.ordering.*

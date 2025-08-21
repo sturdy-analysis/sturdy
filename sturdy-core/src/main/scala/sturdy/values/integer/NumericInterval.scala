@@ -5,7 +5,7 @@ import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, jo
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
-import sturdy.values.config.Bits
+import sturdy.values.config.BitSign
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
@@ -1217,11 +1217,11 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
 given ConvertNumericIntervalsIntLong[I, L](using convert: ConvertIntLong[I, L])(using Numeric[I], Ordering[I], Numeric[L], Ordering[L])
   : ConvertIntLong[NumericInterval[I], NumericInterval[L]] with
 
-  def apply(from: NumericInterval[I], conf: Bits): NumericInterval[L] =
+  def apply(from: NumericInterval[I], conf: BitSign): NumericInterval[L] =
     conf match
-      case Bits.Signed | Bits.Raw =>
+      case BitSign.Signed | BitSign.Raw =>
         NumericInterval.safe(convert(from.low, conf), convert(from.high, conf))
-      case Bits.Unsigned =>
+      case BitSign.Unsigned =>
         val (unsignedLow, unsignedHigh) = from.unsignedBounds
         NumericInterval.safe(convert(unsignedLow, conf), convert(unsignedHigh, conf))
 
@@ -1288,16 +1288,16 @@ given ConvertNumericIntervalToBytes[From, To, I, B]
 
 
 given ConvertBytesToNumericInterval[From, To, I]
-  (using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.Bits], top: Top[NumericInterval[I]])
+  (using convert: Convert[From, To, Seq[Byte], I, config.BytesSize && SomeCC[ByteOrder] && config.BitSign], top: Top[NumericInterval[I]])
   (using Failure, EffectStack, Ordering[I])
-  : Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.Bits] with
+  : Convert[From, To, Seq[NumericInterval[Byte]], NumericInterval[I], config.BytesSize && SomeCC[ByteOrder] && config.BitSign] with
 
-  def apply(bytes: Seq[NumericInterval[Byte]], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): NumericInterval[I] =
+  def apply(bytes: Seq[NumericInterval[Byte]], conf: config.BytesSize && SomeCC[ByteOrder] && config.BitSign): NumericInterval[I] =
     val lowBytes = new ListBuffer[Byte]
     val highBytes = new ListBuffer[Byte]
 
     val byteIntervals = if (conf.c1.c2.t == ByteOrder.BIG_ENDIAN) bytes else bytes.reverse
-    val convertUnsigned = conf.c2 == config.Bits.Unsigned
+    val convertUnsigned = conf.c2 == config.BitSign.Unsigned
 
     // treat the sign of the most significant byte according to the conversion configuration
     val mostSignificantByte = byteIntervals.head

@@ -56,17 +56,17 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
-    case (config.Overflow.Allow && config.Bits.Signed) => d.toInt
-    case (config.Overflow.Allow && config.Bits.Unsigned) => d.toLong.toInt
-    case (config.Overflow.Fail && config.Bits.Signed) =>
+  def apply(d: Double, conf: config.Overflow && config.BitSign) = conf match
+    case (config.Overflow.Allow && config.BitSign.Signed) => d.toInt
+    case (config.Overflow.Allow && config.BitSign.Unsigned) => d.toLong.toInt
+    case (config.Overflow.Fail && config.BitSign.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Int.MinValue.toDouble || d <= Int.MinValue.toDouble - 1)
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
         d.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Signed) =>
       if (d.isNaN)
         0
       else if (d >= -Int.MinValue.toDouble)
@@ -75,14 +75,14 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         Int.MinValue
       else
         d.toInt
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.BitSign.Unsigned) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Int.MinValue.toDouble * 2.0d || d <= -1.0d)
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
         d.toLong.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Unsigned) =>
       if (d.isNaN)
         0
       else if (d >= -Int.MinValue.toDouble * 2.0d)
@@ -99,11 +99,11 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
-    case (_ && config.Bits.Raw) => JDouble.doubleToRawLongBits(d)
-    case (config.Overflow.Allow && config.Bits.Signed) => d.toLong
+  def apply(d: Double, conf: config.Overflow && config.BitSign) = conf match
+    case (_ && config.BitSign.Raw) => JDouble.doubleToRawLongBits(d)
+    case (config.Overflow.Allow && config.BitSign.Signed) => d.toLong
 //    case (config.Overflow.Allow, config.Bits.Unsigned) => ???
-    case (config.Overflow.Fail && config.Bits.Signed) =>
+    case (config.Overflow.Fail && config.BitSign.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Long.MinValue.toDouble || d < Long.MinValue.toDouble)
@@ -119,7 +119,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         Long.MinValue
       else
         d.toLong
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.BitSign.Unsigned) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Long.MinValue.toDouble * 2.0d || d <= -1.0d)
@@ -128,7 +128,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         (d - 9223372036854775808.0d).toLong | Long.MinValue
       else
         d.toLong
-    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Unsigned) =>
       if (d.isNaN)
         0
       else if (d >= -Long.MinValue.toDouble * 2.0d)
