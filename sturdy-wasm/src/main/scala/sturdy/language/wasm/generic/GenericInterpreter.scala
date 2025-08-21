@@ -279,7 +279,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val s = stack.popOrAbort()
         val d = stack.popOrAbort()
         tables.init(toTableAddr(tableIndex), elem, valToIdx(s), valToIdx(d), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
-        tables.init(toTableAddr(tableIndex), refs, s, d, n).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
 
       case ElemDrop(el) =>
         elems.drop((), ElemAddr(el))
@@ -716,6 +715,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
       stack.popOrAbort()
     }))
+
+  /** add offset to base address (which is already on the stack) */
+  def effectiveAddr(offset: Int): Addr =
+    val v1 = i32ops.integerLit(offset)
+    val v2 = stack.popOrAbort()
+    val res = i32ops.add(v1, v2)
+    val cmp = unsignedCompareOps.ltUnsigned(res, v1)
+    val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
+    valToAddr(v)
 
   def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
