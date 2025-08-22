@@ -281,7 +281,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         tables.init(toTableAddr(tableIndex), elem, valToIdx(s), valToIdx(d), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
 
       case ElemDrop(el) =>
-        elems.drop((), ElemAddr(el))
+        elems.set((), ElemAddr(el), Seq.empty[RefV])
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
@@ -298,6 +298,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(refToVal(funcInstToRefV(funInst)))
     case RefExtern(_) =>
       fail(UnboundFunctionIndex, "Cannot call extern reference")
+    case _ => throw new IllegalArgumentException(s"Expected reference instruction, but got $inst")
   }
 
   def evalSatConvertOp(op: SatConvertop): Unit =

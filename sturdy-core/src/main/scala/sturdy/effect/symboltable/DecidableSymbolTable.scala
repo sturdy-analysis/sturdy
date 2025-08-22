@@ -22,7 +22,7 @@ trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, E
 
   override def set(key: Key, symbol: Int, newEntry: Entry): JOptionC[Unit] = {
     val tab = tables(key)
-    if(0 <= symbol && symbol <= tab.limit.min) {
+    if(0 <= symbol && symbol < tab.limit.min) {
       val newTable = Table(tab.entries + (symbol -> newEntry), tab.limit)
       tables += key -> newTable
       JOptionC.some(())
@@ -102,7 +102,7 @@ class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
 
 class ConcreteSizedTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entry], Concrete {
   override def init(key: Key, entries: Seq[Entry], entryOffset: Int, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =
-    if(entryOffset >= 0 && entryOffset + amount <= entries.size && tableOffset >= 0 && tableOffset + amount <= size(key)) {
+    if(amount >= 0 && entryOffset >= 0 && entryOffset + amount <= entries.size && tableOffset >= 0 && tableOffset + amount <= size(key)) {
       val newEntries = entries.slice(entryOffset, entryOffset + amount)
       for ((entry, index) <- newEntries.zipWithIndex) {
         this.set(key, tableOffset + index, entry)
@@ -124,15 +124,18 @@ class ConcreteSizedTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entr
     }
 
   override def copy(dstKey: Key, srcKey: Key, dstOffset: Int, srcOffset: Int, amount: Int): JOption[NoJoin, Unit] =
-    val srcTab = tables(srcKey)
-    val dstTab = tables(dstKey)
-    if(srcOffset >= 0 && srcOffset + amount <= size(srcKey) && dstOffset >= 0 && dstOffset + amount <= size(srcKey)) {
-      val srcEntries = srcTab.entries.slice(srcOffset, srcOffset + amount)
-      tables += dstKey -> Table(dstTab.entries ++ srcEntries.map((idx, entry) => (idx - srcOffset + dstOffset, entry)), dstTab.limit)
-      JOptionC.some(())
-    } else {
-      JOptionC.none
-    }
+    boundary:
+      val srcTab = tables(srcKey)
+      val dstTab = tables(dstKey)
+      if (amount >= 0 && srcOffset >= 0 && srcOffset + amount <= size(srcKey) && dstOffset >= 0 && dstOffset + amount <= size(dstKey)) {
+        val srcEntries = (0 until amount).map(i => srcTab.entries.getOrElse(srcOffset + i, break(JOptionC.none)))
+        var newEntries = dstTab.entries
+        for ((entry, i) <- srcEntries.zipWithIndex) newEntries = newEntries.updated(dstOffset + i, entry)
+        tables += dstKey -> Table(newEntries, dstTab.limit)
+        JOptionC.some(())
+      } else {
+        JOptionC.none
+      }
 }
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
