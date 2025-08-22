@@ -264,7 +264,6 @@ trait RelationalBaseIntegerOps
     interpretSignedAsUnsigned(v, v._type.byteSize)
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
-    val iv = apronState.getInterval(v)
     val uMax = unsignedMaxValue(fromNumBytes)
     val fromType = v._type
 
@@ -278,7 +277,6 @@ trait RelationalBaseIntegerOps
     interpretUnsignedAsSigned(v, v._type.byteSize)
 
   def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
-    val iv = apronState.getInterval(v)
     val sMax = signedMaxValue(fromNumBytes)
     val uMax = unsignedMaxValue(fromNumBytes)
     val fromType = v._type

@@ -164,9 +164,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def refToVal(r: RefV): Value = Ref(RefValue.RefValue(r))
     override def liftBytes(b: Seq[Byte]): Bytes =
       Bytes.StoredBytes(
-        value = b.map(x => (Num(Int32(NumExpr(ApronExpr.lit(x.toInt, I32Type)))), 1)).toList,
+        value = b.map(x =>
+          (Num(Int32(NumExpr(ApronExpr.lit(byteToUnsignedInt(x), I8Type)))), 1)
+        ).toList,
         byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN)
       )
+    private def byteToUnsignedInt(b: Byte): Int = b & 0xff
 
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
@@ -209,6 +212,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case I64Type => Num(Int64(expr))
           case F32Type => Num(Float32(expr))
           case F64Type => Num(Float64(expr))
+          case I8Type  => throw IllegalArgumentException("I8 type only allowed in memory")
 
     given domLogger: DomLogger[FixIn] = new DomLogger
 

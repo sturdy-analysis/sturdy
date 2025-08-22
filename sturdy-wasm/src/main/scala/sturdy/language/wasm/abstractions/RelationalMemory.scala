@@ -10,7 +10,7 @@ import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
 import sturdy.values.addresses.AddressLimits
 import sturdy.values.{*, given}
-import sturdy.values.references.{PhysicalAddress, VirtualAddress}
+import sturdy.values.references.{PhysicalAddress, Recency, VirtualAddress}
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -51,18 +51,14 @@ trait RelationalMemory extends RelationalValues:
             region <- mem.store.get(PhysicalAddress(heapCtx, phys.recency))
           } yield((region, AlignedRead.Aligned))
         case NumExpr(addrExpr) =>
-          for {
-            case (phys,region) <- mem.store.iterator;
-            (ctx, startAddr) <- staticOrDynamic(phys.ctx, region.startAddr);
-            matches <- Iterable(apronState.satisfies(ApronCons.eq(addrExpr, startAddr)));
-            if(matches == Topped.Actual(true) || matches == Topped.Top)
-          } yield((region, if(matches == Topped.Actual(true)) AlignedRead.Aligned else AlignedRead.Unaligned))
-
-    private def staticOrDynamic(heapCtx: HeapCtx, addr: Addr): Iterable[(HeapCtx.Static | HeapCtx.Dynamic, ApronExpr[VirtAddr, Type])] =
-      (heapCtx,addr) match
-        case (ctx : (HeapCtx.Static | HeapCtx.Dynamic), NumExpr(addrExpr)) => Some((ctx, addrExpr))
-        case (ctx : HeapCtx.Alloc, _: AllocationSites) => None
-        case _ => throw IllegalStateException(s"Expected allocation sites stored at allocation context, but got context $heapCtx and address $addr")
+          val iv = apronState.getIntInterval(addrExpr)
+          ???
+//
+//    private def staticOrDynamic(heapCtx: HeapCtx, addr: Addr): Iterable[(HeapCtx.Static | HeapCtx.Dynamic, ApronExpr[VirtAddr, Type])] =
+//      (heapCtx,addr) match
+//        case (ctx : (HeapCtx.Static | HeapCtx.Dynamic), NumExpr(addrExpr)) => Some((ctx, addrExpr))
+//        case (ctx : HeapCtx.Alloc, _: AllocationSites) => None
+//        case _ => throw IllegalStateException(s"Expected allocation sites stored at allocation context, but got context $heapCtx and address $addr")
 
     private def allocOrNull(ctx: AddrCtx): Iterable[HeapCtx.Alloc | HeapCtx.Static] =
       ctx match

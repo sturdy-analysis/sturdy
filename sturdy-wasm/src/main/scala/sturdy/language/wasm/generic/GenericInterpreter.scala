@@ -307,41 +307,22 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def evalVectorInst(inst: Inst): Unit = inst match {
     case i: VectorLoadInst =>
       i match {
-        case vector: LoadVector =>
-          val memAddr = effectiveAddr(vector.offset)
-          simd.evalLoadVector(vector, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
-            v => stack.push(v)
-          }
-        case splat: LoadVectorSplat =>
-          val memAddr = effectiveAddr(splat.offset)
-          simd.evalLoadVector(splat, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector splat at address $memAddr")) {
-            v => stack.push(v)
-          }
-        case zero: LoadVectorZero =>
-          val memAddr = effectiveAddr(zero.offset)
-          simd.evalLoadVector(zero, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector zero at address $memAddr")) {
-            v => stack.push(v)
-          }
-        case lane: LoadVectorLane =>
-          val v = stack.popOrAbort()
-          val memAddr = effectiveAddr(i.offset)
-          stack.push(v)
-          simd.evalLoadVector(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector lane at address $memAddr")) {
+        case vector: (LoadVector | LoadVectorSplat | LoadVectorZero | LoadVectorLane) =>
+          val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+          simd.evalLoadVector(vector, memoryIndex, addr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $addr")) {
             v => stack.push(v)
           }
         case v128.Load(align, offset) =>
-          val memAddr = effectiveAddr(i.offset)
-          simd.evalLoadVectorBytes(i, memoryIndex, memAddr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $memAddr")) {
+          val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+          simd.evalLoadVectorBytes(i, memoryIndex, addr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $addr")) {
             bytes =>
               val v = decode(bytes, SomeCC(i, false))
               stack.push(v)
           }
       }
     case i: VectorStoreInst =>
-      val v = stack.popOrAbort()
-      val memAddr = effectiveAddr(i.offset)
-      stack.push(v)
-      simd.evalStoreVector(i, memoryIndex, memAddr).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${effectiveAddr(i.offset)}"))
+      val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+      simd.evalStoreVector(i, memoryIndex, addr).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${addr}"))
     case i: VectorInst => stack.push(simd.evalSIMD(i))
   }
 

@@ -15,10 +15,25 @@ import sturdy.values.types.{*, given}
 
 trait RelationalTypes:
   enum Type:
+    /** Represented in Apron as unsigned integer with range [0,255] */
+    case I8Type
+
+    /** Represented in Apron as signed integer with range [Int.MinValue,Int.MaxValue] */
     case I32Type
+
+    /** Represented in Apron as signed integer with range [Long.MinValue,Long.MaxValue] */
     case I64Type
+
+    /** Represented in Apron as real with range [Float.MinValue,Float.MaxValue] plus floating-point special values. */
     case F32Type
-    case F64Type
+
+    /** Represented in Apron as real with range [Double.MinValue,Double.MaxValue] plus floating-point special values. */
+    case F64Type // Represented as real
+
+    def asI8(using f: Failure): BaseType[Byte] =
+      this match
+        case I8Type => BaseType[Byte]
+        case _ => f.fail(WasmFailure.TypeError, s"Expected i8, but got $this")
 
     def asI32(using f: Failure): BaseType[Int] =
       this match
@@ -42,6 +57,7 @@ trait RelationalTypes:
 
     override def toString: String =
       this match
+        case I8Type  => "i8"
         case I32Type => "i32"
         case I64Type => "i64"
         case F32Type => "f32"
@@ -50,13 +66,15 @@ trait RelationalTypes:
   import Type.*
 
   given Ordering[Type] = Ordering.by{
-    case I32Type => 0
-    case I64Type => 1
-    case F32Type => 2
-    case F64Type => 3
+    case I8Type => 0
+    case I32Type => 1
+    case I64Type => 2
+    case F32Type => 3
+    case F64Type => 4
   }
 
   given CombineType[W <: Widening]: Combine[Type, W] = {
+    case (I8Type,  I8Type)  => Unchanged(I8Type)
     case (I32Type, I32Type) => Unchanged(I32Type)
     case (I64Type, I64Type) => Unchanged(I64Type)
     case (F32Type, F32Type) => Unchanged(F32Type)
@@ -68,24 +86,28 @@ trait RelationalTypes:
     extension (t: Type)
       def apronRepresentation: ApronRepresentation =
         t match
+          case I8Type  => BaseType[Byte].apronRepresentation
           case I32Type => BaseType[Int].apronRepresentation
           case I64Type => BaseType[Long].apronRepresentation
           case F32Type => BaseType[Float].apronRepresentation
           case F64Type => BaseType[Double].apronRepresentation
       def roundingDir: RoundingDir =
         t match
+          case I8Type  => BaseType[Byte].roundingDir
           case I32Type => BaseType[Int].roundingDir
           case I64Type => BaseType[Long].roundingDir
           case F32Type => BaseType[Float].roundingDir
           case F64Type => BaseType[Double].roundingDir
       def roundingType: RoundingType =
         t match
+          case I8Type  => BaseType[Byte].roundingType
           case I32Type => BaseType[Int].roundingType
           case I64Type => BaseType[Long].roundingType
           case F32Type => BaseType[Float].roundingType
           case F64Type => BaseType[Double].roundingType
       def byteSize: Int =
         t match
+          case I8Type  => BaseType[Byte].byteSize
           case I32Type => BaseType[Int].byteSize
           case I64Type => BaseType[Long].byteSize
           case F32Type => BaseType[Float].byteSize
