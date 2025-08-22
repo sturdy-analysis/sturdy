@@ -161,23 +161,6 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
   def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionA[V] =
     boundary:
       inst match
-        case loadLane: LoadVectorLane =>
-          val v = stack.popOrAbort()
-          val shape = laneWidthToLaneShape(loadLane.laneWidth)
-          val bytes = mem.read(memIdx, addr, loadLane.laneWidth / 8)
-          var noneSome = false
-          val vecBytes = bytes match {
-            case JOptionA.Some(vec) => vec
-            case JOptionC.Some(vec) => vec
-            case JOptionA.NoneSome(vec) =>
-              noneSome = true
-              vec
-            case JOptionA.None() => break(JOptionA.none)
-            case JOptionC.None() => break(JOptionA.none)
-          }
-          val vec = v128ops.replaceLane(shape, v, loadLane.lane, decode(vecBytes, SomeCC(loadLane, false)))
-          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
-
         case loadSplat: LoadVectorSplat =>
           val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8)
           var noneSome = false
@@ -234,19 +217,36 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
         case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")
 
-  def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Unit] = {
+  def evalLoadVectorLane(inst: LoadVectorLane, memIdx: MemoryAddr, addr: Addr, vec: V)(using J[Bytes]): JOptionA[V] = {
+    boundary:
+      val shape = laneWidthToLaneShape(inst.laneWidth)
+      val bytes = mem.read(memIdx, addr, inst.laneWidth / 8)
+      var noneSome = false
+      val vecBytes = bytes match {
+        case JOptionA.Some(vec) => vec
+        case JOptionC.Some(vec) => vec
+        case JOptionA.NoneSome(vec) =>
+          noneSome = true
+          vec
+        case JOptionA.None() => break(JOptionA.none)
+        case JOptionC.None() => break(JOptionA.none)
+      }
+      val newVec = v128ops.replaceLane(shape, vec, inst.lane, decode(vecBytes, SomeCC(inst, false)))
+      if noneSome then JOptionA.noneSome(newVec) else JOptionA.some(newVec)
+  }
+
+
+  def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr, vec: V): JOption[J, Unit] = {
     inst match {
       case storeVec: StoreVector =>
-        val v = stack.popOrAbort()
-        val bytes = encode(v, SomeCC(storeVec, false))
+        val bytes = encode(vec, SomeCC(storeVec, false))
         mem.write(memIdx, addr, bytes)
       case storeVecLane: StoreVectorLane =>
-        val v = stack.popOrAbort()
         val shape = laneWidthToLaneShape(storeVecLane.laneWidth)
         val bytes = if storeVecLane.laneWidth <= VecBytes then
-          encode(v128ops.extractLane(shape, Unsigned, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+          encode(v128ops.extractLane(shape, Unsigned, vec, storeVecLane.lane), SomeCC(storeVecLane, false))
         else
-          encode(v128ops.extractLane(shape, Raw, v, storeVecLane.lane), SomeCC(storeVecLane, false))
+          encode(v128ops.extractLane(shape, Raw, vec, storeVecLane.lane), SomeCC(storeVecLane, false))
         mem.write(memIdx, addr, bytes)
       case _ => throw new IllegalArgumentException(s"Unsupported SIMD store instruction: $inst")
     }
