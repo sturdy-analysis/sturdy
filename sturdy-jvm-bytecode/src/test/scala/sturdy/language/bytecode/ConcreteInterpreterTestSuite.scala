@@ -1,6 +1,7 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
+import org.opalj.br.instructions.{InvocationInstruction, LoadString}
 import org.opalj.br.{ArrayType, ClassType, IntegerType, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
 import org.scalatest.Inspectors.forEvery
@@ -79,48 +80,74 @@ class FullSuite extends ConcreteInterpreterTestSuite:
 class SelectiveSuite extends ConcreteInterpreterTestSuite:
   runTestCases(TestCases.includedTests)
 
+val delegatedMethodNames = Seq("runPositive", "runNegative", "loadPositive", "loadNegative", "instantiatePositive", "instantiateNegative")
+
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
+  // if the harness fails, the test is canceled
   def assertCase(testCase: Path): Assertion =
     val project = Project(testCase.toFile, bytecode.RTJar)
     println(s"testing $testCase")
-    val name = testCase.getFileName.toString
+    val caseName = testCase.getFileName.toString
 
     val rootCf = project.projectClassFilesWithSources.map(_._1).find:
-      _.thisType.simpleName == name
+      _.thisType.simpleName == caseName
     .getOrElse:
-      cancel("invalid layout")
-    val mains = rootCf.methods.filter:
+      cancel(s"[$caseName] invalid layout: no root class file in case")
+    val rootMains = rootCf.methods.filter:
       _.name == "main"
-    if mains.size != 1 then cancel(s"unexpected amount of main methods: ${mains.size}")
-    val runs = rootCf.methods.filter: m =>
+    if rootMains.size != 1 then cancel(s"[$caseName] unexpected amount of main methods: ${rootMains.size}")
+    val rootRuns = rootCf.methods.filter: m =>
       // this should find the correct run method, it has signature (String[] x PrintStream) -> int
       m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType("java/lang/String")), ClassType("java/io/PrintStream")), IntegerType)
-    if runs.size != 1 then
-      cancel(s"unexpected amount of run methods:\n" + runs.mkString("\n"))
+    if rootRuns.size != 1 then
+      cancel(s"[$caseName] unexpected amount of run methods:\n" + rootRuns.mkString("\n"))
 
     // checked above
-    val run = runs.head
-    // if run doesn't have a body, failing the test is fine
-    val methods = if run.body.getOrElse:
-      fail(s"method has no body:\n$run")
-    .exists: p =>
-      p.instruction.isInvocationInstruction && p.instruction.asInvocationInstruction.name == "runPositive"
-    then
-      // bypass reflections by collecting all run methods
-      val cfs = project.projectClassFilesWithSources.filterNot: (cf, source) =>
-        cf.thisType.simpleName == name || cf.thisType.simpleName.endsWith("n") || TestCases.ignoreRegexes.exists(_.matches(source.toString))
-      cfs.flatMap(_._1.methods.filter(_.name == "run"))
-    else if run.body.get.exists: p =>
-      p.instruction.isInvocationInstruction && p.instruction.asInvocationInstruction.name == "loadNegative"
-    then
-      // loading uses reflections so we ignore those tests for now
-      val targets = run.body.get.flatMap: p =>
-        Option.when(p.instruction.isInvocationInstruction)(p.instruction.asInvocationInstruction)
-      cancel("loading/instantiating tests are currently ignored. this test contains the following invocation instructions:\n" + targets.mkString("\n"))
-    else
-      Seq(run)
+    val rootRun = rootRuns.head
+    val runBody = rootRun.body.getOrElse:
+      cancel(s"[$caseName] root run method with no body:\n$rootRun")
 
-    // TODO: improve this structure
+    // determine which delegated methods are called, if any
+    val calledDelegatedMethods = runBody.flatMap: p =>
+      val instr = p.instruction
+      Option.when(instr.isInvocationInstruction && delegatedMethodNames.contains(instr.asInvocationInstruction.name)):
+        instr.asInvocationInstruction.name
+    .toSeq
+
+    val methods = if calledDelegatedMethods.nonEmpty then
+      //val delegatedClasses =
+      val map = collection.mutable.Map from delegatedMethodNames.map:
+        _ -> collection.mutable.ListBuffer[String]()
+      var nextClass: Option[String] = None
+      runBody.foreachInstruction:
+        case LoadString(s) =>
+          nextClass = Some(s)
+        case i: InvocationInstruction =>
+          map(i.asInvocationInstruction.name) += nextClass.getOrElse:
+            cancel(s"[$caseName] error when constructing delegate call map: option empty")
+          nextClass = None
+        // do nothing if instruction is irrelevant
+        case _ => ()
+      if nextClass.isDefined then cancel(s"[$caseName] class not empty after loop")
+      if map.size != delegatedMethodNames.size then cancel(s"[$caseName] unexpected map size: ${map.size}")
+
+      val ms = map("runPositive").map: cn =>
+        val cfs = project.projectClassFilesWithSources.filter: (cf, _) =>
+          cf.thisType.simpleName == cn
+        if cfs.size != 1 then cancel(s"[$caseName] unexpected amount of class file candidates: ${cfs.size}")
+        // checked above
+        val cf = cfs.head._1
+        val runs = cf.methods.filter: m =>
+          m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType("java/lang/String")), ClassType("java/io/PrintStream")), IntegerType)
+        if runs.size != 1 then cancel(s"[$caseName] unexpected amount of run candidates: ${runs.size}")
+        // checked above
+        runs.head
+      .toSeq
+      ms
+    else Seq(rootRun)
+
+    // TODO: better handling for other delegated methods
+
     forEvery(methods): method =>
       val mType = method.name match
         case "main" => TestedMethodType.Main
