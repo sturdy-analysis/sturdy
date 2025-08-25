@@ -56,9 +56,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def funcInstToRefV(f: FunctionInstance): RefV = ???
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV = ???
     override def refToVal(r: RefV): Value = ???
-    override def makeNullRefV(t: ReferenceType): RefV = ???
     override def liftBytes(b: Seq[Byte]): Bytes = ???
-    override def refVToFunV(r: RefV): FunV = ???
     override def isNullRef(r: Value): ConstantTaintAnalysis.Value = ???
 
     override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] = addr.map(_ + offset)
@@ -105,7 +103,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem]
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)
     val tables: SizedConstantTable[TableAddr, RefV] = new SizedConstantTable
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

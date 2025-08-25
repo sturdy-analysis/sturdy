@@ -15,6 +15,7 @@ import sturdy.values.integer.given
 import sturdy.fix
 import sturdy.fix.Logger
 import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.values.references.ReferenceOps
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
 
@@ -29,10 +30,6 @@ trait ConstantTaintValues extends Interpreter:
   final type F64 = TaintProduct[Topped[Double]]
   final type V128 = TaintProduct[Topped[Array[Byte]]]
   final type Bool = TaintProduct[Topped[Boolean]]
-
-  enum ExternReference:
-    case ExternValue
-    case Null
   final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]]
   final type RefV = Reference
   final type FunV = Powerset[FunctionInstance]
@@ -150,3 +147,10 @@ trait ConstantTaintValues extends Interpreter:
 
     def maybeTainted(v: Value): Boolean =
       Taint.Tainted <= getTaint(v)
+
+  given TaintReference: ReferenceOps[FunV, RefV] with {
+    override def mkNullRef: RefV = ???
+    override def mkExternNullRef: RefV = ???
+    override def mkRef(trg: FunV): RefV = ???
+    override def deref(v: RefV): FunV = ???
+  }

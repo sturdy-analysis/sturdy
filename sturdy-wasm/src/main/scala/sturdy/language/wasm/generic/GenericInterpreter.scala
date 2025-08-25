@@ -281,7 +281,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         tables.init(toTableAddr(tableIndex), elem, valToIdx(s), valToIdx(d), valToSize(n)).getOrElse(fail(TableAccessOutOfBounds, "Invalid table.init access"))
 
       case ElemDrop(el) =>
-        elems.set((), ElemAddr(el), Seq.empty[RefV])
+        elems.drop((), ElemAddr(el))
 
       case _ => throw new IllegalArgumentException(s"Expected table instruction, but got $inst")
     }
@@ -289,7 +289,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   def evalRefInst(inst: Inst): Unit = inst match {
     case RefNull(t) =>
-      stack.push(refToVal(makeNullRefV(t)))
+      stack.push(refToVal(mkNullRef(t)))
     case RefIsNull =>
       val ref = stack.popOrAbort()
       stack.push(isNullRef(ref))
@@ -505,7 +505,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       branchOpsUnit.boolBranch(isNullRef(refToVal(fRef))) {
         fail(UnboundFunctionIndex, s"Cannot call function with null reference $fRef.")
       } {
-        val funV = refVToFunV(fRef)
+        val funV = referenceOps.deref(fRef)
         invokeIndirect(funV, ftExpected, funcIx, loc)
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
@@ -715,6 +715,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val v = branchOpsV.boolBranch(cmp, fail(MemoryAccessOutOfBounds, s"$v1 + $v2"), res)
     valToAddr(v)
 
+  private def mkNullRef(referenceType: ReferenceType): RefV = referenceType match
+    case ReferenceType.FuncRef => referenceOps.mkNullRef
+    case ReferenceType.ExternRef => referenceOps.mkExternNullRef
+
   def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
@@ -882,7 +886,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       case TableType(ty, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
         tables.putNew(tabAddr, SizedSymbolTable.Limit(valToSize(i32ops.integerLit(min)), max.map(m => valToSize(i32ops.integerLit(m)))))
-        tables.fill(tabAddr, makeNullRefV(ty), valToIdx(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min)))
+        tables.fill(tabAddr, mkNullRef(ty), valToIdx(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min)))
         tabCount += 1
         tabAddr
     }

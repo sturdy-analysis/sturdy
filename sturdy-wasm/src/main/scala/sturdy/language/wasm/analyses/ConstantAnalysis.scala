@@ -2,14 +2,14 @@ package sturdy.language.wasm.analyses
 
 import sturdy.control.{ControlEvent, ControlObservable}
 import sturdy.data.{*, given}
+import sturdy.values.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, SymbolTableWithDrop, joinLimit}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, JoinableDecidableSymbolTable, SizedConstantTable, SizedSymbolTable, SymbolTable, SymbolTableWithDrop, joinLimit}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.abstractions.*
@@ -55,40 +55,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def liftBytes(b: Seq[Byte]): Seq[Topped[Byte]] = b.map(Topped.Actual(_))
 
-    override def refVToFunV(r: RefV): FunV =
-      ???
-      // If r contains only functions, return functions.
-      // If r contains also references, return eff.joinWithFailure { filteredFunctions } { Failure ("expected function, but got ...") }
-
-//      r match {
-//      case Powerset(refs) =>
-//        val funcs = refs.collect {
-//          case RefValue.FuncRef(Topped.Actual(f)) => f
-//          case RefValue.ExternRef(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $refs")
-//          case RefValue.FuncNull | RefValue.ExternNull => FunctionInstance.Null()
-//        }
-//        if (funcs.isEmpty) {
-//          f.fail(UnboundFunctionIndex, s"Cannot convert $refs to function instance")
-//        }
-//        Powerset(funcs)
-//    }
-
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
-
-    override def makeNullRefV(t: ReferenceType): RefV = ???
-      // I don't believe we ever need null for functions. When would this ever happen?
-//    {
-//      t match {
-//        case FuncRef => Powerset(Set(ConstantAnalysis.RefValue.FuncNull))
-//        case ExternRef => Powerset(Set(ConstantAnalysis.RefValue.ExternNull))
-//      }
-//    }
 
     override def isNullRef(r: Value): ConstantAnalysis.Value = {
       r match {
         case Value.Ref(RefValue.RefValue(f)) =>
-          if(f.set.contains(ExternReference.Null))
-            if(f.size == 1)
+          if (f.set.contains(ExternReference.Null))
+            if (f.size == 1)
               makeI32(Topped.Actual(1))
             else
               makeI32(Topped.Top)
@@ -122,8 +95,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r: FunctionInstance)) => Value.Ref(RefValue.RefValue(Powerset(r)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(0: Int)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.Null)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(n: Int)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ConcreteInterpreter.ExternReference.Null)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.Null)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ConcreteInterpreter.ExternReference.ExternReference)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))
       case ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(v)) => Value.Vec(VecValue.Vec128(Topped.Actual(v)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends GenericInstance:
@@ -178,7 +151,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty[RefV])(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: ConstantIntervalMappedSymbolTable[TableAddr, RefV] = new ConstantIntervalMappedSymbolTable[TableAddr, RefV]
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

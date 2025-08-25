@@ -55,8 +55,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = ???
     override def refToVal(r: RefV): IntervalAnalysis.Value = ???
     override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
-    override def makeNullRefV(t: ReferenceType): RefV = ???
-    override def refVToFunV(r: RefV): FunV = ???
     override def isNullRef(r: Value): IntervalAnalysis.Value = ???
 
     override def funcInstToRefV(f: FunctionInstance): RefV = ???
@@ -107,7 +105,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalMappedSymbolTable[TableAddr, RefV] = new IntervalMappedSymbolTable[TableAddr, RefV](rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept

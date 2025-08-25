@@ -96,9 +96,26 @@ trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, 
     IsSound.Sound
 
 
-class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], SymbolTableWithDrop[Key, Symbol, Entry, NoJoin], Concrete:
+
+class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry], Concrete
+
+class ConcreteSymbolDropTable[Key, Symbol, Entry](droppedEntry: Entry) extends DecidableSymbolTable[Key, Symbol, Entry], SymbolTableWithDrop[Key, Symbol, Entry, NoJoin], Concrete:
+  var dropped: Map[Key, Set[Symbol]] = Map()
+  
   override def drop(key: Key, symbol: Symbol): Unit =
-    tables += key -> (tables(key) - symbol)
+    dropped += key -> (dropped.getOrElse(key, Set()) + symbol)
+
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOptionC[Unit] = { 
+    if (dropped.getOrElse(key, Set()).contains(symbol))
+      dropped -= key
+    super.set(key, symbol, newEntry)
+  }
+
+  override def get(key: Key, symbol: Symbol): JOptionC[Entry] = { 
+    if (dropped.getOrElse(key, Set()).contains(symbol))
+      return JOptionC.Some(droppedEntry)
+    super.get(key, symbol)
+  }
 
 class ConcreteSizedTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entry], Concrete {
   override def init(key: Key, entries: Seq[Entry], entryOffset: Int, tableOffset: Int, amount: Int): JOption[NoJoin, Unit] =

@@ -33,6 +33,10 @@ trait Interpreter:
   type V128
   type Bool
   type Reference
+  
+  enum ExternReference:
+    case ExternReference
+    case Null
 
   enum NumValue:
     case Int32(i: I32)
@@ -207,11 +211,13 @@ trait Interpreter:
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
+     , refOps: ReferenceOps[FunV, RefV]
      , specOps: SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, J]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
+    val referenceOps: ReferenceOps[FunV, RefV] = refOps
     val specialOps: SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)

@@ -12,6 +12,7 @@ import sturdy.values.integer.*
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
 import sturdy.values.ordering.UnsignedOrderingOps
+import sturdy.values.references.ReferenceOps
 import sturdy.values.simd.SIMDOps
 import swam.{FuncType, GlobalIdx, ReferenceType}
 import swam.syntax.*
@@ -41,6 +42,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst | VectorStoreInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
+  val referenceOps: ReferenceOps[FunV, RefV]
   val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
@@ -60,10 +62,6 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
    * @return sz wrapped in a i32 value
    */
   def sizeToVal(sz: Size): V
-  def refVToFunV(r: RefV): FunV
-
-  def makeNullRefV(t: ReferenceType): RefV
-
   /**
    * Check if a reference is null.
    * @param r the reference to check

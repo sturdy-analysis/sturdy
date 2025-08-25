@@ -6,7 +6,7 @@ import scala.collection.immutable.ArraySeq
 
 given FiniteSeq[V](using Finite[V]): Finite[Seq[V]] with {}
 
-given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], W] with
+/*given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], W] with
   override def apply(vs1: Seq[V], vs2: Seq[V]): MaybeChanged[Seq[V]] =
     if (vs1.size != vs2.size)
       throw new IllegalStateException()
@@ -18,7 +18,27 @@ given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], 
         v.get
     }
     MaybeChanged(vs, changed)
+*/
 
+given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], W] with
+  override def apply(vs1: Seq[V], vs2: Seq[V]): MaybeChanged[Seq[V]] =
+    val minSize = math.min(vs1.size, vs2.size)
+    var changed = false
+    val prefix = vs1.take(minSize).zip(vs2.take(minSize)).map {
+      case (v1, v2) =>
+        val v = j(v1, v2)
+        changed |= v.hasChanged
+        v.get
+    }
+    val suffix =
+      if vs1.size > vs2.size then
+        changed = true
+        vs1.drop(minSize)
+      else if vs2.size > vs1.size then
+        changed = true
+        vs2.drop(minSize)
+      else Seq.empty
+    MaybeChanged(prefix ++ suffix, changed)
 
 given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V], W] with
   override def apply(vs1: List[V], vs2: List[V]): MaybeChanged[List[V]] =

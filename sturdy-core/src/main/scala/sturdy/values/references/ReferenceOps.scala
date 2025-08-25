@@ -9,6 +9,7 @@ case object NullDereference extends FailureKind
 
 trait ReferenceOps[Trg, V]:
   def mkNullRef: V
+  def mkExternNullRef: V = mkNullRef
   def mkRef(trg: Trg): V
   def mkManagedRef(trg: Trg): V = mkRef(trg)
   def deref(v: V): Trg

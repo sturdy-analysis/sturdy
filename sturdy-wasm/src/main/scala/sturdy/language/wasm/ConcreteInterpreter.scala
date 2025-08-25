@@ -8,7 +8,7 @@ import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.ConcreteFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.{ConcreteSizedTable, ConcreteSymbolTable, DecidableSymbolTable, SizedSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.{ConcreteSizedTable, ConcreteSymbolDropTable, ConcreteSymbolTable, DecidableSymbolTable, SizedSymbolTable, SymbolTable}
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
@@ -33,10 +33,10 @@ import java.nio.ByteOrder
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.fix.{Combinator, Contextual}
-import sturdy.language.wasm.abstractions.Control
+import sturdy.language.wasm.abstractions.{ConcreteReference, Control}
 import sturdy.values.Topped
 
-object ConcreteInterpreter extends Interpreter with Control:
+object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
   override type J[A] = NoJoin[A]
   override type I32 = Int
   override type I64 = Long
@@ -44,9 +44,6 @@ object ConcreteInterpreter extends Interpreter with Control:
   override type F64 = Double
   override type V128 = Array[Byte]
   override type Bool = Boolean
-  override type Reference = FunctionInstance | Int
-  override type FunV = FunctionInstance
-  override type RefV = RefValue
   override type Addr = Int
   override type Bytes = Seq[Byte]
   override type Size = Int
@@ -109,11 +106,11 @@ object ConcreteInterpreter extends Interpreter with Control:
           case ReferenceType.ExternRef => makeRef(FunctionInstance.Null)
       case unresolved.RefFunc(x) => x match {
         case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
-        case _ => Value.Ref(RefValue.RefValue(0))
+        case _ => Value.Ref(RefValue.RefValue(ExternReference.Null))
       }
       case unresolved.RefExtern(x) => x match {
-        case Left(r) => Value.Ref(RefValue.RefValue(r))
-        case _ => Value.Ref(RefValue.RefValue(0))
+        case Left(r) => Value.Ref(RefValue.RefValue(ExternReference.ExternReference))
+        case _ => Value.Ref(RefValue.RefValue(ExternReference.Null))
       }
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
@@ -124,28 +121,16 @@ object ConcreteInterpreter extends Interpreter with Control:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
 
-    override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefValue = v match {
-      case Value.Ref(ref) => ref
+    override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV = v match {
+      case Value.Ref(RefValue.RefValue(ref)) => ref
       case _ => f.fail(TypeError, s"Expected a reference value, but got $v")
     }
     
-    override def refToVal(r: RefV): Value = Value.Ref(r)
+    override def refToVal(r: RefV): Value = Value.Ref(RefValue.RefValue(r))
     
     override def liftBytes(b: Seq[Byte]): Seq[Byte] = b
 
-    override def funcInstToRefV(f: FunctionInstance): RefV =
-      RefValue.RefValue(f)
-
-    override def refVToFunV(r: RefV): FunV =
-      r match {
-        case RefValue.RefValue(f : FunctionInstance) => f
-        case RefValue.RefValue(_) => f.fail(UnboundFunctionIndex, s"Cannot convert extern reference to actual function: $r")
-      }
-    
-    override def makeNullRefV(t: ReferenceType): RefValue =
-      t match
-        case FuncRef => RefValue.RefValue(FunctionInstance.Null)
-        case ExternRef => RefValue.RefValue(FunctionInstance.Null)
+    override def funcInstToRefV(f: FunctionInstance): RefV = f
     
     override def isNullRef(r: Value): Value =
       r match {
@@ -180,8 +165,8 @@ object ConcreteInterpreter extends Interpreter with Control:
     override val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     override val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     override val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    override val elems: ConcreteSymbolTable[Unit, ElemAddr, Elem] = new ConcreteSymbolTable
-    override val tables: ConcreteSizedTable[TableAddr, ConcreteInterpreter.RefValue] = new ConcreteSizedTable[TableAddr, RefValue]
+    override val elems: ConcreteSymbolDropTable[Unit, ElemAddr, Elem] = new ConcreteSymbolDropTable(Seq.empty[RefV])
+    override val tables: ConcreteSizedTable[TableAddr, RefV] = new ConcreteSizedTable[TableAddr, RefV]
     override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,

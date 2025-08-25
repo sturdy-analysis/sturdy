@@ -65,7 +65,7 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
     )
 
   Fixpoint.DEBUG = false
-  val EXCLUDE_MEM_GROW = true
+  val EXCLUDE_MEM_GROW = false
 
   def runTests(uri: URI, msg: String => String): Unit =
     Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).filter(p => {
@@ -76,7 +76,7 @@ class ConstantAnalysisTestSpec extends AnyFlatSpec, Matchers:
           println(s"Executing TestScript constant analysis on script ${p.getFileName}")
           val script = Parsing.testscript(p)
           val interp = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp())
-          //interp.run(script)
+          interp.run(script)
           val interpTop = ConstantAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
           interpTop.run(script)
         }
@@ -301,12 +301,12 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
     import ConstantAnalysis.NumValue.*
     import ConstantAnalysis.VecValue.*
     constExprToVal(inst) match
-      case Num(Int32(_)) => ConstantAnalysis.makeI32(ConstantAnalysis.topI32)
-      case Num(Int64(_)) => ConstantAnalysis.makeI64(ConstantAnalysis.topI64)
-      case Num(Float32(_)) => ConstantAnalysis.makeF32(ConstantAnalysis.topF32)
-      case Num(Float64(_)) => ConstantAnalysis.makeF64(ConstantAnalysis.topF64)
-      case Vec(Vec128(_)) => ConstantAnalysis.makeV128(ConstantAnalysis.topV128)
-      case Ref(_) => TopValue
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(_)) => ConstantAnalysis.makeI32(ConstantAnalysis.topI32)
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(_)) => ConstantAnalysis.makeI64(ConstantAnalysis.topI64)
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(_)) => ConstantAnalysis.makeF32(ConstantAnalysis.topF32)
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(_)) => ConstantAnalysis.makeF64(ConstantAnalysis.topF64)
+      case ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(_)) => ConstantAnalysis.makeV128(ConstantAnalysis.topV128)
+      case ConcreteInterpreter.Value.Ref(_) => TopValue
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =

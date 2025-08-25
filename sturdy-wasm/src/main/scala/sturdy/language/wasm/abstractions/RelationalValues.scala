@@ -38,8 +38,5 @@ trait RelationalValues extends RelationalI32Values with PowersetReference:
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Num(Float32(FloatingLit(f, F32Type)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Num(Float64(FloatingLit(d, F64Type)))
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(func : FunctionInstance)) => Ref(RefValue.RefValue(Powerset(func)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(extern : Int)) =>
-        if(extern == 0)
-          Ref(RefValue.RefValue(Powerset(ExternReference.Null)))
-        else
-          Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ConcreteInterpreter.ExternReference.ExternReference)) => Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))
+      // case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ExternReference.Null)) => Ref(RefValue(ExternReference.Null))
