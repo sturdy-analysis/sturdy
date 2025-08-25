@@ -2,15 +2,20 @@ package sturdy.language.wasm.abstractions
 
 import sturdy.apron.{ApronBool, ApronCons, ApronExpr, ApronState, ApronVar}
 import sturdy.data.{*, given}
+import sturdy.effect.EffectStack
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.bytememory.{*, given}
 import sturdy.effect.bytememory.Bytes.*
+import sturdy.effect.failure.Failure
 import sturdy.fix.DomLogger
-import sturdy.language.wasm.analyses.RelationalAnalysis.VirtAddr
+import sturdy.language.wasm.analyses.RelationalAnalysis.{Bool, I32, VirtAddr}
+import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
-import sturdy.values.addresses.AddressLimits
+import sturdy.util.Lazy
+import sturdy.values.addresses.{AddressLimits, AddressOffset}
+import sturdy.values.ordering.UnsignedOrderingOps
 import sturdy.values.{*, given}
-import sturdy.values.references.{PhysicalAddress, Recency, VirtualAddress}
+import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, Recency, VirtualAddress}
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -21,6 +26,33 @@ trait RelationalMemory extends RelationalValues:
   final type Addr = NumExpr | AllocationSites
   final type Size = ApronExpr[VirtAddr, Type]
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
+
+  given RelationalAddressOffset(using f: Failure, lazyEffectStack: Lazy[EffectStack], apronState: ApronState[VirtAddr, Type], unsignedOrderingOps: UnsignedOrderingOps[I32, Bool]): AddressOffset[Addr] with
+    override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
+      given effectStack: EffectStack = lazyEffectStack.value
+      addr match
+        case _ if newOffset == 0 =>
+          addr
+        case AllocationSites(sites, size) =>
+          AllocationSites(PowVirtualAddress(sites.iterator.map {
+            case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset)), n, addrTrans) =>
+              apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
+            case v@VirtualAddress(AddrCtx.Heap(HeapCtx.Static(0)), n, addrTrans) =>
+              v
+            case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
+          }), size)
+        case _ =>
+          val expr = addr.asNumExpr
+          val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
+          given Join[ApronExpr[VirtAddr, Type]] = apronState.join
+          NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
+            f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
+          } {
+            addr match
+              case NumExpr(ApronExpr.Constant(_, floatSpecials, tpe)) => ApronExpr.Constant(apronState.getInterval(resAddr), floatSpecials, tpe)
+              case _ => resAddr
+          })
+    }
 
   given RelationalAddressLimits(using apronState: ApronState[VirtAddr, Type]): AddressLimits[Addr, Size, WithJoin] with
     override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =

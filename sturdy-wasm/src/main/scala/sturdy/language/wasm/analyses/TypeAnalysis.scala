@@ -36,6 +36,7 @@ import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.language.wasm.analyses.TypeAnalysis.typedTop
+import sturdy.values.addresses.AddressOffset
 
 object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -57,13 +58,19 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def funcInstToRefV(f: FunctionInstance): RefV = ???
     override def isNullRef(r: Value): TypeAnalysis.Value = ???
 
-    override def addOffsetToAddr(offset: Int, addr: Addr): Addr = BaseType[Int]
-
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
         JOptionPowerset.None()
       else
         JOptionPowerset.NoneSome(Powerset(vec.toSet))
+
+  given TypeAddressOffset(using f: Failure, effectStack: EffectStack): AddressOffset[Addr] with
+    override def addOffsetToAddr(offset: Int, addr: Addr): Addr =
+      effectStack.joinWithFailure {
+        addr
+      } {
+        f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+      }
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

@@ -18,6 +18,7 @@ import sturdy.language.wasm.abstractions.Fix.given
 import sturdy.language.wasm.generic.WasmFailure.*
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.values.addresses.AddressOffset
 import sturdy.values.booleans.given
 import sturdy.values.convert.{*, given}
 import sturdy.values.exceptions.given
@@ -72,8 +73,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       }
     }
 
-    override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] = addr.map(_ + offset)
-
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
@@ -86,6 +85,23 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
             JOptionPowerset.None()
           else
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
+
+  given ConstantAddressOffset(using f: Failure, effectStack: EffectStack): AddressOffset[Addr] with
+    override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] =
+      addr match
+        case Topped.Top =>
+          effectStack.joinWithFailure {
+              Topped.Top
+          } {
+            f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+          }
+        case Topped.Actual(a) =>
+          val resultAddr = a + offset
+          if (Integer.compareUnsigned(resultAddr, offset) < 0) {
+            f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+          } else {
+            Topped.Actual(resultAddr)
+          }
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match

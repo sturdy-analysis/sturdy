@@ -25,6 +25,7 @@ import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 import WasmFailure.*
 import scodec.bits.ByteVector
+import sturdy.util.{Lazy, lazily}
 
 case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
   override def toString: String =
@@ -190,6 +191,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   val effectStack: EffectStack = newEffectStack
   given EffectStack = effectStack
+  given Lazy[EffectStack] = lazily(effectStack)
 
   private given Failure = failure
 
@@ -309,18 +311,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case i: VectorLoadInst =>
       i match {
         case vector: (LoadVector | LoadVectorSplat | LoadVectorZero) =>
-          val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+          val addr = addressOffset.addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
           simd.evalLoadVector(vector, memoryIndex, addr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $addr")) {
             v => stack.push(v)
           }
         case loadLane: LoadVectorLane =>
           val vec = stack.popOrAbort()
-          val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+          val addr = addressOffset.addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
           simd.evalLoadVectorLane(loadLane, memoryIndex, addr, vec).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector lane at address $addr")) {
             v => stack.push(v)
           }
         case v128.Load(align, offset) =>
-          val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+          val addr = addressOffset.addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
           simd.evalLoadVectorBytes(i, memoryIndex, addr).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read vector at address $addr")) {
             bytes =>
               val v = decode(bytes, SomeCC(i, false))
@@ -329,7 +331,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     case i: VectorStoreInst =>
       val vec = stack.popOrAbort()
-      val addr = addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
+      val addr = addressOffset.addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
       simd.evalStoreVector(i, memoryIndex, addr, vec).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${addr}"))
     case i: VectorInst => stack.push(simd.evalSIMD(i))
     case _ => throw new IllegalArgumentException(s"Expected vector instruction, but got $inst")
@@ -392,7 +394,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
   def load(inst: LoadInst | LoadNInst): Unit =
     val startAddr = valToAddr(stack.popOrAbort())
-    val addr = addOffsetToAddr(inst.offset, startAddr)
+    val addr = addressOffset.addOffsetToAddr(inst.offset, startAddr)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
     memory.read(memIdx, addr, length, inst.align).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr")) {
@@ -407,7 +409,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
     // add offset to base address (which is already on the stack)
     val startAddr = valToAddr(stack.popOrAbort())
-    val addr = addOffsetToAddr(inst.offset, startAddr)
+    val addr = addressOffset.addOffsetToAddr(inst.offset, startAddr)
 
     val memIdx = memoryIndex
     memory.write(memIdx, addr, bytes).getOrElse(

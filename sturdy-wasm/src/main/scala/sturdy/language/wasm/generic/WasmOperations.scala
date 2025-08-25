@@ -42,13 +42,14 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst | VectorStoreInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst | VectorLoadInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, J]
+  val addressOffset: AddressOffset[Addr]
   val referenceOps: ReferenceOps[FunV, RefV]
   val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]] extends AddressOffset[Addr]:
+trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:
   def valToAddr(v: V): Addr
   def valToIdx(v: V): Index
   def valToRef(v: V, funcs: Vector[FunctionInstance]): RefV

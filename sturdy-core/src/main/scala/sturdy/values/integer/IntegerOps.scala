@@ -54,22 +54,22 @@ trait IntegerOps[B, V]:
 
 trait IntegerOpsWithSignInterpretation[B,V](byteSize: Int) extends IntegerOps[B, V]:
 
-  final inline def signedMinValue(numBytes: Int): BigInt =
+  inline def signedMinValue(numBytes: Int): BigInt =
     -BigInt(2).pow(numBytes * 8 - 1)
 
-  final inline def signedMaxValue(numBytes: Int): BigInt =
+  inline def signedMaxValue(numBytes: Int): BigInt =
     BigInt(2).pow(numBytes * 8 - 1) - 1
 
-  final inline def unsignedMinValue(numBytes: Int): BigInt =
+  inline def unsignedMinValue(numBytes: Int): BigInt =
     0
 
-  final inline def unsignedMaxValue(numBytes: Int): BigInt =
+  inline def unsignedMaxValue(numBytes: Int): BigInt =
     BigInt(2).pow(numBytes * 8)
 
-  final inline def interpretSignedAsUnsigned(v: V): V = interpretSignedAsUnsigned(v, byteSize)
+  inline def interpretSignedAsUnsigned(v: V): V = interpretSignedAsUnsigned(v, byteSize)
   def interpretSignedAsUnsigned(v: V, fromNumBytes: Int): V
 
-  final inline def interpretUnsignedAsSigned(v: V): V = interpretUnsignedAsSigned(v, byteSize)
+  inline def interpretUnsignedAsSigned(v: V): V = interpretUnsignedAsSigned(v, byteSize)
   def interpretUnsignedAsSigned(v: V, fromNumBytes: Int): V
 
   override inline def divUnsigned(v1: V, v2: V): V =
@@ -79,7 +79,7 @@ trait IntegerOpsWithSignInterpretation[B,V](byteSize: Int) extends IntegerOps[B,
     interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
 
   override inline def shiftRightUnsigned(v: V, shift: V): V =
-    interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v), shift))
+    interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
 
 
 trait OverflowIntegers[V]:

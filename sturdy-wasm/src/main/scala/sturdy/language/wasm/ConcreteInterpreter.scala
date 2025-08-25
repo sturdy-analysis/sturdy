@@ -35,6 +35,7 @@ import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.fix.{Combinator, Contextual}
 import sturdy.language.wasm.abstractions.{ConcreteReference, Control}
 import sturdy.values.Topped
+import sturdy.values.addresses.AddressOffset
 
 object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
   override type J[A] = NoJoin[A]
@@ -138,19 +139,20 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
         case _ => Value.Num(NumValue.Int32(0))
       }
 
-    override def addOffsetToAddr(offset: Int, addr: Addr): Int =
-      val resultAddr = addr + offset
-      if(Integer.compareUnsigned(resultAddr, offset) < 0)
-        f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
-      else
-        resultAddr
-
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
       if (i >= 0 && i < vec.size)
         JOptionC.Some(vec(i))
       else
         JOptionC.none
+
+  given ConcreteAddressOffset(using f: Failure): AddressOffset[Addr] with
+    override def addOffsetToAddr(offset: Int, addr: Addr): Int =
+      val resultAddr = addr + offset
+      if (Integer.compareUnsigned(resultAddr, offset) < 0)
+        f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+      else
+        resultAddr
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:

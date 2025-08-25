@@ -85,8 +85,7 @@ trait RelationalConvert extends RelationalMemory:
       val expectedNum && SomeCC(toByteOrder, _) && bits = conf
       from match
         case ReadBytes(Topped.Actual(extract((v,readNumBytes))), Topped.Actual(fromByteOrder))
-          if (fromByteOrder == toByteOrder) =>
-            assert(readNumBytes == expectedNum.bytes)
+          if (fromByteOrder == toByteOrder && readNumBytes == expectedNum.bytes) =>
             bits match
               case BitSign.Signed   => v
               case BitSign.Unsigned => intOps.interpretSignedAsUnsigned(v, fromNumBytes = readNumBytes)

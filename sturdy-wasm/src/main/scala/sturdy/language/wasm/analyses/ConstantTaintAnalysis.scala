@@ -12,6 +12,7 @@ import sturdy.effect.symboltable.SizedConstantTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.analyses.ConstantAnalysis.{given}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -37,6 +38,7 @@ import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
+import sturdy.values.addresses.AddressOffset
 import sturdy.values.references.ReferenceOps
 
 object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ExceptionByTarget, ControlFlow, Control:
@@ -59,8 +61,6 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def liftBytes(b: Seq[Byte]): Bytes = ???
     override def isNullRef(r: Value): ConstantTaintAnalysis.Value = ???
 
-    override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] = addr.map(_ + offset)
-
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>
@@ -74,6 +74,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
           else
             JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
+  given ConstantTaintAddressOffset(using f: Failure, effectStack: EffectStack): AddressOffset[Addr] = ConstantAddressOffset
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

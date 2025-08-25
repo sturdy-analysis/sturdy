@@ -68,11 +68,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
              f: Failure,
              effectStack: EffectStack,
              apronState: ApronState[VirtAddr, Type],
-             unsignedOrderingOps: UnsignedOrderingOps[I32, Bool],
              joinExpr: Join[ApronExpr[VirtAddr, Type]]
       ): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
-
-    println("Construct")
 
     override def valToAddr(v: Value): Addr = v match
       case Num(Int32(n@NumExpr(_))) => n
@@ -93,30 +90,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def sizeToVal(sz: Size): Value =
       Num(Int32(NumExpr(sz)))
-
-    override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
-      addr match
-        case _ if newOffset == 0 =>
-          addr
-        case AllocationSites(sites, size) =>
-          AllocationSites(PowVirtualAddress(sites.iterator.map {
-            case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site,initOffset)), n, addrTrans) =>
-              apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
-            case v@VirtualAddress(AddrCtx.Heap(HeapCtx.Static(0)), n, addrTrans) =>
-              v
-            case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
-          }), size)
-        case _ =>
-          val expr = addr.asNumExpr
-          val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
-          NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
-            this.f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
-          } {
-            addr match
-              case NumExpr(ApronExpr.Constant(_,floatSpecials,tpe)) => ApronExpr.Constant(apronState.getInterval(resAddr), floatSpecials, tpe)
-              case _ => resAddr
-          })
-    }
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val expr = ix.asInt32.asNumExpr
@@ -265,6 +238,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
+    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
+    private given Failure = failure
+
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
       heapAlloc(rootFrameData)
@@ -278,8 +254,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
-    val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
-    private given Failure = failure
 
     def getInterval(v: Value): Value =
       v match

@@ -38,6 +38,7 @@ import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
 import sturdy.language.wasm.analyses.IntervalAnalysis.typedTop
+import sturdy.values.addresses.AddressOffset
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
@@ -59,9 +60,6 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = ???
 
-    override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
-      intOps.add(addr, intOps.integerLit(offset))
-
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))
@@ -75,6 +73,19 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       } else {
         // some indices in range, but not all
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
+      }
+
+  given IntervalAddressOffset(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): AddressOffset[Addr] with
+    override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
+      val resAddr = intOps.add(addr, intOps.integerLit(offset))
+      if(Integer.compareUnsigned(resAddr.low, offset) < 0 || Integer.compareUnsigned(resAddr.high, offset) < 0) {
+        eff.joinWithFailure {
+          NumericInterval(math.max(0, resAddr.low), math.max(0, resAddr.high))
+        } {
+          f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+        }
+      } else {
+        resAddr
       }
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
