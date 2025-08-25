@@ -27,11 +27,7 @@ object Powerset {
 given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}
 
 given powersetPO[T]: PartialOrder[Powerset[T]] with
-  override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = {
-    val lteq = x.set.subsetOf(y.set)
-    print(s"PO.lteq(${x.set}, ${y.set}) = $lteq\n")
-    lteq
-  }
+  override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
 
 given JoinPowerset[A]: Join[Powerset[A]] with
   override def apply(v1: Powerset[A], v2: Powerset[A]): MaybeChanged[Powerset[A]] =

@@ -33,7 +33,16 @@ object ConstantAnalysisSoundness {
       case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => PartialOrder[I64].lteq(l1, l2)
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[F32].lteq(f1, f2)
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[F64].lteq(d1, d2)
-      case (Value.Ref(RefValue.RefValue(r1)), Value.Ref(RefValue.RefValue(r2))) => PartialOrder[Reference].lteq(r1, r2)
+      case (Value.Ref(RefValue.RefValue(r1)), Value.Ref(RefValue.RefValue(r2))) =>
+        r1.set.forall { f1 =>
+          r2.set.exists { f2 =>
+            (f1, f2) match {
+              case (inst1: FunctionInstance, inst2: FunctionInstance) => PartialOrder[Topped[FunctionInstance]].lteq(Topped.Actual(inst1), Topped.Actual(inst2))
+              case (ext1: ExternReference, ext2: ExternReference) => ext1 == ext2
+              case _ => false
+            }
+          }
+        }
       case (Value.Vec(VecValue.Vec128(v1)), Value.Vec(VecValue.Vec128(v2))) => lteqVecs(v1, v2)
       case _ => false
     

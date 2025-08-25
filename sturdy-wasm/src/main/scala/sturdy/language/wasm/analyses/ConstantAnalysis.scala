@@ -61,7 +61,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def isNullRef(r: Value): ConstantAnalysis.Value = {
       r match {
         case Value.Ref(RefValue.RefValue(f)) =>
-          if (f.set.contains(ExternReference.Null))
+          if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
             if (f.size == 1)
               makeI32(Topped.Actual(1))
             else

@@ -104,7 +104,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case unresolved.RefNull(t) =>
         t match
           case ReferenceType.FuncRef => makeRef(FunctionInstance.Null)
-          case ReferenceType.ExternRef => makeRef(FunctionInstance.Null)
+          case ReferenceType.ExternRef => makeRef(ExternReference.Null)
       case unresolved.RefFunc(x) => x match {
         case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
         case _ => Value.Ref(RefValue.RefValue(ExternReference.Null))
@@ -135,7 +135,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
     
     override def isNullRef(r: Value): Value =
       r match {
-        case Value.Ref(RefValue.RefValue(FunctionInstance.Null)) => Value.Num(NumValue.Int32(1))
+        case Value.Ref(RefValue.RefValue(FunctionInstance.Null)) | Value.Ref(RefValue.RefValue(ExternReference.Null)) => Value.Num(NumValue.Int32(1))
         case _ => Value.Num(NumValue.Int32(0))
       }
 
