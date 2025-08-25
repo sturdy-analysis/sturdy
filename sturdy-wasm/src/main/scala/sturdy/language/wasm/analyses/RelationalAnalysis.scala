@@ -72,6 +72,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
              joinExpr: Join[ApronExpr[VirtAddr, Type]]
       ): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
 
+    println("Construct")
+
     override def valToAddr(v: Value): Addr = v match
       case Num(Int32(n@NumExpr(_))) => n
       case Num(Int32(a@AllocationSites(_, _))) => a
@@ -108,7 +110,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           val expr = addr.asNumExpr
           val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
           NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
-            f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
+            this.f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
           } {
             addr match
               case NumExpr(ApronExpr.Constant(_,floatSpecials,tpe)) => ApronExpr.Constant(apronState.getInterval(resAddr), floatSpecials, tpe)

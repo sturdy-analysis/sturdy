@@ -2,26 +2,29 @@ package sturdy.data
 
 import sturdy.values.{*, given}
 
-trait LogicalClock[Time]:
-  def zero: Time
-  def increment(oldTime: Time): Time
+import scala.collection.immutable.HashMap
 
-trait VectorClock[Key, Time: Join](using logicalClock: LogicalClock[Time]):
+trait VectorClock[Key: Finite]:
+  var clocks: HashMap[Key, Int] = HashMap.empty
 
-  var clocks: Map[Key, Time] = Map()
-
-  final case class Timestamp(timestamp: Map[Key, Time])
+  final case class Timestamp(timestamp: HashMap[Key, Int]):
+    override def toString: String = s"t${super.hashCode().toString}"
   def timestamp: Timestamp = Timestamp(clocks)
-  def setTimestamp(newTimestamp: Timestamp) = clocks = newTimestamp.timestamp
+  def setTimestamp(newTimestamp: Timestamp): Unit = clocks = newTimestamp.timestamp
 
-  given CombineTimeStamp[W <: Widening](using combineTime: Combine[Time, W]): Combine[Timestamp, W] with
+  given JoinTimeStamp: Join[Timestamp] with
     override def apply(v1: Timestamp, v2: Timestamp): MaybeChanged[Timestamp] =
-      Combine(v1.timestamp, v2.timestamp).map(Timestamp(_))
+      given Join[Int] = (x,y) => MaybeChanged(math.max(x,y), x < y)
+      Join(v1.timestamp, v2.timestamp).map(Timestamp(_))
+
+  given PartialOrderTimeStamp: PartialOrder[Timestamp] with
+    override def lteq(x: Timestamp, y: Timestamp): Boolean =
+      val xs = x.timestamp; val ys = y.timestamp
+      xs.forall((k, xTime) =>
+        ys.get(k).exists(xTime <= _)
+      )
 
   def increment(key: Key): Unit =
     clocks.get(key) match
-      case None          => clocks += key -> logicalClock.zero
-      case Some(oldTime) => clocks += key -> logicalClock.increment(oldTime)
-
-
-
+      case None          => clocks += key -> 1
+      case Some(oldTime) => clocks += key -> (oldTime + 1)

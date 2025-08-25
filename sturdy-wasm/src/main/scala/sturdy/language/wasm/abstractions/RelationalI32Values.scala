@@ -82,9 +82,9 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
 
-  given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOps[Int, I32] =
+  given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOpsWithSignInterpretation[Int, I32] =
     given apronExprIntOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]] = RelationalIntOps[VirtAddr, Type]
-    new LiftedIntegerOps[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
+    new LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](byteSize = 4, extract = _.asNumExpr, inject = NumExpr(_)):
       override def bitAnd(v1: I32, v2: I32): I32 =
         (v1, v2) match
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.And(e1, e2))

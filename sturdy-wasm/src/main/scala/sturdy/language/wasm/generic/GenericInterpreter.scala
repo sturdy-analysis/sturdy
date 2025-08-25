@@ -395,7 +395,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val addr = addOffsetToAddr(inst.offset, startAddr)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
-    memory.read(memIdx, addr, length).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr")) {
+    memory.read(memIdx, addr, length, inst.align).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr")) {
       bytes =>
         val v = decode(bytes, SomeCC(inst, false))
         stack.push(v)

@@ -34,7 +34,7 @@ trait RelationalBaseIntegerOps
        f: Failure,
        overflowHandling: OverflowHandling,
        typeIntOps: IntegerOps[L,Type]
-    ) extends IntegerOps[L, ApronExpr[Addr,Type]]:
+    ) extends IntegerOpsWithSignInterpretation[L, ApronExpr[Addr,Type]]:
   given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -89,15 +89,8 @@ trait RelationalBaseIntegerOps
     }
     handleOverflow(res)
 
-  override def divUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    interpretUnsignedAsSigned(div(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
-
-
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intMod(v1, v2)
-
-  override def remainderUnsigned(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     apronState.ifThenElse(le(lit(0, v1._type), intMod(v1, v2))) {
@@ -124,9 +117,6 @@ trait RelationalBaseIntegerOps
     } {
       intSub(intDiv(intAdd(v, lit(1, v._type)), intPow(lit(2, v._type), modShift), resultType), lit(1, resultType))
     }
-
-  override def shiftRightUnsigned(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
 
   override def rotateLeft(v: ApronExpr[Addr, Type], shift: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.rotateRight(v._type, shift._type))
@@ -200,19 +190,6 @@ trait RelationalBaseIntegerOps
   override def invertBits(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     ApronExpr.top(typeIntOps.invertBits(v._type))
 
-
-  def signedMinValue(numBytes: Int): BigInt =
-    -BigInt(2).pow(numBytes * 8 - 1)
-
-  def signedMaxValue(numBytes: Int): BigInt =
-    BigInt(2).pow(numBytes * 8 - 1) - 1
-
-  def unsignedMinValue(numBytes: Int): BigInt =
-    0
-
-  def unsignedMaxValue(numBytes: Int): BigInt =
-    BigInt(2).pow(numBytes * 8)
-
   def toUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intSub(v, lit(signedMinValue(v._type.byteSize), v._type))
 
@@ -258,11 +235,6 @@ trait RelationalBaseIntegerOps
           Failure(IntegerOverflow, s"$v overflows bounds [${sMin},${sMax}]")
         }
 
-
-
-  inline def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
-    interpretSignedAsUnsigned(v, v._type.byteSize)
-
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val uMax = unsignedMaxValue(fromNumBytes)
     val fromType = v._type
@@ -272,9 +244,6 @@ trait RelationalBaseIntegerOps
     } {
       intAdd(v, lit(uMax, fromType), fromType)
     }
-
-  inline def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr,Type] =
-    interpretUnsignedAsSigned(v, v._type.byteSize)
 
   def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val sMax = signedMaxValue(fromNumBytes)
@@ -299,7 +268,7 @@ given RelationalIntOps
      f: Failure,
      overflowHandling: OverflowHandling,
      typeIntOps: IntegerOps[Int,Type]
-  ): RelationalBaseIntegerOps[Int, Addr, Type] with
+  ): RelationalBaseIntegerOps[Int, Addr, Type] with IntegerOpsWithSignInterpretation[Int, ApronExpr[Addr,Type]](byteSize = 4) with
 
   override def integerLit(i: Int): ApronExpr[Addr, Type] =
     lit(i, typeIntOps.integerLit(i))
@@ -318,7 +287,7 @@ given RelationalLongOps
     f: Failure,
     overflowHandling: OverflowHandling,
     typeIntOps: IntegerOps[Long,Type]
-  ): RelationalBaseIntegerOps[Long, Addr, Type] with
+  ): RelationalBaseIntegerOps[Long, Addr, Type] with IntegerOpsWithSignInterpretation[Long, ApronExpr[Addr,Type]](byteSize = 8) with
 
   override def integerLit(i: Long): ApronExpr[Addr, Type] =
     lit(i, typeIntOps.integerLit(i))
@@ -330,7 +299,7 @@ given RelationalLongOps
 given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Int, ApronExpr[Addr, Type]] with
   override def isSound(c: Int, expr: ApronExpr[Addr, Type]): IsSound =
     val iv = apronState.getInterval(expr)
-    if (Interval(c, c).isLeq(iv))
+    if (Interval(ApronExpr.scalar(c), ApronExpr.scalar(c)).isLeq(iv))
       IsSound.Sound
     else
       IsSound.NotSound(s"$expr with interval $iv does not contain $c")

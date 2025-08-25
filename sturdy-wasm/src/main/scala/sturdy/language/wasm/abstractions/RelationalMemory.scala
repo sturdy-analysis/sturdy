@@ -40,19 +40,53 @@ trait RelationalMemory extends RelationalValues:
       apronState.ifThenElse(And(Constraint(le(lit(0, Type.I32Type), size)), Constraint(le(size, limit))))(ifTrue)(ifFalse)
 
   given RelationalMatchRegions(using apronState: ApronState[VirtAddr, Type]): MatchRegions[HeapCtx, Addr, Size] with
-    override def apply[Val](addr: Addr, mem: Mem[HeapCtx, Addr, Size, Val]): IterableOnce[(MemoryRegion[Addr, Val], AlignedRead)] =
+    override def apply[Val, Timestamp: PartialOrder](addr: Addr, mem: Mem[HeapCtx, Addr, Timestamp, Val, Size]): Topped[IterableOnce[(MemoryRegion[Addr, Timestamp, Val], AlignedRead)]] =
       addr match
         case AllocationSites(sites, size) =>
           // We assume that each malloc addresses is allocated in their own isolated part of the heap.
           // Hence, a malloc address does not overlap with a static address
-          for {
-            phys <- sites.physicalAddresses;
-            heapCtx <- allocOrNull(phys.ctx)
-            region <- mem.store.get(PhysicalAddress(heapCtx, phys.recency))
-          } yield((region, AlignedRead.Aligned))
+          Topped.Actual(
+            for {
+              phys <- sites.physicalAddresses;
+              heapCtx <- allocOrNull(phys.ctx)
+              region <- mem.store.get(PhysicalAddress(heapCtx, phys.recency))
+            } yield((region, AlignedRead.Aligned))
+          )
         case NumExpr(addrExpr) =>
           val iv = apronState.getIntInterval(addrExpr)
-          ???
+          if(iv._1 == iv._2) {
+            mem.store.get(PhysicalAddress(HeapCtx.Static(iv._1), Recency.Recent)) match
+              case Some(staticRegion) =>
+                Topped.Actual(
+                  Iterator((staticRegion, AlignedRead.Aligned)) ++ mem.store.iterator.filter {
+                    case (PhysicalAddress(_:HeapCtx.Dynamic, _),otherRegion) =>
+                      concurrentOrNewerThan(otherRegion.timestamp, staticRegion.timestamp) && addressIncludedInRegion(iv._1, otherRegion)
+                    case _ => false
+                  }.map((_,region) => (region,AlignedRead.MaybeAligned))
+                )
+              case None =>
+                Topped.Actual(
+                  mem.store.iterator.filter {
+                    case (PhysicalAddress(_: HeapCtx.Dynamic, _), otherRegion) =>
+                      addressIncludedInRegion(iv._1, otherRegion)
+                    case _ => false
+                  }.map((_, region) => (region, AlignedRead.MaybeAligned))
+                )
+          } else {
+            Topped.Top
+          }
+
+    private inline def concurrentOrNewerThan[Timestamp: PartialOrder](timestamp1: Timestamp, timestamp2: Timestamp): Boolean =
+      !PartialOrder[Timestamp].lteq(timestamp1, timestamp2)
+
+    private inline def addressIncludedInRegion[Timestamp,Val](n: Int, region: MemoryRegion[Addr,Timestamp,Val]): Boolean =
+      val startAddrIv = apronState.getInterval(region.startAddr.asInstanceOf[NumExpr].expr)
+      startAddrIv.inf.cmp(n) <= 0 && (
+        region.byteSize match
+          case Topped.Actual(bs) => startAddrIv.sup.cmp(n-bs) >= 0
+          case _ => true
+      )
+
 //
 //    private def staticOrDynamic(heapCtx: HeapCtx, addr: Addr): Iterable[(HeapCtx.Static | HeapCtx.Dynamic, ApronExpr[VirtAddr, Type])] =
 //      (heapCtx,addr) match

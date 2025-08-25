@@ -14,13 +14,13 @@ import sturdy.effect.failure.Failure
 class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using tb: Top[B])(using Join[B], Widen[B], Finite[Key]) extends Memory[Key, NumericInterval[Int], Seq[B], Topped[Int], WithJoin], Effect:
   private val constantAddressMemory: ConstantAddressMemory[Key, B] = new ConstantAddressMemory(emptyB)
 
-  override def read(key: Key, addr: NumericInterval[Int], length: Int): JOptionA[Seq[B]] =
+  override def read(key: Key, addr: NumericInterval[Int], length: Int, alignment: Int): JOptionA[Seq[B]] =
     if (addr.countOfNumsInInterval <= rangeLimit)
       EffectStack.pureJoinFold(addr.low to addr.high, addr => constantAddressMemory.read(key, Topped.Actual(addr), length))
     else
       constantAddressMemory.read(key, Topped.Top, length)
 
-  override def write(key: Key, addr: NumericInterval[Int], bytes: Seq[B]): JOptionA[Unit] =
+  override def write(key: Key, addr: NumericInterval[Int], bytes: Seq[B], alignment: Int): JOptionA[Unit] =
     if (addr.countOfNumsInInterval <= rangeLimit)
       EffectStack.localEffect(constantAddressMemory)
         .joinFold(addr.low to addr.high, addr => constantAddressMemory.write(key, Topped.Actual(addr), bytes))

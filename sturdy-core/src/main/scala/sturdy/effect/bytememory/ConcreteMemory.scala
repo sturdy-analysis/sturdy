@@ -13,7 +13,7 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
   
   def getMemories: Map[Key, Mem] = memories.toMap
 
-  override def read(key: Key, addr: Int, length: Int): JOptionC[Seq[Byte]] =
+  override def read(key: Key, addr: Int, length: Int, alignment: Int): JOptionC[Seq[Byte]] =
     val mem = memories(key)
     // since collections are indexed by signed integers, we have to check here for addr >= 0
     // this means our maximum memory size is half of the allowed size in wasm
@@ -23,7 +23,7 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
     else
       JOptionC.none
 
-  override def write(key: Key, addr: Int, bytes: Seq[Byte]): JOptionC[Unit] =
+  override def write(key: Key, addr: Int, bytes: Seq[Byte], alignment: Int): JOptionC[Unit] =
     val mem = memories(key)
     if (addr >= 0 && addr + bytes.size <= mem.size) {
       var i = addr

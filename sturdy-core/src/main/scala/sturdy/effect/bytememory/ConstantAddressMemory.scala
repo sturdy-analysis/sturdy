@@ -23,11 +23,11 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
 
   protected var memories: Map[Key, Mem[B]] = Map()
 
-  override def read(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
+  override def read(key: Key, addr: Topped[Int], length: Int, alignment: Int): JOptionA[Seq[B]] = addr match
     case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
     case Topped.Actual(a) => memories(key).read(a, length)
 
-  override def write(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
+  override def write(key: Key, addr: Topped[Int], bytes: Seq[B], alignment: Int): JOptionA[Unit] =
     val (newMem, res) = memories(key).store(addr, bytes)
     newMem.foreach(memories += key -> _)
     res
