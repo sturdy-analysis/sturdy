@@ -47,12 +47,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
     override def valToRef(v: ConstantAnalysis.Value, funcs: Vector[FunctionInstance]): RefV =
       v match
-        case Value.Ref(RefValue.RefValue(f)) => f
+        case Value.Ref(f) => f
         case Value.TopValue =>
           Powerset[FunctionInstance | ExternReference](funcs*) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
-    override def refToVal(r: RefV): Value = Value.Ref(RefValue.RefValue(r))
+    override def refToVal(r: RefV): Value = Value.Ref(r)
 
     override def liftBytes(b: Seq[Byte]): Seq[Topped[Byte]] = b.map(Topped.Actual(_))
 
@@ -60,7 +60,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def isNullRef(r: Value): ConstantAnalysis.Value = {
       r match {
-        case Value.Ref(RefValue.RefValue(f)) =>
+        case Value.Ref(f) =>
           if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
             if (f.size == 1)
               makeI32(Topped.Actual(1))
@@ -110,10 +110,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(Topped.Actual(l)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r: FunctionInstance)) => Value.Ref(RefValue.RefValue(Powerset(r)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ConcreteInterpreter.ExternReference.Null)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.Null)))
-      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(ConcreteInterpreter.ExternReference.ExternReference)) => Value.Ref(RefValue.RefValue(Powerset(ExternReference.ExternReference)))
-      case ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(v)) => Value.Vec(VecValue.Vec128(Topped.Actual(v)))
+      case ConcreteInterpreter.Value.Ref(r: FunctionInstance) => Value.Ref(Powerset(r))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.Null) => Value.Ref(Powerset(ExternReference.Null))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.ExternReference) => Value.Ref(Powerset(ExternReference.ExternReference))
+      case ConcreteInterpreter.Value.Vec(v) => Value.Vec(Topped.Actual(v))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends GenericInstance:
     private given Instance = this

@@ -6,11 +6,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.ControlEventChecker
 import sturdy.effect.failure.CFallible
-import sturdy.language.wasm.ConcreteInterpreter.{RefValue, Value, constExprToVals, eqVals}
+import sturdy.language.wasm.ConcreteInterpreter.{Value, constExprToVals}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
-import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.SwamException
 import swam.syntax.Module
 import swam.text.*
@@ -72,8 +71,8 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       case (Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
-      case (Value.Ref(ConcreteInterpreter.RefValue.RefValue(r1)), Value.Ref(ConcreteInterpreter.RefValue.RefValue(r2))) => r1 == r2
+      case (Value.Vec(b1), Value.Vec(b2)) => eqVecs(b1, b2)
+      case (Value.Ref(r1), Value.Ref(r2)) => r1 == r2
       case _ => false
     }
 

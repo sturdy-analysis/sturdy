@@ -46,19 +46,11 @@ trait Interpreter:
     case Float64(d: F64)
   import NumValue.*
 
-  enum RefValue:
-    case RefValue(f: Reference)
-  import RefValue.*
-
-  enum VecValue:
-    case Vec128(v: V128)
-  import VecValue.*
-
   enum Value:
     case TopValue
     case Num(n: NumValue)
-    case Ref(r: RefValue)
-    case Vec(v: VecValue)
+    case Ref(r: Reference)
+    case Vec(v: V128)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -82,7 +74,7 @@ trait Interpreter:
       case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
     def asVec128(using f: Failure): V128 = this match
-      case Vec(VecValue.Vec128(v)) => v
+      case Vec(v) => v
       case TopValue => topV128
       case _ => f.fail(TypeError, s"Expected v128 but got $this")
 
@@ -97,7 +89,7 @@ trait Interpreter:
     case NumType.I64 => Value.Num(Int64(topI64))
     case NumType.F32 => Value.Num(Float32(topF32))
     case NumType.F64 => Value.Num(Float64(topF64))
-    case VecType.V128 => Value.Vec(Vec128(topV128))
+    case VecType.V128 => Value.Vec(topV128)
     case ReferenceType.FuncRef | ReferenceType.ExternRef => Value.TopValue
   
   def asBoolean(v: Value)(using Failure): Bool
@@ -105,8 +97,6 @@ trait Interpreter:
 
   given Top[Value] with
     def top: Value = Value.TopValue
-
-  given Finite[RefValue] with {}
 
   def makeI32(a:I32): Value.Num =
     Value.Num(NumValue.Int32(a))
@@ -121,13 +111,13 @@ trait Interpreter:
     Value.Num(NumValue.Float64(a))
 
   def makeRef(f: Reference): Value.Ref =
-    Value.Ref(RefValue.RefValue(f))
+    Value.Ref(f)
 
   def makeBool(b: Bool): Value =
     booleanToVal(b)
 
   def makeV128(v: V128): Value.Vec =
-    Value.Vec(VecValue.Vec128.apply(v))
+    Value.Vec(v)
 
   given GaloisConnection[I32, Value] with
     def asAbstract(i: I32): Value = makeI32(i)
@@ -157,8 +147,8 @@ trait Interpreter:
       case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => Combine[I64, W](l1, l2).map(makeI64)
       case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)
       case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
-      case (Vec(VecValue.Vec128(v1)), Vec(VecValue.Vec128(v2))) => Combine[V128, W](v1, v2).map(makeV128)
-      case (Ref(RefValue.RefValue(r1)), Ref(RefValue.RefValue(r2))) => Combine[Reference, W](r1, r2).map(makeRef)
+      case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
+      case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
       case _ => MaybeChanged(TopValue, v1)
 
   type Addr
@@ -321,7 +311,7 @@ trait Interpreter:
         case (Value.Num(NumValue.Int64(l)), _: v128.Store64Lane) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Float32(f)), _: f32.Store) => encodeF32(f, config.BytesSize.Float && LITTLE_ENDIAN)
         case (Value.Num(NumValue.Float64(d)), _: f64.Store) => encodeF64(d, config.BytesSize.Double && LITTLE_ENDIAN)
-        case (Value.Vec(VecValue.Vec128(v)), _: VectorStoreInst) => encodeV128(v, config.BytesSize.Byte && LITTLE_ENDIAN)
+        case (Value.Vec(v), _: VectorStoreInst) => encodeV128(v, config.BytesSize.Byte && LITTLE_ENDIAN)
         case _ => unsupportedConfiguration(conf, this)
 
 
@@ -351,13 +341,13 @@ trait Interpreter:
         case _: v128.Load64Splat => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
         case _: v128.Load32Zero => Value.Num(NumValue.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.BitSign.Signed)))
         case _: v128.Load64Zero => Value.Num(NumValue.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.BitSign.Signed)))
-        case _: v128.Load8x8S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load8x8U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load16x4S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load16x4U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Unsigned && LITTLE_ENDIAN)))
-        case _: v128.Load32x2S => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong && config.BitSign.Signed && LITTLE_ENDIAN)))
-        case _: v128.Load32x2U => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong &&  config.BitSign.Unsigned && LITTLE_ENDIAN)))
-        case _: VectorLoadInst => Value.Vec(VecValue.Vec128(decodeV128(from, config.BytesSize.Byte && config.BytePadding.None &&  config.BitSign.Raw && LITTLE_ENDIAN)))
+        case _: v128.Load8x8S => Value.Vec(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Signed && LITTLE_ENDIAN))
+        case _: v128.Load8x8U => Value.Vec(decodeV128(from, config.BytesSize.Byte && config.BytePadding.ZeroShort && config.BitSign.Unsigned && LITTLE_ENDIAN))
+        case _: v128.Load16x4S => Value.Vec(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Signed && LITTLE_ENDIAN))
+        case _: v128.Load16x4U => Value.Vec(decodeV128(from, config.BytesSize.Short && config.BytePadding.ZeroInt && config.BitSign.Unsigned && LITTLE_ENDIAN))
+        case _: v128.Load32x2S => Value.Vec(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong && config.BitSign.Signed && LITTLE_ENDIAN))
+        case _: v128.Load32x2U => Value.Vec(decodeV128(from, config.BytesSize.Int && config.BytePadding.ZeroLong &&  config.BitSign.Unsigned && LITTLE_ENDIAN))
+        case _: VectorLoadInst => Value.Vec(decodeV128(from, config.BytesSize.Byte && config.BytePadding.None &&  config.BitSign.Raw && LITTLE_ENDIAN))
 
   type Instance <: GenericInstance
 

@@ -23,7 +23,6 @@ trait RelationalConvert extends RelationalMemory:
   import RelI32.*
   import Value.*
   import NumValue.*
-  import VecValue.*
 
   private final class ConvertIntegerToBytes[From: Numeric, FromV]
     (typeByteSize: Int, inject: FromV => Value)
@@ -72,7 +71,7 @@ trait RelationalConvert extends RelationalMemory:
 
   given ConvertF32Bytes: ConvertFloatBytes[F32, Bytes] = ConvertOtherValueToBytes[Float, F32](inject = n => Num(Float32(n)))
   given ConvertF64Bytes: ConvertDoubleBytes[F64, Bytes] = ConvertOtherValueToBytes[Double, F64](inject = n => Num(Float64(n)))
-  given ConvertV128Bytes: ConvertVecBytes[V128, Bytes] = ConvertOtherValueToBytes[Seq[Byte], V128](inject = n => Vec(Vec128(n)))
+  given ConvertV128Bytes: ConvertVecBytes[V128, Bytes] = ConvertOtherValueToBytes[Seq[Byte], V128](inject = n => Vec(n))
 
   private trait ExtractFromVal[VTo]:
     def unapply(v: List[(Value,Int)]): Option[(VTo,Int)]

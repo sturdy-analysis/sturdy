@@ -26,8 +26,8 @@ given ToppedSIMDOps[V]
   override def vectorBitmask(shape: LaneShape, v: Topped[Array[Byte]]): V = if v.isTop then getValueTop(shape) else ops.vectorBitmask(shape, v.get)
 
   // Binary operations
-  override def vectorAdd(shape: LaneShape, config: Overflow && BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorAdd(shape, config, _, _), v2)
-  override def vectorSub(shape: LaneShape, config: Overflow && BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorSub(shape, config, _, _), v2)
+  override def vectorAdd(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorAdd(shape, overflow, sign, _, _), v2)
+  override def vectorSub(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorSub(shape, overflow, sign, _, _), v2)
   override def vectorMul(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorMul(shape, _, _), v2)
   override def vectorDiv(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorDiv(shape, _, _), v2)
   override def vectorMin(shape: LaneShape, config: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorMin(shape, config, _, _), v2)
@@ -38,7 +38,6 @@ given ToppedSIMDOps[V]
   override def vectorQ15MulrSatS(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorQ15MulrSatS(shape, _, _), v2)
   override def vectorDotS(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorDotS(shape, _, _), v2)
   override def vectorAnd(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorAnd(shape, _, _), v2)
-  override def vectorAndNot(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorAndNot(shape, _, _), v2)
   override def vectorOr(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorOr(shape, _, _), v2)
 
   // Relational operations
@@ -46,9 +45,6 @@ given ToppedSIMDOps[V]
   override def vectorEq(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorEq(shape, _, _), v2)
   override def vectorNe(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorNe(shape, _, _), v2)
   override def vectorLt(shape: LaneShape, config: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorLt(shape, config, _, _), v2)
-  override def vectorGt(shape: LaneShape, config: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorGt(shape, config, _, _), v2)
-  override def vectorLe(shape: LaneShape, config: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorLe(shape, config, _, _), v2)
-  override def vectorGe(shape: LaneShape, config: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorGe(shape, config, _, _), v2)
 
   // Ternary operations
   override def vectorBitselect(shape: LaneShape, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]], mask: Topped[Array[Byte]]): Topped[Array[Byte]] = vectorTernop(shape, v1, v2, mask, ops.vectorBitselect)

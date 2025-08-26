@@ -109,7 +109,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def isNullRef(r: Value): Value =
       r match
-        case Value.Ref(RefValue.RefValue(f)) =>
+        case Value.Ref(f) =>
           if(f.set.contains(ExternReference.Null))
             if(f.size == 1)
               makeBool(ApronBool.Constant(Topped.Actual(true)))
@@ -123,11 +123,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV =
       v match
-        case Value.Ref(RefValue.RefValue(f)) => f
+        case Value.Ref(f) => f
         case Value.TopValue => Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
-    override def refToVal(r: RefV): Value = Ref(RefValue.RefValue(r))
+    override def refToVal(r: RefV): Value = Ref(r)
     override def liftBytes(b: Seq[Byte]): Bytes =
       Bytes.StoredBytes(
         value = b.map(x =>

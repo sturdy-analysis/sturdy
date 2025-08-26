@@ -46,8 +46,8 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Num(NumValue.Int64(tp)) => tp.taint
     case Value.Num(NumValue.Float32(tp)) => tp.taint
     case Value.Num(NumValue.Float64(tp)) => tp.taint
-    case Value.Ref(RefValue.RefValue(tp)) => tp.taint
-    case Value.Vec(VecValue.Vec128(tp)) => tp.taint
+    case Value.Ref(tp) => tp.taint
+    case Value.Vec(tp) => tp.taint
 
   final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.map {
     case Topped.Top => Topped.Top
@@ -98,8 +98,8 @@ trait ConstantTaintValues extends Interpreter:
       case Value.Num(NumValue.Int64(TaintProduct(_, v))) => v.isActual
       case Value.Num(NumValue.Float32(TaintProduct(_, v))) => v.isActual
       case Value.Num(NumValue.Float64(TaintProduct(_, v))) => v.isActual
-      case Value.Ref(RefValue.RefValue(TaintProduct(_, v))) => v.size == 1
-      case Value.Vec(VecValue.Vec128(TaintProduct(_, v))) => v.isActual
+      case Value.Ref(TaintProduct(_, v)) => v.size == 1
+      case Value.Vec(TaintProduct(_, v)) => v.isActual
       case _ => true
     })
 

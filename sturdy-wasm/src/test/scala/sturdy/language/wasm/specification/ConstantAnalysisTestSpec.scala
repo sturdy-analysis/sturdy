@@ -24,7 +24,7 @@ import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.Insensitive
 import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm.analyses.IntervalAnalysis
-import ConcreteInterpreter.{VecValue, constExprToVal, constExprToVals, eqVals, topI32}
+import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals, topI32}
 import swam.ModuleLoader
 import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.binary.ModuleParser
@@ -127,8 +127,8 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l2))) => l1 == l2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d1)), ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r1)), ConcreteInterpreter.Value.Ref(ConcreteInterpreter.RefValue.RefValue(r2))) => r1 == r2
-      case (ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b1)), ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(b2))) => eqVecs(b1, b2)
+      case (ConcreteInterpreter.Value.Ref(r1), ConcreteInterpreter.Value.Ref(r2)) => r1 == r2
+      case (ConcreteInterpreter.Value.Vec(b1), ConcreteInterpreter.Value.Vec(b2)) => eqVecs(b1, b2)
       case _ => false
     }
 
@@ -299,13 +299,12 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
   def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
     import ConstantAnalysis.Value.*
     import ConstantAnalysis.NumValue.*
-    import ConstantAnalysis.VecValue.*
     constExprToVal(inst) match
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(_)) => ConstantAnalysis.makeI32(ConstantAnalysis.topI32)
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(_)) => ConstantAnalysis.makeI64(ConstantAnalysis.topI64)
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(_)) => ConstantAnalysis.makeF32(ConstantAnalysis.topF32)
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(_)) => ConstantAnalysis.makeF64(ConstantAnalysis.topF64)
-      case ConcreteInterpreter.Value.Vec(ConcreteInterpreter.VecValue.Vec128(_)) => ConstantAnalysis.makeV128(ConstantAnalysis.topV128)
+      case ConcreteInterpreter.Value.Vec(_) => ConstantAnalysis.makeV128(ConstantAnalysis.topV128)
       case ConcreteInterpreter.Value.Ref(_) => TopValue
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 

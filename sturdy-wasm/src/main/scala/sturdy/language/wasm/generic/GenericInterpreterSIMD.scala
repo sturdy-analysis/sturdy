@@ -141,7 +141,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     val (v1, v2) = stack.pop2OrAbort()
     binop match {
       case v128.And => v128ops.vectorAnd(V128, v1, v2)
-      case v128.AndNot => v128ops.vectorAndNot(V128, v1, v2)
+      case v128.AndNot => v128ops.vectorAnd(V128, v1, v128ops.vectorNot(V128, v2))
       case v128.Or => v128ops.vectorOr(V128, v1, v2)
       case v128.Xor => v128ops.vectorXor(V128, v1, v2)
     }
@@ -288,16 +288,16 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
         }
       case binop: VectorSatBinop =>
         binop.operation match {
-          case VecBinopType.IAddSatU => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds && Unsigned, v1, v2)
-          case VecBinopType.IAddSatS => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds && Signed, v1, v2)
-          case VecBinopType.ISubSatU => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds && Unsigned, v1, v2)
-          case VecBinopType.ISubSatS => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds && Signed, v1, v2)
+          case VecBinopType.IAddSatU => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds, Unsigned, v1, v2)
+          case VecBinopType.IAddSatS => v128ops.vectorAdd(binop.shape.toLaneShape, JumpToBounds, Signed, v1, v2)
+          case VecBinopType.ISubSatU => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds, Unsigned, v1, v2)
+          case VecBinopType.ISubSatS => v128ops.vectorSub(binop.shape.toLaneShape, JumpToBounds, Signed, v1, v2)
           case _ => throw new IllegalArgumentException(s"Unsupported vector sat binop: ${binop.operation}")
         }
       case binop: IVectorBinop =>
         binop.operation match {
-          case VecBinopType.IAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow && Raw, v1, v2)
-          case VecBinopType.ISub => v128ops.vectorSub(binop.shape.toLaneShape, Allow && Raw, v1, v2)
+          case VecBinopType.IAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow, Raw, v1, v2)
+          case VecBinopType.ISub => v128ops.vectorSub(binop.shape.toLaneShape, Allow, Raw, v1, v2)
           case VecBinopType.IMul => v128ops.vectorMul(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.IAvrgU => v128ops.vectorAvrgU(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.IQ15MulrSatS => v128ops.vectorQ15MulrSatS(binop.shape.toLaneShape, v1, v2)
@@ -305,8 +305,8 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
         }
       case binop: FVectorBinop =>
         binop.operation match {
-          case VecBinopType.FAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow && Raw, v1, v2)
-          case VecBinopType.FSub => v128ops.vectorSub(binop.shape.toLaneShape, Allow && Raw, v1, v2)
+          case VecBinopType.FAdd => v128ops.vectorAdd(binop.shape.toLaneShape, Allow, Raw, v1, v2)
+          case VecBinopType.FSub => v128ops.vectorSub(binop.shape.toLaneShape, Allow, Raw, v1, v2)
           case VecBinopType.FMul => v128ops.vectorMul(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.FDiv => v128ops.vectorDiv(binop.shape.toLaneShape, v1, v2)
           case VecBinopType.FMin => v128ops.vectorMin(binop.shape.toLaneShape, Raw, v1, v2)
@@ -326,12 +326,12 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecRelopType.INe => v128ops.vectorNe(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.ILtU => v128ops.vectorLt(relop.shape.toLaneShape, Unsigned, v1, v2)
           case VecRelopType.ILtS => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.ILeU => v128ops.vectorLe(relop.shape.toLaneShape, Unsigned, v1, v2)
-          case VecRelopType.ILeS => v128ops.vectorLe(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.IGtU => v128ops.vectorGt(relop.shape.toLaneShape, Unsigned, v1, v2)
-          case VecRelopType.IGtS => v128ops.vectorGt(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.IGeU => v128ops.vectorGe(relop.shape.toLaneShape, Unsigned, v1, v2)
-          case VecRelopType.IGeS => v128ops.vectorGe(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.ILeU => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Unsigned, v1, v2), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
+          case VecRelopType.ILeS => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
+          case VecRelopType.IGtU => v128ops.vectorLt(relop.shape.toLaneShape, Unsigned, v2, v1)
+          case VecRelopType.IGtS => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v2, v1)
+          case VecRelopType.IGeU => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Unsigned, v2, v1), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
+          case VecRelopType.IGeS => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Signed, v2, v1), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
           case _ => throw new IllegalArgumentException(s"Unsupported integer vector relop: ${relop.operation}")
 
       case relop: FVectorRelop =>
@@ -339,9 +339,9 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           case VecRelopType.FEq => v128ops.vectorEq(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.FNe => v128ops.vectorNe(relop.shape.toLaneShape, v1, v2)
           case VecRelopType.FLt => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.FLe => v128ops.vectorLe(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.FGt => v128ops.vectorGt(relop.shape.toLaneShape, Signed, v1, v2)
-          case VecRelopType.FGe => v128ops.vectorGe(relop.shape.toLaneShape, Signed, v1, v2)
+          case VecRelopType.FLe => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Signed, v1, v2), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
+          case VecRelopType.FGt => v128ops.vectorLt(relop.shape.toLaneShape, Signed, v2, v1)
+          case VecRelopType.FGe => v128ops.vectorOr(V128, v128ops.vectorLt(relop.shape.toLaneShape, Signed, v2, v1), v128ops.vectorEq(relop.shape.toLaneShape, v1, v2))
           case _ => throw new IllegalArgumentException(s"Unsupported float vector relop: ${relop.operation}")
 
   inline def evalExtmul(op: VectorExtmul, v1: V, v2: V): V =

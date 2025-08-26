@@ -70,8 +70,8 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => l1 == l2
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
-      case (Value.Ref(RefValue.RefValue(r1)), Value.Ref(RefValue.RefValue(r2))) => r1 == r2
-      case (Value.Vec(VecValue.Vec128(b1)), Value.Vec(VecValue.Vec128(b2))) =>
+      case (Value.Ref(r1), Value.Ref(r2)) => r1 == r2
+      case (Value.Vec(b1), Value.Vec(b2)) =>
         val bb1 = ByteBuffer.wrap(b1)
         val bb2 = ByteBuffer.wrap(b2)
 
@@ -100,18 +100,18 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case unresolved.i64.Const(l) => Value.Num(NumValue.Int64(l))
       case unresolved.f32.Const(f) => Value.Num(NumValue.Float32(f))
       case unresolved.f64.Const(d) => Value.Num(NumValue.Float64(d))
-      case unresolved.v128.Const(v, _) => Value.Vec(ConcreteInterpreter.VecValue.Vec128(v))
+      case unresolved.v128.Const(v, _) => Value.Vec(v)
       case unresolved.RefNull(t) =>
         t match
           case ReferenceType.FuncRef => makeRef(FunctionInstance.Null)
           case ReferenceType.ExternRef => makeRef(ExternReference.Null)
       case unresolved.RefFunc(x) => x match {
         case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
-        case _ => Value.Ref(RefValue.RefValue(ExternReference.Null))
+        case _ => Value.Ref(ExternReference.Null)
       }
       case unresolved.RefExtern(x) => x match {
-        case Left(r) => Value.Ref(RefValue.RefValue(ExternReference.ExternReference))
-        case _ => Value.Ref(RefValue.RefValue(ExternReference.Null))
+        case Left(r) => Value.Ref(ExternReference.ExternReference)
+        case _ => Value.Ref(ExternReference.Null)
       }
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
@@ -123,11 +123,11 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
     override def sizeToVal(sz: Int): Value = Value.Num(NumValue.Int32(sz))
 
     override def valToRef(v: Value, funcs: Vector[FunctionInstance]): RefV = v match {
-      case Value.Ref(RefValue.RefValue(ref)) => ref
+      case Value.Ref(ref) => ref
       case _ => f.fail(TypeError, s"Expected a reference value, but got $v")
     }
     
-    override def refToVal(r: RefV): Value = Value.Ref(RefValue.RefValue(r))
+    override def refToVal(r: RefV): Value = Value.Ref(r)
     
     override def liftBytes(b: Seq[Byte]): Seq[Byte] = b
 
@@ -135,7 +135,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
     
     override def isNullRef(r: Value): Value =
       r match {
-        case Value.Ref(RefValue.RefValue(FunctionInstance.Null)) | Value.Ref(RefValue.RefValue(ExternReference.Null)) => Value.Num(NumValue.Int32(1))
+        case Value.Ref(FunctionInstance.Null) | Value.Ref(ExternReference.Null) => Value.Num(NumValue.Int32(1))
         case _ => Value.Num(NumValue.Int32(0))
       }
 

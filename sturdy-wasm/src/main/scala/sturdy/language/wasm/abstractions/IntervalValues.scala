@@ -55,8 +55,8 @@ trait IntervalValues extends Interpreter with PowersetReference:
       case Value.Num(NumValue.Int64(v)) => v.isConstant
       case Value.Num(NumValue.Float32(v)) => v.isActual
       case Value.Num(NumValue.Float64(v)) => v.isActual
-      case Value.Ref(RefValue.RefValue(v)) => v.size == 1
-      case Value.Vec(VecValue.Vec128(v)) => v.isActual
+      case Value.Ref(v) => v.size == 1
+      case Value.Vec(v) => v.isActual
     })
 
     def grouped: Map[String, Map[InstLoc, List[Value]]] =

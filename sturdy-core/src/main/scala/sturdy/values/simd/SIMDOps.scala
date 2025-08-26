@@ -42,8 +42,8 @@ trait SIMDOps[B, Vec, V, LaneIdx]:
   def vectorBitmask(shape: LaneShape, v: Vec): V
 
   // Binary operations
-  def vectorAdd(shape: LaneShape, config: Overflow && BitSign, v1: Vec, v2: Vec): Vec
-  def vectorSub(shape: LaneShape, config: Overflow && BitSign, v1: Vec, v2: Vec): Vec
+  def vectorAdd(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Vec, v2: Vec): Vec
+  def vectorSub(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Vec, v2: Vec): Vec
   def vectorMul(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorDiv(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorMin(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec
@@ -54,7 +54,6 @@ trait SIMDOps[B, Vec, V, LaneIdx]:
   def vectorQ15MulrSatS(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorDotS(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorAnd(shape: LaneShape, v1: Vec, v2: Vec): Vec
-  def vectorAndNot(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorOr(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorXor(shape: LaneShape, v1: Vec, v2: Vec): Vec
 
@@ -62,9 +61,6 @@ trait SIMDOps[B, Vec, V, LaneIdx]:
   def vectorEq(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorNe(shape: LaneShape, v1: Vec, v2: Vec): Vec
   def vectorLt(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec
-  def vectorGt(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec
-  def vectorLe(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec
-  def vectorGe(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec
   
   // Ternary operations
   def vectorBitselect(shape: LaneShape, v1: Vec, v2: Vec, mask: Vec): Vec
@@ -108,8 +104,8 @@ given DummySIMDOps[B, Vec, V, LaneIdx]: SIMDOps[B, Vec, V, LaneIdx] with {
   override def vectorNot(shape: LaneShape, v: Vec): Vec = ???
   override def vectorBitmask(shape: LaneShape, v: Vec): V = ???
 
-  override def vectorAdd(shape: LaneShape, config: Overflow && BitSign, v1: Vec, v2: Vec): Vec = ???
-  override def vectorSub(shape: LaneShape, config: Overflow && BitSign, v1: Vec, v2: Vec): Vec = ???
+  override def vectorAdd(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Vec, v2: Vec): Vec = ???
+  override def vectorSub(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Vec, v2: Vec): Vec = ???
   override def vectorMul(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorDiv(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorMin(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec = ???
@@ -120,16 +116,12 @@ given DummySIMDOps[B, Vec, V, LaneIdx]: SIMDOps[B, Vec, V, LaneIdx] with {
   override def vectorQ15MulrSatS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorDotS(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorAnd(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
-  override def vectorAndNot(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorOr(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorXor(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
 
   override def vectorEq(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorNe(shape: LaneShape, v1: Vec, v2: Vec): Vec = ???
   override def vectorLt(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec = ???
-  override def vectorGt(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec = ???
-  override def vectorLe(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec = ???
-  override def vectorGe(shape: LaneShape, config: BitSign, v1: Vec, v2: Vec): Vec = ???
   override def vectorBitselect(shape: LaneShape, v1: Vec, v2: Vec, mask: Vec): Vec = ???
 
   override def vectorShift(shape: LaneShape, dir: ShiftDirection, config: BitSign, v: Vec, shift: V): Vec = ???

@@ -2,7 +2,6 @@ package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
 import sturdy.IsSound.{NotSound, Sound}
-import sturdy.language.wasm.ConcreteInterpreter.RefValue
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
