@@ -695,7 +695,10 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       return if mth.descriptor.returnType.isVoidType then i32ops.integerLit(-1) else ret
 
     val body = mth.body.getOrElse:
-      throw UnsupportedOperationException(s"body of ${mth.toString} is empty")
+      if mth.isNative then
+        failure.fail(AbortEval.Native(mth), "native method encountered")
+      else
+        throw UnsupportedOperationException(s"body of ${mth.toString} is empty")
     val locals = if body.localVariableTable.isDefined then
       body.localVariableTable.get.map(_.fieldType).map(convertTypes)
     else
@@ -961,3 +964,5 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   enum AbortEval extends FailureKind:
     // abort eval due to System.exit
     case Exit(v: V)
+    // native method encountered
+    case Native(m: Method)

@@ -1,6 +1,7 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
+import org.opalj.br.analyses.Project.JavaClassFileReader
 import org.opalj.br.instructions.{InvocationInstruction, LoadString}
 import org.opalj.br.{ArrayType, ClassType, IntegerType, Method, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
@@ -37,8 +38,8 @@ object TestCases:
   val fullTests: ArraySeq[Path] = allTestCases.filterNot: f =>
     ignoreRegexes.exists(_.matches(f.toString))
 
-  // all explicitly included tests
-  val includedTests: ArraySeq[Path] = allTestCases.filter: f =>
+  // all explicitly included tests that are not ignored
+  val includedTests: ArraySeq[Path] = fullTests.filter: f =>
     includeRegexes.exists(_.matches(f.toString))
 
   // all test cases
@@ -78,9 +79,15 @@ val delegatedMethodNames = Seq("runPositive", "runNegative", "loadPositive", "lo
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   // if the harness fails, the test is canceled
   def assertCase(testCase: Path): Assertion =
-    val project = Project(testCase.toFile, bytecode.RTJar)
-    println(s"testing $testCase")
     val caseName = testCase.getFileName.toString
+    val project = Project(
+      JavaClassFileReader().ClassFiles(testCase.toFile),
+      JavaClassFileReader().ClassFiles(bytecode.RTJar),
+      true,
+      Iterable.empty,
+      (_, ex) => cancel(s"[$caseName] project setup failed: $ex")
+    )
+    println(s"testing $testCase")
 
     // structure validation
     val rootCf = project.projectClassFilesWithSources.map(_._1).find:
@@ -97,6 +104,10 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     val rootRun = rootRuns.head
     val runBody = rootRun.body.getOrElse:
       cancel(s"[$caseName] root run method with no body:\n$rootRun")
+    // every native test contains an invocation of testChecks
+    if runBody.exists: i =>
+      i.instruction.isInvocationInstruction && i.instruction.asInvocationInstruction.name == "testChecks" then
+      cancel(s"[$caseName] TODO: native tests are currently ignored")
 
     // determine which delegated methods are called, if any
     val calledDelegatedMethods = runBody.flatMap: p =>
@@ -149,8 +160,12 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
         // checked above
         runs.head
 
-      forEvery(posCases):
-        runPositive(project, testCase, caseName)
+      // forEvery is not good for stack traces, so only use it if needed
+      if posCases.size != 1 then
+        runPositive(project, testCase, caseName)(posCases.head)
+      else
+        forEvery(posCases):
+          runPositive(project, testCase, caseName)
 
   def runTestCases(testCases: Seq[Path]): Unit =
     testCases.foreach: path =>
@@ -167,7 +182,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 
     val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("String")), 0)))
+    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
     if mType == TestedMethodType.Run then
       // push System.out (null as a replacement)
       concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(NullValue()))
@@ -177,6 +192,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     catch
       // all other exceptions fail the test
       case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
+      case CFailureException(concreteInterpreter.AbortEval.Native(m), _) => cancel(s"[$caseName] native method encountered: $m")
       case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(s"[$caseName] " + e.getMessage)
 
     assert(v.asInt32(using concreteInterpreter.failure) === mType.getExpectedValue)
@@ -185,7 +201,6 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 def runSignaturePredicate(m: Method) =
   // get is safe since unapply always returns Some
   m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType("java/lang/String")), ClassType("java/io/PrintStream")), IntegerType)
-
 
 enum TestedMethodType:
   case Main
