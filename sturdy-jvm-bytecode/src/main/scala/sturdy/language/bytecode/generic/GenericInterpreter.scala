@@ -421,6 +421,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
+        ensureInitialization(declaringClass)
         val cf = findClassFile(declaringClass)
         val mth = cf.findMethod(name, methodDescriptor).get
         val numArgs = methodDescriptor.parametersCount
