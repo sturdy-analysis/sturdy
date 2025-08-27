@@ -8,11 +8,12 @@ import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
+import org.opalj.br.ClassType
 import sturdy.data.MayJoin
 import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.exceptions.ConcreteExceptional
-import sturdy.values.objects.{ SizeOps, TypeOps}
+import sturdy.values.objects.{SizeOps, TypeOps}
 
 trait Interpreter:
 
@@ -195,8 +196,20 @@ trait Interpreter:
 
     //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
     //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
-    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
-    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
+    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply):
+      override def div(v1: Value, v2: Value): Value =
+        branchOpsV.boolBranch(
+          eqOps.equ(v2, Value.Int32(i32Ops.integerLit(0))),
+          except.throws(JvmExcept.Throw(ClassType("java/lang/ArithmeticException"))),
+          Value.Int32(i32Ops.div(v1.asInt32, v2.asInt32))
+        )
+    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply):
+      override def div(v1: Value, v2: Value): Value =
+        branchOpsV.boolBranch(
+          eqOps.equ(v2, Value.Int64(i64Ops.integerLit(0))),
+          except.throws(JvmExcept.Throw(ClassType("java/lang/ArithmeticException"))),
+          Value.Int64(i64Ops.div(v1.asInt64, v2.asInt64))
+        )
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
     final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 

@@ -16,7 +16,8 @@ class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: Inte
   inline def min(v1: V, v2: V): V = inject(ops.min(extract(v1), extract(v2)))
   inline def absolute(v: V): V = inject(ops.absolute(extract(v)))
 
-  inline def div(v1: V, v2: V): V = inject(ops.div(extract(v1), extract(v2)))
+  // not inline due to the jvm implementation needing to override this function
+  def div(v1: V, v2: V): V = inject(ops.div(extract(v1), extract(v2)))
   inline def divUnsigned(v1: V, v2: V): V = inject(ops.divUnsigned(extract(v1), extract(v2)))
   inline def remainder(v1: V, v2: V): V = inject(ops.remainder(extract(v1), extract(v2)))
   inline def remainderUnsigned(v1: V, v2: V): V = inject(ops.remainderUnsigned(extract(v1), extract(v2)))
