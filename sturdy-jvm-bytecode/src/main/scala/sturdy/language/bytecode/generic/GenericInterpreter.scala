@@ -1,30 +1,31 @@
 package sturdy.language.bytecode.generic
 
+import org.opalj.bi.ACC_STATIC
+import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
-import sturdy.effect.operandstack.DecidableOperandStack
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, PCAndInstruction, ReferenceType, ShortType}
 import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin, noJoin}
+import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.store.Store
-import sturdy.effect.allocation.Allocator
-import sturdy.values.booleans.BooleanBranching
-import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, InvokeStaticMethodHandle, LongType, Method, MethodDescriptor, PCAndInstruction, ReferenceType, ShortType}
-import org.opalj.io.process
 import sturdy.effect.{EffectList, EffectStack}
-import sturdy.values.arrays.ArrayOps
-import sturdy.values.objects.ObjectOps
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
+import sturdy.values.arrays.ArrayOps
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.objects.ObjectOps
 import sturdy.values.{Finite, Join, MaybeChanged}
 
-import java.io.{DataInputStream, File, FileInputStream}
+import java.io.File
 import java.net.URL
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
+import scala.collection.mutable
 
 enum JvmExcept[V]:
   case Jump(pc: Int)
@@ -71,14 +72,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V, Unit]
 
-  val staticAddrMap: scala.collection.mutable.Map[(ClassType, String), Addr]
+  val staticAddrMap: mutable.Map[(ClassType, String), Addr]
 
 
   val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame))
   given EffectStack = effectStack
 
-  val classStack: scala.collection.mutable.Stack[ClassFile] = scala.collection.mutable.Stack[ClassFile]()
-  val stringStack: scala.collection.mutable.Stack[String] = scala.collection.mutable.Stack[String]()
+  val classStack: mutable.Stack[ClassFile] = mutable.Stack[ClassFile]()
+  val stringStack: mutable.Stack[String] = mutable.Stack[String]()
   val project: Project[URL]
   val projectSource: String
 
@@ -389,23 +390,16 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         ()
 
       // Load and Store Statics opcode 178 - 179
-      case inst: GETSTATIC =>
-        // TODO: why was this here?
-        // if(inst.name == "out") {
-          // ()
-        // } else
-          val objCF = inst.declaringClass
-          ensureInitialization(objCF)
-          val addr = staticAddrMap((objCF, inst.name))
-          val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, inst.name))
-          stack.push(v)
+      case GETSTATIC(declaringClass, name, _) =>
+        ensureInitialization(declaringClass)
+        val addr = staticAddrMap.getOrElse((declaringClass, name), fail(BytecodeFailure.FieldNotFound, name))
+        val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, name))
+        stack.push(v)
 
-      case inst: PUTSTATIC =>
-        val objCF = inst.declaringClass
-        ensureInitialization(objCF)
+      case PUTSTATIC(declaringClass, name, _) =>
+        ensureInitialization(declaringClass)
         val v = stack.popOrAbort()
-        val addr = staticAlloc(Site.StaticInitialization(objCF, inst.name))
-        staticAddrMap.addOne((objCF, inst.name), addr)
+        val addr = staticAddrMap.getOrElseUpdate((declaringClass, name), staticAlloc(Site.StaticInitialization(declaringClass, name)))
         store.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
@@ -615,22 +609,24 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       project.classFile(objType).get
     }
 
-  def ensureInitialization(objType: ClassType)(using Fixed): Unit =
-    if staticInitialized.contains(objType) then return;
-    import org.opalj.br.reader.Java8Framework;
-    val cfs = if project.isLibraryType(objType) then
-      // TODO: this case causes issues in the concreteInterpreter tests, fix
-      val source = javaLibClassFileWrapper(objType)
-      Java8Framework.ClassFile(nativeSource, source)
-    else
-      val source = if projectSource.endsWith(".class") then projectSource else nonJavaLibClassFileWrapper(objType)
-      process(DataInputStream(FileInputStream(source))):
-        Java8Framework.ClassFile
-    staticInitialized += objType
-    // not every cf has a static initializer, need to only invoke it if it exists
-    val _ = cfs.headOption.flatMap:
-      _.staticInitializer.map:
-        invoke(_, Seq())
+  // ensures that the static initializer of a given class has been invoked
+  // and its static fields have been added to the static address map and store
+  def ensureInitialization(classType: ClassType)(using Fixed): Unit =
+    if staticInitialized.contains(classType) then return;
+    val cf = project.classFile(classType).getOrElse:
+      throw IllegalArgumentException(s"project does not contain a class file that defines $classType")
+    // add class as initialized for different calls to this function
+    staticInitialized += classType
+    // initialize all static fields to their default value
+    cf.fields.filter: field =>
+      ACC_STATIC.isSet(field.accessFlags)
+    .foreach: field =>
+      val addr = staticAlloc(Site.StaticInitialization(classType, field.name))
+      staticAddrMap += (classType, field.name) -> addr
+      store.write(addr, defaultValue(field.fieldType))
+    // not every class has a static initializer, need to only invoke it if it exists
+    cf.staticInitializer.map:
+      invoke(_, Seq())
 
   def createLibraryObj(toLoad: ClassType, site: Site): V =
     val cfs = findClassFile(toLoad)
@@ -799,17 +795,17 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       val nextPC = currInst.indexOfNextInstruction(pc)(body)
       runBody(nextPC, mth)
 
-  def convertTypes(opalTypes: FieldType): ValType = opalTypes match
-    case opalTypes: ByteType => ValType.I32
-    case opalTypes: ShortType => ValType.I32
-    case opalTypes: IntegerType => ValType.I32
-    case opalTypes: FloatType => ValType.F32
-    case opalTypes: LongType => ValType.I64
-    case opalTypes: DoubleType => ValType.F64
-    case opalTypes: BooleanType => ValType.I32
-    case opalTypes: CharType => ValType.I32
-    case opalTypes: ClassType => ValType.Obj
-    case opalTypes: ArrayType => ValType.Array
+  def convertTypes(opalType: FieldType): ValType = opalType match
+    case _: ByteType => ValType.I32
+    case _: ShortType => ValType.I32
+    case _: IntegerType => ValType.I32
+    case _: FloatType => ValType.F32
+    case _: LongType => ValType.I64
+    case _: DoubleType => ValType.F64
+    case _: BooleanType => ValType.I32
+    case _: CharType => ValType.I32
+    case _: ClassType => ValType.Obj
+    case _: ArrayType => ValType.Array
 
   def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => i32ops.integerLit(0)
@@ -818,6 +814,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     case ValType.F64 => f64ops.floatingLit(0)
     case ValType.Obj => objectOps.makeNull()
     case ValType.Array => objectOps.makeNull()
+
+  def defaultValue: FieldType => V = convertTypes.andThen(defaultValue)
 
   // helper function for all if instructions
   private def handleIfInst(predicate: V => V, target: Int): Unit =
