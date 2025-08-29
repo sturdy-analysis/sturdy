@@ -561,12 +561,16 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
 
       // monitorenter opcode 194
-      case _ if (inst.opcode == 194) =>
-        stack.popOrAbort()
+      case MONITORENTER =>
+        // TODO: why was this the implementation?
+        // stack.popOrAbort()
+        throw UnsupportedOperationException("unsupported instruction: monitorenter")
 
       // monitorexit opcode 195
-      case _ if (inst.opcode == 195) =>
-        stack.popOrAbort()
+      case MONITOREXIT =>
+        // TODO: why was this the implementation?
+        // stack.popOrAbort()
+        throw UnsupportedOperationException("unsupported instruction: monitorexit")
 
       // WIDE opcode 196
       case inst: WIDE.type =>
