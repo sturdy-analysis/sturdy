@@ -384,10 +384,13 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val offset = transformedIndices.getOrElse(key, inst.defaultOffset)
         except.throws(JvmExcept.Jump(pc + offset))
 
-
-      // Return opcode 172 - 177
-      case _ if (172 <= inst.opcode && inst.opcode <= 177) =>
-        ()
+      // return instructions
+      case IRETURN | LRETURN | FRETURN | DRETURN | ARETURN =>
+        val returnValue = stack.popOrAbort()
+        stack.clearCurrentOperandFrame()
+        stack.push(returnValue)
+      case RETURN =>
+        stack.clearCurrentOperandFrame()
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, _) =>
