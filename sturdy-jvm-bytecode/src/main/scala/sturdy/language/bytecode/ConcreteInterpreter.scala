@@ -139,7 +139,7 @@ object ConcreteInterpreter extends Interpreter:
       // TODO: find a solution for this warning
       case ConcreteRefValues.Object(_, _, fields: Map[FieldName, FieldAddr]) =>
         store.read(fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
-      case ConcreteRefValues.NullValue() => throw NullPointerException()
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
@@ -151,6 +151,7 @@ object ConcreteInterpreter extends Interpreter:
         else
           store.write(fields(name), v)
           JOptionC.some(())
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
@@ -158,6 +159,7 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.Object(_, cls: ClassFile, _) =>
         val mth = AuxillaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
         invoke(obj, mth, args)
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
