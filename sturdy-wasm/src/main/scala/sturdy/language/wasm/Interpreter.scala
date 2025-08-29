@@ -142,14 +142,20 @@ trait Interpreter:
         Combine[Reference, W],
       ): Combine[Value, W] with
     import Value.*
-    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
-      case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => Combine[I32, W](i1, i2).map(makeI32)
-      case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => Combine[I64, W](l1, l2).map(makeI64)
-      case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)
-      case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
-      case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
-      case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
-      case _ => MaybeChanged(TopValue, v1)
+    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = {
+      try {
+        (v1, v2) match
+          case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => Combine[I32, W](i1, i2).map(makeI32)
+          case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => Combine[I64, W](l1, l2).map(makeI64)
+          case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)
+          case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
+          case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
+          case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
+          case _ => MaybeChanged(TopValue, v1)
+      } catch {
+        case _: CannotJoinException => MaybeChanged(TopValue, v1)
+      }
+    }
 
   type Addr
   type Bytes

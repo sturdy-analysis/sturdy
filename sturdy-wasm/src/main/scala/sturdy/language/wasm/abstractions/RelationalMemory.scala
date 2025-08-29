@@ -86,7 +86,7 @@ trait RelationalMemory extends RelationalValues:
           )
         case NumExpr(addrExpr) =>
           val iv = apronState.getIntInterval(addrExpr)
-          if(iv._1 == iv._2) {
+          if(iv._1 == iv._2 && !staticRegionsOverlap(iv._1, mem)) {
             mem.store.get(PhysicalAddress(HeapCtx.Static(iv._1), Recency.Recent)) match
               case Some(staticRegion) =>
                 Topped.Actual(
@@ -107,6 +107,13 @@ trait RelationalMemory extends RelationalValues:
           } else {
             Topped.Top
           }
+
+    private inline def staticRegionsOverlap[Timestamp,Val](n: Int, mem: Mem[HeapCtx, Addr, Timestamp, Val, Size]): Boolean =
+      (n - 16).to(n - 1).exists(i =>
+        mem.store.get(PhysicalAddress(HeapCtx.Static(i), Recency.Recent)).exists(region =>
+          i + region.byteSize.toOption.getOrElse(16) > n
+        )
+      )
 
     private inline def concurrentOrNewerThan[Timestamp: PartialOrder](timestamp1: Timestamp, timestamp2: Timestamp): Boolean =
       !PartialOrder[Timestamp].lteq(timestamp1, timestamp2)

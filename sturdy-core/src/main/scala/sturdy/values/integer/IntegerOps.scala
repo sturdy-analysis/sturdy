@@ -52,7 +52,7 @@ trait IntegerOps[B, V]:
   def nonzeroBitCount(v: V): V
   def invertBits(v: V): V
 
-trait IntegerOpsWithSignInterpretation[B,V](byteSize: Int) extends IntegerOps[B, V]:
+trait IntegerOpsWithSignInterpretation[B,V] extends IntegerOps[B, V]:
 
   inline def signedMinValue(numBytes: Int): BigInt =
     -BigInt(2).pow(numBytes * 8 - 1)
@@ -66,10 +66,10 @@ trait IntegerOpsWithSignInterpretation[B,V](byteSize: Int) extends IntegerOps[B,
   inline def unsignedMaxValue(numBytes: Int): BigInt =
     BigInt(2).pow(numBytes * 8)
 
-  inline def interpretSignedAsUnsigned(v: V): V = interpretSignedAsUnsigned(v, byteSize)
+  def interpretSignedAsUnsigned(v: V): V
   def interpretSignedAsUnsigned(v: V, fromNumBytes: Int): V
 
-  inline def interpretUnsignedAsSigned(v: V): V = interpretUnsignedAsSigned(v, byteSize)
+  def interpretUnsignedAsSigned(v: V): V
   def interpretUnsignedAsSigned(v: V, fromNumBytes: Int): V
 
   override inline def divUnsigned(v1: V, v2: V): V =

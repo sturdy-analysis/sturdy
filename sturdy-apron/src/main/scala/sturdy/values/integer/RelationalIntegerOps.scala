@@ -235,6 +235,10 @@ trait RelationalBaseIntegerOps
           Failure(IntegerOverflow, s"$v overflows bounds [${sMin},${sMax}]")
         }
 
+  def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    interpretSignedAsUnsigned(v, v._type.byteSize)
+
+
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val uMax = unsignedMaxValue(fromNumBytes)
     val fromType = v._type
@@ -244,6 +248,9 @@ trait RelationalBaseIntegerOps
     } {
       intAdd(v, lit(uMax, fromType), fromType)
     }
+
+  override def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    interpretUnsignedAsSigned(v, v._type.byteSize)
 
   def interpretUnsignedAsSigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val sMax = signedMaxValue(fromNumBytes)
@@ -268,7 +275,7 @@ given RelationalIntOps
      f: Failure,
      overflowHandling: OverflowHandling,
      typeIntOps: IntegerOps[Int,Type]
-  ): RelationalBaseIntegerOps[Int, Addr, Type] with IntegerOpsWithSignInterpretation[Int, ApronExpr[Addr,Type]](byteSize = 4) with
+  ): RelationalBaseIntegerOps[Int, Addr, Type] with IntegerOpsWithSignInterpretation[Int, ApronExpr[Addr,Type]] with
 
   override def integerLit(i: Int): ApronExpr[Addr, Type] =
     lit(i, typeIntOps.integerLit(i))
@@ -287,7 +294,7 @@ given RelationalLongOps
     f: Failure,
     overflowHandling: OverflowHandling,
     typeIntOps: IntegerOps[Long,Type]
-  ): RelationalBaseIntegerOps[Long, Addr, Type] with IntegerOpsWithSignInterpretation[Long, ApronExpr[Addr,Type]](byteSize = 8) with
+  ): RelationalBaseIntegerOps[Long, Addr, Type] with IntegerOpsWithSignInterpretation[Long, ApronExpr[Addr,Type]] with
 
   override def integerLit(i: Long): ApronExpr[Addr, Type] =
     lit(i, typeIntOps.integerLit(i))

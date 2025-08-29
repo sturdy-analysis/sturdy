@@ -90,6 +90,8 @@ object MaybeChanged:
 inline def Changed[A](a: A) = MaybeChanged.Changed(a)
 inline def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
 
+final class CannotJoinException(message: String) extends RuntimeException(message)
+
 /** If `V` a lattice of finite height, then there is no need to widen. */
 given finitely[V](using Join[V], Finite[V]): Widen[V] with
   def apply(v1: V, v2: V) = Join(v1, v2)

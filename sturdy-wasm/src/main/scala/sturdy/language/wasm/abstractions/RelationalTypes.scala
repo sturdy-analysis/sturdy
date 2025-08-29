@@ -79,7 +79,7 @@ trait RelationalTypes:
     case (I64Type, I64Type) => Unchanged(I64Type)
     case (F32Type, F32Type) => Unchanged(F32Type)
     case (F64Type, F64Type) => Unchanged(F64Type)
-    case (t1, t2) => throw new IllegalArgumentException(s"Incompatible types $t1 and $t2")
+    case (t1, t2) => throw new CannotJoinException(s"Incompatible types $t1 and $t2")
   }
 
   given ApronType[Type] with
