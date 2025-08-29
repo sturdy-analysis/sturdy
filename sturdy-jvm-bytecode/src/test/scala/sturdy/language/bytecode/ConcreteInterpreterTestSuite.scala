@@ -35,22 +35,42 @@ object TestCases:
   val includeRegexes: Seq[Regex] = readRegexesFromFile(includeFileName)
 
   // all tests that are not ignored
-  val fullTests: ArraySeq[Path] = allTestCases.filterNot: f =>
-    ignoreRegexes.exists(_.matches(f.toString))
+  val fullTests: ArraySeq[ArraySeq[Path]] = allTestCases.filterNot: paths =>
+    ignoreRegexes.exists(_.matches(paths.head.toString))
 
   // all explicitly included tests that are not ignored
-  val includedTests: ArraySeq[Path] = fullTests.filter: f =>
-    includeRegexes.exists(_.matches(f.toString))
+  val includedTests: ArraySeq[ArraySeq[Path]] = fullTests.filter: paths =>
+    includeRegexes.exists(_.matches(paths.head.toString))
 
   // all test cases
-  def allTestCases: ArraySeq[Path] =
+  def allTestCases: ArraySeq[ArraySeq[Path]] =
+    // flatten nested files
+    val files = Files.list(testRootPath).flatMap:
+      Files.list(_).flatMap:
+        Files.list
+    // sorting here is really important for the grouping
+    // the test case is the path without suffixes, so it will always be first of a group after sorting
+    .iterator().asScala.toSeq.sorted
+    // group testcases that belong together
+    import scala.collection.mutable
+    val map = mutable.Map[Path, mutable.ListBuffer[Path]]()
+    files.foreach: path =>
+      // check whether a test case this path belongs to already exists
+      map.keys.find: key =>
+        val p = path.getFileName.toString
+        val k = key.getFileName.toString
+        p.startsWith(k)
+      match
+        case Some(key) => map(key).append(path)
+        // add a new test case
+        case None => map += path -> mutable.ListBuffer(path)
+
+    // the first element is the test case, all others are auxiliary
+    // every case must contain at least one path, using head is therefore safe and will return the test case
     ArraySeq.from:
-      // flatten nested files
-      Files.list(testRootPath).flatMap:
-        Files.list(_).flatMap:
-          Files.list
-      .iterator().asScala
-    .sorted
+      map.values.map: list =>
+        ArraySeq.from(list.sorted)
+    .sortBy(_.head)
 
   // path where the test hierarchy is located
   def testRootPath: Path =
@@ -78,10 +98,11 @@ val delegatedMethodNames = Seq("runPositive", "runNegative", "loadPositive", "lo
 
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   // if the harness fails, the test is canceled
-  def assertCase(testCase: Path): Assertion =
+  def assertCase(paths: Seq[Path]): Assertion =
+    val testCase = paths.head
     val caseName = testCase.getFileName.toString
     val project = Project(
-      JavaClassFileReader().ClassFiles(testCase.toFile),
+      JavaClassFileReader().AllClassFiles(paths.map(_.toFile)),
       JavaClassFileReader().ClassFiles(bytecode.RTJar),
       true,
       Iterable.empty,
@@ -129,7 +150,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
         cancel(s"[$caseName] loading/instantiating tests are currently ignored. this test contains the following invocation instructions:\n" + targets.mkString("\n"))
     else
       // attempt to parse the classes called by each delegated method in the given method body
-      import scala.collection.mutable;
+      import scala.collection.mutable
       val map = mutable.Map.from:
         delegatedMethodNames.map:
           _ -> mutable.ListBuffer[String]()
@@ -167,12 +188,13 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
         forEvery(posCases):
           runPositive(project, testCase, caseName)
 
-  def runTestCases(testCases: Seq[Path]): Unit =
-    testCases.foreach: path =>
+  def runTestCases(testCases: Seq[Seq[Path]]): Unit =
+    testCases.foreach: paths =>
+      val path = paths.head
       test(path.subpath(path.getNameCount - 3, path.getNameCount).toString):
         // TODO: fix cancelAfter
         cancelAfter(Span(1, Minutes)):
-          assertCase(path)
+          assertCase(paths)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
     val mType = method.name match
