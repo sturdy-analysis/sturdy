@@ -159,6 +159,7 @@ lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
     excludeDependencies ++= Seq(
       ExclusionRule("org.scala-lang.modules", "scala-xml_2.13")
     ),
+    scalacOptions += "-deprecation",
   )
 
 //lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
