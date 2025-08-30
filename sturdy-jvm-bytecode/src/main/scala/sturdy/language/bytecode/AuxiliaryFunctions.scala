@@ -7,17 +7,14 @@ import sturdy.language.bytecode.generic.BytecodeFailure.*
 
 import java.net.URL
 
-object AuxillaryFunctions {
-
-  def findMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, project: Project[URL])(using f: Failure): Method =
-    if (obj.thisType != ClassType("java/lang/Object")) {
-      val nextInherit = project.classHierarchy.supertypeInformation(obj.thisType).get.classTypes.last
-      obj.findMethod(name, sig)
-        .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit, project))
-    }
-    else {
-      obj.findMethod(name, sig).getOrElse(f.fail(MethodNotFound, s"Method $name, $sig not found"))
-    }
+object AuxiliaryFunctions:
+  def findMethodOfSuperclass(classFile: ClassFile, name: String, sig: MethodDescriptor, project: Project[URL])(using f: Failure): Method =
+    classFile.findMethod(name, sig).getOrElse:
+      if (classFile.thisType == ClassType.Object)
+        f.fail(MethodNotFound, s"Method $name, $sig not found")
+      else
+        val nextInherit = classFile.superclassType.get
+        findInheritedMethodOfSuperclass(classFile, name, sig, nextInherit, project)
 
   def javaLibClassFileWrapper(obj: ClassType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
@@ -47,4 +44,3 @@ object AuxillaryFunctions {
           .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit, project))
       }
     }
-}

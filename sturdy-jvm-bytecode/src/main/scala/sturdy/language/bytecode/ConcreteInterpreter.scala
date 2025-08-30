@@ -157,7 +157,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def invokeFunctionCorrect(obj: RefValue, mthName: String, sig: MthSig, args: Seq[V])(invoke: (RefValue, Mth, Seq[V]) => V): V = obj match
       case ConcreteRefValues.Object(_, cls: ClassFile, _) =>
-        val mth = AuxillaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
+        val mth = AuxiliaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
         invoke(obj, mth, args)
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>

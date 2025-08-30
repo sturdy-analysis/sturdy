@@ -8,7 +8,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.Store
-import sturdy.language.bytecode.{AuxillaryFunctions, Interpreter}
+import sturdy.language.bytecode.{AuxiliaryFunctions, Interpreter}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening}
 import sturdy.values.integer.NumericInterval
@@ -116,7 +116,7 @@ trait Objects extends Interpreter:
         ref match
           case Topped.Top => topOpalVal(sig.returnType)
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
-            val mth = AuxillaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
+            val mth = AuxiliaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
             invoke(ref, mth, args)
           case Topped.Actual(_) => ???
 
