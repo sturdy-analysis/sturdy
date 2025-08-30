@@ -1,7 +1,8 @@
 package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ClassFile, Method, MethodDescriptor, ClassType}
+import org.opalj.br.reader.Java8Framework
+import org.opalj.br.{ClassFile, ClassType, Method, MethodDescriptor}
 import sturdy.effect.failure.Failure
 import sturdy.language.bytecode.generic.BytecodeFailure.*
 
@@ -22,25 +23,18 @@ object AuxiliaryFunctions:
 
   def findInheritedMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, inheritedObj: ClassType, project: Project[URL])(using f: Failure): Method =
     val libSource = org.opalj.bytecode.RTJar
-    if (inheritedObj == ClassType("java/lang/Object")) {
-      val objectCF = org.opalj.br.reader.Java8Framework.ClassFile(libSource, "classes/java/lang/Object.class").head
-      objectCF.findMethod(name, sig).getOrElse(
-        obj.interfaceTypes.map(interfaces => project.classFile(interfaces)).map(file => file.get.findMethod(name, sig)).head
+    if inheritedObj == ClassType.Object then
+      // TODO: test
+      val objectCF = Java8Framework.ClassFile(libSource, "classes/java/lang/Object.class").head
+      objectCF.findMethod(name, sig).getOrElse:
+        obj.interfaceTypes.flatMap(interface => project.classFile(interface).get.findMethod(name, sig)).headOption
           .getOrElse(f.fail(MethodNotFound, s"Method $name, $sig not found"))
-      )
-    }
-    else {
-      if (project.isLibraryType(inheritedObj)) {
+    else
+      val cf = if project.isLibraryType(inheritedObj) then
         val source = javaLibClassFileWrapper(inheritedObj)
-        val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(libSource, source).head
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
+        Java8Framework.ClassFile(libSource, source).head
+      else
+        project.classFile(inheritedObj).get
+      val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
+        cf.findMethod(name, sig)
           .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit, project))
-      }
-      else {
-        val cfs = project.classFile(inheritedObj).get
-        val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
-        cfs.findMethod(name, sig)
-          .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit, project))
-      }
-    }
