@@ -415,12 +415,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val obj = stack.popOrAbort()
         objectOps.setField(obj, (inst.declaringClass, inst.name), value)
 
-
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
         ensureInitialization(declaringClass)
         val cf = findClassFile(declaringClass)
-        val mth = cf.findMethod(name, methodDescriptor).get
+        val mth = findMethod(cf, name, methodDescriptor).get
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val ret = invoke(mth, args)
@@ -444,11 +443,10 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       case INVOKESPECIAL(declaringClass, _, name, methodDescriptor) =>
         val cf = findClassFile(declaringClass)
-        val mth = cf.findMethod(name, methodDescriptor).get
+        val mth = findMethod(cf, name, methodDescriptor).get
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        // why are we not using object ops here?
         val ret = invoke(mth, obj +: args)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
@@ -842,6 +840,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   private def handleIfCmpInst(cmpOp: (V, V) => V, target: Int): Unit =
     val v2 = stack.popOrAbort()
     handleIfInst(cmpOp(_, v2), target)
+
+  // tries to find a method in the given class file or the first one while moving upwards in the inheritance hierarchy
+  private def findMethod(cf: ClassFile, name: String, descriptor: MethodDescriptor): Option[Method] =
+    cf.findMethod(name, descriptor).orElse:
+      cf.superclassType.flatMap: superCf =>
+        findMethod(findClassFile(superCf), name, descriptor)
 
   def invokeClassMethod(mth: Method, args: Seq[V]): V =
     mth.name match
