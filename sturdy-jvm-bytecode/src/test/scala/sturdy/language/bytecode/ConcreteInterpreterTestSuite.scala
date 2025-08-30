@@ -125,9 +125,13 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     val rootRun = rootRuns.head
     val runBody = rootRun.body.getOrElse:
       cancel(s"[$caseName] root run method with no body:\n$rootRun")
-    // every native test contains an invocation of testChecks
+    // every native test checks for this flag and therefore needs to load it on the stack
     if runBody.exists: i =>
-      i.instruction.isInvocationInstruction && i.instruction.asInvocationInstruction.name == "testChecks" then
+      try
+        val instr = i.instruction
+        instr.isLoadConstantInstruction && instr.asInstanceOf[LoadString].value == "-platform.nativeCodeSupported"
+      catch case _: ClassCastException => false
+    then
       cancel(s"[$caseName] TODO: native tests are currently ignored")
 
     // determine which delegated methods are called, if any
