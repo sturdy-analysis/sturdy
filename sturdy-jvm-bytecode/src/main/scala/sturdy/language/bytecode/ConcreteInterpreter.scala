@@ -266,8 +266,7 @@ object ConcreteInterpreter extends Interpreter:
 
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val failure: ConcreteFailure = new ConcreteFailure
-    // TODO: () was inserted as a quick solution to achieve compilation
-    val frame: ConcreteCallFrame[FrameData, Int, Value, Unit] = new ConcreteCallFrame[FrameData, Int, Value, Unit](newFrameData, args.view.zipWithIndex.map((x,y) => (y, Some(x))))
+    val frame: ConcreteCallFrame[FrameData, Int, Value, Site] = ConcreteCallFrame[FrameData, Int, Value, Site](newFrameData, args.view.zipWithIndex.map((x,y) => (y, Some(x))))
     val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
     val objAlloc: Allocator[Addr, Site] = new CAllocatorIntIncrement
     val objFieldAlloc: CAllocatorIntIncrement[Site] = new CAllocatorIntIncrement

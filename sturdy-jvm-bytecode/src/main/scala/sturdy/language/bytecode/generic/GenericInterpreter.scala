@@ -71,7 +71,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   val staticAlloc: Allocator[Addr, Site]
   val store: Store[Addr, V, J]
   type FrameData = Int
-  val frame: DecidableMutableCallFrame[FrameData, Int, V, Unit]
+  val frame: DecidableMutableCallFrame[FrameData, Int, V, Site]
 
   val staticAddrMap: mutable.Map[(ClassType, String), Addr]
 
@@ -699,7 +699,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     val argsAndLocals = args.view ++ locals.map(defaultValue)
 
     stack.withNewFrame(0):
-      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map((x,y) => (y, Some(x))), ()):
+      frame.withNew(newFrameData, argsAndLocals.view.zipWithIndex.map((x,y) => (y, Some(x))), Site.Instruction(mth, newFrameData)):
         run(0, mth)
         if mth.descriptor.returnType.isVoidType then
           i32ops.integerLit(-1)

@@ -89,7 +89,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
       case Site.StaticInitialization(obj, name) => PowersetAddr(Addr.Static(obj, name))
       case _ => ??? // TODO
     override val store: AStoreThreaded[singleAddr, AddrSet, Value] = new AStoreThreaded(initStore)
-    override val frame = new JoinableDecidableCallFrame(0, List())
+    override val frame = JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
     override val projectSource: String = path
 
