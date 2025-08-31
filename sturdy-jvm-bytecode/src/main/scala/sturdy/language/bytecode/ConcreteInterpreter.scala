@@ -169,6 +169,7 @@ object ConcreteInterpreter extends Interpreter:
           JOptionC.none
         else
           store.read(vals(idx))
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -180,12 +181,14 @@ object ConcreteInterpreter extends Interpreter:
           store.write(vals(idx), v)
           JOptionC.some(())
         }
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
     override def arrayLength(array: RefValue): Value = array match
       case ConcreteRefValues.nonNullArray(_, _, _, size: Value) =>
         size
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -209,8 +212,9 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
         val arrayVals = vals.map(addr => getVal(array, vals.indexOf(addr)))
         arrayVals
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
-        throw UnsupportedOperationException(s"attempted object operations on $array")
+        throw UnsupportedOperationException(s"attempted array operations on $array")
 
     override def printString(letters: Seq[Int]): Unit =
       println(letters.map(l => l.toChar))
