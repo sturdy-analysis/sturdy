@@ -1,25 +1,13 @@
 package sturdy.language.bytecode.generic
 
-import org.opalj.br.BaseType
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
-import sturdy.effect.failure.Failure
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
-import sturdy.values.floating.*
-import sturdy.values.integer.*
 import org.opalj.br.instructions.*
-
-
-import scala.Float.NaN
-
 
 class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, V, TypeRep]):
 
-
   import bytecodeOps.*
-
 
   def evalNumericOp(inst: Instruction): V = inst match
     case inst: ICONST_M1.type =>
@@ -66,15 +54,17 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
       f32ops.floatingLit(inst.value)
     case inst: LoadDouble =>
       f64ops.floatingLit(inst.value)
+
   def evalNumericUnOp(inst: Instruction, v1: V): V = inst match
-    case inst: INEG.type =>
+    case INEG =>
       i32ops.sub(i32ops.integerLit(0), v1)
-    case inst: LNEG.type =>
+    case LNEG =>
       i64ops.sub(i64ops.integerLit(0), v1)
-    case inst: FNEG.type =>
+    case FNEG =>
       f32ops.negated(v1)
-    case inst: DNEG.type =>
+    case DNEG =>
       f64ops.negated(v1)
+
   def evalNumericBinOp(inst: Instruction, v1: V, v2: V): V = inst match
     case IADD =>
       i32ops.add(v1, v2)
@@ -113,13 +103,15 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case LREM =>
       i64ops.remainder(v1, v2)
     case FREM =>
-      val convertv1 = convert_f32_i32(v1, (config.Overflow.Fail && config.Bits.Signed))
-      val convertv2 = convert_f32_i32(v2, (config.Overflow.Fail && config.Bits.Signed))
+      // TODO: correct implementation
+      val convertv1 = convert_f32_i32(v1, config.Overflow.Fail && config.Bits.Signed)
+      val convertv2 = convert_f32_i32(v2, config.Overflow.Fail && config.Bits.Signed)
       val result = i32ops.remainder(convertv1, convertv2)
       convert_i32_f32(result, config.Bits.Signed)
     case DREM =>
-      val convertv1 = convert_f64_i64(v1, (config.Overflow.Fail && config.Bits.Signed))
-      val convertv2 = convert_f64_i64(v2, (config.Overflow.Fail && config.Bits.Signed))
+      // TODO: correct implementation
+      val convertv1 = convert_f64_i64(v1, config.Overflow.Fail && config.Bits.Signed)
+      val convertv2 = convert_f64_i64(v2, config.Overflow.Fail && config.Bits.Signed)
       val result = i64ops.remainder(convertv1, convertv2)
       convert_i64_f64(result, config.Bits.Signed)
     case ISHL =>
@@ -194,15 +186,15 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case L2D =>
       convert_i64_f64(v, config.Bits.Signed)
     case F2I =>
-      convert_f32_i32(v, (config.Overflow.Fail && config.Bits.Signed))
+      convert_f32_i32(v, config.Overflow.Fail && config.Bits.Signed)
     case F2L =>
-      convert_f32_i64(v, (config.Overflow.Fail && config.Bits.Signed))
+      convert_f32_i64(v, config.Overflow.Fail && config.Bits.Signed)
     case F2D =>
       convert_f32_f64(v, NilCC)
     case D2I =>
-      convert_f64_i32(v, (config.Overflow.Fail && config.Bits.Signed))
+      convert_f64_i32(v, config.Overflow.Fail && config.Bits.Signed)
     case D2L =>
-      convert_f64_i64(v, (config.Overflow.Fail && config.Bits.Signed))
+      convert_f64_i64(v, config.Overflow.Fail && config.Bits.Signed)
     case D2F =>
       convert_f64_f32(v, NilCC)
     case I2B =>
