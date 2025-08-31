@@ -208,7 +208,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 
     val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray(1, Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
+    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.StaticInitialization(ClassType.String, "ignored"), 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
     if mType == TestedMethodType.Run then
       // push System.out (null as a replacement)
       concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(NullValue()))
