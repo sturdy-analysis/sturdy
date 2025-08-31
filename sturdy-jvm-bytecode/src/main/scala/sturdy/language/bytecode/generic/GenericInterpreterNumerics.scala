@@ -146,52 +146,25 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
       i32ops.bitXor(v1, v2)
     case LXOR =>
       i64ops.bitXor(v1, v2)
-    case FCMPL =>
-      val isLt = compareOps.lt(v1, v2)
-      branchOpsV.boolBranch(isLt) {
-        i32ops.integerLit(-1)
+    case inst@(FCMPL | FCMPG | DCMPL | DCMPG) =>
+      val isGt = compareOps.gt(v1, v2)
+      branchOpsV.boolBranch(isGt) {
+        i32ops.integerLit(1)
       } {
-        val isGt = compareOps.gt(v1, v2)
-        branchOpsV.boolBranch(isGt) {
-          i32ops.integerLit(1)
-        } {
+        val isEq = eqOps.equ(v1, v2)
+        branchOpsV.boolBranch(isEq) {
           i32ops.integerLit(0)
-        }
-      }
-    case FCMPG =>
-      val isLt = compareOps.lt(v1, v2)
-      branchOpsV.boolBranch(isLt) {
-        i32ops.integerLit(-1)
-      } {
-        val isGt = compareOps.gt(v1, v2)
-        branchOpsV.boolBranch(isGt) {
-          i32ops.integerLit(1)
         } {
-          i32ops.integerLit(0)
-        }
-      }
-    case DCMPL =>
-      val isLt = compareOps.lt(v1, v2)
-      branchOpsV.boolBranch(isLt) {
-        i32ops.integerLit(-1)
-      } {
-        val isGt = compareOps.gt(v1, v2)
-        branchOpsV.boolBranch(isGt) {
-          i32ops.integerLit(1)
-        } {
-          i32ops.integerLit(0)
-        }
-      }
-    case DCMPG =>
-      val isLt = compareOps.lt(v1, v2)
-      branchOpsV.boolBranch(isLt) {
-        i32ops.integerLit(-1)
-      } {
-        val isGt = compareOps.gt(v1, v2)
-        branchOpsV.boolBranch(isGt) {
-          i32ops.integerLit(1)
-        } {
-          i32ops.integerLit(0)
+          val isLt = compareOps.lt(v1, v2)
+          branchOpsV.boolBranch(isLt) {
+            i32ops.integerLit(-1)
+          } {
+            // v1 or v2 must be NaN if this point is reached
+            i32ops.integerLit:
+              inst match
+                case FCMPL | DCMPL => -1
+                case FCMPG | DCMPG => 1
+          }
         }
       }
     case LCMP =>
@@ -206,7 +179,6 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
           i32ops.integerLit(0)
         }
       }
-
 
   def evalConvertOp(inst: Instruction, v: V): V = inst match
     case I2L =>
