@@ -125,15 +125,15 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case ISHL =>
       i32ops.shiftLeft(v1, v2)
     case LSHL =>
-      i64ops.shiftLeft(v1, v2)
+      i64ops.shiftLeft(v1, convert_i32_i64(v2, config.Bits.Signed))
     case ISHR =>
       i32ops.shiftRight(v1, v2)
     case LSHR =>
-      i64ops.shiftRight(v1, v2)
+      i64ops.shiftRight(v1, convert_i32_i64(v2, config.Bits.Signed))
     case IUSHR =>
       i32ops.shiftRightUnsigned(v1, v2)
     case LUSHR =>
-      i64ops.shiftRightUnsigned(v1, v2)
+      i64ops.shiftRightUnsigned(v1, convert_i32_i64(v2, config.Bits.Signed))
     case IAND =>
       i32ops.bitAnd(v1, v2)
     case LAND =>
