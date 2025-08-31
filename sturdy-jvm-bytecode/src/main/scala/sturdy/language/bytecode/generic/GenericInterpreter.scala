@@ -30,6 +30,7 @@ import scala.collection.mutable
 enum JvmExcept[V]:
   case Jump(pc: Int)
   case Ret(pc: V)
+  case Return()
   case Throw(exception: ClassType)
   case ThrowObject(exception: V)
 
@@ -389,8 +390,10 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val returnValue = stack.popOrAbort()
         stack.clearCurrentOperandFrame()
         stack.push(returnValue)
+        except.throws(JvmExcept.Return())
       case RETURN =>
         stack.clearCurrentOperandFrame()
+        except.throws(JvmExcept.Return())
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, _) =>
@@ -769,6 +772,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         run(targetPC, mth)
       case JvmExcept.Ret(currPC) =>
         //TODO
+      case JvmExcept.Return() =>
+        ()
       case JvmExcept.Throw(exception) =>
         val currPC = frame.data
         val handler = mth.body.get.exceptionHandlersFor(currPC)
