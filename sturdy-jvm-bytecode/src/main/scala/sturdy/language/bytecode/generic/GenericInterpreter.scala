@@ -3,7 +3,7 @@ package sturdy.language.bytecode.generic
 import org.opalj.bi.ACC_STATIC
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, MethodDescriptor, PCAndInstruction, ReferenceType, ShortType}
+import org.opalj.br.*
 import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin, noJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.DecidableMutableCallFrame
@@ -135,14 +135,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 //        classStack.push(cls)
 
 
-      case inst: LoadString =>
-        val string = inst.value.toCharArray.map(l => l.toInt).toSeq
-        val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
-        val stringObj = createLibraryObj(ClassType("java/lang/String"), site)
-        objectOps.setField(stringObj, (ClassType("java/lang/String"),"value"), stringArray)
-        stack.push(stringObj)
-        stringStack.push(inst.value)
+      case LoadString(value) =>
+        stack.push(makeStringObj(site)(value))
+        stringStack.push(value)
 
       case inst: LoadMethodHandle =>
         ???
@@ -157,14 +152,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       case inst: LoadClass_W =>
         val cls = createLibraryObj(ClassType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
         stack.push(cls)
-      case inst: LoadString_W =>
-        val string = inst.value.toCharArray.map(l => l.toInt).toSeq
-        val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(site), convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(inst.value.length))
-        val stringObj = createLibraryObj(ClassType("java/lang/String"), site)
-        objectOps.setField(stringObj, (ClassType("java/lang/String"),"value"), stringArray)
-        stack.push(stringObj)
-        stringStack.push(inst.value)
+      case LoadString_W(value) =>
+        stack.push(makeStringObj(site)(value))
+        stringStack.push(value)
       case inst: LoadMethodHandle_W =>
         ???
       case inst: LoadMethodType_W =>
@@ -397,13 +387,13 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, _) =>
-        ensureInitialization(declaringClass)
+        ensureInitialization(site)(declaringClass)
         val addr = staticAddrMap.getOrElse((declaringClass, name), fail(BytecodeFailure.FieldNotFound, name))
         val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, name))
         stack.push(v)
 
       case PUTSTATIC(declaringClass, name, _) =>
-        ensureInitialization(declaringClass)
+        ensureInitialization(site)(declaringClass)
         val v = stack.popOrAbort()
         val addr = staticAddrMap.getOrElseUpdate((declaringClass, name), staticAlloc(Site.StaticInitialization(declaringClass, name)))
         store.write(addr, v)
@@ -420,7 +410,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
-        ensureInitialization(declaringClass)
+        ensureInitialization(site)(declaringClass)
         val cf = findClassFile(declaringClass)
         val mth = findMethod(cf, name, methodDescriptor).get
         val numArgs = methodDescriptor.parametersCount
@@ -508,17 +498,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       */
 
       // NEW opcode 187
-      case inst: NEW =>
-        if (project.isLibraryType(inst.classType)){
-          val obj = createLibraryObj(inst.classType, site)
-          stack.push(obj)
-        } else {
-          val cfs = project.classFile(inst.classType).get
-          val inheritedFields = project.classHierarchy.allSuperclassesIterator(inst.classType, true)(project).map(cfs => cfs.fields).toSeq
-          val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), Site.FieldInitialization(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
-          val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
-          stack.push(obj)
-        }
+      case NEW(classType) =>
+        val obj = if project.isLibraryType(classType) then
+          createLibraryObj(classType, site)
+        else
+          val cfs = project.classFile(classType).get
+          val inheritedFields = project.classHierarchy.allSuperclassesIterator(classType, true)(project).map(cfs => cfs.fields).toSeq
+          val fields = inheritedFields.flatMap(buildFieldSeq(site))
+          objectOps.makeObject(objAlloc(site), cfs, fields)
+        stack.push(obj)
 
       // Arrays opcode 188 - 190
       case inst: NEWARRAY =>
@@ -619,7 +607,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
-  def ensureInitialization(classType: ClassType)(using Fixed): Unit =
+  def ensureInitialization(site: Site)(classType: ClassType)(using Fixed): Unit =
     if staticInitialized.contains(classType) then return;
     val cf = project.classFile(classType).getOrElse:
       throw IllegalArgumentException(s"project does not contain a class file that defines $classType")
@@ -631,17 +619,16 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     .foreach: field =>
       val addr = staticAlloc(Site.StaticInitialization(classType, field.name))
       staticAddrMap += (classType, field.name) -> addr
-      store.write(addr, defaultValue(field.fieldType))
+      store.write(addr, fieldValue(site)(field))
     // not every class has a static initializer, need to only invoke it if it exists
     cf.staticInitializer.map:
       invoke(_, Seq())
 
   def createLibraryObj(toLoad: ClassType, site: Site): V =
-    val cfs = findClassFile(toLoad)
+    val cf = findClassFile(toLoad)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(toLoad, true)(project).map(cfs => cfs.fields).toSeq.distinct
-    val fields = inheritedFields.flatMap(fields => fields.map(field => (defaultValue(convertTypes(field.fieldType)), Site.FieldInitialization(site, field.name, field.classFile.thisType), (field.classFile.thisType, field.name))))
-    val obj = objectOps.makeObject(objAlloc(site), cfs, fields)
-    obj
+    val fields = inheritedFields.flatMap(buildFieldSeq(site))
+    objectOps.makeObject(objAlloc(site), cf, fields)
 
   def createArray(size: V, compType: ArrayType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
@@ -826,6 +813,41 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     case ValType.Array => objectOps.makeNull()
 
   def defaultValue: FieldType => V = convertTypes.andThen(defaultValue)
+
+  // determines the value of a field
+  // its constant value if it exists, the type's default value otherwise
+  def fieldValue(site: Site)(field: Field): V =
+    field.constantFieldValue.map:
+      valueFromConstField(site)
+    .getOrElse(defaultValue(field.fieldType))
+
+  // literals for numeric types, the site is needed to allocate a string
+  // TODO: consider handling constant strings differently
+  def valueFromConstField(site: Site): ConstantFieldValue[?] => V =
+    case ConstantDouble(d) => f64ops.floatingLit(d)
+    case ConstantFloat(f) => f32ops.floatingLit(f)
+    case ConstantInteger(i) => i32ops.integerLit(i)
+    case ConstantLong(l) => i64ops.integerLit(l)
+    case ConstantString(s) => makeStringObj(site)(s)
+
+  // copied from the loadstring/loadstring_w cases of eval
+  def makeStringObj(site: Site)(value: String): V =
+    val string = value.toCharArray.map(l => l.toInt).toSeq
+    val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
+    val stringArray = arrayOps.makeArray(
+      arrayAlloc(site),
+      convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))),
+      ArrayType(IntegerType),
+      i32ops.integerLit(value.length)
+    )
+    val stringObj = createLibraryObj(ClassType("java/lang/String"), site)
+    objectOps.setField(stringObj, (ClassType("java/lang/String"), "value"), stringArray)
+    stringObj
+
+  // constructs the fields for an object allocation
+  def buildFieldSeq(site: Site)(fields: Fields) = fields.map: field =>
+    val fieldSite = Site.FieldInitialization(site, field.name, field.classFile.thisType)
+    (fieldValue(fieldSite)(field), fieldSite, (field.classFile.thisType, field.name))
 
   // helper function for all if instructions
   private def handleIfInst(predicate: V => V, target: Int): Unit =
