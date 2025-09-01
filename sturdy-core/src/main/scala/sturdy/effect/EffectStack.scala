@@ -70,8 +70,8 @@ class EffectStack(_effects: => Effect,
   override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
-  override def joinOut(dom: Any): Join[Out] = (out1: Out, out2: Out) => outEffects(dom).join(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
-  override def widenOut(dom: Any): Widen[Out] = (out1: Out, out2: Out) => outEffects(dom).widen(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
+  override def joinOut[Codom](using Join[Codom])(dom: Any): Join[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).joinWithResult[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def widenOut[Codom](using Widen[Codom])(dom: Any): Widen[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).widenWithResult[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
 
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf

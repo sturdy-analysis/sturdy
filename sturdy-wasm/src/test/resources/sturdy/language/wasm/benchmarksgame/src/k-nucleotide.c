@@ -7,10 +7,7 @@
 // and each oligonucleotide count output by this program.
 #define MAXIMUM_OUTPUT_LENGTH 4096
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "../../stdlib.h"
 
 #include "khash.h"
 

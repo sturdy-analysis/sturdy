@@ -20,7 +20,7 @@ trait State:
   def widenIn(dom: Any): Widen[In]
   def stackWiden(dom: Any): StackWidening[In]
   
-  def joinOut(dom: Any): Join[Out]
-  def widenOut(dom: Any): Widen[Out]
+  def joinOut[Codom](using Join[Codom])(dom: Any): Join[(Codom,Out)]
+  def widenOut[Codom](using Widen[Codom])(dom: Any): Widen[(Codom,Out)]
 
 type StateT[I, O] = State { type In = I; type Out = O}

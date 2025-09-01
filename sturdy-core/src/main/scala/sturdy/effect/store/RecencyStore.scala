@@ -138,34 +138,39 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     recencyStore.addressIterator(valueIterator) ++ effect.addressIterator(valueIterator)
 
-  override def join: Join[State] = combine(recencyStore.addressTranslation.join, recencyStore.join, effect.join)
-  override def widen: Widen[State] = combine(recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen)
-  def combine[W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W]): Combine[State, W] =
-    (v1: State, v2: State) =>
+  override def join: Join[State] = (state1, state2) => combine[Unit,Widening.No](recencyStore.addressTranslation.join, recencyStore.join, effect.join, implicitly)((unit,state1), (unit,state2)).map(_._2)
+  override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen, implicitly)((unit,state1),(unit,state2)).map(_._2)
+  override def joinWithResult[Codom](using Join[Codom]): Join[(Codom, State)] = combine[Codom,Widening.No](recencyStore.addressTranslation.join, recencyStore.join, effect.join, implicitly)
+  override def widenWithResult[Codom](using Widen[Codom]): Widen[(Codom, State)] = combine[Codom,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen, implicitly)
+
+  def combine[Codom, W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W], combineResult: Combine[Codom, W]): Combine[(Codom,State), W] =
+    (v1: (Codom,State), v2: (Codom,State)) =>
       if(v1 == v2) {
         // Performance optimization: Avoid joining if the states are equal.
         Unchanged(v1)
       } else {
+        val (codom1,state1) = v1; val (codom2,state2) = v2
         val addrTrans = recencyStore.addressTranslation
         val snapshotMapping = addrTrans.mapping
         val snapshotOtherMapping = addrTrans.otherMapping
         val snapshotStore = recencyStore.store.getState
         try {
-          val joinedAddrTrans = combineAddrTrans(v1.addrTransState.asInstanceOf, v2.addrTransState.asInstanceOf)
+          val joinedAddrTrans = combineAddrTrans(state1.addrTransState.asInstanceOf, state2.addrTransState.asInstanceOf)
           addrTrans.mapping = joinedAddrTrans.get.mapping
-          addrTrans.otherMapping = None
+          addrTrans.otherMapping = Some(state2.addrTransState.mapping)
 
-          var joinedRecencyStore = combineRecencyStore(v1.recencyStoreState.asInstanceOf, v2.recencyStoreState.asInstanceOf)
+          var joinedRecencyStore = combineRecencyStore(state1.recencyStoreState.asInstanceOf, state2.recencyStoreState.asInstanceOf)
           recencyStore.setStateNonMonotonically(joinedRecencyStore.get)
 
-          // Joining the states v1 and v2 has the side effect of allocating new virtual addresses and mutate the recency store.
+          // Joining the states has the side effect of allocating new virtual addresses and mutate the recency store.
           // Hence, we need to join the current state of the address translation and recency store afterwards to avoid forgetting these addresses.
-          val joinedEffectState = combineState(v1.effectState, v2.effectState)
+          val joinedEffectState = combineState(state1.effectState, state2.effectState)
+          val joinedResult = combineResult(codom1, codom2)
           joinedRecencyStore = joinedRecencyStore.flatMap(combineRecencyStore(_, recencyStore.getState))
 
           MaybeChanged(
-            RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRecencyStore.get, joinedEffectState.get),
-            joinedRecencyStore.hasChanged || joinedEffectState.hasChanged
+            (joinedResult.get, RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRecencyStore.get, joinedEffectState.get)),
+            joinedRecencyStore.hasChanged || joinedEffectState.hasChanged || joinedResult.hasChanged
           )
         } finally {
           addrTrans.mapping = snapshotMapping

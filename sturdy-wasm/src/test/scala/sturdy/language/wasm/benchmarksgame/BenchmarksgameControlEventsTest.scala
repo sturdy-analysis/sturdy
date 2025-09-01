@@ -45,7 +45,7 @@ class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp,
   }
 
   def run(p: Path, binary: Boolean, stackConfig: StackConfig) =
-    Fixpoint.DEBUG = false
+    Fixpoint.DEBUG = true
 
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)

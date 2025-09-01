@@ -10,9 +10,7 @@
 //#define MAXIMUM_ITERATIONS   50
 #define MAXIMUM_ITERATIONS   5
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "../../stdlib.h"
 
 // intptr_t should be the native integer type on most sane systems.
 typedef intptr_t intnative_t;

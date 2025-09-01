@@ -12,6 +12,7 @@ import sturdy.values.convert.{&&, Convert, LiftedConvert, NilCC, SomeCC}
 import sturdy.values.floating.{ConvertDoubleInt, ConvertFloatInt}
 import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
 import java.nio.ByteOrder
@@ -67,9 +68,10 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       (v1, v2) match
         case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
         case (AllocationSites(sites1, size1), AllocationSites(sites2, size2)) =>
-          val union = sites1.union(sites2)
-          val joinedSize = combineApronExpr(size1,size2)
-          MaybeChanged(AllocationSites(union,joinedSize.get), joinedSize.hasChanged || sites1.physicalAddresses.size < union.physicalAddresses.size)
+          for {
+            sites <- CombinePowVirtualAddress(sites1, sites2);
+            size <- combineApronExpr(size1, size2)
+          } yield(AllocationSites(sites, size))
         case (NumExpr(expr), _ : (BoolExpr | AllocationSites)) if expr.isBottom == Topped.Actual(true) => Changed(v2)
         case (_ : (BoolExpr | AllocationSites), NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
         case (NumExpr(expr), AllocationSites(sites, size)) if apronState.value.getInterval(expr).isZero =>

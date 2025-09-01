@@ -26,7 +26,11 @@
   ;; the correct sequence of unique values if the calls were evaluated in the
   ;; correct order.
 
-  (func $reset (i32.store (i32.const 8) (i32.const 0)))
+  (func $reset
+  (i32.store8 (i32.const 8) (i32.const 0))
+  (i32.store8 (i32.const 9) (i32.const 0))
+  (i32.store8 (i32.const 10) (i32.const 0))
+  (i32.store8 (i32.const 11) (i32.const 0)))
 
   (func $bump
     (i32.store8 (i32.const 11) (i32.load8_u (i32.const 10)))

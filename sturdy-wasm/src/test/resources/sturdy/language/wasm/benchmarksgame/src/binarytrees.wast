@@ -84,112 +84,162 @@
     local.get 0
     call $free)
   (func $__original_main (type 3) (result i32)
-    (local i32 i32 i32 i32 i32 i32 i32 i32 i32)
+    (local i32 i32 i32 f64 i32 i32 i32 i32 i32 i32)
     call $__VERIFIER_nondet_int
     local.set 0
     call $__VERIFIER_nondet_int
-    local.tee 1
+    local.tee 2
     i32.const 2
     i32.add
-    local.tee 2
+    local.tee 1
     local.get 0
     local.get 0
-    local.get 2
+    local.get 1
     i32.lt_u
     select
-    local.tee 3
+    local.tee 4
     i32.const 1
     i32.add
     local.tee 0
     call $BottomUpTree
-    local.tee 2
+    local.tee 1
     call $ItemCheck
-    f64.const 0x1p+1 (;=2;)
-    local.get 0
-    f64.convert_i32_u
-    call $ext_pow
-    i32.trunc_sat_f64_s
+    local.set 5
+    local.get 5
+    block (result i32)  ;; label = @1
+      f64.const 0x1p+1 (;=2;)
+      local.get 0
+      f64.convert_i32_u
+      call $ext_pow
+      local.tee 3
+      f64.abs
+      f64.const 0x1p+31 (;=2.14748e+09;)
+      f64.lt
+      if  ;; label = @2
+        local.get 3
+        i32.trunc_f64_s
+        br 1 (;@1;)
+      end
+      i32.const -2147483648
+    end
+    local.tee 0
     i32.eq
     call $assert
-    local.get 2
-    call $DeleteTree
-    local.get 3
-    call $BottomUpTree
-    local.set 6
     local.get 1
-    local.get 3
+    call $DeleteTree
+    local.get 4
+    call $BottomUpTree
+    local.set 7
+    local.get 2
+    local.get 4
     i32.le_u
     if  ;; label = @1
-      local.get 1
-      local.get 3
+      local.get 2
+      local.get 4
       i32.add
-      local.set 7
+      local.set 8
       loop  ;; label = @2
         i32.const 1
         local.set 0
         i32.const 0
-        local.set 2
-        f64.const 0x1p+1 (;=2;)
-        local.get 7
-        local.get 1
-        i32.sub
-        f64.convert_i32_u
-        call $ext_pow
-        i32.trunc_sat_f64_s
-        local.tee 5
+        local.set 1
+        block (result i32)  ;; label = @3
+          f64.const 0x1p+1 (;=2;)
+          local.get 8
+          local.get 2
+          i32.sub
+          f64.convert_i32_u
+          call $ext_pow
+          local.tee 3
+          f64.abs
+          f64.const 0x1p+31 (;=2.14748e+09;)
+          f64.lt
+          if  ;; label = @4
+            local.get 3
+            i32.trunc_f64_s
+            br 1 (;@3;)
+          end
+          i32.const -2147483648
+        end
+        local.tee 6
         i32.const 0
         i32.gt_s
         if  ;; label = @3
           loop  ;; label = @4
-            local.get 1
-            call $BottomUpTree
-            local.tee 4
-            call $ItemCheck
-            local.set 8
-            local.get 4
-            call $DeleteTree
             local.get 2
-            local.get 8
-            i32.add
-            local.set 2
-            local.get 0
+            call $BottomUpTree
+            local.tee 5
+            call $ItemCheck
+            local.set 9
             local.get 5
+            call $DeleteTree
+            local.get 1
+            local.get 9
+            i32.add
+            local.set 1
+            local.get 0
+            local.get 6
             i32.ne
-            local.set 4
+            local.set 5
             local.get 0
             i32.const 1
             i32.add
             local.set 0
-            local.get 4
+            local.get 5
             br_if 0 (;@4;)
           end
         end
-        f64.const 0x1p+1 (;=2;)
-        local.get 1
-        f64.convert_i32_u
-        call $ext_pow
-        i32.trunc_sat_f64_s
-        local.get 5
+        local.get 6
+        block (result i32)  ;; label = @3
+          f64.const 0x1p+1 (;=2;)
+          local.get 2
+          f64.convert_i32_u
+          call $ext_pow
+          local.tee 3
+          f64.abs
+          f64.const 0x1p+31 (;=2.14748e+09;)
+          f64.lt
+          if  ;; label = @4
+            local.get 3
+            i32.trunc_f64_s
+            br 1 (;@3;)
+          end
+          i32.const -2147483648
+        end
+        local.tee 0
         i32.mul
-        local.get 2
+        local.get 1
         i32.eq
         call $assert
-        local.get 1
+        local.get 2
         i32.const 2
         i32.add
-        local.tee 1
-        local.get 3
+        local.tee 2
+        local.get 4
         i32.le_u
         br_if 0 (;@2;)
       end
     end
-    local.get 6
+    local.get 7
     call $ItemCheck
-    f64.const 0x1p+1 (;=2;)
-    local.get 3
-    f64.convert_i32_u
-    call $ext_pow
-    i32.trunc_sat_f64_s
+    local.tee 0
+    block (result i32)  ;; label = @1
+      f64.const 0x1p+1 (;=2;)
+      local.get 4
+      f64.convert_i32_u
+      call $ext_pow
+      local.tee 3
+      f64.abs
+      f64.const 0x1p+31 (;=2.14748e+09;)
+      f64.lt
+      if  ;; label = @2
+        local.get 3
+        i32.trunc_f64_s
+        br 1 (;@1;)
+      end
+      i32.const -2147483648
+    end
+    local.tee 1
     i32.eq
     call $assert
     i32.const 0)

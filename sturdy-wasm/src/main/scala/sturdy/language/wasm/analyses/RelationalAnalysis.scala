@@ -203,6 +203,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Int64(n) => valueIterator(n)
         case Float32(n) => valueIterator(n)
         case Float64(n) => valueIterator(n)
+        case Ref(_) => Iterator.empty
+        case Vec(_) => Iterator.empty
         case virts: PowVirtAddr @unchecked => virts.iterator
         case expr: ApronExpr[VirtAddr,Type] @unchecked => expr.addrs.iterator
         case cons: ApronCons[VirtAddr,Type] @unchecked => cons.addrs.iterator

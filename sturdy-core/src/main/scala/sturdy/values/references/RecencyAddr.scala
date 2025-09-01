@@ -496,13 +496,14 @@ given CombinePowVirtualAddress[W <: Widening, Context]: Combine[PowVirtualAddres
   override def apply(v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
     combinePowVirtualAddress(v1,v2)
 
-def combinePowVirtualAddress[Context](v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
+def combinePowVirtualAddress[W <: Widening, Context](v1: PowVirtualAddress[Context], v2: PowVirtualAddress[Context]): MaybeChanged[PowVirtualAddress[Context]] =
   v1.addressTranslation match
     case Some(addrTrans) =>
       val joined = new PowVirtualAddress(v1.addrs ++ v2.addrs)
       val phys1 = v1.physicalAddresses(addrTrans.mapping)
       val phys2 = v2.physicalAddresses(addrTrans.otherMapping.getOrElse(addrTrans.mapping))
-      MaybeChanged(joined, Join(phys1,phys2).hasChanged)
+      val changed = Join(phys1,phys2).hasChanged
+      MaybeChanged(joined, changed)
     case None =>
       if(v2.isEmpty)
         Unchanged(v1)

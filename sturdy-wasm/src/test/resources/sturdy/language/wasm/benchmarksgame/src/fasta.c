@@ -19,10 +19,7 @@
 
 #define THREADS_TO_USE 4
 
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "../../stdlib.h"
 
 #ifdef _OPENMP
 #include <omp.h>

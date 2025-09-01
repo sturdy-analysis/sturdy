@@ -6,12 +6,13 @@
 */
 
 #define _GNU_SOURCE
-#include <sched.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <string.h>
+//#include <sched.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <ctype.h>
+//#include <unistd.h>
+//#include <string.h>
+#include "../../stdlib.h"
 
 char *pairs = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
 char tbl[128];

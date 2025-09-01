@@ -45,14 +45,14 @@
               local.get 5
               local.get 5
               f64.load offset=24
+              local.get 4
+              f64.load offset=48
               local.get 5
               f64.load
               local.get 4
               f64.load
               f64.sub
               local.tee 8
-              local.get 4
-              f64.load offset=48
               f64.mul
               local.get 2
               local.get 5
@@ -88,9 +88,9 @@
               local.get 5
               local.get 5
               f64.load offset=32
-              local.get 10
               local.get 4
               f64.load offset=48
+              local.get 10
               f64.mul
               local.get 6
               f64.mul
@@ -99,9 +99,9 @@
               local.get 5
               local.get 5
               f64.load offset=40
-              local.get 9
               local.get 4
               f64.load offset=48
+              local.get 9
               f64.mul
               local.get 6
               f64.mul

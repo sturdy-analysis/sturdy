@@ -7,36 +7,36 @@
   (func $__wasm_call_ctors (type 1)
     nop)
   (func $__original_main (type 2) (result i32)
-    (local i32 i32 i32 f64 i32 i32 i32 i32 i32)
+    (local i32 i32 f64 i32 i32 i32 i32 i32 i32)
     global.get $__stack_pointer
     i32.const 2400
     i32.sub
-    local.tee 4
+    local.tee 3
     global.set $__stack_pointer
-    local.get 4
+    local.get 3
     i32.const 832
     i32.add
-    local.set 5
-    local.get 4
+    local.set 4
+    local.get 3
     i32.const 824
     i32.add
-    local.set 1
-    local.get 4
+    local.set 5
+    local.get 3
     i32.const 816
     i32.add
-    local.set 7
-    local.get 4
+    local.set 6
+    local.get 3
     i32.const 800
     i32.add
     i32.const 8
     i32.or
     local.set 8
     loop  ;; label = @1
-      local.get 2
+      local.get 1
       i32.const 3
       i32.shl
       local.tee 0
-      local.get 4
+      local.get 3
       i32.const 800
       i32.add
       i32.add
@@ -48,12 +48,7 @@
       i64.const 4607182418800017408
       i64.store
       local.get 0
-      local.get 7
-      i32.add
-      i64.const 4607182418800017408
-      i64.store
-      local.get 0
-      local.get 1
+      local.get 6
       i32.add
       i64.const 4607182418800017408
       i64.store
@@ -62,42 +57,48 @@
       i32.add
       i64.const 4607182418800017408
       i64.store
-      local.get 2
+      local.get 0
+      local.get 4
+      i32.add
+      i64.const 4607182418800017408
+      i64.store
+      local.get 1
       i32.const 5
       i32.add
-      local.tee 2
+      local.tee 1
       i32.const 100
       i32.ne
       br_if 0 (;@1;)
     end
     loop  ;; label = @1
       i32.const 0
-      local.set 1
+      local.set 5
       loop  ;; label = @2
-        local.get 1
+        local.get 5
         i32.const 1
         i32.add
-        local.set 2
+        local.set 6
         f64.const 0x0p+0 (;=0;)
-        local.set 3
+        local.set 2
         i32.const 0
         local.set 0
         loop  ;; label = @3
           f64.const 0x1p+0 (;=1;)
           local.get 0
-          local.get 2
+          local.get 5
           i32.add
-          local.get 0
+          local.tee 1
+          i32.const 1
+          i32.add
           local.get 1
-          i32.add
           i32.mul
           i32.const 1
           i32.shr_u
-          local.get 2
+          local.get 6
           i32.add
           f64.convert_i32_s
           f64.div
-          local.get 4
+          local.get 3
           i32.const 800
           i32.add
           local.get 0
@@ -106,9 +107,9 @@
           i32.add
           f64.load
           f64.mul
-          local.get 3
+          local.get 2
           f64.add
-          local.set 3
+          local.set 2
           local.get 0
           i32.const 1
           i32.add
@@ -117,51 +118,48 @@
           i32.ne
           br_if 0 (;@3;)
         end
-        local.get 4
+        local.get 3
         i32.const 1600
         i32.add
-        local.get 1
+        local.get 5
         i32.const 3
         i32.shl
         i32.add
-        local.get 3
+        local.get 2
         f64.store
         i32.const 0
-        local.set 5
-        local.get 2
-        local.tee 1
+        local.set 4
+        local.get 6
+        local.tee 5
         i32.const 100
         i32.ne
         br_if 0 (;@2;)
       end
       loop  ;; label = @2
-        local.get 5
-        i32.const 1
-        i32.add
-        local.set 1
         f64.const 0x0p+0 (;=0;)
-        local.set 3
+        local.set 2
         i32.const 0
         local.set 0
         loop  ;; label = @3
           f64.const 0x1p+0 (;=1;)
           local.get 0
+          local.get 4
+          i32.add
+          local.tee 1
           i32.const 1
           i32.add
-          local.tee 2
-          local.get 0
           local.get 1
-          i32.add
-          local.get 0
-          local.get 5
-          i32.add
           i32.mul
           i32.const 1
           i32.shr_u
+          local.get 0
+          i32.const 1
+          i32.add
+          local.tee 1
           i32.add
           f64.convert_i32_s
           f64.div
-          local.get 4
+          local.get 3
           i32.const 1600
           i32.add
           local.get 0
@@ -170,65 +168,67 @@
           i32.add
           f64.load
           f64.mul
-          local.get 3
-          f64.add
-          local.set 3
           local.get 2
+          f64.add
+          local.set 2
+          local.get 1
           local.tee 0
           i32.const 100
           i32.ne
           br_if 0 (;@3;)
         end
+        local.get 3
         local.get 4
-        local.get 5
         i32.const 3
         i32.shl
         i32.add
-        local.get 3
+        local.get 2
         f64.store
-        local.get 1
-        local.set 5
-        local.get 1
+        local.get 4
+        i32.const 1
+        i32.add
+        local.tee 4
         i32.const 100
         i32.ne
         br_if 0 (;@2;)
       end
       i32.const 0
-      local.set 1
+      local.set 5
       loop  ;; label = @2
-        local.get 1
+        local.get 5
         i32.const 1
         i32.add
-        local.set 2
+        local.set 6
         f64.const 0x0p+0 (;=0;)
-        local.set 3
+        local.set 2
         i32.const 0
         local.set 0
         loop  ;; label = @3
           f64.const 0x1p+0 (;=1;)
           local.get 0
-          local.get 2
+          local.get 5
           i32.add
-          local.get 0
+          local.tee 1
+          i32.const 1
+          i32.add
           local.get 1
-          i32.add
           i32.mul
           i32.const 1
           i32.shr_u
-          local.get 2
+          local.get 6
           i32.add
           f64.convert_i32_s
           f64.div
-          local.get 4
+          local.get 3
           local.get 0
           i32.const 3
           i32.shl
           i32.add
           f64.load
           f64.mul
-          local.get 3
+          local.get 2
           f64.add
-          local.set 3
+          local.set 2
           local.get 0
           i32.const 1
           i32.add
@@ -237,51 +237,48 @@
           i32.ne
           br_if 0 (;@3;)
         end
-        local.get 4
+        local.get 3
         i32.const 1600
         i32.add
-        local.get 1
+        local.get 5
         i32.const 3
         i32.shl
         i32.add
-        local.get 3
+        local.get 2
         f64.store
         i32.const 0
-        local.set 5
-        local.get 2
-        local.tee 1
+        local.set 4
+        local.get 6
+        local.tee 5
         i32.const 100
         i32.ne
         br_if 0 (;@2;)
       end
       loop  ;; label = @2
-        local.get 5
-        i32.const 1
-        i32.add
-        local.set 1
         f64.const 0x0p+0 (;=0;)
-        local.set 3
+        local.set 2
         i32.const 0
         local.set 0
         loop  ;; label = @3
           f64.const 0x1p+0 (;=1;)
           local.get 0
+          local.get 4
+          i32.add
+          local.tee 1
           i32.const 1
           i32.add
-          local.tee 2
-          local.get 0
           local.get 1
-          i32.add
-          local.get 0
-          local.get 5
-          i32.add
           i32.mul
           i32.const 1
           i32.shr_u
+          local.get 0
+          i32.const 1
+          i32.add
+          local.tee 1
           i32.add
           f64.convert_i32_s
           f64.div
-          local.get 4
+          local.get 3
           i32.const 1600
           i32.add
           local.get 0
@@ -290,40 +287,41 @@
           i32.add
           f64.load
           f64.mul
-          local.get 3
-          f64.add
-          local.set 3
           local.get 2
+          f64.add
+          local.set 2
+          local.get 1
           local.tee 0
           i32.const 100
           i32.ne
           br_if 0 (;@3;)
         end
-        local.get 4
+        local.get 3
         i32.const 800
         i32.add
-        local.get 5
+        local.get 4
         i32.const 3
         i32.shl
         i32.add
-        local.get 3
+        local.get 2
         f64.store
-        local.get 1
-        local.set 5
-        local.get 1
+        local.get 4
+        i32.const 1
+        i32.add
+        local.tee 4
         i32.const 100
         i32.ne
         br_if 0 (;@2;)
       end
-      local.get 6
+      local.get 7
       i32.const 1
       i32.add
-      local.tee 6
+      local.tee 7
       i32.const 10
       i32.ne
       br_if 0 (;@1;)
     end
-    local.get 4
+    local.get 3
     i32.const 2400
     i32.add
     global.set $__stack_pointer

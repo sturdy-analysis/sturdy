@@ -80,7 +80,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("left-to-right.wast")
+    p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
@@ -172,8 +172,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
     case BinaryModule(id, bytes) =>
       val mod = Parsing.fromBytes(bytes)
       loadModule(id, mod)
-    case QuotedModule(id, text) =>
-      ???
+    case QuotedModule(id, text) => {}
     case AssertReturn(action, expectedRes) =>
       totalTestCases.increment()
       val aRes = runAAction(action, convertVals)

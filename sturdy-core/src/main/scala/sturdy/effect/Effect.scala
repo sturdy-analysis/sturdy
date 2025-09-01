@@ -37,6 +37,22 @@ trait Effect:
   /** Widens two internal states of the effect. */
   def widen: Widen[State]
 
+  def joinWithResult[Codom](using Join[Codom]): Join[(Codom,State)] = {
+    case ((cod1,state1), (cod2,state2)) =>
+      for {
+        cod <- Join(cod1, cod2);
+        state <- join(state1, state2)
+      } yield((cod,state))
+  }
+
+  def widenWithResult[Codom](using Widen[Codom]): Widen[(Codom,State)] = {
+    case ((cod1, state1), (cod2, state2)) =>
+      for {
+        cod <- Widen(cod1, cod2);
+        state <- widen(state1, state2)
+      } yield ((cod, state))
+  }
+
   def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
       stack match

@@ -2,6 +2,7 @@ package sturdy.fix
 
 import org.eclipse.collections.api.factory.Maps
 import org.eclipse.collections.api.map.MutableMap
+import sturdy.data.{*,given}
 import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
@@ -212,7 +213,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
       PushResult.Skip(TrySturdy(throw RecurrentCall(frame)), None)
     case Some(OutCacheEntry(result, out, _)) =>
       LinearStateOperationCounter.wideningCounter += 1
-      val joinedOut = Profiler.addTime("widen"){state.joinOut(frame.dom)(currentOut, out).get}
+      val ((),joinedOut) = Profiler.addTime("widen"){ state.joinOut[Unit](frame.dom)(((), currentOut), ((), out)).get }
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP RECURRENT  $frame <- $result:$joinedOut")
       PushResult.Skip(result, Some(joinedOut))
@@ -224,20 +225,19 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
         println(s"${stackHeightMinusOneIndent}POP  $frame <- ${Changed(result)}")
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut, stability)) =>
-      val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
-      val newOut = Profiler.addTime("widen"){state.widenOut(frame.dom)(previousOut, out)}
+      val joined = Profiler.addTime("widen"){state.widenOut[TrySturdy[Codom]](frame.dom)((previousResult,previousOut), (result,out))}
+      val (newResult,newOut) = joined.get
 
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame <- $newResult")
 
-      val changed = newResult.hasChanged || newOut.hasChanged
-      if (changed) {
-        outCache.put(frame, OutCacheEntry(newResult.get, newOut.get, Stability.Unstable))
+      if (joined.hasChanged) {
+        outCache.put(frame, OutCacheEntry(newResult, newOut, Stability.Unstable))
         if (Fixpoint.DEBUG_INVARIANTS && outCacheEntry.isStable) {
-          throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
+          throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame (${joined.hasChanged}) <- $outCacheEntry")
         }
-        PopResult.Unstable(newResult.get, Some(newOut.get))
+        PopResult.Unstable(newResult, Some(newOut))
       } else {
         outCacheEntry.stability = Stability.Stable
         PopResult.Stable(StableMaker.empty)
