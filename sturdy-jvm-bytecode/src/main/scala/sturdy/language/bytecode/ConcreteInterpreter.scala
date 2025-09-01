@@ -21,6 +21,8 @@ import sturdy.values.objects.*
 import sturdy.values.arrays.*
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.Site
+import sturdy.values.config
+import sturdy.values.convert.&&
 import sturdy.values.ordering.EqOps
 
 import java.net.URL
@@ -265,6 +267,20 @@ object ConcreteInterpreter extends Interpreter:
     override implicit val project: Project[URL] = files
 
     override val projectSource: String = path
+
+    // adjust the given instances, the current sturdy-core implementation does not reflect the required semantics
+    // config can be ignored here
+    given ConcreteConvertFloatInt: ConcreteConvertFloatInt with
+      override def apply(f: Float, conf: config.Overflow && config.Bits): Int = f.toInt
+
+    given ConcreteConvertFloatLong: ConcreteConvertFloatLong with
+      override def apply(f: Float, conf: config.Overflow && config.Bits): Long = f.toLong
+
+    given ConcreteConvertDoubleInt: ConcreteConvertDoubleInt with
+      override def apply(d: Double, conf: config.Overflow && config.Bits): Int = d.toInt
+
+    given ConcreteConvertDoubleLong: ConcreteConvertDoubleLong with
+      override def apply(d: Double, conf: config.Overflow && config.Bits): Long = d.toLong
 
     override val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
     override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
