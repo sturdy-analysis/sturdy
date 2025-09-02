@@ -17,6 +17,7 @@ trait Exceptions:
     override def exception(exc: JvmExcept[V]): JvmExceptAbstract[V] = exc match
       case JvmExcept.Jump(pc) => JvmExceptAbstract(Powerset(pc), None, Powerset(), None)
       case JvmExcept.Ret(pc) => JvmExceptAbstract(Powerset(), Some(pc), Powerset(), None)
+      case JvmExcept.Return() => ??? // TODO
       case JvmExcept.Throw(exception) => JvmExceptAbstract(Powerset(), None, Powerset(exception), None)
       case JvmExcept.ThrowObject(exception) => JvmExceptAbstract(Powerset(), None, Powerset(), Some(exception))
 
