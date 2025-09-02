@@ -421,6 +421,8 @@ given RelationalFloatOps
       )
     }
 
+  override def remainder(dividend: ApronExpr[Addr, Type], divisor: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ??? // TODO
+
   def checkForNewFloatSpecials(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)
     if(iv.isBottom) {

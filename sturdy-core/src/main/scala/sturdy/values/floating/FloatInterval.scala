@@ -84,6 +84,7 @@ trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def truncate(v: FloatInterval): FloatInterval = ???
   def nearest(v: FloatInterval): FloatInterval = ???
   def copysign(v: FloatInterval, sign: FloatInterval): FloatInterval = ???
+  override def remainder(dividend: FloatInterval, divisor: FloatInterval): FloatInterval = ??? // TODO
 
 given FloatIntervalOrderingOps: OrderingOps[FloatInterval, Topped[Boolean]] with
   def lt(iv1: FloatInterval, iv2: FloatInterval): Topped[Boolean] =

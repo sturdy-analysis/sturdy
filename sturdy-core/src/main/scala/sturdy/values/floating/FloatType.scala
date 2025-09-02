@@ -33,6 +33,7 @@ trait TypeFloatOps[F, T](val floatType: T, typeError: String => T) extends Float
   override def truncate(v: T): T = unFloatOp("truncate", v)
   override def nearest(v: T): T = unFloatOp("nearest", v)
   override def copysign(v: T, sign: T): T = binFloatOp("copysign", v, sign)
+  override def remainder(dividend: T, divisor: T): T = binFloatOp("remainder", dividend, divisor)
 
   private inline def unFloatOp(op: String, v1: T): T =
     if (v1 == floatType)
@@ -70,3 +71,4 @@ given BaseTypeFloatOps[B: ClassTag](using Fractional[B]): FloatOps[B, BaseType[B
   def truncate(v: BaseType[B]): BaseType[B] = BaseType[B]
   def nearest(v: BaseType[B]): BaseType[B] = BaseType[B]
   def copysign(v: BaseType[B], sign: BaseType[B]): BaseType[B] = BaseType[B]
+  override def remainder(dividend: BaseType[B], divisor: BaseType[B]): BaseType[B] = BaseType[B]

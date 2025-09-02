@@ -31,3 +31,4 @@ given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] w
   def truncate(v: Topped[T]): Topped[T] = v.unary(ops.truncate)
   def nearest(v: Topped[T]): Topped[T] = v.unary(ops.nearest)
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
+  override def remainder(dividend: Topped[T], divisor: Topped[T]): Topped[T] = dividend.binary(ops.remainder, divisor)

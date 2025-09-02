@@ -16,7 +16,7 @@ import java.nio.ByteOrder
 
 given Structural[Double] with {}
 
-given ConcreteDoubleOps: FloatOps[Double, Double] with
+given ConcreteDoubleOps(): FloatOps[Double, Double] with
   def floatingLit(f: Double): Double = f
   def NaN: Double = Double.NaN
   def posInfinity: Double = Double.PositiveInfinity
@@ -44,6 +44,7 @@ given ConcreteDoubleOps: FloatOps[Double, Double] with
     else
       Math.copySign((Math.round(v / 2) * 2).toDouble, v)
   def copysign(v: Double, sign: Double): Double = Math.copySign(v, sign)
+  override def remainder(dividend: Double, divisor: Double): Double = Math.IEEEremainder(dividend, divisor)
 
   def logNatural(v: Double): Double = Math.log(v)
 

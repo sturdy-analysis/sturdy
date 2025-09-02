@@ -103,17 +103,9 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case LREM =>
       i64ops.remainder(v1, v2)
     case FREM =>
-      // TODO: correct implementation
-      val convertv1 = convert_f32_i32(v1, config.Overflow.Fail && config.Bits.Signed)
-      val convertv2 = convert_f32_i32(v2, config.Overflow.Fail && config.Bits.Signed)
-      val result = i32ops.remainder(convertv1, convertv2)
-      convert_i32_f32(result, config.Bits.Signed)
+      f32ops.remainder(v1, v2)
     case DREM =>
-      // TODO: correct implementation
-      val convertv1 = convert_f64_i64(v1, config.Overflow.Fail && config.Bits.Signed)
-      val convertv2 = convert_f64_i64(v2, config.Overflow.Fail && config.Bits.Signed)
-      val result = i64ops.remainder(convertv1, convertv2)
-      convert_i64_f64(result, config.Bits.Signed)
+      f64ops.remainder(v1, v2)
     case ISHL =>
       i32ops.shiftLeft(v1, v2)
     case LSHL =>

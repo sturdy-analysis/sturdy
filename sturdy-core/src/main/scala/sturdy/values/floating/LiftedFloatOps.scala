@@ -26,3 +26,4 @@ final class LiftedFloatOps[B, V, D](extract: V => D, inject: D => V)(using ops: 
   inline def truncate(v: V): V = inject(ops.truncate(extract(v)))
   inline def nearest(v: V): V = inject(ops.nearest(extract(v)))
   inline def copysign(v: V, sign: V): V = inject(ops.copysign(extract(v), extract(sign)))
+  override inline def remainder(dividend: V, divisor: V): V = inject(ops.remainder(extract(dividend), extract(divisor)))

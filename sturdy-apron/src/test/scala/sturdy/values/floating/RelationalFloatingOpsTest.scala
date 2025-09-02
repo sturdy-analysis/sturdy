@@ -99,3 +99,4 @@ final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) ext
   override def truncate(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.truncate(v) }
   override def nearest(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.nearest(v) }
   override def copysign(v: V, sign: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.copysign(v, sign) }
+  override def remainder(dividend: V, divisor: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.remainder(dividend, divisor) }

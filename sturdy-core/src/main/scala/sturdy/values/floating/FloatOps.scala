@@ -28,6 +28,7 @@ trait FloatOps[B, V]:
   def truncate(v: V): V 
   def nearest(v: V): V 
   def copysign(v: V, sign: V): V
+  def remainder(dividend: V, divisor: V): V
 
 type ConvertFloatInt[VFrom, VTo] = Convert[Float, Int, VFrom, VTo, config.Overflow && config.Bits]
 type ConvertFloatLong[VFrom, VTo] = Convert[Float, Long, VFrom, VTo, config.Overflow && config.Bits]

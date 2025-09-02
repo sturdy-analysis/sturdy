@@ -282,6 +282,14 @@ object ConcreteInterpreter extends Interpreter:
     given ConcreteConvertDoubleLong: ConcreteConvertDoubleLong with
       override def apply(d: Double, conf: config.Overflow && config.Bits): Long = d.toLong
 
+    // jvm floating point remainder is different from IEEE754 remainder, the current standard implementation of the concrete float ops
+    // delegate the calculation to the jvm this code is running on
+    given ConcreteFloatOps: ConcreteFloatOps with
+      override def remainder(dividend: Float, divisor: Float): Float = dividend % divisor
+
+    given ConcreteDoubleOps: ConcreteDoubleOps with
+      override def remainder(dividend: Double, divisor: Double): Double = dividend % divisor
+
     override val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
     override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin] =
       LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
