@@ -177,7 +177,7 @@ static void generate_Count_For_Oligonucleotide(
 }
 
 
-int main(){
+int _start(){
 	char buffer[4096];
 
 	// Find the start of the third polynucleotide.

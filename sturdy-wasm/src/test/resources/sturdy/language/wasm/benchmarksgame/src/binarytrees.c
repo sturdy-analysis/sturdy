@@ -63,8 +63,7 @@ void DeleteTree(treeNode* tree)
     free(tree);
 } /* DeleteTree() */
 
-
-int main()
+int _start()
 {
     unsigned   N, depth, minDepth, maxDepth, stretchDepth;
     treeNode   *stretchTree, *longLivedTree, *tempTree;
@@ -81,7 +80,7 @@ int main()
     stretchDepth = maxDepth + 1;
 
     stretchTree = BottomUpTree(stretchDepth);
-    assert(ItemCheck(stretchTree) == ((long) ext_pow(2,stretchDepth)));
+    assert(ItemCheck(stretchTree) == ((long) pow(2,stretchDepth)));
 
     DeleteTree(stretchTree);
 
@@ -91,7 +90,7 @@ int main()
     {
         long    i, iterations, check;
 
-        iterations = ext_pow(2, maxDepth - depth + minDepth);
+        iterations = pow(2, maxDepth - depth + minDepth);
 
         check = 0;
 
@@ -103,10 +102,10 @@ int main()
         } /* for(i = 1...) */
 
 
-        assert((long)ext_pow(2,depth) * iterations == check);
+        assert((long)pow(2,depth) * iterations == check);
     } /* for(depth = minDepth...) */
 
-    assert(ItemCheck(longLivedTree) == (long)ext_pow(2,maxDepth));
+    assert(ItemCheck(longLivedTree) == (long)pow(2,maxDepth));
 
     return 0;
 } /* main() */

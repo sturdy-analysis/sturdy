@@ -24,8 +24,9 @@ int flip()
    register int i;
    register elem *x, *y, c;
 
-   for (x = t, y = s, i = max_n; i--; )
-      *x++ = *y++;
+   memcpy(t, s, sizeof(elem) * max_n);
+//   for (x = t, y = s, i = max_n; i--; )
+//      *x++ = *y++;
    i = 1;
    do {
       for (x = t, y = t + t[0]; x < y; )
@@ -68,7 +69,7 @@ void tk(int n)
    }
 }
 
-int main()
+int _start()
 {
    int i;
 
@@ -87,8 +88,7 @@ int main()
 
    for (i = 0; i < max_n; i++) s[i] = i;
    tk(max_n);
-
-   //printf("%d\nPfannkuchen(%d) = %d\n", checksum, max_n, maxflips);
+   printf("%d\nPfannkuchen(%d) = %d\n", checksum, max_n, maxflips);
 
    return 0;
 }

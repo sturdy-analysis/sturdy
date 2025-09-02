@@ -58,12 +58,15 @@ final class RelationalStack
         else
           Join(v1,v2)
 
-  override def joinWith(other: List[Val]): List[Val] =
-    val (frame, rest) = stack.splitAt(stack.size - framePointer)
-    val otherFrame = other.take(stack.size - framePointer)
-    val joinedFrame = frame.zipAll[Val, Val](otherFrame, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
+  override def joinWith(first: List[Val]): List[Val] =
+    val firstFrame = first.take(stack.size - framePointer)
+    val (secondFrame, rest) = stack.splitAt(stack.size - framePointer)
+    val joinedFrame = firstFrame.zipAll[Val, Val](secondFrame, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
       case ((v1, null),_) => v1
       case ((null, v2),_) => v2
       case ((v1, v2),idx) => combineValues(false, idx, v1, v2).get
     }
     joinedFrame ++ rest
+
+  override def toString: String =
+    stack.toString()

@@ -3,7 +3,7 @@ package sturdy.language.wasm.generic
 import sturdy.data.JOption
 import sturdy.data.MayJoin
 import sturdy.values.addresses.AddressOffset
-import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BreakIf}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.floating.*
@@ -47,6 +47,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: MayJoin[_]]
   val specialOps: SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J]
   val branchOpsV: BooleanBranching[V, V]
   val branchOpsUnit: BooleanBranching[V, Unit]
+  val breakIfOps: BreakIf[V]
 
 /** Operations specific to Wasm */
 trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: MayJoin[_]]:

@@ -35,3 +35,28 @@ given RelationalBooleanSelectionBool[Addr, Type, A: Join]
   (using apronState: ApronState[Addr,Type]): BooleanSelection[ApronBool[Addr,Type], A] with
   inline override def boolSelect(v: ApronBool[Addr, Type], ifTrue: A, ifFalse: A): A =
     apronState.ifThenElse(v)(ifTrue)(ifFalse)
+
+given RelationalBreakIf[Addr, Type](using apronState: ApronState[Addr,Type], effectStack: EffectStack): BreakIf[ApronCons[Addr,Type]] with
+  inline override def breakIf(cond: ApronCons[Addr, Type])(break: effectStack.State => Unit): Unit =
+    apronState.ifThenElse(effectStack)(cond) {
+
+    } {
+      break(effectStack.getState)
+    }
+    apronState.addConstraints(cond)
+
+  inline override def assertCondition(cond: ApronCons[Addr, Type], state: effectStack.State): Unit =
+    effectStack.setState(state)
+    apronState.addConstraints(cond)
+
+given RelationalBreakIfBool[Addr, Type](using apronState: ApronState[Addr,Type], effectStack: EffectStack): BreakIf[ApronBool[Addr,Type]] with
+  override def breakIf(cond: ApronBool[Addr, Type])(break: effectStack.State => Unit): Unit =
+    apronState.ifThenElse(effectStack)(cond) {
+      break(effectStack.getState)
+    } {
+
+    }
+    apronState.addCondition(cond.negated)
+
+  override def assertCondition(cond: ApronBool[Addr, Type], state: effectStack.State): Unit =
+    effectStack.setStateNonMonotonically(state)

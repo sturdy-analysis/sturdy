@@ -125,9 +125,7 @@ int main() {
 
 #define AC_VERSION_KHASH_H "0.2.8"
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include "../../stdlib.h"
 
 /* compiler specific configuration */
 

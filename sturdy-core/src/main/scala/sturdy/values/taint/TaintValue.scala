@@ -1,8 +1,9 @@
 package sturdy.values.taint
 
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.MaybeChanged
-import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BreakIf}
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
@@ -146,3 +147,7 @@ given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[
 
 given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBranching[TaintProduct[V], R] with
   def boolBranch(v: TaintProduct[V], thn: => R, els: => R): R = ops.boolBranch(v.value, thn, els)
+
+given TaintBreakIf[V](using effectStack: EffectStack, ops: BreakIf[V]): BreakIf[TaintProduct[V]] with
+  override def breakIf(cond: TaintProduct[V])(break: effectStack.State => Unit): Unit = ops.breakIf(cond.value)(break)
+  override def assertCondition(cond: TaintProduct[V], state: effectStack.State): Unit = ops.assertCondition(cond.value, state)

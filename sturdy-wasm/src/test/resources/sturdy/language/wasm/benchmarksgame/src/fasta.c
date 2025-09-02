@@ -275,7 +275,7 @@ static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
 }
 
 
-int main()
+int _start()
 {
     const intnative_t n=2500;
 

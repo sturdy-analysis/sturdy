@@ -29,10 +29,28 @@ class HostModules(initModules: (String, List[HostFunction])*):
 
 val stdlib: List[HostFunction] = List(
   HostFunction("malloc", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("realloc", FuncType(Vector(I32, I32), Vector(I32))),
+  HostFunction("calloc", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("free", FuncType(Vector(I32), Vector())),
   HostFunction("assert", FuncType(Vector(I32), Vector())),
-  HostFunction("ext_pow", FuncType(Vector(F64, F64), Vector(F64))),
-  HostFunction("assert", FuncType(Vector(I32), Vector()))
+  HostFunction("pow", FuncType(Vector(F64, F64), Vector(F64))),
+  HostFunction("exp2", FuncType(Vector(F64), Vector(F64))),
+  HostFunction("memmove", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("memcpy", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("memset", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("memcmp", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("strlen", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("toupper", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("tolower", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("fileno", FuncType(Vector(I32), Vector(I32))),
+  HostFunction("read", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("fgets", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("write", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("fwrite", FuncType(Vector(I32, I32, I32, I32), Vector(I32))),
+  HostFunction("printf", FuncType(Vector(I32, I32), Vector(I32))),
+  HostFunction("fprintf", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("qsort", FuncType(Vector(I32, I32, I32, I32), Vector())),
+  HostFunction("exit", FuncType(Vector(I32), Vector())),
 )
 
 val wasi_snapshot_preview1: List[HostFunction] = List(

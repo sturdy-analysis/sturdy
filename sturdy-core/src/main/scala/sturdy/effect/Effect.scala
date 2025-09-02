@@ -37,7 +37,8 @@ trait Effect:
   /** Widens two internal states of the effect. */
   def widen: Widen[State]
 
-  def joinWithResult[Codom](using Join[Codom]): Join[(Codom,State)] = {
+  /** Join that closes over values of type `Body`. Mainly used by the virtual recency abstract to close over virtual addresses. */
+  def joinClosingOver[Body](using Join[Body]): Join[(Body,State)] = {
     case ((cod1,state1), (cod2,state2)) =>
       for {
         cod <- Join(cod1, cod2);
@@ -45,7 +46,8 @@ trait Effect:
       } yield((cod,state))
   }
 
-  def widenWithResult[Codom](using Widen[Codom]): Widen[(Codom,State)] = {
+  /** Widening that closes over values of type `Body`. Mainly used by the virtual recency abstract to close over virtual addresses. */
+  def widenClosingOver[Body](using Widen[Body]): Widen[(Body,State)] = {
     case ((cod1, state1), (cod2, state2)) =>
       for {
         cod <- Widen(cod1, cod2);

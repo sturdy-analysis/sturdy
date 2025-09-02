@@ -5,8 +5,8 @@ import org.scalatest.Suites
 import sturdy.language.wasm.analyses.RelationalAnalysis
 
 class BenchmarksgameRelationalControlEventsTests extends Suites(
-//  new BenchmarksgameRelationalControlEventsTest(Polka(true)),
-//  new BenchmarksgameRelationalControlEventsTest(Octagon()),
+  new BenchmarksgameRelationalControlEventsTest(Polka(true)),
+  new BenchmarksgameRelationalControlEventsTest(Octagon()),
   new BenchmarksgameRelationalControlEventsTest(Box()),
 )
 
@@ -15,4 +15,4 @@ class BenchmarksgameRelationalControlEventsTest(manager: apron.Manager)
     RelationalAnalysis,
     RelationalAnalysis.Instance(manager,_,_,_)
   ):
-  behavior of "Benchmarks Game with " + manager.getClass.getSimpleName
+  override def suiteName: String = "Benchmarks Game with " + manager.getClass.getSimpleName

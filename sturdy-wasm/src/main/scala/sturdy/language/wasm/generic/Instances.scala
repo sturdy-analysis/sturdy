@@ -71,6 +71,11 @@ class ModuleInstance(val id: Option[Any] = None):
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
+  def exportedName(searched: ExternalValue): Option[String] =
+    exports.find ((name, externalVal) =>
+        searched == externalVal
+    ).map(_._1)
+
   def exportedFunctions: Map[String, ExternalValue.Function] =
     exports.collect {
       case (name, fun: ExternalValue.Function) => (name, fun)
@@ -131,11 +136,15 @@ enum FunctionInstance:
     case Host(mod, _, _) => mod
     case Null => ModuleInstance()
 
-  override def toString: String =
+  def funcName: Option[String] =
     this match
-      case Wasm(_, funcIx,_, tpe) => s"f$funcIx: ${toString(tpe)}"
-      case Host(_, _, hostFun) => s"${hostFun.name}: ${toString(hostFun.funcType)}"
-      case Null => "Null"
+      case Wasm(mod, funcIx,_, tpe) =>
+        mod.exportedName(ExternalValue.Function(funcIdx))
+      case Host(_, _, hostFun) => Some(s"${hostFun.name}: ${toString(hostFun.funcType)}")
+      case Null => Some("Null")
+
+  override def toString: String =
+    funcName.getOrElse(s"f${this.asInstanceOf[Wasm].funcIx.toString}: ${toString(this.asInstanceOf[Wasm].funcType)}")
 
   private def toString(tpe: FuncType): String =
     s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"

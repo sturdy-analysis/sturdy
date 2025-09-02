@@ -117,16 +117,15 @@ struct planet bodies[] = {
 
 #define N sizeof(bodies)/sizeof(planet)
 
-int main()
+int _start()
 {
-   //int n = 5000;
-   int n = 10;
+   int n = __VERIFIER_nondet_int();
 
    offset_momentum(N, bodies);
-//   printf("%.9f\n", energy(N, bodies));
+   printf("%.9f\n", energy(N, bodies));
 
    advance(N, bodies, 0.01, n);
 
- //  printf("%.9f\n", energy(N, bodies));
+   printf("%.9f\n", energy(N, bodies));
    return 0;
 }

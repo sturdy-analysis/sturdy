@@ -420,4 +420,13 @@
     )
     (return (local.get $x))
   )
+
+  (func (export "abs") (param $x i32) (result i32)
+    (block $exit (result i32)
+        local.get $x
+        (br_if $exit (i32.le_s (i32.const 0) (local.get $x)))
+        drop
+        (i32.sub (i32.const 0) (local.get $x))
+    )
+  )
 )

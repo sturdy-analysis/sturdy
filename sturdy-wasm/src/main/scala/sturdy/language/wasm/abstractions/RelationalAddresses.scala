@@ -12,7 +12,7 @@ import sturdy.values.references.{*, given}
 trait RelationalAddresses extends RelationalTypes:
   enum AddrCtx:
     case CallFrame(callFramePosition: Int, programPos: Option[FixIn], function: FrameData)
-    case Global(addr: Int)
+    case Global(addr: Int | String)
     case Stack(stackPosition: Int, programPosition: FixIn, function: FrameData)
     case Heap(ctx: HeapCtx)
     case Temp(programPosition: FixIn, tpe: Type)
@@ -64,7 +64,12 @@ trait RelationalAddresses extends RelationalTypes:
 
   given Ordering[AddrCtx] = {
     case (AddrCtx.CallFrame(callFramePos1, progPos1, data1), AddrCtx.CallFrame(callFramePos2, progPos2, data2)) => Ordering[(FrameData, Option[FixIn], Int)].compare((data1, progPos1, callFramePos1), (data2, progPos2, callFramePos2))
-    case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering[Int].compare(idx1, idx2)
+    case (AddrCtx.Global(idx1:Int), AddrCtx.Global(idx2:Int)) => Ordering[Int].compare(idx1, idx2)
+    case (AddrCtx.Global(idx1:String), AddrCtx.Global(idx2:String)) => Ordering[String].compare(idx1, idx2)
+    case (AddrCtx.Global(idx1), AddrCtx.Global(idx2)) => Ordering.by[String | Int, Int]{
+        case _: Int => 1
+        case _: String => 2
+      }.compare(idx1, idx2)
     case (AddrCtx.Stack(stackPos1, programPos1, data1), AddrCtx.Stack(stackPos2, programPos2, data2)) => Ordering[(FrameData, FixIn, Int)].compare((data1, programPos1, stackPos1),(data2, programPos2, stackPos2))
     case (AddrCtx.Temp(programPos1, tpe1), AddrCtx.Temp(programPos2, tpe2)) => Ordering[(FixIn,Type)].compare((programPos1, tpe1), (programPos2, tpe2))
     case (ctx1, ctx2) => Ordering.by[AddrCtx, Int]{

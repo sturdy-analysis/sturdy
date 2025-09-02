@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Coeff, Interval, Var}
+import apron.{Abstract1, Coeff, Interval, Var}
 import gmp.{Mpfr, Mpq}
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
@@ -233,8 +233,9 @@ final class ApronRecencyState
           addCondition(e2)
         }
 
-  inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval =
-    relationalStore.getBound(convertExpr.virtToPhys(expr))
+  inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(expr, abs = relationalStore.abstract1)
+  inline def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type], abs: Abstract1): Interval =
+    relationalStore.getBound(convertExpr.virtToPhys(expr), abs)
 
   inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
     relationalStore.getFloatBound(convertExpr.virtToPhys(expr))
@@ -250,11 +251,11 @@ final class ApronRecencyState
   def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
-    case (e1, e2) if (getInterval(e1).isBottom) =>
+    case (e1, e2) if (getInterval(e1, relationalStore.leftJoin).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e2.setFloatSpecials(specials).setType(tpe)
       )
-    case (e1, e2) if (getInterval(e2).isBottom) =>
+    case (e1, e2) if (getInterval(e2, relationalStore.rightJoin).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e1.setFloatSpecials(specials).setType(tpe)
       )
@@ -293,21 +294,21 @@ final class ApronRecencyState
     case (e1,e2) if containsFailedAddrs(recencyStore.addressTranslation.mapping, e1) || containsFailedAddrs(recencyStore.addressTranslation.otherMapping.getOrElse(recencyStore.addressTranslation.mapping), e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
-          val iv1 = getInterval(e1)
+          val iv1 = getInterval(e1, relationalStore.leftJoin)
           val ctx = allocator(joinedType)
           val failedVirt = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed)
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
-          val iv2 = getInterval(failedExpr)
+          val iv2 = getInterval(failedExpr, relationalStore.rightJoin)
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
       )
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
         val ctx = allocator(joinedType)
         val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
-        assign(result, e1)
-        assign(result, e2)
-        if(isUnconstraint(result))
-          makeNonRelational(result)
+        relationalStore.write(result.physical, convertExpr.virtToPhys(e1), relationalStore.leftJoin)
+        relationalStore.write(result.physical, convertExpr.virtToPhys(e2), relationalStore.rightJoin)
+//        if(isUnconstraint(result))
+//          makeNonRelational(result)
         // Check if expression has grown happens when combining Abstract1
         Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
       }
@@ -336,7 +337,7 @@ final class ApronRecencyState
     e1.isConstant && e2.isConstant || structuralEq(e1, e2)
 
   override def toString: String =
-    relationalStore.abstract1.toString
+    relationalStore.toString
 
 given ApronExprIntervalRange[Addr, Type: ApronType](using apronState: ApronState[Addr, Type]): IntervalRange[ApronExpr[Addr,Type]] with
   var tpe: Type = _

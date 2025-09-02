@@ -4,8 +4,7 @@ import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.wasm.generic.*
 import sturdy.values.*
-import sturdy.values.booleans.BooleanBranching
-import sturdy.values.booleans.LiftedBooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BreakIf, LiftedBooleanBranching, LiftedBreakIf}
 import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.exceptions.Exceptional
@@ -22,6 +21,7 @@ import WasmFailure.*
 import sturdy.values.simd.*
 import swam.ReferenceType.*
 import sturdy.control.ControlObservable
+import sturdy.effect.EffectStack
 import sturdy.language.wasm.abstractions.Control
 import sturdy.values.addresses.AddressOffset
 
@@ -167,6 +167,7 @@ trait Interpreter:
 
   given ValueWasmOps
     (using failure: Failure
+     , effectStack: EffectStack
      , i32Ops: IntegerOps[Int, I32]
      , i64Ops: IntegerOps[Long, I64]
      , f32Ops: FloatOps[Float, F32]
@@ -206,6 +207,7 @@ trait Interpreter:
      , decodeV128: ConvertBytesVec[Bytes, V128]
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+     , breakOps: BreakIf[Bool]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
      , excOps: Exceptional[WasmException[Value], ExcV, J]
      , addrOffset: AddressOffset[Addr]
@@ -220,6 +222,7 @@ trait Interpreter:
     final val specialOps: SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, J] = specOps
     final val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     final val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
+    final val breakIfOps: BreakIf[Value] = new LiftedBreakIf[Value, Bool](v => v.asBoolean)
 
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, makeI32)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, makeI64)

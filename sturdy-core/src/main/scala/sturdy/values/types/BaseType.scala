@@ -1,12 +1,12 @@
 package sturdy.values.types
 
-import sturdy.data.{MakeJoined, WithJoin, joinComputations, joinWithFailure}
+import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
-import sturdy.values.booleans.{BooleanBranching, BooleanOps}
+import sturdy.values.booleans.{BooleanBranching, BooleanOps, BreakIf}
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
@@ -59,6 +59,12 @@ given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](us
 given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)
+
+given BaseTypeBreakIf[B](using effectStack: EffectStack): BreakIf[BaseType[Boolean]] with
+  override def breakIf(cond: BaseType[Boolean])(break: effectStack.State => Unit): Unit =
+    joinComputations { } { break(effectStack.getState) }
+  override def assertCondition(cond: BaseType[Boolean], state: effectStack.State): Unit =
+    {}
 
 given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
   (t1: BaseType[B], t2: BaseType[B]) =>

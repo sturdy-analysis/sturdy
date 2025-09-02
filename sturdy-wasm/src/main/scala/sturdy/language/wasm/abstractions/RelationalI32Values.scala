@@ -96,6 +96,18 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.Or(e1, e2))
           case _ => NumExpr(apronExprIntOps.bitOr(v1.asNumExpr, v2.asNumExpr))
 
+      override def bitXor(v1: I32, v2: I32): I32 =
+        (v1, v2) match
+          case (BoolExpr(e1), NumExpr(e2)) =>
+            val iv = apronState.getInterval(e2)
+            if(iv.isEqual(1)) {
+              // b xor 1 == !b
+              BoolExpr(e1.negated)
+            } else {
+              bitXor(NumExpr(v1.asNumExpr), v2)
+            }
+          case (NumExpr(e1), BoolExpr(e2)) => bitXor(v2, v1)
+          case _ => NumExpr(apronExprIntOps.bitXor(v1.asNumExpr, v2.asNumExpr))
 
   given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
     override def equ(v1: I32, v2: I32): Bool =

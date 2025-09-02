@@ -62,16 +62,18 @@ class EffectStack(_effects: => Effect,
     repeating()
   override def setInState(dom: Any, in: In): Unit = inEffects(dom).setState(in.asInstanceOf)
   override def setOutState(dom: Any, out: Out): Unit = outEffects(dom).setState(out.asInstanceOf)
-  
+
   final override type State = All
   override def getState: State = getAllState
   override def setState(st: State): Unit = setAllState(st)
+  override def setStateNonMonotonically(st: State): Unit =
+    effects.setStateNonMonotonically(st.asInstanceOf)
 
   override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
-  override def joinOut[Codom](using Join[Codom])(dom: Any): Join[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).joinWithResult[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
-  override def widenOut[Codom](using Widen[Codom])(dom: Any): Widen[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).widenWithResult[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def joinOut[Codom](using Join[Codom])(dom: Any): Join[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).joinClosingOver[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def widenOut[Codom](using Widen[Codom])(dom: Any): Widen[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).widenClosingOver[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
 
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
@@ -107,7 +109,11 @@ class EffectStack(_effects: => Effect,
       case (true, false) => joiner.retainSecond(triedG)
       case (true, true) => joiner.retainNone()
 
-    Join(triedF, triedG).get.getOrThrow
+    val joinedTried = Join(triedF, triedG).get
+
+    joiner.afterJoin()
+
+    joinedTried.getOrThrow
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {

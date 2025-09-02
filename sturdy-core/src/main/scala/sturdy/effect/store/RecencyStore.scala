@@ -138,12 +138,12 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     recencyStore.addressIterator(valueIterator) ++ effect.addressIterator(valueIterator)
 
-  override def join: Join[State] = (state1, state2) => combine[Unit,Widening.No](recencyStore.addressTranslation.join, recencyStore.join, effect.join, implicitly)((unit,state1), (unit,state2)).map(_._2)
-  override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen, implicitly)((unit,state1),(unit,state2)).map(_._2)
-  override def joinWithResult[Codom](using Join[Codom]): Join[(Codom, State)] = combine[Codom,Widening.No](recencyStore.addressTranslation.join, recencyStore.join, effect.join, implicitly)
-  override def widenWithResult[Codom](using Widen[Codom]): Widen[(Codom, State)] = combine[Codom,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widen, effect.widen, implicitly)
+  override def join: Join[State] = (state1, state2) => combine[Unit,Widening.No](recencyStore.addressTranslation.join, recencyStore.joinClosingOver(using effect.joinClosingOver))((unit,state1), (unit,state2)).map(_._2)
+  override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widenClosingOver(using effect.widenClosingOver))((unit,state1),(unit,state2)).map(_._2)
+  override def joinClosingOver[Codom](using Join[Codom]): Join[(Codom, State)] = combine[Codom,Widening.No](recencyStore.addressTranslation.join, recencyStore.joinClosingOver(using effect.joinClosingOver))
+  override def widenClosingOver[Codom](using Widen[Codom]): Widen[(Codom, State)] = combine[Codom,Widening.Yes](recencyStore.addressTranslation.widen, recencyStore.widenClosingOver(using effect.widenClosingOver))
 
-  def combine[Codom, W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineRecencyStore: Combine[recencyStore.State, W], combineState: Combine[effect.State, W], combineResult: Combine[Codom, W]): Combine[(Codom,State), W] =
+  def combine[Codom, W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineAll: Combine[((Codom, effect.State), recencyStore.State), W]): Combine[(Codom,State), W] =
     (v1: (Codom,State), v2: (Codom,State)) =>
       if(v1 == v2) {
         // Performance optimization: Avoid joining if the states are equal.
@@ -159,19 +159,10 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
           addrTrans.mapping = joinedAddrTrans.get.mapping
           addrTrans.otherMapping = Some(state2.addrTransState.mapping)
 
-          var joinedRecencyStore = combineRecencyStore(state1.recencyStoreState.asInstanceOf, state2.recencyStoreState.asInstanceOf)
-          recencyStore.setStateNonMonotonically(joinedRecencyStore.get)
-
-          // Joining the states has the side effect of allocating new virtual addresses and mutate the recency store.
-          // Hence, we need to join the current state of the address translation and recency store afterwards to avoid forgetting these addresses.
-          val joinedEffectState = combineState(state1.effectState, state2.effectState)
-          val joinedResult = combineResult(codom1, codom2)
-          joinedRecencyStore = joinedRecencyStore.flatMap(combineRecencyStore(_, recencyStore.getState))
-
-          MaybeChanged(
-            (joinedResult.get, RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRecencyStore.get, joinedEffectState.get)),
-            joinedRecencyStore.hasChanged || joinedEffectState.hasChanged || joinedResult.hasChanged
-          )
+          combineAll(((codom1,state1.effectState),state1.recencyStoreState.asInstanceOf), ((codom2,state2.effectState),state2.recencyStoreState.asInstanceOf)).map {
+            case ((joinedResult,joinedEffectState), joinedRencencyStore) =>
+              (joinedResult, RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRencencyStore, joinedEffectState))
+          }
         } finally {
           addrTrans.mapping = snapshotMapping
           addrTrans.otherMapping = snapshotOtherMapping
@@ -210,7 +201,7 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
         recencyStore.store.setStateNonMonotonically(snapshotStore)
       }
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = EffectList(recencyStore.addressTranslation, recencyStore, effect).makeComputationJoiner[A]
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new EffectListJoiner[A](Seq(recencyStore.addressTranslation, recencyStore, effect)))
 
 object RecencyClosure:
   def apply[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V](recencyStore: RecencyStore[Context, Virt, V]): RecencyClosure[Context, Virt, V] = new RecencyClosure(recencyStore, new Stateless {})

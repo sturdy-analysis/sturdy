@@ -210,9 +210,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case cons: ApronCons[VirtAddr,Type] @unchecked => cons.addrs.iterator
         case bool: ApronBool[VirtAddr,Type] @unchecked => bool.addrs.iterator
         case excV: ExcV @unchecked =>
-          for(listVals <- excV.values.iterator;
-              value <- listVals.iterator;
-              addr <- valueIterator(value))
+          for((ops,cond) <- excV.values.iterator;
+              addr <- valueIterator(ops) ++ valueIterator(cond))
             yield(addr)
         case physAddr: PhysAddr @unchecked => Iterator.empty
         case _ =>
@@ -250,7 +249,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
         (key: Unit, sym: GlobalAddr) =>
-          AddrCtx.Global(sym.addr)
+          module.exportedName(ExternalValue.Global(sym.addr)).map(AddrCtx.Global(_)).getOrElse(AddrCtx.Global(sym.addr))
     ))
 
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
@@ -389,6 +388,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "proc_exit" =>
         val exitCode = args.head
         failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "memcpy" =>
+        args match
+          case List(dst, src, len) =>
+            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToSize(len))
+            List(dst)
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to memcpy, but got $args")
       case "malloc" =>
         args match
           case List(Num(Int32(size))) =>
@@ -403,12 +408,18 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List()
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
-      case "ext_pow" =>
+      case "pow" =>
         args match
           case List(base, exponent) =>
             List(wasmOps.f64ops.pow(base, exponent))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+      case "exp2" =>
+        args match
+          case List(exponent) =>
+            List(wasmOps.f64ops.pow(wasmOps.f64ops.floatingLit(2), exponent))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64 as arguments to exp2, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(_))) =>

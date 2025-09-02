@@ -36,7 +36,7 @@ void process(char *from, char *to) {
       c = tbl[(int)*from], *from = tbl[(int)*to], *to = c;
 }
 
-int main() {
+int _start() {
    char *s;
    for (s = pairs; *s; s += 2) {
       tbl[toupper(s[0])] = s[1];

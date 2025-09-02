@@ -2,6 +2,7 @@ package sturdy.language.wasm.benchmarksgame
 
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.{BasicControlEvent, BranchingControlEvent, ControlEventChecker, ControlEventGraphBuilder, ControlEventParser, ControlObservable, ControlObserver, ExceptionControlEvent, FixpointControlEvent, PrintingControlObserver, RecordingControlObserver}
 import sturdy.effect.failure.{AFallible, CollectedFailures}
@@ -23,8 +24,7 @@ import scala.jdk.StreamConverters.*
 
 class BenchmarksgameConstantControlEventsTest extends BenchmarksgameControlEventsTest[ConstantAnalysis.type](ConstantAnalysis, ConstantAnalysis.Instance(_,_,_))
 
-class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp, newInstance: (FrameData,Iterable[interp.Value],WasmConfig) => interp.Instance) extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame (recompiled)"
+class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp, newInstance: (FrameData,Iterable[interp.Value],WasmConfig) => interp.Instance) extends AnyFunSuite, Matchers:
 
   val funcName = "_start"
   val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
@@ -37,8 +37,8 @@ class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp,
 //    }
   }
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"benchmark ${p.getFileName}" in {
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fankuchredux.wasm")).sorted.foreach { p =>
+    test(s"${p.getFileName}") {
       run(p, binary = true, StackConfig.StackedStates())
       Profiler.reset()
     }

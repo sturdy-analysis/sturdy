@@ -62,7 +62,8 @@ enum JumpTarget:
 
 given Finite[JumpTarget] with {}
 
-case class WasmException[V](target: JumpTarget, operands: List[V])
+case class WasmException[V](target: JumpTarget, operands: List[V], breakIfState: Option[BreakIfState[V]])
+case class BreakIfState[V](condition: V, state: Any)
 
 type Imports = Map[String, ModuleInstance]
 
@@ -484,19 +485,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case Br(labelIndex) =>
       branch(labelIndex)
     case BrIf(labelIndex) =>
-      val isZero = num.evalNumeric(i32.Eqz)
-      branchOpsUnit.boolBranch(isZero) {
-        // v == 0: else branch
-        // do nothing
-      } {
-        branch(labelIndex)
+      val x = stack.popOrAbort()
+      val cond = eqOps.neq(x, i32ops.integerLit(0))
+      breakIfOps.breakIf(cond) { state =>
+        branch(labelIndex, Some(BreakIfState(cond,state)))
       }
     case BrTable(labels, defaultLabel) =>
       val ix = stack.popOrAbort()
-      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
+      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch(_))
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      throws(WasmException(JumpTarget.Return, operands))
+      throws(WasmException(JumpTarget.Return, operands, None))
     case Call(funcIdx) =>
       val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
       invoke(func, loc)
@@ -512,10 +511,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
-  def branch(labelIndex: LabelIdx): Unit =
+  private inline def not(cond: V): V =
+    eqOps.equ(cond, i32ops.integerLit(0))
+
+  def branch(labelIndex: LabelIdx, breakCondition: Option[BreakIfState[V]] = None): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    throws(WasmException(JumpTarget.Jump(labelIndex), operands))
+    throws(WasmException(JumpTarget.Jump(labelIndex), operands, breakCondition))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
@@ -540,18 +542,21 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException(JumpTarget.Jump(labelIndex), operands) =>
+          case WasmException(JumpTarget.Jump(labelIndex), operands, breakIfState) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
+              breakIfState match
+                case Some(BreakIfState(cond, state)) => breakIfOps.assertCondition(cond, state)
+                case None => {}
               assertFrameSize(arities.jumpOperands)
               for ((i, loc) <- branchTarget)
                 eval(i, loc)
               assertFrameSize(arities.results)
             } else {
               assertFrameSize(0)
-              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands))
+              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, breakIfState))
             }
-          case WasmException(JumpTarget.Return, _) =>
+          case WasmException(JumpTarget.Return, _, _) =>
             assertFrameSize(0)
             throws(ex)
         }
@@ -589,9 +594,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
-        case WasmException(JumpTarget.Return, operands) =>
+        case WasmException(JumpTarget.Return, operands, _) =>
           stack.pushN(operands)
-        case WasmException(JumpTarget.Jump(_), _) =>
+        case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
     }
