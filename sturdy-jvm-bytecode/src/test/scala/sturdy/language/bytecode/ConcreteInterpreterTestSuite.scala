@@ -17,7 +17,7 @@ import sturdy.language.bytecode.ConcreteRefValues.{NullValue, nonNullArray}
 import sturdy.language.bytecode.abstractions.Site
 
 import java.net.URL
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, NoSuchFileException, Path, Paths}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
@@ -83,8 +83,11 @@ object TestCases:
     path
 
   // parsing for the files defining the tests to include/exclude
-  private def readRegexesFromFile(filename: String) =
-    Files.lines(Paths.get(resourcePath + filename)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
+  private def readRegexesFromFile(filename: String): Seq[Regex] =
+    try Files.lines(Paths.get(resourcePath + filename)).iterator().asScala.filterNot(_.startsWith("//")).map(_.r).toSeq
+    catch case e: NoSuchFileException =>
+      Console.err.println(s"exception while reading $filename, continuing without regexes:\n${e.getMessage}")
+      Seq()
 
 // run all tests
 class FullSuite extends ConcreteInterpreterTestSuite:
