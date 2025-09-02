@@ -190,8 +190,8 @@ class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, 
     case D2F =>
       convert_f64_f32(v, NilCC)
     case I2B =>
-      v
+      convert_i32_i8(v, NilCC)
     case I2C =>
-      v
+      convert_i32_u16(v, NilCC)
     case I2S =>
-      v
+      convert_i32_i16(v, NilCC)

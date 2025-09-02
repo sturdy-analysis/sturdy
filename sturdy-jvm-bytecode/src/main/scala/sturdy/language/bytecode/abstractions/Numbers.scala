@@ -6,6 +6,9 @@ import sturdy.values.Topped
 import sturdy.values.integer.NumericInterval
 
 trait Numbers extends Interpreter:
+  final type I8 = Topped[Byte]
+  final type I16 = Topped[Short]
+  final type U16 = Topped[Char]
   final type I32 = Topped[Int]
   final type I64 = Topped[Long]
   final type F32 = Topped[Float]
@@ -30,6 +33,9 @@ trait Numbers extends Interpreter:
     case Topped.Actual(false) => Value.Int32(Topped.Actual(0))
 
 trait IntervalNumbers extends Interpreter:
+  final type I8 = NumericInterval[Byte]
+  final type I16 = NumericInterval[Short]
+  final type U16 = NumericInterval[Char]
   final type I32 = NumericInterval[Int]
   final type I64 = NumericInterval[Long]
   final type F32 = Topped[Float]

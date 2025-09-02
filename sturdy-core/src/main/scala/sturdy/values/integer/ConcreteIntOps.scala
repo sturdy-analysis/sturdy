@@ -8,7 +8,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, Topped, config}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
-import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{Bits, UnsupportedConfiguration, unsupportedConfiguration}
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -96,6 +96,24 @@ given EqOps[Int, Boolean] with
 given OrderingOps[Int, Boolean] with
   def lt(v1: Int, v2: Int): Boolean = v1 < v2
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
+
+given ConcreteConvertByteInt(): ConvertByteInt[Byte, Int] with
+  override def apply(from: Byte, conf: NilCC.type): Int = from
+
+given ConcreteConvertShortInt(): ConvertShortInt[Short, Int] with
+  override def apply(from: Short, conf: NilCC.type): Int = from
+
+given ConcreteConvertCharInt(): ConvertCharInt[Char, Int] with
+  override def apply(from: Char, conf: NilCC.type): Int = from
+
+given ConcreteConvertIntByte(): ConvertIntByte[Int, Byte] with
+  override def apply(from: Int, conf: NilCC.type): Byte = from.toByte
+
+given ConcreteConvertIntShort(): ConvertIntShort[Int, Short] with
+  override def apply(from: Int, conf: NilCC.type): Short = from.toShort
+
+given ConcreteConvertIntChar(): ConvertIntChar[Int, Char] with
+  override def apply(from: Int, conf: NilCC.type): Char = from.toChar
 
 given ConcreteConvertIntLong(using failure: Failure): ConvertIntLong[Int, Long] with
   /*

@@ -19,8 +19,9 @@ trait Interpreter:
 
   type J[A] <: MayJoin[A]
   
-  //type I8
-  //type I16
+  type I8
+  type I16
+  type U16
   type I32
   type I64
   type F32
@@ -156,6 +157,12 @@ trait Interpreter:
     , i64Ops: IntegerOps[Long, I64]
     , f32Ops: FloatOps[Float, F32]
     , f64Ops: FloatOps[Double, F64]
+    , convertI8I32: ConvertByteInt[I8, I32]
+    , convertI16I32: ConvertShortInt[I16, I32]
+    , convertU16I32: ConvertCharInt[U16, I32]
+    , convertI32I8: ConvertIntByte[I32, I8]
+    , convertI32I16: ConvertIntShort[I32, I16]
+    , convertI32U16: ConvertIntChar[I32, U16]
     , convertI32I64: ConvertIntLong[I32, I64]
     , convertI32F32: ConvertIntFloat[I32, F32]
     , convertI32F64: ConvertIntDouble[I32, F64]
@@ -220,6 +227,14 @@ trait Interpreter:
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
     final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
+    // the jvm treats all the smaller types of byte, short, and char as ints, so we always just convert them back
+    private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+    private def i32_from_i16: I16 => Value = (convertI16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+    private def i32_from_u16: U16 => Value = (convertU16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+
+    final val convert_i32_i8: ConvertIntByte[Value, Value] = LiftedConvert(_.asInt32, i32_from_i8)
+    final val convert_i32_i16: ConvertIntShort[Value, Value] = LiftedConvert(_.asInt32, i32_from_i16)
+    final val convert_i32_u16: ConvertIntChar[Value, Value] = LiftedConvert(_.asInt32, i32_from_u16)
     final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
     final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, Value.Float32.apply)
     final val convert_i32_f64: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, Value.Float64.apply)

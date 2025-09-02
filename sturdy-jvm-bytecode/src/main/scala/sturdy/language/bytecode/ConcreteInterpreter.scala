@@ -35,8 +35,9 @@ enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, Ar
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
-  //override type I8  = Byte
-  //override type I16 = Short
+  override type I8  = Byte
+  override type I16 = Short
+  override type U16 = Char
   override type I32 = Int
   override type I64 = Long
   override type F32 = Float
