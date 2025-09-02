@@ -76,7 +76,7 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
       store.free(deadPhysicals)
     }
 
-  override type State = initStore.State
+  override final type State = initStore.State
   override inline def getState: State = initStore.getState
   override inline def setState(st: State): Unit = initStore.setState(st)
   override inline def setStateNonMonotonically(st: State): Unit = initStore.setStateNonMonotonically(st)
@@ -145,7 +145,7 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
 
   def combine[Codom, W <: Widening](combineAddrTrans: Combine[recencyStore.addressTranslation.State, W], combineAll: Combine[((Codom, effect.State), recencyStore.State), W]): Combine[(Codom,State), W] =
     (v1: (Codom,State), v2: (Codom,State)) =>
-      if(v1 == v2) {
+      if((v1._1 == v2._1) && (v1._2 eq v2._2)) {
         // Performance optimization: Avoid joining if the states are equal.
         Unchanged(v1)
       } else {
@@ -159,7 +159,10 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
           addrTrans.mapping = joinedAddrTrans.get.mapping
           addrTrans.otherMapping = Some(state2.addrTransState.mapping)
 
-          combineAll(((codom1,state1.effectState),state1.recencyStoreState.asInstanceOf), ((codom2,state2.effectState),state2.recencyStoreState.asInstanceOf)).map {
+          combineAll(
+            ((codom1,state1.effectState),state1.recencyStoreState.asInstanceOf[recencyStore.State]),
+            ((codom2,state2.effectState),state2.recencyStoreState.asInstanceOf[recencyStore.State])
+          ).map {
             case ((joinedResult,joinedEffectState), joinedRencencyStore) =>
               (joinedResult, RecencyClosureState(recencyStore, recencyStore.addressTranslation.getState, joinedRencencyStore, joinedEffectState))
           }

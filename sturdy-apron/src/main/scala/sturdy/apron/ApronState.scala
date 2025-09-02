@@ -233,12 +233,12 @@ final class ApronRecencyState
           addCondition(e2)
         }
 
-  inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(expr, abs = relationalStore.abstract1)
-  inline def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type], abs: Abstract1): Interval =
-    relationalStore.getBound(convertExpr.virtToPhys(expr), abs)
+  inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(expr, state = relationalStore.getStateNoCopy)
+  inline def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type], state: relationalStore.State): Interval =
+    relationalStore.getBound(convertExpr.virtToPhys(expr), state)
 
   inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
-    relationalStore.getFloatBound(convertExpr.virtToPhys(expr))
+    relationalStore.getFloatBound(convertExpr.virtToPhys(expr), state = relationalStore.getStateNoCopy)
 
   inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type]): Topped[Boolean] =
     convertExpr.virtToPhys(v).map(relationalStore.satisfies).getOrElse(Topped.Top)
@@ -270,8 +270,8 @@ final class ApronRecencyState
       }
       MaybeChanged(ApronExpr.Addr(ApronVar(virt), joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
-      val iv1 = getInterval(e1)
-      val iv2 = getInterval(e2)
+      val iv1 = getInterval(e1, relationalStore.leftJoin)
+      val iv2 = getInterval(e2, relationalStore.rightJoin)
       if(widen)
         Widen[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
           ApronExpr.Constant(_, _, _)

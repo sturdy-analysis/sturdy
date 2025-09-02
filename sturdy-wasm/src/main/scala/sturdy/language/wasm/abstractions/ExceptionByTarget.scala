@@ -16,14 +16,8 @@ trait ExceptionByTarget extends Interpreter:
 
   given JoinBreakIfState(using combineValue: Join[Value], effectStack: EffectStack): Join[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      for {
-        condition <- combineValue(v1.condition, v2.condition)
-        state <- effectStack.join(v1.state, v2.state)
-      } yield(BreakIfState(condition, state))
+      effectStack.joinClosingOver((v1.condition,v1.state), (v1.condition,v2.state)).map((condition,state) => BreakIfState(condition, state))
 
   given WidenBreakIfState(using combineValue: Widen[Value], effectStack: EffectStack): Widen[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      for {
-        condition <- combineValue(v1.condition, v2.condition)
-        state <- effectStack.widen(v1.state, v2.state)
-      } yield(BreakIfState(condition, state))
+      effectStack.widenClosingOver((v1.condition,v1.state), (v1.condition,v2.state)).map((condition,state) => BreakIfState(condition, state))

@@ -21,37 +21,39 @@ case class ApronExprConverter
 
   val addrTrans = recencyStore.addressTranslation
 
-  def virtToPhys(mapping: Map[Ctx, RecencyRegion], virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
+  def virtToPhys(mapping: Map[Ctx, RecencyRegion], state: relationalStore.State, virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
     virtAddr.addressTrans.recency(mapping, virtAddr.ctx, virtAddr.n) match
       case PowRecency.Recent =>
         PhysicalAddress(virtAddr.ctx, Recency.Recent)
       case PowRecency.Old =>
         PhysicalAddress(virtAddr.ctx, Recency.Old)
       case PowRecency.RecentOld =>
-        recencyStore.joinRecentIntoOld(mapping, PowVirtualAddress(virtAddr))
+        relationalStore.withState(state) {
+          recencyStore.joinRecentIntoOld(mapping, PowVirtualAddress(virtAddr))
+        }
         PhysicalAddress(virtAddr.ctx, Recency.Old)
       case PowRecency.Failed =>
         PhysicalAddress(virtAddr.ctx, Recency.Failed)
 
-  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
-    exprVirtAddr.mapAddr(virtToPhys(mapping,_))
+  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], state: relationalStore.State, exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
+    exprVirtAddr.mapAddr(virtToPhys(mapping,state,_))
 
-  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): Option[ApronCons[PhysicalAddress[Ctx], Type]] =
+  inline def virtToPhys(mapping: Map[Ctx, RecencyRegion], state: relationalStore.State, constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): Option[ApronCons[PhysicalAddress[Ctx], Type]] =
     if(constrVirtAddr.addrs.forall(virt =>
       virt.addressTrans.recency(mapping, virt.ctx, virt.n) == PowRecency.Recent
     ))
-      Some(constrVirtAddr.mapAddr(virtToPhys(mapping,_)))
+      Some(constrVirtAddr.mapAddr(virtToPhys(mapping,state,_)))
     else
       None
 
   inline def virtToPhys(virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
-    virtToPhys(addrTrans.mapping, virtAddr)
+    virtToPhys(addrTrans.mapping, relationalStore.getStateNoCopy, virtAddr)
 
   inline def virtToPhys(exprVirtAddr: ApronExpr[VirtualAddress[Ctx], Type]): ApronExpr[PhysicalAddress[Ctx], Type] =
-    virtToPhys(addrTrans.mapping, exprVirtAddr)
+    virtToPhys(addrTrans.mapping, relationalStore.getStateNoCopy, exprVirtAddr)
 
   inline def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): Option[ApronCons[PhysicalAddress[Ctx], Type]] =
-    virtToPhys(addrTrans.mapping, constrVirtAddr)
+    virtToPhys(addrTrans.mapping, relationalStore.getStateNoCopy, constrVirtAddr)
 
   def physToVirt(mapping: Map[Ctx, RecencyRegion], phys: PhysicalAddress[Ctx]): VirtualAddress[Ctx] =
     val region = mapping.getOrElse(phys.ctx,
