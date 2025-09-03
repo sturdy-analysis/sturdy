@@ -359,8 +359,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       case inst: GOTO =>
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
       case inst: JSR =>
+        throw UnsupportedOperationException("unsupported instruction: ret")
+        /*
         stack.push(i32ops.integerLit(pc))
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+        */
       case inst: RET =>
         throw UnsupportedOperationException("unsupported instruction: ret")
         /*
@@ -591,8 +594,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // jsr_wt opcode 201
       case inst: JSR_W =>
+        throw UnsupportedOperationException("unsupported instruction: ret")
+        /*
         stack.push(i32ops.integerLit(pc))
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
+        */
 
       // breakpoint
       case _ if (inst.opcode == 202) =>
