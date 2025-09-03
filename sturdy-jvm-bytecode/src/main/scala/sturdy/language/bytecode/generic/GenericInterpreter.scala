@@ -192,72 +192,77 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType("java/lang/IndexOutOfBoundsException"), site)))
         )
 
-      // Manip stack opcode 87 - 95
-      case inst: POP.type =>
+      // operand stack management instructions (opcodes 87 - 95)
+      case POP =>
         stack.popOrAbort()
-      case inst: POP2.type =>
+
+      case POP2 =>
         val v = stack.popOrAbort()
-        branchOpsUnit.boolBranch(sizeOps.is32Bit(v)){
+        branchOpsUnit.boolBranch(sizeOps.is32Bit(v)) {
           stack.popOrAbort()
-        }{ }
-      case inst: DUP.type =>
-        val dup = stack.popOrAbort()
-        stack.push(dup)
-        stack.push(dup)
-      case inst: DUP_X1.type =>
-        val dup = stack.popOrAbort()
-        val ins = stack.popOrAbort()
-        stack.push(dup)
-        stack.push(ins)
-        stack.push(dup)
-      case inst: DUP_X2.type =>
-        val dup = stack.popOrAbort()
-        val secondElem = stack.popOrAbort()
-        branchOpsUnit.boolBranch(sizeOps.is32Bit(secondElem)){
-          val thirdElem = stack.popOrAbort()
-          stack.push(dup)
-          stack.push(thirdElem)
-          stack.push(secondElem)
-          stack.push(dup)
-        }{
-          stack.push(dup)
-          stack.push(secondElem)
-          stack.push(dup)
-        }
-      case inst: DUP2.type =>
-        val dup1 = stack.popOrAbort()
-        branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-          val dup2 = stack.popOrAbort()
-          stack.push(dup2)
-          stack.push(dup1)
-          stack.push(dup2)
-          stack.push(dup1)
-        }{
-          stack.push(dup1)
-          stack.push(dup1)
+        } {}
+
+      case DUP =>
+        val value = stack.popOrAbort()
+        stack.pushN(List(
+          value, value
+        ))
+
+      case DUP_X1 =>
+        val (value2, value1) = stack.pop2OrAbort()
+        stack.pushN(List(
+          value1, value2, value1
+        ))
+
+      case DUP_X2 =>
+        val (value2, value1) = stack.pop2OrAbort()
+        branchOpsUnit.boolBranch(sizeOps.is32Bit(value2)) {
+          // form 1
+          val value3 = stack.popOrAbort() // must be 32bit, currently unchecked
+          stack.pushN(List(
+            value1, value3, value2, value1
+          ))
+        } {
+          // form 2
+          stack.pushN(List(
+            value1, value2, value1
+          ))
         }
 
-      case inst: DUP2_X1.type =>
-        val dup1 = stack.popOrAbort()
-        val dup2 = stack.popOrAbort()
-        branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-          val thirdElem = stack.popOrAbort()
-          stack.push(dup2)
-          stack.push(dup1)
-          stack.push(thirdElem)
-          stack.push(dup2)
-          stack.push(dup1)
-        }{
-          stack.push(dup1)
-          stack.push(dup2)
-          stack.push(dup1)
+      case DUP2 =>
+        val value1 = stack.popOrAbort()
+        branchOpsUnit.boolBranch(sizeOps.is32Bit(value1)) {
+          // form 2
+          val value2 = stack.popOrAbort() // must be 32bit, currently unchecked
+          stack.pushN(List(
+            value2, value1, value2, value1
+          ))
+        } {
+          // form 1
+          stack.pushN(List(
+            value1, value1
+          ))
+        }
+
+      case DUP2_X1 =>
+        val (value2, value1) = stack.pop2OrAbort() // value2 must be 32bit, currently unchecked
+        branchOpsUnit.boolBranch(sizeOps.is32Bit(value1)) {
+          // form 1
+          val value3 = stack.popOrAbort() // must be 32bit, currently unchecked
+          stack.pushN(List(
+            value2, value1, value3, value2, value1
+          ))
+        } {
+          // form 2
+          stack.pushN(List(
+            value1, value2, value1
+          ))
         }
 
       case DUP2_X2 =>
         // 32bit ~ category 1 computational type
         // 64bit ~ category 2 computational type
-        val value1 = stack.popOrAbort()
-        val value2 = stack.popOrAbort()
+        val (value2, value1) = stack.pop2OrAbort()
         branchOpsUnit.boolBranch(sizeOps.is32Bit(value1)) {
           // value1 32bit
           branchOpsUnit.boolBranch(sizeOps.is32Bit(value2)) {
@@ -299,11 +304,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           }
         }
 
-      case inst: SWAP.type =>
-        val top = stack.popOrAbort()
-        val bot = stack.popOrAbort()
-        stack.push(top)
-        stack.push(bot)
+      case SWAP =>
+        val (value2, value1) = stack.pop2OrAbort()
+        stack.pushN(List(
+          value1, value2
+        ))
 
       // Arithmetic Ops opcode 96 - 115
       case _ if (96 <= inst.opcode && inst.opcode <= 115) =>
