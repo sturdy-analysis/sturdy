@@ -252,43 +252,53 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           stack.push(dup2)
           stack.push(dup1)
         }
-      case inst: DUP2_X2.type =>
-        val dup1 = stack.popOrAbort()
-        val dup2 = stack.popOrAbort()
-        branchOpsUnit.boolBranch(sizeOps.is32Bit(dup1)){
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(dup2)){
-            //dup1 64bit and dup2 32bit
-            val thirdElem = stack.popOrAbort()
-            stack.push(dup1)
-            stack.push(thirdElem)
-            stack.push(dup2)
-            stack.push(dup1)
-          }{
-            //dup1 and dup2 64bit
-            stack.push(dup1)
-            stack.push(dup2)
-            stack.push(dup2)
+
+      case DUP2_X2 =>
+        // 32bit ~ category 1 computational type
+        // 64bit ~ category 2 computational type
+        val value1 = stack.popOrAbort()
+        val value2 = stack.popOrAbort()
+        branchOpsUnit.boolBranch(sizeOps.is32Bit(value1)) {
+          // value1 32bit
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(value2)) {
+            // value2 32bit
+            val value3 = stack.popOrAbort()
+            branchOpsUnit.boolBranch(sizeOps.is32Bit(value3)) {
+              // value3 32bit
+              // -> form 1
+              val value4 = stack.popOrAbort() // must be 32bit, currently unchecked
+              stack.pushN(List(
+                value2, value1, value4, value3, value2, value1
+              ))
+            } {
+              // value3 64bit
+              // -> form 3
+              stack.pushN(List(
+                value2, value1, value3, value2, value1
+              ))
+            }
+          } {
+            // value2 64bit
+            throw IllegalStateException("dup2_x2 called on illegal stack: value1 category 1, value2 category 2")
           }
-        }{
-          val thirdElem = stack.popOrAbort()
-          branchOpsUnit.boolBranch(sizeOps.is32Bit(thirdElem)){
-            //all elements 32bit
-            val fourthElem = stack.popOrAbort()
-            stack.push(dup2)
-            stack.push(dup1)
-            stack.push(fourthElem)
-            stack.push(thirdElem)
-            stack.push(dup2)
-            stack.push(dup1)
-          }{
-            //dup1 and dup2 32bit, thirdElem 64bit
-            stack.push(dup2)
-            stack.push(dup1)
-            stack.push(thirdElem)
-            stack.push(dup2)
-            stack.push(dup1)
+        } {
+          // value1 64bit
+          branchOpsUnit.boolBranch(sizeOps.is32Bit(value2)) {
+            // value2 32bit
+            // -> form 2
+            val value3 = stack.popOrAbort() // must be 32bit, currently unchecked
+            stack.pushN(List(
+              value1, value3, value2, value1
+            ))
+          } {
+            // value2 64bit
+            // -> form 4
+            stack.pushN(List(
+              value1, value2, value1
+            ))
           }
         }
+
       case inst: SWAP.type =>
         val top = stack.popOrAbort()
         val bot = stack.popOrAbort()
