@@ -362,8 +362,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         stack.push(i32ops.integerLit(pc))
         except.throws(JvmExcept.Jump(pc + inst.branchoffset))
       case inst: RET =>
+        throw UnsupportedOperationException("unsupported instruction: ret")
+        /*
         val index = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
         except.throws(JvmExcept.Ret(index))
+        */
       case inst: TABLESWITCH =>
         val index = stack.popOrAbort()
         val transformedIndices = inst.jumpOffsets.zipWithIndex.map(pairs => (i32ops.integerLit(pairs._2), pairs._1)).toMap
