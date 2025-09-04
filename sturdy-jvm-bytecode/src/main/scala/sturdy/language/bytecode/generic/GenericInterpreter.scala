@@ -79,16 +79,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame))
   given EffectStack = effectStack
 
-  val classStack: mutable.Stack[ClassFile] = mutable.Stack[ClassFile]()
-  val stringStack: mutable.Stack[String] = mutable.Stack[String]()
   val project: Project[URL]
   val projectSource: String
 
   val nativeSource: File = org.opalj.bytecode.RTJar
   val objectCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
-  // TODO: ununsed
-  val classCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Class.class").head
-  val stringCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/String.class").head
 
   var staticInitialized: Set[ClassType] = Set()
 
@@ -131,13 +126,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         //val getClassMth = objectOps.findFunction(obj, "getClass", MethodDescriptor(ArraySeq[FieldType](), ClassType("java/lang/Class")))(findMethodOfObj)
         val cls = createLibraryObj(ClassType("java/lang/Class"), Site.Instruction(mth, pc, variant = 1))
         stack.push(cls)
-//        val cls = findClassFile(inst.value.mostPreciseClassType)
-//        classStack.push(cls)
-
 
       case LoadString(value) =>
         stack.push(makeStringObj(site)(value))
-        stringStack.push(value)
 
       case inst: LoadMethodHandle =>
         ???
@@ -154,7 +145,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         stack.push(cls)
       case LoadString_W(value) =>
         stack.push(makeStringObj(site)(value))
-        stringStack.push(value)
       case inst: LoadMethodHandle_W =>
         ???
       case inst: LoadMethodType_W =>
@@ -989,14 +979,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         // true if that object is assignment compatable with the object represented by this class
         ???
       case "isInterface" =>
-        val cls = classStack.pop()
-        if (cls.isInterfaceDeclaration)
+        if ??? then
           i32ops.integerLit(1)
         else
           i32ops.integerLit(0)
       case "isPrimitive" =>
-        val string = stringStack.pop()
-        if(string == "int" || string ==  "float" || string == "boolean" || string == "byte" || string == "char" || string == "short" || string == "long" || string == "double")
+        if ??? then
           i32ops.integerLit(1)
         else
           i32ops.integerLit(0)
