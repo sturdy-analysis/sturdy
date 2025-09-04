@@ -18,7 +18,7 @@ import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
 import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, Exceptions, IntervalNumbers, IntervalObjects, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
-import sturdy.values.{Topped, Widen, given}
+import sturdy.values.{Join, MaybeChanged, Topped, Widen, given}
 import sturdy.values.booleans.given
 import sturdy.values.convert.{*, given}
 import sturdy.values.floating.{*, given}
@@ -90,7 +90,13 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val projectSource: String = path
 
     override val staticFieldTable: JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | AddrSet] = JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | Addr]()
-    
+
+    given Join[InitializationResult | Addr] with
+      override def apply(v1: InitializationResult | Addr, v2: InitializationResult | Addr): MaybeChanged[InitializationResult | Addr] = (v1, v2) match
+        case (v1: Addr, v2: Addr) => Join(v1, v2)
+        case (v1: InitializationResult, v2: InitializationResult) => MaybeChanged(v1, v2)
+        case _ => throw IllegalStateException()
+
     given Project[URL] = project
     private given Failure = failure
     import ConcreteInterpreter.given

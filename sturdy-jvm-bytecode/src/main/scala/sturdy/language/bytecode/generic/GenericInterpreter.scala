@@ -91,8 +91,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   given Finite[ClassType] with {}
   given Finite[InitializationCheck.type | String] with {}
-  given Join[InitializationResult | Addr] with
-    override def apply(v1: InitializationResult | Addr, v2: InitializationResult | Addr): MaybeChanged[InitializationResult | Addr] = ???
 
   implicit val effectStack: EffectStack = EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
