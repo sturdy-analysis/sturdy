@@ -6,7 +6,7 @@ import org.opalj.br.instructions.{InvocationInstruction, LoadString}
 import org.opalj.br.{ArrayType, ClassType, IntegerType, Method, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
 import org.scalatest.Inspectors.forEvery
-import org.scalatest.ParallelTestExecution
+import org.scalatest.{Assertions, ParallelTestExecution}
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
 import org.scalatest.funsuite.AnyFunSuite
@@ -74,7 +74,11 @@ object TestCases:
 
   // path where the test hierarchy is located
   def testRootPath: Path =
-    var path = Paths.get(resourcePath)
+    var path = try
+      Paths.get(resourcePath)
+    catch case e: NoSuchFileException =>
+      Assertions.cancel(s"exception while reading resource path $resourcePath:\n${e.getMessage}")
+
     // walk directory tree until we hit the test cases
     while Files.list(path).filter(Files.isDirectory(_)).count() == 1 do
       // safe as the loop head checks that at least one element exists
