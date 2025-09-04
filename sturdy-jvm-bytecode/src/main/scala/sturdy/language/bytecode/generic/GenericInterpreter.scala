@@ -11,6 +11,7 @@ import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.store.Store
+import sturdy.effect.symboltable.{DecidableSymbolTable, SymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.Site
@@ -25,7 +26,6 @@ import java.io.File
 import java.net.URL
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
-import scala.collection.mutable
 
 enum JvmExcept[V]:
   case Jump(pc: Int)
@@ -60,10 +60,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
+  implicit val joinAddr: J[Addr]
 
-  val stack: DecidableOperandStack[V]
-  val failure: Failure
+  implicit val failure: Failure
   val except: Except[JvmExcept[V], ExcV, J]
+  val stack: DecidableOperandStack[V]
   val objAlloc: Allocator[Addr, Site]
   val objFieldAlloc: Allocator[Addr, Site]
   val arrayAlloc: Allocator[Addr, Site]
@@ -73,19 +74,32 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V, Site]
 
-  val staticAddrMap: mutable.Map[(ClassType, String), Addr]
+  // unit type to represent the initialization table lookup
+  object InitializationCheck
+  // result of the initialization
+  enum InitializationResult:
+    // initialization is currently running
+    case Ongoing
+    // initialization was successful
+    case Success
+    // class is marked as erroneous
+    case Failure(/* TODO: hold the exception that must have been thrown */)
+  // holds the static fields of classes and their initialization results
+  // staticFieldTable(C, InitializationCheck) must hold the initialization result for every class C
+  // staticFieldTable(C, f) holds the addresses of every field f of every class C
+  val staticFieldTable: DecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | Addr]
 
+  given Finite[ClassType] with {}
+  given Finite[InitializationCheck.type | String] with {}
+  given Join[InitializationResult | Addr] with
+    override def apply(v1: InitializationResult | Addr, v2: InitializationResult | Addr): MaybeChanged[InitializationResult | Addr] = ???
 
-  val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame))
-  given EffectStack = effectStack
+  implicit val effectStack: EffectStack = EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
   val project: Project[URL]
   val projectSource: String
 
   val nativeSource: File = org.opalj.bytecode.RTJar
-  val objectCF: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, "classes/java/lang/Object.class").head
-
-  var staticInitialized: Set[ClassType] = Set()
 
   def javaLibClassFileWrapper(obj: ClassType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"
@@ -95,7 +109,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     val path = projectSource ++ File.separator ++ obj.simpleName ++ ".class"
     path
 
-  private given Failure = failure
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
@@ -399,14 +412,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, _) =>
         ensureInitialization(site)(declaringClass)
-        val addr = staticAddrMap.getOrElse((declaringClass, name), fail(BytecodeFailure.FieldNotFound, name))
+        val addr = staticFieldTable.get(declaringClass, name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
         val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, name))
         stack.push(v)
 
       case PUTSTATIC(declaringClass, name, _) =>
         ensureInitialization(site)(declaringClass)
         val v = stack.popOrAbort()
-        val addr = staticAddrMap.getOrElseUpdate((declaringClass, name), staticAlloc(Site.StaticInitialization(declaringClass, name)))
+        val addr = staticFieldTable.get(declaringClass, name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
         store.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
@@ -622,21 +635,41 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
   def ensureInitialization(site: Site)(classType: ClassType)(using Fixed): Unit =
-    if staticInitialized.contains(classType) then return;
+    try staticFieldTable.get(classType, InitializationCheck).option(initializeClass(site)(classType)):
+      case InitializationResult.Ongoing | InitializationResult.Success => ()
+      case InitializationResult.Failure() => except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
+      case x => throw IllegalStateException(s"static initialization check returned dubious value: $x")
+    catch case _: NoSuchElementException => initializeClass(site)(classType)
+
+  def initializeClass(site: Site)(classType: ClassType)(using Fixed): Unit =
+    // need to make sure the class is registered in the table to avoid exceptions
+    staticFieldTable.putNew(classType)
+    staticFieldTable.set(classType, InitializationCheck, InitializationResult.Ongoing)
     val cf = project.classFile(classType).getOrElse:
       throw IllegalArgumentException(s"project does not contain a class file that defines $classType")
-    // add class as initialized for different calls to this function
-    staticInitialized += classType
+    // ensure initialization of superclass first
+    cf.superclassType.foreach:
+      ensureInitialization(site)(_)
     // initialize all static fields to their default value
     cf.fields.filter: field =>
       ACC_STATIC.isSet(field.accessFlags)
     .foreach: field =>
       val addr = staticAlloc(Site.StaticInitialization(classType, field.name))
-      staticAddrMap += (classType, field.name) -> addr
+      staticFieldTable.set(classType, field.name, addr)
       store.write(addr, fieldValue(site)(field))
+    // add class as initialized for different calls to this function
     // not every class has a static initializer, need to only invoke it if it exists
-    cf.staticInitializer.map:
-      invoke(_, Seq())
+    cf.staticInitializer.foreach: mth =>
+      except.tryCatch {
+        val _ = invoke(mth, Seq())
+      } {
+        case JvmExcept.Throw(_) | JvmExcept.ThrowObject(_)  =>
+          staticFieldTable.set(classType, InitializationCheck, InitializationResult.Failure())
+          except.throws(JvmExcept.Throw(ClassType.ExceptionInInitializerError))
+        case e => except.throws(e)
+      }
+    // if nothing was thrown, the initialization was successful
+    staticFieldTable.set(classType, InitializationCheck, InitializationResult.Success)
 
   def createLibraryObj(toLoad: ClassType, site: Site): V =
     val cf = findClassFile(toLoad)

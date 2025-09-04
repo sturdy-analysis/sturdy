@@ -11,6 +11,7 @@ import sturdy.effect.except.{ConcreteExcept, Except}
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.store.{CStore, Store}
+import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
 import sturdy.language.bytecode.generic.*
 import sturdy.values.booleans.ConcreteBooleanBranching
@@ -26,7 +27,6 @@ import sturdy.values.convert.&&
 import sturdy.values.ordering.EqOps
 
 import java.net.URL
-import scala.collection.mutable
 
 enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, ArrayElemAddr, AType, ASizeType]:
   case Object(oid: ObjectAddr, cls: Class, fields: Map[FieldName, ObjFieldAddr])
@@ -251,6 +251,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override val joinUnit: MayJoin.NoJoin[Unit] = implicitly
     override val jvV: MayJoin.NoJoin[Value] = implicitly
+    override val joinAddr: MayJoin.NoJoin[Addr] = implicitly
 
     override val stack: ConcreteOperandStack[Value] = ConcreteOperandStack[Value]
     override implicit val failure: ConcreteFailure = ConcreteFailure()
@@ -263,7 +264,7 @@ object ConcreteInterpreter extends Interpreter:
     override val staticAlloc: CAllocatorIntIncrement[Site] = CAllocatorIntIncrement[Site]
     override val store: CStore[Addr, Value] = CStore(initStore)
 
-    override val staticAddrMap: mutable.Map[(ClassType, String), Addr] = mutable.Map()
+    override val staticFieldTable: ConcreteSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | (Site, FrameData)] = ConcreteSymbolTable()
 
     override implicit val project: Project[URL] = files
 

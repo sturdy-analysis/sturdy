@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassFile, Method, MethodDescriptor, ClassType, ReferenceType}
+import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, MethodDescriptor, ReferenceType}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.TrySturdy
@@ -11,6 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
 import sturdy.effect.store.AStoreThreaded
+import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
@@ -25,10 +26,9 @@ import sturdy.values.integer.given
 import sturdy.values.objects.*
 import sturdy.values.ordering.given
 import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps}
-import sturdy.values.references.{finitePowersetAddr, PowersetAddr}
+import sturdy.values.references.{PowersetAddr, given}
 
 import java.net.URL
-import scala.collection.mutable
 
 object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exceptions:
   override type J[A] = WithJoin[A]
@@ -73,6 +73,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[ConstantAnalysis.Value] = implicitly
+    override val joinAddr: WithJoin[Addr] = implicitly
 
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
@@ -93,7 +94,7 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val project: Project[URL] = files
     override val projectSource: String = path
 
-    override val staticAddrMap: mutable.Map[(ClassType, String), Addr] = mutable.Map()
+    override val staticFieldTable: JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | AddrSet] = JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | Addr]()
 
     given Project[URL] = project
     private given Failure = failure
