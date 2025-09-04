@@ -544,7 +544,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
 
       // athrow opcode 191
-      case inst: ATHROW.type =>
+      case ATHROW =>
         val thrown = stack.popOrAbort()
         except.throws(JvmExcept.ThrowObject(thrown))
 
@@ -787,17 +787,29 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         ()
       case JvmExcept.Throw(exception) =>
         val currPC = frame.data
-        val handler = mth.body.get.exceptionHandlersFor(currPC)
-          .find(handlerException => exception.isSubtypeOf(handlerException.catchType.get)(project.classHierarchy))
-          .getOrElse(except.throws(JvmExcept.Throw(exception)))
+        val body = mth.body.get
+        val handler = body.handlersForException(currPC, exception)(project.classHierarchy).headOption.getOrElse:
+          stack.clearCurrentOperandFrame()
+          except.throws(JvmExcept.Throw(exception))
+        // handler has been found
         val exceptionObject = createLibraryObj(exception, Site.Instruction(mth, pc))
         stack.push(exceptionObject)
         run(handler.handlerPC, mth)
       case JvmExcept.ThrowObject(exception) =>
+        // if the exception is null, a NPE has to be thrown instead
+        if objectOps.isNull(exception) != i32ops.integerLit(0) then except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+        // otherwise, handle the exception
         val currPC = frame.data
-        val handler = mth.body.get.exceptionHandlersFor(currPC)
+        val body = mth.body.get
+        val handler = body.exceptionHandlersFor(currPC)
+          // try to find handler for exception
           .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
-          .getOrElse(except.throws(JvmExcept.ThrowObject(exception)))
+          // try to find finally clause to invoke if no handler was found
+          .orElse(body.handlersFor(currPC, false).find(_.catchType.isEmpty))
+          .getOrElse:
+            stack.clearCurrentOperandFrame()
+            except.throws(JvmExcept.ThrowObject(exception))
+        // handler has been found
         stack.push(exception)
         run(handler.handlerPC, mth)
     }
