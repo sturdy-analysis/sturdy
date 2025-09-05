@@ -2,7 +2,7 @@ package sturdy.language.bytecode
 
 import scala.util.boundary
 import boundary.break
-import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, MethodDescriptor, ReferenceType}
+import org.opalj.br.{ArrayType, BaseType, ClassFile, ClassHierarchy, ClassType, Method, MethodDescriptor, ReferenceType}
 import org.opalj.br.analyses.Project
 import sturdy.data.{MayJoin, *, given}
 import sturdy.effect.allocation.{Allocator, CAllocatorIntIncrement}
@@ -27,6 +27,7 @@ import sturdy.values.convert.&&
 import sturdy.values.ordering.EqOps
 
 import java.net.URL
+import scala.annotation.tailrec
 
 enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, ArrayElemAddr, AType, ASizeType]:
   case Object(oid: ObjectAddr, cls: Class, fields: Map[FieldName, ObjFieldAddr])
@@ -35,7 +36,7 @@ enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, Ar
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
-  override type I8  = Byte
+  override type I8 = Byte
   override type I16 = Short
   override type U16 = Char
   override type I32 = Int
@@ -87,17 +88,29 @@ object ConcreteInterpreter extends Interpreter:
 
   given ConcreteTypeOps(using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
     override def instanceOf(v: RefValue, target: TypeRep): Boolean = v match
-      case ConcreteRefValues.Object(_, cf: ClassFile, _) =>
-        if (target == null)
-          false
-        else
-          cf.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy)
-      case ConcreteRefValues.nonNullArray(_, _, arrayType: AType, _) =>
-        if (target == null)
-          false
-        else
-          arrayType == target.asArrayType
-      case ConcreteRefValues.NullValue() => target == null
+      case ConcreteRefValues.Object(_, cf, _) =>
+        checkInstanceOf(cf.thisType, target)
+      case ConcreteRefValues.nonNullArray(_, _, ty, _) =>
+        checkInstanceOf(ty, target)
+      case ConcreteRefValues.NullValue() => false
+
+    @tailrec
+    private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
+      case c: ClassType =>
+        c.isSubtypeOf(t.mostPreciseClassType)
+      case ArrayType(sc) => t match
+        case t: ClassType =>
+          Set(ClassType.Object, ClassType.Cloneable, ClassType.Serializable).contains(t)
+        case t: ArrayType =>
+          val tc = t.componentType
+          tc == sc || tc == ClassType.Object || (sc match
+            case sc: ClassType => tc.isClassType && sc.isSubtypeOf(tc.asClassType)
+            case sc: ArrayType => tc.isReferenceType && checkInstanceOf(sc, tc.asReferenceType)
+            case _: BaseType => false
+            )
+      case x: ArrayType => throw UnsupportedOperationException(s"ArrayType deconstruction failed unexpectedly with value $x")
+
+    given ClassHierarchy = project.classHierarchy
 
   given intSizeOps: SizeOps[I32, Boolean] with
     override def is32Bit(v: I32): Boolean = true

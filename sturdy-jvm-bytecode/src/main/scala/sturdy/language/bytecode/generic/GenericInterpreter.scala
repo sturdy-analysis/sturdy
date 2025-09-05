@@ -551,25 +551,28 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
 
       // checkcast opcode 192
-      case inst: CHECKCAST =>
-        val v = stack.popOrAbort()
-        val flag = typeOps.instanceOf(v, inst.referenceType)
-        branchOpsUnit.boolBranch(flag){
-          stack.push(v)
-        }{
-          stack.push(i32ops.integerLit(0))
+      case CHECKCAST(referenceType) =>
+        val objectref = stack.peekOrAbort()
+        branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {} {
+          // not null
+          branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {} {
+            except.throws(JvmExcept.Throw(ClassType.ClassCastException))
+          }
         }
 
       // instanceof opcode 193
-      case inst: INSTANCEOF =>
-        val v = stack.popOrAbort()
-        val flag = typeOps.instanceOf(v, inst.referenceType)
-        branchOpsUnit.boolBranch(flag){
-          stack.push(i32ops.integerLit(1))
-        }{
+      case INSTANCEOF(referenceType) =>
+        val objectref = stack.popOrAbort()
+        branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {
           stack.push(i32ops.integerLit(0))
+        } {
+          // not null
+          branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {
+            stack.push(i32ops.integerLit(1))
+          } {
+            stack.push(i32ops.integerLit(0))
+          }
         }
-
 
       // monitorenter opcode 194
       case MONITORENTER =>
