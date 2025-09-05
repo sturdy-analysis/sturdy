@@ -28,39 +28,42 @@ trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
   final def readOrElse(x: Addr, default: => V)(using J[V]): V =
     read(x).getOrElse(default)
 
-trait StoreWithImmutableOps[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]:
-  def read(x: Addr, state: State): JOption[J, V]
-  def write(x: Addr, v: V, state: State): State
-  def move(from: Addr, to: Addr, state0: State): State =
+
+trait StoreWithPureOps[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]:
+  def readPure(x: Addr, state: State): JOption[J, V]
+  def writePure(x: Addr, v: V, state: State): State
+  def movePure(from: Addr, to: Addr, state0: State): State =
     var state = state0
-    read(from, state).map(
+    readPure(from, state).map(
       value =>
-        state = write(to, value, state)
-        state = free(from, state)
+        state = writePure(to, value, state)
+        state = freePure(from, state)
     )
     state
-  def copy(from: Addr, to: Addr, state0: State): State =
+  def copyPure(from: Addr, to: Addr, state0: State): State =
     var state = state0
-    read(from, state).map(
+    readPure(from, state).map(
       value =>
-        state = write(to, value, state)
+        state = writePure(to, value, state)
     )
     state
-  def free(x: Addr, state: State): State
+  def freePure(x: Addr, state: State): State
 
   def withInternalState[A](f: State => (A,State)): A
+  inline def modifyInternalState(f: State => State): Unit =
+    withInternalState(s => ((), f(s)))
 
   override def read(x: Addr): JOption[J, V] =
-    withInternalState(state => (read(x,state), state))
+    withInternalState(state => (readPure(x,state), state))
 
-  override inline def write(x: Addr, v: V): Unit =
-    withInternalState(state => ((),write(x, v, state)))
+  override def write(x: Addr, v: V): Unit =
+    modifyInternalState(writePure(x, v, _))
 
   override inline def move(from: Addr, to: Addr): Unit =
-    withInternalState(state => ((), move(from, to, state)))
+    modifyInternalState(movePure(from, to, _))
 
   override inline def copy(from: Addr, to: Addr): Unit =
-    withInternalState(state => ((), copy(from, to, state)))
+    modifyInternalState(copyPure(from, to, _))
 
   override inline def free(x: Addr): Unit =
-    withInternalState(state => ((), free(x, state)))
+    modifyInternalState(freePure(x, _))

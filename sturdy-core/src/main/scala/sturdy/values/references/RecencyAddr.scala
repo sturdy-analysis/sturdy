@@ -101,15 +101,37 @@ given CombineRecencyRegion[W <: Widening]: Combine[RecencyRegion, W] =
     val joinedRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
     MaybeChanged(joinedRegion, joinedRegion.recency != region1.recency)
 
-final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) extends Effect:
-  var mapping: Map[Context,RecencyRegion] = init
-  var otherMapping: Option[Map[Context,RecencyRegion]] = None
+
+trait HasAddressTranslationState[Context,State]:
+  inline def get(state: State): AddressTranslationState[Context] = _with(state)(st => (st,st))._1
+  inline def set(state: State, addressTranslationState: AddressTranslationState[Context]): State = modify(state)(_ => addressTranslationState)
+  def _with[A](state:State)(f: AddressTranslationState[Context] => (A,AddressTranslationState[Context])): (A,State)
+  def modify(state: State)(f: AddressTranslationState[Context] => AddressTranslationState[Context]): State = _with(state)(st => ((),f(st)))._2
+
+object AddressTranslationState:
+  def apply[Context,State](using hasAddrTransState: HasAddressTranslationState[Context,State]): HasAddressTranslationState[Context,State] = hasAddrTransState
+
+trait AddressTranslation[Context: Finite](init: Map[Context, RecencyRegion]) extends Effect:
   var fresh: mutable.Map[Context,Int] = mutable.Map()
 
-  inline def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] = physicalAddresses(this.mapping, ctx, n)
+  protected def stateHasAddrTransState: HasAddressTranslationState[Context,State]
+  given HasAddressTranslationState[Context,State] = stateHasAddrTransState
 
-  def physicalAddresses(mapping: Map[Context,RecencyRegion], ctx: Context, n: Int): PowPhysicalAddress[Context] =
-    recency(mapping, ctx, n) match
+  def internalState: State
+  def leftState: State
+  def rightState: State
+  def withInternalState[A](f: State => (A, State)): A
+  inline def modifyInternalState(f: State => State): Unit = withInternalState(st => ((), f(st)))
+
+  inline def internalAddressTranslationState: AddressTranslationState[Context] =
+    AddressTranslationState[Context,State].get(internalState)
+  inline def modifyInternalAddressTranslationState(f: AddressTranslationState[Context] => AddressTranslationState[Context]): Unit =
+    modifyInternalState(state => AddressTranslationState[Context,State].modify(state)(f))
+
+  inline def apply(ctx: Context, n: Int): PowPhysicalAddress[Context] = physicalAddresses(ctx, n, internalState)
+
+  def physicalAddresses[State](using HasAddressTranslationState[Context,State])(ctx: Context, n: Int, state: State): PowPhysicalAddress[Context] =
+    recency(ctx, n, state) match
       case PowRecency.RecentOld =>
         PowersetAddr(PhysicalAddress(ctx, Recency.Recent), PhysicalAddress(ctx, Recency.Old))
       case PowRecency.Recent =>
@@ -120,10 +142,10 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         PowersetAddr(PhysicalAddress(ctx, Recency.Failed))
 
   inline def recency(ctx: Context, n: Int): PowRecency =
-    recency(mapping, ctx, n)
+    recency(ctx, n, internalState)
 
-  def recency(mapping: Map[Context, RecencyRegion], ctx: Context, n: Int): PowRecency =
-    mapping.get(ctx) match
+  def recency[State](using HasAddressTranslationState[Context,State])(ctx: Context, n: Int, state: State): PowRecency =
+    AddressTranslationState[Context,State].get(state).mapping.get(ctx) match
       case Some(RecencyRegion(recent, old, failed)) =>
         if (failed.contains(n))
           assert(!recent.contains(n) && !old.contains(n), s"Virtual $n cannot be simultaneously failed and recent/old.")
@@ -137,44 +159,45 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
         else throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
       case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
-  def setRecency(virt: VirtualAddress[Context], powRecency: PowRecency) =
-    val RecencyRegion(recent, old, failed) = region(mapping, virt.ctx).getOrElse(RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
+  inline def setRecency(virt: VirtualAddress[Context], powRecency: PowRecency): Unit =
+    modifyInternalState(setRecencyPure(virt, powRecency, _))
+
+  def setRecencyPure[State](using HasAddressTranslationState[Context,State])(virt: VirtualAddress[Context], powRecency: PowRecency, state: State): State =
+    val RecencyRegion(recent, old, failed) = regionPure(virt.ctx, state).getOrElse(RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
       powRecency match
         case PowRecency.Recent =>
-          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old - virt.n, failed - virt.n))
+          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old - virt.n, failed - virt.n), state)
         case PowRecency.Old =>
-          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old + virt.n, failed - virt.n))
+          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old + virt.n, failed - virt.n), state)
         case PowRecency.RecentOld =>
-          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old + virt.n, failed - virt.n))
+          setRegion(virt.ctx, RecencyRegion(recent + virt.n, old + virt.n, failed - virt.n), state)
         case PowRecency.Failed =>
-          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old - virt.n, failed + virt.n))
+          setRegion(virt.ctx, RecencyRegion(recent - virt.n, old - virt.n, failed + virt.n), state)
 
   inline def region(ctx: Context): Option[RecencyRegion] =
-    region(mapping, ctx)
+    regionPure(ctx, internalState)
 
-  def region(mapping: Map[Context, RecencyRegion], ctx: Context): Option[RecencyRegion] =
-    mapping.get(ctx)
+  inline def regionPure[State](using HasAddressTranslationState[Context,State])(ctx: Context, state: State): Option[RecencyRegion] =
+    AddressTranslationState[Context,State].get(state).mapping.get(ctx)
 
-  def setRegion(ctx: Context, region: RecencyRegion): Unit =
-    mapping += ctx -> region
+  inline def setRegion[State](using HasAddressTranslationState[Context,State])(ctx: Context, region: RecencyRegion, state:State): State =
+    AddressTranslationState[Context,State].modify(state)(addrTransState => AddressTranslationState(addrTransState.mapping + (ctx -> region)))
 
-  def isEqual(v1: VirtualAddress[Context], v2: VirtualAddress[Context]): Boolean =
-    v1.ctx == v2.ctx && {
-      otherMapping match
-        case Some(other) => recency(mapping, v1.ctx, v1.n) == recency(other, v2.ctx, v2.n)
-        case None => recency(mapping, v1.ctx, v1.n) == recency(mapping, v2.ctx, v2.n)
+  inline def isEqual(v1: VirtualAddress[Context], v2: VirtualAddress[Context]): Boolean =
+    v1.ctx == v2.ctx && recency(v1.ctx, v1.n, leftState) == recency(v2.ctx, v2.n, rightState)
+
+  inline def alloc(ctx: Context): VirtualAddress[Context] =
+    withInternalState(allocPure(ctx,_))
+
+  def allocPure[State](using HasAddressTranslationState[Context,State])(ctx: Context, state: State): (VirtualAddress[Context],State) =
+    AddressTranslationState[Context,State]._with(state){ case AddressTranslationState(mapping) =>
+      val virt = freshVirt(ctx)
+      mapping.get(ctx) match
+        case Some(RecencyRegion(recent, old, failed)) =>
+          (virt, AddressTranslationState(mapping + (ctx -> RecencyRegion(BitSet(virt.n), old ++ recent, failed))))
+        case None =>
+          (virt, AddressTranslationState(mapping + (ctx -> RecencyRegion(BitSet(virt.n), BitSet.empty, BitSet.empty))))
     }
-
-  def alloc(ctx: Context): VirtualAddress[Context] =
-    val virt = freshVirt(ctx)
-
-    mapping.get(ctx) match
-      case Some(RecencyRegion(recent, old, failed)) =>
-        mapping += ctx -> RecencyRegion(BitSet(virt.n), old ++ recent, failed)
-      case None =>
-        mapping += ctx -> RecencyRegion(BitSet(virt.n), BitSet.empty, BitSet.empty)
-
-    virt
 
   inline def freshVirt(ctx: Context): VirtualAddress[Context] =
     val freshId = this.fresh.getOrElse(ctx, 0)
@@ -186,148 +209,119 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     setRecency(virt, recency)
     virt
 
-  def joinRecentIntoOld(virt: VirtualAddress[Context]): Unit =
-    for(region <- mapping.get(virt.ctx)) {
-      mapping += virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n, region.failed)
+  def joinRecentIntoOld[State](using HasAddressTranslationState[Context,State])(virt: VirtualAddress[Context], state: State): State =
+    AddressTranslationState[Context,State].modify(state) { case AddressTranslationState(mapping) =>
+      AddressTranslationState(
+        mapping.get(virt.ctx).map(region =>
+          mapping + (virt.ctx -> RecencyRegion(region.recent - virt.n, region.old + virt.n, region.failed))
+        ).getOrElse(mapping)
+      )
     }
 
-  def deadPhysicalAddresses(alive: PowVirtualAddress[Context]): PowPhysicalAddress[Context] =
-    var dead = mapping
+  def deadPhysicalAddresses[State](using HasAddressTranslationState[Context,State])(alive: PowVirtualAddress[Context], state: State = internalState): PowPhysicalAddress[Context] =
+    var dead = AddressTranslationState[Context,State].get(state).mapping
     for((ctx,ns) <- alive.addrs.keys.groupMap(_._1)(_._2))
       dead.get(ctx) match
         case Some(region) =>
           if(ns.exists(region.contains))
             dead -= ctx
         case None => {}
-    PowersetAddr(physicalAddressesByContext(dead).values.flatMap(_.addrs).toSet)
+    PowersetAddr(physicalAddressesByContext(AddressTranslationState(dead)).values.flatMap(_.addrs).toSet)
 
-  def removePhysicalAddresses(physicalAddresses: PowPhysicalAddress[Context]): Unit =
-    for(phys <- physicalAddresses.iterator)
-      mapping.get(phys.ctx) match
-        case Some(RecencyRegion(recent, old, failed)) =>
-          phys.recency match
-            case Recency.Recent =>
-              if(old.isEmpty)
-                mapping -= phys.ctx
-              else
-                mapping += phys.ctx -> RecencyRegion(BitSet.empty, old, failed)
-            case Recency.Old =>
-              if(recent.isEmpty)
-                mapping -= phys.ctx
-              else
-                mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty, failed)
-            case Recency.Failed =>
-              if(failed.isEmpty)
-                mapping -= phys.ctx
-              else
-                mapping += phys.ctx -> RecencyRegion(recent, old, BitSet.empty)
-        case None => {}
+  def removePhysicalAddresses[State](using HasAddressTranslationState[Context,State])(physicalAddresses: PowPhysicalAddress[Context], state: State): State =
+    AddressTranslationState[Context,State].modify(state) { addrTransState =>
+      var mapping = addrTransState.mapping
+      for (phys <- physicalAddresses.iterator)
+        mapping.get(phys.ctx) match
+          case Some(RecencyRegion(recent, old, failed)) =>
+            phys.recency match
+              case Recency.Recent =>
+                if (old.isEmpty)
+                  mapping -= phys.ctx
+                else
+                  mapping += phys.ctx -> RecencyRegion(BitSet.empty, old, failed)
+              case Recency.Old =>
+                if (recent.isEmpty)
+                  mapping -= phys.ctx
+                else
+                  mapping += phys.ctx -> RecencyRegion(recent, BitSet.empty, failed)
+              case Recency.Failed =>
+                if (failed.isEmpty)
+                  mapping -= phys.ctx
+                else
+                  mapping += phys.ctx -> RecencyRegion(recent, old, BitSet.empty)
+          case None => {}
 
-  override type State = AddressTranslationState
-
-  override def getState: State = AddressTranslationState(mapping)
-
-  override def setState(st: State): Unit =
-    for((ctx, regionState) <- st.mapping) {
-      mapping.get(ctx) match
-        case None =>
-          mapping += (ctx) -> regionState
-        case Some(regionCurrent) if regionCurrent.combineWithOlder(regionState) != regionCurrent =>
-          mapping += (ctx) -> regionCurrent.combineWithOlder(regionState)
-        case Some(_) /* if regionCurrent.combineWithOlder(regionState) == regionCurrent */ => {}
+      AddressTranslationState(mapping)
     }
 
-  override def setStateNonMonotonically(st: State): Unit =
-    mapping = st.mapping
-
-  override def setBottom: Unit = mapping = Map()
-
-  given finiteVirt: Finite[Context] with {}
-  override def join: Join[State] = (s1: State, s2: State) =>
-    Join[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
-  override def widen: Widen[State] = (s1: State, s2: State) =>
-    Widen[Map[Context,RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
-
-  case class AddressTranslationState(mapping: Map[Context, RecencyRegion]):
-    override def equals(obj: Any): Boolean =
-      obj match
-        case other: AddressTranslationState =>
-          this.mapping.view.mapValues(_.recency).toMap.equals(other.mapping.view.mapValues(_.recency).toMap)
-        case _ => false
-
-    override def hashCode(): Int =
-      this.mapping.view.mapValues(_.recency).toMap.hashCode()
-
-    def difference(other: AddressTranslationState): AddressTranslationState =
-      AddressTranslationState(
-        mapping.flatMap {
-          (ctx, region1) =>
-            other.mapping.get(ctx) match
-              case Some(region2) =>
-                val newRegion = RecencyRegion(region1.recent.diff(region2.recent), region1.old.diff(region2.old), region1.failed.diff(region2.failed))
-                if(newRegion.isEmpty)
-                  None
-                else
-                  Some((ctx, newRegion))
-              case None =>
-                Some((ctx, region1))
+  def setAddressTranslationState(st: AddressTranslationState[Context]): Unit = {
+    modifyInternalState(state =>
+      AddressTranslationState[Context,State].modify(state) { addrTransState =>
+        var mapping = addrTransState.mapping
+        for ((ctx, regionState) <- st.mapping) {
+          mapping.get(ctx) match
+            case None =>
+              mapping += (ctx) -> regionState
+            case Some(regionCurrent) if regionCurrent.combineWithOlder(regionState) != regionCurrent =>
+              mapping += (ctx) -> regionCurrent.combineWithOlder(regionState)
+            case Some(_) /* if regionCurrent.combineWithOlder(regionState) == regionCurrent */ => {}
         }
-      )
+        AddressTranslationState(mapping)
+      }
+    )
+  }
 
-    /** Computes the virtual addresses allocated between a starting and an end state and sets them to failed. */
-    def failedVirts(before: AddressTranslationState): AddressTranslationState =
-      AddressTranslationState(
-        mapping.flatMap {
-          (ctx, regionAfter) =>
-            val regionBefore = before.mapping.getOrElse(ctx, RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
-            val virtsAllocatedInFailedBranch = (regionAfter.recent ++ regionAfter.old).diff(regionBefore.recent ++ regionBefore.old)
-            val newRegion = RecencyRegion(
-              recent = BitSet.empty,
-              old = BitSet.empty,
-              failed = regionAfter.failed ++ regionBefore.failed ++ virtsAllocatedInFailedBranch
-            )
-            Some((ctx, newRegion))
-        }
-      )
+  def setAddressTranslationStateNonMonotonically(st: AddressTranslationState[Context]): Unit =
+    modifyInternalState(AddressTranslationState[Context,State].set(_, st))
 
-    override def toString: String =
-      s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
+  def setAddressTranslationStateBottom: Unit =
+    setAddressTranslationStateNonMonotonically(AddressTranslationState(Map()))
 
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
-    val before: State = AddressTranslationState(mapping)
-    var afterFirst: State = _
+  def makeAddressTranslationComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
+    val before: AddressTranslationState[Context] = internalAddressTranslationState
+    var afterFirst: AddressTranslationState[Context] = _
 
     override def inbetween(fFailed: Boolean): Unit =
-      afterFirst = AddressTranslationState(mapping)
-      mapping = before.mapping
+      modifyInternalAddressTranslationState {
+        state =>
+          afterFirst = state
+          before
+      }
 
     override def retainNone(): Unit =
-      val afterSecond = AddressTranslationState(mapping)
-      mapping = join(before, join(afterFirst.failedVirts(before), afterSecond.failedVirts(before)).get).get.mapping
+      modifyInternalAddressTranslationState(afterSecond =>
+        Join(before, Join(afterFirst.failedVirts(before), afterSecond.failedVirts(before)).get).get
+      )
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      mapping = join(afterFirst, AddressTranslationState(mapping).failedVirts(before)).get.mapping
+      modifyInternalAddressTranslationState(afterSecond =>
+        Join(afterFirst, afterSecond.failedVirts(before)).get
+      )
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
-      mapping = join(afterFirst.failedVirts(before), AddressTranslationState(mapping)).get.mapping
+      modifyInternalAddressTranslationState(afterSecond =>
+        Join(afterFirst.failedVirts(before), afterSecond).get
+      )
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      val afterSecond = AddressTranslationState(mapping)
-      mapping = join(afterFirst, afterSecond).get.mapping
+      modifyInternalAddressTranslationState(afterSecond =>
+        Join(afterFirst, afterSecond).get
+      )
   )
 
   def virtualAddresses: PowVirtualAddress[Context] =
-    PowVirtualAddress(mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)
+    PowVirtualAddress(internalAddressTranslationState.mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)
 
   def virtualAddresses(ctx: Context): PowVirtualAddress[Context] =
-    mapping.get(ctx) match
+    internalAddressTranslationState.mapping.get(ctx) match
       case Some(region) =>
         PowVirtualAddress((region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this)))
       case None => PowVirtualAddress.empty
 
-  inline def physicalAddressesByContext: Map[Context,PowPhysicalAddress[Context]] = physicalAddressesByContext(this.mapping)
-  def physicalAddressesByContext(mapping: Map[Context,RecencyRegion]): Map[Context, PowPhysicalAddress[Context]] =
-    mapping.map((ctx,region) =>
+  inline def physicalAddressesByContext: Map[Context,PowPhysicalAddress[Context]] = physicalAddressesByContext(internalAddressTranslationState)
+  def physicalAddressesByContext(state: AddressTranslationState[Context]): Map[Context, PowPhysicalAddress[Context]] =
+    state.mapping.map((ctx,region) =>
       if(region.recent.isEmpty)
         (ctx, PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
       else if(region.old.isEmpty)
@@ -337,16 +331,61 @@ final class AddressTranslation[Context](init: Map[Context, RecencyRegion]) exten
     )
 
   def virtualAddressesByContext: Map[Context, PowVirtualAddress[Context]] =
-    mapping.map((ctx,region) =>
+    internalAddressTranslationState.mapping.map((ctx,region) =>
       (ctx, PowVirtualAddress((region.recent ++ region.old).view.map(n => VirtualAddress(ctx,n,this))))
     )
 
-  override def clone(): AddressTranslation[Context] = new AddressTranslation[Context](mapping)
+  override def clone(): AddressTranslation[Context] = throw UnsupportedOperationException()
 
-  override def toString: String = mapping.toString
 
-object AddressTranslation:
-  def empty[Context]: AddressTranslation[Context] = new AddressTranslation[Context](Map.empty)
+case class AddressTranslationState[Context](mapping: Map[Context, RecencyRegion]):
+  override def equals(obj: Any): Boolean =
+    obj match
+      case other: AddressTranslationState[Context]@unchecked =>
+        this.mapping.view.mapValues(_.recency).toMap.equals(other.mapping.view.mapValues(_.recency).toMap)
+      case _ => false
+
+  override def hashCode(): Int =
+    this.mapping.view.mapValues(_.recency).toMap.hashCode()
+
+  def difference(other: AddressTranslationState[Context]): AddressTranslationState[Context] =
+    AddressTranslationState(
+      mapping.flatMap {
+        (ctx, region1) =>
+          other.mapping.get(ctx) match
+            case Some(region2) =>
+              val newRegion = RecencyRegion(region1.recent.diff(region2.recent), region1.old.diff(region2.old), region1.failed.diff(region2.failed))
+              if (newRegion.isEmpty)
+                None
+              else
+                Some((ctx, newRegion))
+            case None =>
+              Some((ctx, region1))
+      }
+    )
+
+  /** Computes the virtual addresses allocated between a starting and an end state and sets them to failed. */
+  def failedVirts(before: AddressTranslationState[Context]): AddressTranslationState[Context] =
+    AddressTranslationState(
+      mapping.flatMap {
+        (ctx, regionAfter) =>
+          val regionBefore = before.mapping.getOrElse(ctx, RecencyRegion(BitSet.empty, BitSet.empty, BitSet.empty))
+          val virtsAllocatedInFailedBranch = (regionAfter.recent ++ regionAfter.old).diff(regionBefore.recent ++ regionBefore.old)
+          val newRegion = RecencyRegion(
+            recent = BitSet.empty,
+            old = BitSet.empty,
+            failed = regionAfter.failed ++ regionBefore.failed ++ virtsAllocatedInFailedBranch
+          )
+          Some((ctx, newRegion))
+      }
+    )
+
+  override def toString: String =
+    s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
+
+given AddressTranslationStateCombine[Ctx: Finite, W <: Widening]: Combine[AddressTranslationState[Ctx], W] =
+  (s1: AddressTranslationState[Ctx], s2: AddressTranslationState[Ctx]) =>
+    Combine[Map[Ctx, RecencyRegion], W](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
 
 case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTranslation[Context]) extends AbstractAddr[VirtualAddress[Context]]:
 
@@ -383,27 +422,16 @@ given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] =
   (virt1: VirtualAddress[Context], virt2: VirtualAddress[Context]) =>
     if(virt1.ctx == virt2.ctx) {
       val addrTrans = virt1.addressTrans
-      val mapping = addrTrans.mapping
-      val otherMapping = addrTrans.otherMapping.getOrElse(mapping)
-      val region1 = addrTrans.region(mapping, virt1.ctx).get
-      val recency1 = addrTrans.recency(mapping, virt1.ctx, virt1.n)
-      val recency2 = addrTrans.recency(otherMapping, virt2.ctx, virt2.n)
+      import addrTrans.given
+      val region1 = addrTrans.regionPure(virt1.ctx, addrTrans.leftState).get
+      val recency1 = addrTrans.recency(virt1.ctx, virt1.n, addrTrans.leftState)
+      val recency2 = addrTrans.recency(virt2.ctx, virt2.n, addrTrans.rightState)
       val joinedRecency = Join(recency1, recency2)
-      joinedRecency.get match
-        case PowRecency.Recent =>
-          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old - virt1.n, region1.failed - virt1.n)
-        case PowRecency.Old =>
-          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent - virt1.n, region1.old + virt1.n, region1.failed - virt1.n)
-        case PowRecency.RecentOld =>
-          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent + virt1.n, region1.old + virt1.n, region1.failed - virt1.n)
-        case PowRecency.Failed =>
-          addrTrans.mapping += virt1.ctx -> RecencyRegion(region1.recent - virt1.n, region1.old - virt1.n, region1.failed + virt1.n)
+      addrTrans.setRecency(virt1, joinedRecency.get)
       joinedRecency.map(_ => virt1)
     } else {
       throw new IllegalArgumentException(s"Cannot join virtual addresses with different contexts $virt1, $virt2")
     }
-
-
 
 
 case class PhysicalAddress[Context](ctx: Context, recency: Recency) extends AbstractAddr[PhysicalAddress[Context]]:
@@ -434,10 +462,10 @@ type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], Physic
 class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Context]]) extends AbstractAddr[VirtualAddress[Context]]:
   def virtualAddresses: Iterable[VirtualAddress[Context]] = addrs.values
   def physicalAddresses: Set[PhysicalAddress[Context]] = virtualAddresses.flatMap(_.physical.addrs).toSet
-  def physicalAddresses(mapping: Map[Context,RecencyRegion]): Map[Context,PowRecency] =
+  def physicalAddresses(state: AddressTranslationState[Context]): Map[Context,PowRecency] =
     addressTranslation match
       case Some(addrTrans) =>
-        addrs.keys.groupMapReduce(_._1)((ctx, idx) => addrTrans.recency(mapping, ctx, idx))(Join[PowRecency](_,_).get)
+        addrs.keys.groupMapReduce(_._1)((ctx, idx) => addrTrans.recency(ctx, idx, state))(Join[PowRecency](_,_).get)
       case None => Map.empty
 
   override def isEmpty: Boolean = addrs.isEmpty
@@ -470,10 +498,8 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
       case other: PowVirtualAddress[Context] @unchecked =>
         addressTranslation match
           case Some(addrMap) =>
-            val mapping = addrMap.mapping
-            val otherMapping = addrMap.otherMapping.getOrElse(mapping)
-            val phys1 = this.physicalAddresses(mapping)
-            val phys2 = other.physicalAddresses(otherMapping)
+            val phys1 = this.physicalAddresses(addrMap.leftState)
+            val phys2 = other.physicalAddresses(addrMap.leftState)
             phys1.equals(phys2)
           case None => other.isEmpty
       case _ => false
@@ -481,7 +507,7 @@ class PowVirtualAddress[Context](val addrs: Map[(Context,Int), VirtualAddress[Co
   override def hashCode(): Int =
     addressTranslation match
       case Some(addrTrans) =>
-        physicalAddresses(addrTrans.mapping).hashCode()
+        physicalAddresses(addrTrans.internalAddressTranslationState).hashCode()
       case None =>
         Map.empty.hashCode()
 
@@ -500,8 +526,8 @@ def combinePowVirtualAddress[W <: Widening, Context](v1: PowVirtualAddress[Conte
   v1.addressTranslation match
     case Some(addrTrans) =>
       val joined = new PowVirtualAddress(v1.addrs ++ v2.addrs)
-      val phys1 = v1.physicalAddresses(addrTrans.mapping)
-      val phys2 = v2.physicalAddresses(addrTrans.otherMapping.getOrElse(addrTrans.mapping))
+      val phys1 = v1.physicalAddresses(addrTrans.leftAddressTranslationState)
+      val phys2 = v2.physicalAddresses(addrTrans.rightAddressTranslationState)
       val changed = Join(phys1,phys2).hasChanged
       MaybeChanged(joined, changed)
     case None =>

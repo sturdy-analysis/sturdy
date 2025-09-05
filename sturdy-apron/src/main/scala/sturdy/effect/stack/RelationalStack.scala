@@ -2,7 +2,7 @@ package sturdy.effect.stack
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, StatelessRelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -26,7 +26,7 @@ final class RelationalStack
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Val],
-    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
+    relationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends JoinableDecidableOperandStack[Val]:
 

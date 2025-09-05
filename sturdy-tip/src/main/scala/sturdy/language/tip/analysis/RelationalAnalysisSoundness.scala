@@ -29,7 +29,7 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
   given Abstractly[ConcreteInterpreter.Addr, Addr] =
     (cAddr: ConcreteInterpreter.Addr) =>
       val ctx = Abstractly[ConcreteInterpreter.Addr, AddrCtx](cAddr)
-      addrTrans.mapping.get(ctx) match
+      addrTrans.region(ctx) match
         case None => throw new IllegalStateException(s"Address Translation $addrTrans does not contain context $ctx")
         case Some(region) =>
           PowVirtualAddress(VirtualAddress(ctx, region.recent.max, addrTrans))

@@ -19,13 +19,9 @@ given ToppedBreakIf[B](using failure: Failure, effectStack: EffectStack): BreakI
   override def breakIf(cond: Topped[Boolean])(break: effectStack.State => Unit): Unit =
     val state = effectStack.getState
     cond match
-      case Topped.Actual(true) => assertCondition(cond, state)
-      case Topped.Actual(false) => break(effectStack.getState); assertCondition(cond, state)
-      case Topped.Top => joinComputations { break(state) } { }; assertCondition(cond, state)
+      case Topped.Actual(true) => break(effectStack.getState)
+      case Topped.Actual(false) =>
+      case Topped.Top => joinComputations { break(state) } { }
 
   override def assertCondition(cond: Topped[Boolean], state: effectStack.State): Unit =
     effectStack.setState(state)
-    cond match
-      case Topped.Actual(true) => {}
-      case Topped.Actual(false) => failure.fail(AssertionFailure(cond), s"Expected condition $cond to be true, but the condition was false")
-      case Topped.Top => joinWithFailure {} { failure.fail(AssertionFailure(cond), s"Expected condition $cond to be true, but the condition was false") }

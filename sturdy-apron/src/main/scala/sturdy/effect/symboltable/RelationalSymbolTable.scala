@@ -2,7 +2,7 @@ package sturdy.effect.symboltable
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.apron.{ApronExpr, ApronRecencyState, RelationalExpr}
+import sturdy.apron.{ApronExpr, ApronRecencyState, StatelessRelationalExpr}
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -10,7 +10,8 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
 import scala.reflect.ClassTag
-import scala.util.boundary, boundary.break
+import scala.util.boundary
+import boundary.break
 
 final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Widen, Ctx, Type]
   (
@@ -18,7 +19,7 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Entry],
-    relationalValue: RelationalExpr[Entry, VirtualAddress[Ctx], Type]
+    relationalValue: StatelessRelationalExpr[Entry, VirtualAddress[Ctx], Type]
   ) extends DecidableSymbolTable[Key, Symbol, Entry]:
 
   val table: JoinableDecidableSymbolTable[Key, Symbol, PowVirtualAddress[Ctx]] = new JoinableDecidableSymbolTable()

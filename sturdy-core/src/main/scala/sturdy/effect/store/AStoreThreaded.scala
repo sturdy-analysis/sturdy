@@ -11,20 +11,20 @@ import scala.reflect.ClassTag
 
 /** An abstract threaded store. */
 class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V], Widen[V], Finite[A])
-  extends StoreWithImmutableOps[AA, V, WithJoin]:
+  extends StoreWithPureOps[AA, V, WithJoin]:
 
   private var store: Map[A, V] = _init
 
   override def read(xs: AA): JOptionA[V] =
-    read(xs, store)
+    readPure(xs, store)
 
-  override def read(xs: AA, state: State): JOptionA[V] =
+  override def readPure(xs: AA, state: State): JOptionA[V] =
     if (xs.isEmpty)
       JOptionA.None()
     else
       xs.reduce(x => JOptionA(state.get(x)))
 
-  override def write(xs: AA, v: V, state: State): State =
+  override def writePure(xs: AA, v: V, state: State): State =
     var store = state
     if (xs.isEmpty) {
       // nothing
@@ -38,7 +38,7 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
     }
     store
 
-  override def free(xs: AA, state: State): State =
+  override def freePure(xs: AA, state: State): State =
     var store = state
     if (xs.isStrong)
       xs.reduce(x => store -= x)

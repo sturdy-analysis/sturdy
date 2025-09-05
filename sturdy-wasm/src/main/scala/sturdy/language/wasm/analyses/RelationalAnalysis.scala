@@ -159,7 +159,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given Join[ApronExpr[VirtAddr, Type]] = JoinApronExpr[VirtAddr, Type]
     given Widen[ApronExpr[VirtAddr, Type]] = WidenApronExpr[VirtAddr, Type]
 
-    given RelationalExpr[Value, VirtAddr, Type] with
+    given StatelessRelationalExpr[Value, VirtAddr, Type] with
       override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, Type]] =
         v match
           case Num(Int32(NumExpr(expr))) => Some(expr)

@@ -2,7 +2,7 @@ package sturdy.effect.callframe
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, StatelessRelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
@@ -30,7 +30,7 @@ final class RelationalCallFrame
     val localVariableAllocator: Allocator[Ctx, (Var,Data,Option[CallSite])],
     val apronState: ApronRecencyState[Ctx, Type, Val]
   )(using
-    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
+    relationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends MutableCallFrame[Data, Var, Val, CallSite, NoJoin]
      with DecidableCallFrame[Data, Var, Val, CallSite]:
@@ -50,7 +50,7 @@ final class RelationalCallFrame
 
   override def data: Data = addressCallFrame.data
 
-  def getAddressTranslation: AddressTranslation[Ctx] = apronState.recencyStore.getAddressTranslation
+  def getAddressTranslation: AddressTranslation[Ctx] = apronState.recencyStore.addressTranslation
 
   def setVars(newVars: Iterable[(Var, Option[Val])]) =
     addressCallFrame.setVars(

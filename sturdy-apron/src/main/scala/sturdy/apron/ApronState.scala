@@ -2,6 +2,7 @@ package sturdy.apron
 
 import apron.{Abstract1, Coeff, Interval, Var}
 import gmp.{Mpfr, Mpq}
+import sturdy.apron
 import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
@@ -176,14 +177,14 @@ final class ApronRecencyState
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   )(using
-    RelationalExpr[Val, VirtualAddress[Ctx], Type]
+    StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends ApronState[VirtualAddress[Ctx], Type]:
 
   val effectStack: EffectStack = EffectStack(recencyStore)
   val convertExpr: ApronExprConverter[Ctx, Type, Val] = ApronExprConverter(recencyStore, relationalStore)
-  given Lazy[ApronExprConverter[Ctx, Type, Val]] = Lazy(convertExpr)
-  val relationalValue: RelationalExpr[Val, PhysicalAddress[Ctx], Type] = implicitly
+  given lazyConvertExpr: Lazy[ApronExprConverter[Ctx, Type, Val]] = Lazy(convertExpr)
+  val relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Ctx], Type, lazyConvertExpr.value.State] = RelationalValueApronExprPhysicalAddress[Val, Ctx, Type].asInstanceOf
 
   inline def unapply: (RecencyStore[Ctx, PowVirtualAddress[Ctx], Val], RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]) =
     (recencyStore, relationalStore)
@@ -233,15 +234,21 @@ final class ApronRecencyState
           addCondition(e2)
         }
 
-  inline override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(expr, state = relationalStore.getStateNoCopy)
-  inline def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type], state: relationalStore.State): Interval =
-    relationalStore.getBound(convertExpr.virtToPhys(expr), state)
+  override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.internalState, expr)
+  def getInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = {
+    // purposefully throws away changes to the state as they lower precision.
+    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, state.clone().asInstanceOf)
+    relationalStore.getBound(physExpr, state1._2.asInstanceOf)
+  }
 
-  inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
-    relationalStore.getFloatBound(convertExpr.virtToPhys(expr), state = relationalStore.getStateNoCopy)
+  inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): apron.FloatInterval =
+    getFloatInterval(relationalStore.internalState, expr)
+  def getFloatInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
+    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, state.clone.asInstanceOf)
+    relationalStore.getFloatBound(physExpr, state1._2.asInstanceOf[relationalStore.State])
 
   inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type]): Topped[Boolean] =
-    convertExpr.virtToPhys(v).map(relationalStore.satisfies).getOrElse(Topped.Top)
+    convertExpr.virtToPhys(v).map(relationalStore.satisfies(_)).getOrElse(Topped.Top)
 
   override def effects: EffectStack = effectStack
 
@@ -251,11 +258,11 @@ final class ApronRecencyState
   def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
-    case (e1, e2) if (getInterval(e1, relationalStore.leftJoin).isBottom) =>
+    case (e1, e2) if (getInterval(relationalStore.leftState, e1).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e2.setFloatSpecials(specials).setType(tpe)
       )
-    case (e1, e2) if (getInterval(e2, relationalStore.rightJoin).isBottom) =>
+    case (e1, e2) if (getInterval(relationalStore.rightState, e2).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e1.setFloatSpecials(specials).setType(tpe)
       )
@@ -270,8 +277,8 @@ final class ApronRecencyState
       }
       MaybeChanged(ApronExpr.Addr(ApronVar(virt), joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
-      val iv1 = getInterval(e1, relationalStore.leftJoin)
-      val iv2 = getInterval(e2, relationalStore.rightJoin)
+      val iv1 = getInterval(relationalStore.leftState, e1)
+      val iv2 = getInterval(relationalStore.rightState, e2)
       if(widen)
         Widen[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
           ApronExpr.Constant(_, _, _)
@@ -291,22 +298,22 @@ final class ApronRecencyState
         rCombined <- combineExpr(widen, allocator).apply(r1, r2)
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
-    case (e1,e2) if containsFailedAddrs(recencyStore.addressTranslation.mapping, e1) || containsFailedAddrs(recencyStore.addressTranslation.otherMapping.getOrElse(recencyStore.addressTranslation.mapping), e2) =>
+    case (e1,e2) if containsFailedAddrs(relationalStore.leftAddressTranslationState, e1) || containsFailedAddrs(relationalStore.rightAddressTranslationState, e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
-          val iv1 = getInterval(e1, relationalStore.leftJoin)
+          val iv1 = getInterval(relationalStore.leftState, e1)
           val ctx = allocator(joinedType)
           val failedVirt = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed)
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
-          val iv2 = getInterval(failedExpr, relationalStore.rightJoin)
+          val iv2 = getInterval(relationalStore.rightState, failedExpr)
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
       )
     case (e1,e2) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
         val ctx = allocator(joinedType)
         val result = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old)
-        relationalStore.write(result.physical, convertExpr.virtToPhys(e1), relationalStore.leftJoin)
-        relationalStore.write(result.physical, convertExpr.virtToPhys(e2), relationalStore.rightJoin)
+        relationalStore.withLeftState(relationalStore.writePure(result.physical, convertExpr.virtToPhys(e1), _))
+        relationalStore.withRightState(relationalStore.writePure(result.physical, convertExpr.virtToPhys(e2), _))
 //        if(isUnconstraint(result))
 //          makeNonRelational(result)
         // Check if expression has grown happens when combining Abstract1
@@ -320,8 +327,8 @@ final class ApronRecencyState
   override def makeNonRelational(virtualAddress: VirtualAddress[Ctx]): Unit =
     relationalStore.moveToNonRelationalStore(virtualAddress.physical)
 
-  private def containsFailedAddrs(mapping: Map[Ctx, RecencyRegion], expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
-    expr.addrs.exists(virt => recencyStore.addressTranslation.recency(mapping, virt.ctx, virt.n) == PowRecency.Failed)
+  private def containsFailedAddrs(state: AddressTranslationState[Ctx], expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+    expr.addrs.exists(virt => recencyStore.addressTranslation.recency(virt.ctx, virt.n, state) == PowRecency.Failed)
 
   private def structuralEq(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
     (e1, e2) match

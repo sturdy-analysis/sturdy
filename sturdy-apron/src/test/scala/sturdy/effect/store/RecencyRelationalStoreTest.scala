@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import apron.{Abstract1, Environment, Interval}
-import sturdy.apron.{ApronExpr, RelationalExpr, given}
+import sturdy.apron.{ApronExpr, RelationalExpr, StatelessRelationalExpr, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.values.{Finite, Widen}
@@ -29,7 +29,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
 
   var relationalStore: RelationalStore[Ctx, BaseType[Int], PowPAddr, NumericInterval[Int]] = null
 
-  given RelationalExpr[NumericInterval[Int], PhysicalAddress[Ctx], BaseType[Int]] with
+  given StatelessRelationalExpr[NumericInterval[Int], PhysicalAddress[Ctx], BaseType[Int]] with
     override def getRelationalExpr(v: NumericInterval[Int]): Option[ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]] =
       Option(ApronExpr.interval(v.low, v.high, BaseType[Int]))
     override def makeRelationalExpr(expr: ApronExpr[PhysicalAddress[Ctx], BaseType[Int]]): NumericInterval[Int] =

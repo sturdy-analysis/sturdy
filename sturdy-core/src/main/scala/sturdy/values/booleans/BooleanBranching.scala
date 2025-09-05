@@ -49,12 +49,11 @@ trait BreakIf[B](using effectStack: EffectStack):
 given ConcreteBreakIf(using failure: Failure, effectStack: EffectStack): BreakIf[Boolean] with
   override def breakIf(cond: Boolean)(break: effectStack.State => Unit): Unit =
     val state = effectStack.getState
-    if(! cond) {
+    if(cond) {
       break(state)
     }
-    assertCondition(cond, state)
 
   override def assertCondition(cond: Boolean, state: effectStack.State): Unit =
     effectStack.setState(state)
     if(!cond)
-      failure.fail(AssertionFailure(cond), s"Expected condition $cond to be true, but the condition was false")
+      failure.fail(AssertionFailure(cond), s"Expected condition to be true, but the condition was $cond")
