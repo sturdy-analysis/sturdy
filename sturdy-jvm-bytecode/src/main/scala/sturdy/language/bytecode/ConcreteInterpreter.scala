@@ -230,6 +230,9 @@ object ConcreteInterpreter extends Interpreter:
         aid1 == aid2
       case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
         true
+      // arrays and objects are not equal to null
+      case (ConcreteRefValues.NullValue(), _) | (_, ConcreteRefValues.NullValue()) =>
+        false
       case _ =>
         throw IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
@@ -240,6 +243,9 @@ object ConcreteInterpreter extends Interpreter:
         aid1 != aid2
       case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
         false
+      // arrays and objects are not equal to null
+      case (ConcreteRefValues.NullValue(), _) | (_, ConcreteRefValues.NullValue()) =>
+        true
       case _ =>
         throw IllegalArgumentException(s"trying to compare values $v1 and $v2")
 
