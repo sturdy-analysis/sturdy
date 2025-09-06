@@ -63,8 +63,6 @@ object ConcreteInterpreter extends Interpreter:
 
   override type ExcV = JvmExcept[Value]
 
-  //override def topI8: Byte = throw new UnsupportedOperationException
-  //override def topI16: Short = throw new UnsupportedOperationException
   override def topI32: Int = throw UnsupportedOperationException()
 
   override def topI64: Long = throw UnsupportedOperationException()

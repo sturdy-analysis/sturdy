@@ -1,15 +1,12 @@
 package sturdy.language.bytecode.generic
 
 import sturdy.values.booleans.BooleanBranching
-import sturdy.values.convert.*
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
 import sturdy.values.objects.*
 
 trait BytecodeOps[Idx, V, TypeRep]:
-  //val i8ops:  IntegerOps[Byte, V]
-  //val i16ops: IntegerOps[Short, V]
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]

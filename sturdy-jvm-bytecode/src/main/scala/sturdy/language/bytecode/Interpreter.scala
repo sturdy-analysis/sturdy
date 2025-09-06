@@ -18,7 +18,7 @@ import sturdy.values.objects.{SizeOps, TypeOps}
 trait Interpreter:
 
   type J[A] <: MayJoin[A]
-  
+
   type I8
   type I16
   type U16
@@ -34,7 +34,7 @@ trait Interpreter:
   type MthName
   type MthSig
   type Idx
-  
+
   type TypeRep
   //type NullVal
   type FieldName
@@ -51,8 +51,6 @@ trait Interpreter:
   val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
   enum Value:
     case TopValue
-    //case Int8(b: I8)
-    //case Int16(s: I16)
     case Int32(i: I32)
     case Int64(l: I64)
     case Float32(f: F32)
@@ -63,14 +61,7 @@ trait Interpreter:
     //case Null(n: NullVal)
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
-    /*def asInt8: I8 = this match
-      case Int8(b) => b
-      case TopValue => topI8
-      case _ => ??? //f.fail(TypeError, s"Expected i8 but got $this")
-    def asInt16: I16 = this match
-      case Int16(s) => s
-      case TopValue => topI16
-      case _ => ??? //f.fail(TypeError, s"Expected i32 but got $this")*/
+
     def asInt32(using f: Failure): I32 = this match
       case Int32(i) => i
       case TopValue => topI32
@@ -109,8 +100,6 @@ trait Interpreter:
       case TopValue => topRef
       case _ => f.fail(TypeError, s"Expected ref but got $this")
 
-  //def topI8: I8
-  //def topI16: I16
   def topI32: I32
   def topI64: I64
   def topF32: F32
@@ -151,8 +140,6 @@ trait Interpreter:
   
   given ValueBytecodeOps
     (using failure: Failure
-      //i8Ops: IntegerOps[Byte, I8]
-    //, i16Ops: IntegerOps[Short, I16]
     , i32Ops: IntegerOps[Int, I32]
     , i64Ops: IntegerOps[Long, I64]
     , f32Ops: FloatOps[Float, F32]
@@ -200,9 +187,6 @@ trait Interpreter:
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
-
-    //final val i8ops: IntegerOps[Byte, Value] = new LiftedIntegerOps(_.asInt8, Value.Int8.apply)
-    //final val i16ops: IntegerOps[Short, Value] = new LiftedIntegerOps(_.asInt16, Value.Int16.apply)
 
     // throws an arithmetic exception if the 2nd operand is 0, performs the computation otherwise
     private def arithmeticExceptionChecked[I](extract: Value => I, inject: I => Value, mk0: 0 => I)(op: (I, I) => I)(v1: Value, v2: Value): Value =
