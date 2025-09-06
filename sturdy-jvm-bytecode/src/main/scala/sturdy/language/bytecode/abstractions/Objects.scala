@@ -112,7 +112,7 @@ trait Objects extends Interpreter:
               JOptionA.some(())
           case Topped.Actual(_) => ???
 
-      override def invokeFunctionCorrect(ref: RefValue, mthName: String, sig: MethodDescriptor, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
+      override def invokeFunctionCorrect(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
         ref match
           case Topped.Top => topOpalVal(sig.returnType)
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>

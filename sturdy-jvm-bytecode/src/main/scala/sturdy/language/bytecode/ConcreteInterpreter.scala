@@ -153,13 +153,43 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
-    override def invokeFunctionCorrect(obj: RefValue, mthName: String, sig: MthSig, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
+    // TODO: finish and improve resolution and selection
+    override def invokeFunctionCorrect(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.Object(_, cls: ClassFile, _) =>
-        val mth = AuxiliaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
-        invoke(obj, mth, args)
+        val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+        val actual = selectMethod(cls.thisType, resolvedMethod)
+        //val mth = AuxiliaryFunctions.findMethodOfSuperclass(cls, mthName, sig, project)
+        invoke(obj, actual, args)
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
+
+    given ClassHierarchy = project.classHierarchy
+
+    private def resolveMethod(caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor): Method =
+      project.resolveMethodReference(calleeStatic, name, descriptor)
+        .filter(mth =>
+          val t = mth.isAccessibleBy(caller, project.nests)
+          t
+        )
+        .getOrElse:
+          val supert = project.classFile(calleeStatic).get.superclassType.getOrElse(???)
+          resolveMethod(caller, supert, name, descriptor)
+
+    def selectMethod(dynamicType: ClassType, resolvedMethod: Mth): Mth =
+      if resolvedMethod.isPrivate then return resolvedMethod
+      val m = boundary:
+        project.classFile(dynamicType).get.methods.find(project.overridingMethods(resolvedMethod).contains(_)).orElse:
+          var c = dynamicType
+          while project.classFile(c).get.superclassType.isDefined do
+            c = project.classFile(c).get.superclassType.get
+            val m = project.classFile(c).get.methods.find(project.overridingMethods(resolvedMethod).contains(_))
+            if m.isDefined then break(m)
+          None
+      if m.isDefined then return m.get
+      val s = project.findMaximallySpecificSuperinterfaceMethods(dynamicType, resolvedMethod.name, resolvedMethod.descriptor)
+      if s._2.size == 1 && s._2.head.isNotAbstract then return s._2.head
+      ???
 
     override def makeNull(): RefValue = ConcreteRefValues.NullValue()
 

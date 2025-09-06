@@ -441,7 +441,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
-      case INVOKEVIRTUAL(_, name, methodDescriptor) =>
+      case INVOKEVIRTUAL(declaringClass, name, methodDescriptor) =>
         val numArgs = methodDescriptor.parametersCount
         // TODO: remove this special case
         val (obj, args) = if name == "println" || name == "print" then
@@ -452,7 +452,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           val args = stack.popNOrAbort(numArgs)
           val obj = stack.popOrAbort()
           (obj, args)
-        val ret = objectOps.invokeFunctionCorrect(obj, name, methodDescriptor, args)(invokeWrapper)
+        val ret = objectOps.invokeFunctionCorrect(mth.classFile, project.classFile(declaringClass.mostPreciseClassType).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -466,11 +466,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
-      case INVOKEINTERFACE(_, name, methodDescriptor) =>
+      case INVOKEINTERFACE(declaringClass, name, methodDescriptor) =>
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(obj, name, methodDescriptor, args)(invokeWrapper)
+        val ret = objectOps.invokeFunctionCorrect(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
