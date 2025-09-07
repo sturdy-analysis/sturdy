@@ -4,17 +4,17 @@ import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.Store
 
-class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, J[_] <: MayJoin[_], UOV, UB]
+class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, CallData, J[_] <: MayJoin[_], UOV, UB]
   (extractO: OV => UOV, injectO: UOV => OV, extractB: B => UB, injectB: UB => B)
-  (using ops: ObjectOps[FieldName, OID, V, CF, UOV, Site, Mth, MthName, MthSig, UB, J]) extends ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, J]:
+  (using ops: ObjectOps[FieldName, OID, V, CF, UOV, Site, Mth, MthName, MthSig, UB, CallData, J]) extends ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, CallData, J]:
 
   override def makeObject(oid: OID, cfs: CF, vals: Seq[(V, Site, FieldName)]): OV = injectO(ops.makeObject(oid, cfs, vals))
   override def getField(obj: OV, name: FieldName)(using Failure): V = ops.getField(extractO(obj), name)
   override def setField(obj: OV, name: FieldName, v: V): JOption[J, Unit] = ops.setField(extractO(obj), name, v)
 
-  override def invokeFunctionCorrect(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V =
+  override def invokeFunctionCorrect(callData: CallData)(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V =
     def liftedInvoke = (uov: UOV, mth: Mth, vs: Seq[V]) => invoke(injectO(uov), mth, vs)
-    ops.invokeFunctionCorrect(callingClass, staticClass, mthName, sig, extractO(obj), args)(liftedInvoke)
+    ops.invokeFunctionCorrect(callData)(callingClass, staticClass, mthName, sig, extractO(obj), args)(liftedInvoke)
 
   override def makeNull(): OV = injectO(ops.makeNull())
 

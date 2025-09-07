@@ -14,7 +14,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.{DecidableSymbolTable, SymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
-import sturdy.language.bytecode.abstractions.Site
+import sturdy.language.bytecode.abstractions.{InvokeType, Site}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
@@ -55,7 +55,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
   import bytecodeOps.*
-  val objectOps: ObjectOps[(ClassType, String), Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, J]
+  val objectOps: ObjectOps[(ClassType, String), Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, InvokeType, J]
   val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, J]
 
   implicit val joinUnit: J[Unit]
@@ -110,7 +110,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what")
 
   lazy val num = new GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
-  lazy val native = new JavaNativeFunctions[V, Addr, Idx, Addr, Addr, ObjRep, TypeRep, J](bytecodeOps, objectOps, arrayOps)
+  private lazy val native = JavaNativeFunctions[V, Addr, Idx, Addr, Addr, ObjRep, TypeRep, InvokeType, J](bytecodeOps, objectOps, arrayOps)
 
   def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit =
     val site = Site.Instruction(mth, pc)
@@ -452,17 +452,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           val args = stack.popNOrAbort(numArgs)
           val obj = stack.popOrAbort()
           (obj, args)
-        val ret = objectOps.invokeFunctionCorrect(mth.classFile, project.classFile(declaringClass.mostPreciseClassType).get, name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeFunctionCorrect(InvokeType.Virtual)(mth.classFile, project.classFile(declaringClass.mostPreciseClassType).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
       case INVOKESPECIAL(declaringClass, _, name, methodDescriptor) =>
-        val cf = findClassFile(declaringClass)
-        val mth = findMethod(cf, name, methodDescriptor).get
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = invoke(mth, obj +: args)
+        val ret = objectOps.invokeFunctionCorrect(InvokeType.Special)(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -470,7 +468,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeFunctionCorrect(InvokeType.Interface)(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 

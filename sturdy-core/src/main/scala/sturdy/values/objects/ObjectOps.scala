@@ -12,11 +12,11 @@ import sturdy.values.ordering.EqOps
 import scala.collection.mutable
 
 
-trait ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, J[_] <: MayJoin[_]]:
+trait ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, CallData, J[_] <: MayJoin[_]]:
   def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site,FieldName)]): OV
   def getField(obj: OV, name: FieldName)(using Failure): V
   def setField(obj: OV, name: FieldName, v: V): JOption[J, Unit]
-  def invokeFunctionCorrect(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V
+  def invokeFunctionCorrect(callData: CallData)(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V
   def makeNull(): OV
   def isNull(obj: OV): B
 
