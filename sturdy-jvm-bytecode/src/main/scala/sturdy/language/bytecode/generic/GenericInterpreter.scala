@@ -171,13 +171,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val v = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
         stack.push(v)
 
-      //load from array opcode opcode 46 - 53
-      case _ if (46 <= inst.opcode && inst.opcode <= 53) =>
-        val idx = stack.popOrAbort()
-        val array = stack.popOrAbort()
-        val v = arrayOps.getVal(array, idx).getOrElse(
-          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType("java/lang/IndexOutOfBoundsException"), site)))
-        )
+      // load from array (opcode 46 - 53)
+      case IALOAD | LALOAD | FALOAD | DALOAD | AALOAD | BALOAD | CALOAD | SALOAD =>
+        val index = stack.popOrAbort()
+        val arrayref = stack.popOrAbort()
+        val v = arrayOps.getVal(arrayref, index).getOrElse:
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType.ArrayIndexOutOfBoundsException, site)))
         stack.push(v)
 
       // store local variable opcode 54 - 78
@@ -195,9 +194,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           case _ => stack.popOrAbort()
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
-        arrayOps.setVal(arrayref, index, value).getOrElse(
+        arrayOps.setVal(arrayref, index, value).getOrElse:
           except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType.ArrayIndexOutOfBoundsException, site)))
-        )
 
       // operand stack management instructions (opcodes 87 - 95)
       case POP =>

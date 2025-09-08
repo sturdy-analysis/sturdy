@@ -320,12 +320,13 @@ object ConcreteInterpreter extends Interpreter:
       ConcreteRefValues.nonNullArray(aid, valAddrs, arrayType, arraySize)
 
     override def getVal(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
-      case ConcreteRefValues.nonNullArray(_, vals: Vector[Addr], _, _) =>
-        if idx >= vals.size then
+      case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
+        if idx >= vals.size || idx < 0 then
           JOptionC.none
         else
           store.read(vals(idx))
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+      case ConcreteRefValues.NullValue() =>
+        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
