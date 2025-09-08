@@ -456,11 +456,11 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
-      case INVOKESPECIAL(declaringClass, _, name, methodDescriptor) =>
+      case INVOKESPECIAL(declaringClass, isInterface, name, methodDescriptor) =>
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(InvokeType.Special)(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeFunctionCorrect(InvokeType.Special(isInterface))(mth.classFile, project.classFile(declaringClass).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
