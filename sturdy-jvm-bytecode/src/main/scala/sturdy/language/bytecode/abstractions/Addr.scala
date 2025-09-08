@@ -38,6 +38,8 @@ enum Site:
   case ArrayElementInitialization(s: Site, ix: Int)
   case FieldInitialization(s: Site, name: String, cls: ClassType)
   case StaticInitialization(obj: ClassType, name: String)
+  // not created within the program
+  case External
 
   // deconstructs the instruction into a tuple containing the fields of the Instruction variant or fails using Failure
   def deconstructInstruction()(using failure: Failure): (Method, Int, Int) =

@@ -443,15 +443,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       case INVOKEVIRTUAL(declaringClass, name, methodDescriptor) =>
         val numArgs = methodDescriptor.parametersCount
-        // TODO: remove this special case
-        val (obj, args) = if name == "println" || name == "print" then
-          val printString = stack.popOrAbort()
-          val obj = createLibraryObj(ClassType("java/io/PrintStream"), Site.Instruction(mth, pc, variant = 1))
-          (obj, Seq(printString))
-        else
-          val args = stack.popNOrAbort(numArgs)
-          val obj = stack.popOrAbort()
-          (obj, args)
+        val args = stack.popNOrAbort(numArgs)
+        val obj = stack.popOrAbort()
         val ret = objectOps.invokeFunctionCorrect(InvokeType.Virtual)(mth.classFile, project.classFile(declaringClass.mostPreciseClassType).get, name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
@@ -720,7 +713,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   // every invoke instruction will call this function
   def invoke(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
-    // TODO: remove this special case
+    // TODO: remove this println summary
     if(mth.name == "println" || mth.name == "print")
       val string = arrayOps.getArray(objectOps.getField(args(1), (ClassType("java/lang/String"), "value"))).map(vals => vals.get)
       arrayOps.printString(string)
@@ -728,6 +721,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     // we are currently unable to properly deal with System.exit
     if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
       failure.fail(AbortEval.Exit(args.head), "System.exit")
+
     if native.nativeFunList.contains(mth.name) then
       val ret = invokeClassMethod(mth, args)
       return if mth.descriptor.returnType.isVoidType then i32ops.integerLit(-1) else ret
