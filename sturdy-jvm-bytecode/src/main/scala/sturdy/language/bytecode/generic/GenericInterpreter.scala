@@ -184,13 +184,13 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val v1 = stack.popOrAbort()
         frame.setLocalOrElse(inst.lvIndex, v1, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
-      // store in array opcode 79 - 86
-      case _ if (79 <= inst.opcode && inst.opcode <= 86) =>
-        val v = stack.popOrAbort()
-        val idx = stack.popOrAbort()
-        val array = stack.popOrAbort()
-        arrayOps.setVal(array, idx, v).getOrElse(
-          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType("java/lang/IndexOutOfBoundsException"), site)))
+      // store in array (opcode 79 - 86)
+      case IASTORE | LASTORE | FASTORE | DASTORE | AASTORE | BASTORE | CASTORE | SASTORE =>
+        val value = stack.popOrAbort()
+        val index = stack.popOrAbort()
+        val arrayref = stack.popOrAbort()
+        arrayOps.setVal(arrayref, index, value).getOrElse(
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType.IndexOutOfBoundsException, site)))
         )
 
       // operand stack management instructions (opcodes 87 - 95)

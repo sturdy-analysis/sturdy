@@ -92,7 +92,8 @@ object ConcreteInterpreter extends Interpreter:
         checkInstanceOf(cf.thisType, target)
       case ConcreteRefValues.nonNullArray(_, _, ty, _) =>
         checkInstanceOf(ty, target)
-      case ConcreteRefValues.NullValue() => false
+      case ConcreteRefValues.NullValue() =>
+        true
 
     @tailrec
     private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
@@ -128,7 +129,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: RefValue): Boolean = true
 
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL]): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -287,7 +288,7 @@ object ConcreteInterpreter extends Interpreter:
       case _ => 0
 
   given ConcreteArrayOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin]): ArrayOps[Addr, Int, Value, RefValue, AType, Site, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure): ArrayOps[Addr, Int, Value, RefValue, AType, Site, NoJoin] with
     override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
@@ -306,15 +307,23 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
+    // returns some if setting the value was successful, none otherwise
+    // it can only fail by being out of bounds
     override def setVal(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
-      case ConcreteRefValues.nonNullArray(_, vals: Vector[Addr], _, _) =>
-        if (idx >= vals.size)
+      case ConcreteRefValues.nonNullArray(_, vals, arrayType, _) =>
+        if idx >= vals.size || idx < 0 then
           JOptionC.none
-        else {
+        else
+          // reference types need to be checked, null should pass the type check so no need for special handling
+          if arrayType.componentType.isReferenceType then
+            val cType = arrayType.componentType.asReferenceType
+            if !ConcreteTypeOps(using project).instanceOf(v.asRef, cType) then
+              except.throws(JvmExcept.Throw(ClassType.ArrayStoreException))
+
           store.write(vals(idx), v)
           JOptionC.some(())
-        }
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+      case ConcreteRefValues.NullValue() =>
+        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
