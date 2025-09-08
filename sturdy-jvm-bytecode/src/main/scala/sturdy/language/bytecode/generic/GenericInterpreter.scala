@@ -517,6 +517,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // NEW opcode 187
       case NEW(classType) =>
+        ensureInitialization(site)(classType)
         val obj = if project.isLibraryType(classType) then
           createLibraryObj(classType, site)
         else
