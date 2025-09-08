@@ -360,24 +360,12 @@ object ConcreteInterpreter extends Interpreter:
         aid1 == aid2
       case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
         true
-      // arrays and objects are not equal to null
-      case (ConcreteRefValues.NullValue(), _) | (_, ConcreteRefValues.NullValue()) =>
-        false
+      // each remaining case (comparing anything to null or objects to arrays) must be false
       case _ =>
-        throw IllegalArgumentException(s"trying to compare values $v1 and $v2")
+        false
 
-    override def neq(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
-      case (ConcreteRefValues.Object(oid1, _, _), ConcreteRefValues.Object(oid2, _, _)) =>
-        oid1 != oid2
-      case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
-        aid1 != aid2
-      case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
-        false
-      // arrays and objects are not equal to null
-      case (ConcreteRefValues.NullValue(), _) | (_, ConcreteRefValues.NullValue()) =>
-        true
-      case _ =>
-        throw IllegalArgumentException(s"trying to compare values $v1 and $v2")
+    override def neq(v1: RefValue, v2: RefValue): Boolean =
+      !this.equ(v1, v2)
 
   private type InitialStore = Map[Addr, Value]
 
