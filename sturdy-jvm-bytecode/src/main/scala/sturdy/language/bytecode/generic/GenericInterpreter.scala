@@ -190,7 +190,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
         arrayOps.setVal(arrayref, index, value).getOrElse(
-          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType.IndexOutOfBoundsException, site)))
+          except.throws(JvmExcept.ThrowObject(createLibraryObj(ClassType.ArrayIndexOutOfBoundsException, site)))
         )
 
       // operand stack management instructions (opcodes 87 - 95)
