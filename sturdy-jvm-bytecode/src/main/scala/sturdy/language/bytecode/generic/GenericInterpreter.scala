@@ -390,15 +390,23 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val index = frame.getLocalOrElse(inst.lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
         except.throws(JvmExcept.Ret(index))
         */
-      case inst: TABLESWITCH =>
+
+      case TABLESWITCH(defaultOffset, low, high, jumpOffsets) =>
         val index = stack.popOrAbort()
-        val transformedIndices = inst.jumpOffsets.zipWithIndex.map(pairs => (i32ops.integerLit(pairs._2), pairs._1)).toMap
-        val offset = transformedIndices.getOrElse(index, inst.defaultOffset)
-        except.throws(JvmExcept.Jump(pc + offset))
-      case inst: LOOKUPSWITCH =>
+        var target = defaultOffset
+        branchOpsUnit.boolBranch(compareOps.lt(index, i32ops.integerLit(low))) {} {
+          branchOpsUnit.boolBranch(compareOps.gt(index, i32ops.integerLit(high))) {} {
+            // not greater than high or less than low
+            val indexMap = jumpOffsets.zipWithIndex.map(pair => (i32ops.integerLit(pair._2), pair._1)).toMap
+            target = indexMap(i32ops.sub(index, i32ops.integerLit(low)))
+          }
+        }
+        except.throws(JvmExcept.Jump(pc + target))
+
+      case LOOKUPSWITCH(defaultOffset, npairs) =>
         val key = stack.popOrAbort()
-        val transformedIndices = inst.npairs.map(pairs => (i32ops.integerLit(pairs.key), pairs.value)).toMap
-        val offset = transformedIndices.getOrElse(key, inst.defaultOffset)
+        val transformedIndices = npairs.map(pair => (i32ops.integerLit(pair.key), pair.value)).toMap
+        val offset = transformedIndices.getOrElse(key, defaultOffset)
         except.throws(JvmExcept.Jump(pc + offset))
 
       // return instructions
