@@ -141,22 +141,44 @@ object ConcreteInterpreter extends Interpreter:
       ConcreteRefValues.Object(oid, cfs, fieldAddrs)
 
     override def getField(obj: RefValue, name: FieldName)(using failure: Failure): Value = obj match
-      case ConcreteRefValues.Object(_, _, fields: Map[FieldName, Addr]) =>
-        store.read(fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
+      case ConcreteRefValues.Object(_, cf, fields) =>
+        val resolvedField = resolveField(cf, name)
+        val resolvedFieldName = (resolvedField.classFile.thisType, resolvedField.name)
+        val addr = fields.getOrElse(resolvedFieldName, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))
+        store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     override def setField(obj: RefValue, name: FieldName, v: Value): JOptionC[Unit] = obj match
-      case ConcreteRefValues.Object(_, _, fields: Map[FieldName, Addr]) =>
-        if !fields.contains(name) then
+      case ConcreteRefValues.Object(_, cf, fields) =>
+        val resolvedField = resolveField(cf, name)
+        val resolvedFieldName = (resolvedField.classFile.thisType, resolvedField.name)
+        if !fields.contains(resolvedFieldName) then
           JOptionC.none
         else
-          store.write(fields(name), v)
+          store.write(fields(resolvedFieldName), v)
           JOptionC.some(())
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
+
+    // predicate to check whether a field matches a fieldname
+    private def nameMatches(name: FieldName)(field: Field): Boolean =
+      field.name == name._2
+
+    // TODO: access control
+    // TODO: field type checking (currently, only name and class are considered)
+    // - consider implementing a field descriptor type to facilitate this
+    @tailrec
+    private def resolveField(c: ClassFile, name: FieldName): Field =
+      var candidate: Option[Field] = None
+      candidate = c.fields.find(nameMatches(name)).orElse:
+        hierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(nameMatches(name))
+      if candidate.isDefined then return candidate.get
+      if c.superclassType.isEmpty then
+        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+      resolveField(project.classFile(c.superclassType.get).get, name)
 
     override def invokeFunctionCorrect(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))

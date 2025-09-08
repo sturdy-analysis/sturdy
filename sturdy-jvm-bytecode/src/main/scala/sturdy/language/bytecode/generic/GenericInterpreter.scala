@@ -427,14 +427,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         store.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
-      case inst: GETFIELD =>
+      case GETFIELD(declaringClass, name, _) =>
         val obj = stack.popOrAbort()
-        val field = objectOps.getField(obj, (inst.declaringClass, inst.name))
+        val field = objectOps.getField(obj, (declaringClass, name))
         stack.push(field)
-      case inst: PUTFIELD =>
+
+      case PUTFIELD(declaringClass, name, _) =>
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
-        objectOps.setField(obj, (inst.declaringClass, inst.name), value)
+        objectOps.setField(obj, (declaringClass, name), value).option(fail(BytecodeFailure.FieldNotFound, s"($declaringClass, $name)"))(identity)
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
