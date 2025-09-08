@@ -19,6 +19,7 @@ import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
+import sturdy.values.convert.NilCC
 import sturdy.values.objects.ObjectOps
 import sturdy.values.{Finite, Join, MaybeChanged}
 
@@ -185,8 +186,13 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         frame.setLocalOrElse(inst.lvIndex, v1, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${inst.lvIndex.toString}"))
 
       // store in array (opcode 79 - 86)
-      case IASTORE | LASTORE | FASTORE | DASTORE | AASTORE | BASTORE | CASTORE | SASTORE =>
-        val value = stack.popOrAbort()
+      case inst@(IASTORE | LASTORE | FASTORE | DASTORE | AASTORE | BASTORE | CASTORE | SASTORE) =>
+        // truncate values if needed
+        val value = inst match
+          case BASTORE => convert_i32_i8(stack.popOrAbort(), NilCC)
+          case CASTORE => convert_i32_u16(stack.popOrAbort(), NilCC)
+          case SASTORE => convert_i32_i16(stack.popOrAbort(), NilCC)
+          case _ => stack.popOrAbort()
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
         arrayOps.setVal(arrayref, index, value).getOrElse(
