@@ -44,8 +44,8 @@ object RecencyRelationalStore:
       Map()
     )
 
-    val recencyStore: RecencyStore[Ctx, PowVirtAddr, Val] =
-      RecencyStore(relationalStore)
+    import relationalStore.given
+    val recencyStore: RecencyStore[Ctx, PowVirtAddr, Val] = RecencyStore(relationalStore)
 
     convertExpr = new ApronExprConverter[Ctx, Type, Val](recencyStore, relationalStore)
 

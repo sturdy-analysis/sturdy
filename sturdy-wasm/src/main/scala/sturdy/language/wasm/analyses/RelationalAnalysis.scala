@@ -151,7 +151,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def jvElem: WithJoin[Elem] = implicitly
     //    override def widenState: Widen[State] = implicitly
 
-    val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
     var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
     var apronState: ApronRecencyState[AddrCtx, Type, Value] = null
     given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
@@ -183,11 +182,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given domLogger: DomLogger[FixIn] = new DomLogger
 
     val relationalStore: RelationalStore[AddrCtx, Type, PowPhysAddr, Value] = new RelationalStore[AddrCtx, Type, PowPhysAddr, Value](
+      Map(),
       manager = apronManager,
-      initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialMetaData = Map()
+      initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
+      initialNonRelationalStore = Map()
     )
-    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
+    import relationalStore.given
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
     given ApronRecencyState[AddrCtx, Type, Value] = apronState
@@ -221,7 +222,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     def garbageCollect(): Unit =
       val alive = PowVirtualAddress(this.addressIterator)
-      val dead = recencyStore.addressTranslation.deadPhysicalAddresses(alive)
+      val dead = relationalStore.deadPhysicalAddresses(alive, relationalStore.internalState)
       val stateBefore = effectStack.getState
       recencyStore.collectGarbage(alive)
       val stateAfter = effectStack.getState

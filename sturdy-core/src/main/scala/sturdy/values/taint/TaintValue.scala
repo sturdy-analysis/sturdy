@@ -149,5 +149,5 @@ given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBra
   def boolBranch(v: TaintProduct[V], thn: => R, els: => R): R = ops.boolBranch(v.value, thn, els)
 
 given TaintBreakIf[V](using effectStack: EffectStack, ops: BreakIf[V]): BreakIf[TaintProduct[V]] with
-  override def breakIf(cond: TaintProduct[V])(break: effectStack.State => Unit): Unit = ops.breakIf(cond.value)(break)
+  override def breakIf(cond: TaintProduct[V])(break: => Unit): Unit = ops.breakIf(cond.value)(break)
   override def assertCondition(cond: TaintProduct[V], state: effectStack.State): Unit = ops.assertCondition(cond.value, state)

@@ -80,7 +80,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("call.wast")
+    p.toString.endsWith("memory_grow.wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()
@@ -231,14 +231,14 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
         case None => // nothing
         case Some(name) => cModules += name -> cModInst
       cCurrent = cModInst
+      val aModInst = aInterp.instantiateModule(mod, aImports)
+      id match
+        case None => // nothing
+        case Some(name) => aModules += name -> aModInst
+      aCurrent = aModInst
+      // check for soundness of the interpreter states after initialization
+      assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
     }
-    val aModInst = aInterp.instantiateModule(mod, aImports)
-    id match
-      case None => // nothing
-      case Some(name) => aModules += name -> aModInst
-    aCurrent = aModInst
-    // check for soundness of the interpreter states after initialization
-    assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
 
   def instantiate(t: TestModule): CFallible[ModuleInstance] =
     t match

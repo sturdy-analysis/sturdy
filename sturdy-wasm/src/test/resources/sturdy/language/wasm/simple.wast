@@ -373,6 +373,7 @@
           (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
           (local.set 1 (i32.sub (local.get 1) (i32.const 5)))
           (local.set 1 (i32.mul (local.get 1) (i32.const 7)))
+          ;; x := ((x * 3) - 5) * 7
           (br 0)
           (local.set 1 (i32.mul (local.get 1) (i32.const 100)))
         )
@@ -380,6 +381,7 @@
           (local.set 1 (i32.mul (local.get 1) (i32.const 5)))
           (local.set 1 (i32.sub (local.get 1) (i32.const 7)))
           (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
+          ;; x := ((x * 5) - 7) * 3
           (br 0)
           (local.set 1 (i32.mul (local.get 1) (i32.const 1000)))
         )

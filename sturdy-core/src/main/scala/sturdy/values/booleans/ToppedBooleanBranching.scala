@@ -16,12 +16,11 @@ given ToppedBooleanBranching[B, R](using ops: BooleanBranching[B, R])(using Effe
     case Topped.Actual(b) => ops.boolBranch(b, thn, els)
 
 given ToppedBreakIf[B](using failure: Failure, effectStack: EffectStack): BreakIf[Topped[Boolean]] with
-  override def breakIf(cond: Topped[Boolean])(break: effectStack.State => Unit): Unit =
-    val state = effectStack.getState
+  override def breakIf(cond: Topped[Boolean])(break: => Unit): Unit =
     cond match
-      case Topped.Actual(true) => break(effectStack.getState)
+      case Topped.Actual(true) => break
       case Topped.Actual(false) =>
-      case Topped.Top => joinComputations { break(state) } { }
+      case Topped.Top => joinComputations { break } { }
 
   override def assertCondition(cond: Topped[Boolean], state: effectStack.State): Unit =
     effectStack.setState(state)

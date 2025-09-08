@@ -11,15 +11,15 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, J
 import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
-import sturdy.effect.print.{PrintBound,  given}
-import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
+import sturdy.effect.print.{PrintBound, given}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, RelationalStoreState, Store}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
 import sturdy.language.tip.abstractions.{CfgConfig, Control, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
-import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelType, AddrCtx}
+import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, AddrCtx, RelType}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -126,13 +126,12 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
-    val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
     var exprConverter: ApronExprConverter[AddrCtx, RelType, Value] = null
     var apronState: ApronRecencyState[AddrCtx, RelType, Value] = null
     given lazyApronState: Lazy[ApronState[VirtualAddress[AddrCtx], RelType]] = lazily(apronState)
     given lazyExprConverter: Lazy[ApronExprConverter[AddrCtx, RelType, Value]] = lazily(exprConverter)
 
-    given relationalValue: StatelessRelationalExpr[Value, VirtAddr, RelType] with
+    given StatelessRelationalExpr[Value, VirtAddr, RelType] with
       override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
         v match
           case Value.IntValue(expr) => Some(expr)
@@ -141,12 +140,16 @@ object RelationalAnalysis extends Interpreter,
       override inline def makeRelationalExpr(expr: ApronExpr[VirtAddr, RelType]): Value =
         Value.IntValue(expr)
 
+    given StatefullRelationalExprT[Value, PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, AddrCtx, RelType].asInstanceOf
+
     val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] = new RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] (
+      initAddrTrans = Map(),
       manager = apronManager,
-      initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialMetaData = Map()
+      initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
+      initialNonRelationalStore = Map()
     )
-    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
+    import relationalStore.given
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState

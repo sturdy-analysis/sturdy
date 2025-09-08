@@ -1,6 +1,7 @@
 package sturdy.apron
 
 import sturdy.util.Lazy
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.references.{AddressTranslationState, PhysicalAddress, VirtualAddress}
 
 type StatefullRelationalExprT[Val,Addr,Type, _State] = StatefullRelationalExpr[Val,Addr,Type] { type State = _State }
@@ -10,6 +11,7 @@ trait StatefullRelationalExpr[Val, Addr, Type]:
   def makeRelationalExprPure(expr: ApronExpr[Addr,Type], state: State): (Val,State)
   inline def getRelationalExpr(v: Val): Option[ApronExpr[Addr, Type]] = withInternalState(getRelationalExprPure(v, _))
   inline def makeRelationalExpr(expr: ApronExpr[Addr, Type]): Val = withInternalState(makeRelationalExprPure(expr, _))
+  def getMetaData(v: Val): Option[(FloatSpecials, Type)]
   def withInternalState[A](f: State => (A,State)): A
 
 trait StatelessRelationalExpr[Val, Addr, Type]:
@@ -22,26 +24,25 @@ given RelationalValueApronExpr[Addr, Type]: StatelessRelationalExpr[ApronExpr[Ad
 
 given RelationalValueApronExprPhysicalAddress[Val, Ctx, Type]
   (using
-   virtRelationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type],
+   stateless: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type],
    convertExpr: Lazy[ApronExprConverter[Ctx, Type, Val]]
   ): StatefullRelationalExpr[Val, PhysicalAddress[Ctx], Type] with
   type State = convertExpr.value.State
 
   override def getRelationalExprPure(v: Val, state: State): (Option[ApronExpr[PhysicalAddress[Ctx], Type]],State) = {
-    virtRelationalValue.getRelationalExpr(v) match
+    stateless.getRelationalExpr(v) match
       case Some(expr) =>
         val (ret, convertExprState) = convertExpr.value.virtToPhysPure(expr, state)
         (Some(ret), convertExprState)
       case None => (None, state)
   }
 
-  override def makeRelationalExprPure(expr: ApronExpr[PhysicalAddress[Ctx], Type], state: State): (Val, State) =
-    (virtRelationalValue.makeRelationalExpr(convertExpr.value.physToVirt(expr)), state)
+  override def makeRelationalExprPure(physExpr: ApronExpr[PhysicalAddress[Ctx], Type], state1: State): (Val, State) =
+    val (virtExpr, state2) = convertExpr.value.physToVirtPure(physExpr, state1)
+    (stateless.makeRelationalExpr(virtExpr), state2)
 
-  override def withInternalState[A](f: (State) => (A, State)): A =
-    convertExpr.value.addrTrans.withInternalState(addrTransState1 =>
-      convertExpr.value.recencyStore.withInternalState(recStoreState1 =>
-        val (a,(addrTransState2,recStoreState2)) = f((addrTransState1,recStoreState1))
-        ((a, addrTransState2),recStoreState2)
-      )
-    )
+  override def getMetaData(v: Val): Option[(FloatSpecials, Type)] =
+    stateless.getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
+
+  override def withInternalState[A](f: State => (A, State)): A =
+    convertExpr.value.recencyStore.withInternalState(s => f(s.asInstanceOf[State]).asInstanceOf[(A,convertExpr.value.recencyStore.State)])

@@ -150,10 +150,10 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
             PushResult.Continue(None)
           case Some(cachedIn) =>
             LinearStateOperationCounter.wideningCounter += 1
-            val inWidenedWithCache = Profiler.addTime("widen"){state.widenIn(dom)(cachedIn, in)}
+            val inWidenedWithCache = Profiler.addTime("widen"){state.widenIn[Unit](dom)(((),cachedIn), ((),in))}
             if (inWidenedWithCache.hasChanged || info.frameIdWithInStateOfCache.isEmpty) {
               // call is semi-recurrent: output state occurs in the cache but for an incompatible input state
-              val newIn = inWidenedWithCache.get
+              val newIn = inWidenedWithCache.get._2
               if (Fixpoint.DEBUG)
                 println(s"${stackHeightIndent}PUSH SEMI-RECURRENT $frame:$newIn")
 
@@ -201,7 +201,7 @@ final class StackedFrames[Dom, Codom, Ctx, In, Out]
       Unchanged(in)
     case Some(recurrentIn) =>
       LinearStateOperationCounter.wideningCounter += 1
-      val newIn = Profiler.addTime("widen"){state.widenIn(frame.dom)(recurrentIn, in)}
+      val newIn = Profiler.addTime("widen"){state.widenIn[Unit](frame.dom)(((),recurrentIn), ((),in))}.map(_._2)
       if (newIn.hasChanged)
         inCache.put(frame, newIn.get)
       newIn

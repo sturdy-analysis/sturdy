@@ -47,8 +47,8 @@ class EffectStack(_effects: => Effect,
 
   private lazy val effects: Effect = _effects
 
-  private def inEffects(dom: Any): Effect = _inEffects.applyOrElse(dom, _ => effects)
-  private def outEffects(dom: Any): Effect = _outEffects.applyOrElse(dom, _ => effects)
+  def inEffects(dom: Any): Effect = _inEffects.applyOrElse(dom, _ => effects)
+  def outEffects(dom: Any): Effect = _outEffects.applyOrElse(dom, _ => effects)
 
   final override type All = Any
   final override type In = Any
@@ -69,11 +69,11 @@ class EffectStack(_effects: => Effect,
   override def setStateNonMonotonically(st: State): Unit =
     effects.setStateNonMonotonically(st.asInstanceOf)
 
-  override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
-  override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def joinIn[Body](using Join[Body])(dom: Any): Join[(Body,In)] = (in1: (Body,In), in2: (Body,In)) => inEffects(dom).joinClosingOver(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def widenIn[Body](using Widen[Body])(dom: Any): Widen[(Body,In)] = (in1: (Body,In), in2: (Body,In)) => inEffects(dom).widenClosingOver(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
-  override def joinOut[Codom](using Join[Codom])(dom: Any): Join[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).joinClosingOver[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
-  override def widenOut[Codom](using Widen[Codom])(dom: Any): Widen[(Codom,Out)] = (v1: (Codom,Out), v2: (Codom,Out)) => outEffects(dom).widenClosingOver[Codom](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def joinOut[Body](using Join[Body])(dom: Any): Join[(Body,Out)] = (v1: (Body,Out), v2: (Body,Out)) => outEffects(dom).joinClosingOver[Body](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def widenOut[Body](using Widen[Body])(dom: Any): Widen[(Body,Out)] = (v1: (Body,Out), v2: (Body,Out)) => outEffects(dom).widenClosingOver[Body](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
 
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf

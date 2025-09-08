@@ -16,13 +16,13 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
   private var store: Map[A, V] = _init
 
   override def read(xs: AA): JOptionA[V] =
-    readPure(xs, store)
+    readPure(xs, store)._1
 
-  override def readPure(xs: AA, state: State): JOptionA[V] =
+  override def readPure(xs: AA, state: State): (JOptionA[V],State) =
     if (xs.isEmpty)
-      JOptionA.None()
+      (JOptionA.None(),state)
     else
-      xs.reduce(x => JOptionA(state.get(x)))
+      (xs.reduce(x => JOptionA(state.get(x))),state)
 
   override def writePure(xs: AA, v: V, state: State): State =
     var store = state

@@ -43,14 +43,13 @@ class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends 
 
 
 trait BreakIf[B](using effectStack: EffectStack):
-  def breakIf(cond: B)(break: effectStack.State => Unit): Unit
+  def breakIf(cond: B)(break: => Unit): Unit
   def assertCondition(cond: B, state: effectStack.State): Unit
 
 given ConcreteBreakIf(using failure: Failure, effectStack: EffectStack): BreakIf[Boolean] with
-  override def breakIf(cond: Boolean)(break: effectStack.State => Unit): Unit =
-    val state = effectStack.getState
+  override def breakIf(cond: Boolean)(break: => Unit): Unit =
     if(cond) {
-      break(state)
+      break
     }
 
   override def assertCondition(cond: Boolean, state: effectStack.State): Unit =

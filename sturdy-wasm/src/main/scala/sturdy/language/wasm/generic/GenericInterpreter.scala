@@ -62,7 +62,7 @@ enum JumpTarget:
 
 given Finite[JumpTarget] with {}
 
-case class WasmException[V](target: JumpTarget, operands: List[V], breakIfState: Option[BreakIfState[V]])
+case class WasmException[V](target: JumpTarget, operands: List[V], breakIfState: JOptionA[BreakIfState[V]])
 case class BreakIfState[V](condition: V, state: Any)
 
 type Imports = Map[String, ModuleInstance]
@@ -487,15 +487,18 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case BrIf(labelIndex) =>
       val x = stack.popOrAbort()
       val cond = eqOps.neq(x, i32ops.integerLit(0))
-      breakIfOps.breakIf(cond) { state =>
-        branch(labelIndex, Some(BreakIfState(cond,state)))
+      breakIfOps.breakIf(cond) {
+        val returnArity = labelStack.lookupReturnArity(labelIndex)
+        val operands = stack.popNOrAbort(returnArity)
+        val state = effectStack.getState
+        throws(WasmException(JumpTarget.Jump(labelIndex), operands, JOptionA.Some(BreakIfState(cond,state))))
       }
     case BrTable(labels, defaultLabel) =>
       val ix = stack.popOrAbort()
-      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch(_))
+      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      throws(WasmException(JumpTarget.Return, operands, None))
+      throws(WasmException(JumpTarget.Return, operands, JOptionA.None()))
     case Call(funcIdx) =>
       val func = module.functions.lift(funcIdx).getOrElse(fail(UnboundFunctionIndex, funcIdx.toString))
       invoke(func, loc)
@@ -514,17 +517,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private inline def not(cond: V): V =
     eqOps.equ(cond, i32ops.integerLit(0))
 
-  def branch(labelIndex: LabelIdx, breakCondition: Option[BreakIfState[V]] = None): Unit =
+  def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    throws(WasmException(JumpTarget.Jump(labelIndex), operands, breakCondition))
+    throws(WasmException(JumpTarget.Jump(labelIndex), operands, JOptionA.None()))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
 
-  private inline def assertFrameSize(size: Int): Unit = {
-//    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
-//      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+  private def assertFrameSize(size: Int): Unit = {
+    if (stack.frameSize != size)
+      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
   }
 
   def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
@@ -544,10 +547,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         ex match {
           case WasmException(JumpTarget.Jump(labelIndex), operands, breakIfState) =>
             if (labelIndex == 0) {
+              breakIfState.option(default = ()) { case BreakIfState(cond,state) =>
+                effectStack.setStateNonMonotonically(state)
+              }
               stack.pushN(operands)
-              breakIfState match
-                case Some(BreakIfState(cond, state)) => breakIfOps.assertCondition(cond, state)
-                case None => {}
               assertFrameSize(arities.jumpOperands)
               for ((i, loc) <- branchTarget)
                 eval(i, loc)
