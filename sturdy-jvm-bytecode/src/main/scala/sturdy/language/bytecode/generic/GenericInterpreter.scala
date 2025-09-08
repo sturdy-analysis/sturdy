@@ -536,24 +536,20 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         stack.push(obj)
 
       // Arrays opcode 188 - 190
-      case inst: NEWARRAY =>
-        val size = stack.popOrAbort()
-        val array = createArray(size, inst.arrayType, site)
-        stack.push(array)
-      case inst: ANEWARRAY =>
-        val size = stack.popOrAbort()
-        val array = createArray(size, inst.arrayType, site)
-        stack.push(array)
-      case inst: ARRAYLENGTH.type =>
+      case NEWARRAY(componentType) =>
+        handleNewArray(componentType, site)
+
+      case ANEWARRAY(componentType) =>
+        handleNewArray(componentType, site)
+
+      case ARRAYLENGTH =>
         val array = stack.popOrAbort()
         stack.push(arrayOps.arrayLength(array))
-
 
       // athrow opcode 191
       case ATHROW =>
         val thrown = stack.popOrAbort()
         except.throws(JvmExcept.ThrowObject(thrown))
-
 
       // checkcast opcode 192
       case CHECKCAST(referenceType) =>
@@ -597,10 +593,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         throw UnsupportedOperationException("unsupported instruction: wide")
 
       // multianewarray opcode 197
-      case inst: MULTIANEWARRAY =>
-        val dims = stack.popNOrAbort(inst.dimensions)
-        stack.push(createNDArray(inst.dimensions, inst.arrayType, dims.reverse, site))
-        counter = 0
+      case MULTIANEWARRAY(arrayType, dimensions) =>
+        val dims = stack.popNOrAbort(dimensions)
+        dims.foreach: dim =>
+          branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
+            except.throws(JvmExcept.Throw(ClassType.NegativeArraySizeException))
+          } {}
+        val arrayref = createNDArray(dimensions, arrayType, dims.reverse, site)
+        stack.push(arrayref)
 
       // ifnull, ifnonnull opcode 198 - 199
       case inst: IFNULL =>
@@ -683,12 +683,20 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     val fields = inheritedFields.flatMap(buildFieldSeq(site))
     objectOps.makeObject(objAlloc(site), cf, fields)
 
-  def createArray(size: V, compType: ArrayType, site: Site): V =
+  private def handleNewArray(componentType: FieldType, site: Site): Unit =
+    val count = stack.popOrAbort()
+    val arrayref = branchOpsV.boolBranch(compareOps.lt(count, i32ops.integerLit(0))) {
+      except.throws(JvmExcept.Throw(ClassType.NegativeArraySizeException))
+    } {
+      createArray(count, componentType, site)
+    }
+    stack.push(arrayref)
+
+  def createArray(size: V, componentType: FieldType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
-    val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
-      .zipWithIndex.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2)))
-    val array = arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, compType, size)
-    array
+    val convertedArrayVals = arrayVals.zipWithIndex.map: tuple =>
+      (defaultValue(componentType), Site.ArrayElementInitialization(site, tuple._2))
+    arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, ArrayType(componentType), size)
 
   private var counter = 0
   def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: Site): V =
