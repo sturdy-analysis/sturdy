@@ -40,9 +40,3 @@ enum Site:
   case StaticInitialization(obj: ClassType, name: String)
   // not created within the program
   case External
-
-  // deconstructs the instruction into a tuple containing the fields of the Instruction variant or fails using Failure
-  def deconstructInstruction()(using failure: Failure): (Method, Int, Int) =
-    this match
-      case Site.Instruction(mth, pc, variant) => (mth, pc, variant)
-      case _ => failure.fail(IncorrectSiteVariant, s"expected an instruction site, got $this")

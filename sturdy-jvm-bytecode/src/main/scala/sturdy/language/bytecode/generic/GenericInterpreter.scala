@@ -599,7 +599,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
             except.throws(JvmExcept.Throw(ClassType.NegativeArraySizeException))
           } {}
-        val arrayref = createNDArray(dimensions, arrayType, dims.reverse, site)
+        val arrayref = createMultiArray(arrayType, dims, site)
         stack.push(arrayref)
 
       // ifnull, ifnonnull opcode 198 - 199
@@ -698,36 +698,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       (defaultValue(componentType), Site.ArrayElementInitialization(site, tuple._2))
     arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, ArrayType(componentType), size)
 
-  private var counter = 0
-  def createNDArray(numDims: Int, compType: ArrayType, dims: List[V], site: Site): V =
-    val (mth, pc, _) = site.deconstructInstruction()
-    if (numDims == 2)
-      val counterSnap = counter
-      //println("ND IF: " + counterSnap)
-      counter += 1
-      val temp = arrayOps.initArray(dims(1))
-      val temp2 = temp.zipWithIndex.map(vals => (create2DArray(dims.head, compType, Site.Instruction(mth, pc)), Site.ArrayElementInitialization(Site.Instruction(mth, pc, counterSnap), vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(Site.Instruction(mth, pc, counterSnap)), temp2, compType, dims(1))
-      array
-    else
-      val counterSnap = counter
-      //println("ND Else: " + counterSnap)
-      counter += 1
-      val temp = arrayOps.initArray(dims(numDims-1))
-      val temp2 = temp.zipWithIndex.map(vals => (createNDArray(numDims-1, compType.componentType.asArrayType, dims, site), Site.ArrayElementInitialization(Site.Instruction(mth, pc, counterSnap), vals._2)))
-      val array = arrayOps.makeArray(arrayAlloc(Site.Instruction(mth, pc, counterSnap)), temp2, compType, dims(numDims-1))
-      array
-
-  def create2DArray(size: V, compType: ArrayType, site: Site): V =
-    val (mth, pc, _) = site.deconstructInstruction()
-    val counterSnap = counter
-    //println("2D: " + counterSnap)
-    counter += 1
-    val arrayVals = arrayOps.initArray(size)
-    val convertedArrayVals = arrayVals.map(_ => compType.elementType).map(convertTypes).map(defaultValue)
-      .zipWithIndex.map(vals => (vals._1, Site.ArrayElementInitialization(Site.Instruction(mth, pc, counterSnap), vals._2)))
-    val array = arrayOps.makeArray(arrayAlloc(Site.Instruction(mth, pc, counterSnap)), convertedArrayVals, compType, size)
-    array
+  private def createMultiArray(arrayType: ArrayType, dims: List[V], site: Site): V =
+    val (size, elementSupplier) = dims match
+      case size :: Nil => (size, () => defaultValue(arrayType.componentType))
+      case size :: xs => (size, () => createMultiArray(arrayType.componentType.asArrayType, xs, site))
+      case Nil => throw IllegalStateException("dims.size must be >= 1 at all times")
+    val initialArray = arrayOps.initArray(size)
+    val filledArray = initialArray.zipWithIndex.map: tuple =>
+      (elementSupplier(), Site.ArrayElementInitialization(site, tuple._2))
+    arrayOps.makeArray(arrayAlloc(site), filledArray, arrayType, size)
 
   def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
     invoke(mth, obj +: args)
