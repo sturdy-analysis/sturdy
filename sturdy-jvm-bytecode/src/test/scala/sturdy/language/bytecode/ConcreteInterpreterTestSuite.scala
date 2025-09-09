@@ -204,7 +204,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       val path = paths.head
       test(path.subpath(path.getNameCount - 3, path.getNameCount).toString):
         // TODO: fix cancelAfter
-        cancelAfter(Span(1, Minutes)):
+        // cancelAfter(Span(1, Minutes)):
           assertCase(paths)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
