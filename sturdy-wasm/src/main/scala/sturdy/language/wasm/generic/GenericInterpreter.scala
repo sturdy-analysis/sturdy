@@ -616,7 +616,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     (funcs.result(), globs.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None, hostModules: HostModules = HostModules(("wasi_snapshot_preview1", wasi_snapshot_preview1))): ModuleInstance = external {
+  def initializeModule(module: Module, imports: Imports = Map.empty, moduleId: Option[Any] = None, hostModules: HostModules = HostModules(("wasi_snapshot_preview1", wasi_snapshot_preview1), ("wasi_unstable", wasi_unstable))): ModuleInstance = external {
     initializeThis()
 
     val modInst = new ModuleInstance(moduleId)
