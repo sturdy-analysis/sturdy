@@ -14,6 +14,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.{DecidableSymbolTable, SymbolTable}
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
+import sturdy.language.bytecode.AuxiliaryFunctions
 import sturdy.language.bytecode.abstractions.{InvokeType, Site}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.values.MaybeChanged.Unchanged
@@ -421,15 +422,13 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, _) =>
-        ensureInitialization(site)(declaringClass)
-        val addr = staticFieldTable.get(declaringClass, name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
+        val addr = getStaticFieldAddr(site, declaringClass, name)
         val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, name))
         stack.push(v)
 
       case PUTSTATIC(declaringClass, name, _) =>
-        ensureInitialization(site)(declaringClass)
+        val addr = getStaticFieldAddr(site, declaringClass, name)
         val v = stack.popOrAbort()
-        val addr = staticFieldTable.get(declaringClass, name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
         store.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
@@ -926,6 +925,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     cf.findMethod(name, descriptor).orElse:
       cf.superclassType.flatMap: superCf =>
         findMethod(findClassFile(superCf), name, descriptor)
+
+  private def getStaticFieldAddr(site: Site, declaringClass: ClassType, name: String)(using Fixed): Addr =
+    ensureInitialization(site)(declaringClass)
+    val resolvedField = AuxiliaryFunctions.resolveField(project.classFile(declaringClass).get, (declaringClass, name))(using project).getOrElse:
+      except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+    staticFieldTable.get(resolvedField.classFile.thisType, resolvedField.name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
 
   def invokeClassMethod(mth: Method, args: Seq[V]): V =
     mth.name match

@@ -2,11 +2,12 @@ package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
 import org.opalj.br.reader.Java8Framework
-import org.opalj.br.{ClassFile, ClassType, Method, MethodDescriptor}
+import org.opalj.br.{ClassFile, ClassType, Field, Method, MethodDescriptor}
 import sturdy.effect.failure.Failure
 import sturdy.language.bytecode.generic.BytecodeFailure.*
 
 import java.net.URL
+import scala.annotation.tailrec
 
 object AuxiliaryFunctions:
   def findMethodOfSuperclass(classFile: ClassFile, name: String, sig: MethodDescriptor, project: Project[URL])(using f: Failure): Method =
@@ -38,3 +39,19 @@ object AuxiliaryFunctions:
       val nextInherit = project.classHierarchy.supertypeInformation(inheritedObj).get.classTypes.last
         cf.findMethod(name, sig)
           .getOrElse(findInheritedMethodOfSuperclass(obj, name, sig, nextInherit, project))
+
+  // predicate to check whether a field matches a fieldname
+  private def nameMatches(name: (ClassType, String))(field: Field): Boolean =
+    field.name == name._2
+
+  // TODO: access control
+  // TODO: field type checking (currently, only name and class are considered)
+  // - consider implementing a field descriptor type to facilitate this
+  @tailrec
+  def resolveField(c: ClassFile, name: (ClassType, String))(using project: Project[URL]): Option[Field] =
+    var candidate: Option[Field] = None
+    candidate = c.fields.find(nameMatches(name)).orElse:
+      project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(nameMatches(name))
+    if candidate.isDefined then return candidate
+    if c.superclassType.isEmpty then return None
+    resolveField(project.classFile(c.superclassType.get).get, name)
