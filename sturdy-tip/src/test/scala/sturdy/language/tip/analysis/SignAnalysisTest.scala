@@ -5,6 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.control.ControlEventGraphBuilder
 import sturdy.effect.EffectStack
 import sturdy.effect.print.given
 import sturdy.effect.allocation.CAllocatorIntIncrement
@@ -42,13 +43,14 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter( p =>
-    !p.toString.endsWith("00Stack.tip") && !p.toString.endsWith("Ten.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
+    !p.toString.endsWith("00Stack.tip") && p.toString.endsWith("double_call.tip") && !p.toString.endsWith("00.tip") && p.toString.endsWith(".tip")
   ).sorted.foreach { p =>
 //    it must s"soundly analyze ${p.getFileName} with stacked states" in {
 //      runSignAnalysis(p, StackConfig.StackedStates())
 //    }
     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
-      runSignAnalysis(p, StackConfig.StackedCfgNodes())
+      //runSignAnalysis(p, StackConfig.StackedCfgNodes())
+      runSignAnalysis(p, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true))
     }
   }
 
@@ -60,6 +62,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
+
+      val builder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
 //      val onlyCalls = false
 //      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
@@ -74,6 +78,9 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       given CAllocatorIntIncrement[AllocationSite] = interp.alloc
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+
+      println(builder.get.toGraphViz)
+
       (aresult, analysis)
     } else {
       null
