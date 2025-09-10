@@ -483,18 +483,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         label(BlockId(ifInst -> true), ars, thnInsts, None)
       }
     case Br(labelIndex) =>
-      branch(labelIndex)
+      breakIfOps.break { state =>
+        branch(labelIndex, JOptionA.Some(BreakIfState(i32ops.integerLit(1),state)))
+      }
     case BrIf(labelIndex) =>
       val x = stack.popOrAbort()
       val cond = eqOps.neq(x, i32ops.integerLit(0))
       breakIfOps.breakIf(cond) { state =>
-        val returnArity = labelStack.lookupReturnArity(labelIndex)
-        val operands = stack.popNOrAbort(returnArity)
-        throws(WasmException(JumpTarget.Jump(labelIndex), operands, JOptionA.Some(BreakIfState(cond,state))))
+        branch(labelIndex, JOptionA.Some(BreakIfState(cond,state)))
       }
     case BrTable(labels, defaultLabel) =>
       val ix = stack.popOrAbort()
-      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
+      breakIfOps.break{ state =>
+        indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch(_, JOptionA.Some(BreakIfState(i32ops.integerLit(1),state))))
+      }
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
       throws(WasmException(JumpTarget.Return, operands, JOptionA.None()))
@@ -513,13 +515,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
-  private inline def not(cond: V): V =
-    eqOps.equ(cond, i32ops.integerLit(0))
-
-  def branch(labelIndex: LabelIdx): Unit =
+  def branch(labelIndex: LabelIdx, breakIfState: JOptionA[BreakIfState[V]] = JOptionA.None()): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    throws(WasmException(JumpTarget.Jump(labelIndex), operands, JOptionA.None()))
+    throws(WasmException(JumpTarget.Jump(labelIndex), operands, breakIfState))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)

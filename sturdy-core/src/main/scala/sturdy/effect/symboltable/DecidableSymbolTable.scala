@@ -68,7 +68,6 @@ trait SizedDecidableSymbolTable[Key, Entry] extends SizedSymbolTable[Key, Int, E
       MaybeChanged(Table(entriesJoined.get, limitJoined.get),
         entriesJoined.hasChanged || limitJoined.hasChanged)
 
-
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
 
@@ -156,61 +155,29 @@ class ConcreteSizedTable[Key, Entry] extends SizedDecidableSymbolTable[Key, Entr
 }
 
 class JoinableDecidableSymbolTable[Key, Symbol, Entry](using Join[Entry], Widen[Entry], Finite[Key], Finite[Symbol]) extends DecidableSymbolTable[Key, Symbol, Entry]:
-  override type State = Map[Key, Map[Symbol, Entry]]
+  override type State = JoinableDecidableSymbolTableState
 
-  override def getState: State = tables
+  override def getState: State = JoinableDecidableSymbolTableState(tables)
 
-  override def setState(st: State): Unit = tables = st
+  override def setState(st: State): Unit = tables = st.tables
 
   override def join: Join[State] = implicitly
 
   override def widen: Widen[State] = implicitly
+
+  case class JoinableDecidableSymbolTableState(tables: Map[Key, Map[Symbol, Entry]]):
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: JoinableDecidableSymbolTableState => MapEquals(this.tables, other.tables, (table1, table2) => MapEquals(table1, table2))
+        case _ => false
+
+  given CombineJoinableDecidableSymbolTableState[W <: Widening](using combineMaps: Combine[Map[Key, Map[Symbol, Entry]],W]): Combine[JoinableDecidableSymbolTableState, W] with
+    override def apply(v1: JoinableDecidableSymbolTableState, v2: JoinableDecidableSymbolTableState): MaybeChanged[JoinableDecidableSymbolTableState] =
+      combineMaps(v1.tables, v2.tables).map(JoinableDecidableSymbolTableState.apply)
+
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     for(tab <- tables.values.iterator;
         entry <- tab.values.iterator;
         addr <- valueIterator(entry))
       yield(addr)
-
-  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new SymbolTableJoiner[A])
-
-  class SymbolTableJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = tables
-    private var fTables: Map[Key, Map[Symbol, Entry]] = null
-
-    override def inbetween(fFailed: Boolean): Unit =
-      fTables = tables
-      tables = snapshot
-
-    override def retainNone(): Unit =
-      tables = snapshot
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      tables = fTables
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
-    // nothing
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (fTables.size != tables.size)
-        throw new IllegalStateException()
-      var joined = Map[Key, Map[Symbol, Entry]]()
-      for ((key, fmap) <- fTables) {
-        var joinedMap = Map[Symbol, Entry]()
-        val gmap = tables(key)
-        if (fmap.size != gmap.size)
-          throw new IllegalStateException()
-        for ((sym, fentry) <- fmap) {
-          val gentry = gmap(sym)
-          joinedMap += sym -> Join(fentry, gentry).get
-        }
-        joined += key -> joinedMap
-      }
-      tables = joined
-  }
-
-
-
-//  override type State = Map[Key, Map[Symbol, Entry]]
-//  override def getState: Map[Key, Map[Symbol, Entry]] = tables
-//  override def setState(tables: Map[Key, Map[Symbol, Entry]]): Unit = this.tables = tables

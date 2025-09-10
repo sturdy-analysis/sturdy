@@ -63,6 +63,7 @@ given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[
 given BaseTypeBreakIf[B](using effectStack: EffectStack): BreakIf[BaseType[Boolean]] with
   override type State = Unit
 
+  override def break(br: State => Unit): Unit = br(())
   override def breakIf(cond: BaseType[Boolean])(break: State => Unit): Unit =
     joinComputations { } { break(()) }
 

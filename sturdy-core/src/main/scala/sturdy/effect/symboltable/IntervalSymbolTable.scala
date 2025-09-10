@@ -16,7 +16,7 @@ import scala.util.boundary.break
 class IntervalSymbolTable[Key: Finite, Symbol: IntervalRange, Entry: Join, Size: IntervalRange](using EffectStack)
     extends SizedSymbolTable[Key, Symbol, Entry, Size, WithJoin], Effect:
 
-  private val constantSymbolTable: SizedConstantTable[Key, Entry] = new SizedConstantTable()
+  val constantSymbolTable: SizedConstantTable[Key, Entry] = new SizedConstantTable()
 
   override def get(key: Key, symbol: Symbol): JOption[WithJoin, Entry] =
     IntervalRange[Symbol].range(symbol) match

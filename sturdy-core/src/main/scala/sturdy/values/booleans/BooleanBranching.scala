@@ -45,6 +45,7 @@ class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends 
 
 trait BreakIf[B]:
   type State
+  def break(br: State => Unit): Unit
   def breakIf(cond: B)(break: State => Unit): Unit
   def assertCondition(cond: B, state: State): Unit
   def joinClosingOver[Body](using Join[Body]): Join[(Body,State)]
@@ -52,6 +53,10 @@ trait BreakIf[B]:
 
 given ConcreteBreakIf(using failure: Failure, effectStack: EffectStack): BreakIf[Boolean] with
   type State = effectStack.State
+
+  override def break(br: State => Unit): Unit =
+    br(effectStack.getState)
+
   override def breakIf(cond: Boolean)(break: State => Unit): Unit =
     if(cond) {
       break(effectStack.getState)

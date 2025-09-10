@@ -11,6 +11,7 @@ final class LiftedBooleanBranching[B, VB, R](extract: B => VB)(using ops: Boolea
 
 final class LiftedBreakIf[B,VB](extract: B => VB)(using val ops: BreakIf[VB]) extends BreakIf[B]:
   override type State = ops.State
+  inline override def break(br: ops.State => Unit): Unit = ops.break(br)
   inline override def breakIf(cond: B)(break: State => Unit): Unit = ops.breakIf(extract(cond))(break)
   inline override def assertCondition(cond: B, state: State): Unit = ops.assertCondition(extract(cond), state)
   inline override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = ops.joinClosingOver

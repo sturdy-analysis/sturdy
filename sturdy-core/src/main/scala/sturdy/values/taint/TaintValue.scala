@@ -150,6 +150,7 @@ given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBra
 
 private final class TaintBreakIf[V](using val ops: BreakIf[V]) extends BreakIf[TaintProduct[V]]:
   override type State = ops.State
+  inline override def break(br: ops.State => Unit): Unit = ops.break(br)
   inline override def breakIf(cond: TaintProduct[V])(break: State => Unit): Unit = ops.breakIf(cond.value)(break)
   inline override def assertCondition(cond: TaintProduct[V], state: State): Unit = ops.assertCondition(cond.value, state)
   inline override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = ops.joinClosingOver

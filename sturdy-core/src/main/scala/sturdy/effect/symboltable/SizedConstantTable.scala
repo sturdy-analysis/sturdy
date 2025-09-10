@@ -95,21 +95,29 @@ class SizedConstantTable[Key, Entry](using Finite[Key], Join[Entry], EffectStack
   override def putNew(key: Key): Unit =
     putNew(key, SizedSymbolTable.Limit(Topped.Actual(0), None))
 
-  override type State = Tables[Key, Entry]
-  override def getState: State = tables
-  override def setState(s: State): Unit = tables = s
-  override def join: Join[State] = JoinMap(using {
-    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
-    case (v1@Right(_), Left(_)) => Unchanged(v1)
-    case (Left(_), v2@Right(_)) => Changed(v2)
-    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
-  })
-  override def widen: Widen[State] = CombineFiniteKeyMap(using {
-    case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
-    case (v1@Right(_), Left(_)) => Unchanged(v1)
-    case (Left(_), v2@Right(_)) => Changed(v2)
-    case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
-  })
+  case class SizedConstantTableState(tables: Tables[Key,Entry]):
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: SizedConstantTableState => MapEquals(this.tables, other.tables)
+        case _ => false
+
+  override type State = SizedConstantTableState
+  override def getState: State = SizedConstantTableState(tables)
+  override def setState(s: State): Unit = tables = s.tables
+  override def join: Join[State] = (s1,s2) =>
+    JoinMap[Key,Either[Table[Int, Entry], Entry]](using {
+      case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+      case (v1@Right(_), Left(_)) => Unchanged(v1)
+      case (Left(_), v2@Right(_)) => Changed(v2)
+      case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+    }).apply(s1.tables, s2.tables).map(SizedConstantTableState.apply)
+  override def widen: Widen[State] = (s1,s2) =>
+    CombineFiniteKeyMap[Key,Either[Table[Int, Entry], Entry], Widening.Yes](using {
+      case (Right(a), Right(b)) => Join(a, b).map(Right.apply)
+      case (v1@Right(_), Left(_)) => Unchanged(v1)
+      case (Left(_), v2@Right(_)) => Changed(v2)
+      case (Left(t1), Left(t2)) => Join(t1, t2).map(Left.apply)
+    }).apply(s1.tables, s2.tables).map(SizedConstantTableState.apply)
 
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
@@ -278,3 +286,11 @@ object SizedConstantTable:
 
     def map[Symbol1, Entry1](mapSym: Symbol => Symbol1, mapEntry: Entry => Entry1): Table[Symbol1, Entry1] =
       Table(underlying.map((sym, entry) => (mapSym(sym), entry.map(mapEntry))), dirtySymbols.map(mapSym), limit)
+
+    override def equals(obj: Any): Boolean =
+      obj match
+        case other: Table[Symbol @unchecked, Entry @unchecked] =>
+          MapEquals(this.underlying, other.underlying) &&
+            this.dirtySymbols == other.dirtySymbols &&
+            this.limit == other.limit
+        case _ => false

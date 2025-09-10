@@ -38,6 +38,10 @@ given RelationalBooleanSelectionBool[Addr, Type, A: Join]
 
 given RelationalBreakIf[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,Type,Val], effectStack: EffectStack): BreakIf[ApronCons[VirtualAddress[Ctx],Type]] with
   override type State = apronState.recencyStore.State
+
+  override def break(br: State => Unit): Unit =
+    br(apronState.recencyStore.getState)
+
   override def breakIf(cond: ApronCons[VirtualAddress[Ctx], Type])(break: State => Unit): Unit =
     apronState.ifThenElse(effectStack)(cond) {
       break(apronState.recencyStore.getState)
@@ -54,6 +58,9 @@ given RelationalBreakIf[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,
 
 given RelationalBreakIfBool[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,Type,Val], effectStack: EffectStack): BreakIf[ApronBool[VirtualAddress[Ctx],Type]] with
   override type State = apronState.recencyStore.State
+
+  override def break(br: State => Unit): Unit =
+    br(apronState.recencyStore.getState)
 
   override def breakIf(cond: ApronBool[VirtualAddress[Ctx], Type])(break: State => Unit): Unit =
     apronState.ifThenElse(effectStack)(cond) {

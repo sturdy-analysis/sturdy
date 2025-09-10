@@ -18,6 +18,8 @@ given ToppedBooleanBranching[B, R](using ops: BooleanBranching[B, R])(using Effe
 given ToppedBreakIf[B](using effectStack: EffectStack): BreakIf[Topped[Boolean]] with
   type State = Unit
 
+  override def break(br: Unit => Unit): Unit = br(())
+
   override def breakIf(cond: Topped[Boolean])(break: State => Unit): Unit =
     cond match
       case Topped.Actual(true) => break(())
