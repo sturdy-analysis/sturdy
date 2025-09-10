@@ -5,7 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.control.ControlEventGraphBuilder
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.EffectStack
 import sturdy.effect.print.given
 import sturdy.effect.allocation.CAllocatorIntIncrement
@@ -54,6 +54,10 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     }
   }
 
+  /*Fixpoint.DEBUG = true
+  Fixpoint.DEBUG_INVARIANTS = true
+  Fixpoint.DEBUG_PRIOR_OUTPUT = true*/
+
   def runSignAnalysis(p: Path, stackConfig: StackConfig) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
@@ -63,6 +67,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
       val analysis = new SignAnalysis.Instance(Map(), Map(), stackConfig)
 
+      analysis.addControlObserver(new PrintingControlObserver()(println))
       val builder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
 //      val onlyCalls = false
