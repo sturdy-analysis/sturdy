@@ -4,6 +4,7 @@ import sturdy.data.{JOptionA, WithJoin}
 import sturdy.effect.EffectStack
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.{BreakIfState, JumpTarget, WasmException}
+import sturdy.values.booleans.BreakIf
 import sturdy.values.{Combine, Join, MaybeChanged, Widen, Widening}
 import sturdy.values.exceptions.{Exceptional, ExceptionalByTarget}
 
@@ -13,10 +14,10 @@ trait ExceptionByTarget extends Interpreter:
   given ExceptByTarget: Exceptional[WasmException[Value], ExcV, WithJoin] =
     new ExceptionalByTarget(e => (e.target, (e.operands,e.breakIfState)), { case (trg, (ops, breakIfState)) => WasmException(trg, ops, breakIfState) })
 
-  given JoinBreakIfState(using combineValue: Join[Value], effectStack: EffectStack): Join[BreakIfState[Value]] with
+  given JoinBreakIfState(using combineValue: Join[Value], breakIfOps: BreakIf[Bool]): Join[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      effectStack.joinClosingOver((v1.condition,v1.state), (v1.condition,v2.state)).map((condition,state) => BreakIfState(condition, state))
+      breakIfOps.joinClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v1.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))
 
-  given WidenBreakIfState(using combineValue: Widen[Value], effectStack: EffectStack): Widen[BreakIfState[Value]] with
+  given WidenBreakIfState(using combineValue: Widen[Value], breakIfOps: BreakIf[Bool]): Widen[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      effectStack.widenClosingOver((v1.condition,v1.state), (v1.condition,v2.state)).map((condition,state) => BreakIfState(condition, state))
+      breakIfOps.widenClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v1.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))

@@ -2,6 +2,7 @@ package sturdy.values.booleans
 
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{AssertionFailure, Failure}
+import sturdy.values.{Join, Widen}
 
 import scala.annotation.targetName
 
@@ -42,17 +43,24 @@ class ObservedBooleanBranching[B, R](using ops: BooleanBranching[B, R]) extends 
     ops.boolBranch(v, thn, els)
 
 
-trait BreakIf[B](using effectStack: EffectStack):
-  def breakIf(cond: B)(break: => Unit): Unit
-  def assertCondition(cond: B, state: effectStack.State): Unit
+trait BreakIf[B]:
+  type State
+  def breakIf(cond: B)(break: State => Unit): Unit
+  def assertCondition(cond: B, state: State): Unit
+  def joinClosingOver[Body](using Join[Body]): Join[(Body,State)]
+  def widenClosingOver[Body](using Widen[Body]): Widen[(Body,State)]
 
 given ConcreteBreakIf(using failure: Failure, effectStack: EffectStack): BreakIf[Boolean] with
-  override def breakIf(cond: Boolean)(break: => Unit): Unit =
+  type State = effectStack.State
+  override def breakIf(cond: Boolean)(break: State => Unit): Unit =
     if(cond) {
-      break
+      break(effectStack.getState)
     }
 
-  override def assertCondition(cond: Boolean, state: effectStack.State): Unit =
+  override def assertCondition(cond: Boolean, state: State): Unit =
     effectStack.setState(state)
     if(!cond)
       failure.fail(AssertionFailure(cond), s"Expected condition to be true, but the condition was $cond")
+
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, Any)] = throw UnsupportedOperationException()
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, Any)] = throw UnsupportedOperationException()

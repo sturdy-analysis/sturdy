@@ -61,10 +61,15 @@ given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[
     joinComputations(thn)(els)
 
 given BaseTypeBreakIf[B](using effectStack: EffectStack): BreakIf[BaseType[Boolean]] with
-  override def breakIf(cond: BaseType[Boolean])(break: => Unit): Unit =
-    joinComputations { } { break }
-  override def assertCondition(cond: BaseType[Boolean], state: effectStack.State): Unit =
-    {}
+  override type State = Unit
+
+  override def breakIf(cond: BaseType[Boolean])(break: State => Unit): Unit =
+    joinComputations { } { break(()) }
+
+  override def assertCondition(cond: BaseType[Boolean], state: State): Unit = {}
+
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = (v1,v2) => Join(v1._1,v2._1).map((_,()))
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = (v1,v2) => Widen(v1._1,v2._1).map((_,()))
 
 given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
   (t1: BaseType[B], t2: BaseType[B]) =>

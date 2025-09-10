@@ -148,6 +148,11 @@ given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[
 given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBranching[TaintProduct[V], R] with
   def boolBranch(v: TaintProduct[V], thn: => R, els: => R): R = ops.boolBranch(v.value, thn, els)
 
-given TaintBreakIf[V](using effectStack: EffectStack, ops: BreakIf[V]): BreakIf[TaintProduct[V]] with
-  override def breakIf(cond: TaintProduct[V])(break: => Unit): Unit = ops.breakIf(cond.value)(break)
-  override def assertCondition(cond: TaintProduct[V], state: effectStack.State): Unit = ops.assertCondition(cond.value, state)
+private final class TaintBreakIf[V](using val ops: BreakIf[V]) extends BreakIf[TaintProduct[V]]:
+  override type State = ops.State
+  inline override def breakIf(cond: TaintProduct[V])(break: State => Unit): Unit = ops.breakIf(cond.value)(break)
+  inline override def assertCondition(cond: TaintProduct[V], state: State): Unit = ops.assertCondition(cond.value, state)
+  inline override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = ops.joinClosingOver
+  inline override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = ops.widenClosingOver
+
+given TaintBreakIfGiven[V](using ops: BreakIf[V]): BreakIf[TaintProduct[V]] = TaintBreakIf[V]

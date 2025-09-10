@@ -83,11 +83,11 @@ final class RelationalAnalysisSimpleTest(using apronManager: apron.Manager) exte
   testFunction(simple, "test-global", List(topi32), List(i32(doubleIv(1, 2, FloatSpecials.Integer, I32Type))))
   testFunction(simple, "test-call-indirect-parametric", List(topi32), List(i32(doubleIv(0, 0, FloatSpecials.Integer, I32Type))))
   testFailingFunction(simple, "division", List(i32(ApronExpr.lit(1, I32Type)), topi32), IntegerDivisionByZero)
-  testFunction(simple, "effects", List(topi32), List(i32(doubleIv(-14, -6, FloatSpecials.Integer, I32Type))))
+  testFunction(simple, "effects", List(topi32), List(i32(doubleIv(-35, 21, FloatSpecials.Integer, I32Type))))
 
   testFunction(simple, "operand_stack_is_immutable", List(), List(i32(doubleIv(0, 0, FloatSpecials.Integer, I32Type))))
   testFunction(simple, "plus_five", List(i32(ApronExpr.lit(0, I32Type))), List(i32(doubleIv(1, 5, FloatSpecials.Integer, I32Type))))
-  testFunction(simple, "loop_to_100", List(i32(ApronExpr.lit(0, I32Type))), List(i32(doubleIv(100, 100, FloatSpecials.Integer, I32Type))))
+  testFunction(simple, "loop_to_100", List(i32(ApronExpr.lit(0, I32Type))), List(i32(doubleIv(100, Integer.MAX_VALUE, FloatSpecials.Integer, I32Type))))
   testFunction(simple, "abs", List(i32(doubleIv(-10, 10, FloatSpecials.Integer, I32Type))), List(i32(doubleIv(0, 10, FloatSpecials.Integer, I32Type))))
 
   testFunction(fact, "fac-rec", List(i64(ApronExpr.lit(1, I64Type))), List(i64(ApronExpr.lit(1, I64Type))))

@@ -109,8 +109,8 @@ trait AddressTranslation[Context: Finite] extends Effect:
 
   def nullState: State
 
-  inline def internalState: State =
-    internalStateOption.getOrElse(throw NullPointerException("AddressTranslation.internalState is null"))
+  def internalState: State =
+    internalStateOption.getOrElse(throw Error("AddressTranslation.internalState is null"))
   def internalStateOption: Option[State]
   def withInternalState[A](f: State => (A, State)): A
   def modifyInternalState(f: State => State): Unit
@@ -161,8 +161,8 @@ trait AddressTranslation[Context: Finite] extends Effect:
           PowRecency.Recent
         else if (old.contains(n))
           PowRecency.Old
-        else throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
-      case None => throw IllegalStateException(s"Virtual address ${ctx}@${n} is not bound to a physical address")
+        else throw Error(s"Virtual address ${ctx}@${n} is not bound to a physical address")
+      case None => throw Error(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
   inline def setRecency(virt: VirtualAddress[Context], powRecency: PowRecency): Unit =
     modifyInternalState(setRecencyPure(virt, powRecency, _))
@@ -259,61 +259,6 @@ trait AddressTranslation[Context: Finite] extends Effect:
 
       AddressTranslationState(mapping)
     }
-
-  def setAddressTranslationState(st: AddressTranslationState[Context]): Unit = {
-    modifyInternalState(state =>
-      AddressTranslationState[Context,State].modify(state) { addrTransState =>
-        var mapping = addrTransState.mapping
-        for ((ctx, regionState) <- st.mapping) {
-          mapping.get(ctx) match
-            case None =>
-              mapping += (ctx) -> regionState
-            case Some(regionCurrent) if regionCurrent.combineWithOlder(regionState) != regionCurrent =>
-              mapping += (ctx) -> regionCurrent.combineWithOlder(regionState)
-            case Some(_) /* if regionCurrent.combineWithOlder(regionState) == regionCurrent */ => {}
-        }
-        AddressTranslationState(mapping)
-      }
-    )
-  }
-
-  def setAddressTranslationStateNonMonotonically(st: AddressTranslationState[Context]): Unit =
-    modifyInternalState(AddressTranslationState[Context,State].set(_, st))
-
-  def setAddressTranslationStateBottom: Unit =
-    setAddressTranslationStateNonMonotonically(AddressTranslationState(Map()))
-
-  def makeAddressTranslationComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ComputationJoiner[A]:
-    val before: AddressTranslationState[Context] = internalAddressTranslationState
-    var afterFirst: AddressTranslationState[Context] = _
-
-    override def inbetween(fFailed: Boolean): Unit =
-      modifyInternalAddressTranslationState {
-        state =>
-          afterFirst = state
-          before
-      }
-
-    override def retainNone(): Unit =
-      modifyInternalAddressTranslationState(afterSecond =>
-        Join(before, Join(afterFirst.failedVirts(before), afterSecond.failedVirts(before)).get).get
-      )
-
-    override def retainFirst(fRes: TrySturdy[A]): Unit =
-      modifyInternalAddressTranslationState(afterSecond =>
-        Join(afterFirst, afterSecond.failedVirts(before)).get
-      )
-
-    override def retainSecond(gRes: TrySturdy[A]): Unit =
-      modifyInternalAddressTranslationState(afterSecond =>
-        Join(afterFirst.failedVirts(before), afterSecond).get
-      )
-
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      modifyInternalAddressTranslationState(afterSecond =>
-        Join(afterFirst, afterSecond).get
-      )
-  )
 
   def virtualAddresses: PowVirtualAddress[Context] =
     PowVirtualAddress(internalAddressTranslationState.mapping.flatMap((ctx,region) => (region.recent ++ region.old).view.map(n => VirtualAddress(ctx, n, this))).toList)
@@ -449,7 +394,7 @@ given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] =
       addrTrans.setRecency(virt1, joinedRecency.get)
       joinedRecency.map(_ => virt1)
     } else {
-      throw new IllegalArgumentException(s"Cannot join virtual addresses with different contexts $virt1, $virt2")
+      throw new CannotJoinException(s"Cannot join virtual addresses with different contexts $virt1, $virt2")
     }
 
 
@@ -548,8 +493,6 @@ def combinePowVirtualAddress[W <: Widening, Context](v1: PowVirtualAddress[Conte
       val phys1 = v1.physicalAddresses(addrTrans.leftAddressTranslationState)
       val phys2 = v2.physicalAddresses(addrTrans.rightAddressTranslationState)
       val changed = Join(phys1,phys2).hasChanged
-      if(joined.toString == "PowVirtualAddresses(L2@nesting@7,L2@nesting@8,L2@nesting@4,L2@nesting@5,L2@nesting@6,L2@nesting@9)")
-        try {throw IllegalArgumentException()} catch { case _: IllegalArgumentException => }
       MaybeChanged(joined, changed)
     case None =>
       if(v2.isEmpty)

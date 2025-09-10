@@ -487,10 +487,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case BrIf(labelIndex) =>
       val x = stack.popOrAbort()
       val cond = eqOps.neq(x, i32ops.integerLit(0))
-      breakIfOps.breakIf(cond) {
+      breakIfOps.breakIf(cond) { state =>
         val returnArity = labelStack.lookupReturnArity(labelIndex)
         val operands = stack.popNOrAbort(returnArity)
-        val state = effectStack.getState
         throws(WasmException(JumpTarget.Jump(labelIndex), operands, JOptionA.Some(BreakIfState(cond,state))))
       }
     case BrTable(labels, defaultLabel) =>
@@ -548,7 +547,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case WasmException(JumpTarget.Jump(labelIndex), operands, breakIfState) =>
             if (labelIndex == 0) {
               breakIfState.option(default = ()) { case BreakIfState(cond,state) =>
-                effectStack.setStateNonMonotonically(state)
+                breakIfOps.assertCondition(cond, state.asInstanceOf[breakIfOps.State])
               }
               stack.pushN(operands)
               assertFrameSize(arities.jumpOperands)

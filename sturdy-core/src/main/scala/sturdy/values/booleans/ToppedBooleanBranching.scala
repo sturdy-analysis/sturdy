@@ -1,7 +1,7 @@
 package sturdy.values.booleans
 
 import sturdy.data.{*, given}
-import sturdy.values.{Join, Topped}
+import sturdy.values.{Join, Topped, Widen}
 import sturdy.effect.failure.{AssertionFailure, Failure}
 import sturdy.effect.EffectStack
 
@@ -15,12 +15,16 @@ given ToppedBooleanBranching[B, R](using ops: BooleanBranching[B, R])(using Effe
     case Topped.Top => joinComputations(thn)(els)
     case Topped.Actual(b) => ops.boolBranch(b, thn, els)
 
-given ToppedBreakIf[B](using failure: Failure, effectStack: EffectStack): BreakIf[Topped[Boolean]] with
-  override def breakIf(cond: Topped[Boolean])(break: => Unit): Unit =
-    cond match
-      case Topped.Actual(true) => break
-      case Topped.Actual(false) =>
-      case Topped.Top => joinComputations { break } { }
+given ToppedBreakIf[B](using effectStack: EffectStack): BreakIf[Topped[Boolean]] with
+  type State = Unit
 
-  override def assertCondition(cond: Topped[Boolean], state: effectStack.State): Unit =
-    effectStack.setState(state)
+  override def breakIf(cond: Topped[Boolean])(break: State => Unit): Unit =
+    cond match
+      case Topped.Actual(true) => break(())
+      case Topped.Actual(false) =>
+      case Topped.Top => joinComputations { break(()) } { }
+
+  override def assertCondition(cond: Topped[Boolean], state: State): Unit = {}
+
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = (v1,v2) => Join(v1._1,v2._1).map((_,()))
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = (v1,v2) => Widen(v1._1,v2._1).map((_,()))

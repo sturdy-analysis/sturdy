@@ -1,5 +1,6 @@
 /**
  * Standard library stubs to replace libc's functions.
+ * Definitions are copied from the GNU C library (glibc) and are subject to the LGPL license.
  */
 
 #ifndef _STDLIB_H
@@ -196,8 +197,6 @@ typedef typeof(sizeof(0)) size_t;
 #   define ULONG_MAX	4294967295UL
 #  endif
 
-
-
 extern int toupper(int chr);
 extern int tolower(int chr);
 
@@ -230,8 +229,8 @@ extern void exit (int status);
 typedef __SWORD_TYPE ssize_t;
 struct _IO_FILE;
 typedef struct _IO_FILE FILE;
-extern ssize_t write (int fd, const void *buf, size_t nbytes);
-extern ssize_t read (int fd, void *buf, size_t nbytes);
+extern ssize_t write(int fd, const void *buf, size_t nbytes);
+extern ssize_t read(int fd, void *buf, size_t nbytes);
 extern size_t fwrite(const void *data, size_t size, size_t count, FILE *stream);
 extern int fputs(const char* str, FILE* fp);
 extern char* fgets (char *buf, int n, FILE* fp);

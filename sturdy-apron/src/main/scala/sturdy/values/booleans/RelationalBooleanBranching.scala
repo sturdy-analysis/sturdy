@@ -36,27 +36,37 @@ given RelationalBooleanSelectionBool[Addr, Type, A: Join]
   inline override def boolSelect(v: ApronBool[Addr, Type], ifTrue: A, ifFalse: A): A =
     apronState.ifThenElse(v)(ifTrue)(ifFalse)
 
-given RelationalBreakIf[Addr, Type](using apronState: ApronState[Addr,Type], effectStack: EffectStack): BreakIf[ApronCons[Addr,Type]] with
-  override def breakIf(cond: ApronCons[Addr, Type])(break: => Unit): Unit =
+given RelationalBreakIf[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,Type,Val], effectStack: EffectStack): BreakIf[ApronCons[VirtualAddress[Ctx],Type]] with
+  override type State = apronState.recencyStore.State
+  override def breakIf(cond: ApronCons[VirtualAddress[Ctx], Type])(break: State => Unit): Unit =
     apronState.ifThenElse(effectStack)(cond) {
-      break
+      break(apronState.recencyStore.getState)
     } {
     }
     apronState.addConstraints(cond.negated)
 
-  override def assertCondition(cond: ApronCons[Addr, Type], state: effectStack.State): Unit =
-    effectStack.setStateNonMonotonically(state)
+  override def assertCondition(cond: ApronCons[VirtualAddress[Ctx], Type], state: State): Unit =
+    apronState.recencyStore.setState(state)
     apronState.addConstraints(cond)
 
-given RelationalBreakIfBool[Addr, Type](using apronState: ApronState[Addr,Type], effectStack: EffectStack): BreakIf[ApronBool[Addr,Type]] with
-  override def breakIf(cond: ApronBool[Addr, Type])(break:  => Unit): Unit =
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = apronState.recencyStore.joinClosingOver
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = apronState.recencyStore.widenClosingOver
+
+given RelationalBreakIfBool[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,Type,Val], effectStack: EffectStack): BreakIf[ApronBool[VirtualAddress[Ctx],Type]] with
+  override type State = apronState.recencyStore.State
+
+  override def breakIf(cond: ApronBool[VirtualAddress[Ctx], Type])(break: State => Unit): Unit =
     apronState.ifThenElse(effectStack)(cond) {
-      break
+      break(apronState.recencyStore.getState)
     } {
 
     }
     apronState.addCondition(cond.negated)
 
-  override def assertCondition(cond: ApronBool[Addr, Type], state: effectStack.State): Unit =
-    effectStack.setStateNonMonotonically(state)
+  override def assertCondition(cond: ApronBool[VirtualAddress[Ctx], Type], state: State): Unit =
+    apronState.recencyStore.setState(state)
     apronState.addCondition(cond)
+
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = apronState.recencyStore.joinClosingOver
+
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = apronState.recencyStore.widenClosingOver

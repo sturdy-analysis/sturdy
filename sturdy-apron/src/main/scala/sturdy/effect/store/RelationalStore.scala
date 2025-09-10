@@ -335,9 +335,55 @@ final class RelationalStore
   override def getState: State =
     _internalState.copy(abs1 = copyAbstract1(_internalState.abs1))
 
-  override def setState(s: State): Unit =
+  override def setState(olderState: State): Unit = {
     // This ensures that old variables are never forgotten.
-    setStateNonMonotonically(widen(s, getState).get)
+
+    val beforeState = _internalState
+
+    var joinedAddrTrans: Map[Context, RecencyRegion] = Map()
+    for(ctx <- _internalState.addressTranslationState.mapping.keys ++ olderState.addressTranslationState.mapping.keys) {
+      (_internalState.addressTranslationState.mapping.get(ctx), olderState.addressTranslationState.mapping.get(ctx)) match
+        case (Some(internalRegion), Some(oldRegion)) =>
+          // Context `ctx` occurs in `olderState` and `internalState`.
+          // Hence, there is a conflict between internalState[PhysicalAddress(ctx, Recent)] and olderState[PhysicalAddress(ctx, Recent)].
+          // To avoid loosing precision when setting the state, ensure that recent variables in olderState have priority over internalState.
+          val joinedFailed = internalRegion.failed ++ oldRegion.failed
+          joinedAddrTrans += ctx -> RecencyRegion(
+            recent = oldRegion.recent -- joinedFailed,
+            old = (oldRegion.old ++ ((internalRegion.old ++ internalRegion.recent) -- oldRegion.recent)) -- joinedFailed,
+            failed = joinedFailed
+          )
+          _internalState = movePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)).asInstanceOf[PowAddr], PowersetAddr(PhysicalAddress(ctx, Recency.Old)).asInstanceOf[PowAddr], _internalState)
+        case (Some(internalRegion),None) =>
+          // Context does not occur in olderState, hence there is no conflict.
+          joinedAddrTrans += ctx -> internalRegion
+        case (None, Some(oldRegion)) =>
+          joinedAddrTrans += ctx -> oldRegion
+    }
+
+    // Then widen the `_internalState` into the `olderState`.
+    _internalState = widen(
+      olderState.withAddressTranslationState(_ => AddressTranslationState(joinedAddrTrans)),
+      _internalState.withAddressTranslationState(_ => AddressTranslationState(joinedAddrTrans))
+    ).get
+
+    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
+    assertVirtualAddressesIncludedIn(olderState.addressTranslationState, _internalState.addressTranslationState)
+  }
+
+  private def assertVirtualAddressesIncludedIn[A](addrTransSmaller: AddressTranslationState[Context], addrTransLarger: AddressTranslationState[Context]): Unit =
+    for ((ctx, regionBefore) <- addrTransSmaller.mapping) {
+      addrTransLarger.mapping.get(ctx) match
+        case Some(regionAfter) =>
+          if (!(regionBefore.recent ++ regionBefore.old ++ regionBefore.failed).subsetOf(regionAfter.recent ++ regionAfter.old ++ regionAfter.failed))
+            throw Error(s"Address translation forgot virtual addresses: " +
+              s"address translation before with [$ctx -> $regionBefore] " +
+              s"is not a subset of address translation after with [$ctx -> $regionAfter]")
+        case None =>
+          throw Error(s"Address translation forgot virtual addresses: " +
+            s"address translation before with [$ctx -> $regionBefore] " +
+            s"is not a subset of address translation after without a region for $ctx")
+    }
 
   override def setStateNonMonotonically(s: State): Unit =
     _internalState = s.copy(abs1 = copyAbstract1(s.abs1))
@@ -474,12 +520,14 @@ final class RelationalStore
       _retainBoth = true
 
 
-    override def afterJoin(): Unit =
+    override def afterJoin(): Unit = {
       if(_retainBoth) {
         _internalState = join(_leftState, _rightState).get
         _leftState = snapshotLeftJoin
         _rightState = snapshotRightJoin
       }
+      assertVirtualAddressesIncludedIn(before.addressTranslationState, _internalState.addressTranslationState)
+    }
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     nonRelationalStore.addressIterator(valueIterator)
