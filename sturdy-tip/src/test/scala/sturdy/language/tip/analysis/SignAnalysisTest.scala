@@ -50,7 +50,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //    }
     it must s"soundly analyze ${p.getFileName} with stacked frames" in {
       //runSignAnalysis(p, StackConfig.StackedCfgNodes())
-      runSignAnalysis(p, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true))
+      runSignAnalysis(p, StackConfig.StackedStates(storeIntermediateOutput = true, storeNonrecursiveOutput = true, readPriorOutput = false))
     }
   }
 
