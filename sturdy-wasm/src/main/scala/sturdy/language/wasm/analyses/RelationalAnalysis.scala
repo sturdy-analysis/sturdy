@@ -291,11 +291,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             ), expr._type)))
         case Value.Vec(_) | Value.Ref(_) | Value.TopValue => v
 
-    def constantInstructions: ConstantInstructionsLogger =
-      val constants = new ConstantInstructionsLogger
-      this.fixpoint.addContextFreeLogger(constants)
-      constants
-
 //    extension(expr: ApronExpr[VirtAddr,Type])
 //      def isConstant: Boolean =
 //        val iv = apronState.getInterval(expr)
@@ -334,26 +329,44 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             println(s"RETURN f${id.funcIx}(${args.mkString(",")} @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
           case _ => {}
 
+    def instructionsIntervals: InstructionIntervalLogger =
+      val intervalLogger = new InstructionIntervalLogger
+      this.fixpoint.addContextFreeLogger(intervalLogger)
+      intervalLogger
 
-    class ConstantInstructionsLogger extends InstructionResultLogger[Interval, Value](stack):
+    enum Info:
+      case Numeric(interval: Interval, tpe: Type)
+      case Boolean(value: Topped[Boolean])
+      case AllocationSites(sites: PowPhysAddr, size: Interval)
+      case Top
+
+    given Join[Info] = {
+      case (Info.Numeric(iv1, tpe1), Info.Numeric(iv2, tpe2)) if tpe1 == tpe2 => Join(iv1, iv2).map(Info.Numeric(_, tpe1))
+      case (Info.Boolean(b1), Info.Boolean(b2)) => Join(b1, b2).map(Info.Boolean(_))
+      case (Info.AllocationSites(sites1, size1), Info.AllocationSites(sites2, size2)) =>
+        for {
+          sites <- Join(sites1, sites2)
+          size <- Join(size1, size2)
+        } yield (Info.AllocationSites(sites, size))
+      case (Info.Top, _) => Unchanged(Info.Top)
+      case (_, Info.Top) => Changed(Info.Top)
+      case (_, _) => Changed(Info.Top)
+    }
+
+    class InstructionIntervalLogger extends InstructionResultLogger[Info, Value](stack):
       override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
       override def dummyValue: Value = Num(Int32(NumExpr(ApronExpr.constant(Interval(0, 0), I32Type))))
       
-      def getInfo(value: Value): Interval = value match
+      def getInfo(value: Value): Info = value match
         case Num(Int32(v32)) => v32 match
-          case NumExpr(v) => apronState.getInterval(v)
-          case BoolExpr(v) =>
-            apronState.getBoolean(v) match
-              case Topped.Actual(true)  => Interval(1,1)
-              case Topped.Actual(false) => Interval(0,0)
-              case Topped.Top           => Interval(0,1)
-          case AllocationSites(_, _) => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
-        case Num(Int64(v)) => apronState.getInterval(v)
-        case Num(Float32(v)) => apronState.getInterval(v)
-        case Num(Float64(v)) => apronState.getInterval(v)
-        case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Interval(Double.NegativeInfinity, Double.PositiveInfinity)
-
+          case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type)
+          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v))
+          case AllocationSites(sites, size) => Info.AllocationSites(sites, apronState.getInterval(size))
+        case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type)
+        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type)
+        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type)
+        case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
 
       def get: Map[InstLoc, List[Interval]] = instructionInfo.filter(_._2.forall (
         iv => iv.inf.isEqual(iv.sup)

@@ -100,7 +100,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     }
   }
 
-class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, aInterp: RelationalAnalysis.Instance, useTop: Boolean = false):
+class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val aInterp: RelationalAnalysis.Instance, useTop: Boolean = false):
   import aInterp.given
   import sturdy.language.wasm.analyses.RelationalAnalysisSoundness.given
 
@@ -109,6 +109,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, a
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val instructionIntervalLogger: aInterp.InstructionIntervalLogger = aInterp.instructionsIntervals
   val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
