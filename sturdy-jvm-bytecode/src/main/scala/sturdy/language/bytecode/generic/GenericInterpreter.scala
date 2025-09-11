@@ -106,7 +106,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   val project: Project[URL]
   val projectSource: String
 
-  val nativeSource: File = org.opalj.bytecode.RTJar
+  val nativeSource: File = org.opalj.bytecode.JavaBase
 
   def javaLibClassFileWrapper(obj: ClassType): String =
     val source = "classes/" ++ obj.packageName ++ "/" ++ obj.simpleName ++ ".class"

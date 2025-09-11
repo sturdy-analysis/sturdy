@@ -12,7 +12,7 @@ class FullProgramTest extends AnyFunSuite:
 
     val pWithLibrary = Project(
       new java.io.File(projectPath), // path to the JAR files/directories containing the project
-      org.opalj.bytecode.RTJar
+      org.opalj.bytecode.JavaBase
     )
 
     val mainMethods = pWithLibrary.allClassFiles.flatMap(elem => elem.findMethod("main")).filter(elem => !pWithLibrary.isLibraryType(elem.classFile.thisType))

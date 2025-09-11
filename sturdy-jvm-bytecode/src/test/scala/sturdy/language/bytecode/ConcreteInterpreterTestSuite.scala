@@ -110,7 +110,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     val caseName = testCase.getFileName.toString
     val project = Project(
       JavaClassFileReader().AllClassFiles(paths.map(_.toFile)),
-      JavaClassFileReader().ClassFiles(bytecode.RTJar),
+      JavaClassFileReader().ClassFiles(bytecode.JavaBase),
       true,
       Iterable.empty,
       (_, ex) => cancel(s"[$caseName] project setup failed: $ex")

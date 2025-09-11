@@ -23,7 +23,7 @@ object AuxiliaryFunctions:
     source
 
   def findInheritedMethodOfSuperclass(obj: ClassFile, name: String, sig: MethodDescriptor, inheritedObj: ClassType, project: Project[URL])(using f: Failure): Method =
-    val libSource = org.opalj.bytecode.RTJar
+    val libSource = org.opalj.bytecode.JavaBase
     if inheritedObj == ClassType.Object then
       // TODO: test
       val objectCF = Java8Framework.ClassFile(libSource, "classes/java/lang/Object.class").head

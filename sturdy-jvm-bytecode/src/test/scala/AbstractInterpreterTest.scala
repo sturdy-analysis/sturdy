@@ -18,7 +18,7 @@ class AbstractInterpreterTest extends AnyFunSuite:
 
     val pWithLibrary = Project(
       new java.io.File(projectPath), // path to the JAR files/directories containing the project
-      org.opalj.bytecode.RTJar
+      org.opalj.bytecode.JavaBase
     )
 
     val simpleMath: ClassFile =
@@ -48,7 +48,7 @@ class AbstractInterpreterTest extends AnyFunSuite:
 //  val classClassFile = pWithLibrary.allClassFiles.find(cls => cls.thisType == ClassType("java/lang/Class"))
 //  println(classClassFile.get.methods.size)
 //  println(classClassFile.get.methodsWithBody.size)
-//  val nativeSource = org.opalj.bytecode.RTJar
+//  val nativeSource = org.opalj.bytecode.JavaBase
 //  val source = javaLibClassFileWrapper(ClassType("java/lang/Class"))
 //  val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
 //  println(cfs.methods.size)

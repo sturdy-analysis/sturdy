@@ -139,7 +139,7 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
     )
   )
 
-val opalCommit = "48991def3e1b61d376af7c77c94d24124b417187"
+val opalCommit = "fc0b1f52b3f8812450e73b4af742e8bdaf11d93e"
 val opal = uri(s"https://github.com/opalj/opal.git#$opalCommit")
 
 lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
