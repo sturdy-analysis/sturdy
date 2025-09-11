@@ -2,7 +2,7 @@ package sturdy.language.bytecode
 
 import org.opalj.br.analyses.Project
 import org.opalj.br.analyses.Project.JavaClassFileReader
-import org.opalj.br.instructions.{InvocationInstruction, LoadString}
+import org.opalj.br.instructions.{InvocationInstruction, LoadClass, LoadString}
 import org.opalj.br.{ArrayType, ClassType, IntegerType, Method, MethodDescriptor, ReferenceType}
 import org.opalj.bytecode
 import org.scalatest.Inspectors.forEvery
@@ -11,10 +11,11 @@ import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Minutes, Span}
+import sturdy.effect.except.ConcreteSturdyException
 import sturdy.effect.failure.CFailureException
-import sturdy.language.bytecode.ConcreteRefValues.{NullValue, nonNullArray}
+import sturdy.language.bytecode.ConcreteRefValues.nonNullArray
 import sturdy.language.bytecode.abstractions.Site
+import sturdy.language.bytecode.generic.JvmExcept
 
 import java.net.URL
 import java.nio.file.{Files, NoSuchFileException, Path, Paths}
@@ -102,6 +103,7 @@ class SelectiveSuite extends ConcreteInterpreterTestSuite:
   runTestCases(TestCases.includedTests)
 
 val delegatedMethodNames = Seq("runPositive", "runNegative", "loadPositive", "loadNegative", "instantiatePositive", "instantiateNegative")
+val supportedDelegatedMethods = Seq("runPositive", "runNegative")
 
 class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   // if the harness fails, the test is canceled
@@ -150,54 +152,91 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
 
     if calledDelegatedMethods.isEmpty then
       // tests that don't call delegate methods are expected to be positive tests
-      runPositive(project, testCase, caseName)(rootRun)
-    else if !calledDelegatedMethods.contains("runPositive") then
-      // TODO: better handling for other delegated methods
-      if calledDelegatedMethods.contains("runNegative") then
-        cancel(s"[$caseName] TODO: negative tests are currently ignored")
-      else
-        val targets = runBody.flatMap: p =>
-          Option.when(p.instruction.isInvocationInstruction)(p.instruction.asInvocationInstruction)
-        cancel(s"[$caseName] loading/instantiating tests are currently ignored. this test contains the following invocation instructions:\n" + targets.mkString("\n"))
+      return runPositive(project, testCase, caseName)(rootRun)
+    // no delegated methods that we currently support
+    if calledDelegatedMethods.intersect(supportedDelegatedMethods).isEmpty then
+      // TODO: run these as well
+      val targets = runBody.flatMap: p =>
+        Option.when(p.instruction.isInvocationInstruction)(p.instruction.asInvocationInstruction)
+      cancel(s"[$caseName] loading/instantiating tests are currently ignored. this test contains the following invocation instructions:\n" + targets.mkString("\n"))
+
+    // attempt to parse the information for each delegated method call
+    import scala.collection.mutable
+    // map of class names invoked by each delegated method
+    val invocationMap = mutable.Map.from:
+      delegatedMethodNames.map:
+        _ -> mutable.ListBuffer[String]()
+    // map of loaded classes
+    val classMap = mutable.Map.from:
+      delegatedMethodNames.map:
+        _ -> mutable.ListBuffer[ReferenceType]()
+    var nextTestClass: Option[String] = None
+    var nextExpectedClass: Option[ReferenceType] = None
+    // each invocation of a delegated method must be preceded by loading its class name as a string
+    // each invocation of a delegated negative method must be preceded by loading the expected exception class
+    runBody.foreachInstruction:
+      case LoadString(s) =>
+        nextTestClass = Some(s)
+      case LoadClass(r) =>
+        if nextExpectedClass.isDefined then fail(s"[$caseName] unexpectedly full: $nextExpectedClass")
+        nextExpectedClass = Some(r)
+      case i: InvocationInstruction =>
+        val name = i.asInvocationInstruction.name
+        invocationMap(name) += nextTestClass.getOrElse:
+          cancel(s"[$caseName] error when constructing delegate call map: option empty")
+        nextTestClass = None
+        // only negative tests load classes
+        if name.contains("Negative") then
+          classMap(name) += nextExpectedClass.getOrElse:
+            fail(s"[$caseName] error when constructing expected class map: option empty")
+          nextExpectedClass = None
+      // do nothing if instruction is irrelevant
+      case _ => ()
+    // assertions after run body has been parsed
+    if nextTestClass.isDefined then cancel(s"[$caseName] test class not empty after loop: $nextTestClass")
+    if nextExpectedClass.isDefined then fail(s"[$caseName] expected class not empty after loop: $nextExpectedClass")
+    if invocationMap.size != delegatedMethodNames.size then cancel(s"[$caseName] unexpected invocation map size: ${invocationMap.size}")
+    if classMap.size != delegatedMethodNames.size then cancel(s"[$caseName] unexpected class map size: ${invocationMap.size}")
+
+    val runNegInvocations = invocationMap("runNegative")
+    val runNegExpectedClasses = classMap("runNegative")
+    if runNegInvocations.size != runNegExpectedClasses.size then
+      fail(s"${runNegInvocations.size} runNegative calls detected, ${runNegExpectedClasses.size} classes loaded")
+
+    val posCases = invocationMap("runPositive").filterNot: className =>
+      TestCases.ignoreRegexes.exists:
+        _.matches(className)
+    .map:
+      getRunMethodFromName(project, caseName)
+
+    // zip them first as the order of both should be the same, so filtering needs to happen to both
+    val negCases = runNegInvocations.zip(runNegExpectedClasses).filterNot: tuple =>
+      TestCases.ignoreRegexes.exists:
+        _.matches(tuple._1)
+    .map: tuple =>
+      (getRunMethodFromName(project, caseName)(tuple._1), tuple._2)
+
+    // forEvery is not good for stack traces, so only use it if needed
+    if posCases.size == 1 then
+      runPositive(project, testCase, caseName)(posCases.head)
     else
-      // attempt to parse the classes called by each delegated method in the given method body
-      import scala.collection.mutable
-      val map = mutable.Map.from:
-        delegatedMethodNames.map:
-          _ -> mutable.ListBuffer[String]()
-      var nextClass: Option[String] = None
-      // each invocation of a delegated method must be preceded by loading its class name as a string
-      runBody.foreachInstruction:
-        case LoadString(s) =>
-          nextClass = Some(s)
-        case i: InvocationInstruction =>
-          map(i.asInvocationInstruction.name) += nextClass.getOrElse:
-            cancel(s"[$caseName] error when constructing delegate call map: option empty")
-          nextClass = None
-        // do nothing if instruction is irrelevant
-        case _ => ()
-      if nextClass.isDefined then cancel(s"[$caseName] class not empty after loop")
-      if map.size != delegatedMethodNames.size then cancel(s"[$caseName] unexpected map size: ${map.size}")
+      forEvery(posCases):
+        runPositive(project, testCase, caseName)
+    if negCases.size == 1 then
+      runNegative(project, testCase, caseName)(negCases.head._1, negCases.head._2)
+    else
+      forEvery(negCases):
+        runNegative(project, testCase, caseName)
 
-      val posCases = map("runPositive").filterNot: className =>
-        TestCases.ignoreRegexes.exists:
-          _.matches(className)
-      .map: className =>
-        val cfs = project.projectClassFilesWithSources.filter: (cf, _) =>
-          cf.thisType.simpleName == className
-        if cfs.size != 1 then cancel(s"[$caseName] unexpected amount of class file candidates: ${cfs.size}")
-        // head access checked above
-        val runs = cfs.head._1.methods.filter(runSignaturePredicate)
-        if runs.size != 1 then cancel(s"[$caseName] unexpected amount of run candidates for $className: ${runs.size}")
-        // checked above
-        runs.head
-
-      // forEvery is not good for stack traces, so only use it if needed
-      if posCases.size != 1 then
-        runPositive(project, testCase, caseName)(posCases.head)
-      else
-        forEvery(posCases):
-          runPositive(project, testCase, caseName)
+  def getRunMethodFromName(project: Project[URL], caseName: String)(className: String): Method =
+    val cfs = project.projectClassFilesWithSources.filter: (cf, _) =>
+      cf.thisType.simpleName == className
+    if cfs.size != 1 then cancel(s"[$caseName] unexpected amount of class file candidates: ${cfs.size}")
+    // head access checked above
+    val runs = cfs.head._1.methods.filter(runSignaturePredicate)
+    if runs.size != 1 then cancel(s"[$caseName] unexpected amount of run candidates for $className: ${runs.size}")
+    // checked above
+    runs.head
 
   def runTestCases(testCases: Seq[Seq[Path]]): Unit =
     testCases.foreach: paths =>
@@ -205,21 +244,25 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       test(path.subpath(path.getNameCount - 3, path.getNameCount).toString):
         // TODO: fix cancelAfter
         // cancelAfter(Span(1, Minutes)):
-          assertCase(paths)
+        assertCase(paths)
 
-  def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
+  // returns all that is required to run the tested method
+  def runSetup(project: Project[URL], testCase: Path, caseName: String)(method: Method): (ConcreteInterpreter.Instance, TestedMethodType) =
     val mType = method.name match
       case "main" => TestedMethodType.Main
       case "run" => TestedMethodType.Run
-      case s => cancel(s"[$caseName] invalid method name: $s")
+      case s => fail(s"[$caseName] invalid method name: $s")
 
-    val concreteInterpreter = new ConcreteInterpreter.Instance(project, testCase.toString, Map())
+    val concreteInterpreter = ConcreteInterpreter.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.StaticInitialization(ClassType.String, "ignored"), 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
+    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
     if mType == TestedMethodType.Run then
       // push System.out
       concreteInterpreter.stack.push(concreteInterpreter.createLibraryObj(ClassType("java/io/PrintStream"), Site.External))
+    (concreteInterpreter, mType)
 
+  def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
+    val (concreteInterpreter, mType) = runSetup(project, testCase, caseName)(method)
     val v = try
       concreteInterpreter.invokeExternal(method, true)
     catch
@@ -229,6 +272,25 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
       case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(s"[$caseName] " + e.getMessage)
 
     assert(v.asInt32(using concreteInterpreter.failure) === mType.getExpectedValue)
+
+  def runNegative(project: Project[URL], testCase: Path, caseName: String)(method: Method, expectedException: ReferenceType): Assertion =
+    val (concreteInterpreter, _) = runSetup(project, testCase, caseName)(method)
+    try
+      concreteInterpreter.invokeExternal(method, true)
+      fail(s"[$caseName] no exception thrown")
+    catch
+      // all other exceptions fail the test
+      case CFailureException(concreteInterpreter.AbortEval.Native(m), _) => fail(s"[$caseName] native method encountered: $m")
+      case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => fail(s"[$caseName] " + e.getMessage)
+      case ConcreteSturdyException(e) => e match
+        case JvmExcept.Throw(exception) =>
+          assert(exception == expectedException)
+        case JvmExcept.ThrowObject(exception: ConcreteInterpreter.Value) =>
+          exception.asRef(using concreteInterpreter.failure) match
+            case ConcreteRefValues.Object(_, cls, _) => assert(cls.thisType == expectedException)
+            case refValue => fail(s"unexpected throw object: $refValue")
+        case x =>
+          fail(s"unexpected throw: $x")
 
 // predicate for finding the run method with signature (String[] x PrintStream) -> int
 def runSignaturePredicate(m: Method) =
