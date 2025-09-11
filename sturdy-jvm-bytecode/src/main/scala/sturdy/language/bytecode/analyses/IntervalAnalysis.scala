@@ -68,7 +68,7 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     val joinUnit: WithJoin[Unit] = implicitly
     val jvV: WithJoin[IntervalAnalysis.Value] = implicitly
-    override val joinAddr: WithJoin[Addr] = ??? // TODO
+    override val joinAddr: WithJoin[Addr] = implicitly
 
     override val stack = new JoinableDecidableOperandStack
     override val failure = new CollectedFailures[BytecodeFailure]
