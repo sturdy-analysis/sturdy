@@ -258,7 +258,7 @@ class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLi
     concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
     if mType == TestedMethodType.Run then
       // push System.out
-      concreteInterpreter.stack.push(concreteInterpreter.createLibraryObj(ClassType("java/io/PrintStream"), Site.External))
+      concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassType("java/io/PrintStream"), Site.External))
     (concreteInterpreter, mType)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
