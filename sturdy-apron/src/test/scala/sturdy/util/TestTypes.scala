@@ -1,5 +1,6 @@
 package sturdy.util
 
+import apron.Interval
 import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{*, given}
@@ -58,43 +59,14 @@ object TestTypes:
         case DoubleType => "doulbe"
         case BoolType => "boolean"
 
-  given Ordering[Type] = {
-    case (Type.IntType, Type.IntType) |
-         (Type.LongType, Type.LongType) |
-         (Type.FloatType, Type.FloatType) |
-         (Type.DoubleType, Type.DoubleType) |
-         (Type.BoolType, Type.BoolType) => 0
-
-    case (Type.IntType, Type.LongType) |
-         (Type.IntType, Type.FloatType) |
-         (Type.IntType, Type.DoubleType) |
-         (Type.IntType, Type.BoolType) |
-
-         (Type.LongType, Type.FloatType) |
-         (Type.LongType, Type.DoubleType) |
-         (Type.LongType, Type.BoolType) |
-
-         (Type.FloatType, Type.DoubleType) |
-         (Type.FloatType, Type.BoolType) |
-
-         (Type.DoubleType, Type.BoolType)
-           => 1
-    case
-         (Type.BoolType, Type.DoubleType) |
-         (Type.BoolType, Type.FloatType) |
-         (Type.BoolType, Type.LongType) |
-         (Type.BoolType, Type.IntType) |
-
-         (Type.DoubleType, Type.FloatType) |
-         (Type.DoubleType, Type.LongType) |
-         (Type.DoubleType, Type.IntType) |
-
-         (Type.FloatType, Type.LongType) |
-         (Type.FloatType, Type.IntType) |
-
-         (Type.LongType, Type.IntType)
-            => -1
-  }
+  given Ordering[Type] = (t1, t2) =>
+    Ordering.by {
+      case Type.IntType => 1
+      case Type.LongType => 2
+      case Type.FloatType => 3
+      case Type.DoubleType => 4
+      case Type.BoolType => 5
+    }.compare(t1, t2)
 
   given (using failure: Failure, effectStack: EffectStack): IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asInt, inject = _ => Type.IntType)
   given (using failure: Failure, effectStack: EffectStack): IntegerOps[Long, Type] = LiftedIntegerOps[Long, Type, BaseType[Long]](extract = _.asLong, inject = _ => Type.LongType)
@@ -149,6 +121,14 @@ object TestTypes:
           case Type.BoolType => BaseType[Boolean].byteSize
           case Type.FloatType => BaseType[Float].byteSize
           case Type.DoubleType => BaseType[Double].byteSize
+
+      override def signedBounds: Interval =
+        tpe match
+          case Type.IntType => BaseType[Int].signedBounds
+          case Type.LongType => BaseType[Long].signedBounds
+          case Type.BoolType => BaseType[Boolean].signedBounds
+          case Type.FloatType => BaseType[Float].signedBounds
+          case Type.DoubleType => BaseType[Double].signedBounds
 
   given[W <: Widening]: Combine[Type, W] = {
     case (t@Type.IntType, Type.IntType) => MaybeChanged.Unchanged(t)

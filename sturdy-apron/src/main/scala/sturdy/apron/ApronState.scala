@@ -36,6 +36,11 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
   def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
   def addCondition(condition: ApronBool[Addr,Type]): Unit
+
+  def isUnconstrained(expr: ApronExpr[Addr,Type]): Boolean
+  def isUnconstrained(cons: ApronCons[Addr,Type]): Boolean
+  def isUnconstrained(cond: ApronBool[Addr,Type]): Boolean
+
   def effects: EffectStack
   inline def join[A: Join](f: => A)(g: => A): A =
     effects.joinComputations(f)(g)
@@ -118,7 +123,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
 
-  inline def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
+  def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
     getBoolean(v, getFloatInterval(v.e1), getFloatInterval(v.e2))
 
   private def getBoolean(v: ApronCons[Addr, Type], iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
@@ -163,7 +168,6 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case CompareOp.Ge =>
         getBoolean(ApronCons(CompareOp.Le, v.e2, v.e1), iv2, iv1)
 
-  def isUnconstraint(addr: Addr): Boolean
   def makeNonRelational(addr: Addr): Unit
 
 final class ApronRecencyState
@@ -235,6 +239,25 @@ final class ApronRecencyState
         } {
           addCondition(e2)
         }
+
+  override def isUnconstrained(expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+    expr match
+      case ApronExpr.Addr(ApronVar(virtAddr), _, _) =>
+        relationalStore.isUnconstrained(virtAddr.physical, relationalStore.internalState)
+      case ApronExpr.Constant(coeff, _, tpe) =>
+        tpe.signedBounds.cmp(coeff) < 0
+      case ApronExpr.Unary(_, e, _, _, _, _) => isUnconstrained(e)
+      case ApronExpr.Binary(_, e1, e2, _, _, _, _) => isUnconstrained(e1) || isUnconstrained(e2)
+
+  override def isUnconstrained(cons: ApronCons[VirtualAddress[Ctx], Type]): Boolean =
+    isUnconstrained(cons.e1) || isUnconstrained(cons.e2)
+
+  override def isUnconstrained(cons: ApronBool[VirtualAddress[Ctx], Type]): Boolean =
+    cons match
+      case ApronBool.Constraint(cons) => isUnconstrained(cons)
+      case ApronBool.Constant(toppedBool) => toppedBool.isTop
+      case ApronBool.And(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
+      case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
   override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.internalState, expr)
   def getInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = {
@@ -336,9 +359,6 @@ final class ApronRecencyState
         Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
       }
   }
-
-  override def isUnconstraint(virtualAddress: VirtualAddress[Ctx]): Boolean =
-    relationalStore.isUnconstrained(virtualAddress.physical)
 
   override def makeNonRelational(virtualAddress: VirtualAddress[Ctx]): Unit =
     relationalStore.moveToNonRelationalStore(virtualAddress.physical)

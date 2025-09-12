@@ -150,7 +150,7 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
 
   val module = wasm.Parsing.fromText(path)
   val interp = new RelationalAnalysis.Instance(apronManager, FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(stackConfig)))
-  val constants = interp.instructionsIntervals
+  val constrainedInstructionsLogger = interp.constrainedInstructionsLogger
   interp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val cfg = interp.addControlObserver(new ControlEventGraphBuilder)
 
@@ -162,10 +162,10 @@ def runAnalysis(path: Path, funName: String, args: List[Value], stackConfig: Sta
 
 //  val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
 //  val deadLabels = ControlFlow.deadLabels(cfg)
-  val constantInstructions = constants.get
+  val constrainedInstructions = constrainedInstructionsLogger.getConstrained
 //  println(s"Found ${deadInstructions.size} dead instructions")
 //  println(s"Found ${deadLabels.size} dead labels")
-  println(s"Found ${constantInstructions.size} constant instructions")
+  println(s"Found ${constrainedInstructions.size} constrained instructions")
   println(cfg.get.toGraphViz)
 
   LinearStateOperationCounter.addToListAndReset()

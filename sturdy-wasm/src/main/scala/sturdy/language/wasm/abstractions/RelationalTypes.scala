@@ -1,5 +1,6 @@
 package sturdy.language.wasm.abstractions
 
+import apron.Interval
 import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
@@ -84,34 +85,41 @@ trait RelationalTypes:
 
   given ApronType[Type] with
     extension (t: Type)
-      def apronRepresentation: ApronRepresentation =
+      override def apronRepresentation: ApronRepresentation =
         t match
           case I8Type  => BaseType[Byte].apronRepresentation
           case I32Type => BaseType[Int].apronRepresentation
           case I64Type => BaseType[Long].apronRepresentation
           case F32Type => BaseType[Float].apronRepresentation
           case F64Type => BaseType[Double].apronRepresentation
-      def roundingDir: RoundingDir =
+      override def roundingDir: RoundingDir =
         t match
           case I8Type  => BaseType[Byte].roundingDir
           case I32Type => BaseType[Int].roundingDir
           case I64Type => BaseType[Long].roundingDir
           case F32Type => BaseType[Float].roundingDir
           case F64Type => BaseType[Double].roundingDir
-      def roundingType: RoundingType =
+      override def roundingType: RoundingType =
         t match
           case I8Type  => BaseType[Byte].roundingType
           case I32Type => BaseType[Int].roundingType
           case I64Type => BaseType[Long].roundingType
           case F32Type => BaseType[Float].roundingType
           case F64Type => BaseType[Double].roundingType
-      def byteSize: Int =
+      override def byteSize: Int =
         t match
           case I8Type  => BaseType[Byte].byteSize
           case I32Type => BaseType[Int].byteSize
           case I64Type => BaseType[Long].byteSize
           case F32Type => BaseType[Float].byteSize
           case F64Type => BaseType[Double].byteSize
+      override def signedBounds: Interval =
+        t match
+          case I8Type  => BaseType[Byte].signedBounds
+          case I32Type => BaseType[Int].signedBounds
+          case I64Type => BaseType[Long].signedBounds
+          case F32Type => BaseType[Float].signedBounds
+          case F64Type => BaseType[Double].signedBounds
 
   given (using failure: Failure, effectStack: EffectStack): IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asI32, inject = _ => Type.I32Type)
 

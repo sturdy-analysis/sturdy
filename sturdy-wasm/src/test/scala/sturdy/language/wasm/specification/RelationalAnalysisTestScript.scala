@@ -34,7 +34,7 @@ import com.github.tototoshi.csv.*
 
 val csvWriter = {
   val writer = CSVWriter.open(File("relational-test-script.csv"))
-  writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed"))
+  writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed", "constrained_instructions", "total_instructions", "percent_constrained"))
   writer
 }
 
@@ -109,7 +109,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-  val instructionIntervalLogger: aInterp.InstructionIntervalLogger = aInterp.instructionsIntervals
+  val constrainedInstructionsLogger: aInterp.ConstrainedInstructionsLogger = aInterp.constrainedInstructionsLogger
   val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
@@ -146,8 +146,20 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
         aInterp.garbageCollect()
       }
     } finally {
-      val percentPassed = if(totalTestCases.n == 0) 100.0d else passedTestCases.n.toDouble / totalTestCases.n.toDouble * 100.0d
-      csvWriter.writeRow(List(filename.toString, aInterp.apronManager.getClass.getSimpleName, passedTestCases.toString, totalTestCases.toString, f"$percentPassed%.1f"))
+      val percentPassed = if(totalTestCases.n == 0) 100d else passedTestCases.n.toDouble / totalTestCases.n.toDouble * 100d
+      val constrainedInstructions = constrainedInstructionsLogger.getConstrained.size
+      val totalInstructions = constrainedInstructionsLogger.getAllInstructionInfos.size
+      val percentConstrained = if(totalInstructions == 0) 100d else constrainedInstructions.toDouble / totalInstructions.toDouble * 100d
+      csvWriter.writeRow(List(
+        filename.toString,
+        aInterp.apronManager.getClass.getSimpleName,
+        passedTestCases.toString,
+        totalTestCases.toString,
+        f"$percentPassed%.1f",
+        constrainedInstructions.toString,
+        totalInstructions.toString,
+        f"$percentConstrained%.1f"
+      ))
     }
 
   def getCModule(module: Option[String]): ModuleInstance = module match

@@ -97,6 +97,12 @@ enum InstLoc:
     case (InInit(mod1, pc1), InInit(mod2, pc2)) if mod1 == mod2 => pc2 - pc1
     case _ => throw new MatchError((this, that))
 
+  def module: ModuleInstance =
+    this match
+      case InFunction(funcId, _) => funcId.mod
+      case InInit(mod, _) => mod
+      case InvokeExported(mod, _) => mod
+
 given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,Int), (Int,String)]]] {
   case InstLoc.InFunction(fid,pc) => Left((fid,pc))
   case InstLoc.InInit(mod, pc) => Right(Left((mod.hashCode(),pc)))
@@ -361,28 +367,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val n = stack.popOrAbort()
       val v = stack.popOrAbort() // val
       val d = stack.popOrAbort()
-      val memSize = num.evalIBinop(i32.Mul, sizeToVal(memory.size(memoryIndex)), num.evalNumeric(i32.Const(pageSize)))
-      val offsetCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), memSize)
-      branchOpsUnit.boolBranch(offsetCheck)(fail(MemoryAccessOutOfBounds, "Invalid memory.fill access")) {
-        memory.fill(memoryIndex, valToAddr(d), valToSize(n), encode(v, SomeCC(i32.Store8(0, 0), false))).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.fill access"))
-      }
+      memory.fill(memoryIndex, valToAddr(d), valToSize(n), encode(v, SomeCC(i32.Store8(0, 0), false))).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.fill access"))
     case MemoryCopy =>
       val n = stack.popOrAbort()
       val s = stack.popOrAbort()
       val d = stack.popOrAbort()
-      // assert unsigned s + n <= memSize && d + n <= memSize
-      val memSize = num.evalIBinop(i32.Mul, sizeToVal(memory.size(memoryIndex)), num.evalNumeric(i32.Const(pageSize)))
-      val srcCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, s, n), memSize)
-      val dstCheck = num.evalIRelop(i32.GtU, num.evalIBinop(i32.Add, d, n), memSize)
-      val check = num.evalIBinop(i32.Or, srcCheck, dstCheck)
-      branchOpsUnit.boolBranch(check)(fail(MemoryAccessOutOfBounds, "Invalid memory.copy access")) {
-        memory.copy(memoryIndex, valToAddr(s), valToAddr(d), valToSize(n)).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.copy access"))
-      }
+      memory.copy(memoryIndex, valToAddr(s), valToAddr(d), valToSize(n)).getOrElse(fail(MemoryAccessOutOfBounds, "Invalid memory.copy access"))
     case MemoryInit(ix) =>
       val n = stack.popOrAbort()
       val s = stack.popOrAbort()
       val d = stack.popOrAbort()
-
       val data = module.data.lift(ix).getOrElse(fail(DataSegmentOutOfBounds, ix.toString))
       memory.init(memoryIndex, valToAddr(d), valToAddr(s), valToSize(n), liftBytes(data.data.toIterable.toSeq)).getOrElse(
         fail(MemoryAccessOutOfBounds, s"Cannot initialize memory with $data at address $d with size $n from offset $s")

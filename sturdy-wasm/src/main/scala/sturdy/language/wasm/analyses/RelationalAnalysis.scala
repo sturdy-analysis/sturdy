@@ -329,54 +329,76 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             println(s"RETURN f${id.funcIx}(${args.mkString(",")} @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
           case _ => {}
 
-    def instructionsIntervals: InstructionIntervalLogger =
-      val intervalLogger = new InstructionIntervalLogger
+    def constrainedInstructionsLogger: ConstrainedInstructionsLogger =
+      val intervalLogger = new ConstrainedInstructionsLogger
       this.fixpoint.addContextFreeLogger(intervalLogger)
       intervalLogger
 
     enum Info:
-      case Numeric(interval: Interval, tpe: Type)
-      case Boolean(value: Topped[Boolean])
-      case AllocationSites(sites: PowPhysAddr, size: Interval)
+      case Numeric(interval: Interval, tpe: Type, unconstrained: scala.Boolean)
+      case Boolean(value: Topped[scala.Boolean], unconstrained: scala.Boolean)
+      case AllocationSites(sites: PowPhysAddr, size: Interval, sizeUnconstrained: scala.Boolean)
       case Top
 
+      def isConstrained: scala.Boolean = !isUnconstrained
+
+      def isUnconstrained: scala.Boolean =
+        this match
+          case Numeric(_,_, unconstrained) => unconstrained
+          case Boolean(_, unconstrained) => unconstrained
+          case AllocationSites(_, _, unconstrained) => unconstrained
+          case Top => true
+
+    val joinUnconstrained = new Join[Boolean] {
+      override def apply(v1: Boolean, v2: Boolean): MaybeChanged[Boolean] = MaybeChanged(v1 || v2, v1 != (v1 || v2))
+    }
+
     given Join[Info] = {
-      case (Info.Numeric(iv1, tpe1), Info.Numeric(iv2, tpe2)) if tpe1 == tpe2 => Join(iv1, iv2).map(Info.Numeric(_, tpe1))
-      case (Info.Boolean(b1), Info.Boolean(b2)) => Join(b1, b2).map(Info.Boolean(_))
-      case (Info.AllocationSites(sites1, size1), Info.AllocationSites(sites2, size2)) =>
+      case (Info.Numeric(iv1, tpe1, constrained1), Info.Numeric(iv2, tpe2, constrained2)) if tpe1 == tpe2 =>
+        for {
+          iv <- Join(iv1, iv2)
+          constrained <- joinUnconstrained(constrained1, constrained2)
+        } yield(Info.Numeric(iv, tpe1, constrained))
+      case (Info.Boolean(b1, constrained1), Info.Boolean(b2, constrained2)) =>
+        for {
+          b <- Join(b1, b2)
+          constrained <- joinUnconstrained(constrained1, constrained2)
+        } yield(Info.Boolean(b, constrained))
+      case (Info.AllocationSites(sites1, size1, constrained1), Info.AllocationSites(sites2, size2, constrained2)) =>
         for {
           sites <- Join(sites1, sites2)
           size <- Join(size1, size2)
-        } yield (Info.AllocationSites(sites, size))
+          constrained <- joinUnconstrained(constrained1,constrained2)
+        } yield (Info.AllocationSites(sites, size, constrained))
       case (Info.Top, _) => Unchanged(Info.Top)
       case (_, Info.Top) => Changed(Info.Top)
       case (_, _) => Changed(Info.Top)
     }
 
-    class InstructionIntervalLogger extends InstructionResultLogger[Info, Value](stack):
+    class ConstrainedInstructionsLogger extends InstructionResultLogger[Info, Value](stack):
       override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
-      override def dummyValue: Value = Num(Int32(NumExpr(ApronExpr.constant(Interval(0, 0), I32Type))))
-      
       def getInfo(value: Value): Info = value match
         case Num(Int32(v32)) => v32 match
-          case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type)
-          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v))
-          case AllocationSites(sites, size) => Info.AllocationSites(sites, apronState.getInterval(size))
-        case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type)
-        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type)
-        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type)
+          case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type, apronState.isUnconstrained(v))
+          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), apronState.isUnconstrained(v))
+          case AllocationSites(sites, size) => Info.AllocationSites(PowersetAddr(sites.physicalAddresses), apronState.getInterval(size), apronState.isUnconstrained(size))
+        case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type, apronState.isUnconstrained(v))
+        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type, apronState.isUnconstrained(v))
+        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type, apronState.isUnconstrained(v))
         case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
 
-      def get: Map[InstLoc, List[Interval]] = instructionInfo.filter(_._2.forall (
-        iv => iv.inf.isEqual(iv.sup)
-      ))
+      def getAllInstructionInfos: Map[InstLoc, List[Info]] =
+        instructionInfo
 
-      def grouped: Map[String, Map[InstLoc, List[Interval]]] =
-        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
+      def getConstrained: Map[InstLoc, List[Info]] =
+        instructionInfo.filter((_,infos) => infos.forall(_.isConstrained))
+
+      def grouped: Map[String, Map[InstLoc, List[Info]]] =
+        getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
 
       def groupedCount: Map[String, Int] =
-        get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
+        getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
 
 
     override def newEffectStack: EffectStack =

@@ -89,7 +89,6 @@ trait ConstantTaintValues extends Interpreter:
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, NoJoin])(using Failure) extends InstructionResultLogger[Value, Value](stack):
     override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
-    override def dummyValue: Value = Value.Num(NumValue.Int32((TaintProduct(Taint.Untainted, Topped.Actual(0)))))
     override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
@@ -120,7 +119,7 @@ trait ConstantTaintValues extends Interpreter:
     def memoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo
     def taintedMemoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo.filter(_._2.set.nonEmpty)
     
-    override def enterInfo(inst: Inst): Option[Powerset[Value]] =
+    override def enterInfo(inst: Inst, loc: InstLoc): Option[Powerset[Value]] =
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =
           if (addressOnTopOfStack(inst))
@@ -135,7 +134,7 @@ trait ConstantTaintValues extends Interpreter:
       } else
         None
 
-    override def exitInfo(inst: Inst, success: Boolean): Option[Powerset[Value]] = None
+    override def exitInfo(inst: Inst, loc: InstLoc, success: Boolean): Option[Powerset[Value]] = None
 
     def addressOnTopOfStack(inst: syntax.Inst): Boolean = inst match
       case _: syntax.LoadInst => true

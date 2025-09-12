@@ -40,10 +40,10 @@ final class RelationalStore
   inline def getType(powAddr: PowAddr, state: State = _internalState): JOptionA[Type] =
     getMetaData(powAddr, state).map(_._2)
 
-  private inline def getMetaData(phys: PhysicalAddress[Context], state: State): JOptionA[(FloatSpecials, Type)] =
+  inline def getMetaData(phys: PhysicalAddress[Context], state: State): JOptionA[(FloatSpecials, Type)] =
     getMetaData(PowersetAddr(phys).asInstanceOf[PowAddr], state)
 
-  private def getMetaData(powAddr: PowAddr, state: State): JOptionA[(FloatSpecials, Type)] =
+  def getMetaData(powAddr: PowAddr, state: State): JOptionA[(FloatSpecials, Type)] =
     for {
       value <- nonRelationalStore.readPure(powAddr, state.nonRelationalStoreState)._1
       metaData <- JOptionA(relationalValue.getMetaData(value))
@@ -211,11 +211,34 @@ final class RelationalStore
     state.abs1.changeEnvironment(manager, env.remove(addrArray), false)
     state
 
-  def isUnconstrained(powAddr: PowAddr, state: State = _internalState): Boolean =
-    val env = state.abs1.getEnvironment
-    powAddr.iterator.map(ApronVar(_)).forall(x =>
-      env.hasVar(x) && state.abs1.isDimensionUnconstrained(manager, x)
+  /**
+   * An address `x` is unconstrained if any of the following hold:
+   *   - `x` has recency Failed
+   *   - `x` has an unconstrained value in the non-relational store
+   *   - `x` is in the relational abstract domain and its dimension is unconstrained
+   */
+  def isUnconstrained(powAddr: PowAddr, state0: State = _internalState): Boolean = {
+    var state = state0
+    powAddr.iterator.forall(x =>
+      if(x.recency == Recency.Failed) {
+        true
+      } else {
+        val nonRelVal = nonRelationalStore.readPure(PowersetAddr(x).asInstanceOf[PowAddr], state.nonRelationalStoreState)._1.toOption.getOrElse {
+          throw Error(s"No metadata for physical address $x")
+        }
+        val (nonRelExpr,state1) = relationalValue.getRelationalExprPure(nonRelVal, state)
+        state = state1
+        val nonRelationalExprUnconstrained = nonRelExpr match {
+          case Some(expr) => expr._type.signedBounds.cmp(getBound(expr, state)) < 0
+          case None => false
+        }
+        if(nonRelationalExprUnconstrained)
+          true
+        else
+          state.abs1.getEnvironment.hasVar(ApronVar(x)) && state.abs1.isDimensionUnconstrained(manager, ApronVar(x))
+      }
     )
+  }
 
   private def moveUnconstrainedToNonRelationalStore(state: State): State =
     val env = state.abs1.getEnvironment

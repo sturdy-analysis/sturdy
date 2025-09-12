@@ -47,7 +47,6 @@ trait ConstantValues extends Interpreter with PowersetReference:
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, MayJoin.NoJoin])(using Failure) extends InstructionResultLogger[Value,Value](stack):
     override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
-    override def dummyValue: Value = Value.Num(NumValue.Int32(Topped.Actual(0)))
     override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
