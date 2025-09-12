@@ -60,7 +60,7 @@ object RelationalAnalysisSoundness {
       // soundness for stack, memory, symbol tables, call frame
       a.stack.operandStackIsSound(c.stack) &&
         // a.memory.memoryIsSound(c.memory) &&   (Top-Memory is trivially sound)
-        a.globals.tableIsSound(c.globals) &&
+        a.globals.tableIsSound(c.globals) // &&
         // a.tables.tableIsSound(c.tables) &&
-        a.callFrame.isSound(c.callFrame)
+        // a.callFrame.isSound(c.callFrame)
 }

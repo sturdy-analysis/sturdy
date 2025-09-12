@@ -5,12 +5,12 @@ import sturdy.apron.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.wasm.Interpreter
-import sturdy.data.{*,given}
+import sturdy.data.{*, given}
 import sturdy.util.Lazy
 import sturdy.values.config.{BitSign, BytesSize, Overflow}
-import sturdy.values.convert.{&&, Convert, LiftedConvert, NilCC, SomeCC}
+import sturdy.values.convert.{&&, Convert, ConvertConfig, LiftedConvert, NilCC, SomeCC}
 import sturdy.values.floating.{ConvertDoubleInt, ConvertFloatInt}
-import sturdy.values.integer.{*, given}
+import sturdy.values.integer.{IntegerOpsWithSignInterpretation, RelationalBaseIntegerOps, *, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
@@ -84,17 +84,16 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
 
-  given I32IntegerOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOpsWithSignInterpretation[Int, I32] =
-    given apronExprIntOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]] = RelationalIntOps[VirtAddr, Type]
-    new LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](byteSize = 4, extract = _.asNumExpr, inject = NumExpr(_)):
+  given I32IntegerOps(using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOpsWithSignInterpretation[Int, I32] =
+    new LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def bitAnd(v1: I32, v2: I32): I32 =
         (v1, v2) match
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.And(e1, e2))
-          case _ => NumExpr(apronExprIntOps.bitAnd(v1.asNumExpr, v2.asNumExpr))
+          case _ => NumExpr(intOps.bitAnd(v1.asNumExpr, v2.asNumExpr))
       override def bitOr(v1: I32, v2: I32): I32 =
         (v1, v2) match
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.Or(e1, e2))
-          case _ => NumExpr(apronExprIntOps.bitOr(v1.asNumExpr, v2.asNumExpr))
+          case _ => NumExpr(intOps.bitOr(v1.asNumExpr, v2.asNumExpr))
 
       override def bitXor(v1: I32, v2: I32): I32 =
         (v1, v2) match
@@ -107,9 +106,9 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
               bitXor(NumExpr(v1.asNumExpr), v2)
             }
           case (NumExpr(e1), BoolExpr(e2)) => bitXor(v2, v1)
-          case _ => NumExpr(apronExprIntOps.bitXor(v1.asNumExpr, v2.asNumExpr))
+          case _ => NumExpr(intOps.bitXor(v1.asNumExpr, v2.asNumExpr))
 
-  given I32EqOps(using apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
+  given I32EqOps(using eqOps: EqOps[ApronExpr[VirtAddr,Type], Bool], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
     override def equ(v1: I32, v2: I32): Bool =
       (v1, v2) match
         case (AllocationSites(sites, _), NumExpr(expr)) =>
@@ -126,13 +125,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           else if (coeff.isScalar && !c1ContainsNaN /* && ! coeff.isEqual(0) */ )
             c1
           else
-            EqOps.equ(v1.asNumExpr, i2)
+            eqOps.equ(v1.asNumExpr, i2)
         case (NumExpr(_), BoolExpr(_)) =>
           equ(v2, v1)
         case (BoolExpr(c1), BoolExpr(c2)) =>
           println(s"Created boolean condition ($c1 iff $c2), which may blow up the size of the boolean exponentially")
           ApronBool.Or(ApronBool.And(c1, c2), ApronBool.And(c1.negated, c2.negated))
-        case _ => EqOps.equ(v1.asNumExpr, v2.asNumExpr)
+        case _ => eqOps.equ(v1.asNumExpr, v2.asNumExpr)
 
     override def neq(v1: I32, v2: I32): Bool = equ(v1, v2).negated
 
@@ -159,3 +158,18 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given I32ConvertDoubleInt(using ApronState[VirtAddr, Type], ConvertDoubleInt[F64, ApronExpr[VirtAddr, Type]]): ConvertDoubleInt[F64, I32] =
     LiftedConvert[Double, Int, F64, I32, F64, ApronExpr[VirtAddr, Type], Overflow && BitSign](extract = x => x, inject = NumExpr(_))
+
+  private inline def toNonRelational(using apronState: ApronState[VirtAddr,Type])(v: I32): I32 =
+    v match
+      case NumExpr(e) => NumExpr(apronState.toNonRelational(e))
+      case BoolExpr(e) => BoolExpr(apronState.toNonRelational(e))
+      case _: AllocationSites => v
+
+  final class NonRelationalI32IntegerOps(using relationalIntOps: IntegerOpsWithSignInterpretation[Int, I32], apronState: ApronState[VirtAddr, Type])
+    extends LiftedIntegerOpsWithSignInterpretation[Int, I32, I32](extract = i32 => i32, inject = toNonRelational)
+
+  final class NonRelationalI32Convert[From, V, Config <: ConvertConfig[_]](using relationalConvert: Convert[From, Int, V, I32, Config], apronState: ApronState[VirtAddr, Type])
+    extends LiftedConvert[From, Int, V, I32, V, I32, Config](
+      extract = expr => expr,
+      inject = toNonRelational
+    )

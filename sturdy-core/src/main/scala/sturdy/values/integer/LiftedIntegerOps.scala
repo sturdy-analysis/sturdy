@@ -36,7 +36,7 @@ class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: Inte
   inline def nonzeroBitCount(v: V): V = inject(ops.nonzeroBitCount(extract(v)))
   inline def invertBits(v: V): V = inject(ops.invertBits(extract(v)))
 
-class LiftedIntegerOpsWithSignInterpretation[B, V, I](byteSize: Int, extract: V => I, inject: I => V)(using ops: IntegerOpsWithSignInterpretation[B, I]) extends LiftedIntegerOps[B,V,I](extract, inject) with IntegerOpsWithSignInterpretation[B, V]:
+class LiftedIntegerOpsWithSignInterpretation[B, V, I](extract: V => I, inject: I => V)(using ops: IntegerOpsWithSignInterpretation[B, I]) extends LiftedIntegerOps[B,V,I](extract, inject) with IntegerOpsWithSignInterpretation[B, V]:
   override def interpretSignedAsUnsigned(v: V): V = inject(ops.interpretSignedAsUnsigned(extract(v)))
   override def interpretSignedAsUnsigned(v: V, fromNumBytes: Int): V = inject(ops.interpretSignedAsUnsigned(extract(v), fromNumBytes))
   override def interpretUnsignedAsSigned(v: V): V = inject(ops.interpretUnsignedAsSigned(extract(v)))

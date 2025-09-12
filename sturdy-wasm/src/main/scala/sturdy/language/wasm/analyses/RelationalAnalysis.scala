@@ -7,7 +7,7 @@ import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, Re
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy, bytememory}
 import sturdy.effect.bytememory.{*, given}
-import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, RelationalCallFrame}
+import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, NonRelationalCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
@@ -231,12 +231,21 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       println(s"State Before: $stateBefore")
       println(s"State After: $stateAfter")
 
-    val callFrame: RelationalCallFrame[FrameData, Int, Value, InstLoc, AddrCtx, Type] = new RelationalCallFrame(
-      initData = rootFrameData,
-      initVars = Iterable.empty,
-      localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
-      apronState
-    )
+    val callFrame: MutableCallFrame[FrameData, Int, Value, InstLoc, MayJoin.NoJoin] =
+      if(config.relational)
+        new RelationalCallFrame(
+          initData = rootFrameData,
+          initVars = Iterable.empty,
+          localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
+          apronState
+        )
+      else
+        new NonRelationalCallFrame(
+          initData = rootFrameData,
+          initVars = Iterable.empty,
+          localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
+          relationalStore
+        )
 
     val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
 
@@ -418,7 +427,38 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         }
       )
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
+      if(config.relational)
+        ValueWasmOps
+      else
+        ValueWasmOps(using
+          i32Ops = new NonRelationalI32IntegerOps,
+          i64Ops = NonRelationalIntegerOps[Long,VirtAddr,Type],
+          f32Ops = NonRelationalFloatOps[Float,VirtAddr,Type],
+          f64Ops = NonRelationalFloatOps[Double,VirtAddr,Type],
+          i32EqOps = NonRelationalEqOps[I32,VirtAddr,Type],
+          i64EqOps = NonRelationalEqOps[I64,VirtAddr,Type],
+          f32EqOps = NonRelationalEqOps[F32,VirtAddr,Type],
+          f64EqOps = NonRelationalEqOps[F64,VirtAddr,Type],
+          i32CompareOps = NonRelationalOrderingOps[I32,VirtAddr,Type],
+          i64CompareOps = NonRelationalOrderingOps[I64,VirtAddr,Type],
+          f32CompareOps = NonRelationalOrderingOps[F32,VirtAddr,Type],
+          f64CompareOps = NonRelationalOrderingOps[F64,VirtAddr,Type],
+          i32UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I32,VirtAddr,Type],
+          i64UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I64,VirtAddr,Type],
+          convertI32I64 = NonRelationalConvert[Int, Long, I32, VirtAddr, Type, BitSign],
+          convertI32F32 = NonRelationalConvert[Int, Float, I32, VirtAddr, Type, BitSign],
+          convertI32F64 = NonRelationalConvert[Int, Double, I32, VirtAddr, Type, BitSign],
+          convertI64I32 = NonRelationalI32Convert[Long, I64, NilCC.type],
+          convertI64F32 = NonRelationalConvert[Long, Float, I64, VirtAddr, Type, BitSign],
+          convertI64F64 = NonRelationalConvert[Long, Double, I64, VirtAddr, Type, BitSign],
+          convertF32I32 = NonRelationalI32Convert[Float, F32, Overflow && BitSign],
+          convertF32I64 = NonRelationalConvert[Float, Long, F32, VirtAddr, Type, Overflow && BitSign],
+          convertF32F64 = NonRelationalConvert[Float, Double, F32, VirtAddr, Type, NilCC.type],
+          convertF64I32 = NonRelationalI32Convert[Double, F64, Overflow && BitSign],
+          convertF64I64 = NonRelationalConvert[Double, Long, F64, VirtAddr, Type, Overflow && BitSign],
+          convertF64F32 = NonRelationalConvert[Double, Float, F32, VirtAddr, Type, NilCC.type]
+        )
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
       case "proc_exit" =>

@@ -7,7 +7,7 @@ import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
-import sturdy.values.{Changed, Combine, Join, MaybeChanged, Topped, Unchanged, Widen, Widening}
+import sturdy.values.{*, given}
 import sturdy.values.booleans.{BooleanOps, given}
 import sturdy.values.ordering.{EqOps, given}
 import sturdy.values.floating.{*, given}
@@ -72,6 +72,12 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def join: Join[ApronExpr[Addr, Type]]
   def widen: Widen[ApronExpr[Addr, Type]]
 
+  def toNonRelational(expr: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
+    ApronExpr.Constant(getInterval(expr), specials = expr.floatSpecials, tpe = expr._type)
+
+  def toNonRelational(cond: ApronBool[Addr,Type]): ApronBool[Addr,Type] =
+    ApronBool.Constant(getBoolean(cond))
+
   def getInterval(expr: ApronExpr[Addr, Type]): Interval
 
   def getFloatInterval(expr: ApronExpr[Addr, Type]): sturdy.apron.FloatInterval
@@ -123,50 +129,25 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
 
-  def getBoolean(v: ApronCons[Addr, Type]): Topped[Boolean] =
-    getBoolean(v, getFloatInterval(v.e1), getFloatInterval(v.e2))
-
-  private def getBoolean(v: ApronCons[Addr, Type], iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
-    v.op match
-      case CompareOp.Eq =>
-        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
-          Topped.Actual(false)
-        else if(iv1.floatSpecials.nan || iv2.floatSpecials.nan)
-          Topped.Top
-        else if (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
-          Topped.Actual(true)
-        else if (iv1.meet(iv2).isBottom) // no overlap
-          Topped.Actual(false)
-        else // overlap
-          Topped.Top
-      case CompareOp.Neq =>
-        getBoolean(ApronCons(CompareOp.Eq, v.e1, v.e2), iv1, iv2).map(! _)
-      case CompareOp.Lt =>
-        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
-          Topped.Actual(false)
-        else if (iv1.floatSpecials.nan || iv2.floatSpecials.nan)
-          Topped.Top
-        else if (iv1.sup().cmp(iv2.inf()) < 0) // iv1 < iv2
-          Topped.Actual(true)
-        else if (iv2.sup().cmp(iv1.inf()) <= 0) // iv2 <= iv1
-          Topped.Actual(false)
-        else // overlap
-          Topped.Top
-      case CompareOp.Le =>
-        if (iv1.isScalar && iv1.floatSpecials.nan || iv2.isScalar && iv2.floatSpecials.nan)
-          Topped.Actual(false)
-        else if (iv1.floatSpecials.nan || iv2.floatSpecials.nan)
-          Topped.Top
-        else if (iv1.sup().cmp(iv2.inf()) <= 0) // iv1 <= iv2
-          Topped.Actual(true)
-        else if (iv2.sup().cmp(iv1.inf()) < 0) // iv2 < iv1
-          Topped.Actual(false)
-        else
-          Topped.Top
-      case CompareOp.Gt =>
-        getBoolean(ApronCons(CompareOp.Lt, v.e2, v.e1), iv2, iv1)
-      case CompareOp.Ge =>
-        getBoolean(ApronCons(CompareOp.Le, v.e2, v.e1), iv2, iv1)
+  def getBoolean(cond: ApronCons[Addr, Type]): Topped[Boolean] = {
+    val specials1 = cond.e1.floatSpecials
+    val specials2 = cond.e2.floatSpecials
+    cond.op match
+      case CompareOp.Eq if(!specials1.isBottom || !specials2.isBottom) => Topped.Top
+      case CompareOp.Neq if(specials1.nan || specials2.nan || (specials1.isLeq(specials2) && !specials1.isBottom) || (specials2.isLeq(specials1) && !specials2.isBottom)) => Topped.Top
+      case CompareOp.Le | CompareOp.Lt if(specials1.nan || specials2.nan || specials1.negZero || specials1.posInfinity || specials2.negZero || specials2.negInfinity) => Topped.Top
+      case CompareOp.Ge | CompareOp.Gt if(specials1.nan || specials2.nan || specials1.negZero || specials1.negInfinity || specials2.negZero || specials2.posInfinity) => Topped.Top
+      case _ =>
+        (satisfies(cond),satisfies(cond.negated)) match
+          case (Topped.Actual(true), Topped.Actual(false)) =>
+             Topped.Actual(true)
+          case (Topped.Actual(false), Topped.Actual(true)) =>
+            Topped.Actual(false)
+          case (Topped.Actual(false), Topped.Actual(false)) =>
+            addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
+          case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
+            Topped.Top
+  }
 
   def makeNonRelational(addr: Addr): Unit
 
@@ -229,8 +210,8 @@ final class ApronRecencyState
     condition match
       case ApronBool.Constraint(constraint) => addConstraints(constraint)
       case ApronBool.Constant(Topped.Actual(false)) =>
-          relationalStore.setBottom
-          relationalStore.addConstraints()
+        relationalStore.setBottom
+        relationalStore.addConstraints()
       case ApronBool.Constant(Topped.Actual(true)) | ApronBool.Constant(Topped.Top) => {}
       case ApronBool.And(e1, e2) => addCondition(e1); addCondition(e2)
       case ApronBool.Or(e1, e2) =>
