@@ -4,6 +4,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.OperandStack
+import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
 import sturdy.values.convert.SomeCC
 import sturdy.values.config.BitSign.*
 import sturdy.values.config.Overflow.*
@@ -157,84 +158,41 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     }
   }
 
-  // TODO: Refactor method
-  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using J[Bytes]): JOptionA[V] =
+  def evalLoadVector(inst: Inst, memIdx: MemoryAddr, addr: Addr)(using f: Failure)(using J[Bytes]): JOptionA[V] =
     boundary:
       inst match
         case loadSplat: LoadVectorSplat =>
-          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8)
-          var noneSome = false
-          val vecBytes = bytes match {
-            case JOptionA.Some(vec) => vec
-            case JOptionC.Some(vec) => vec
-            case JOptionA.NoneSome(vec) =>
-              noneSome = true
-              vec
-            case JOptionA.None() => break(JOptionA.none)
-            case JOptionC.None() => break(JOptionA.none)
-          }
-          val numV = decode(vecBytes, SomeCC(loadSplat, false))
+          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load splat"))
+          val numV = decode(bytes, SomeCC(loadSplat, false))
           val vec = loadSplat.shape match {
             case VectorSplatShape.i8_splat => v128ops.splat(I8, numV)
             case VectorSplatShape.i16_splat => v128ops.splat(I16, numV)
             case VectorSplatShape.i32_splat => v128ops.splat(I32, numV)
             case VectorSplatShape.i64_splat => v128ops.splat(I64, numV)
           }
-          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+          JOptionA.some(vec)
 
         case loadZero: LoadVectorZero =>
-          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8)
-          var noneSome = false
-          val vecBytes = bytes match {
-            case JOptionA.Some(vec) => vec
-            case JOptionC.Some(vec) => vec
-            case JOptionA.NoneSome(vec) =>
-              noneSome = true
-              vec
-            case JOptionA.None() => break(JOptionA.none)
-            case JOptionC.None() => break(JOptionA.none)
-          }
-          val numV = decode(vecBytes, SomeCC(loadZero, false))
+          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load zero"))
+          val numV = decode(bytes, SomeCC(loadZero, false))
           val vec = loadZero.shape match {
             case VectorZeroShape.i32_zero => v128ops.zeroPad(I32, numV)
             case VectorZeroShape.i64_zero => v128ops.zeroPad(I64, numV)
           }
-          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+          JOptionA.some(vec)
 
         case loadExtend: LoadVector =>
-          val bytes = mem.read(memIdx, addr, 8)
-          var noneSome = false
-          val vecBytes = bytes match {
-            case JOptionA.Some(vec) => vec
-            case JOptionC.Some(vec) => vec
-            case JOptionA.NoneSome(vec) =>
-              noneSome = true
-              vec
-            case JOptionA.None() => break(JOptionA.none)
-            case JOptionC.None() => break(JOptionA.none)
-          }
-          val vec = decode(vecBytes, SomeCC(loadExtend, false))
-          if noneSome then JOptionA.noneSome(vec) else JOptionA.some(vec)
+          val bytes = mem.read(memIdx, addr, 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load extend"))
+          val vec = decode(bytes, SomeCC(loadExtend, false))
+          JOptionA.some(vec)
         case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")
 
-  def evalLoadVectorLane(inst: LoadVectorLane, memIdx: MemoryAddr, addr: Addr, vec: V)(using J[Bytes]): JOptionA[V] = {
-    boundary:
+  def evalLoadVectorLane(inst: LoadVectorLane, memIdx: MemoryAddr, addr: Addr, vec: V)(using f: Failure)(using J[Bytes]): JOptionA[V] = {
       val shape = laneWidthToLaneShape(inst.laneWidth)
-      val bytes = mem.read(memIdx, addr, inst.laneWidth / 8)
-      var noneSome = false
-      val vecBytes = bytes match {
-        case JOptionA.Some(vec) => vec
-        case JOptionC.Some(vec) => vec
-        case JOptionA.NoneSome(vec) =>
-          noneSome = true
-          vec
-        case JOptionA.None() => break(JOptionA.none)
-        case JOptionC.None() => break(JOptionA.none)
-      }
-      val newVec = v128ops.replaceLane(shape, vec, inst.lane, decode(vecBytes, SomeCC(inst, false)))
-      if noneSome then JOptionA.noneSome(newVec) else JOptionA.some(newVec)
+      val bytes = mem.read(memIdx, addr, inst.laneWidth / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load lane"))
+      val newVec = v128ops.replaceLane(shape, vec, inst.lane, decode(bytes, SomeCC(inst, false)))
+      JOptionA.some(newVec)
   }
-
 
   def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr, vec: V): JOption[J, Unit] = {
     inst match {
