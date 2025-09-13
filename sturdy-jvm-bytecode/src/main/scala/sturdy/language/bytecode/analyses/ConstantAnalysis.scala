@@ -92,7 +92,6 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
     override val store: AStoreThreaded[singleAddr, AddrSet, Value] = new AStoreThreaded(initStore)
     override val frame = JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
-    override val projectSource: String = path
 
     override val staticFieldTable: JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | AddrSet] = JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | Addr]()
 

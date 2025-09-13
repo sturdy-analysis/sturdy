@@ -327,8 +327,6 @@ object ConcreteInterpreter extends Interpreter:
 
     override implicit val project: Project[URL] = files
 
-    override val projectSource: String = path
-
     // adjust the given instances, the current sturdy-core implementation does not reflect the required semantics
     // config can be ignored here
     given ConcreteConvertFloatInt: ConcreteConvertFloatInt with

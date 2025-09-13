@@ -102,7 +102,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   implicit val effectStack: EffectStack = EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
   implicit val project: Project[URL]
-  val projectSource: String
 
   private def fail(k: FailureKind, what: String) = failure.fail(k, what)
 
