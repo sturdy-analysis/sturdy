@@ -12,9 +12,9 @@ class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, 
   override def getField(obj: OV, name: FieldName)(using Failure): V = ops.getField(extractO(obj), name)
   override def setField(obj: OV, name: FieldName, v: V): JOption[J, Unit] = ops.setField(extractO(obj), name, v)
 
-  override def invokeFunctionCorrect(callData: CallData)(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V =
+  override def invokeMethod(callData: CallData)(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V =
     def liftedInvoke = (uov: UOV, mth: Mth, vs: Seq[V]) => invoke(injectO(uov), mth, vs)
-    ops.invokeFunctionCorrect(callData)(callingClass, staticClass, mthName, sig, extractO(obj), args)(liftedInvoke)
+    ops.invokeMethod(callData)(callingClass, staticClass, mthName, sig, extractO(obj), args)(liftedInvoke)
 
   override def makeNull(): OV = injectO(ops.makeNull())
 

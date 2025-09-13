@@ -166,7 +166,7 @@ object ConcreteInterpreter extends Interpreter:
         except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
       (resolvedField.classFile.thisType, resolvedField.name)
 
-    override def invokeFunctionCorrect(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
+    override def invokeMethod(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case ConcreteRefValues.Object(_, cf, _) => callData match
         case InvokeType.Interface =>

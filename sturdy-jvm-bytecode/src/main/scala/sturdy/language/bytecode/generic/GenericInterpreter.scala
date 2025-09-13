@@ -459,7 +459,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(InvokeType.Virtual)(mth.classFile, getClassFile(declaringClass.mostPreciseClassType), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(InvokeType.Virtual)(mth.classFile, getClassFile(declaringClass.mostPreciseClassType), name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -467,7 +467,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(InvokeType.Special(isInterface))(mth.classFile, getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(InvokeType.Special(isInterface))(mth.classFile, getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -475,7 +475,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeFunctionCorrect(InvokeType.Interface)(mth.classFile, getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(InvokeType.Interface)(mth.classFile, getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
