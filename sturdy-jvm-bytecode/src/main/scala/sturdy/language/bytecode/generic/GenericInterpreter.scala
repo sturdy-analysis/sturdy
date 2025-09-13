@@ -15,9 +15,9 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
-import sturdy.language.bytecode.AuxiliaryFunctions
 import sturdy.language.bytecode.abstractions.{InvokeType, Site}
 import sturdy.language.bytecode.generic.FixIn.Eval
+import sturdy.language.bytecode.resolveField
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
@@ -69,7 +69,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   implicit val joinAddr: J[Addr]
 
   implicit val failure: Failure
-  val except: Except[JvmExcept[V], ExcV, J]
+  implicit val except: Except[JvmExcept[V], ExcV, J]
   val stack: DecidableOperandStack[V]
   val objAlloc: Allocator[Addr, Site]
   val objFieldAlloc: Allocator[Addr, Site]
@@ -103,7 +103,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   implicit val effectStack: EffectStack = EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
-  val project: Project[URL]
+  implicit val project: Project[URL]
   val projectSource: String
 
   private def fail(k: FailureKind, what: String) = failure.fail(k, what)
@@ -918,7 +918,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   private def getStaticFieldAddr(site: Site, declaringClass: ClassType, name: String)(using Fixed): Addr =
     ensureInitialization(site)(declaringClass)
-    val resolvedField = AuxiliaryFunctions.resolveField(getClassFile(declaringClass), (declaringClass, name))(using project).getOrElse:
+    val resolvedField = resolveField(getClassFile(declaringClass), (declaringClass, name))(using project).getOrElse:
       except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
     staticFieldTable.get(resolvedField.classFile.thisType, resolvedField.name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
 

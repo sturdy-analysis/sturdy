@@ -162,7 +162,7 @@ object ConcreteInterpreter extends Interpreter:
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     private def getFieldName(cf: ClassFile, name: FieldName): FieldName =
-      val resolvedField = AuxiliaryFunctions.resolveField(cf, name).getOrElse:
+      val resolvedField = resolveField(cf, name).getOrElse:
         except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
       (resolvedField.classFile.thisType, resolvedField.name)
 
@@ -205,89 +205,6 @@ object ConcreteInterpreter extends Interpreter:
 
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
-
-    // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
-    private def resolveMethod(caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor): Method =
-      if hierarchy.isInterface(calleeStatic).isYesOrUnknown then
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
-      val resolved = project.resolveMethodReference(calleeStatic, name, descriptor).getOrElse:
-        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchMethodError")))
-      // access control
-      if resolved.isAccessibleBy(caller, project.nests) then
-        resolved
-      else
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
-
-    // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
-    private def resolveInterfaceMethod(caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor): Method =
-      if hierarchy.isInterface(calleeStatic).isNoOrUnknown then
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
-      val resolved = project.resolveInterfaceMethodReference(calleeStatic, name, descriptor).getOrElse:
-        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchMethodError")))
-      // access control
-      if resolved.isAccessibleBy(caller, project.nests) then
-        resolved
-      else
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
-
-    private def canOverride(mc: Method, ma: Method): Boolean =
-      !mc.isStatic && !ma.isStatic && mc.name == ma.name && mc.descriptor == ma.descriptor && !mc.isPrivate &&
-        Method.canDirectlyOverride(mc.classFile.thisType.packageName, ma.visibilityModifier, ma.classFile.thisType.packageName)
-
-    // method selection algorithm for invokeinterface and invokevirtual
-    private def selectMethod(dynamicType: ClassType, resolvedMethod: Mth): Mth =
-      if resolvedMethod.isPrivate then return resolvedMethod
-
-      val dynCF = project.classFile(dynamicType).get
-      val candidate = dynCF.methods.find(canOverride(_, resolvedMethod))
-      if candidate.isDefined then return candidate.get
-
-      var superType = dynCF.superclassType
-      var result: Option[Method] = None
-      while superType.isDefined do
-        val cf = project.classFile(superType.get).get
-        if result.isEmpty then
-          result = cf.methods.find(canOverride(_, resolvedMethod))
-        superType = cf.superclassType
-      if result.isDefined then return result.get
-
-      val maxSpecificMethods = project.findMaximallySpecificSuperinterfaceMethods(hierarchy.superinterfaceTypes(dynamicType).get, resolvedMethod.name, resolvedMethod.descriptor, UIDSet.empty)._2
-      if maxSpecificMethods.size == 1 then
-        maxSpecificMethods.head
-      else if maxSpecificMethods.isEmpty then
-        except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
-      else
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
-
-    // method selection algorithm for invokespecial
-    private def selectSpecial(c: ClassType, resolvedMethod: Mth): Mth =
-      val cf = project.classFile(c).get
-      val candidate = cf.methods.find: mth =>
-        !mth.isStatic && mth.name == resolvedMethod.name && mth.descriptor == resolvedMethod.descriptor
-      if candidate.isDefined then return candidate.get
-
-      var superType = cf.superclassType
-      var result: Option[Method] = None
-      while superType.isDefined && result.isEmpty do
-        val cf = project.classFile(superType.get).get
-        if result.isEmpty then
-          result = cf.methods.find: mth =>
-            !mth.isStatic && mth.name == resolvedMethod.name && mth.descriptor == resolvedMethod.descriptor
-        superType = cf.superclassType
-      if result.isDefined then return result.get
-
-      if hierarchy.isInterface(c).isYes then
-        val m = project.classFile(ClassType.Object).get.methods.find: mth =>
-          !mth.isStatic && mth.isPublic && mth.name == resolvedMethod.name && mth.descriptor == resolvedMethod.descriptor
-        if m.isDefined then return m.get
-
-      val maxSpecificMethods = project.findMaximallySpecificSuperinterfaceMethods(hierarchy.superinterfaceTypes(c).get, resolvedMethod.name, resolvedMethod.descriptor, UIDSet.empty)._2.filter(_.isNotAbstract)
-      if maxSpecificMethods.size == 1 then
-        maxSpecificMethods.head
-      else if maxSpecificMethods.isEmpty then
-        except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
-      else
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
 
     override def makeNull(): RefValue = ConcreteRefValues.NullValue()
 

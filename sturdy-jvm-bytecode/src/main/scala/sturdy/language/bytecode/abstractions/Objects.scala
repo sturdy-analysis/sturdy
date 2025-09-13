@@ -1,14 +1,14 @@
 package sturdy.language.bytecode.abstractions
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ClassType, ReferenceType, ShortType, Type}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassHierarchy, ClassType, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ReferenceType, ShortType, Type}
 import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.EffectStack
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.Store
-import sturdy.language.bytecode.{AuxiliaryFunctions, Interpreter}
+import sturdy.language.bytecode.{Interpreter, resolveMethod, selectMethod}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening}
 import sturdy.values.integer.NumericInterval
@@ -83,6 +83,8 @@ trait Objects extends Interpreter:
         case _ => ??? // TODO: not implemented
 
     def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] {
+      given hierachy: ClassHierarchy = project.classHierarchy
+
       override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
         val fieldAddrs = vals.map { (v, site, name) =>
           val addr = alloc(site)
@@ -116,8 +118,10 @@ trait Objects extends Interpreter:
         ref match
           case Topped.Top => topOpalVal(sig.returnType)
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
-            val mth = AuxiliaryFunctions.findMethodOfSuperclass(obj.cls, mthName, sig, project)
-            invoke(ref, mth, args)
+            // TODO: test, add errors/exceptions
+            val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+            val selectedMethod = selectMethod(obj.cls.thisType, resolvedMethod)
+            invoke(ref, selectedMethod, args)
           case Topped.Actual(_) => ???
 
       override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())

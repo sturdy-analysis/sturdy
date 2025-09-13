@@ -48,7 +48,7 @@ trait Interpreter:
 
   type ExcV
 
-  val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = new ConcreteExcept
+  implicit val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = ConcreteExcept[JvmExcept[Value]]()
   enum Value:
     case TopValue
     case Int32(i: I32)
