@@ -4,7 +4,6 @@ import org.opalj.bi.ACC_STATIC
 import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
 import org.opalj.br.*
-import org.opalj.br.reader.Java8Framework
 import sturdy.data.{JOption, JOptionC, MayJoin, NoJoin, noJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.DecidableMutableCallFrame
@@ -25,7 +24,6 @@ import sturdy.values.convert.NilCC
 import sturdy.values.objects.ObjectOps
 import sturdy.values.{Finite, Join, MaybeChanged}
 
-import java.io.File
 import java.net.URL
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
@@ -55,7 +53,7 @@ given Finite[FixOut] with {}
 trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
-  type Fixed = FixIn => FixOut
+  private type Fixed = FixIn => FixOut
 
   val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
 
@@ -171,7 +169,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // load Local variable opcode 21 - 45
       case inst@LoadLocalVariableInstruction(_, lvIndex) =>
-        val v = frame.getLocalOrElse(lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${lvIndex.toString}"))
+        val v = frame.getLocalOrElse(lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString} , ${lvIndex.toString}"))
         stack.push(v)
 
       // load from array (opcode 46 - 53)
@@ -185,7 +183,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // store local variable opcode 54 - 78
       case inst@StoreLocalVariableInstruction(_, lvIndex) =>
         val v1 = stack.popOrAbort()
-        frame.setLocalOrElse(lvIndex, v1, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString()} , ${lvIndex.toString}"))
+        frame.setLocalOrElse(lvIndex, v1, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString} , ${lvIndex.toString}"))
 
       // store in array (opcode 79 - 86)
       case inst@(IASTORE | LASTORE | FASTORE | DASTORE | AASTORE | BASTORE | CASTORE | SASTORE) =>
@@ -336,7 +334,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // iinc opcode 132
       case inst@IINC(lvIndex, constValue) =>
         val toInc = frame.getLocalOrElse(lvIndex, fail(BytecodeFailure.UnboundLocal, s" ${inst.toString} , ${lvIndex.toString}"))
-        frame.setLocalOrElse(lvIndex, i32ops.add(toInc, i32ops.integerLit(constValue)), fail(BytecodeFailure.UnboundLocal, s" ${toString} , ${lvIndex.toString}"))
+        frame.setLocalOrElse(lvIndex, i32ops.add(toInc, i32ops.integerLit(constValue)), fail(BytecodeFailure.UnboundLocal, s" ${inst.toString} , ${lvIndex.toString}"))
 
       // Conversions opcode 133 - 147
       case inst if 133 <= inst.opcode && inst.opcode <= 147 =>
@@ -784,7 +782,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     } {
       case JvmExcept.Jump(targetPC) =>
         run(targetPC, mth)
-      case JvmExcept.Ret(currPC) =>
+      case JvmExcept.Ret(_) =>
         ??? // TODO
       case JvmExcept.Return() =>
         ()
@@ -887,7 +885,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     stringObj
 
   // constructs the fields for an object allocation
-  def buildFieldSeq(site: Site)(fields: Fields) = fields.map: field =>
+  def buildFieldSeq(site: Site)(fields: Fields): Seq[(V, Site, (ClassType, String))] = fields.map: field =>
     val fieldSite = Site.FieldInitialization(site, field.name, field.classFile.thisType)
     (fieldValue(fieldSite)(field), fieldSite, (field.classFile.thisType, field.name))
 
