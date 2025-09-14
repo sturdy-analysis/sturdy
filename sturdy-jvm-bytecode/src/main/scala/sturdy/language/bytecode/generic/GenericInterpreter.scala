@@ -106,7 +106,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   private def fail(k: FailureKind, what: String) = failure.fail(k, what)
 
   private lazy val num = GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
-  private lazy val native = JavaNativeFunctions[V, Addr, Idx, Addr, Addr, ObjRep, TypeRep, InvokeType, J](bytecodeOps, objectOps, arrayOps)
+  private lazy val native = GenericInterpreterNativeMethods[V, Addr, Idx, Addr, Addr, ObjRep, TypeRep, InvokeType, J](bytecodeOps, objectOps, arrayOps)
 
   def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit =
     val site = Site.Instruction(mth, pc)

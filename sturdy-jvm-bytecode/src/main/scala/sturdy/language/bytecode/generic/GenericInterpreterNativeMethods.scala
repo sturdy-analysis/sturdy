@@ -5,9 +5,9 @@ import sturdy.data.{JOption, JOptionC, MayJoin}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.objects.{Object, ObjectOps}
 
-
-
-class JavaNativeFunctions[V, Addr, Idx, OID, AID, ObjRep, TypeRep, CallData, J[_] <: MayJoin[_]]
+// class to deal with important native methods, e.g., the class Class
+// TODO: clean up, improve, fix
+class GenericInterpreterNativeMethods[V, Addr, Idx, OID, AID, ObjRep, TypeRep, CallData, J[_] <: MayJoin[_]]
   (bytecodeOps: BytecodeOps[Idx, V, ReferenceType],
    objectOps: ObjectOps[(ClassType, String), OID, V, ClassFile, V, _, Method, String, MethodDescriptor, V, CallData, J],
    arrayOps: ArrayOps[AID, V, V, V, ArrayType, _, J]):
