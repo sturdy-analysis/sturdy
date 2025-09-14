@@ -106,7 +106,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   private def fail(k: FailureKind, what: String) = failure.fail(k, what)
 
   private lazy val num = GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
-  private lazy val native = GenericInterpreterNativeMethods[V, Addr, Idx, Addr, Addr, ObjRep, TypeRep, InvokeType, J](bytecodeOps, objectOps, arrayOps)
+  private lazy val native = GenericInterpreterNativeMethods[V, Addr, Idx, ObjType, Addr, Addr, ObjRep, TypeRep, ExcV, InvokeType, J](this)
 
   def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit =
     val site = Site.Instruction(mth, pc)
@@ -709,7 +709,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       fail(AbortEval.Exit(args.head), "System.exit")
 
     if native.nativeFunList.contains(mth.name) then
-      val ret = invokeClassMethod(mth, args)
+      val ret = native.invokeClassMethod(mth, args)
       return if mth.descriptor.returnType.isVoidType then i32ops.integerLit(-1) else ret
 
     val body = mth.body.getOrElse:
@@ -918,128 +918,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     val resolvedField = resolveField(getClassFile(declaringClass), (declaringClass, name))(using project).getOrElse:
       except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
     staticFieldTable.get(resolvedField.classFile.thisType, resolvedField.name).option(fail(BytecodeFailure.FieldNotFound, name))(_.asInstanceOf[Addr])
-
-  def invokeClassMethod(mth: Method, args: Seq[V]): V =
-    mth.name match
-      case "desiredAssertionStatus0" =>
-        i32ops.integerLit(1)
-      case "forName0" =>
-        ???
-      case "getConstantPool" =>
-        // not in docs
-        ???
-      case "getDeclaredClasses0" =>
-        // returns array of all declared classes in this class
-        ???
-      case "getDeclaredConstructors0" =>
-        // returns array of all constructors declared by the class
-        ???
-      case "getDeclaredFields0" =>
-        // creates a field object of a given string name
-        ???
-      case "getDeclaredMethods0" =>
-        // returns an array of method objects of all declared methods
-        ???
-      case "getDeclaringClass0" =>
-        // if this class is member of another class return class object of that class
-        ???
-      case "getEnclosingMethod0" =>
-        // if this class is local or anonymous within a method, return method object of that method
-        ???
-      case "getGenericSignature0" =>
-        // not in docs
-        ???
-      case "getInterfaces0" =>
-        // array of all implemented classes for objects, of all extended interfaces for interfaces
-        ???
-      case "getModifiers" =>
-        // returns java class modifiers encoed as an integer
-        ???
-      case "getNestHost0" =>
-        ???
-      case "getNestMembers0" =>
-        ???
-      case "getPermittedSubclasses0" =>
-        ???
-      case "getPrimitiveClass" =>
-        // not in docs
-        val clsObj = createObject(ClassType("java/lang/Class"), Site.Instruction(mth, 0))
-        clsObj
-      case "getProtectionDomain" =>
-        // returns protectionDomain of this class
-        ???
-      case "getRawAnnotations" =>
-        // not in docs
-        ???
-      case "getRawTypeAnnotations" =>
-        // not in docs
-        ???
-      case "getRecordComponents0" =>
-        ???
-      case "getSigners" =>
-        // returns signers of this class
-        ???
-      case "getSimpleBinaryName0" =>
-        ???
-      case "getSuperclass" =>
-        // returns class of the superclass of the encapsulated object
-        ???
-      case "initClassName" =>
-        ???
-      case "isArray" =>
-        // true if this class represents an array
-        ???
-      case "isAssignableFrom" =>
-        // true if this class is the same, or super of that class
-        ???
-      case "isHidden" =>
-        ???
-      case "isInstance" =>
-        // true if that object is assignment compatable with the object represented by this class
-        ???
-      case "isInterface" =>
-        if ??? then
-          i32ops.integerLit(1)
-        else
-          i32ops.integerLit(0)
-      case "isPrimitive" =>
-        if ??? then
-          i32ops.integerLit(1)
-        else
-          i32ops.integerLit(0)
-      case "isRecord0" =>
-        ???
-      case "registerNatives" =>
-        i32ops.integerLit(-1)
-      case "setSigners" =>
-        // not in docs
-        ???
-
-      /*
-      case "getComponentType" =>
-        // returns class representing the component type of an array, this class must represent an array class
-        ???
-      case "getName" =>
-        // returns the name of the object encapsulated by this class
-        ???
-      case "getName0" =>
-        // returns the name of the object encapsulated by this class
-        ???
-      */
-      case "desiredAssertionStatus" =>
-        ???
-      case "fillInStackTrace" =>
-        //temporary
-        bytecodeOps.i32ops.integerLit(-1)
-      case "arraycopy" =>
-        val src = args.head
-        val srcPos = args(1)
-        val dest = args(2)
-        val destPos = args(3)
-        val length = args(4)
-        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
-        //temporary
-        bytecodeOps.i32ops.integerLit(-1)
 
   enum AbortEval extends FailureKind:
     // abort eval due to System.exit
