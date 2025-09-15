@@ -139,7 +139,8 @@ lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))
     )
   )
 
-val opalCommit = "fc0b1f52b3f8812450e73b4af742e8bdaf11d93e"
+// TODO: switch back to develop branch once this fix has been integrated
+val opalCommit = "c06faefc50daa186175217aaefbf132a23434220"
 val opal = uri(s"https://github.com/opalj/opal.git#$opalCommit")
 
 lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
