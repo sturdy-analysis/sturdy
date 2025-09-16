@@ -822,8 +822,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     // TODO: maybe handle nonexistent body differently
     val body = mth.body.get
     // get is safe to call as unapply always returns Some here
-    val instructionMap = body.iterator.map(PCAndInstruction.unapply(_).get).toMap
-    val currInst = instructionMap(pc)
+    val currInst = body.iterator.find(_.pc == pc).map(_.instruction).getOrElse:
+      throw IllegalStateException(s"can't find instruction with pc $pc")
     frame.setData(pc)
     evalFix(currInst, mth, pc)
 
