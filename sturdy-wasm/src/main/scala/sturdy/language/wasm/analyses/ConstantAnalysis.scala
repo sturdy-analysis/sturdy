@@ -62,13 +62,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       r match {
         case Value.Ref(f) =>
           if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
-            if (f.size == 1)
+            if (f.set.filter(_ == ExternReference.Null) ++ f.set.filter(_ == FunctionInstance.Null) == f.set)
               makeI32(Topped.Actual(1))
             else
               makeI32(Topped.Top)
           else
             makeI32(Topped.Actual(0))
-        case ConstantAnalysis.Value.TopValue => Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))
+        case ConstantAnalysis.Value.TopValue => makeI32(Topped.Top)
         case _ => Value.Num(NumValue.Int32(Topped.Actual(0)))
       }
     }

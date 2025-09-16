@@ -100,9 +100,9 @@ trait InstructionResultLogger[Info, V](stack: OperandStack[V, NoJoin])(using Top
            _: ReferenceInst |
            _: LocalGet | _: GlobalGet | _: TableGet |
            _: LoadInst | _: LoadNInst | _: VectorLoadInst |
-           _: i8x16.Swizzle.type | _:i8x16.Shuffle | _: VectorDot | _: VectorSplat |
+           _: i8x16.Swizzle.type | _:i8x16.Shuffle | _: VectorSplat |
            _: VectorExtractLane | _: VectorReplaceLane |
-           _: VectorBitmask | _: VectorShiftop | _: VectorExtmul | _: VectorExtadd |
+           _: VectorBitmask | _: VectorShiftop |
            _: MemorySize.type | _: TableSize
         => Output(1)
       case block: Block

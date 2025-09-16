@@ -44,7 +44,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
 
   override def fill(key: Key, addr: Topped[Int], byteAmount: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] =
     val mem = memories(key)
-    if (addr.isTop || byteAmount.isTop) {
+    if (byteAmount.isTop) {
       mem match
         case _: TopMem[B] => return JOptionA.noneSome(())
         case m: SizeMem[B] => memories += key -> SizeMem(m.size, m.sizeLimit, isDefinite = true, m.newBound(value).get)
@@ -76,7 +76,7 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
       memories += key -> m.getOrElse(break(JOptionA.none))
       if (noneSome) JOptionA.noneSome(()) else res
 
-  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], byteAmount: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = {
+  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], byteAmount: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] =
     val mem = memories(key)
     var noneSome = false
     var initBytes: Seq[B] = dataBytes
@@ -92,7 +92,6 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     boundary:
       memories += key -> m.getOrElse(break(JOptionA.none))
       if (noneSome) JOptionA.noneSome(()) else res
-  }
 
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     initSize match
