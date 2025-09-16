@@ -1,6 +1,6 @@
 package sturdy.values.floating
 
-final class LiftedFloatOps[B, V, D](extract: V => D, inject: D => V)(using ops: FloatOps[B, D]) extends FloatOps[B, V]:
+class LiftedFloatOps[B, V, D](extract: V => D, inject: D => V)(using ops: FloatOps[B, D]) extends FloatOps[B, V]:
   inline def floatingLit(f: B): V = inject(ops.floatingLit(f))
   inline def randomFloat(): V = inject(ops.randomFloat())
   inline def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))

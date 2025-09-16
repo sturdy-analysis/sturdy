@@ -301,7 +301,7 @@ final class RelationalStore
     val resolvedCons = replaceMissingAddrs(cons, state)
     if(state.abs1.satisfy(manager, resolvedCons.toApron(env)))
       Topped.Actual(true)
-    else if(state.abs1.satisfy(manager, resolvedCons.negated.toApron(env)))
+    else if(manager.wasExact())
       Topped.Actual(false)
     else
       Topped.Top
