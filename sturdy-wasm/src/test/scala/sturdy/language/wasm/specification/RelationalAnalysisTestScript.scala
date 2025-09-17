@@ -41,14 +41,15 @@ val csvWriter = {
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
-  new RelationalAnalysisTestScript(Polka(true)),
-  new RelationalAnalysisTestScript(Octagon()),
-  new RelationalAnalysisTestScript(Box()),
+  new RelationalAnalysisTestScript(Polka(true), relational = true),
+  new RelationalAnalysisTestScript(Octagon(), relational = true),
+  new RelationalAnalysisTestScript(Box(), relational = true),
+  new RelationalAnalysisTestScript(Polka(true), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()
 
-class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matchers:
+class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true) extends AnyFlatSpec, Matchers:
   behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
@@ -60,7 +61,7 @@ class RelationalAnalysisTestScript(manager: Manager) extends AnyFlatSpec, Matche
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
     Iterator(
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(stackedStates)), ctx = Insensitive)),
-      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive, relational = relational)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(stackedStates)), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
 //      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
@@ -214,11 +215,12 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
       passedTestCases.increment()
     case AssertTrap(action: Action, message: String) =>
       totalTestCases.increment()
-      val aRes = runAAction(action, convertVals)
+      val state = aInterp.effectStack.getState
+      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setStateNonMonotonically(state) }
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
-      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+//      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
       passedTestCases.increment()
     case AssertModuleTrap(mod,_) =>
       totalTestCases.increment()

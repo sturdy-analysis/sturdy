@@ -297,9 +297,8 @@ final class RelationalStore
     state.abs1.isBottom(manager)
 
   def satisfies(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] =
-    val env = state.abs1.getEnvironment
     val resolvedCons = replaceMissingAddrs(cons, state)
-    if(state.abs1.satisfy(manager, resolvedCons.toApron(env)))
+    if(state.abs1.satisfy(manager, resolvedCons.toApron(state.abs1.getEnvironment)))
       Topped.Actual(true)
     else if(manager.wasExact())
       Topped.Actual(false)

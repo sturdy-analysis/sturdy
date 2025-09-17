@@ -7,11 +7,11 @@ import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, Re
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy, bytememory}
 import sturdy.effect.bytememory.{*, given}
-import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, NonRelationalCallFrame, RelationalCallFrame}
+import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{DecidableOperandStack, JoinableDecidableOperandStack, given}
-import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTableWithDrop}
+import sturdy.effect.symboltable.{ConstantIntervalMappedSymbolTable, ConstantSymbolTable, DecidableSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, RelationalSymbolTable, SymbolTable, SymbolTableWithDrop}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -190,7 +190,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     import relationalStore.given
     val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
-    apronState = new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+    apronState =
+      if(config.relational)
+        new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+      else
+        new NonRelationalApronState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
     given ApronRecencyState[AddrCtx, Type, Value] = apronState
 
     def addressIterator: Iterator[VirtAddr] =
@@ -240,14 +244,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           apronState
         )
       else
-        new NonRelationalCallFrame(
+        new JoinableDecidableCallFrame(
           initData = rootFrameData,
-          initVars = Iterable.empty,
-          localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
-          relationalStore
+          initVars = Iterable.empty
         )
 
-    val stack: RelationalStack[Value, AddrCtx, Type] = new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
+    val stack: DecidableOperandStack[Value] =
+      if(config.relational)
+        new RelationalStack(stackAlloc[Int, Value, InstLoc, NoJoin](rootFrameData, callFrame))
+      else
+        JoinableDecidableOperandStack[Value]
 
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
@@ -257,10 +263,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       heapAlloc(rootFrameData)
     )
 
-    val globals: RelationalSymbolTable[Unit, GlobalAddr, Value, AddrCtx, Type] = new RelationalSymbolTable(new AAllocatorFromContext(
-        (key: Unit, sym: GlobalAddr) =>
-          module.exportedName(ExternalValue.Global(sym.addr)).map(AddrCtx.Global(_)).getOrElse(AddrCtx.Global(sym.addr))
-    ))
+    val globals: DecidableSymbolTable[Unit, GlobalAddr, Value] =
+      if(config.relational)
+        new RelationalSymbolTable(new AAllocatorFromContext(
+            (key: Unit, sym: GlobalAddr) =>
+              module.exportedName(ExternalValue.Global(sym.addr)).map(AddrCtx.Global(_)).getOrElse(AddrCtx.Global(sym.addr))
+        ))
+      else
+        JoinableDecidableSymbolTable()
 
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]

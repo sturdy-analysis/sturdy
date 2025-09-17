@@ -261,18 +261,21 @@ given RelationalConvertLongDouble[Addr: Ordering : ClassTag, Type: ApronType]
 
 private final class RelationalConvertIntegerFloating[From, To: Numeric: Bounded, Addr: Ordering: ClassTag, Type: ApronType](using failure: Failure, effectStack: EffectStack, intOps: RelationalBaseIntegerOps[From, Addr, Type], convertType: Convert[From, To, Type, Type, BitSign])
   extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], BitSign]:
-  def apply(from: ApronExpr[Addr,Type], conf: BitSign) = conf match
-    case conf@BitSign.Signed =>
-      cast(from, RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
-    case conf@BitSign.Unsigned =>
-      cast(intOps.interpretSignedAsUnsigned(from), RoundingType.Single, RoundingDir.Nearest, convertType(from._type, conf))
-    case conf@BitSign.Raw =>
-      val topIv = Interval(Numeric[To].toDouble(Bounded[To].minValue), Numeric[To].toDouble(Bounded[To].maxValue))
-      joinWithFailure(
-        floatConstant(topIv, FloatSpecials.Top, convertType(from._type, conf))
-      ) (
-        unsupportedConfiguration(conf, this)
-      )
+  def apply(from: ApronExpr[Addr,Type], conf: BitSign) = {
+    val tpe = convertType(from._type, conf)
+    conf match
+      case conf@BitSign.Signed =>
+        cast(from, tpe.roundingType, RoundingDir.Nearest, tpe)
+      case conf@BitSign.Unsigned =>
+        cast(intOps.interpretSignedAsUnsigned(from), tpe.roundingType, RoundingDir.Nearest, tpe)
+      case conf@BitSign.Raw =>
+        val topIv = Interval(Numeric[To].toDouble(Bounded[To].minValue), Numeric[To].toDouble(Bounded[To].maxValue))
+        joinWithFailure(
+          floatConstant(topIv, FloatSpecials.Top, convertType(from._type, conf))
+        ) (
+          unsupportedConfiguration(conf, this)
+        )
+  }
 
 //private final class RelationalConvertIntegerBytes[From, Addr: Ordering: ClassTag, Type: ApronType]
 //  (using failure: Failure, apronState: ApronState[Addr,Type], typeOps: IntegerOps[From, Type])

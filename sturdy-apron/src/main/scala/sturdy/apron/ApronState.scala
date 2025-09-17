@@ -7,7 +7,7 @@ import sturdy.apron.ApronExpr.{addr, booleanLit}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
-import sturdy.values.{*, given}
+import sturdy.values.{Widen, *, given}
 import sturdy.values.booleans.{BooleanOps, given}
 import sturdy.values.ordering.{EqOps, given}
 import sturdy.values.floating.{*, given}
@@ -151,7 +151,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def makeNonRelational(addr: Addr): Unit
 
-final class ApronRecencyState
+class ApronRecencyState
   [
     Ctx: Ordering,
     Type: ApronType : Join: Widen,
@@ -362,6 +362,26 @@ final class ApronRecencyState
 
   override def toString: String =
     relationalStore.toString
+
+class NonRelationalApronState[Ctx: Ordering, Type: ApronType: Join: Widen, Val: Join: Widen]
+  (
+    temporaryVariableAllocator: Allocator[Ctx, Type],
+    recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
+    relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
+  )(using
+    StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
+  )
+  extends ApronRecencyState[Ctx, Type, Val](temporaryVariableAllocator, recencyStore, relationalStore):
+  override def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
+    (e1: ApronExpr[VirtualAddress[Ctx],Type], e2: ApronExpr[VirtualAddress[Ctx],Type]) =>
+      val iv1 = getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), e1)
+      val iv2 = getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), e2)
+      for {
+        iv <- if(widen) Widen(iv1,iv2) else Join(iv1,iv2);
+        floatSpecials <- if(widen) Widen(e1.floatSpecials,e2.floatSpecials) else Join(e1.floatSpecials,e2.floatSpecials)
+        tpe <- if(widen) Widen(e1._type,e2._type) else Join(e1._type,e2._type)
+      } yield(ApronExpr.floatConstant(iv, floatSpecials, tpe))
+
 
 given ApronExprIntervalRange[Addr, Type: ApronType](using apronState: ApronState[Addr, Type]): IntervalRange[ApronExpr[Addr,Type]] with
   var tpe: Type = _
