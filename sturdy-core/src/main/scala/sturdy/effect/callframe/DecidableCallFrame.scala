@@ -103,25 +103,25 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = vars
-    private var fVars: Array[V] = _
+    private val before = vars
+    private var afterFirst: Array[V] = _
 
     override def inbetween(fFailed: Boolean): Unit =
-      fVars = vars
-      vars = snapshot
+      afterFirst = vars
+      vars = before
 
     override def retainNone(): Unit =
       setBottom
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      vars = fVars
+      vars = afterFirst
 
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (vars.length != fVars.length)
+      if (vars.length != afterFirst.length)
         throw IllegalStateException()
-      vars = vars.zip(fVars).map(Join[V](_,_).get)
+      vars = afterFirst.zip(vars).map(Join[V](_,_).get)
   }
 
   override def toString: String =

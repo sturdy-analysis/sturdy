@@ -10,6 +10,7 @@ import sturdy.values.integer.given
 import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, *, given}
 
+import scala.collection.immutable.BitSet
 import scala.reflect.ClassTag
 
 /**
@@ -362,32 +363,30 @@ final class RelationalStore
 
     val beforeState = _internalState
 
-    var joinedAddrTrans: Map[Context, RecencyRegion] = Map()
-    for(ctx <- _internalState.addressTranslationState.mapping.keys ++ olderState.addressTranslationState.mapping.keys) {
-      (_internalState.addressTranslationState.mapping.get(ctx), olderState.addressTranslationState.mapping.get(ctx)) match
-        case (Some(internalRegion), Some(oldRegion)) =>
-          // Context `ctx` occurs in `olderState` and `internalState`.
-          // Hence, there is a conflict between internalState[PhysicalAddress(ctx, Recent)] and olderState[PhysicalAddress(ctx, Recent)].
-          // To avoid loosing precision when setting the state, ensure that recent variables in olderState have priority over internalState.
-          val joinedFailed = internalRegion.failed ++ oldRegion.failed
-          joinedAddrTrans += ctx -> RecencyRegion(
-            recent = oldRegion.recent -- joinedFailed,
-            old = (oldRegion.old ++ ((internalRegion.old ++ internalRegion.recent) -- oldRegion.recent)) -- joinedFailed,
-            failed = joinedFailed
-          )
-          _internalState = movePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)).asInstanceOf[PowAddr], PowersetAddr(PhysicalAddress(ctx, Recency.Old)).asInstanceOf[PowAddr], _internalState)
-        case (Some(internalRegion),None) =>
-          // Context does not occur in olderState, hence there is no conflict.
-          joinedAddrTrans += ctx -> internalRegion
-        case (None, Some(oldRegion)) =>
-          joinedAddrTrans += ctx -> oldRegion
+    for((ctx,internalRegion) <- _internalState.addressTranslationState.mapping) {
+      if(olderState.addressTranslationState.mapping.contains(ctx)) {
+        // Context `ctx` occurs in `olderState` and `internalState`.
+        // Hence, there is a conflict between internalState[PhysicalAddress(ctx, Recent)] and olderState[PhysicalAddress(ctx, Recent)].
+        // To avoid loosing precision when setting the state, ensure that recent variables in olderState have priority over internalState.
+
+        _internalState =
+          setRegion(ctx,
+            RecencyRegion(
+              recent = BitSet.empty,
+              old = internalRegion.recent ++ internalRegion.old,
+              failed = internalRegion.failed
+            ),
+            _internalState)
+
+        _internalState =
+          movePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)).asInstanceOf[PowAddr],
+            PowersetAddr(PhysicalAddress(ctx, Recency.Old)).asInstanceOf[PowAddr],
+            _internalState)
+      }
     }
 
     // Then widen the `_internalState` into the `olderState`.
-    _internalState = widen(
-      olderState.withAddressTranslationState(_ => AddressTranslationState(joinedAddrTrans)),
-      _internalState.withAddressTranslationState(_ => AddressTranslationState(joinedAddrTrans))
-    ).get
+    _internalState = widen(olderState, _internalState).get
 
     assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
     assertVirtualAddressesIncludedIn(olderState.addressTranslationState, _internalState.addressTranslationState)

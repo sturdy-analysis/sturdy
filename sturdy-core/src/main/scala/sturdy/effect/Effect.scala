@@ -69,13 +69,13 @@ trait Effect:
 
     override def inbetween(fFailed: Boolean): Unit =
       afterFirst = getState
-      setState(original)
+      setStateNonMonotonically(original)
 
     override def retainNone(): Unit =
       setBottom
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
-      setState(afterFirst)
+      setStateNonMonotonically(afterFirst)
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       () // do nothing
@@ -83,7 +83,7 @@ trait Effect:
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       val afterSecond = getState
       val joined = join(afterFirst, afterSecond)
-      setState(joined.get)
+      setStateNonMonotonically(joined.get)
   )
 
 trait Stateless extends Effect:

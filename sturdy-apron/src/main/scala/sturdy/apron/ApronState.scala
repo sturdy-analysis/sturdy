@@ -79,6 +79,8 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     ApronBool.Constant(getBoolean(cond))
 
   def getInterval(expr: ApronExpr[Addr, Type]): Interval
+  def getLeftInterval(expr: ApronExpr[Addr,Type]): Interval
+  def getRightInterval(expr: ApronExpr[Addr,Type]): Interval
 
   def getFloatInterval(expr: ApronExpr[Addr, Type]): sturdy.apron.FloatInterval
 
@@ -241,6 +243,9 @@ class ApronRecencyState
       case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
   override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.internalState, expr)
+  override def getLeftInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.leftState.getOrElse(relationalStore.internalState), expr)
+  override def getRightInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.rightState.getOrElse(relationalStore.internalState), expr)
+
   def getInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = {
     // purposefully throws away changes to the state as they lower precision.
     val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, state.clone().asInstanceOf)

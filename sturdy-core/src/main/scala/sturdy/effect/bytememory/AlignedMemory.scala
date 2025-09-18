@@ -8,7 +8,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import Bytes.*
 import sturdy.data
-import sturdy.effect.EffectStack
+import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.util.Profiler
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 
@@ -223,10 +223,35 @@ final class AlignedMemory
 
   override def getState: State = AlignedMemoryState(memories)
 
-  override def setState(st: State): Unit = memories = st.state
+  override def setState(st: State): Unit = {
+    for (memoryAddr <- memories.keySet ++ st.state.keySet) {
+      (memories.get(memoryAddr), st.state.get(memoryAddr)) match {
+        case (Some(internalMemory), Some(otherMemory)) =>
+          var mem = internalMemory
+          for(case physAddr@PhysicalAddress(ctx,Recency.Recent) <- internalMemory.store.keys) {
+            if(otherMemory.store.contains(physAddr)) {
+              for (joinedRegion <- Join(mem.store.get(PhysicalAddress(physAddr.ctx, Recency.Recent)), internalMemory.store.get(PhysicalAddress(physAddr.ctx, Recency.Old))).get) {
+                mem = mem.copy(
+                  store = mem.store + (PhysicalAddress(ctx, Recency.Old) -> joinedRegion) - PhysicalAddress(ctx, Recency.Recent)
+                )
+              }
+            }
+          }
+          memories += memoryAddr -> mem
+        case _ => {}
+      }
+    }
+    memories = widen(st, getState).get.state
+  }
+
+  override def setStateNonMonotonically(st: AlignedMemoryState): Unit =
+    memories = st.state
 
   override def join: Join[State] = (s1: State,s2:State) => Profiler.addTime("RelationalMemoryState.combine") { Join(s1.state,s2.state).map(AlignedMemoryState(_)) }
   override def widen: Widen[State] = (s1: State,s2:State) => Profiler.addTime("RelationalMemoryState.combine") { Widen(s1.state,s2.state).map(AlignedMemoryState(_)) }
+
+  override def setBottom: Unit =
+    memories = Map()
 
 case class Mem[Ctx, Addr, Timestamp, Val, Size](store: SortedMap[PhysicalAddress[Ctx], MemoryRegion[Addr, Timestamp, Val]],
                                                 fillBytes: Option[Bytes[Val]],

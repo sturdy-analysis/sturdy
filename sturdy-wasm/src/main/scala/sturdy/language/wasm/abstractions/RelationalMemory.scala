@@ -15,7 +15,7 @@ import sturdy.util.Lazy
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.ordering.UnsignedOrderingOps
 import sturdy.values.{*, given}
-import sturdy.values.references.{PhysicalAddress, PowVirtualAddress, Recency, VirtualAddress}
+import sturdy.values.references.{AbstractReference, PhysicalAddress, PowVirtualAddress, Recency, ReferenceOps, VirtualAddress}
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -33,14 +33,15 @@ trait RelationalMemory extends RelationalValues:
       addr match
         case _ if newOffset == 0 =>
           addr
-        case AllocationSites(sites, size) =>
-          AllocationSites(PowVirtualAddress(sites.iterator.map {
-            case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset)), n, addrTrans) =>
-              apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
-            case v@VirtualAddress(AddrCtx.Heap(HeapCtx.Static(0)), n, addrTrans) =>
-              v
-            case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
-          }), size)
+        case AllocationSites(reference, size) =>
+          AllocationSites(
+            reference.mapAddr(sites =>
+              PowVirtualAddress(sites.iterator.map {
+                case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset)), n, addrTrans) =>
+                  apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
+                case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
+              })
+            ), size)
         case _ =>
           val expr = addr.asNumExpr
           val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
@@ -71,12 +72,13 @@ trait RelationalMemory extends RelationalValues:
       given Join[A] = implicitly[WithJoin[A]].j
       apronState.ifThenElse(And(Constraint(le(lit(0, Type.I32Type), size)), Constraint(le(size, limit))))(ifTrue)(ifFalse)
 
-  given RelationalMatchRegions(using apronState: ApronState[VirtAddr, Type]): MatchRegions[HeapCtx, Addr, Size] with
+  given RelationalMatchRegions(using apronState: ApronState[VirtAddr, Type], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]]): MatchRegions[HeapCtx, Addr, Size] with
     override def apply[Val, Timestamp: PartialOrder](addr: Addr, mem: Mem[HeapCtx, Addr, Timestamp, Val, Size]): Topped[IterableOnce[(MemoryRegion[Addr, Timestamp, Val], AlignedRead)]] =
       addr match
-        case AllocationSites(sites, size) =>
+        case AllocationSites(reference, size) =>
           // We assume that each malloc addresses is allocated in their own isolated part of the heap.
           // Hence, a malloc address does not overlap with a static address
+          val sites = refOps.deref(reference)
           Topped.Actual(
             for {
               phys <- sites.physicalAddresses;
@@ -141,7 +143,7 @@ trait RelationalMemory extends RelationalValues:
   given CombineAddr[W <: Widening](using combineI32: Combine[I32, W]): Combine[Addr, W] with
     def apply(v1: Addr, v2: Addr): MaybeChanged[Addr] = combineI32(v1, v2).map(_.asInstanceOf[Addr])
 
-  def heapAlloc[Bytes](rootFrameData: FrameData)(using apronState: ApronState[VirtAddr, Type], domLogger: DomLogger[FixIn]):
+  def heapAlloc[Bytes](rootFrameData: FrameData)(using apronState: ApronState[VirtAddr, Type], domLogger: DomLogger[FixIn], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]]):
     AAllocatorFromContext[(MemoryAddr,Addr,Bytes), IterableOnce[HeapCtx]] =
       AAllocatorFromContext((key, addr, _) =>
         addr match
@@ -151,7 +153,8 @@ trait RelationalMemory extends RelationalValues:
               Iterator(HeapCtx.Static(u))
             else
               Iterator(HeapCtx.Dynamic(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))))
-          case AllocationSites(sites, _) =>
+          case AllocationSites(reference, _) =>
+            val sites = refOps.deref(reference)
             sites.iterator.map {
               case VirtualAddress(AddrCtx.Heap(heapCtx), _, _) => heapCtx
               case virt => throw IllegalArgumentException(s"Expected HeapCtx, but got ${virt.ctx}")

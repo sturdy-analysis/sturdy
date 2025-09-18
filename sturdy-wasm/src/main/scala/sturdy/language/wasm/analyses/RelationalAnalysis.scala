@@ -197,44 +197,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         new NonRelationalApronState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
     given ApronRecencyState[AddrCtx, Type, Value] = apronState
 
-    def addressIterator: Iterator[VirtAddr] =
-      def valueIterator(value: Any): Iterator[VirtAddr] = value match
-        case TopValue => Iterator.empty
-        case Num(n) => valueIterator(n)
-        case Int32(n) => valueIterator(n)
-        case NumExpr(n) => valueIterator(n)
-        case BoolExpr(n) => valueIterator(n)
-        case AllocationSites(sites, size) => valueIterator(sites) ++ valueIterator(size)
-        case Int64(n) => valueIterator(n)
-        case Float32(n) => valueIterator(n)
-        case Float64(n) => valueIterator(n)
-        case Ref(_) => Iterator.empty
-        case Vec(_) => Iterator.empty
-        case virts: PowVirtAddr @unchecked => virts.iterator
-        case expr: ApronExpr[VirtAddr,Type] @unchecked => expr.addrs.iterator
-        case cons: ApronCons[VirtAddr,Type] @unchecked => cons.addrs.iterator
-        case bool: ApronBool[VirtAddr,Type] @unchecked => bool.addrs.iterator
-        case excV: ExcV @unchecked =>
-          for((ops,cond) <- excV.values.iterator;
-              addr <- valueIterator(ops) ++ valueIterator(cond))
-            yield(addr)
-        case physAddr: PhysAddr @unchecked => Iterator.empty
-        case _ =>
-          throw IllegalArgumentException("Unknown Value "+value)
-
-      effectStack.addressIterator[VirtAddr](valueIterator)
-
-    def garbageCollect(): Unit =
-      val alive = PowVirtualAddress(this.addressIterator)
-      val dead = relationalStore.deadPhysicalAddresses(alive, relationalStore.internalState)
-      val stateBefore = effectStack.getState
-      recencyStore.collectGarbage(alive)
-      val stateAfter = effectStack.getState
-      println(s"Alive: $alive")
-      println(s"Dead: $dead")
-      println(s"State Before: $stateBefore")
-      println(s"State After: $stateAfter")
-
     val callFrame: MutableCallFrame[FrameData, Int, Value, InstLoc, MayJoin.NoJoin] =
       if(config.relational)
         new RelationalCallFrame(
@@ -275,6 +237,44 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
+
+    def addressIterator: Iterator[VirtAddr] =
+      def valueIterator(value: Any): Iterator[VirtAddr] = value match
+        case TopValue => Iterator.empty
+        case Num(n) => valueIterator(n)
+        case Int32(n) => valueIterator(n)
+        case NumExpr(n) => valueIterator(n)
+        case BoolExpr(n) => valueIterator(n)
+        case AllocationSites(sites, size) => valueIterator(sites) ++ valueIterator(size)
+        case Int64(n) => valueIterator(n)
+        case Float32(n) => valueIterator(n)
+        case Float64(n) => valueIterator(n)
+        case Ref(_) => Iterator.empty
+        case Vec(_) => Iterator.empty
+        case virts: PowVirtAddr @unchecked => virts.iterator
+        case expr: ApronExpr[VirtAddr, Type] @unchecked => expr.addrs.iterator
+        case cons: ApronCons[VirtAddr, Type] @unchecked => cons.addrs.iterator
+        case bool: ApronBool[VirtAddr, Type] @unchecked => bool.addrs.iterator
+        case excV: ExcV @unchecked =>
+          for ((ops, cond) <- excV.values.iterator;
+               addr <- valueIterator(ops) ++ valueIterator(cond))
+          yield (addr)
+        case physAddr: PhysAddr @unchecked => Iterator.empty
+        case _ =>
+          throw IllegalArgumentException("Unknown Value " + value)
+
+      effectStack.addressIterator[VirtAddr](valueIterator)
+
+    def garbageCollect(): Unit =
+      val alive = PowVirtualAddress(this.addressIterator)
+      val dead = relationalStore.deadPhysicalAddresses(alive, relationalStore.internalState)
+      val stateBefore = effectStack.getState
+      recencyStore.collectGarbage(alive)
+      val stateAfter = effectStack.getState
+      println(s"Alive: $alive")
+      println(s"Dead: $dead")
+      println(s"State Before: $stateBefore")
+      println(s"State After: $stateAfter")
 
     def getInterval(v: Value): Value =
       v match
@@ -356,7 +356,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     enum Info:
       case Numeric(interval: Interval, tpe: Type, unconstrained: scala.Boolean)
       case Boolean(value: Topped[scala.Boolean], unconstrained: scala.Boolean)
-      case AllocationSites(sites: PowPhysAddr, size: Interval, sizeUnconstrained: scala.Boolean)
+      case AllocationSites(sites: AbstractReference[Powerset[PhysAddr]], size: Interval, sizeUnconstrained: scala.Boolean)
       case Top
 
       def isConstrained: scala.Boolean = !isUnconstrained
@@ -383,9 +383,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           b <- Join(b1, b2)
           constrained <- joinUnconstrained(constrained1, constrained2)
         } yield(Info.Boolean(b, constrained))
-      case (Info.AllocationSites(sites1, size1, constrained1), Info.AllocationSites(sites2, size2, constrained2)) =>
+      case (Info.AllocationSites(ref1, size1, constrained1), Info.AllocationSites(ref2, size2, constrained2)) =>
         for {
-          sites <- Join(sites1, sites2)
+          sites <- Join(ref1, ref2)
           size <- Join(size1, size2)
           constrained <- joinUnconstrained(constrained1,constrained2)
         } yield (Info.AllocationSites(sites, size, constrained))
@@ -401,7 +401,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Num(Int32(v32)) => v32 match
           case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type, apronState.isUnconstrained(v))
           case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), apronState.isUnconstrained(v))
-          case AllocationSites(sites, size) => Info.AllocationSites(PowersetAddr(sites.physicalAddresses), apronState.getInterval(size), apronState.isUnconstrained(size))
+          case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses)), apronState.getInterval(size), apronState.isUnconstrained(size))
         case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type, apronState.isUnconstrained(v))
         case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type, apronState.isUnconstrained(v))
         case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type, apronState.isUnconstrained(v))
@@ -485,7 +485,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Num(Int32(size))) =>
             val allocSite = domLogger.getDoms(1)
             val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            List(Num(Int32(AllocationSites(PowVirtualAddress(virt), size.asNumExpr))))
+            List(Num(Int32(AllocationSites(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
           case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "free" =>
         args match
