@@ -523,6 +523,9 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // NEW opcode 187
       case NEW(classType) =>
+        checkAccessControl(classType, mth)
+        if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/InstantiationError")))
         ensureInitialization(site)(classType)
         stack.push(createObject(classType, site))
 
@@ -531,7 +534,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         handleNewArray(componentType, site)
 
       case ANEWARRAY(componentType) =>
-        arrayAccessControl(componentType, mth)
+        checkAccessControl(componentType, mth)
         handleNewArray(componentType, site)
 
       case ARRAYLENGTH =>
@@ -586,7 +589,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
-        arrayAccessControl(arrayType, mth)
+        checkAccessControl(arrayType, mth)
         val dims = stack.popNOrAbort(dimensions)
         dims.foreach: dim =>
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
@@ -679,8 +682,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     }
     stack.push(arrayref)
 
-  private def arrayAccessControl(componentType: ReferenceType, mth: Method): Unit =
-    val cType = getClassFile(resolveClass(componentType, mth.classFile.thisType)(using project.classHierarchy))
+  private def checkAccessControl(refType: ReferenceType, mth: Method): Unit =
+    val cType = getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy))
     if !accessControl(cType, mth.classFile.thisType)(using project.classHierarchy) then
       except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
 
