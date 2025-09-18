@@ -28,15 +28,7 @@ import scodec.bits.ByteVector
 import sturdy.util.{Lazy, lazily}
 
 case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
-  override def toString: String =
-    if (module == null)
-      s"Function $funcIx"
-    else funcIx match
-      case Some(ix) =>
-        module.exports.find{ case (name,ExternalValue.Function(ix2)) => ix == ix2; case _ => false } match
-          case Some((name,_)) => name
-          case None => ix.toString
-      case None => s"Unknown Function"
+  override def toString: String = funcIx.map(FuncId(module, _).toString).getOrElse("Unknown Function")
 
 given FiniteFrameData: Finite[FrameData] with {}
 given Ordering[FrameData] = Ordering.by(data => (data.funcIx, data.returnArity, data.module.hashCode))
@@ -68,7 +60,13 @@ case class BreakIfState[V](condition: V, state: Any)
 type Imports = Map[String, ModuleInstance]
 
 case class FuncId(mod: ModuleInstance, funcIx: Int):
-  override def toString: String = s"$mod.$funcIx"
+  override def toString: String =
+    if (mod == null)
+      s"Function $funcIx"
+    else
+      mod.exports.find { case (name, ExternalValue.Function(ix2)) => funcIx == ix2; case _ => false } match
+        case Some((name, _)) => name
+        case None => funcIx.toString
 
 given Ordering[FuncId] = Ordering.by[FuncId, (ModuleInstance,Int)](funcid => (funcid.mod, funcid.funcIx))
 

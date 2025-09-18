@@ -328,7 +328,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             }
             val state = effectStack.getState
             print("  ".repeat(stack.size))
-            println(s"CALL   f${id.funcIx}(${args.mkString(",")} @ ${state.hashCode()}")
+            println(s"CALL ${id}(${args.mkString(",")}) @ ${state.hashCode()}")
             stack.push((dom,args,state))
           case _ => {}
 
@@ -345,7 +345,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               }
             val outState = effectStack.getState
             print("  ".repeat(stack.size))
-            println(s"RETURN f${id.funcIx}(${args.mkString(",")} @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+            println(s"RETURN ${id}(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
           case _ => {}
 
     def constrainedInstructionsLogger: ConstrainedInstructionsLogger =
@@ -479,7 +479,22 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(dst, src, len) =>
             memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToSize(len))
             List(dst)
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to memcpy, but got $args")
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
+      case "memmove" =>
+        args match
+          case List(dst, src, len) =>
+            val lenSize = wasmOps.specialOps.valToSize(len)
+            val (l,h) = apronState.getIntInterval(lenSize)
+            if(l == h) {
+              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), l).getOrElse(failure.fail(WasmFailure.MemoryAccessOutOfBounds, s"Cannot access memory at $src"))
+              bytes match
+                case Bytes.ReadBytes(Topped.Actual(bs), byteOrder) => memory.write(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), Bytes.StoredBytes(bs, byteOrder))
+                case _ => memory.fill(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), lenSize, Bytes.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
+            } else {
+              memory.fill(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), lenSize, Bytes.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),4)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
+            }
+            List(dst)
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
       case "malloc" =>
         args match
           case List(Num(Int32(size))) =>

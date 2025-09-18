@@ -37,7 +37,7 @@ class BenchmarksgameControlEventsTest[Interp <: Interpreter](val interp: Interp,
 //    }
   }
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fankuchredux.wasm")).sorted.foreach { p =>
     test(s"${p.getFileName}") {
       run(p, binary = true, StackConfig.StackedStates())
       Profiler.reset()

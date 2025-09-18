@@ -11,20 +11,26 @@ case class HostFunction(name: String, funcType: FuncType):
 given Structural[HostFunction] with {}
 
 class HostModules(initModules: (String, List[HostFunction])*):
-  var hostModules: Map[String, (ModuleInstance, Map[String, (Int, HostFunction)])] = Map()
+  var hostModules: Map[String, ModuleInstance] = Map()
   for((name, functions) <- initModules) addModule(name, functions)
 
-  def addModule(moduleName: String, functions: List[HostFunction]): Unit =
+  private def addModule(moduleName: String, functions: List[HostFunction]): Unit =
     val functionMap = functions.zipWithIndex.map((func,id) => func.name -> (id,func)).toMap[String, (Int, HostFunction)]
-    hostModules += moduleName -> (ModuleInstance(Some(moduleName)), functionMap)
+    val module = ModuleInstance(Some(moduleName))
+    for((function,idx) <- functions.zipWithIndex) {
+      module.exports :+= (function.name -> ExternalValue.Function(idx))
+      module.addFunction(FunctionInstance.Host(module, idx, function))
+    }
+    hostModules += moduleName -> module
 
   def containsModule(hostModule: String): Boolean = hostModules.contains(hostModule)
 
   def getHostFunction(moduleName: String, functionName: String): Option[(ModuleInstance, Int, HostFunction)] =
     for {
-      (moduleInst, functions) <- hostModules.get(moduleName);
-      (ix, hostFunction) <- functions.get(functionName)
-    } yield ((moduleInst, ix, hostFunction))
+      moduleInst <- hostModules.get(moduleName);
+      case (_,ExternalValue.Function(idx)) <- moduleInst.exports.find((name,_) => name == functionName)
+      case FunctionInstance.Host(_, _, hostFunction) <- moduleInst.functions.lift(idx)
+    } yield ((moduleInst, idx, hostFunction))
 
 
 val stdlib: List[HostFunction] = List(
