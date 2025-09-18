@@ -16,7 +16,7 @@ import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.{InvokeType, Site}
 import sturdy.language.bytecode.generic.FixIn.Eval
-import sturdy.language.bytecode.resolveField
+import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
@@ -531,6 +531,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         handleNewArray(componentType, site)
 
       case ANEWARRAY(componentType) =>
+        arrayAccessControl(componentType, mth)
         handleNewArray(componentType, site)
 
       case ARRAYLENGTH =>
@@ -585,6 +586,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
+        arrayAccessControl(arrayType, mth)
         val dims = stack.popNOrAbort(dimensions)
         dims.foreach: dim =>
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
@@ -677,7 +679,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     }
     stack.push(arrayref)
 
-  def createArray(size: V, componentType: FieldType, site: Site): V =
+  private def arrayAccessControl(componentType: ReferenceType, mth: Method): Unit =
+    val cType = getClassFile(resolveClass(componentType, mth.classFile.thisType)(using project.classHierarchy))
+    if !accessControl(cType, mth.classFile.thisType)(using project.classHierarchy) then
+      except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+
+  private def createArray(size: V, componentType: FieldType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.zipWithIndex.map: tuple =>
       (defaultValue(componentType), Site.ArrayElementInitialization(site, tuple._2))

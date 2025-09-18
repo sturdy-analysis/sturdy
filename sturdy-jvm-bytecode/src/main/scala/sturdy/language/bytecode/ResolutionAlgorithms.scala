@@ -1,7 +1,8 @@
 package sturdy.language.bytecode
 
+import org.opalj.bi.{ACC_PRIVATE, ACC_PROTECTED, ACC_PUBLIC}
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ClassFile, ClassHierarchy, ClassType, Field, Method, MethodDescriptor}
+import org.opalj.br.{ArrayType, ClassFile, ClassHierarchy, ClassType, Field, Method, MethodDescriptor, ReferenceType}
 import org.opalj.collection.immutable.UIDSet
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
@@ -16,6 +17,21 @@ import scala.annotation.tailrec
 // predicate to check whether a field matches a fieldname
 private def nameMatches(name: (ClassType, String))(field: Field): Boolean =
   field.name == name._2
+
+// 5.4.3.1 class and interface resolution
+def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): ClassType =
+  val resC = c match
+    case classType: ClassType =>
+      classType
+    case arrayType: ArrayType =>
+      if arrayType.componentType.isReferenceType then
+        resolveClass(arrayType.componentType.asReferenceType, d)
+      else
+        // TODO: not sure whether this is correct
+        arrayType.mostPreciseClassType
+  if !accessControl(project.classFile(resC).get, d) then
+    except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+  resC
 
 // TODO: access control
 // TODO: field type checking (currently, only name and class are considered)
@@ -111,3 +127,22 @@ def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod:
     except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
   else
     except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+
+def accessControl(e: Field | Method | ClassFile, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
+  val c = (e match
+    case f: Field => f.classFile
+    case m: Method => m.classFile
+    case c: ClassFile => c
+    ).thisType
+
+  // adapted from https://github.com/opalj/opal/blob/1cdb64f98d166f8bc3c08e501aeffa2bf2ef659d/OPAL/br/src/main/scala/org/opalj/br/Method.scala#L487
+  e.visibilityModifier match
+    // TODO Respect Java 9 modules
+    case Some(ACC_PUBLIC) =>
+      true
+    case Some(ACC_PROTECTED) =>
+      c.packageName == d.packageName || d.isASubtypeOf(c).isNotNo
+    case Some(ACC_PRIVATE) =>
+      c == d || project.nests.getOrElse(c, c) == project.nests.getOrElse(d, d)
+    case None =>
+      c.packageName == d.packageName
