@@ -34,7 +34,7 @@ import sturdy.values.types.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.util.{*, given}
 import swam.syntax.*
-import swam.{FuncType, OpCode, ReferenceType, syntax}
+import swam.{FuncType, OpCode, ReferenceType, ValType, syntax}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -57,6 +57,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   import NumValue.*
   import Type.*
   import RelI32.*
+  import RelationalInfo.{*,given}
 
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = constant(ApronExpr.topInterval, I32Type)
@@ -232,13 +233,63 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               module.exportedName(ExternalValue.Global(sym.addr)).map(AddrCtx.Global(_)).getOrElse(AddrCtx.Global(sym.addr))
         ))
       else
-        JoinableDecidableSymbolTable()
+        JoinableDecidableSymbolTable[Unit, GlobalAddr, Value]()
 
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
 
-    def addressIterator: Iterator[VirtAddr] =
+    override def newEffectStack: EffectStack =
+      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except, failure))
+      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, tables, callFrame))
+      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame))
+      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, failure))
+      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except))
+
+      new EffectStack(allEffects,
+        {
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => inEffectsFunction
+          case _: FixIn.Eval => inEffectsEval
+        }, {
+          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => outEffectsFunction
+          case _: FixIn.Eval => outEffectsEval
+        }
+      )
+
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
+      if (config.relational)
+        ValueWasmOps
+      else
+        ValueWasmOps(using
+          i32Ops = new NonRelationalI32IntegerOps,
+          i64Ops = NonRelationalIntegerOps[Long, VirtAddr, Type],
+          f32Ops = NonRelationalFloatOps[Float, VirtAddr, Type],
+          f64Ops = NonRelationalFloatOps[Double, VirtAddr, Type],
+          i32EqOps = NonRelationalEqOps[I32, VirtAddr, Type],
+          i64EqOps = NonRelationalEqOps[I64, VirtAddr, Type],
+          f32EqOps = NonRelationalEqOps[F32, VirtAddr, Type],
+          f64EqOps = NonRelationalEqOps[F64, VirtAddr, Type],
+          i32CompareOps = NonRelationalOrderingOps[I32, VirtAddr, Type],
+          i64CompareOps = NonRelationalOrderingOps[I64, VirtAddr, Type],
+          f32CompareOps = NonRelationalOrderingOps[F32, VirtAddr, Type],
+          f64CompareOps = NonRelationalOrderingOps[F64, VirtAddr, Type],
+          i32UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I32, VirtAddr, Type],
+          i64UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I64, VirtAddr, Type],
+          convertI32I64 = NonRelationalConvert[Int, Long, I32, VirtAddr, Type, BitSign],
+          convertI32F32 = NonRelationalConvert[Int, Float, I32, VirtAddr, Type, BitSign],
+          convertI32F64 = NonRelationalConvert[Int, Double, I32, VirtAddr, Type, BitSign],
+          convertI64I32 = NonRelationalI32Convert[Long, I64, NilCC.type],
+          convertI64F32 = NonRelationalConvert[Long, Float, I64, VirtAddr, Type, BitSign],
+          convertI64F64 = NonRelationalConvert[Long, Double, I64, VirtAddr, Type, BitSign],
+          convertF32I32 = NonRelationalI32Convert[Float, F32, Overflow && BitSign],
+          convertF32I64 = NonRelationalConvert[Float, Long, F32, VirtAddr, Type, Overflow && BitSign],
+          convertF32F64 = NonRelationalConvert[Float, Double, F32, VirtAddr, Type, NilCC.type],
+          convertF64I32 = NonRelationalI32Convert[Double, F64, Overflow && BitSign],
+          convertF64I64 = NonRelationalConvert[Double, Long, F64, VirtAddr, Type, Overflow && BitSign],
+          convertF64F32 = NonRelationalConvert[Double, Float, F32, VirtAddr, Type, NilCC.type]
+        )
+
+    private def addressIterator: Iterator[VirtAddr] =
       def valueIterator(value: Any): Iterator[VirtAddr] = value match
         case TopValue => Iterator.empty
         case Num(n) => valueIterator(n)
@@ -258,7 +309,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case excV: ExcV @unchecked =>
           for ((ops, cond) <- excV.values.iterator;
                addr <- valueIterator(ops) ++ valueIterator(cond))
-          yield (addr)
+          yield addr
         case physAddr: PhysAddr @unchecked => Iterator.empty
         case _ =>
           throw IllegalArgumentException("Unknown Value " + value)
@@ -315,160 +366,88 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 //        val iv = apronState.getInterval(expr)
 //        iv.inf().isEqual(iv.sup())
 
-    class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
+    private class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
       val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
 
       override def enter(dom: FixIn): Unit =
         dom match
           case FixIn.EnterWasmFunction(id,_,FuncType(params,_)) =>
-            val args = params.indices.map {
-              i =>
-                val v = callFrame.getLocal(i).get
-                (v, getInterval(v))
-            }
-            val state = effectStack.getState
-            print("  ".repeat(stack.size))
-            println(s"CALL ${id}(${args.mkString(",")}) @ ${state.hashCode()}")
-            stack.push((dom,args,state))
-          case _ => {}
+            enterFunction(dom, id, params)
+          case FixIn.EnterHostFunction(id, HostFunction(_, FuncType(params, _))) =>
+            enterFunction(dom, id, params)
+          case _ => ()
+
+      private def enterFunction(dom: FixIn, id: FuncId, params: Vector[ValType]): Unit =
+        val args = params.indices.map {
+          i =>
+            val v = callFrame.getLocal(i).get
+            (v, getInterval(v))
+        }
+
+        val state = effectStack.getState
+        print("  ".repeat(stack.size))
+        println(s"CALL ${id}(${args.mkString(",")}) @ ${state.hashCode()}")
+        stack.push((dom, args, state))
+
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =
         dom match
-          case FixIn.EnterWasmFunction(id, _, ft) =>
-            val (_,args,inState) = stack.pop
-            val result =
-              codom.map{
-                case FixOut.ExitWasmFunction(returns) =>  FixOut.ExitWasmFunction(returns.map(v => (v, getInterval(v))))
-                case FixOut.ExitHostFunction(returns) =>  FixOut.ExitHostFunction(returns.map(v => (v, getInterval(v))))
-                case FixOut.Eval() =>  FixOut.Eval()
-                case FixOut.MostGeneralClient() => FixOut.MostGeneralClient()
-              }
-            val outState = effectStack.getState
-            print("  ".repeat(stack.size))
-            println(s"RETURN ${id}(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+          case FixIn.EnterWasmFunction(id, _, _) => exitFunction(id, codom)
+          case FixIn.EnterHostFunction(id, _) => exitFunction(id, codom)
           case _ => {}
+
+      private def exitFunction(id: FuncId, codom: TrySturdy[FixOut[Value]]) =
+        val (_, args, inState) = stack.pop
+        val result =
+          codom.map {
+            case FixOut.ExitWasmFunction(returns) => FixOut.ExitWasmFunction(returns.map(v => (v, getInterval(v))))
+            case FixOut.ExitHostFunction(returns) => FixOut.ExitHostFunction(returns.map(v => (v, getInterval(v))))
+            case FixOut.Eval() => FixOut.Eval()
+            case FixOut.MostGeneralClient() => FixOut.MostGeneralClient()
+          }
+        val outState = effectStack.getState
+        print("  ".repeat(stack.size))
+        println(s"RETURN $id(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
+
 
     def constrainedInstructionsLogger: ConstrainedInstructionsLogger =
       val intervalLogger = new ConstrainedInstructionsLogger
       this.fixpoint.addContextFreeLogger(intervalLogger)
       intervalLogger
 
-    enum Info:
-      case Numeric(interval: Interval, tpe: Type, unconstrained: scala.Boolean)
-      case Boolean(value: Topped[scala.Boolean], unconstrained: scala.Boolean)
-      case AllocationSites(sites: AbstractReference[Powerset[PhysAddr]], size: Interval, sizeUnconstrained: scala.Boolean)
-      case Top
-
-      def isConstrained: scala.Boolean = !isUnconstrained
-
-      def isUnconstrained: scala.Boolean =
-        this match
-          case Numeric(_,_, unconstrained) => unconstrained
-          case Boolean(_, unconstrained) => unconstrained
-          case AllocationSites(_, _, unconstrained) => unconstrained
-          case Top => true
-
-    val joinUnconstrained = new Join[Boolean] {
-      override def apply(v1: Boolean, v2: Boolean): MaybeChanged[Boolean] = MaybeChanged(v1 || v2, v1 != (v1 || v2))
-    }
-
-    given Join[Info] = {
-      case (Info.Numeric(iv1, tpe1, constrained1), Info.Numeric(iv2, tpe2, constrained2)) if tpe1 == tpe2 =>
-        for {
-          iv <- Join(iv1, iv2)
-          constrained <- joinUnconstrained(constrained1, constrained2)
-        } yield(Info.Numeric(iv, tpe1, constrained))
-      case (Info.Boolean(b1, constrained1), Info.Boolean(b2, constrained2)) =>
-        for {
-          b <- Join(b1, b2)
-          constrained <- joinUnconstrained(constrained1, constrained2)
-        } yield(Info.Boolean(b, constrained))
-      case (Info.AllocationSites(ref1, size1, constrained1), Info.AllocationSites(ref2, size2, constrained2)) =>
-        for {
-          sites <- Join(ref1, ref2)
-          size <- Join(size1, size2)
-          constrained <- joinUnconstrained(constrained1,constrained2)
-        } yield (Info.AllocationSites(sites, size, constrained))
-      case (Info.Top, _) => Unchanged(Info.Top)
-      case (_, Info.Top) => Changed(Info.Top)
-      case (_, _) => Changed(Info.Top)
-    }
-
     class ConstrainedInstructionsLogger extends InstructionResultLogger[Info, Value](stack):
       override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
       def getInfo(value: Value): Info = value match
         case Num(Int32(v32)) => v32 match
-          case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type, apronState.isUnconstrained(v))
-          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), apronState.isUnconstrained(v))
-          case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses)), apronState.getInterval(size), apronState.isUnconstrained(size))
-        case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type, apronState.isUnconstrained(v))
-        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type, apronState.isUnconstrained(v))
-        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type, apronState.isUnconstrained(v))
+          case NumExpr(v) => Info.Numeric(apronState.getInterval(v), I32Type, isConstrained(v))
+          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), isConstrained(v))
+          case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
+        case Num(Int64(v)) => Info.Numeric(apronState.getInterval(v), I64Type, isConstrained(v))
+        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v), F32Type, isConstrained(v))
+        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v), F64Type, isConstrained(v))
         case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
+
+      private def isConstrained(v: ApronExpr[VirtAddr, Type] | ApronBool[VirtAddr, Type]): IsConstrained =
+        if (v match {
+          case expr: ApronExpr[VirtAddr, Type] => apronState.isUnconstrained(expr);
+          case bool: ApronBool[VirtAddr, Type] => apronState.isUnconstrained(bool)
+        })
+          IsConstrained.Unconstrained
+        else
+          IsConstrained.Constrained
 
       def getAllInstructionInfos: Map[InstLoc, List[Info]] =
         instructionInfo
 
       def getConstrained: Map[InstLoc, List[Info]] =
-        instructionInfo.filter((_,infos) => infos.forall(_.isConstrained))
+        instructionInfo.filter((_, infos) => infos.forall(_.isConstrained))
 
       def grouped: Map[String, Map[InstLoc, List[Info]]] =
         getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
 
       def groupedCount: Map[String, Int] =
         getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
-
-
-    override def newEffectStack: EffectStack =
-      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except, failure))
-      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, tables, callFrame))
-      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame))
-      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, failure))
-      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except))
-
-      new EffectStack(allEffects,
-        {
-          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => inEffectsFunction
-          case _: FixIn.Eval => inEffectsEval
-        }, {
-          case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => outEffectsFunction
-          case _: FixIn.Eval => outEffectsEval
-        }
-      )
-
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
-      if(config.relational)
-        ValueWasmOps
-      else
-        ValueWasmOps(using
-          i32Ops = new NonRelationalI32IntegerOps,
-          i64Ops = NonRelationalIntegerOps[Long,VirtAddr,Type],
-          f32Ops = NonRelationalFloatOps[Float,VirtAddr,Type],
-          f64Ops = NonRelationalFloatOps[Double,VirtAddr,Type],
-          i32EqOps = NonRelationalEqOps[I32,VirtAddr,Type],
-          i64EqOps = NonRelationalEqOps[I64,VirtAddr,Type],
-          f32EqOps = NonRelationalEqOps[F32,VirtAddr,Type],
-          f64EqOps = NonRelationalEqOps[F64,VirtAddr,Type],
-          i32CompareOps = NonRelationalOrderingOps[I32,VirtAddr,Type],
-          i64CompareOps = NonRelationalOrderingOps[I64,VirtAddr,Type],
-          f32CompareOps = NonRelationalOrderingOps[F32,VirtAddr,Type],
-          f64CompareOps = NonRelationalOrderingOps[F64,VirtAddr,Type],
-          i32UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I32,VirtAddr,Type],
-          i64UnsignedCompareOps = NonRelationalUnsignedOrderingOps[I64,VirtAddr,Type],
-          convertI32I64 = NonRelationalConvert[Int, Long, I32, VirtAddr, Type, BitSign],
-          convertI32F32 = NonRelationalConvert[Int, Float, I32, VirtAddr, Type, BitSign],
-          convertI32F64 = NonRelationalConvert[Int, Double, I32, VirtAddr, Type, BitSign],
-          convertI64I32 = NonRelationalI32Convert[Long, I64, NilCC.type],
-          convertI64F32 = NonRelationalConvert[Long, Float, I64, VirtAddr, Type, BitSign],
-          convertI64F64 = NonRelationalConvert[Long, Double, I64, VirtAddr, Type, BitSign],
-          convertF32I32 = NonRelationalI32Convert[Float, F32, Overflow && BitSign],
-          convertF32I64 = NonRelationalConvert[Float, Long, F32, VirtAddr, Type, Overflow && BitSign],
-          convertF32F64 = NonRelationalConvert[Float, Double, F32, VirtAddr, Type, NilCC.type],
-          convertF64I32 = NonRelationalI32Convert[Double, F64, Overflow && BitSign],
-          convertF64I64 = NonRelationalConvert[Double, Long, F64, VirtAddr, Type, Overflow && BitSign],
-          convertF64F32 = NonRelationalConvert[Double, Float, F32, VirtAddr, Type, NilCC.type]
-        )
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
       case "proc_exit" =>

@@ -794,8 +794,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                         hostModules: HostModules = defaultHostModules): ModuleInstance = external {
     initializeThis()
 
-    val modInst = new ModuleInstance(moduleId)
     val (funcImports, globImports, globTypes, tabImports, memImpors) = resolveImports(module, imports, hostModules)
+
+    val modInst = ModuleInstance(moduleId)
 
     // First allocate exports
     allocExports(module, modInst)

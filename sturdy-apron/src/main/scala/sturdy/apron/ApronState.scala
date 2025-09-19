@@ -19,6 +19,11 @@ import sturdy.values.integer.{IntervalRange, NumericInterval}
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
+enum ResolveState:
+  case Internal
+  case Left
+  case Right
+
 trait ApronState[Addr: Ordering: ClassTag,Type]:
   def withTempVars[A](resultType: Type, exprs: ApronExpr[Addr,Type]*)
                      (f: PartialFunction[(Addr, List[ApronExpr[Addr,Type]]),A]): A
@@ -34,12 +39,10 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def alloc(ctx: Any): Addr
 
   def assign(v: Addr, expr: ApronExpr[Addr,Type]): Unit
-  def addConstraints(constraints: ApronCons[Addr,Type]*): Unit
-  def addCondition(condition: ApronBool[Addr,Type]): Unit
+  def addConstraints(constraints: ApronCons[Addr,Type]*): ResolveState ?=> Unit
+  def addCondition(condition: ApronBool[Addr,Type]): ResolveState ?=> Unit
 
-  def isUnconstrained(expr: ApronExpr[Addr,Type]): Boolean
-  def isUnconstrained(cons: ApronCons[Addr,Type]): Boolean
-  def isUnconstrained(cond: ApronBool[Addr,Type]): Boolean
+  def isUnconstrained(expr: ApronExpr[Addr,Type] | ApronCons[Addr,Type] | ApronBool[Addr,Type]): ResolveState ?=> Boolean
 
   def effects: EffectStack
   inline def join[A: Join](f: => A)(g: => A): A =
@@ -52,6 +55,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   inline def ifThenElse[A: Join](condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
     ifThenElse(effects)(condition)(f)(g)
   def ifThenElse[A: Join](effectStack: EffectStack)(condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
+    given resolveState: ResolveState = ResolveState.Internal
     getBoolean(condition) match
       case Topped.Actual(true) =>
         addCondition(condition)
@@ -78,23 +82,21 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def toNonRelational(cond: ApronBool[Addr,Type]): ApronBool[Addr,Type] =
     ApronBool.Constant(getBoolean(cond))
 
-  def getInterval(expr: ApronExpr[Addr, Type]): Interval
-  def getLeftInterval(expr: ApronExpr[Addr,Type]): Interval
-  def getRightInterval(expr: ApronExpr[Addr,Type]): Interval
+  def getInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> Interval
 
-  def getFloatInterval(expr: ApronExpr[Addr, Type]): sturdy.apron.FloatInterval
+  def getFloatInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> sturdy.apron.FloatInterval
 
-  def getIntInterval(expr: ApronExpr[Addr, Type]): (Int,Int) =
+  def getIntInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> (Int,Int) =
     val (lower,upper) = getBigIntInterval(expr)
     (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
 
-  def getLongInterval(expr: ApronExpr[Addr, Type]): (Long, Long) =
+  def getLongInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> (Long, Long) =
     val (lower, upper) = getBigIntInterval(expr)
     val inf = lower.getOrElse[BigInt](Long.MinValue).max(Long.MinValue).toLong
     val sup = upper.getOrElse[BigInt](Long.MaxValue).min(Long.MaxValue).toLong
     (inf,sup)
 
-  def getBigIntInterval(expr: ApronExpr[Addr, Type]): (Option[BigInt],Option[BigInt]) =
+  def getBigIntInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> (Option[BigInt],Option[BigInt]) =
     val iv = getInterval(expr)
     val lower =
       if (iv.inf().isInfty() != 0)
@@ -114,7 +116,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
     (lower, upper)
 
-  def getDoubleInterval(expr: ApronExpr[Addr, Type]): (Double, Double) =
+  def getDoubleInterval(expr: ApronExpr[Addr, Type]): ResolveState ?=> (Double, Double) =
     val iv = getInterval(expr)
     val lower: Array[Double] = Array(0.0)
     iv.inf().toDouble(lower, Mpfr.RNDZ)
@@ -122,34 +124,32 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
 
-  def satisfies(v: ApronCons[Addr,Type]): Topped[Boolean]
+  def satisfies(v: ApronCons[Addr,Type]): ResolveState ?=> Topped[Boolean]
 
-  def getBoolean(v: ApronBool[Addr, Type]): Topped[Boolean] =
+  def getBoolean(v: ApronBool[Addr, Type] | ApronCons[Addr,Type]): ResolveState ?=> Topped[Boolean] =
     v match
       case ApronBool.Constraint(cons) => getBoolean(cons)
       case ApronBool.Constant(b) => b
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
-
-  def getBoolean(cond: ApronCons[Addr, Type]): Topped[Boolean] = {
-    val specials1 = cond.e1.floatSpecials
-    val specials2 = cond.e2.floatSpecials
-    cond.op match
-      case CompareOp.Eq if(!specials1.isBottom || !specials2.isBottom) => Topped.Top
-      case CompareOp.Neq if(specials1.nan || specials2.nan || (specials1.isLeq(specials2) && !specials1.isBottom) || (specials2.isLeq(specials1) && !specials2.isBottom)) => Topped.Top
-      case CompareOp.Le | CompareOp.Lt if(specials1.nan || specials2.nan || specials1.negZero || specials1.posInfinity || specials2.negZero || specials2.negInfinity) => Topped.Top
-      case CompareOp.Ge | CompareOp.Gt if(specials1.nan || specials2.nan || specials1.negZero || specials1.negInfinity || specials2.negZero || specials2.posInfinity) => Topped.Top
-      case _ =>
-        (satisfies(cond),satisfies(cond.negated)) match
-          case (Topped.Actual(true), Topped.Actual(false)) =>
-             Topped.Actual(true)
-          case (Topped.Actual(false), Topped.Actual(true)) =>
-            Topped.Actual(false)
-          case (Topped.Actual(false), Topped.Actual(false)) =>
-            addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
-          case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
-            Topped.Top
-  }
+      case cons@ApronCons(op, e1, e2) =>
+        val specials1 = e1.floatSpecials
+        val specials2 = e2.floatSpecials
+        op match
+          case CompareOp.Eq if(!specials1.isBottom || !specials2.isBottom) => Topped.Top
+          case CompareOp.Neq if(specials1.nan || specials2.nan || (specials1.isLeq(specials2) && !specials1.isBottom) || (specials2.isLeq(specials1) && !specials2.isBottom)) => Topped.Top
+          case CompareOp.Le | CompareOp.Lt if(specials1.nan || specials2.nan || specials1.negZero || specials1.posInfinity || specials2.negZero || specials2.negInfinity) => Topped.Top
+          case CompareOp.Ge | CompareOp.Gt if(specials1.nan || specials2.nan || specials1.negZero || specials1.negInfinity || specials2.negZero || specials2.posInfinity) => Topped.Top
+          case _ =>
+            (satisfies(cons),satisfies(cons.negated)) match
+              case (Topped.Actual(true), Topped.Actual(false)) =>
+                 Topped.Actual(true)
+              case (Topped.Actual(false), Topped.Actual(true)) =>
+                Topped.Actual(false)
+              case (Topped.Actual(false), Topped.Actual(false)) =>
+                addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
+              case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
+                Topped.Top
 
   def makeNonRelational(addr: Addr): Unit
 
@@ -204,11 +204,11 @@ class ApronRecencyState
       relationalValue.makeRelationalExpr(
         convertExpr.virtToPhys(expr)))
 
-  inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
-    val physConstraints = constraints.flatMap(convertExpr.virtToPhys(_))
-    relationalStore.addConstraints(physConstraints*)
+  inline override def addConstraints(using resolveState: ResolveState = ResolveState.Internal)(constraints: ApronCons[VirtualAddress[Ctx], Type]*): Unit =
+    val physConstraints = constraints.flatMap(constraint => withState(convertExpr.virtToPhysPure(constraint, _)))
+    modifyState(relationalStore.addConstraintsPure(_,physConstraints*))
 
-  override def addCondition(condition: ApronBool[VirtualAddress[Ctx], Type]): Unit =
+  override def addCondition(using resolveState: ResolveState = ResolveState.Internal)(condition: ApronBool[VirtualAddress[Ctx], Type]): Unit =
     condition match
       case ApronBool.Constraint(constraint) => addConstraints(constraint)
       case ApronBool.Constant(Topped.Actual(false)) =>
@@ -223,7 +223,7 @@ class ApronRecencyState
           addCondition(e2)
         }
 
-  override def isUnconstrained(expr: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+  override def isUnconstrained(using resolveState: ResolveState = ResolveState.Internal)(expr: ApronExpr[VirtualAddress[Ctx], Type] | ApronCons[VirtualAddress[Ctx], Type] | ApronBool[VirtualAddress[Ctx], Type]): Boolean =
     expr match
       case ApronExpr.Addr(ApronVar(virtAddr), _, _) =>
         relationalStore.isUnconstrained(virtAddr.physical, relationalStore.internalState)
@@ -231,35 +231,24 @@ class ApronRecencyState
         tpe.signedBounds.cmp(coeff) < 0
       case ApronExpr.Unary(_, e, _, _, _, _) => isUnconstrained(e)
       case ApronExpr.Binary(_, e1, e2, _, _, _, _) => isUnconstrained(e1) || isUnconstrained(e2)
-
-  override def isUnconstrained(cons: ApronCons[VirtualAddress[Ctx], Type]): Boolean =
-    isUnconstrained(cons.e1) || isUnconstrained(cons.e2)
-
-  override def isUnconstrained(cons: ApronBool[VirtualAddress[Ctx], Type]): Boolean =
-    cons match
+      case ApronCons(_, e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
       case ApronBool.Constraint(cons) => isUnconstrained(cons)
       case ApronBool.Constant(toppedBool) => toppedBool.isTop
       case ApronBool.And(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
       case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
-  override def getInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.internalState, expr)
-  override def getLeftInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.leftState.getOrElse(relationalStore.internalState), expr)
-  override def getRightInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = getInterval(state = relationalStore.rightState.getOrElse(relationalStore.internalState), expr)
-
-  def getInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): Interval = {
+  inline override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): ResolveState ?=> Interval =
     // purposefully throws away changes to the state as they lower precision.
-    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, state.clone().asInstanceOf)
+    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone().asInstanceOf)
     relationalStore.getBound(physExpr, state1)
-  }
 
-  inline override def getFloatInterval(expr: ApronExpr[VirtualAddress[Ctx], Type]): apron.FloatInterval =
-    getFloatInterval(relationalStore.internalState, expr)
-  def getFloatInterval(state: relationalStore.State, virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): sturdy.apron.FloatInterval =
-    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, state.clone.asInstanceOf)
+  inline override def getFloatInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type]): ResolveState ?=> apron.FloatInterval =
+    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone.asInstanceOf)
     relationalStore.getFloatBound(physExpr, state1)
 
-  inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type]): Topped[Boolean] =
-    convertExpr.virtToPhys(v).map(relationalStore.satisfies(_)).getOrElse(Topped.Top)
+  inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type]): ResolveState ?=> Topped[Boolean] =
+    val (optionPhysExpr,state1) = convertExpr.virtToPhysPure(v,getResolveState.clone())
+    optionPhysExpr.map(expr => relationalStore.satisfies(expr,state1)).getOrElse(Topped.Top)
 
   override def effects: EffectStack = effectStack
 
@@ -269,11 +258,11 @@ class ApronRecencyState
   def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
-    case (e1, e2) if (getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), e1).isBottom) =>
+    case (e1, e2) if (getInterval(e1)(using ResolveState.Left).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e2.setFloatSpecials(specials).setType(tpe)
       )
-    case (e1, e2) if (getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), e2).isBottom) =>
+    case (e1, e2) if (getInterval(e2)(using ResolveState.Right).isBottom) =>
       Join[(FloatSpecials, Type)]((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).map((specials, tpe) =>
         e1.setFloatSpecials(specials).setType(tpe)
       )
@@ -285,8 +274,8 @@ class ApronRecencyState
       val joinedSpecials = Join(specials1, specials2)
       MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
-      val iv1 = getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), e1)
-      val iv2 = getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), e2)
+      val iv1 = getInterval(using ResolveState.Left)(e1)
+      val iv2 = getInterval(using ResolveState.Right)(e2)
       if(widen)
         Widen[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
           ApronExpr.Constant(_, _, _)
@@ -312,8 +301,8 @@ class ApronRecencyState
           val ctx = allocator(joinedType)
           val failedVirt = relationalStore.withLeftState(recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed, _))
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
-          val iv1 = getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), failedExpr)
-          val iv2 = getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), e2)
+          val iv1 = getInterval(using ResolveState.Left)(failedExpr)
+          val iv2 = getInterval(using ResolveState.Right)(e2)
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
       )
     case (e1,e2) if containsFailedAddrs(e2, relationalStore.rightState.getOrElse(relationalStore.internalState)) =>
@@ -322,8 +311,8 @@ class ApronRecencyState
           val ctx = allocator(joinedType)
           val failedVirt = relationalStore.withRightState(recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed, _))
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
-          val iv1 = getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), e1)
-          val iv2 = getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), failedExpr)
+          val iv1 = getInterval(using ResolveState.Left)(e1)
+          val iv2 = getInterval(using ResolveState.Right)(failedExpr)
           MaybeChanged(failedExpr, ! iv2.isLeq(iv1))
       )
     case (e1,e2) =>
@@ -365,6 +354,21 @@ class ApronRecencyState
   private inline def structurallyJoinable(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
     e1.isConstant && e2.isConstant || structuralEq(e1, e2)
 
+  inline private def withState[A](using resolveState: ResolveState)(f: relationalStore.State => (A, relationalStore.State)): A =
+    resolveState match
+      case ResolveState.Internal => relationalStore.withInternalState(f)
+      case ResolveState.Left => relationalStore.withLeftState(f)
+      case ResolveState.Right => relationalStore.withRightState(f)
+
+  inline private def modifyState(using resolveState: ResolveState)(f: relationalStore.State => relationalStore.State): Unit =
+    withState(state => ((), f(state)))
+
+  inline private def getResolveState(using resolveState: ResolveState): relationalStore.State =
+    resolveState match
+      case ResolveState.Internal => relationalStore.internalState
+      case ResolveState.Right => relationalStore.rightState.getOrElse(relationalStore.internalState)
+      case ResolveState.Left => relationalStore.leftState.getOrElse(relationalStore.internalState)
+
   override def toString: String =
     relationalStore.toString
 
@@ -379,8 +383,8 @@ class NonRelationalApronState[Ctx: Ordering, Type: ApronType: Join: Widen, Val: 
   extends ApronRecencyState[Ctx, Type, Val](temporaryVariableAllocator, recencyStore, relationalStore):
   override def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
     (e1: ApronExpr[VirtualAddress[Ctx],Type], e2: ApronExpr[VirtualAddress[Ctx],Type]) =>
-      val iv1 = getInterval(relationalStore.leftState.getOrElse(relationalStore.internalState), e1)
-      val iv2 = getInterval(relationalStore.rightState.getOrElse(relationalStore.internalState), e2)
+      val iv1 = getInterval(e1)(using ResolveState.Left)
+      val iv2 = getInterval(e2)(using ResolveState.Right)
       for {
         iv <- if(widen) Widen(iv1,iv2) else Join(iv1,iv2);
         floatSpecials <- if(widen) Widen(e1.floatSpecials,e2.floatSpecials) else Join(e1.floatSpecials,e2.floatSpecials)

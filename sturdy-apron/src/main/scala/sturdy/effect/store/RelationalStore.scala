@@ -258,7 +258,7 @@ final class RelationalStore
   def addConstraints(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
     _internalState = addConstraintsPure(_internalState, constraints*)
 
-  private def addConstraintsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
+  def addConstraintsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
     val resolvedConstraints = constraints
       .map(cons => replaceMissingAddrs(cons, state))
       .filter(cons =>

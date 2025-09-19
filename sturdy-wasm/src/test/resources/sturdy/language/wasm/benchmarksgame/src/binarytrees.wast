@@ -53,36 +53,23 @@
     i32.const 1
     i32.add)
   (func $BottomUpTree (type 0) (param i32) (result i32)
-    (local i32 i32)
     block  ;; label = @1
-      block  ;; label = @2
-        local.get 0
-        br_if 0 (;@2;)
-        i32.const 0
-        local.set 1
-        i32.const 0
-        local.set 2
-        br 1 (;@1;)
-      end
+      local.get 0
+      i32.eqz
+      br_if 0 (;@1;)
       local.get 0
       i32.const -1
       i32.add
       local.tee 0
       call $BottomUpTree
-      local.set 1
       local.get 0
       call $BottomUpTree
-      local.set 2
+      call $NewTreeNode
+      return
     end
-    i32.const 8
-    call $malloc
-    local.tee 0
-    local.get 2
-    i32.store offset=4
-    local.get 0
-    local.get 1
-    i32.store
-    local.get 0)
+    i32.const 0
+    i32.const 0
+    call $NewTreeNode)
   (func $DeleteTree (type 1) (param i32)
     (local i32)
     block  ;; label = @1

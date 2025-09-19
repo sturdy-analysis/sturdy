@@ -8,6 +8,7 @@ import sturdy.values.{*,given}
 
 given intervalOrdering: PartialOrder[Interval] with
   override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
+  override def tryCompare(iv1: Interval, iv2: Interval): Option[Int] = Some(iv1.cmp(iv2))
 
 given JoinInterval: Join[Interval] with
   def apply(iv1: Interval, iv2: Interval): MaybeChanged[Interval] =
