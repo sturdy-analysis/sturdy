@@ -653,7 +653,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   // returns the class file of a given type or throws an exception
   def getClassFile(classType: ClassType): ClassFile =
     project.classFile(classType).getOrElse:
-      throw IllegalStateException(s"project does not contain a class file that defines $classType")
+      except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
 
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
