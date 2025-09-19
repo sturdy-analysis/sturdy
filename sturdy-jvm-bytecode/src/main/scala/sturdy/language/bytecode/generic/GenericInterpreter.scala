@@ -453,6 +453,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       case PUTFIELD(declaringClass, name, _) =>
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
+        // TODO: check field type as well
+        val field = resolveField(getClassFile(declaringClass), (declaringClass, name)).getOrElse:
+          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        runAccessControl(field, mth)
+        if field.isStatic then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+        if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
         objectOps.setField(obj, (declaringClass, name), value).option(fail(BytecodeFailure.FieldNotFound, s"($declaringClass, $name)"))(identity)
 
       // Invoke Functions opcode 182 - 186
