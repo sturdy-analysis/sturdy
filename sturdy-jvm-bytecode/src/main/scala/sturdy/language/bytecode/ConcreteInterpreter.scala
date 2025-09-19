@@ -185,6 +185,8 @@ object ConcreteInterpreter extends Interpreter:
 
         case InvokeType.Virtual =>
           val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+          if resolvedMethod.isStatic then
+            except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)
           if selectedMethod.isAbstract then
             except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))

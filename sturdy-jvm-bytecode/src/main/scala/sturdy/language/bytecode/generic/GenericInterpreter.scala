@@ -468,6 +468,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         ensureInitialization(site)(declaringClass)
         val cf = getClassFile(declaringClass)
         val mth = findMethod(cf, name, methodDescriptor).get
+        if mth.isAbstract || mth.isNotStatic then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val ret = invoke(mth, args)
