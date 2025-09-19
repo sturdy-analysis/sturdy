@@ -145,9 +145,10 @@ object ConcreteInterpreter extends Interpreter:
         val resolvedFieldName = getFieldName(cf, name)
         val addr = fields.getOrElse(resolvedFieldName, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
-      case _ =>
-        throw UnsupportedOperationException(s"attempted object operations on $obj")
+      case ConcreteRefValues.NullValue() =>
+        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      case ConcreteRefValues.nonNullArray(_, _, _, _) =>
+        except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
 
     override def setField(obj: RefValue, name: FieldName, v: Value): JOptionC[Unit] = obj match
       case ConcreteRefValues.Object(_, cf, fields) =>
