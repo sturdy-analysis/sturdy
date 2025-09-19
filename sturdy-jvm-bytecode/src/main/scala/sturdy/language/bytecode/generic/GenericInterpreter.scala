@@ -441,9 +441,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Load and Store Fields opcode 180 - 181
       case GETFIELD(declaringClass, name, _) =>
+        // TODO: check whether object is array before these checks
+        val field = resolveField(getClassFile(declaringClass), (declaringClass, name)).getOrElse:
+          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        if field.isStatic then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         val obj = stack.popOrAbort()
-        val field = objectOps.getField(obj, (declaringClass, name))
-        stack.push(field)
+        val v = objectOps.getField(obj, (declaringClass, name))
+        stack.push(v)
 
       case PUTFIELD(declaringClass, name, _) =>
         val value = stack.popOrAbort()
