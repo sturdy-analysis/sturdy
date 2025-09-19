@@ -426,6 +426,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         stack.push(v)
 
       case PUTSTATIC(declaringClass, name, _) =>
+        val field = project.classHierarchy.allSuperclassesIterator(declaringClass, true)(project).flatMap(cfs => cfs.fields).find:
+          _.name == name
+        .getOrElse:
+          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        runAccessControl(field, mth)
+        if field.isNotStatic then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+        if field.isFinal && !(field.classFile == mth.classFile && mth.isStaticInitializer) then
+          except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
         val addr = getStaticFieldAddr(site, declaringClass, name)
         val v = stack.popOrAbort()
         store.write(addr, v)
@@ -523,7 +532,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // NEW opcode 187
       case NEW(classType) =>
-        checkAccessControl(classType, mth)
+        checkAccessControlForRefType(classType, mth)
         if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
           except.throws(JvmExcept.Throw(ClassType("java/lang/InstantiationError")))
         ensureInitialization(site)(classType)
@@ -534,7 +543,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         handleNewArray(componentType, site)
 
       case ANEWARRAY(componentType) =>
-        checkAccessControl(componentType, mth)
+        checkAccessControlForRefType(componentType, mth)
         handleNewArray(componentType, site)
 
       case ARRAYLENGTH =>
@@ -593,7 +602,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
-        checkAccessControl(arrayType, mth)
+        checkAccessControlForRefType(arrayType, mth)
         val dims = stack.popNOrAbort(dimensions)
         dims.foreach: dim =>
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
@@ -686,10 +695,12 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     }
     stack.push(arrayref)
 
-  private def checkAccessControl(refType: ReferenceType, mth: Method): Unit =
-    val cType = getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy))
-    if !accessControl(cType, mth.classFile.thisType)(using project.classHierarchy) then
+  private def runAccessControl(e: Field | Method | ClassFile, mth: Method): Unit =
+    if !accessControl(e, mth.classFile.thisType)(using project.classHierarchy) then
       except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+
+  private def checkAccessControlForRefType(refType: ReferenceType, mth: Method): Unit =
+    runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy)), mth)
 
   private def createArray(size: V, componentType: FieldType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
