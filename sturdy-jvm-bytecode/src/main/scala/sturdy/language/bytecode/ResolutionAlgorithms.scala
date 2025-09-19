@@ -129,12 +129,15 @@ def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod:
     except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
 
 def accessControl(e: Field | Method | ClassFile, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
+  e match
+    case e: (Field | Method) => fieldOrMethodAccessControl(e, d)
+    case c: ClassFile => classAccessControl(c, d)
+
+private def fieldOrMethodAccessControl(e: Field | Method, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
   val c = (e match
     case f: Field => f.classFile
     case m: Method => m.classFile
-    case c: ClassFile => c
     ).thisType
-
   // adapted from https://github.com/opalj/opal/blob/1cdb64f98d166f8bc3c08e501aeffa2bf2ef659d/OPAL/br/src/main/scala/org/opalj/br/Method.scala#L487
   e.visibilityModifier match
     // TODO Respect Java 9 modules
@@ -146,3 +149,8 @@ def accessControl(e: Field | Method | ClassFile, d: ClassType)(using hierarchy: 
       c == d || project.nests.getOrElse(c, c) == project.nests.getOrElse(d, d)
     case None =>
       c.packageName == d.packageName
+
+// classes or interfaces
+private def classAccessControl(c: ClassFile, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
+  // TODO Respect Java 9 modules
+  c.isPublic || c.thisType.packageName == d.packageName

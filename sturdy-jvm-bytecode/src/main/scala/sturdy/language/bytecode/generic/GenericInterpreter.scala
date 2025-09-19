@@ -551,6 +551,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val objectref = stack.peekOrAbort()
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {} {
           // not null
+          // this performs access control, the type should be resolved by opal
+          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy)
           branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {} {
             except.throws(JvmExcept.Throw(ClassType.ClassCastException))
           }
@@ -562,6 +564,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {
           stack.push(i32ops.integerLit(0))
         } {
+          // this performs access control, the type should be resolved by opal
+          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy)
           // not null
           branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {
             stack.push(i32ops.integerLit(1))
