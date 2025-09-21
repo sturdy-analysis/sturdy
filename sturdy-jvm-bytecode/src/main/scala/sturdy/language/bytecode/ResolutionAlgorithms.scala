@@ -6,6 +6,7 @@ import org.opalj.br.{ArrayType, ClassFile, ClassHierarchy, ClassType, Field, Met
 import org.opalj.collection.immutable.UIDSet
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
+import sturdy.language.bytecode.abstractions.FieldIdent
 import sturdy.language.bytecode.generic.JvmExcept
 
 import java.net.URL
@@ -13,10 +14,6 @@ import scala.annotation.tailrec
 
 // functions that implement the algorithms defined in chapter 5.4 of the jvm specification
 // see https://docs.oracle.com/javase/specs/jvms/se24/html/jvms-5.html#jvms-5.4
-
-// predicate to check whether a field matches a fieldname
-private def nameMatches(name: (ClassType, String))(field: Field): Boolean =
-  field.name == name._2
 
 // 5.4.3.1 class and interface resolution
 def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): ClassType =
@@ -34,16 +31,14 @@ def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType
   resC
 
 // TODO: access control
-// TODO: field type checking (currently, only name and class are considered)
-// - consider implementing a field descriptor type to facilitate this
 @tailrec
-def resolveField(c: ClassFile, name: (ClassType, String))(using project: Project[URL]): Option[Field] =
+def resolveField(c: ClassFile, ident: FieldIdent)(using project: Project[URL]): Option[Field] =
   var candidate: Option[Field] = None
-  candidate = c.fields.find(nameMatches(name)).orElse:
-    project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(nameMatches(name))
+  candidate = c.fields.find(ident.matchesField).orElse:
+    project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(ident.matchesField)
   if candidate.isDefined then return candidate
   if c.superclassType.isEmpty then return None
-  resolveField(project.classFile(c.superclassType.get).get, name)
+  resolveField(project.classFile(c.superclassType.get).get, ident)
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
 def resolveMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =

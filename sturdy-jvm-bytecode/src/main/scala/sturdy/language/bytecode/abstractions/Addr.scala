@@ -1,9 +1,7 @@
 package sturdy.language.bytecode.abstractions
 
-import org.opalj.br.{Method, ClassType}
-import sturdy.effect.failure.Failure
+import org.opalj.br.Method
 import sturdy.effect.store.ManageableAddr
-import sturdy.language.bytecode.generic.BytecodeFailure.IncorrectSiteVariant
 import sturdy.values.references.{AbstractAddr, PowersetAddr}
 import sturdy.values.{Finite, Join}
 
@@ -15,8 +13,8 @@ enum Addr extends ManageableAddr(true) with AbstractAddr[Addr]:
   case Array(site: Site)
   case ArrayElement(site: Site, index: Int)
   case Object(site: Site)
-  case Field(site: Site, name: String, cls: ClassType)
-  case Static(id: (ClassType, String))
+  case Field(site: Site, ident: FieldIdent)
+  case Static(ident: FieldIdent)
 
   // implementation without much thought put into it currently
   override def isEmpty: Boolean = false
@@ -36,7 +34,7 @@ type AddrSet = PowersetAddr[Addr, Addr]
 enum Site:
   case Instruction(mth: Method, pc: Int, variant: Int = 0)
   case ArrayElementInitialization(s: Site, ix: Int)
-  case FieldInitialization(s: Site, name: String, cls: ClassType)
-  case StaticInitialization(obj: ClassType, name: String)
+  case FieldInitialization(s: Site, ident: FieldIdent)
+  case StaticInitialization(ident: FieldIdent)
   // not created within the program
   case External

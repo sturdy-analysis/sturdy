@@ -3,7 +3,6 @@ package sturdy.language.bytecode
 import org.opalj.bi.ACC_SUPER
 import org.opalj.br.*
 import org.opalj.br.analyses.Project
-import org.opalj.collection.immutable.UIDSet
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.{Allocator, CAllocatorIntIncrement}
 import sturdy.effect.callframe.ConcreteCallFrame
@@ -14,7 +13,7 @@ import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
-import sturdy.language.bytecode.abstractions.{InvokeType, Site}
+import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeType, Site}
 import sturdy.language.bytecode.generic.*
 import sturdy.values.arrays.*
 import sturdy.values.booleans.ConcreteBooleanBranching
@@ -56,7 +55,7 @@ object ConcreteInterpreter extends Interpreter:
   override type Idx = Int
   override type TypeRep = ReferenceType
   //override type NullVal = Null
-  override type FieldName = (ClassType, String)
+  override type FieldName = FieldIdent
   //override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
   override type AType = ArrayType
   //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
@@ -165,7 +164,7 @@ object ConcreteInterpreter extends Interpreter:
     private def getFieldName(cf: ClassFile, name: FieldName): FieldName =
       val resolvedField = resolveField(cf, name).getOrElse:
         except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
-      (resolvedField.classFile.thisType, resolvedField.name)
+      FieldIdent(resolvedField.classFile.thisType, resolvedField.name, resolvedField.fieldType)
 
     override def invokeMethod(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
@@ -326,7 +325,8 @@ object ConcreteInterpreter extends Interpreter:
     override val staticAlloc: CAllocatorIntIncrement[Site] = CAllocatorIntIncrement[Site]
     override val store: CStore[Addr, Value] = CStore(initStore)
 
-    override val staticFieldTable: ConcreteSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | (Site, FrameData)] = ConcreteSymbolTable()
+    override val classInitializationState: ConcreteSymbolTable[Unit, ClassType, InitializationResult] = ConcreteSymbolTable()
+    override val staticFieldTable: ConcreteSymbolTable[Unit, FieldName, Addr] = ConcreteSymbolTable()
 
     override implicit val project: Project[URL] = files
 

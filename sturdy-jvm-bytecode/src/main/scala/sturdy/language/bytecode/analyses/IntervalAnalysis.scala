@@ -75,26 +75,21 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
     override val except = new JoinedExcept()
     override val objAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext(site => PowersetAddr(Addr.Object(site)))
     override val objFieldAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
-      case Site.FieldInitialization(s, name, cls) => PowersetAddr(Addr.Field(s, name, cls))
+      case Site.FieldInitialization(s, ident) => PowersetAddr(Addr.Field(s, ident))
       case _ => ??? // TODO
     override val arrayAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext(site => PowersetAddr(Addr.Array(site)))
     override val arrayValAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
       case Site.ArrayElementInitialization(s, ix) => PowersetAddr(Addr.ArrayElement(s, ix))
       case _ => ??? // TODO
     override val staticAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
-      case Site.StaticInitialization(obj, name) => PowersetAddr(Addr.Static(obj, name))
+      case Site.StaticInitialization(ident) => PowersetAddr(Addr.Static(ident))
       case _ => ??? // TODO
     override val store: AStoreThreaded[singleAddr, AddrSet, Value] = new AStoreThreaded(initStore)
     override val frame = JoinableDecidableCallFrame(0, List())
     override val project: Project[URL] = files
 
-    override val staticFieldTable: JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | AddrSet] = JoinableDecidableSymbolTable[ClassType, InitializationCheck.type | String, InitializationResult | Addr]()
-
-    given Join[InitializationResult | Addr] with
-      override def apply(v1: InitializationResult | Addr, v2: InitializationResult | Addr): MaybeChanged[InitializationResult | Addr] = (v1, v2) match
-        case (v1: Addr, v2: Addr) => Join(v1, v2)
-        case (v1: InitializationResult, v2: InitializationResult) => MaybeChanged(v1, v2)
-        case _ => throw IllegalStateException()
+    override val classInitializationState: JoinableDecidableSymbolTable[Unit, ClassType, InitializationResult] = JoinableDecidableSymbolTable[Unit, ClassType, InitializationResult]()
+    override val staticFieldTable: JoinableDecidableSymbolTable[Unit, FieldName, AddrSet] = JoinableDecidableSymbolTable[Unit, FieldName, AddrSet]()
 
     given Project[URL] = project
     private given Failure = failure
@@ -166,8 +161,8 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     override val bytecodeOps: BytecodeOps[Idx, Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[(ClassType, String), Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin] =
-      new LiftedObjectOps[(ClassType, String), Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin] =
+      new LiftedObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 

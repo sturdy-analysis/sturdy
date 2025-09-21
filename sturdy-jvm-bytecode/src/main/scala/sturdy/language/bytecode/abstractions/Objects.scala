@@ -27,7 +27,7 @@ trait Objects extends Interpreter:
   override type Addr = AddrSet
 
   override type ObjType = ClassFile
-  override type FieldName = (ClassType, String)
+  override type FieldName = FieldIdent
 
   type Obj = Object[Addr, ObjType, Addr, FieldName]
   type Arr = Array[Addr, Addr, AType, Value]
