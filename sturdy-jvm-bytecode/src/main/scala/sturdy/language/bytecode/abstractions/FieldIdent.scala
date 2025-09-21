@@ -1,21 +1,18 @@
 package sturdy.language.bytecode.abstractions
 
-import org.opalj.br.{ArrayType, CharType, ClassType, Field, FieldType}
+import org.opalj.br.{ArrayType, ByteType, ClassType, Field, FieldType}
 import sturdy.values.Finite
 
 // type to identify fields
-class FieldIdent(val declaringClass: ClassType, val name: String, val fieldType: FieldType):
+case class FieldIdent(declaringClass: ClassType, name: String, fieldType: FieldType):
   // check whether this identifier matches a field
   def matchesField(field: Field): Boolean =
     // TODO: figure out how handle declaring class
     name == field.name && fieldType == field.fieldType
 
-  override def toString: String =
-    s"FieldIdent($declaringClass, $name, $fieldType)"
-
 // definitions for frequently used fields
 object FieldIdent:
-  final val StringValue = FieldIdent(ClassType.String, "value", ArrayType(CharType))
+  final val StringValue = FieldIdent(ClassType.String, "value", ArrayType(ByteType))
 
 given Finite[FieldIdent] with {}
 

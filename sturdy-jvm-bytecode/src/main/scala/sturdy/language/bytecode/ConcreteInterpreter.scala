@@ -13,7 +13,7 @@ import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
-import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeType, Site}
+import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.*
 import sturdy.values.arrays.*
 import sturdy.values.booleans.ConcreteBooleanBranching
@@ -139,32 +139,27 @@ object ConcreteInterpreter extends Interpreter:
       }.toMap
       ConcreteRefValues.Object(oid, cfs, fieldAddrs)
 
-    override def getField(obj: RefValue, name: FieldName)(using failure: Failure): Value = obj match
-      case ConcreteRefValues.Object(_, cf, fields) =>
-        val resolvedFieldName = getFieldName(cf, name)
-        val addr = fields.getOrElse(resolvedFieldName, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))
+    override def getField(callingClass: ClassFile, obj: RefValue, name: FieldName)(using failure: Failure): Value = obj match
+      case ConcreteRefValues.Object(_, _, fields) =>
+        val resolvedField = resolveField(callingClass.thisType, name)
+        val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
       case ConcreteRefValues.NullValue() =>
         except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case ConcreteRefValues.nonNullArray(_, _, _, _) =>
         except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
 
-    override def setField(obj: RefValue, name: FieldName, v: Value): JOptionC[Unit] = obj match
-      case ConcreteRefValues.Object(_, cf, fields) =>
-        val resolvedFieldName = getFieldName(cf, name)
-        if !fields.contains(resolvedFieldName) then
+    override def setField(callingClass: ClassFile, obj: RefValue, name: FieldName, v: Value): JOptionC[Unit] = obj match
+      case ConcreteRefValues.Object(_, _, fields) =>
+        val resolvedField = resolveField(callingClass.thisType, name)
+        if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
-          store.write(fields(resolvedFieldName), v)
+          store.write(fields(resolvedField.getIdent), v)
           JOptionC.some(())
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
-
-    private def getFieldName(cf: ClassFile, name: FieldName): FieldName =
-      val resolvedField = resolveField(cf, name).getOrElse:
-        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
-      FieldIdent(resolvedField.classFile.thisType, resolvedField.name, resolvedField.fieldType)
 
     override def invokeMethod(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))

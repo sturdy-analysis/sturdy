@@ -428,13 +428,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, fieldType) =>
-        val addr = getStaticFieldAddr(site, declaringClass, name, fieldType)
+        val ident = FieldIdent(declaringClass, name, fieldType)
+        val addr = getStaticFieldAddr(mth.classFile.thisType, mth, site, ident)
         val v = store.readOrElse(addr, fail(BytecodeFailure.UnboundStaticVar, name))
         stack.push(v)
 
       case PUTSTATIC(declaringClass, name, fieldType) =>
+        val ident = FieldIdent(declaringClass, name, fieldType)
         val field = project.classHierarchy.allSuperclassesIterator(declaringClass, true)(project).flatMap(cfs => cfs.fields).find:
-          _.name == name
+          ident.matchesField
         .getOrElse:
           except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
         runAccessControl(field, mth)
@@ -442,45 +444,43 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         if field.isFinal && !(field.classFile == mth.classFile && mth.isStaticInitializer) then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
-        val addr = getStaticFieldAddr(site, declaringClass, name, fieldType)
+        val addr = getStaticFieldAddr(mth.classFile.thisType, mth, site, ident)
         val v = stack.popOrAbort()
         store.write(addr, v)
 
       // Load and Store Fields opcode 180 - 181
-      case GETFIELD(declaringClass, name, ty) =>
-        val ident = FieldIdent(declaringClass, name, ty)
+      case GETFIELD(declaringClass, name, fieldType) =>
+        val ident = FieldIdent(declaringClass, name, fieldType)
         // TODO: check whether object is array before these checks
-        val field = resolveField(getClassFile(declaringClass), ident).getOrElse:
-          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        val field = resolveField(mth.classFile.thisType, ident)
         if field.isStatic then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         val obj = stack.popOrAbort()
-        val v = objectOps.getField(obj, ident)
+        val v = objectOps.getField(mth.classFile, obj, ident)
         stack.push(v)
 
       case PUTFIELD(declaringClass, name, fieldType) =>
         val ident = FieldIdent(declaringClass, name, fieldType)
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
-        val field = resolveField(getClassFile(declaringClass), ident).getOrElse:
-          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        val field = resolveField(mth.classFile.thisType, ident)
         runAccessControl(field, mth)
         if field.isStatic then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
-        objectOps.setField(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
+        objectOps.setField(mth.classFile, obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
-        ensureInitialization(site)(declaringClass)
+        ensureInitialization(mth, site)(declaringClass)
         val cf = getClassFile(declaringClass)
-        val mth = findMethod(cf, name, methodDescriptor).get
-        if mth.isAbstract || mth.isNotStatic then
+        val candidate = findMethod(cf, name, methodDescriptor).get
+        if candidate.isAbstract || candidate.isNotStatic then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
-        val ret = invoke(mth, args)
+        val ret = invoke(candidate, args)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -558,7 +558,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         checkAccessControlForRefType(classType, mth)
         if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
           except.throws(JvmExcept.Throw(ClassType("java/lang/InstantiationError")))
-        ensureInitialization(site)(classType)
+        ensureInitialization(mth, site)(classType)
         stack.push(createObject(classType, site))
 
       // Arrays opcode 188 - 190
@@ -667,24 +667,24 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
-  def ensureInitialization(site: Site)(classType: ClassType)(using Fixed): Unit =
-    try classInitializationState.get((), classType).option(initializeClass(site)(classType)):
+  def ensureInitialization(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
+    try classInitializationState.get((), classType).option(initializeClass(mth, site)(classType)):
       case InitializationResult.Ongoing | InitializationResult.Success => ()
       case InitializationResult.Failure() => except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
     catch case _: NoSuchElementException =>
       // this should happen iff this is the first initialization of a class, initialize tables
       classInitializationState.putNew(())
       staticFieldTable.putNew(())
-      initializeClass(site)(classType)
+      initializeClass(mth, site)(classType)
 
   // expects unit to be present in the state and field tables
-  def initializeClass(site: Site)(classType: ClassType)(using Fixed): Unit =
+  def initializeClass(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
     // need to make sure the class is registered in the table to avoid exceptions
     classInitializationState.set((), classType, InitializationResult.Ongoing)
     val cf = getClassFile(classType)
     // ensure initialization of superclass first
     cf.superclassType.foreach:
-      ensureInitialization(site)(_)
+      ensureInitialization(mth, site)(_)
     // initialize all static fields to their default value
     cf.fields.filter: field =>
       ACC_STATIC.isSet(field.accessFlags)
@@ -754,7 +754,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     val newFrameData = 0
     // TODO: remove this println summary
     if (mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(objectOps.getField(args(1), FieldIdent.StringValue)).map(vals => vals.get)
+      val string = arrayOps.getArray(objectOps.getField(mth.classFile, args(1), FieldIdent.StringValue)).map(vals => vals.get)
       arrayOps.printString(string)
       return i32ops.integerLit(-1)
     // we are currently unable to properly deal with System.exit
@@ -788,14 +788,14 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ClassType("java/lang/String"),"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(args.head, FieldIdent.StringValue)).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(args(1), FieldIdent.StringValue)).map(vals => vals.get)
+        val baseString = arrayOps.getArray(objectOps.getField(mth.classFile, args.head, FieldIdent.StringValue)).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(mth.classFile, args(1), FieldIdent.StringValue)).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
           concattedString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
         val stringObj = createObject(ClassType("java/lang/String"), Site.Instruction(mth, 0))
-        objectOps.setField(stringObj, FieldIdent.StringValue, stringArray)
+        objectOps.setField(mth.classFile, stringObj, FieldIdent.StringValue, stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)
@@ -933,7 +933,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       i32ops.integerLit(value.length)
     )
     val stringObj = createObject(ClassType.String, site)
-    objectOps.setField(stringObj, FieldIdent.StringValue, stringArray)
+    objectOps.setField(getClassFile(ClassType.String), stringObj, FieldIdent.StringValue, stringArray)
     stringObj
 
   // constructs the fields for an object allocation
@@ -967,11 +967,10 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       cf.superclassType.flatMap: superCf =>
         findMethod(getClassFile(superCf), name, descriptor)
 
-  private def getStaticFieldAddr(site: Site, declaringClass: ClassType, name: String, fieldType: FieldType)(using Fixed): Addr =
-    ensureInitialization(site)(declaringClass)
-    val resolvedField = resolveField(getClassFile(declaringClass), FieldIdent(declaringClass, name, fieldType))(using project).getOrElse:
-      except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
-    staticFieldTable.get((), resolvedField.getIdent).option(fail(BytecodeFailure.FieldNotFound, name))(identity)
+  private def getStaticFieldAddr(caller: ClassType, mth: Method, site: Site, ident: FieldIdent)(using Fixed): Addr =
+    ensureInitialization(mth, site)(ident.declaringClass)
+    val resolvedField = resolveField(caller, ident)
+    staticFieldTable.get((), resolvedField.getIdent).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
   enum AbortEval extends FailureKind:
     // abort eval due to System.exit

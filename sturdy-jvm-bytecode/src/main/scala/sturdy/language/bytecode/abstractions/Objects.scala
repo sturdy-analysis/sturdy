@@ -93,7 +93,7 @@ trait Objects extends Interpreter:
         }.toMap
         Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
 
-      override def getField(ref: RefValue, name: FieldName)(using failure: Failure): Value =
+      override def getField(callingClass: ClassFile, ref: RefValue, name: FieldName)(using failure: Failure): Value =
         // TODO: fix
         // import sturdy.data.MakeJoined
         ref match
@@ -103,7 +103,7 @@ trait Objects extends Interpreter:
           case Topped.Actual(AbstractReferenceValue.NullValue()) => throw NullPointerException()
           case Topped.Actual(_) => ???
 
-      override def setField(ref: RefValue, name: FieldName, v: Value): JOption[WithJoin, Unit] =
+      override def setField(callingClass: ClassFile, ref: RefValue, name: FieldName, v: Value): JOption[WithJoin, Unit] =
         ref match
           case Topped.Top => setFieldNonActual
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>

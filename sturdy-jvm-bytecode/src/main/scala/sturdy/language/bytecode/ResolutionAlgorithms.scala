@@ -30,15 +30,23 @@ def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType
     except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
   resC
 
-// TODO: access control
 @tailrec
-def resolveField(c: ClassFile, ident: FieldIdent)(using project: Project[URL]): Option[Field] =
+def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIdent)(using project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Field =
+  val c = project.classFile(ident.declaringClass).getOrElse:
+    except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
   var candidate: Option[Field] = None
   candidate = c.fields.find(ident.matchesField).orElse:
     project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(ident.matchesField)
-  if candidate.isDefined then return candidate
-  if c.superclassType.isEmpty then return None
-  resolveField(project.classFile(c.superclassType.get).get, ident)
+  candidate match
+    case Some(field) =>
+      if accessControl(field, d)(using project.classHierarchy) then
+        field
+      else
+        except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+    case None =>
+      if c.superclassType.isEmpty then
+        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+      resolveField(d, FieldIdent(c.superclassType.get, ident.name, ident.fieldType))
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
 def resolveMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
