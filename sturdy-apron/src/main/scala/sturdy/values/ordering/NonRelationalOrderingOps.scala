@@ -1,6 +1,6 @@
 package sturdy.values.ordering
 
-import sturdy.apron.{ApronBool, ApronExpr, ApronState}
+import sturdy.apron.{ApronBool, ApronExpr, ApronState, ResolveState}
 
 
 final class NonRelationalOrderingOps[
@@ -14,7 +14,7 @@ final class NonRelationalOrderingOps[
   )
   extends LiftedOrderingOps[V, ApronBool[Addr,Type], V, ApronBool[Addr,Type]](
     extract = expr => expr,
-    inject = apronState.toNonRelational
+    inject = apronState.toNonRelational(_)(using ResolveState.Internal)
   )
 
 final class NonRelationalUnsignedOrderingOps[
@@ -28,7 +28,7 @@ final class NonRelationalUnsignedOrderingOps[
   )
   extends LiftedUnsignedOrderingOps[V, ApronBool[Addr, Type], V, ApronBool[Addr, Type]](
     extract = expr => expr,
-    inject = apronState.toNonRelational
+    inject = apronState.toNonRelational(_)(using ResolveState.Internal)
   )
 
 final class NonRelationalEqOps[
@@ -42,5 +42,5 @@ final class NonRelationalEqOps[
   )
     extends LiftedEqOps[V, ApronBool[Addr,Type], V, ApronBool[Addr,Type]](
       extract = expr => expr,
-      inject = apronState.toNonRelational
+      inject = apronState.toNonRelational(_)(using ResolveState.Internal)
     )

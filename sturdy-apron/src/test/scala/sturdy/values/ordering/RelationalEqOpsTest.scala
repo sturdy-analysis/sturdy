@@ -40,7 +40,7 @@ given Structural[Boolean] with {}
 
 given RelationalIntervalEqOps[L](using apronState: ApronState[VirtAddr,Type]): RelationalEqOps[VirtAddr, Type] with IntervalEqOps[L, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] with
   override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
-    apronState.getBoolean(b)
+    apronState.getBoolean(b)(using ResolveState.Internal)
 
 class RelationalIntEqOpsTest(using Manager) extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),

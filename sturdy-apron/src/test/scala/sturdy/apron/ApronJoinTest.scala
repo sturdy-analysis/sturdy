@@ -67,6 +67,8 @@ class RelationalJoinTest
    manager: apron.Manager
   ) extends AnyFunSuite:
 
+  given defaultResolveState: ResolveState = ResolveState.Internal
+
   val minValue = Bounded[L].minValue
   val maxValue = Bounded[L].maxValue
 

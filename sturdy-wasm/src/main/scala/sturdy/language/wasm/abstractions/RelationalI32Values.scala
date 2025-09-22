@@ -32,18 +32,18 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final type Bool = ApronBool[VirtAddr, Type]
 
   extension (i32: I32)
-    inline def asNumExpr(using apronState: ApronState[VirtAddr, Type]): ApronExpr[VirtAddr, Type] =
+    inline def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       i32 match
         case NumExpr(expr) => expr
-        case BoolExpr(condition) => apronState.getBoolean(condition) match
+        case BoolExpr(condition) => apronState.getBoolean(condition)(using resolveState) match
           case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
         case AllocationSites(sites, _) => ApronExpr.top(I32Type)
 
-    def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]]): ApronExpr[VirtAddr, Type] =
+    def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       given ApronState[VirtAddr, Type] = lazyApronState.value
-      i32.asNumExpr
+      i32.asNumExpr(using resolveState = resolveState)
 
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
   final override def booleanToVal(b: Bool): Value = Num(Int32(BoolExpr(b)))
@@ -59,13 +59,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           } yield(AllocationSites(sites, size))
         case (NumExpr(expr), _ : (BoolExpr | AllocationSites)) if expr.isBottom == Topped.Actual(true) => Changed(v2)
         case (_ : (BoolExpr | AllocationSites), NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
-        case (NumExpr(expr), AllocationSites(sites, size)) if apronState.value.getRightInterval(expr).isZero =>
+        case (NumExpr(expr), AllocationSites(sites, size)) if apronState.value.getInterval(expr)(using ResolveState.Left).isZero =>
           given ApronState[VirtAddr,Type] = apronState.value
           Changed(AllocationSites(Join(sites, AbstractReference.Null).get, size))
-        case (AllocationSites(sites, size), NumExpr(expr)) if apronState.value.getRightInterval(expr).isZero =>
+        case (AllocationSites(sites, size), NumExpr(expr)) if apronState.value.getInterval(expr)(using ResolveState.Right).isZero =>
           given ApronState[VirtAddr, Type] = apronState.value
           MaybeChanged(AllocationSites(Join(sites, AbstractReference.Null).get, size), !sites.containsNull)
-        case (_, _) => combineApronExpr(v1.asNumExprLazy, v2.asNumExprLazy).map(NumExpr.apply)
+        case (_, _) => combineApronExpr(v1.asNumExprLazy(using resolveState = ResolveState.Left), v2.asNumExprLazy(using resolveState = ResolveState.Right)).map(NumExpr.apply)
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
 
@@ -97,9 +97,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     override def equ(v1: I32, v2: I32): Bool =
       (v1, v2) match
         case (AllocationSites(sites, _), NumExpr(expr)) =>
-          if(apronState.getInterval(expr).isZero)
-            ApronBool.Constant(Topped.Actual(sites.containsNull))
-          else
+          if(apronState.getInterval(expr).isZero) {
+            sites match {
+              case _: AbstractReference.Null.type => ApronBool.Constant(Topped.Actual(true))
+              case _: AbstractReference.Addr[?] => ApronBool.Constant(Topped.Actual(false))
+              case _: AbstractReference.NullAddr[?] => ApronBool.Constant(Topped.Top)
+            }
+          } else
             equ(NumExpr(v1.asNumExpr), v2)
         case (_: NumExpr, _: AllocationSites) =>
           equ(v2, v1)

@@ -26,7 +26,7 @@ object RelationalInfo:
       tryCompare(x, y).get <= 0
 
   enum Info:
-    case Numeric(interval: Interval, tpe: Any, constrained: IsConstrained)
+    case Numeric(interval: FloatInterval, tpe: Any, constrained: IsConstrained)
     case Boolean(value: Topped[scala.Boolean], constrained: IsConstrained)
     case AllocationSites(sites: AbstractReference[Powerset[PhysicalAddress[Any]]], size: Interval, sizeConstrained: IsConstrained)
     case Top

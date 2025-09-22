@@ -47,11 +47,11 @@ given RelationalBreakIf[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,
       break(apronState.recencyStore.getState)
     } {
     }
-    apronState.addConstraints(cond.negated)
+    apronState.addConstraints(cond.negated)(using ResolveState.Internal)
 
   override def assertCondition(cond: ApronCons[VirtualAddress[Ctx], Type], state: State): Unit =
     apronState.recencyStore.setState(state)
-    apronState.addConstraints(cond)
+    apronState.addConstraints(cond)(using ResolveState.Internal)
 
   override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = apronState.recencyStore.joinClosingOver
   override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = apronState.recencyStore.widenClosingOver
@@ -68,11 +68,11 @@ given RelationalBreakIfBool[Ctx, Type, Val](using apronState: ApronRecencyState[
     } {
 
     }
-    apronState.addCondition(cond.negated)
+    apronState.addCondition(cond.negated)(using ResolveState.Internal)
 
   override def assertCondition(cond: ApronBool[VirtualAddress[Ctx], Type], state: State): Unit =
     apronState.recencyStore.setState(state)
-    apronState.addCondition(cond)
+    apronState.addCondition(cond)(using ResolveState.Internal)
 
   override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = apronState.recencyStore.joinClosingOver
 

@@ -1,6 +1,6 @@
 package sturdy.values.convert
 
-import sturdy.apron.{ApronExpr, ApronState}
+import sturdy.apron.{ApronExpr, ApronState, ResolveState}
 
 final class NonRelationalConvert[From, To, V, Addr,Type, Config <: ConvertConfig[_]]
   (using
@@ -9,5 +9,5 @@ final class NonRelationalConvert[From, To, V, Addr,Type, Config <: ConvertConfig
   )
   extends LiftedConvert[From, To, V, ApronExpr[Addr,Type], V, ApronExpr[Addr,Type], Config](
     extract = expr => expr,
-    inject = apronState.toNonRelational
+    inject = apronState.toNonRelational(_)(using ResolveState.Internal)
   )

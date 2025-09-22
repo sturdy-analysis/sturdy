@@ -230,7 +230,7 @@ final class RelationalStore
         val (nonRelExpr,state1) = relationalValue.getRelationalExprPure(nonRelVal, state)
         state = state1
         val nonRelationalExprUnconstrained = nonRelExpr match {
-          case Some(expr) => expr._type.signedBounds.cmp(getBound(expr, state)) < 0
+          case Some(expr) => expr._type.signedTop.cmp(getBound(expr, state)) < 0
           case None => false
         }
         if(nonRelationalExprUnconstrained)

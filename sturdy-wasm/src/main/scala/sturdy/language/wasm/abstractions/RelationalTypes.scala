@@ -113,13 +113,13 @@ trait RelationalTypes:
           case I64Type => BaseType[Long].byteSize
           case F32Type => BaseType[Float].byteSize
           case F64Type => BaseType[Double].byteSize
-      override def signedBounds: Interval =
+      override def signedTop: sturdy.apron.FloatInterval =
         t match
-          case I8Type  => BaseType[Byte].signedBounds
-          case I32Type => BaseType[Int].signedBounds
-          case I64Type => BaseType[Long].signedBounds
-          case F32Type => BaseType[Float].signedBounds
-          case F64Type => BaseType[Double].signedBounds
+          case I8Type  => BaseType[Byte].signedTop
+          case I32Type => BaseType[Int].signedTop
+          case I64Type => BaseType[Long].signedTop
+          case F32Type => BaseType[Float].signedTop
+          case F64Type => BaseType[Double].signedTop
 
   given (using failure: Failure, effectStack: EffectStack): IntegerOps[Int, Type] = LiftedIntegerOps[Int, Type, BaseType[Int]](extract = _.asI32, inject = _ => Type.I32Type)
 
@@ -156,3 +156,5 @@ trait RelationalTypes:
   given (using failure: Failure, effectStack: EffectStack): ConvertDoubleLong[Type, Type] = LiftedConvert[Double, Long, Type, Type, BaseType[Double], BaseType[Long], Overflow && BitSign](extract = _.asF64, inject = _ => Type.I64Type)
 
   given (using failure: Failure, effectStack: EffectStack): ConvertDoubleFloat[Type, Type] = LiftedConvert[Double, Float, Type, Type, BaseType[Double], BaseType[Float], NilCC.type](extract = _.asF64, inject = _ => Type.F32Type)
+
+  given defaultResolveState: ResolveState = ResolveState.Internal

@@ -12,6 +12,7 @@ import sturdy.effect.symboltable.{*, given}
 import sturdy.{*, given}
 
 object RelationalAnalysisSoundness {
+  given defaultResolveState: ResolveState = ResolveState.Internal
 
   given valuesSound(using apronState: ApronState[VirtAddr, Type]): Soundness[ConcreteInterpreter.Value, RelationalAnalysis.Value] with
     override def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound =

@@ -153,6 +153,7 @@ object RelationalAnalysis extends Interpreter,
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState
+    given defaultResolveState: ResolveState = ResolveState.Internal
 
     val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, AddrCtx, RelType] = new RelationalCallFrame(
       initData = "$main",

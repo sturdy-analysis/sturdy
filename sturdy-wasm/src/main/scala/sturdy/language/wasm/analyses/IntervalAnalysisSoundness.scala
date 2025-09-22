@@ -36,13 +36,6 @@ object IntervalAnalysisSoundness {
     override def apply(c: List[C]): List[A] =
       c.map(aValue.apply)
 
-  given [A](using poValue: PartialOrder[A]): PartialOrder[List[A]] with
-    override def lteq(x: List[A], y: List[A]): Boolean =
-      if (x.length != y.length)
-        false
-      else
-        x.zip(y).forall((a,b) => poValue.lteq(a,b))
-
   given (using bs: Soundness[Byte,Byte]): Soundness[Byte, Topped[Byte]] with
     def isSound(cByte: Byte, aByte: Topped[Byte]): IsSound = aByte match
       case Topped.Top => IsSound.Sound

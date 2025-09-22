@@ -1,6 +1,6 @@
 package sturdy.values.floating
 
-import sturdy.apron.{ApronExpr, ApronState}
+import sturdy.apron.{ApronExpr, ApronState, ResolveState}
 
 final class NonRelationalFloatOps[
     L,
@@ -13,5 +13,5 @@ final class NonRelationalFloatOps[
   )
   extends LiftedFloatOps[L, ApronExpr[Addr,Type], ApronExpr[Addr,Type]](
     extract = expr => expr,
-    inject = apronState.toNonRelational
+    inject = apronState.toNonRelational(_)(using ResolveState.Internal)
   )

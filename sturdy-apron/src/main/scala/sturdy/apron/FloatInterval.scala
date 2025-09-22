@@ -1,11 +1,10 @@
 package sturdy.apron
 
 import apron.*
+import sturdy.values.{Join, MaybeChanged, PartialOrder}
 
-import java.lang.{Double => JDouble}
-
+import java.lang.Double as JDouble
 import scala.collection.mutable.ArrayBuffer
-
 import sturdy.values.floating.FloatSpecials
 
 object FloatInterval:
@@ -150,3 +149,32 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
 
   override def toString: String =
     super.toString
+
+
+given JoinFloatInterval: Join[FloatInterval] with
+  def apply(iv1: FloatInterval, iv2: FloatInterval): MaybeChanged[FloatInterval] =
+    val res = FloatInterval(iv1.floatSpecials.meet(iv2.floatSpecials))
+    if(iv1.isNonSpecialBottom) {
+      res.setInf(iv2.nonSpecialInf)
+      res.setSup(iv2.nonSpecialSup)
+    } else if(iv2.isNonSpecialBottom) {
+      res.setInf(iv1.nonSpecialInf)
+      res.setSup(iv1.nonSpecialSup)
+    } else {
+      if (iv1.nonSpecialInf.cmp(iv2.nonSpecialInf) <= 0)
+        res.setInf(iv1.nonSpecialInf)
+      else
+        res.setInf(iv2.nonSpecialInf)
+
+      if (iv1.nonSpecialSup.cmp(iv2.nonSpecialSup) <= 0)
+        res.setSup(iv2.nonSpecialSup)
+      else
+        res.setSup(iv1.nonSpecialSup)
+    }
+
+    MaybeChanged(res, ! res.isLeq(iv1))
+
+
+given PartialOrderFloatInterval: PartialOrder[FloatInterval] with
+  override def lteq(x: FloatInterval, y: FloatInterval): Boolean =
+    x.isLeq(y)

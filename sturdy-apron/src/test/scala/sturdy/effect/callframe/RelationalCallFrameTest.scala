@@ -5,7 +5,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import apron.*
 import gmp.*
-import sturdy.apron.{ApronExpr, given}
+import sturdy.apron.{ApronExpr, ResolveState, given}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -31,6 +31,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
+  given defaultResolveState: ResolveState = ResolveState.Internal
 
   given Manager = new apron.Polka(true)
 

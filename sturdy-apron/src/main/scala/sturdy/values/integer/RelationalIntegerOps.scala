@@ -35,7 +35,9 @@ trait RelationalBaseIntegerOps
        overflowHandling: OverflowHandling,
        typeIntOps: IntegerOps[L,Type]
     ) extends IntegerOpsWithSignInterpretation[L, ApronExpr[Addr,Type]]:
+
   given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
+  given defaultResolveState: ResolveState = ResolveState.Internal
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     handleOverflow(intAdd(v1, v2))
@@ -305,7 +307,7 @@ given RelationalLongOps
 
 given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Int, ApronExpr[Addr, Type]] with
   override def isSound(c: Int, expr: ApronExpr[Addr, Type]): IsSound =
-    val iv = apronState.getInterval(expr)
+    val iv = apronState.getInterval(expr)(using ResolveState.Internal)
     if (Interval(ApronExpr.scalar(c), ApronExpr.scalar(c)).isLeq(iv))
       IsSound.Sound
     else
@@ -313,7 +315,7 @@ given SoundnessIntApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]
 
 given SoundnessLongApronExpr[Addr, Type](using apronState: ApronState[Addr,Type]): Soundness[Long, ApronExpr[Addr,Type]] with
   override def isSound(c: Long, expr: ApronExpr[Addr, Type]): IsSound =
-    val iv = apronState.getInterval(expr)
+    val iv = apronState.getInterval(expr)(using ResolveState.Internal)
     if(Interval(ApronExpr.scalar(c), ApronExpr.scalar(c)).isLeq(iv))
       IsSound.Sound
     else

@@ -118,6 +118,8 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
    convertType: Convert[From, To, Type, Type, Overflow && BitSign]
   ) extends Convert[From, To, ApronExpr[Addr,Type], ApronExpr[Addr,Type], Overflow && BitSign]:
 
+  given defaultResolveState: ResolveState = ResolveState.Internal
+
   def apply(from: ApronExpr[Addr,Type], config: Overflow && BitSign) =
     val fromType = from._type
     val toType = convertType(fromType, config)
@@ -227,7 +229,7 @@ private final class RelationalConvertFloatingInteger[From, To, Addr: Ordering: C
 given RelationalConvertDoubleFloat[Addr: Ordering: ClassTag, Type: ApronType](using apronState: ApronState[Addr,Type], floatOps: RelationalFloatOps[Float, Addr, Type], convertType: ConvertDoubleFloat[Type, Type]):
   ConvertDoubleFloat[ApronExpr[Addr,Type], ApronExpr[Addr,Type]] = {
     case (from, conf) =>
-      val iv = apronState.getInterval(from)
+      val iv = apronState.getInterval(from)(using ResolveState.Internal)
       floatOps.checkForNewFloatSpecials(
         floatCast(from, RoundingType.Single, RoundingDir.Nearest, from.floatSpecials, convertType(from._type, conf))
       )

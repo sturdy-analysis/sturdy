@@ -122,13 +122,13 @@ object TestTypes:
           case Type.FloatType => BaseType[Float].byteSize
           case Type.DoubleType => BaseType[Double].byteSize
 
-      override def signedBounds: Interval =
+      override def signedTop: sturdy.apron.FloatInterval =
         tpe match
-          case Type.IntType => BaseType[Int].signedBounds
-          case Type.LongType => BaseType[Long].signedBounds
-          case Type.BoolType => BaseType[Boolean].signedBounds
-          case Type.FloatType => BaseType[Float].signedBounds
-          case Type.DoubleType => BaseType[Double].signedBounds
+          case Type.IntType => BaseType[Int].signedTop
+          case Type.LongType => BaseType[Long].signedTop
+          case Type.BoolType => BaseType[Boolean].signedTop
+          case Type.FloatType => BaseType[Float].signedTop
+          case Type.DoubleType => BaseType[Double].signedTop
 
   given[W <: Widening]: Combine[Type, W] = {
     case (t@Type.IntType, Type.IntType) => MaybeChanged.Unchanged(t)
