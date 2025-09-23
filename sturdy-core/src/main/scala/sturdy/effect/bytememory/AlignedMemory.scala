@@ -16,6 +16,8 @@ import java.nio.ByteOrder
 import scala.annotation.tailrec
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
+import scala.util.boundary
+import scala.util.boundary.break
 
 /**
  * Indicates if the read address aligns with the stored address, i.e., if storedAddr = readAddr.
@@ -146,45 +148,30 @@ final class AlignedMemory
       ()
     }
 
-  override def init(key: Key, targetAddr: Addr, sourceAddr: Addr, byteAmount: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
+  override def init(key: Key, targetAddr0: Addr, sourceAddr0: Addr, byteAmount0: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
     dataBytes match
       case StoredBytes(valueList, byteOrder) =>
-        addressLimits.ifSizeLeLimit(byteAmount, sizeIntOps.integerLit(0)) {
-          // if byteAmount is 0, we are done writing.
-          JOptionA.Some(())
-        } {
-          addressLimits.ifAddrLeSize(sourceAddr, sizeIntOps.integerLit(0)) {
-            if(valueList.isEmpty) {
-              throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
-            } else {
-              val atom@(value, byteSize) = valueList.head
+        var targetAddr = targetAddr0
+        var sourceAddr = sourceAddr0
+        var byteAmount = byteAmount0
+        var result = JOptionA.Some[Unit](())
 
-              write(key, targetAddr, StoredBytes(List(atom), byteOrder)).flatMap(_ =>
-                init(
-                  key = key,
-                  targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr),
-                  sourceAddr = sourceAddr,
-                  byteAmount = sizeIntOps.sub(byteAmount, sizeIntOps.integerLit(byteSize)),
-                  dataBytes = StoredBytes(valueList.tail, byteOrder)
-                )
-              ).asInstanceOf[JOptionA[Unit]]
-            }
-          }.orElseAndThen[JOptionA[Unit]] {
-            // if sourceAddr > 0
-            if (valueList.isEmpty) {
-              throw IllegalArgumentException(s"Memory.Init: Need to write $byteAmount of bytes, but ran out of bytes to write: $dataBytes")
-            } else {
-              val atom@(_, byteSize) = valueList.head
-              init(
-                key = key,
-                targetAddr = targetAddr,
-                sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr),
-                byteAmount = byteAmount,
-                dataBytes = StoredBytes(valueList.tail, byteOrder)
-              ).asInstanceOf[JOptionA[Unit]]
-            }
-          } { opt => opt }
+        for(atom@(value,byteSize) <- valueList) {
+          addressLimits.ifSizeLeLimit(byteAmount, sizeIntOps.integerLit(0)) {
+            // if byteAmount is 0, we are done writing.
+          } {
+            addressLimits.ifAddrLeSize(sourceAddr, sizeIntOps.integerLit(0)) {
+              result = Join(result, write(key, targetAddr, StoredBytes(List(atom), byteOrder)).asInstanceOf[JOptionA[Unit]]).get
+              targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr)
+              byteAmount = sizeIntOps.sub(byteAmount, sizeIntOps.integerLit(byteSize))
+            }.orElseAndThen[Unit] {
+              // if sourceAddr > 0
+              sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr)
+            } { opt => opt }
+          }
         }
+
+        result
 
       case bs: ReadBytes[Val] => throw IllegalArgumentException(s"Expected StoredBytes, but got $bs")
 

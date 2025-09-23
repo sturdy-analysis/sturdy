@@ -2,7 +2,7 @@ package sturdy.apron
 
 import apron.*
 import gmp.{Mpq, Mpz}
-import sturdy.apron.ApronExpr.topInterval
+import sturdy.apron.ApronExpr.{mpqScalar, topInterval}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
@@ -134,6 +134,44 @@ enum ApronExpr[Addr, Type]:
         throw new IllegalArgumentException(s"Exception while converting ApronExpr $expr with environment $env", exc)
     }
 
+  def simplify: ApronExpr[Addr, Type] =
+    this match
+      // lit1 ⊕ lit2 ~> |lit1⊕lit2|
+      case Binary(op, Constant(l2: DoubleScalar, sp2, tpe2), Constant(l3: DoubleScalar, sp3, tpe3), rdt1, rdd1, sp1, tpe1)
+        if(tpe1 == tpe2 && tpe2 == tpe3 && sp1 == sp2 && sp2 == sp3) =>
+        evaluateLiterals(op, l2, l3).map(ApronExpr.floatConstant(_, sp1, tpe1)).getOrElse(this)
+      // (e1 ⊕ lit1) ⊕ lit2 ~> e1 ⊕ |lit1⊕lit2|
+      case Binary(op1, Binary(op2, e2, Constant(l3: DoubleScalar, sp3, tpe3), rdt2, rdd2, sp2, tpe2), Constant(l4: DoubleScalar, sp4, tpe4), rdt1, rdd1, sp1, tpe1)
+        if (op1 == op2 && rdt1 == rdt2 && rdd1 == rdd2 && sp1 == sp2 && sp2 == sp3 && sp3 == sp4 && tpe1 == tpe2 && tpe2 == tpe3 && tpe3 == tpe4) =>
+        evaluateLiterals(op1, l3, l4).map(lit =>
+          Binary(op1, e2, ApronExpr.floatConstant(lit, sp1, tpe1), rdt1, rdd1, sp1, tpe1)
+        ).getOrElse(this)
+      case _ =>
+        this
+
+  private inline def evaluateLiterals(op: BinOp, l1: DoubleScalar, l2: DoubleScalar): Option[Scalar] =
+    op match {
+      case BinOp.Add => isPrecise(BigDecimal(l1.get) + BigDecimal(l2.get))
+      case BinOp.Sub => isPrecise(BigDecimal(l1.get) - BigDecimal(l2.get))
+      case BinOp.Mul => isPrecise(BigDecimal(l1.get) * BigDecimal(l2.get))
+      case BinOp.Div =>
+        if(l2.get == 0)
+          None
+        else
+          isPrecise(BigDecimal(l1.get) / BigDecimal(l2.get))
+      case BinOp.Mod => isPrecise(BigDecimal(l1.get) % BigDecimal(l2.get))
+      case BinOp.Pow =>
+        if(l2.get == l2.get.toInt)
+          isPrecise(BigDecimal(l1.get).pow(l2.get.toInt))
+        else
+          None
+    }
+
+  private def isPrecise(b: BigDecimal): Option[Scalar] =
+    if (b.isExactDouble)
+      Some(DoubleScalar(b.doubleValue))
+    else
+      None
 
 object ApronExpr:
   inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Integer, _type)
@@ -173,7 +211,23 @@ object ApronExpr:
       m
   inline def scalar(f: Float): Scalar = new DoubleScalar(f)
   inline def scalar(d: Double): Scalar = new DoubleScalar(d)
+  def scalar(f: BigDecimal): Scalar =
+    val d = new DoubleScalar(f.doubleValue())
+    val m = mpqScalar(f)
+    if(d.isEqual(m))
+      d
+    else
+      m
 
+  private inline def mpqScalar(f: BigDecimal): MpqScalar =
+    if(f.scale <= 0)
+      new MpqScalar(new Mpq(f.bigDecimal.toBigInteger, BigInteger.ONE))
+    else {
+      val denominator = BigInteger.TEN.pow(f.scale)
+      val numerator = f.bigDecimal.unscaledValue()
+      val d = numerator.gcd(denominator)
+      new MpqScalar(numerator.divide(d), denominator.divide(d))
+    }
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, FloatSpecials.Integer, tpe)

@@ -37,7 +37,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
   override def afterAll(): Unit =
     csvWriter.close()
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fasta.wasm")).sorted.foreach { p =>
     test(s"${p.getFileName}") {
       val module = Parsing.fromBinary(p)
 

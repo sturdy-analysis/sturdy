@@ -501,6 +501,23 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(wasmOps.f64ops.pow(wasmOps.f64ops.floatingLit(2), exponent))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected f64 as arguments to exp2, but got $args")
+      case "fwrite" =>
+        args match
+          case List(data@Num(Int32(_)), Num(Int32(size)), c@Num(Int32(count)), Num(Int32(stream))) =>
+            val (l,h) = apronState.getIntInterval(count.asNumExpr)
+            if(l == h) {
+              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(data), l)
+              println(s"fwrite($data, $size, $count, $stream) = $bytes")
+            } else {
+              println(s"fwrite($data, $size, $count, $stream)")
+            }
+            List(c)
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
+      case "strlen" =>
+        args match
+          case List(Num(Int32(str))) => ???
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(_))) =>

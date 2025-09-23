@@ -44,14 +44,12 @@ trait RelationalMemory extends RelationalValues:
             ), size)
         case _ =>
           val expr = addr.asNumExpr
-          val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type)
+          val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type).simplify
           given Join[ApronExpr[VirtAddr, Type]] = apronState.join
           NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
             f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
           } {
-            addr match
-              case NumExpr(ApronExpr.Constant(_, floatSpecials, tpe)) => ApronExpr.Constant(apronState.getInterval(resAddr), floatSpecials, tpe)
-              case _ => resAddr
+            resAddr
           })
     }
 

@@ -40,13 +40,13 @@ trait RelationalBaseIntegerOps
   given defaultResolveState: ResolveState = ResolveState.Internal
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intAdd(v1, v2))
+    handleOverflow(intAdd(v1, v2)).simplify
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intSub(v1, v2))
+    handleOverflow(intSub(v1, v2)).simplify
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intMul(v1, v2))
+    handleOverflow(intMul(v1, v2)).simplify
 
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -214,24 +214,17 @@ trait RelationalBaseIntegerOps
   def handleOverflow(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     val sMin = signedMinValue(v._type.byteSize)
     val sMax = signedMaxValue(v._type.byteSize)
-    val uMin = unsignedMinValue(v._type.byteSize)
-    val uMax = unsignedMaxValue(v._type.byteSize)
-
-    def inSignedRange(v: ApronExpr[Addr, Type]) =
-      And(Constraint(le(lit(sMin, v._type), v)), Constraint(le(v, lit(sMax, v._type))))
+    val inSignedRange = And(Constraint(le(lit(sMin, v._type), v)), Constraint(le(v, lit(sMax, v._type))))
 
     overflowHandling match
       case OverflowHandling.WrapAround =>
-        val fromType = v._type
-
-
-        apronState.ifThenElse(inSignedRange(v)) {
+        apronState.ifThenElse(inSignedRange) {
           v
         } {
-          constant(ApronExpr.topInterval, fromType)
+          constant(ApronExpr.topInterval, v._type)
         }
       case OverflowHandling.Fail =>
-        apronState.ifThenElse(inSignedRange(v)) {
+        apronState.ifThenElse(inSignedRange) {
           v
         } {
           Failure(IntegerOverflow, s"$v overflows bounds [${sMin},${sMax}]")
@@ -239,7 +232,6 @@ trait RelationalBaseIntegerOps
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     interpretSignedAsUnsigned(v, v._type.byteSize)
-
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type], fromNumBytes: Int): ApronExpr[Addr, Type] =
     val uMax = unsignedMaxValue(fromNumBytes)
