@@ -144,6 +144,16 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
         else
           ???
 
+      override def typeOf(v: RefValue): ReferenceType =
+        if v.isActual then
+          val refVal = v.get
+          refVal match
+            case AbstractReferenceValue.maybeNullObject(obj, _) => obj.cls.thisType
+            case AbstractReferenceValue.maybeNullArray(array, _) => array.arrayType
+            case AbstractReferenceValue.NullValue() => ??? // TODO
+        else
+          ??? // TODO
+
     given intSizeOps: SizeOps[I32, Bool] with
       override def is32Bit(v: I32): Bool = Topped.Actual(true)
 

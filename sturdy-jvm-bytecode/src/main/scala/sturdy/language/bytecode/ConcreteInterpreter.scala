@@ -94,6 +94,12 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.NullValue() =>
         true
 
+    // null is currently not supported since java lacks a bottom type we could use here
+    override def typeOf(v: RefValue): ReferenceType = v match
+      case ConcreteRefValues.Object(_, cls, _) => cls.thisType
+      case ConcreteRefValues.nonNullArray(_, _, arrayType, _) => arrayType
+      case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null") 
+
     @tailrec
     private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
       case c: ClassType =>

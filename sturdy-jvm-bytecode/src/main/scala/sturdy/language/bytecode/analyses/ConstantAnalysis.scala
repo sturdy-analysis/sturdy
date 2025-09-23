@@ -15,7 +15,7 @@ import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
-import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
+import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter, abstractions}
 import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, ConstantObjects, Exceptions, InvokeType, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
 import sturdy.values.{Join, MaybeChanged, Topped, given}
@@ -124,6 +124,16 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
                 Topped.Actual(false)
         else
           ???
+
+      override def typeOf(v: RefValue): ReferenceType =
+        if v.isActual then
+          val refVal = v.get
+          refVal match
+            case AbstractReferenceValue.maybeNullObject(obj, _) => obj.cls.thisType
+            case AbstractReferenceValue.maybeNullArray(array, _) => array.arrayType
+            case AbstractReferenceValue.NullValue() => ??? // TODO
+        else
+          ??? // TODO
 
     given intSizeOps: SizeOps[I32, Bool] with
       override def is32Bit(v: I32): Bool = Topped.Actual(true)

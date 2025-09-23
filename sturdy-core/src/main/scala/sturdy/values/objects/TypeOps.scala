@@ -5,6 +5,7 @@ import sturdy.values.integer.NumericInterval
 
 trait TypeOps[V, TypeRep, B]:
   def instanceOf(v: V, target: TypeRep): B
+  def typeOf(v: V): TypeRep
 
 object TypeOps:
   def instanceOf[V, TypeRep, B](v: V, target: TypeRep)(using ops: TypeOps[V, TypeRep, B]): B =

@@ -281,10 +281,13 @@ trait Interpreter:
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
-      import Value.*
       override def instanceOf(v: Value, check: TypeRep): Value = v match
-        case ReferenceValue(r1) => boolean(TypeOps.instanceOf(r1, check))
-        case _ => ??? // TODO: not implemented
+        case Value.ReferenceValue(r1) => boolean(refTypeOps.instanceOf(r1, check))
+        case _ => ??? // TODO
+
+      override def typeOf(v: Value): TypeRep = v match
+        case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
+        case _ => ??? // TODO
 
     final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
       import Value.*

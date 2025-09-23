@@ -70,7 +70,3 @@ given structuralArray[AID, Addr, AType, ASize]: Structural[Array[AID, Addr, ATyp
 given ArrayEqOps[AID, Addr, AType, V]: EqOps[Array[AID, Addr, AType, V], Boolean] with
   override def equ(v1: Array[AID, Addr, AType, V], v2: Array[AID, Addr, AType, V]): Boolean = v1.aid == v2.aid
   override def neq(v1: Array[AID, Addr, AType, V], v2: Array[AID, Addr, AType, V]): Boolean = v1.aid != v2.aid
-
-class ConcreteArrayTypeOps[AID, Addr, AType, Type, V](f: (AType, Type) => Boolean) extends TypeOps[Array[AID, Addr, AType, V], Type, Boolean]:
-  override def instanceOf(v: Array[AID, Addr, AType, V], target: Type): Boolean = f(v.arrayType, target)
-
