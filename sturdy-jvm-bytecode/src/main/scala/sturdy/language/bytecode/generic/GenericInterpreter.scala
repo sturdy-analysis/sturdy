@@ -451,11 +451,15 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
       // Load and Store Fields opcode 180 - 181
       case GETFIELD(declaringClass, name, fieldType) =>
         val ident = FieldIdent(declaringClass, name, fieldType)
-        // TODO: check whether object is array before these checks
+        val obj = stack.popOrAbort()
+        // typeOps currently can't deal with nulls, so this needs to be checked first
+        branchOpsUnit.boolBranch(objectOps.isNull(obj)) {} {
+          if typeOps.typeOf(obj).isArrayType then
+            except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
+        }
         val field = resolveField(mth.classFile.thisType, ident)
         if field.isStatic then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
-        val obj = stack.popOrAbort()
         val v = objectOps.getField(mth.classFile, obj, ident)
         stack.push(v)
 
