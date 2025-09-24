@@ -43,11 +43,14 @@ import WasmFailure.*
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
+import sturdy.effect.bytememory.Bytes as BTS
 import sturdy.fix.{DomLogger, Logger}
 
 import java.math.BigInteger
 import scala.collection.immutable.List
 import scala.math
+import scala.util.boundary
+import scala.util.boundary.break
 
 object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddresses, RelationalValues, RelationalMemory, RelationalConvert, ExceptionByTarget, Control:
   final type J[A] = WithJoin[A]
@@ -223,7 +226,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc(rootFrameData)
+      heapAlloc(rootFrameData),
+      moveMemLoc(rootFrameData)
     )
 
     val globals: DecidableSymbolTable[Unit, GlobalAddr, Value] =
@@ -516,7 +520,26 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
       case "strlen" =>
         args match
-          case List(Num(Int32(str))) => ???
+          case List(ptr@Num(Int32(_))) => boundary:
+            val topLen = List(Num(Int32(NumExpr(ApronExpr.top(I32Type)))))
+            val stringSeparator = Interval('\u0000'.toByte, '\u0000'.toByte)
+            val ptrAddr = wasmOps.specialOps.valToAddr(ptr)
+            var len = 0
+            while {
+              val optBytes = memory.read(MemoryAddr(0), wasmOps.addressOffset.addOffsetToAddr(len, ptrAddr), 1).asInstanceOf[JOptionA[BTS[Value]]]
+              len += 1
+              optBytes match
+                case JOptionA.Some(BTS.ReadBytes(Topped.Actual(List((Num(Int32(v)),1))), _)) =>
+                  val iv = apronState.getInterval(v.asNumExpr)
+                  if(iv.isEqual(stringSeparator))
+                    break(List(Num(Int32(NumExpr(ApronExpr.lit(len, I32Type))))))
+                  else if(stringSeparator.isLeq(iv))
+                    break(topLen)
+                  else /* if(!stringSeparator.isLeq(iv)) */
+                    true
+                case _ => break(topLen)
+            } do ()
+            throw new Exception("Unreachable")
           case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "assert" =>
         args match

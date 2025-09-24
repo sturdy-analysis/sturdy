@@ -154,6 +154,9 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       else
         resultAddr
 
+    override def moveAddress(addr: Int, srcOffset: Int, dstOffset: Int): Int =
+      addr - srcOffset + dstOffset
+
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value]) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 

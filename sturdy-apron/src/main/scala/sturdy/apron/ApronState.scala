@@ -133,23 +133,15 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
       case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
       case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
       case cons@ApronCons(op, e1, e2) =>
-        val specials1 = e1.floatSpecials
-        val specials2 = e2.floatSpecials
-        op match
-          case CompareOp.Eq if(!specials1.isBottom || !specials2.isBottom) => Topped.Top
-          case CompareOp.Neq if(specials1.nan || specials2.nan || (specials1.isLeq(specials2) && !specials1.isBottom) || (specials2.isLeq(specials1) && !specials2.isBottom)) => Topped.Top
-          case CompareOp.Le | CompareOp.Lt if(specials1.nan || specials2.nan || specials1.negZero || specials1.posInfinity || specials2.negZero || specials2.negInfinity) => Topped.Top
-          case CompareOp.Ge | CompareOp.Gt if(specials1.nan || specials2.nan || specials1.negZero || specials1.negInfinity || specials2.negZero || specials2.posInfinity) => Topped.Top
-          case _ =>
-            (satisfies(cons),satisfies(cons.negated)) match
-              case (Topped.Actual(true), Topped.Actual(false)) =>
-                 Topped.Actual(true)
-              case (Topped.Actual(false), Topped.Actual(true)) =>
-                Topped.Actual(false)
-              case (Topped.Actual(false), Topped.Actual(false)) =>
-                addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
-              case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
-                Topped.Top
+        (satisfies(cons),satisfies(cons.negated)) match
+          case (Topped.Actual(true), Topped.Actual(false)) =>
+             Topped.Actual(true)
+          case (Topped.Actual(false), Topped.Actual(true)) =>
+            Topped.Actual(false)
+          case (Topped.Actual(false), Topped.Actual(false)) =>
+            addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
+          case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
+            Topped.Top
 
   def makeNonRelational(addr: Addr)(using ResolveState): Unit
 
@@ -238,17 +230,28 @@ class ApronRecencyState
       case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
   inline override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
-    // purposefully throws away changes to the state as they lower precision.
-    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone().asInstanceOf)
-    relationalStore.getBound(physExpr, state1)
+    if(virtExpr.isConstant) {
+      relationalStore.getBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+    } else {
+      val (physExpr, state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone().asInstanceOf)
+      relationalStore.getBound(physExpr, state1)
+    }
 
   inline override def getFloatInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): apron.FloatInterval =
-    val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone.asInstanceOf)
-    relationalStore.getFloatBound(physExpr, state1)
+    if (virtExpr.isConstant) {
+      relationalStore.getFloatBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+    } else {
+      val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone.asInstanceOf)
+      relationalStore.getFloatBound(physExpr, state1)
+    }
 
   inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type])(using ResolveState): Topped[Boolean] =
-    val (optionPhysExpr,state1) = convertExpr.virtToPhysPure(v,getResolveState.clone())
-    optionPhysExpr.map(expr => relationalStore.satisfies(expr,state1)).getOrElse(Topped.Top)
+    if(v.isConstant) {
+      relationalStore.satisfies(v.asInstanceOf[ApronCons[PhysicalAddress[Ctx], Type]], getResolveState)
+    } else {
+      val (optionPhysExpr, state1) = convertExpr.virtToPhysPure(v, getResolveState.clone())
+      optionPhysExpr.map(expr => relationalStore.satisfies(expr, state1)).getOrElse(Topped.Top)
+    }
 
   override def effects: EffectStack = effectStack
 
@@ -328,8 +331,6 @@ class ApronRecencyState
           val (result, state3) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state2)
           (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), phys2, state3))
         }
-//        if(isUnconstraint(result))
-//          makeNonRelational(result)
         // Check if expression has grown happens when combining Abstract1
         Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
       }

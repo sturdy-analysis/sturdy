@@ -72,6 +72,8 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
         f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
       }
 
+    override def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr = BaseType[Int]
+
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
 //    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)

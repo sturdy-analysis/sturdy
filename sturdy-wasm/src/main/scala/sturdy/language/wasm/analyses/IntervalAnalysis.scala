@@ -88,6 +88,9 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         resAddr
       }
 
+    override def moveAddress(addr: NumericInterval[Int], srcOffset: NumericInterval[Int], dstOffset: NumericInterval[Int]): NumericInterval[Int] =
+      NumericInterval(addr.low - srcOffset.low + dstOffset.low, addr.high - srcOffset.high + dstOffset.high)
+
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue

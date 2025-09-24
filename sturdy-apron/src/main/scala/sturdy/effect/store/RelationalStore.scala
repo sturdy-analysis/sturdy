@@ -60,13 +60,16 @@ final class RelationalStore
   override def writePure(powAddr: PowAddr, v: Val, state1: State): State =
     relationalValue.getRelationalExprPure(v, state1) match
       case (Some(exp), state2) =>
-        writePure(powAddr, replaceMissingAddrs(exp, state2), state2)
+        writePurePrivate(powAddr, replaceMissingAddrs(exp, state2), state2)
       case (None, _) =>
         state1.withNonRelationalState{ st =>
           nonRelationalStore.writePure(powAddr, v, st)
         }
 
   def writePure(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type], state0: State): State =
+    writePurePrivate(powAddr, replaceMissingAddrs(physExpr, state0), state0)
+
+  private def writePurePrivate(powAddr: PowAddr, physExpr: ApronExpr[PhysicalAddress[Context], Type], state0: State): State =
     var state = state0
     for(toAddr <- powAddr.iterator) {
       state = writeMetaData(toAddr, physExpr, state)
@@ -195,12 +198,12 @@ final class RelationalStore
 
       // Create non-relational value from address
       val iv = getBound(ApronExpr.addr(addr, tpe), state)
-      val newVal = JOptionA.Some(relationalValue.makeRelationalExpr(ApronExpr.floatConstant(iv, specials, tpe)))
+      val (newVal,state1) = relationalValue.makeRelationalExprPure(ApronExpr.floatConstant(iv, specials, tpe), state); state = state1
 
       // Join value into non-relational store.
       val paddr = PowersetAddr(addr).asInstanceOf[PowAddr]
       val oldVal = nonRelationalStore.readPure(paddr, state.nonRelationalStoreState)._1
-      val resVal = Join(oldVal, newVal).get.toOption.getOrElse(throw new IllegalStateException(s"no value to write at address $addr to the non-relational store"))
+      val resVal = Join(oldVal, JOptionA.Some(newVal)).get.toOption.get
       state = state.withNonRelationalState(st => nonRelationalStore.writePure(paddr, resVal, st))
       val res = nonRelationalStore.read(paddr)
     }
@@ -297,15 +300,60 @@ final class RelationalStore
   def isBottom(state: State): Boolean =
     state.abs1.isBottom(manager)
 
-  def satisfies(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] =
-    val resolvedCons = replaceMissingAddrs(cons, state)
-    if(state.abs1.satisfy(manager, resolvedCons.toApron(state.abs1.getEnvironment)))
-      Topped.Actual(true)
-    else if(manager.wasExact())
-      Topped.Actual(false)
-    else
-      Topped.Top
+  private def satisfies(op: CompareOp, iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
+    op match
+      case CompareOp.Eq =>
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
+          Topped.Actual(true)
+        else if (iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0)
+          Topped.Actual(false)
+        else
+          Topped.Top
 
+      case CompareOp.Neq =>
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0)
+          Topped.Actual(true)
+        else if (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
+          Topped.Actual(false)
+        else
+          Topped.Top
+
+      case CompareOp.Le =>
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) <= 0)
+          Topped.Actual(true)
+        else if (iv2.sup.cmp(iv1.inf) < 0)
+          Topped.Actual(false)
+        else
+          Topped.Top
+
+      case CompareOp.Lt =>
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) < 0)
+          Topped.Actual(true)
+        else if (iv2.sup.cmp(iv1.inf) <= 0)
+          Topped.Actual(false)
+        else
+          Topped.Top
+
+      case CompareOp.Ge => satisfies(CompareOp.Le, iv2, iv1)
+      case CompareOp.Gt => satisfies(CompareOp.Lt, iv2, iv1)
+
+  def satisfies(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] =
+    if(cons.isConstant) {
+      val iv1 = getFloatBound(cons.e1)
+      val iv2 = getFloatBound(cons.e2)
+      satisfies(cons.op, iv1, iv2)
+    } else {
+      val resolvedCons = replaceMissingAddrs(cons, state)
+      manager.setFlagExactWanted(Manager.FUNID_SAT_TCONS, true)
+      if (!cons.e1.floatSpecials.isBottom || !cons.e2.floatSpecials.isBottom)
+        Topped.Top
+      else if (state.abs1.satisfy(manager, resolvedCons.toApron(state.abs1.getEnvironment)))
+        Topped.Actual(true)
+      else if (manager.wasExact())
+        Topped.Actual(false)
+      else
+        Topped.Top
+    }
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type], state: State = _internalState): Interval =
     val env = state.abs1.getEnvironment
@@ -322,10 +370,18 @@ final class RelationalStore
 
 
   private def replaceMissingAddrs(cons: ApronCons[PhysicalAddress[Context], Type], state: State): ApronCons[PhysicalAddress[Context], Type] =
-    cons.mapExprs(expr => replaceMissingAddrs(expr, state))
+    if(cons.isConstant)
+      cons
+    else
+      cons.mapExprs(expr => replaceMissingAddrs(expr, state))
 
   private def replaceMissingAddrs(expr: ApronExpr[PhysicalAddress[Context], Type], state: State): ApronExpr[PhysicalAddress[Context], Type] =
-    expr.mapAddrSame((_var,specials, tpe) => replaceMissingAddrs(_var, specials, tpe, state))
+    if(expr.toString == "cast (TStore8(0,0) @i32_align_switch:26:i32_Old * 1.0)")
+      try { throw IllegalArgumentException() } catch { case _: Exception => }
+    if(expr.isConstant)
+      expr
+    else
+      expr.mapAddrSame((_var,specials, tpe) => replaceMissingAddrs(_var, specials, tpe, state))
 
   private def replaceMissingAddrs(_var: ApronVar[PhysicalAddress[Context]], specials: FloatSpecials, tpe: Type, state1: State): ApronExpr[PhysicalAddress[Context], Type] =
     _var match
@@ -490,7 +546,8 @@ final class RelationalStore
           finalJoinedNonRelationalStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
           joinedAddrTrans <- combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
           joinedAbs1 <- combineAbs1(_leftState.abs1, _rightState.abs1)
-        } yield ((joinedA, RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore)))
+          joinedState = optimize(RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore))
+        } yield (joinedA, joinedState)
       } finally {
         _internalState = snapshotCurrentState
         _leftState = snapshotLeftJoin

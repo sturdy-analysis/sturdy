@@ -82,7 +82,12 @@ enum ApronExpr[Addr, Type]:
       case Binary(op, expr1, expr2, roundingType, roundingDir, specials, _type) =>
         Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, specials, _type)
         
-  def isConstant: Boolean = addrs.isEmpty
+  def isConstant: Boolean =
+    this match
+      case _: ApronExpr.Addr[?,?] => false
+      case _: Constant[?,?] => true
+      case unary: Unary[?,?] => unary.e.isConstant
+      case binary: Binary[?,?] => binary.l.isConstant && binary.r.isConstant
 
   def isTop: Topped[Boolean] =
     this match
@@ -378,15 +383,17 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
 
   override def toString: String = s"($e1 $op $e2)"
 
-  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
+  inline def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
     ApronCons(op, e1.mapAddr(f), e2.mapAddr(f))
 
-  def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
+  inline def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
     ApronCons(op, f(e1), f(e2))
 
-  def addrs: Set[Addr] = e1.addrs ++ e2.addrs
+  inline def addrs: Set[Addr] = e1.addrs ++ e2.addrs
 
-  def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
+  inline def isConstant: Boolean = e1.isConstant && e2.isConstant
+
+  final def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
     case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
     case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
     case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))

@@ -37,3 +37,6 @@ given ToppedAddressLimits: AddressLimits[Topped[Int], Topped[Int], WithJoin] wit
 given ToppedAddressOffset: AddressOffset[Topped[Int]] with
   override def addOffsetToAddr(offset: Int, addr: Topped[Int]): Topped[Int] =
     addr.map(offset + _)
+  override def moveAddress(addr: Topped[Int], srcOffset: Topped[Int], dstOffset: Topped[Int]): Topped[Int] =
+    // addr - srcAddr + dstAddr
+    addr.binary(_ - _, srcOffset).binary(_ + _, dstOffset)

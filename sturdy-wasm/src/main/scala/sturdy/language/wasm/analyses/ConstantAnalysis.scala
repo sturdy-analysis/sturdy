@@ -103,6 +103,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
             Topped.Actual(resultAddr)
           }
 
+    override def moveAddress(addr: Topped[Int], srcOffset: Topped[Int], dstOffset: Topped[Int]): Topped[Int] =
+      addr.binary(_ - _, srcOffset).binary(_ + _, dstOffset)
+
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
