@@ -85,15 +85,15 @@ trait Objects extends Interpreter:
     def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] {
       given hierachy: ClassHierarchy = project.classHierarchy
 
-      override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
+      override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
         val fieldAddrs = vals.map { (v, site, name) =>
           val addr = alloc(site)
           store.write(addr, v)
           (name, addr)
         }.toMap
-        Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, cfs, fieldAddrs), false))
+        Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, c, fieldAddrs), false))
 
-      override def getField(callingClass: ClassFile, ref: RefValue, name: FieldName)(using failure: Failure): Value =
+      override def getField(callingClass: ClassFile, ref: RefValue, identifier: FieldName)(using failure: Failure): Value =
         // TODO: fix
         // import sturdy.data.MakeJoined
         ref match
@@ -103,18 +103,18 @@ trait Objects extends Interpreter:
           case Topped.Actual(AbstractReferenceValue.NullValue()) => throw NullPointerException()
           case Topped.Actual(_) => ???
 
-      override def setField(callingClass: ClassFile, ref: RefValue, name: FieldName, v: Value): JOption[WithJoin, Unit] =
+      override def setField(callingClass: ClassFile, ref: RefValue, identifier: FieldName, v: Value): JOption[WithJoin, Unit] =
         ref match
           case Topped.Top => setFieldNonActual
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
-            if (!obj.fields.contains(name))
+            if (!obj.fields.contains(identifier))
               JOptionA.none
             else
-              store.write(obj.fields(name), v)
+              store.write(obj.fields(identifier), v)
               JOptionA.some(())
           case Topped.Actual(_) => ???
 
-      override def invokeMethod(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
+      override def invokeMethod(context: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
         ref match
           case Topped.Top => topOpalVal(sig.returnType)
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>

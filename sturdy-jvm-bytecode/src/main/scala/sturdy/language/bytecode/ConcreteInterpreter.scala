@@ -137,27 +137,27 @@ object ConcreteInterpreter extends Interpreter:
   (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL]): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
-    override def makeObject(oid: Addr, cfs: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
+    override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
       val fieldAddrs = vals.map { (v, site, name) =>
         val addr = alloc(site)
         store.write(addr, v)
         (name, addr)
       }.toMap
-      ConcreteRefValues.Object(oid, cfs, fieldAddrs)
+      ConcreteRefValues.Object(oid, c, fieldAddrs)
 
-    override def getField(callingClass: ClassFile, obj: RefValue, name: FieldName)(using failure: Failure): Value = obj match
+    override def getField(callingClass: ClassFile, obj: RefValue, identifier: FieldName)(using failure: Failure): Value = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(callingClass.thisType, name)
-        val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))
-        store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
+        val resolvedField = resolveField(callingClass.thisType, identifier)
+        val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
+        store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$identifier not bound"))
       case ConcreteRefValues.NullValue() =>
         except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case ConcreteRefValues.nonNullArray(_, _, _, _) =>
         except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
 
-    override def setField(callingClass: ClassFile, obj: RefValue, name: FieldName, v: Value): JOptionC[Unit] = obj match
+    override def setField(callingClass: ClassFile, obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(callingClass.thisType, name)
+        val resolvedField = resolveField(callingClass.thisType, identifier)
         if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
@@ -167,9 +167,9 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
-    override def invokeMethod(callData: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
+    override def invokeMethod(context: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
-      case ConcreteRefValues.Object(_, cf, _) => callData match
+      case ConcreteRefValues.Object(_, cf, _) => context match
         case InvokeType.Interface =>
           if !hierarchy.isSubtypeOf(cf.thisType, staticClass.thisType) then
             except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))

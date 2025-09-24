@@ -12,13 +12,13 @@ import sturdy.values.ordering.EqOps
 import scala.collection.mutable
 
 
-trait ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, CallData, J[_] <: MayJoin[_]]:
-  def makeObject(oid: OID, cfs: CF, vals: Seq[(V,Site,FieldName)]): OV
-  def getField(callingClass: CF, obj: OV, name: FieldName)(using Failure): V
-  def setField(callingClass: CF, obj: OV, name: FieldName, v: V): JOption[J, Unit]
-  def invokeMethod(callData: CallData)(callingClass: CF, staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V
-  def makeNull(): OV
-  def isNull(obj: OV): B
+trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, MthName, MthSig, Boolean, InvokeContext, J[_] <: MayJoin[_]]:
+  def makeObject(oid: ObjectIdentifier, c: Class, vals: Seq[(Value,Site,FieldIdentifier)]): ObjectValue
+  def getField(callingClass: Class, obj: ObjectValue, identifier: FieldIdentifier)(using Failure): Value
+  def setField(callingClass: Class, obj: ObjectValue, identifier: FieldIdentifier, v: Value): JOption[J, Unit]
+  def invokeMethod(context: InvokeContext)(callingClass: Class, staticClass: Class, mthName: MthName, sig: MthSig, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
+  def makeNull(): ObjectValue
+  def isNull(obj: ObjectValue): Boolean
 
 
 case class Object[OID, CF, FieldAddr, FieldName](oid: OID, cls: CF, fields: Map[FieldName, FieldAddr])
