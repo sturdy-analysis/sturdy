@@ -197,7 +197,7 @@ class ApronRecencyState
         convertExpr.virtToPhys(expr)))
 
   inline override def addConstraints(constraints: ApronCons[VirtualAddress[Ctx], Type]*)(using ResolveState): Unit =
-    val physConstraints = constraints.flatMap(constraint => withState(convertExpr.virtToPhysPure(constraint, _)))
+    val physConstraints = constraints.map(constraint => withState(convertExpr.virtToPhysPure(constraint, _)))
     modifyState(relationalStore.addConstraintsPure(_,physConstraints*))
 
   override def addCondition(condition: ApronBool[VirtualAddress[Ctx], Type])(using ResolveState): Unit =
@@ -249,8 +249,8 @@ class ApronRecencyState
     if(v.isConstant) {
       relationalStore.satisfies(v.asInstanceOf[ApronCons[PhysicalAddress[Ctx], Type]], getResolveState)
     } else {
-      val (optionPhysExpr, state1) = convertExpr.virtToPhysPure(v, getResolveState.clone())
-      optionPhysExpr.map(expr => relationalStore.satisfies(expr, state1)).getOrElse(Topped.Top)
+      val (physCons, state1) = convertExpr.virtToPhysPure(v, getResolveState.clone())
+      relationalStore.satisfies(physCons, state1)
     }
 
   override def effects: EffectStack = effectStack

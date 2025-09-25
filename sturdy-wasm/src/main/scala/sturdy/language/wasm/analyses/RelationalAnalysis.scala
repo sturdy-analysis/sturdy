@@ -422,15 +422,17 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     class ConstrainedInstructionsLogger extends InstructionResultLogger[Info, Value](stack):
       override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
-      def getInfo(value: Value): Info = value match
-        case Num(Int32(v32)) => v32 match
-          case NumExpr(v) => Info.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
-          case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), isConstrained(v))
-          case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
-        case Num(Int64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
-        case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
-        case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))
-        case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
+      def getInfo(value: Value): Info = Profiler.disableMeasurement {
+        value match
+          case Num(Int32(v32)) => v32 match
+            case NumExpr(v) => Info.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
+            case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), isConstrained(v))
+            case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
+          case Num(Int64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
+          case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
+          case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))
+          case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
+      }
 
       private def isConstrained(v: ApronExpr[VirtAddr, Type] | ApronBool[VirtAddr, Type]): IsConstrained =
         if (v match {
