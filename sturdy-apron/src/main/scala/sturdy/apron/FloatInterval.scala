@@ -63,26 +63,29 @@ class FloatInterval(infimum: Scalar, supremum: Scalar, var floatSpecials: FloatS
   def nonSpecialSup: Scalar =
     super.sup()
 
-  def setNegInfinity(b: Boolean): Unit =
+  inline def setNegInfinity(b: Boolean): Unit =
     floatSpecials = floatSpecials.setNegInfinity(b)
 
-  def setNegZero(b: Boolean): Unit =
+  inline def setNegZero(b: Boolean): Unit =
     floatSpecials = floatSpecials.setNegZero(b)
 
-  def setPosInfinity(b: Boolean): Unit =
+  inline def setPosInfinity(b: Boolean): Unit =
     floatSpecials = floatSpecials.setPosInfinity(b)
 
-  def setNaN(b: Boolean): Unit =
+  inline def setNaN(b: Boolean): Unit =
     floatSpecials = floatSpecials.setNaN(b)
 
   override def clone(): FloatInterval =
     new FloatInterval(super.inf().copy(), super.sup().copy(), floatSpecials)
 
-  override def isBottom: Boolean =
+  inline override def isBottom: Boolean =
     isNonSpecialBottom && floatSpecials == FloatSpecials.Bottom
 
   def isNonSpecialBottom: Boolean =
     super.isBottom
+
+  inline def isExactlyNaN: Boolean =
+    floatSpecials == FloatSpecials.NaN && isNonSpecialBottom
 
   inline def onlySpecials: Boolean =
     isNonSpecialBottom

@@ -13,7 +13,7 @@ import sturdy.values.ordering.{EqOps, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.data.{*, given}
-import sturdy.util.Lazy
+import sturdy.util.{Lazy, Profiler}
 import sturdy.values.integer.{IntervalRange, NumericInterval}
 
 import scala.annotation.tailrec
@@ -139,7 +139,10 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
           case (Topped.Actual(false), Topped.Actual(true)) =>
             Topped.Actual(false)
           case (Topped.Actual(false), Topped.Actual(false)) =>
-            addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
+            if(e1.floatSpecials.nan || e2.floatSpecials.nan)
+              Topped.Actual(false)
+            else
+              addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
           case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
             Topped.Top
 
@@ -258,7 +261,7 @@ class ApronRecencyState
   override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, temporaryVariableAllocator)
   override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, temporaryVariableAllocator)
 
-  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = {
+  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = Profiler.addTime("ApronState.combineExpr") {
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
     case (e1, e2) if (getInterval(e1)(using ResolveState.Left).isBottom) =>

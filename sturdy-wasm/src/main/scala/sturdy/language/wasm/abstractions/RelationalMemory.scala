@@ -53,7 +53,13 @@ trait RelationalMemory extends RelationalValues:
           })
     }
 
-    override def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr = ???
+    override def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr =
+      (addr,srcOffset,dstOffset) match {
+        case (NumExpr(addrExpr), NumExpr(srcOffsetExpr), NumExpr(dstOffsetExpr)) =>
+          val tpe = addrExpr._type
+          NumExpr(ApronExpr.intAdd(ApronExpr.intSub(addrExpr, srcOffsetExpr, tpe), dstOffsetExpr, tpe))
+        case _ => throw IllegalArgumentException(s"moveAddress only supports numeric expressions, but got ($addr,$srcOffset,$dstOffset)")
+      }
 
   given RelationalAddressLimits(using apronState: ApronState[VirtAddr, Type]): AddressLimits[Addr, Size, WithJoin] with
     override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =

@@ -122,7 +122,7 @@ class RelationalJoinTest
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe true
-          apronState.effectStack.setState(joinedState.get)
+          apronState.effectStack.setStateNonMonotonically(joinedState.get)
           apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
             (0,20)
       }
@@ -140,7 +140,7 @@ class RelationalJoinTest
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe false
-          apronState.effectStack.setState(joinedState.get)
+          apronState.effectStack.setStateNonMonotonically(joinedState.get)
           apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
             (0, 20)
       }
@@ -158,7 +158,7 @@ class RelationalJoinTest
           val state2 = apronState.effectStack.getState
           val joinedState = apronState.effectStack.join(state1, state2)
           joinedState.hasChanged shouldBe true
-          apronState.effectStack.setState(joinedState.get)
+          apronState.effectStack.setStateNonMonotonically(joinedState.get)
           apronState.getIntInterval(x) shouldBe (0, 20)
           apronState.getIntInterval(ApronExpr.addr(y, Type.IntType)) shouldBe(1, 22)
       }
@@ -182,7 +182,7 @@ class RelationalJoinTest
 
       val state1 = apronState.effectStack.getState
 
-      apronState.effectStack.setState(state0)
+      apronState.effectStack.setStateNonMonotonically(state0)
 
       val z = apronState.recencyStore.alloc(Ctx.Var("z"))
       val zAddr = ApronExpr.addr(z, Type.IntType)
@@ -194,7 +194,7 @@ class RelationalJoinTest
 
       val joinedState = apronState.effectStack.join(state1, state2)
       joinedState.hasChanged shouldBe true
-      apronState.effectStack.setState(joinedState.get)
+      apronState.effectStack.setStateNonMonotonically(joinedState.get)
 
       apronState.getIntInterval(xAddr) shouldBe(0, 20)
       apronState.getIntInterval(yAddr) shouldBe(0, 10)

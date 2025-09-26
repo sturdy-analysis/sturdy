@@ -312,8 +312,8 @@ final class RelationalStore
 
   def satisfies(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] = Profiler.addTime("RelationalStore.satisfies") {
     val resolvedCons = replaceMissingAddrs(cons, state)
-    val iv1 = getFloatBound(resolvedCons.e1)
-    val iv2 = getFloatBound(resolvedCons.e2)
+    val iv1 = getFloatBound(resolvedCons.e1, state)
+    val iv2 = getFloatBound(resolvedCons.e2, state)
     satisfies(resolvedCons.op, iv1, iv2) match
       case res: Topped.Actual[Boolean] => res
       case _: Topped.Top.type =>
@@ -336,31 +336,31 @@ final class RelationalStore
       case CompareOp.Eq =>
         if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
           Topped.Actual(true)
-        else if (iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0)
+        else if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv1.sup().cmp(iv2.inf()) < 0 || iv2.sup().cmp(iv1.inf()) < 0)
           Topped.Actual(false)
         else
           Topped.Top
 
       case CompareOp.Neq =>
-        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) < 0 || iv2.sup.cmp(iv1.inf) < 0)
+        if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv1.sup().cmp(iv2.inf()) < 0 || iv2.sup().cmp(iv1.inf()) < 0)
           Topped.Actual(true)
-        else if (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
+        else if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan || (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2)))
           Topped.Actual(false)
         else
           Topped.Top
 
       case CompareOp.Le =>
-        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) <= 0)
-          Topped.Actual(true)
-        else if (iv2.sup.cmp(iv1.inf) < 0)
-          Topped.Actual(false)
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup().cmp(iv2.inf()) <= 0)
+          { println(s"${iv1.sup()} <= ${iv2.inf()} == ${iv1.sup().cmp(iv2.inf()) <= 0}"); Topped.Actual(true) }
+        else if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv2.sup().cmp(iv1.inf()) < 0)
+          { println(s"${iv2.sup()} <= ${iv1.inf()} == ${iv2.sup().cmp(iv1.inf()) <= 0}"); Topped.Actual(false) }
         else
           Topped.Top
 
       case CompareOp.Lt =>
-        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup.cmp(iv2.inf) < 0)
-          Topped.Actual(true)
-        else if (iv2.sup.cmp(iv1.inf) <= 0)
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan || iv1.sup().cmp(iv2.inf()) < 0)
+          { println(s"${iv1.sup()} <= ${iv2.inf()} == ${iv1.sup().cmp(iv2.inf()) <= 0}"); Topped.Actual(true) }
+        else if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv2.sup().cmp(iv1.inf()) <= 0)
           Topped.Actual(false)
         else
           Topped.Top
@@ -425,36 +425,24 @@ final class RelationalStore
     _internalState.copy(abs1 = copyAbstract1(_internalState.abs1))
 
   override def setState(olderState: State): Unit = Profiler.addTime("RelationalStore.setState") {
-    // This ensures that old variables are never forgotten.
+    // Prioritize recent variables from olderState, but do not forget about old variables in _internalState.
+    // To do this, we remove all recent variables in olderState from _internalState and then widen _internalState with olderState.
 
-    val beforeState = _internalState
-
-    for((ctx,internalRegion) <- _internalState.addressTranslationState.mapping) {
-      if(olderState.addressTranslationState.mapping.contains(ctx)) {
-        // Context `ctx` occurs in `olderState` and `internalState`.
-        // Hence, there is a conflict between internalState[PhysicalAddress(ctx, Recent)] and olderState[PhysicalAddress(ctx, Recent)].
-        // To avoid loosing precision when setting the state, ensure that recent variables in olderState have priority over internalState.
-
-        _internalState =
-          setRegion(ctx,
-            RecencyRegion(
-              recent = BitSet.empty,
-              old = internalRegion.recent ++ internalRegion.old,
-              failed = internalRegion.failed
-            ),
-            _internalState)
-
-        _internalState =
-          movePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)).asInstanceOf[PowAddr],
-            PowersetAddr(PhysicalAddress(ctx, Recency.Old)).asInstanceOf[PowAddr],
-            _internalState)
+    _internalState = _internalState.withNonRelationalState(nonRelationalStoreState =>
+      nonRelationalStoreState.filter {
+        case (phys@PhysicalAddress(_,Recency.Recent), _) => ! olderState.nonRelationalStoreState.contains(phys)
+        case _ => true
       }
-    }
+    )
+    _internalState.abs1.forget(manager, _internalState.abs1.getEnvironment.getVars.filter {
+      case _var@ApronVar(PhysicalAddress(_,Recency.Recent)) => ! olderState.abs1.getEnvironment.hasVar(_var)
+      case _ => true
+    }, false)
 
     // Then widen the `_internalState` into the `olderState`.
     _internalState = widen(olderState, _internalState).get
 
-    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
+//    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
     assertVirtualAddressesIncludedIn(olderState.addressTranslationState, _internalState.addressTranslationState)
   }
 
@@ -539,31 +527,32 @@ final class RelationalStore
 
   def combineRelationalStoreState[A,W <: Widening](using combineA: Combine[A,W], combineAddrTrans: Combine[AddressTranslationState[Context], W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[(A,State), W] =
     (s1: (A,State), s2: (A,State)) =>
-//      Profiler.addTime("RelationalStoreState.combine") {
-      val snapshotCurrentState = _internalState
-      val snapshotLeftJoin = _leftState
-      val snapshotRightJoin = _rightState
-      try {
-        _internalState = null
-        _leftState = s1._2.clone
-        _rightState = s2._2.clone
+      Profiler.addTime("RelationalStoreState.combine") {
+        val snapshotCurrentState = _internalState
+        val snapshotLeftJoin = _leftState
+        val snapshotRightJoin = _rightState
+        try {
+          _internalState = null
+          _leftState = s1._2.clone
+          _rightState = s2._2.clone
 
-        // Joining A and the non-relational store can have side-effects on `_leftState`, `_rightState`.
-        // To avoid loosing these updates, we join the non-relational store a second time.
-        for {
-          joinedA <- combineA(s1._1, s2._1)
-          preJoinedNonRelStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
-          finalJoinedNonRelationalStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
-          joinedAddrTrans <- combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
-          joinedAbs1 <- combineAbs1(_leftState.abs1, _rightState.abs1)
-          joinedState = optimize(RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore))
-        } yield (joinedA, joinedState)
-      } finally {
-        _internalState = snapshotCurrentState
-        _leftState = snapshotLeftJoin
-        _rightState = snapshotRightJoin
+          // Joining A and the non-relational store can have side-effects on `_leftState`, `_rightState`.
+          // To avoid loosing these updates, we join the non-relational store a second time.
+          for {
+            joinedA <- combineA(s1._1, s2._1)
+            preJoinedNonRelStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
+            finalJoinedNonRelationalStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
+            joinedAddrTrans <- combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
+            joinedAbs1 <- combineAbs1(_leftState.abs1, _rightState.abs1)
+            joinedState = RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore)
+//              optimize(RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore))
+          } yield (joinedA, joinedState)
+        } finally {
+          _internalState = snapshotCurrentState
+          _leftState = snapshotLeftJoin
+          _rightState = snapshotRightJoin
+        }
       }
-//      }
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new RelationalStoreComputationJoiner[A])
   private final class RelationalStoreComputationJoiner[A] extends ComputationJoiner[A]:

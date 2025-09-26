@@ -29,7 +29,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
   )
 
   val csvWriter = {
-    val writer = CSVWriter.open(File("relational-test-script.csv"))
+    val writer = CSVWriter.open(File("relational-precision-test.csv"))
     writer.writeRow(List("filename", "relational_more_precise", "non_relational_more_precise", "same_precision", "incomparable", "total_compared", "not_compared"))
     writer
   }
@@ -37,7 +37,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
   override def afterAll(): Unit =
     csvWriter.close()
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fasta.wasm")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.foreach { p =>
     test(s"${p.getFileName}") {
       val module = Parsing.fromBinary(p)
 
@@ -47,6 +47,8 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       relationalAnalysis.failure.fallible(
         relationalAnalysis.invokeExported(moduleInst, funcName, List.empty)
       )
+      Profiler.printLastMeasured()
+      Profiler.reset()
 
       val nonRelationalAnalysis = RelationalAnalysis.Instance(Polka(true),FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = false))
       val nonRelationalInfoLogger = nonRelationalAnalysis.constrainedInstructionsLogger
@@ -54,6 +56,8 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       nonRelationalAnalysis.failure.fallible(
         nonRelationalAnalysis.invokeExported(moduleInst, funcName, List.empty)
       )
+      Profiler.printLastMeasured()
+      Profiler.reset()
 
       val relationalInfos = relationalInfoLogger.getAllInstructionInfos
       val nonRelationalInfos = nonRelationalInfoLogger.getAllInstructionInfos
@@ -69,6 +73,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
           if(infos1.length != infos2.length)
             throw IllegalStateException(s"List of infos $infos1 and $infos2 for $loc do not have the same length")
           else {
+            totalComparedInstructions += 1
             PartialOrder[List[Info]].tryCompare(infos1, infos2) match
               case Some(n) =>
                 if (n == 0)
@@ -95,7 +100,5 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
           (relationalInfos.keySet ++ nonRelationalInfos.keySet).size - totalComparedInstructions
         )
       )
-
-      Profiler.reset()
     }
   }

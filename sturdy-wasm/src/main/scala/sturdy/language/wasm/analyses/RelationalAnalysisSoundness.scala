@@ -9,14 +9,15 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.{*, given}
 import sturdy.effect.symboltable.{*, given}
+import sturdy.util.Profiler
 import sturdy.{*, given}
 
 object RelationalAnalysisSoundness {
   given defaultResolveState: ResolveState = ResolveState.Internal
 
   given valuesSound(using apronState: ApronState[VirtAddr, Type]): Soundness[ConcreteInterpreter.Value, RelationalAnalysis.Value] with
-    override def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound =
-      (c,a) match
+    override def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound = Profiler.disableMeasurement {
+      (c, a) match
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(ci32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int32(vi32))) => Soundness.isSound(ci32, vi32.asNumExpr)
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(ci64)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int64(vi64))) => Soundness.isSound(ci64, vi64)
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(cf32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(vf32))) => Soundness.isSound(cf32, vf32)
@@ -25,13 +26,15 @@ object RelationalAnalysisSoundness {
         case (ConcreteInterpreter.Value.Vec(cv), RelationalAnalysis.Value.Vec(av)) => Soundness.isSound(cv, av)
         case (_, RelationalAnalysis.Value.TopValue) => IsSound.Sound
         case (_, _) => IsSound.NotSound(s"abstract value $a with interval does not overapproximate concrete value $c")
+    }
 
   given referencesSound: Soundness[ConcreteInterpreter.Reference, RelationalAnalysis.Reference] with
-    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference, a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]): IsSound =
-      if(a.set.contains(toRelationalAnalysisExternRef(c)))
+    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference, a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]): IsSound = Profiler.disableMeasurement {
+      if (a.set.contains(toRelationalAnalysisExternRef(c)))
         IsSound.Sound
       else
         IsSound.NotSound(s"Abstract reference $a does not contain instance $c")
+    }
 
     private def toRelationalAnalysisExternRef(c: FunctionInstance | ConcreteInterpreter.ExternReference): FunctionInstance | RelationalAnalysis.ExternReference =
       c match
@@ -54,7 +57,7 @@ object RelationalAnalysisSoundness {
       powersetContainsOneSound.isSound(cFun, aFun)
 
   given Soundness[ConcreteInterpreter.Instance, RelationalAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound =
+    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound = Profiler.disableMeasurement {
       import a.given
       import a.tables.given
 
@@ -62,6 +65,7 @@ object RelationalAnalysisSoundness {
       a.stack.operandStackIsSound(c.stack) &&
         // a.memory.memoryIsSound(c.memory) &&   (Top-Memory is trivially sound)
         a.globals.tableIsSound(c.globals) // &&
-        // a.tables.tableIsSound(c.tables) &&
-        // a.callFrame.isSound(c.callFrame)
+      // a.tables.tableIsSound(c.tables) &&
+      // a.callFrame.isSound(c.callFrame)
+    }
 }
