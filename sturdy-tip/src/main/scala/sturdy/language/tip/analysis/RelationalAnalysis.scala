@@ -31,6 +31,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.types.{BaseType, given}
 
 import scala.collection.immutable.BitSet
@@ -139,6 +140,9 @@ object RelationalAnalysis extends Interpreter,
 
       override inline def makeRelationalExpr(expr: ApronExpr[VirtAddr, RelType]): Value =
         Value.IntValue(expr)
+
+      override def getMetaData(v: Value): Option[(FloatSpecials, RelType)] =
+        getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
 
     given StatefullRelationalExprT[Value, PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, AddrCtx, RelType].asInstanceOf
 

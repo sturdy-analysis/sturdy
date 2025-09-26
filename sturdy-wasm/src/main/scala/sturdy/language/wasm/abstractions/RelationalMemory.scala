@@ -93,75 +93,85 @@ trait RelationalMemory extends RelationalValues:
           allocSites.iterator
         case NumExpr(readStart) =>
           val readStartIv = apronState.getIntInterval(readStart)
-          val readStartLow = math.max(0, readStartIv._1)
-          val readStartHigh = math.max(readStartLow, readStartIv._2)
-          val readEnd = ApronExpr.intAdd(readStart, size, readStart._type)
-          val readEndIv = apronState.getIntInterval(readEnd)
-          val readEndLow = math.max(0, readEndIv._1)
-          val readEndHigh = math.max(readEndLow, readEndIv._2)
+          if(readStartIv._1 <= 0 && readStartIv._2 == Integer.MAX_VALUE) {
+            mem.store.iterator.map((physAddr,region) => (physAddr, region, AlignedRead.MaybeAligned))
+          } else {
+            val readStartLow = math.max(0, readStartIv._1)
+            val readStartHigh = math.max(readStartLow, readStartIv._2)
+            val readEnd = ApronExpr.intAdd(readStart, size, readStart._type)
+            val readEndIv = apronState.getIntInterval(readEnd)
+            val readEndLow = math.max(0, readEndIv._1)
+            val readEndHigh = math.max(readEndLow, readEndIv._2)
 
 
-          def regionOverlaps(i: Int, region: MemoryRegion[Addr,Timestamp,Val]) =
-            region.byteSize match
-              case Topped.Top => i < readEndHigh
-              case Topped.Actual(byteSize) =>
-                val regionEnd = i + byteSize
-                readStartLow < regionEnd && regionEnd <= readEndHigh
-
-          val matchingStaticRegions =
-            if(readEndHigh - readStartLow <= 20) {
-              for {
-                i <- math.max(0, readStartLow - 16).until(readEndHigh).iterator;
-                physAddr = PhysicalAddress(HeapCtx.Static(i), Recency.Recent);
-                region <- mem.store.get(physAddr).iterator
-                if (regionOverlaps(i,region))
-              } yield (physAddr, region, alignedRead(readStart, region))
-            } else {
-              for {
-                (physAddr,region) <- mem.store.iterator
-                if (
-                  physAddr.ctx match
-                    case HeapCtx.Static(i) => regionOverlaps(i, region)
-                    case _ => false
-                  )
-              } yield (physAddr, region, alignedRead(readStart, region))
-
-            }
-
-          val staticRegionAtReadStart = mem.store.get(PhysicalAddress(HeapCtx.Static(readStartLow), Recency.Recent))
-          val matchingDynamicRegions = for {
-            (physAddr,region) <- mem.store.iterator
-            if (physAddr match
-              case PhysicalAddress(_: HeapCtx.Dynamic, _) => true
-              case _ => false
-            )
-            if(
-              // Filter out dynamic regions that are certainly overwritten by the
-              // static region at the start of the read.
-              readStartLow == readStartHigh &&
-              staticRegionAtReadStart.exists(staticRegion =>
-                concurrentOrNewerThan(region.timestamp, staticRegion.timestamp)
-              )
-            )
-            if {
-              val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
-
+            def regionOverlaps(i: Int, region: MemoryRegion[Addr, Timestamp, Val]) =
               region.byteSize match
-                case Topped.Top =>
-                  apronState.satisfies(ApronCons.le(regionStart, readEnd)) != Topped.Actual(false)
+                case Topped.Top => i < readEndHigh
                 case Topped.Actual(byteSize) =>
-                  // Check if the **end** of the region overlaps with the read address range.
-                  val regionEnd = ApronExpr.intAdd(regionStart, ApronExpr.lit(byteSize, regionStart._type), regionStart._type)
-                  apronState.satisfies(ApronCons.lt(readStart, regionEnd)) != Topped.Actual(false) && apronState.satisfies(ApronCons.le(regionEnd, readEnd)) != Topped.Actual(false)
-            }
-          } yield((physAddr, region, alignedRead(readStart, region)))
+                  val regionEnd = i + byteSize
+                  readStartLow < regionEnd && regionEnd <= readEndHigh
 
-          matchingStaticRegions ++ matchingDynamicRegions
+            val matchingStaticRegions =
+              if (readEndHigh - readStartLow <= 20) {
+                for {
+                  i <- math.max(0, readStartLow - 16).until(readEndHigh).iterator;
+                  physAddr = PhysicalAddress(HeapCtx.Static(i), Recency.Recent);
+                  region <- mem.store.get(physAddr).iterator
+                  if (regionOverlaps(i, region))
+                } yield (physAddr, region, alignedRead(readStart, region))
+              } else {
+                for {
+                  (physAddr, region) <- mem.store.iterator
+                  if (
+                    physAddr.ctx match
+                      case HeapCtx.Static(i) => regionOverlaps(i, region)
+                      case _ => false
+                    )
+                } yield (physAddr, region, alignedRead(readStart, region))
+
+              }
+
+            val staticRegionAtReadStart = mem.store.get(PhysicalAddress(HeapCtx.Static(readStartLow), Recency.Recent))
+            val matchingDynamicRegions = for {
+              (physAddr, region) <- mem.store.iterator
+              if (physAddr match
+                case PhysicalAddress(_: HeapCtx.Dynamic, _) => true
+                case _ => false
+                )
+              if (
+                // Filter out dynamic regions that are certainly overwritten by the
+                // static region at the start of the read.
+                readStartLow == readStartHigh &&
+                  staticRegionAtReadStart.exists(staticRegion =>
+                    concurrentOrNewerThan(region.timestamp, staticRegion.timestamp)
+                  )
+                )
+              if {
+                val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
+
+                region.byteSize match
+                  case Topped.Top =>
+                    apronState.assert(ApronCons.le(regionStart, readEnd)) != Topped.Actual(false)
+                  case Topped.Actual(byteSize) =>
+                    // Check if the **end** of the region overlaps with the read address range.
+                    val regionEnd = ApronExpr.intAdd(regionStart, ApronExpr.lit(byteSize, regionStart._type), regionStart._type)
+                    apronState.assert(
+                      ApronBool.And(
+                        ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
+                        ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
+                      )
+                    ) != Topped.Actual(false)
+              }
+            } yield ((physAddr, region, alignedRead(readStart, region)))
+
+            matchingStaticRegions ++ matchingDynamicRegions
+          }
+
 
     private inline def alignedRead[Timestamp,Val](readStart: ApronExpr[VirtAddr, Type], memoryRegion: MemoryRegion[Addr, Timestamp, Val]): AlignedRead =
       memoryRegion.startAddr match
         case NumExpr(regionStart) =>
-          apronState.getBoolean(ApronCons.eq(readStart, regionStart)) match
+          apronState.assert(ApronCons.eq(readStart, regionStart)) match
             case Topped.Actual(true) => AlignedRead.Aligned
             case _ => AlignedRead.MaybeAligned
         case _: AllocationSites => AlignedRead.MaybeAligned

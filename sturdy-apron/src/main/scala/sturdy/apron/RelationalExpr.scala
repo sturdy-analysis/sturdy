@@ -17,10 +17,12 @@ trait StatefullRelationalExpr[Val, Addr, Type]:
 trait StatelessRelationalExpr[Val, Addr, Type]:
   def getRelationalExpr(v: Val): Option[ApronExpr[Addr,Type]]
   def makeRelationalExpr(expr: ApronExpr[Addr,Type]): Val
+  def getMetaData(v: Val): Option[(FloatSpecials, Type)]
 
 given RelationalValueApronExpr[Addr, Type]: StatelessRelationalExpr[ApronExpr[Addr,Type], Addr, Type] with
   override inline def getRelationalExpr(v: ApronExpr[Addr, Type]): Option[ApronExpr[Addr, Type]] = Some(v)
   override inline def makeRelationalExpr(expr: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = expr
+  override def getMetaData(v: ApronExpr[Addr, Type]): Option[(FloatSpecials, Type)] = Some((v.floatSpecials,v._type))
 
 given RelationalValueApronExprPhysicalAddress[Val, Ctx, Type]
   (using
@@ -42,7 +44,7 @@ given RelationalValueApronExprPhysicalAddress[Val, Ctx, Type]
     (stateless.makeRelationalExpr(virtExpr), state2)
 
   override def getMetaData(v: Val): Option[(FloatSpecials, Type)] =
-    stateless.getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
+    stateless.getMetaData(v)
 
   override def withInternalState[A](f: State => (A, State)): A =
     convertExpr.value.recencyStore.withInternalState(s => f(s.asInstanceOf[State]).asInstanceOf[(A,convertExpr.value.recencyStore.State)])

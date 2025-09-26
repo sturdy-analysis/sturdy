@@ -150,7 +150,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, PowVAddr, NumericI
       store.write(PowVirtualAddress(a2), NumericInterval(1, 2))
     } {
       a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
-      store.read(PowVirtualAddress(a3)) should be(JOptionA.Some(NumericInterval(3,4)))
+      store.read(PowVirtualAddress(a1)) should be(JOptionA.Some(NumericInterval(3,4)))
 
       a3 = store.alloc(ctx1)
       store.write(PowVirtualAddress(a3), NumericInterval(5, 6))
@@ -160,7 +160,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, PowVAddr, NumericI
       store.read(PowVirtualAddress(a1)) should be(JOptionA.Some(NumericInterval(3,4)))
 
       // a2 should not be bound to a physical address, since it was allocated in the other branch.
-      an [Exception] should be thrownBy a2.physical
+      an [Error] should be thrownBy a2.physical
 
       store.free(PowVirtualAddress(a3))
 
@@ -308,15 +308,12 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, PowVAddr, NumericI
     store.write(PowVirtualAddress(a3), NumericInterval(3, 4))
     val state2 = (store.getState, store.addressTranslation.getState)
     val joinStore = store.join(state1._1, state2._1)
-    val joinAddrTrans = store.addressTranslation.join(state1._2.asInstanceOf, state2._2.asInstanceOf)
-    store.setState(joinStore.get)
-    store.addressTranslation.setState(joinAddrTrans.get.asInstanceOf)
+    store.setStateNonMonotonically(joinStore.get)
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
     a2.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent), PhysicalAddress(ctx1, Old))
     a3.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Recent))
     joinStore.hasChanged should be(false)
-    joinAddrTrans.hasChanged should be(false)
   }
 
   test("Example 1 in \"Revisiting Recency Abstraction for JavaScript\" with Addr = AllocSite x Recency") {

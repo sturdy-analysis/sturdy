@@ -5,6 +5,7 @@ import com.github.tototoshi.csv.CSVWriter
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import sturdy.control.PrintingControlObserver
 import sturdy.fix.StackConfig
 import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
@@ -43,6 +44,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
 
       val relationalAnalysis = RelationalAnalysis.Instance(Polka(true),FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = true))
       val relationalInfoLogger = relationalAnalysis.constrainedInstructionsLogger
+      relationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       var moduleInst = relationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
       relationalAnalysis.failure.fallible(
         relationalAnalysis.invokeExported(moduleInst, funcName, List.empty)
@@ -52,6 +54,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
 
       val nonRelationalAnalysis = RelationalAnalysis.Instance(Polka(true),FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = false))
       val nonRelationalInfoLogger = nonRelationalAnalysis.constrainedInstructionsLogger
+      nonRelationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       moduleInst = nonRelationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
       nonRelationalAnalysis.failure.fallible(
         nonRelationalAnalysis.invokeExported(moduleInst, funcName, List.empty)

@@ -56,7 +56,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     ifThenElse(effects)(condition)(f)(g)
   def ifThenElse[A: Join](effectStack: EffectStack)(condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
     given resolveState: ResolveState = ResolveState.Internal
-    getBoolean(condition) match
+    assert(condition) match
       case Topped.Actual(true) =>
         addCondition(condition)
         f
@@ -80,7 +80,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     ApronExpr.Constant(getInterval(expr), specials = expr.floatSpecials, tpe = expr._type)
 
   def toNonRelational(cond: ApronBool[Addr,Type])(using ResolveState): ApronBool[Addr,Type] =
-    ApronBool.Constant(getBoolean(cond))
+    ApronBool.Constant(assert(cond))
 
   def getInterval(expr: ApronExpr[Addr, Type])(using ResolveState): Interval
 
@@ -124,27 +124,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     iv.inf().toDouble(upper, Mpfr.RNDZ)
     (lower(0), upper(0))
 
-  def satisfies(v: ApronCons[Addr,Type])(using ResolveState): Topped[Boolean]
-
-  def getBoolean(v: ApronBool[Addr, Type] | ApronCons[Addr,Type])(using ResolveState): Topped[Boolean] =
-    v match
-      case ApronBool.Constraint(cons) => getBoolean(cons)
-      case ApronBool.Constant(b) => b
-      case ApronBool.And(e1, e2) => summon[BooleanOps[Topped[Boolean]]].and(getBoolean(e1), getBoolean(e2))
-      case ApronBool.Or(e1, e2)  => summon[BooleanOps[Topped[Boolean]]].or(getBoolean(e1), getBoolean(e2))
-      case cons@ApronCons(op, e1, e2) =>
-        (satisfies(cons),satisfies(cons.negated)) match
-          case (Topped.Actual(true), Topped.Actual(false)) =>
-             Topped.Actual(true)
-          case (Topped.Actual(false), Topped.Actual(true)) =>
-            Topped.Actual(false)
-          case (Topped.Actual(false), Topped.Actual(false)) =>
-            if(e1.floatSpecials.nan || e2.floatSpecials.nan)
-              Topped.Actual(false)
-            else
-              addCondition(ApronBool.Constant(Topped.Actual(false))); throw Error();
-          case (Topped.Actual(true), Topped.Actual(true)) | (Topped.Top, _) | (_, Topped.Top) =>
-            Topped.Top
+  def assert(v: ApronBool[Addr, Type] | ApronCons[Addr,Type])(using ResolveState): Topped[Boolean]
 
   def makeNonRelational(addr: Addr)(using ResolveState): Unit
 
@@ -232,6 +212,12 @@ class ApronRecencyState
       case ApronBool.And(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
       case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
+  def getValue(addr: VirtualAddress[Ctx])(using ResolveState): JOptionA[Val] =
+    withState{ state =>
+      val phys = relationalStore.physicalAddresses(addr.ctx, addr.n, state)
+      relationalStore.readPure(phys, state)
+    }
+
   inline override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
     if(virtExpr.isConstant) {
       relationalStore.getBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
@@ -248,13 +234,31 @@ class ApronRecencyState
       relationalStore.getFloatBound(physExpr, state1)
     }
 
-  inline override def satisfies(v: ApronCons[VirtualAddress[Ctx], Type])(using ResolveState): Topped[Boolean] =
-    if(v.isConstant) {
-      relationalStore.satisfies(v.asInstanceOf[ApronCons[PhysicalAddress[Ctx], Type]], getResolveState)
-    } else {
-      val (physCons, state1) = convertExpr.virtToPhysPure(v, getResolveState.clone())
-      relationalStore.satisfies(physCons, state1)
-    }
+  override def assert(v: ApronBool[VirtualAddress[Ctx], Type] | ApronCons[VirtualAddress[Ctx], Type])(using ResolveState): Topped[Boolean] =
+    v match
+      case cons: ApronCons[VirtualAddress[Ctx], Type] =>
+        if (cons.isConstant) {
+          relationalStore.assert(cons.asInstanceOf[ApronCons[PhysicalAddress[Ctx], Type]], getResolveState)
+        } else {
+          val (physCons, state1) = convertExpr.virtToPhysPure(cons, getResolveState.clone())
+          relationalStore.assert(physCons, state1)
+        }
+      case ApronBool.Constraint(cons) => assert(cons)
+      case ApronBool.Constant(b) => b
+      case ApronBool.And(e1, e2) =>
+        assert(e1) match
+          case _false@Topped.Actual(false) => _false
+          case Topped.Actual(true) => assert(e2)
+          case _top@Topped.Top => assert(e2) match
+            case _false@Topped.Actual(false) => _false
+            case _ => _top
+      case ApronBool.Or(e1, e2) =>
+        assert(e1) match
+          case _true@Topped.Actual(true) => _true
+          case Topped.Actual(false) => assert(e2)
+          case _top@Topped.Top => assert(e2) match
+            case _true@Topped.Actual(true) => _true
+            case _ => _top
 
   override def effects: EffectStack = effectStack
 

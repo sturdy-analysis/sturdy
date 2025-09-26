@@ -88,7 +88,7 @@ final class AlignedMemory
             case b =>
               topBytes
           }
-          .takeAtMost(1, orElse = topBytes)
+          .atMost(10, orElse = topBytes)
           .reduce(Join(_,_).get)
 
     readBytes.byteSize match
@@ -104,7 +104,7 @@ final class AlignedMemory
         JOptionA.NoneSome(ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top))
 
   extension[A](iter: Iterator[A])
-    def takeAtMost(n: Int, orElse: A): Iterator[A] =
+    def atMost(n: Int, orElse: A): Iterator[A] =
       new AbstractIterator[A]:
         var taken = 0
         override def next(): A =

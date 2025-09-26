@@ -1,6 +1,6 @@
 package sturdy.util
 
-final class Lazy[T](arg: => T):
+final class Lazy[+T](arg: => T):
   lazy val value: T = arg
   def force: T = value
 

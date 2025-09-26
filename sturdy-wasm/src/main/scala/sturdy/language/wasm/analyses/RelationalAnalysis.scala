@@ -97,13 +97,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val expr = ix.asInt32.asNumExpr
-      val (l,h) = apronState.getIntInterval(expr)
-      val elems = for (i <- l.max(0) to h.min(vec.size - 1))
-        yield vec(i)
+      val elems = vec.indices.filter(i =>
+        apronState.assert(ApronCons.eq(expr, ApronExpr.lit(i, I32Type))) != Topped.Actual(false)
+      ).map(vec(_))
       if (elems.isEmpty) {
         // no elems in range
         JOptionPowerset.None()
-      } else if (h < vec.size) {
+      } else if (elems.size < vec.size) {
         // all indices in range
         JOptionPowerset.Some(Powerset(elems.toSet))
       } else {
@@ -157,7 +157,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
     var apronState: ApronRecencyState[AddrCtx, Type, Value] = null
-    given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+    given Lazy[ApronRecencyState[AddrCtx, Type, Value]] = Lazy(apronState)
     given Lazy[ApronExprConverter[AddrCtx, Type, Value]] = Lazy(exprConverter)
     given Join[ApronExpr[VirtAddr, Type]] = JoinApronExpr[VirtAddr, Type]
     given Widen[ApronExpr[VirtAddr, Type]] = WidenApronExpr[VirtAddr, Type]
@@ -182,6 +182,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case F32Type => Num(Float32(expr))
           case F64Type => Num(Float64(expr))
           case I8Type  => throw IllegalArgumentException("I8 type only allowed in memory")
+
+      override def getMetaData(v: Value): Option[(FloatSpecials, Type)] =
+        v match
+          case Num(_: Int32) => Some((FloatSpecials.Bottom, I32Type))
+          case Num(_: Int64) => Some((FloatSpecials.Bottom, I64Type))
+          case Num(Float32(expr)) => Some((expr.floatSpecials, expr._type))
+          case Num(Float64(expr)) => Some((expr.floatSpecials, expr._type))
+          case Value.Vec(_) => None
+          case Value.Ref(_) => None
+          case Value.TopValue => None
 
     given domLogger: DomLogger[FixIn] = new DomLogger
 
@@ -426,7 +436,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         value match
           case Num(Int32(v32)) => v32 match
             case NumExpr(v) => Info.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
-            case BoolExpr(v) => Info.Boolean(apronState.getBoolean(v), isConstrained(v))
+            case BoolExpr(v) => Info.Boolean(apronState.assert(v), isConstrained(v))
             case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
           case Num(Int64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
           case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))

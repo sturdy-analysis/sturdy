@@ -121,7 +121,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
     val joined = closure.join(state1, state2)
     joined.hasChanged shouldBe true
 
-    closure.setState(joined.get)
+    closure.setStateNonMonotonically(joined.get)
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getInterval(xExpr) shouldBe Interval(0, 15)
@@ -143,7 +143,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
 
     val joinedStates = closure.join(state1, state2)
     joinedStates.hasChanged shouldBe true
-    closure.setState(joinedStates.get)
+    closure.setStateNonMonotonically(joinedStates.get)
 
     var xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getInterval(xExpr) shouldBe Interval(0, 5)

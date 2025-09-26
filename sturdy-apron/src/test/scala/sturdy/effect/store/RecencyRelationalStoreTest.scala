@@ -5,6 +5,7 @@ import sturdy.apron.{ApronExpr, ApronExprConverter, ApronRecencyState, ApronStat
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
 import sturdy.util.{Lazy, lazily}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.{Finite, Widen}
 import sturdy.values.integer.{BaseTypeIntegerOps, NumericInterval, NumericIntervalJoin, NumericIntervalWiden}
 import sturdy.values.references.{*, given}
@@ -44,6 +45,9 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
       iv.sup().toDouble(d, 0)
       val upper = d(0).intValue()
       NumericInterval(lower, upper)
+
+    override def getMetaData(v: Value): Option[(FloatSpecials, Type)] =
+      Some((FloatSpecials.Bottom, BaseType[Int]))
 
   given relationalValue: StatefullRelationalExprT[Value, PAddr, Type, RelationalStoreState[Ctx, Map[PAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, Ctx, Type].asInstanceOf
   val relationalStore: RelationalStore[Ctx, Type, PowPAddr, Value] = new RelationalStore(Map(), man, initialState, Map())

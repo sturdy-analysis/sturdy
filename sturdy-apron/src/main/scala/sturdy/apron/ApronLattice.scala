@@ -47,14 +47,14 @@ object ApronJoins:
 
         val env2_minus_env1 = minus(env2, env1).getVars
         val combinable1 =
-          if (env2_minus_env1.nonEmpty)
+          if (env2_minus_env1.nonEmpty) {
             s1ExtEnv.assignCopy(
               manager,
               env2_minus_env1,
               env2_minus_env1.map(v => ApronExpr.constant(s2ExtEnv.getBound(manager, v), null).toIntern(lce)),
               null
             )
-          else
+          } else
             s1ExtEnv
 
         val env1_minus_env2 = minus(env1, env2).getVars

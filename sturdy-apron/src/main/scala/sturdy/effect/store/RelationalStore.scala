@@ -10,6 +10,7 @@ import sturdy.values.integer.given
 import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, *, given}
 
+import scala.annotation.tailrec
 import scala.collection.immutable.BitSet
 import scala.reflect.ClassTag
 
@@ -311,27 +312,40 @@ final class RelationalStore
     state.abs1.isBottom(manager)
 
   def satisfies(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] = Profiler.addTime("RelationalStore.satisfies") {
+    if (!cons.e1.floatSpecials.isBottom || !cons.e2.floatSpecials.isBottom)
+      Topped.Top
+    else {
+      val resolvedCons = replaceMissingAddrs(cons, state)
+      if(state.abs1.satisfy(manager, resolvedCons.toApron(state.abs1.getEnvironment)))
+        Topped.Actual(true)
+      else if(manager.getFlagExactWanted(Manager.FUNID_SAT_LINCONS) && manager.wasExact())
+        Topped.Actual(false)
+      else
+        Topped.Top
+    }
+  }
+
+  def assert(cons: ApronCons[PhysicalAddress[Context], Type], state: State = _internalState): Topped[Boolean] = Profiler.addTime("RelationalStore.assert") {
     val resolvedCons = replaceMissingAddrs(cons, state)
     val iv1 = getFloatBound(resolvedCons.e1, state)
     val iv2 = getFloatBound(resolvedCons.e2, state)
-    satisfies(resolvedCons.op, iv1, iv2) match
+    assert(resolvedCons.op, iv1, iv2) match
       case res: Topped.Actual[Boolean] => res
       case _: Topped.Top.type =>
         if (!cons.e1.floatSpecials.isBottom || !cons.e2.floatSpecials.isBottom)
           Topped.Top
         else {
-          manager.setFlagExactWanted(Manager.FUNID_BOTTOM, true)
           if (state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
-            Topped.Actual(true)
-          else if (manager.wasExact())
             Topped.Actual(false)
+          else if (state.abs1.meetCopy(manager, resolvedCons.negated.toApron(state.abs1.getEnvironment)).isBottom(manager))
+            Topped.Actual(true)
           else
             Topped.Top
         }
   }
 
-
-  private def satisfies(op: CompareOp, iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
+  @tailrec
+  private def assert(op: CompareOp, iv1: sturdy.apron.FloatInterval, iv2: sturdy.apron.FloatInterval): Topped[Boolean] =
     op match
       case CompareOp.Eq =>
         if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2))
@@ -344,29 +358,29 @@ final class RelationalStore
       case CompareOp.Neq =>
         if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv1.sup().cmp(iv2.inf()) < 0 || iv2.sup().cmp(iv1.inf()) < 0)
           Topped.Actual(true)
-        else if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan || (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2)))
+        else if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && (iv1.isScalar && iv2.isScalar && iv1.isEqual(iv2)))
           Topped.Actual(false)
         else
           Topped.Top
 
       case CompareOp.Le =>
         if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup().cmp(iv2.inf()) <= 0)
-          { println(s"${iv1.sup()} <= ${iv2.inf()} == ${iv1.sup().cmp(iv2.inf()) <= 0}"); Topped.Actual(true) }
+          Topped.Actual(true)
         else if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv2.sup().cmp(iv1.inf()) < 0)
-          { println(s"${iv2.sup()} <= ${iv1.inf()} == ${iv2.sup().cmp(iv1.inf()) <= 0}"); Topped.Actual(false) }
+          Topped.Actual(false)
         else
           Topped.Top
 
       case CompareOp.Lt =>
-        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan || iv1.sup().cmp(iv2.inf()) < 0)
-          { println(s"${iv1.sup()} <= ${iv2.inf()} == ${iv1.sup().cmp(iv2.inf()) <= 0}"); Topped.Actual(true) }
+        if (!iv1.floatSpecials.nan && !iv2.floatSpecials.nan && iv1.sup().cmp(iv2.inf()) < 0)
+          Topped.Actual(true)
         else if (iv1.isExactlyNaN || iv2.isExactlyNaN || iv2.sup().cmp(iv1.inf()) <= 0)
           Topped.Actual(false)
         else
           Topped.Top
 
-      case CompareOp.Ge => satisfies(CompareOp.Le, iv2, iv1)
-      case CompareOp.Gt => satisfies(CompareOp.Lt, iv2, iv1)
+      case CompareOp.Ge => assert(CompareOp.Le, iv2, iv1)
+      case CompareOp.Gt => assert(CompareOp.Lt, iv2, iv1)
 
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type], state: State = _internalState): Interval = Profiler.addTime("RelationalStore.getBound") {
     val env = state.abs1.getEnvironment
@@ -412,7 +426,14 @@ final class RelationalStore
                 } else {
                   expr
                 }
-              case None => ApronExpr.Addr(_var, specials, tpe)
+              case None =>
+                if(state2.abs1.getEnvironment.hasVar(_var))
+                  ApronExpr.Addr(_var, specials, tpe)
+                else {
+                  // This case happens if the non-relational store contains a non-bottom value
+                  // not bound in the environment of the relational abstract domain.
+                  ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+                }
           case None =>
             throw new IllegalArgumentException(s"No metadata for $phys store")
   }

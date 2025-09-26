@@ -35,7 +35,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     inline def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       i32 match
         case NumExpr(expr) => expr
-        case BoolExpr(condition) => apronState.getBoolean(condition)(using resolveState) match
+        case BoolExpr(condition) => apronState.assert(condition)(using resolveState) match
           case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
@@ -48,24 +48,44 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
   final override def booleanToVal(b: Bool): Value = Num(Int32(BoolExpr(b)))
 
-  given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronState: Lazy[ApronState[VirtAddr,Type]]): Combine[I32, W] with
+  given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
       (v1, v2) match
+        case _ if(v1 eq v2) => Unchanged(v1)
+        case (NumExpr(expr), _) if expr.isBottom == Topped.Actual(true) => Changed(v2)
+        case (_, NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
         case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
-        case (AllocationSites(sites1, size1), AllocationSites(sites2, size2)) =>
-          for {
-            sites <- Combine(sites1, sites2);
-            size <- combineApronExpr(size1, size2)
-          } yield(AllocationSites(sites, size))
-        case (NumExpr(expr), _ : (BoolExpr | AllocationSites)) if expr.isBottom == Topped.Actual(true) => Changed(v2)
-        case (_ : (BoolExpr | AllocationSites), NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
-        case (NumExpr(expr), AllocationSites(sites, size)) if apronState.value.getInterval(expr)(using ResolveState.Left).isZero =>
-          given ApronState[VirtAddr,Type] = apronState.value
-          Changed(AllocationSites(Join(sites, AbstractReference.Null).get, size))
-        case (AllocationSites(sites, size), NumExpr(expr)) if apronState.value.getInterval(expr)(using ResolveState.Right).isZero =>
-          given ApronState[VirtAddr, Type] = apronState.value
-          MaybeChanged(AllocationSites(Join(sites, AbstractReference.Null).get, size), !sites.containsNull)
-        case (_, _) => combineApronExpr(v1.asNumExprLazy(using resolveState = ResolveState.Left), v2.asNumExprLazy(using resolveState = ResolveState.Right)).map(NumExpr.apply)
+        case (alloc1:AllocationSites, alloc2:AllocationSites) => CombineAllocationSites(alloc1,alloc2)
+        case (NumExpr(expr), alloc2@AllocationSites(sites, size)) =>
+          given apronState: ApronRecencyState[AddrCtx,Type,Value] = apronStateLazy.value
+          if(apronState.getInterval(expr)(using ResolveState.Left).isZero)
+            Changed(AllocationSites(Join(sites, AbstractReference.Null).get, size))
+          else
+            expr match
+              case ApronExpr.Addr(x,_,_) =>
+                apronState.getValue(x)(using ResolveState.Left).toOption match
+                  case Some(Value.Num(Int32(alloc1: AllocationSites))) => CombineAllocationSites(alloc1, alloc2)
+                  case _ => combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
+        case (alloc1@AllocationSites(sites, size), NumExpr(expr)) =>
+          given apronState: ApronRecencyState[AddrCtx,Type,Value] = apronStateLazy.value
+          if(apronState.getInterval(expr)(using ResolveState.Right).isZero)
+            MaybeChanged(AllocationSites(Join(sites, AbstractReference.Null).get, size), !sites.containsNull)
+          else
+            expr match
+              case ApronExpr.Addr(x,_,_) =>
+                apronState.getValue(x)(using ResolveState.Right).toOption match
+                  case Some(Value.Num(Int32(alloc2: AllocationSites))) => CombineAllocationSites(alloc1, alloc2)
+                  case _ => combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
+        case (_,_) =>
+          given ApronState[VirtAddr,Type] = apronStateLazy.value
+          combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
+
+  given CombineAllocationSites[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W]): Combine[AllocationSites, W] with
+    override def apply(v1: AllocationSites, v2: AllocationSites): MaybeChanged[AllocationSites] =
+      for {
+        sites <- Combine(v1.sites, v2.sites);
+        size <- combineApronExpr(v1.size, v2.size)
+      } yield (AllocationSites(sites, size))
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
 

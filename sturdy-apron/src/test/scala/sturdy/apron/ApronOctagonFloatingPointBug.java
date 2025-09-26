@@ -20,6 +20,24 @@ public class ApronOctagonFloatingPointBug {
         Abstract1 abs2 = abs1.assignCopy(manager, "b", new Texpr1Intern(env, new Texpr1CstNode(new Interval(1,1))), null);
         Abstract1 abs3 = abs2.assignCopy(manager, "d", new Texpr1Intern(env, new Texpr1CstNode(new Interval(2,2))), null);
 
+
         System.out.println(abs3); // <empty>
+
+        Tcons1 cons =
+                new Tcons1(Tcons1.SUPEQ,
+                        new Texpr1Intern(env,
+                                new Texpr1BinNode(Texpr1BinNode.OP_SUB,
+                                        new Texpr1BinNode(Texpr1BinNode.OP_ADD,
+                                                new Texpr1VarNode("b"),
+                                                new Texpr1VarNode("d")
+                                        ),
+                                        new Texpr1CstNode(new DoubleScalar(Integer.MIN_VALUE))
+                                )
+                        )
+                );
+
+        System.out.println(cons);
+        abs1.meet(manager, cons);
+        System.out.println(abs1);
     }
 }

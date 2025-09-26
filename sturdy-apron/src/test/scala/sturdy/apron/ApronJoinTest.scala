@@ -169,12 +169,12 @@ class RelationalJoinTest
     withApronState {
       val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
 
-      val x = apronState.recencyStore.alloc(Ctx.Var("x"))
+      val x = apronState.alloc(Ctx.Var("x"))
       val xAddr = ApronExpr.addr(x, Type.IntType)
 
       val state0 = apronState.effectStack.getState
 
-      val y = apronState.recencyStore.alloc(Ctx.Var("y"))
+      val y = apronState.alloc(Ctx.Var("y"))
       val yAddr = ApronExpr.addr(y, Type.IntType)
 
       apronState.assign(x, ApronExpr.interval(0, 10, Type.IntType))
@@ -184,7 +184,7 @@ class RelationalJoinTest
 
       apronState.effectStack.setStateNonMonotonically(state0)
 
-      val z = apronState.recencyStore.alloc(Ctx.Var("z"))
+      val z = apronState.alloc(Ctx.Var("z"))
       val zAddr = ApronExpr.addr(z, Type.IntType)
 
       apronState.assign(z, ApronExpr.interval(10, 20, Type.IntType))
