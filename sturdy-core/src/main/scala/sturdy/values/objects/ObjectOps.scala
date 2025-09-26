@@ -12,7 +12,7 @@ trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Si
 
   def setField(callingClass: Class, obj: ObjectValue, identifier: FieldIdentifier, v: Value): JOption[J, Unit]
 
-  def invokeMethod(context: InvokeContext)(callingClass: Class, staticClass: Class, mthName: MthName, sig: MthSig, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
+  def invokeMethod(context: InvokeContext)(staticClass: Class, mthName: MthName, sig: MthSig, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
 
   def makeNull(): ObjectValue
 

@@ -16,7 +16,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter}
-import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, Exceptions, IntervalNumbers, IntervalObjects, InvokeType, Site, given}
+import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, Exceptions, IntervalNumbers, IntervalObjects, InvokeContext, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
 import sturdy.values.{Join, MaybeChanged, Topped, Widen, given}
 import sturdy.values.booleans.given
@@ -171,8 +171,8 @@ object IntervalAnalysis extends Interpreter, IntervalNumbers, IntervalObjects, E
 
     override val bytecodeOps: BytecodeOps[Idx, Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin] =
-      new LiftedObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeType, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeContext, WithJoin] =
+      new LiftedObjectOps[FieldName, Addr, IntervalAnalysis.Value, ClassFile, IntervalAnalysis.Value, Site, Method, String, MethodDescriptor, IntervalAnalysis.Value, InvokeContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 

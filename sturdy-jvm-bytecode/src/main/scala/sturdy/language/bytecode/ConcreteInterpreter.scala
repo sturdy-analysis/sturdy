@@ -13,7 +13,7 @@ import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
-import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeType, Site, getIdent}
+import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.*
 import sturdy.values.arrays.*
 import sturdy.values.booleans.ConcreteBooleanBranching
@@ -134,7 +134,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: RefValue): Boolean = true
 
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL]): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL]): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -167,10 +167,10 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
-    override def invokeMethod(context: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
+    override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case ConcreteRefValues.Object(_, cf, _) => context match
-        case InvokeType.Interface =>
+        case (InvokeType.Interface, callingClass) =>
           if !hierarchy.isSubtypeOf(cf.thisType, staticClass.thisType) then
             except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
           val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
@@ -183,7 +183,7 @@ object ConcreteInterpreter extends Interpreter:
             except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
           invoke(obj, selectedMethod, args)
 
-        case InvokeType.Virtual =>
+        case (InvokeType.Virtual, callingClass) =>
           val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
           if resolvedMethod.isStatic then
             except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
@@ -192,7 +192,7 @@ object ConcreteInterpreter extends Interpreter:
             except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
           invoke(obj, selectedMethod, args)
 
-        case InvokeType.Special(isInterfaceCall) =>
+        case (InvokeType.Special(isInterfaceCall), callingClass) =>
           val resolvedMethod = if isInterfaceCall then
             resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
           else
@@ -354,8 +354,8 @@ object ConcreteInterpreter extends Interpreter:
       override def remainder(dividend: Double, divisor: Double): Double = dividend % divisor
 
     override val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
-    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeType, MayJoin.NoJoin] =
-      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeType, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin] =
+      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteObjectOps(using objFieldAlloc, store, project)
       )
     override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin] =

@@ -82,7 +82,7 @@ trait Objects extends Interpreter:
         case _: ArrayType => Value.ReferenceValue(topRef)
         case _ => ??? // TODO: not implemented
 
-    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeType, WithJoin] {
+    def makeObjOps(using interpreter: Interpreter)(getFieldNonActual: JOptionA[Value], setFieldNonActual: JOptionA[Unit], isNullFn: Int => interpreter.I32)(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeContext, WithJoin] = new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, interpreter.I32, InvokeContext, WithJoin] {
       given hierachy: ClassHierarchy = project.classHierarchy
 
       override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -114,12 +114,12 @@ trait Objects extends Interpreter:
               JOptionA.some(())
           case Topped.Actual(_) => ???
 
-      override def invokeMethod(context: InvokeType)(callingClass: ClassFile, staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
+      override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
         ref match
           case Topped.Top => topOpalVal(sig.returnType)
           case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
             // TODO: test, add errors/exceptions
-            val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+            val resolvedMethod = resolveMethod(context._2.thisType, staticClass.thisType, mthName, sig)
             val selectedMethod = selectMethod(obj.cls.thisType, resolvedMethod)
             invoke(ref, selectedMethod, args)
           case Topped.Actual(_) => ???
@@ -159,7 +159,7 @@ trait Objects extends Interpreter:
       JOptionA.some(())
 
 trait ConstantObjects extends Objects, Numbers:
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.none, JOptionA.some(Value.TopValue), Topped.Actual.apply)
 
   given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
@@ -212,7 +212,7 @@ trait ConstantObjects extends Objects, Numbers:
       println(letters.map(l => l.get.toChar))
 
 trait IntervalObjects extends Objects, IntervalNumbers:
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeType, WithJoin] =
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] =
     Helper.makeObjOps(using this)(JOptionA.some(Value.TopValue), JOptionA.none, NumericInterval.constant)
 
   given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with

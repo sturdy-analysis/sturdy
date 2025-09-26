@@ -8,7 +8,7 @@ import sturdy.values.objects.{Object, ObjectOps}
 
 // class to deal with important native methods, e.g., the class Class
 // TODO: clean up, improve, fix
-class GenericInterpreterNativeMethods[V, Addr, Idx, ObjType, OID, AID, ObjRep, TypeRep, ExcV, CallData, J[_] <: MayJoin[_]]
+class GenericInterpreterNativeMethods[V, Addr, Idx, ObjType, OID, AID, ObjRep, TypeRep, ExcV, InvokeContext, J[_] <: MayJoin[_]]
   (interpreter: GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J]):
   import interpreter.*
   import interpreter.bytecodeOps.*
