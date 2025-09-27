@@ -35,7 +35,6 @@ class NewTest extends AnyFunSuite:
       try {
         val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
         //val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
-        //val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map())
         if (mth.parameterTypes.nonEmpty)
           val args = InitParams(mth, interp)
           interp.stack.pushN(args.toList)
@@ -45,7 +44,6 @@ class NewTest extends AnyFunSuite:
           println("Executing Method: " ++ mth.name)
           println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
         //println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
-        //println("Abstract Interpretation Interval Analysis: " ++ intervalInterp.invokeExternal(mth, true).toString)
         println("- - - - - - - - - - - - - - -")
       } catch {
         case e: Exception => println(e.toString)

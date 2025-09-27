@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import java.io.{DataInputStream, FileInputStream}
 import java.nio.file.Paths
 import sturdy.language.bytecode.ConcreteInterpreter
-import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
+import sturdy.language.bytecode.analyses.ConstantAnalysis
 
 class AbstractInterpreterTest extends AnyFunSuite:
   test("abstract interpreter test"):
@@ -35,11 +35,9 @@ class AbstractInterpreterTest extends AnyFunSuite:
     for(mth <- testMths){
       val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
       val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
-      val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map())
       println("Executing Method: " ++ mth.name)
       println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
       println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
-      println("Abstract Interpretation Interval Analysis: " ++ intervalInterp.invokeExternal(mth, true).toString)
       println("- - - - - - - - - - - - - - -")
     }
 //

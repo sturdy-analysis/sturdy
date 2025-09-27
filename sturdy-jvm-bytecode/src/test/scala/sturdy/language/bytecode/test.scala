@@ -5,7 +5,7 @@ import org.opalj.br.analyses.Project
 import org.opalj.br.instructions.*
 import org.opalj.io.process
 import org.scalatest.funsuite.AnyFunSuite
-import sturdy.language.bytecode.analyses.{ConstantAnalysis, IntervalAnalysis}
+import sturdy.language.bytecode.analyses.ConstantAnalysis
 import sturdy.language.bytecode.generic.ValType
 
 import java.io.{DataInputStream, File, FileInputStream}
@@ -55,8 +55,6 @@ class test extends AnyFunSuite:
 
     val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
 
-    val intervalInterp = new IntervalAnalysis.Instance(pWithLibrary, projectPath, Map())
-
     //val fixpoint = new ConcreteFixpoint[FixIn, FixOut]
 
     /*
@@ -96,9 +94,6 @@ class test extends AnyFunSuite:
 
     println("--- SubTest ---")
     val testMethod = cfs.findMethod("sub2").head
-    intervalInterp.evalExternal(BIPUSH(5))
-    intervalInterp.evalExternal(BIPUSH(7))
-    println(intervalInterp.invokeExternal(testMethod, true))
 
 
     println("--- BranchTest ---")
@@ -273,8 +268,6 @@ class test extends AnyFunSuite:
     //  println(absInterp.invokeExternal(constTest2, true))
     //  val constLoopTest = cfs.findMethod("constantLoopTest").head
     ////  absInterp.evalExternal(ICONST_0)
-    //  intervalInterp.stack.push(IntervalAnalysis.Value.Int32(IntervalAnalysis.topI32))
-    //  println(intervalInterp.invokeExternal(constLoopTest, true))
 
     //  println("--- InfiniteLoopTest ---")
     //  val infiniteLoopTest = cfs.findMethod("infiniteLoopTest").head

@@ -11,7 +11,6 @@ import sturdy.effect.store.Store
 import sturdy.language.bytecode.{Interpreter, resolveMethod, selectMethod}
 import sturdy.values.arrays.{Array, ArrayOps}
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening}
-import sturdy.values.integer.NumericInterval
 import sturdy.values.objects.{Object, ObjectOps}
 
 import java.net.URL
@@ -210,53 +209,3 @@ trait ConstantObjects extends Objects, Numbers:
 
     override def printString(letters: Seq[Topped[Int]]): Unit =
       println(letters.map(l => l.get.toChar))
-
-trait IntervalObjects extends Objects, IntervalNumbers:
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] =
-    Helper.makeObjOps(using this)(JOptionA.some(Value.TopValue), JOptionA.none, NumericInterval.constant)
-
-  given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
-    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
-      Helper.makeArray(aid, vals, arrayType, arraySize)
-
-    override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
-      ref match
-        case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) if idx.isConstant =>
-          if (idx.low >= array.vals.size)
-            JOptionA.none
-          else
-            store.read(array.vals(idx.low))
-        case Topped.Top if idx.isConstant => JOptionA.some(Value.TopValue)
-        case _ => ???
-
-    override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
-      ref match
-        case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) if idx.isConstant =>
-          if (idx.low >= array.vals.size)
-            JOptionA.none
-          else
-            store.write(array.vals(idx.low), v)
-            JOptionA.some(())
-        case Topped.Top if idx.isConstant => JOptionA.none
-        case _ => ???
-
-    override def arrayLength(ref: RefValue): Value =
-      Helper.arrayLength(ref)
-
-    override def initArray(size: I32): Seq[Any] =
-      Seq.fill(size.low) {}
-
-    override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
-      (src, dest) match
-        case (Topped.Actual(AbstractReferenceValue.maybeNullArray(src, _)), Topped.Actual(AbstractReferenceValue.maybeNullArray(dest, _))) if srcPos.isConstant && destPos.isConstant =>
-          Helper.copyArray(src, srcPos.low, dest, destPos.low, length.low)
-        case _ => ???
-
-    override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
-      ref match
-        case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) =>
-          array.vals.map(addr => getVal(ref, NumericInterval.constant(array.vals.indexOf(addr))))
-        case _ => ???
-
-    override def printString(letters: Seq[NumericInterval[Int]]): Unit =
-      println(letters.map(l => l.low.toChar))
