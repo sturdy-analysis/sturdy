@@ -1,24 +1,24 @@
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, MethodDescriptor, ReferenceType}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassHierarchy, ClassType, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ReferenceType, ShortType, Type}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
-import sturdy.effect.TrySturdy
+import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
-import sturdy.effect.store.AStoreThreaded
+import sturdy.effect.store.{AStoreThreaded, Store}
 import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
-import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter, abstractions}
-import sturdy.language.bytecode.abstractions.{AbstractReferenceValue, Addr, AddrSet, ConstantObjects, Exceptions, InvokeContext, Numbers, Site, given}
+import sturdy.language.bytecode.{ConcreteInterpreter, Interpreter, abstractions, resolveMethod, selectMethod}
+import sturdy.language.bytecode.abstractions.{Addr, AddrSet, Exceptions, FieldIdent, InvokeContext, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
-import sturdy.values.{Join, MaybeChanged, Topped, given}
+import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening, given}
 import sturdy.values.booleans.given
 import sturdy.values.convert.given
 import sturdy.values.floating.given
@@ -29,8 +29,14 @@ import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps}
 import sturdy.values.references.{PowersetAddr, given}
 
 import java.net.URL
+import scala.util.boundary
 
-object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exceptions:
+enum AbstractReferenceValue[A, O]:
+  case maybeNullObject(obj: O, maybeNull: Boolean)
+  case maybeNullArray(array: A, maybeNull: Boolean)
+  case NullValue()
+
+object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type J[A] = WithJoin[A]
   type Mth = Method
   type MthName = String
@@ -38,6 +44,178 @@ object ConstantAnalysis extends Interpreter, Numbers, ConstantObjects, Exception
   type Idx = I32
   override type ExcV = JvmExceptAbstract[Value]
 
+  override type Addr = AddrSet
+
+  override type ObjType = ClassFile
+  override type FieldName = FieldIdent
+
+  type Obj = Object[Addr, ObjType, Addr, FieldName]
+  type Arr = Array[Addr, Addr, AType, Value]
+  override type RefValue = Topped[AbstractReferenceValue[Arr, Obj]]
+  override type TypeRep = ReferenceType
+  override type AType = ArrayType
+
+  override final def topRef: RefValue = Topped.Top
+
+  // TODO: are these needed?
+  final type NullVal = Null
+
+  final def topNull: NullVal = null
+
+  given combineRef[W <: Widening]: Combine[RefValue, W] with
+    override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] =
+      import AbstractReferenceValue.{maybeNullArray, maybeNullObject, NullValue}
+      (v1, v2) match
+        case (Topped.Actual(v1), Topped.Actual(v2)) => (v1, v2) match
+          case (maybeNullObject(obj, _), NullValue()) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullObject(obj, true)))
+          case (NullValue(), maybeNullObject(obj, _)) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullObject(obj, true)))
+          case (maybeNullObject(_, _), maybeNullObject(_, _)) =>
+            MaybeChanged.Changed(topRef)
+          case (maybeNullArray(_, _), maybeNullArray(_, _)) =>
+            MaybeChanged.Changed(topRef)
+          case (maybeNullArray(array, _), NullValue()) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullArray(array, true)))
+          case (NullValue(), maybeNullArray(array, _)) =>
+            MaybeChanged.Changed(Topped.Actual(maybeNullArray(array, true)))
+          case (NullValue(), NullValue()) =>
+            MaybeChanged.Changed(topRef)
+          case _ => ???
+        case _ => MaybeChanged.Changed(topRef)
+
+  given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
+
+  // const trait
+
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] =
+    new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] {
+      given hierachy: ClassHierarchy = project.classHierarchy
+
+      override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
+        val fieldAddrs = vals.map { (v, site, name) =>
+          val addr = alloc(site)
+          store.write(addr, v)
+          (name, addr)
+        }.toMap
+        Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, c, fieldAddrs), false))
+
+      override def getField(callingClass: ClassFile, ref: RefValue, identifier: FieldName)(using failure: Failure): Value =
+        // TODO: fix
+        // import sturdy.data.MakeJoined
+        ref match
+          case Topped.Top => ??? // getFieldNonActual
+          case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) => ???
+          // store.read(obj.fields.getOrElse(name, failure.fail(BytecodeFailure.FieldNotFound, s"field $name not found"))).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$name not bound"))
+          case Topped.Actual(AbstractReferenceValue.NullValue()) => throw NullPointerException()
+          case Topped.Actual(_) => ???
+
+      override def setField(callingClass: ClassFile, ref: RefValue, identifier: FieldName, v: Value): JOption[WithJoin, Unit] =
+        ref match
+          case Topped.Top => JOptionA.some(Value.TopValue)
+          case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
+            if (!obj.fields.contains(identifier))
+              JOptionA.none
+            else
+              store.write(obj.fields(identifier), v)
+              JOptionA.some(())
+          case Topped.Actual(_) => ???
+
+      override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value =
+        ref match
+          case Topped.Top => topOpalVal(sig.returnType)
+          case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
+            // TODO: test, add errors/exceptions
+            val resolvedMethod = resolveMethod(context._2.thisType, staticClass.thisType, mthName, sig)
+            val selectedMethod = selectMethod(obj.cls.thisType, resolvedMethod)
+            invoke(ref, selectedMethod, args)
+          case Topped.Actual(_) => ???
+
+      override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
+
+      override def isNull(ref: RefValue): I32 =
+        ref match
+          case Topped.Top => topI32
+          case Topped.Actual(AbstractReferenceValue.maybeNullObject(_, false)) => Topped.Actual(0)
+          case Topped.Actual(AbstractReferenceValue.NullValue()) => Topped.Actual(1)
+          case Topped.Actual(_) => ???
+    }
+
+  given constArrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
+    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
+      val valAddrs = vals.map { (v, site) =>
+        val addr = alloc(site)
+        store.write(addr, v)
+        addr
+      }.toVector
+      Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
+
+    override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] =
+      (ref, idx) match
+        case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
+          if (idx >= array.vals.size)
+            JOptionA.none
+          else
+            store.read(array.vals(idx))
+        case (Topped.Actual(_), Topped.Actual(_)) => ???
+        case _ => JOptionA.some(Value.TopValue)
+
+    override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+      (ref, idx) match
+        case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
+          if (idx >= array.vals.size)
+            JOptionA.none
+          else
+            store.write(array.vals(idx), v)
+            JOptionA.some(())
+        case (Topped.Actual(_), Topped.Actual(_)) => ???
+        case _ => JOptionA.none
+
+    override def arrayLength(ref: RefValue): Value = ref match
+      case Topped.Top => Value.Int32(topI32)
+      case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => array.arraySize
+      case Topped.Actual(_) => ???
+
+    override def initArray(size: I32): Seq[Any] =
+      Seq.fill(size.get) {}
+
+    override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
+      import Topped.Actual
+      (src, dest, srcPos, destPos, length) match
+        case (Actual(AbstractReferenceValue.maybeNullArray(src, _)), Actual(AbstractReferenceValue.maybeNullArray(dest, _)), Actual(srcPos), Actual(destPos), Actual(length)) =>
+          boundary:
+            for (i <- 0 until length)
+              if (srcPos + i >= src.vals.size || destPos + i >= dest.vals.size)
+                boundary.break(JOptionA.none)
+              else
+                val toCopy = store.read(src.vals(srcPos + i)).get
+                store.write(dest.vals(destPos + i), toCopy)
+          JOptionA.some(())
+        case (Actual(_), Actual(_), Actual(_), Actual(_), Actual(_)) => ???
+        case _ => JOptionA.none
+
+    override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
+      ref match
+        case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) =>
+          array.vals.map(addr => getVal(ref, Topped.Actual(array.vals.indexOf(addr))))
+        case _ => ???
+
+    override def printString(letters: Seq[Topped[Int]]): Unit =
+      println(letters.map(l => l.get.toChar))
+
+  def topOpalVal(ty: Type): Value =
+    ty match
+      case ByteType => Value.Int32(topI32)
+      case ShortType => Value.Int32(topI32)
+      case IntegerType => Value.Int32(topI32)
+      case FloatType => Value.Float32(topF32)
+      case LongType => Value.Int64(topI64)
+      case DoubleType => Value.Float64(topF64)
+      case BooleanType => Value.Int32(topI32)
+      case CharType => Value.Int32(topI32)
+      case _: ClassType => Value.ReferenceValue(topRef)
+      case _: ArrayType => Value.ReferenceValue(topRef)
+      case _ => ??? // TODO: not implemented
 
   //  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
 //    override def apply(c: ConcreteInterpreter.Value): Value = c match
