@@ -90,3 +90,8 @@ object TrySturdy:
 
 given CombineTrySturdy[A, W <: Widening](using Combine[A, W]): Combine[TrySturdy[A], W] with
   override def apply(v1: TrySturdy[A], v2: TrySturdy[A]): MaybeChanged[TrySturdy[A]] = TrySturdy.combine(v1, v2)
+
+object TrySturdyFinally:
+  inline def apply[A](f: => A)(g: => Unit): A =
+    try {val r = f; g; r} catch
+      case e : SturdyThrowable => g; throw e
