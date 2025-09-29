@@ -64,7 +64,7 @@ final class RelationalStore
       case (Some(exp), state2) =>
         writePurePrivate(powAddr, replaceMissingAddrs(exp, state2), state2)
       case (None, _) =>
-        state1.withNonRelationalState{ st =>
+        state1.modifyNonRelationalState{ st =>
           nonRelationalStore.writePure(powAddr, v, st)
         }
 
@@ -104,7 +104,7 @@ final class RelationalStore
 
   private def writeMetaData(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type], state1: State): State =
     val (v, state2) = relationalValue.makeRelationalExprPure(ApronExpr.floatConstant(ApronExpr.bottomInterval, expr.floatSpecials, expr._type), state1)
-    state2.withNonRelationalState(nonRelationalStore.writePure(PowersetAddr(addr).asInstanceOf[PowAddr], v, _))
+    state2.modifyNonRelationalState(nonRelationalStore.writePure(PowersetAddr(addr).asInstanceOf[PowAddr], v, _))
 
   private def extendAbstract1(addr: PhysicalAddress[Context], expr: ApronExpr[PhysicalAddress[Context], Type], state: State): Boolean =
     if(getBound(expr, state).isBottom) {
@@ -130,17 +130,24 @@ final class RelationalStore
   override def movePure(fromPow: PowAddr, toPow: PowAddr, state0: State): State = Profiler.addTime("RelationalStore.movePure") {
     var state = state0
     if (fromPow.isStrong && fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      state = state.withNonRelationalState(nonRelationalStore.movePure(fromPow, toPow, _))
+      state = state.modifyNonRelationalState(nonRelationalStore.movePure(fromPow, toPow, _))
 
       val from = fromPow.iterator.next()
       val to = toPow.iterator.next()
 
+      var fromIv = Interval()
+      var toIv = Interval()
+
       val env = state.abs1.getEnvironment
       (env.hasVar(from), env.hasVar(to)) match
         case (true, true) =>
+          fromIv = state.abs1.getBound(manager, from)
           state.abs1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
+          toIv = state.abs1.getBound(manager, to)
         case (true, false) =>
+          fromIv = state.abs1.getBound(manager, from)
           state.abs1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
+          toIv = state.abs1.getBound(manager, to)
         case (false, true) | (false, false) => // Nothing to do
 
     } else {
@@ -159,7 +166,7 @@ final class RelationalStore
    */
   override def copyPure(fromPow: PowAddr, toPow: PowAddr, state0: State): State = Profiler.addTime("RelationalStore.copyPure") {
     var state = state0
-    state = state.withNonRelationalState(st => nonRelationalStore.copyPure(fromPow, toPow, st))
+    state = state.modifyNonRelationalState(st => nonRelationalStore.copyPure(fromPow, toPow, st))
 
     val env = state.abs1.getEnvironment
     val toSet = toPow.iterator.map(ApronVar(_)).toSet
@@ -208,7 +215,7 @@ final class RelationalStore
       val paddr = PowersetAddr(addr).asInstanceOf[PowAddr]
       val oldVal = nonRelationalStore.readPure(paddr, state.nonRelationalStoreState)._1
       val resVal = Join(oldVal, JOptionA.Some(newVal)).get.toOption.get
-      state = state.withNonRelationalState(st => nonRelationalStore.writePure(paddr, resVal, st))
+      state = state.modifyNonRelationalState(st => nonRelationalStore.writePure(paddr, resVal, st))
       val res = nonRelationalStore.read(paddr)
     }
 
@@ -385,7 +392,6 @@ final class RelationalStore
   def getBound(expr: ApronExpr[PhysicalAddress[Context], Type], state: State = _internalState): Interval = Profiler.addTime("RelationalStore.getBound") {
     val env = state.abs1.getEnvironment
     val expr1 = replaceMissingAddrs(expr, state)
-    val addrs = expr1.addrs
     state.abs1.getBound(state.abs1.getCreationManager, expr1.toIntern(env))
   }
 
@@ -422,7 +428,7 @@ final class RelationalStore
                     expr
                   else
                     ApronExpr.Constant(
-                      Join(state2.abs1.getBound(manager, _var), state2.abs1.getBound(manager, _var)).get, specials, tpe)
+                      Join(state2.abs1.getBound(manager, expr.toIntern(state2.abs1.getEnvironment)), state2.abs1.getBound(manager, _var)).get, specials, tpe)
                 } else {
                   expr
                 }
@@ -432,7 +438,7 @@ final class RelationalStore
                 else {
                   // This case happens if the non-relational store contains a non-bottom value
                   // not bound in the environment of the relational abstract domain.
-                  ApronExpr.Constant(ApronExpr.topInterval, specials, tpe)
+                  ApronExpr.Constant(ApronExpr.bottomInterval, specials, tpe)
                 }
           case None =>
             throw new IllegalArgumentException(s"No metadata for $phys store")
@@ -449,21 +455,21 @@ final class RelationalStore
     // Prioritize recent variables from olderState, but do not forget about old variables in _internalState.
     // To do this, we remove all recent variables in olderState from _internalState and then widen _internalState with olderState.
 
-    _internalState = _internalState.withNonRelationalState(nonRelationalStoreState =>
+    _internalState = _internalState.modifyNonRelationalState(nonRelationalStoreState =>
       nonRelationalStoreState.filter {
         case (phys@PhysicalAddress(_,Recency.Recent), _) => ! olderState.nonRelationalStoreState.contains(phys)
         case _ => true
       }
     )
-    _internalState.abs1.forget(manager, _internalState.abs1.getEnvironment.getVars.filter {
-      case _var@ApronVar(PhysicalAddress(_,Recency.Recent)) => ! olderState.abs1.getEnvironment.hasVar(_var)
-      case _ => true
-    }, false)
+    _internalState.abs1.changeEnvironment(manager, _internalState.abs1.getEnvironment.remove(_internalState.abs1.getEnvironment.getVars.filter{
+      case v@ApronVar(PhysicalAddress(_,Recency.Recent)) => olderState.abs1.getEnvironment.hasVar(v)
+      case _ => false
+    }), false)
 
     // Then widen the `_internalState` into the `olderState`.
     _internalState = widen(olderState, _internalState).get
 
-//    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
+    //    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
     assertVirtualAddressesIncludedIn(olderState.addressTranslationState, _internalState.addressTranslationState)
   }
 
@@ -663,11 +669,14 @@ case class RelationalStoreState[Context,Value](addressTranslationState: AddressT
 
   override def toString: String = s"RelationalStoreState($hashCode, $addressTranslationState, ${abs1.getEnvironment}, $abs1, $nonRelationalStoreState)"
 
-  def withNonRelationalState(f: Map[PhysicalAddress[Context], Value] => Map[PhysicalAddress[Context], Value]): RelationalStoreState[Context, Value] =
-    val newNonRelationalStoreState = f(nonRelationalStoreState)
-    copy(nonRelationalStoreState = newNonRelationalStoreState)
+  inline def withNonRelationalState[A](f: Map[PhysicalAddress[Context], Value] => (A,Map[PhysicalAddress[Context], Value])): (A,RelationalStoreState[Context,Value]) =
+    val (res,newNonRelationalStoreState) = f(nonRelationalStoreState)
+    (res,copy(nonRelationalStoreState = newNonRelationalStoreState))
 
-  def withAddressTranslationState(f: AddressTranslationState[Context] => AddressTranslationState[Context]) =
+  inline def modifyNonRelationalState(f: Map[PhysicalAddress[Context], Value] => Map[PhysicalAddress[Context], Value]): RelationalStoreState[Context, Value] =
+    withNonRelationalState(st => ((),f(st)))._2
+
+  inline def withAddressTranslationState(f: AddressTranslationState[Context] => AddressTranslationState[Context]) =
     val newAddressTranslationState = f(addressTranslationState)
     copy(addressTranslationState = newAddressTranslationState)
 

@@ -212,13 +212,13 @@ class ApronRecencyState
       case ApronBool.And(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
       case ApronBool.Or(e1, e2) => isUnconstrained(e1) || isUnconstrained(e2)
 
-  def getValue(addr: VirtualAddress[Ctx])(using ResolveState): JOptionA[Val] =
+  def getNonRelationalValue(addr: VirtualAddress[Ctx])(using ResolveState): JOptionA[Val] =
     withState{ state =>
       val phys = relationalStore.physicalAddresses(addr.ctx, addr.n, state)
-      relationalStore.readPure(phys, state)
+      state.withNonRelationalState(relationalStore.nonRelationalStore.readPure(phys, _))
     }
 
-  inline override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
+  override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
     if(virtExpr.isConstant) {
       relationalStore.getBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
     } else {

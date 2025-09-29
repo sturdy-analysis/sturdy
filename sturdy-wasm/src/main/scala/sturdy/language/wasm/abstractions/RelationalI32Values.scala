@@ -15,8 +15,6 @@ import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
-import java.nio.ByteOrder
-
 trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Type.*
   import Value.*
@@ -26,6 +24,12 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
     case AllocationSites(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type])
+
+    def addNull(): Option[AllocationSites] =
+      this match
+        case AllocationSites(sites, size) => Some(AllocationSites(Join(sites, AbstractReference.Null).get, size))
+        case _ => None
+
   import RelI32.*
 
   final type I32 = RelI32
@@ -39,6 +43,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
+        case AllocationSites(AbstractReference.Null, _) => ApronExpr.lit(0, I32Type)
         case AllocationSites(sites, _) => ApronExpr.top(I32Type)
 
     def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
@@ -50,42 +55,73 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
 
   given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
-      (v1, v2) match
-        case _ if(v1 eq v2) => Unchanged(v1)
-        case (NumExpr(expr), _) if expr.isBottom == Topped.Actual(true) => Changed(v2)
+     (v1, v2) match
+        case _ if((v1 eq v2) || (v1 == v2)) => Unchanged(v1)
+        case (NumExpr(expr), _) if expr.isBottom == Topped.Actual(true) =>
+          MaybeChanged(v2,
+            v2 match
+              case NumExpr(e2) => e2.isBottom != Topped.Actual(true)
+              case _ => true
+          )
         case (_, NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
         case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
-        case (alloc1:AllocationSites, alloc2:AllocationSites) => CombineAllocationSites(alloc1,alloc2)
-        case (NumExpr(expr), alloc2@AllocationSites(sites, size)) =>
-          given apronState: ApronRecencyState[AddrCtx,Type,Value] = apronStateLazy.value
-          if(apronState.getInterval(expr)(using ResolveState.Left).isZero)
-            Changed(AllocationSites(Join(sites, AbstractReference.Null).get, size))
-          else
-            expr match
-              case ApronExpr.Addr(x,_,_) =>
-                apronState.getValue(x)(using ResolveState.Left).toOption match
-                  case Some(Value.Num(Int32(alloc1: AllocationSites))) => CombineAllocationSites(alloc1, alloc2)
-                  case _ => combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
-        case (alloc1@AllocationSites(sites, size), NumExpr(expr)) =>
-          given apronState: ApronRecencyState[AddrCtx,Type,Value] = apronStateLazy.value
-          if(apronState.getInterval(expr)(using ResolveState.Right).isZero)
-            MaybeChanged(AllocationSites(Join(sites, AbstractReference.Null).get, size), !sites.containsNull)
-          else
-            expr match
-              case ApronExpr.Addr(x,_,_) =>
-                apronState.getValue(x)(using ResolveState.Right).toOption match
-                  case Some(Value.Num(Int32(alloc2: AllocationSites))) => CombineAllocationSites(alloc1, alloc2)
-                  case _ => combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
+        case (AllocSitesLeft(alloc1), AllocSitesRight(alloc2)) => CombineAllocationSites(alloc1,alloc2)
         case (_,_) =>
           given ApronState[VirtAddr,Type] = apronStateLazy.value
           combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
 
+  private object AllocSitesLeft:
+    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Option[AllocationSites] =
+      AllocSites.unapply(v)(using resolveState = ResolveState.Left)
+
+  private object AllocSitesRight:
+    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx, Type, Value]]): Option[AllocationSites] =
+      AllocSites.unapply(v)(using resolveState = ResolveState.Right)
+
+  private object AllocSites:
+    def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]], resolveState: ResolveState): Option[AllocationSites] =
+      v match {
+        case allocationSites: AllocationSites => Some(allocationSites)
+        case NumExpr(ApronExpr.Constant(coeff, _, _)) =>
+          if(coeff.isZero)
+            Some(AllocationSites(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
+          else
+            None
+        case NumExpr(expr@ApronExpr.Addr(x,_,_)) =>
+          given apronState: ApronRecencyState[AddrCtx,Type,Value] = apronStateLazy.value
+          val iv = apronState.getInterval(expr)(using resolveState)
+
+          apronState.getNonRelationalValue(x)(using resolveState).toOption match {
+            case Some(Value.Num(Int32(allocationSites: AllocationSites))) =>
+              if(iv.isBottom)
+                Some(allocationSites)
+              else if(iv.isZero)
+                allocationSites.addNull()
+              else
+                None
+            case Some(Value.Num(Int32(NumExpr(expr)))) if expr.isBottom == Topped.Actual(true) =>
+              if(iv.isZero)
+                Some(AllocationSites(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
+              else
+                None
+            case Some(nonRelValue) =>
+              None
+            case None => throw IllegalArgumentException(s"Address $x is unbound in non-relational store ${apronState.relationalStore}")
+          }
+        case _ => None
+      }
+
   given CombineAllocationSites[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W]): Combine[AllocationSites, W] with
-    override def apply(v1: AllocationSites, v2: AllocationSites): MaybeChanged[AllocationSites] =
-      for {
-        sites <- Combine(v1.sites, v2.sites);
-        size <- combineApronExpr(v1.size, v2.size)
-      } yield (AllocationSites(sites, size))
+    override def apply(v1: AllocationSites, v2: AllocationSites): MaybeChanged[AllocationSites] = {
+      if(v1 eq v2) {
+        Unchanged(v1)
+      } else {
+        for {
+          sites <- Combine(v1.sites, v2.sites);
+          size <- combineApronExpr(v1.size, v2.size)
+        } yield (AllocationSites(sites, size))
+      }
+    }
 
   given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
 
