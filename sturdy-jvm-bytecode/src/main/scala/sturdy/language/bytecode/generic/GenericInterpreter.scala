@@ -78,9 +78,6 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
   type FrameData = Int
   val frame: DecidableMutableCallFrame[FrameData, Int, V, Site]
 
-  // unit type to represent the initialization table lookup
-  object InitializationCheck
-
   // result of the initialization
   enum InitializationResult:
     // initialization is currently running
@@ -106,7 +103,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   given Finite[ClassType] with {}
 
-  implicit val effectStack: EffectStack = EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
+  // needs to be lazy due to the initialization order, do not use the companion object here!
+  implicit val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
   implicit val project: Project[URL]
 
