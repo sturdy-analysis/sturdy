@@ -31,7 +31,7 @@ import scala.collection.immutable.ArraySeq
 enum JvmExcept[V]:
   case Jump(pc: Int)
   case Ret(pc: V)
-  case Return()
+  case Return(returnValue: V)
   case Throw(exception: ClassType)
   case ThrowObject(exception: V)
 
@@ -419,10 +419,10 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         val returnValue = stack.popOrAbort()
         stack.clearCurrentOperandFrame()
         stack.push(returnValue)
-        except.throws(JvmExcept.Return())
+        except.throws(JvmExcept.Return(returnValue))
       case RETURN =>
         stack.clearCurrentOperandFrame()
-        except.throws(JvmExcept.Return())
+        except.throws(JvmExcept.Return(i32ops.integerLit(-1)))
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, fieldType) =>
@@ -824,7 +824,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
-  // wraps run_pen in fixed
+  // wraps run_open in fixed
   def run(pc: Int, mth: Method)(using fixed: Fixed): Unit =
     fixed(FixIn.Jump(pc, mth)) match
       case FixOut.Jump() => ()
@@ -838,7 +838,7 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
         run(targetPC, mth)
       case JvmExcept.Ret(_) =>
         ??? // TODO
-      case JvmExcept.Return() =>
+      case JvmExcept.Return(_) =>
         ()
       case JvmExcept.Throw(exception) =>
         val currPC = frame.data
