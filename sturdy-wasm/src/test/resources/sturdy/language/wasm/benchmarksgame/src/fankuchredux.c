@@ -24,9 +24,8 @@ int flip()
    register int i;
    register elem *x, *y, c;
 
-   memcpy(t, s, sizeof(elem) * max_n);
-//   for (x = t, y = s, i = max_n; i--; )
-//      *x++ = *y++;
+   for (x = t, y = s, i = max_n; i--; )
+      *x++ = *y++;
    i = 1;
    do {
       for (x = t, y = t + t[0]; x < y; )
@@ -81,10 +80,10 @@ int _start()
    */
 
    max_n = __VERIFIER_nondet_int();
-   /*if (max_n < 3 || max_n > 15) {
-      //fprintf(stderr, "range: must be 3 <= n <= 12\n");
+   if (max_n < 3 || max_n > 15) {
+      fprintf(stderr, "range: must be 3 <= n <= 12\n");
       exit(1);
-   }*/
+   }
 
    for (i = 0; i < max_n; i++) s[i] = i;
    tk(max_n);

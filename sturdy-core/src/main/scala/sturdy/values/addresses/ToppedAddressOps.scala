@@ -4,6 +4,9 @@ import sturdy.data.{*, given}
 import sturdy.values.{Join, Topped}
 
 given ToppedAddressLimits: AddressLimits[Topped[Int], Topped[Int], WithJoin] with
+  override def addSizeToAddr(size: Topped[Int], addr: Topped[Int]): Topped[Int] =
+    addr.binary(_ + _, size)
+  
   override def ifAddrLeSize[A: WithJoin](addr: Topped[Int], size: Topped[Int])(f: => A): JOption[WithJoin, A] =
     (addr, size) match
       case (Topped.Actual(a), Topped.Actual(s)) =>

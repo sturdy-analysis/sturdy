@@ -13,6 +13,7 @@ import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
 import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
 import sturdy.util.Lazy
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
+import sturdy.values.integer.IntegerOps
 import sturdy.values.ordering.UnsignedOrderingOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{AbstractReference, PhysicalAddress, PowVirtualAddress, Recency, ReferenceOps, VirtualAddress}
@@ -62,6 +63,12 @@ trait RelationalMemory extends RelationalValues:
       }
 
   given RelationalAddressLimits(using apronState: ApronState[VirtAddr, Type]): AddressLimits[Addr, Size, WithJoin] with
+
+    override def addSizeToAddr(size: Size, addr: Addr): Addr =
+      addr match
+        case NumExpr(addrExpr) => NumExpr(ApronExpr.intAdd(addrExpr, size, Type.I32Type))
+        case AllocationSites(_,_) => throw IllegalArgumentException("Adding a size to allocation-sites is not supported by the analysis.")
+
     override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =
       given Join[A] = implicitly[WithJoin[A]].j
       addr match
@@ -78,8 +85,24 @@ trait RelationalMemory extends RelationalValues:
       given Join[A] = implicitly[WithJoin[A]].j
       apronState.ifThenElse(And(Constraint(le(lit(0, Type.I32Type), size)), Constraint(le(size, limit))))(ifTrue)(ifFalse)
 
-  given RelationalLanguageSpecificMemOps(using apronState: ApronState[VirtAddr, Type], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]]): LanguageSpecificMemOps[HeapCtx, Addr, Size] with
-    override def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mem: Mem[HeapCtx, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[HeapCtx], MemoryRegion[Addr, Timestamp, Val], AlignedRead)] =
+  given RelationalSizeOps(using apronState: ApronState[VirtAddr, Type], integerOps: IntegerOps[Int,Size]): SizeOps[Size] with {
+    override def fromInt(size: Int): Size = ApronExpr.lit(size, Type.I32Type)
+    override def add(size1: Size, size2: Size): Size = ApronExpr.intAdd(size1, size2, Type.I32Type)
+    override def sub(size1: Size, size2: Size): Size = ApronExpr.intSub(size1, size2, Type.I32Type)
+    override def mul(size1: Size, size2: Size): Size = ApronExpr.intMul(size1, size2, Type.I32Type)
+    override def min(size1: Size, size2: Size): Size = integerOps.min(size1, size2)
+    override def toTopped(size: Size): Topped[Int] = {
+      val (l,h) = apronState.getIntInterval(size)
+      if(l == h)
+        Topped.Actual(l)
+      else
+        Topped.Top
+    }
+  }
+
+
+  given RelationalLanguageSpecificMemOps(using apronState: ApronState[VirtAddr, Type], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]], sizeOps: SizeOps[Size]): LanguageSpecificMemOps[HeapCtx, Addr, Size] with
+    override def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mem: Mem[HeapCtx, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[HeapCtx], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)] =
       addr match
         case AllocationSites(reference, size) =>
           // We assume that each malloc addresses is allocated in their own isolated part of the heap.
@@ -103,13 +126,12 @@ trait RelationalMemory extends RelationalValues:
             val readEndLow = math.max(0, readEndIv._1)
             val readEndHigh = math.max(readEndLow, readEndIv._2)
 
-
-            def regionOverlaps(i: Int, region: MemoryRegion[Addr, Timestamp, Val]) =
-              region.byteSize match
-                case Topped.Top => i < readEndHigh
-                case Topped.Actual(byteSize) =>
-                  val regionEnd = i + byteSize
-                  readStartLow < regionEnd && regionEnd <= readEndHigh
+            def regionOverlaps(i: Int, region: MemoryRegion[Addr, Size, Timestamp, Val]): Boolean = {
+              val (sizeLow,sizeHigh) = apronState.getIntInterval(region.byteSize)
+              val regionEndLow = i.toLong + sizeLow.toLong
+              val regionEndHigh = i.toLong + sizeHigh.toLong
+              readStartLow < regionEndLow && regionEndHigh <= readEndHigh
+            }
 
             val matchingStaticRegions =
               if (readEndHigh - readStartLow <= 20) {
@@ -141,34 +163,54 @@ trait RelationalMemory extends RelationalValues:
               if (
                 // Filter out dynamic regions that are certainly overwritten by the
                 // static region at the start of the read.
-                readStartLow == readStartHigh &&
+                if(readStartLow == readStartHigh)
                   staticRegionAtReadStart.exists(staticRegion =>
                     concurrentOrNewerThan(region.timestamp, staticRegion.timestamp)
                   )
-                )
+                else
+                  true
+              )
               if {
                 val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
 
-                region.byteSize match
-                  case Topped.Top =>
-                    apronState.assert(ApronCons.le(regionStart, readEnd)) != Topped.Actual(false)
-                  case Topped.Actual(byteSize) =>
-                    // Check if the **end** of the region overlaps with the read address range.
-                    val regionEnd = ApronExpr.intAdd(regionStart, ApronExpr.lit(byteSize, regionStart._type), regionStart._type)
-                    apronState.assert(
-                      ApronBool.And(
-                        ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
-                        ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
-                      )
-                    ) != Topped.Actual(false)
+                // Check if the **end** of the region overlaps with the read address range.
+                val regionEnd = ApronExpr.intAdd(regionStart, region.byteSize, regionStart._type)
+                apronState.assert(
+                  ApronBool.And(
+                    ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
+                    ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
+                  )
+                ) != Topped.Actual(false)
               }
             } yield ((physAddr, region, alignedRead(readStart, region)))
+
+            // TODO: Remove, used for Debugging.
+//            for((physAddr, region) <- mem.store.iterator) {
+//              physAddr match
+//                case PhysicalAddress(_: HeapCtx.Dynamic, _) =>
+//                  if(readStartLow == readStartHigh && staticRegionAtReadStart.exists(staticRegion => concurrentOrNewerThan(region.timestamp, staticRegion.timestamp))) {
+//                    println("overwritten")
+//                  } else {
+//                    val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
+//
+//                    // Check if the **end** of the region overlaps with the read address range.
+//                    val regionEnd = ApronExpr.intAdd(regionStart, region.byteSize, regionStart._type)
+//                    val assert = apronState.assert(
+//                      ApronBool.And(
+//                        ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
+//                        ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
+//                      )
+//                    )
+//                    println("assert")
+//                  }
+//                case _ => ()
+//            }
 
             matchingStaticRegions ++ matchingDynamicRegions
           }
 
 
-    private inline def alignedRead[Timestamp,Val](readStart: ApronExpr[VirtAddr, Type], memoryRegion: MemoryRegion[Addr, Timestamp, Val]): AlignedRead =
+    private inline def alignedRead[Timestamp,Val](readStart: ApronExpr[VirtAddr, Type], memoryRegion: MemoryRegion[Addr, Size, Timestamp, Val]): AlignedRead =
       memoryRegion.startAddr match
         case NumExpr(regionStart) =>
           apronState.assert(ApronCons.eq(readStart, regionStart)) match

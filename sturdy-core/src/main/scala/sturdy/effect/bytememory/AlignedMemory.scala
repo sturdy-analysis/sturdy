@@ -3,22 +3,18 @@ package sturdy.effect.bytememory
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.allocation.Allocator
-import sturdy.values.integer.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 import Bytes.*
 import sturdy.data
-import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
+import sturdy.effect.EffectStack
 import sturdy.util.Profiler
-import sturdy.values.addresses.{AddressLimits, AddressOffset}
+import sturdy.values.addresses.{AddressOffset, AddressLimits}
 
 import java.nio.ByteOrder
-import scala.annotation.tailrec
 import scala.collection.AbstractIterator
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
-import scala.util.boundary
-import scala.util.boundary.break
 
 /**
  * Indicates if the read address aligns with the stored address, i.e., if storedAddr = readAddr.
@@ -33,7 +29,15 @@ enum AlignedRead:
       case MaybeAligned => Topped.Top
 
 trait LanguageSpecificMemOps[Context, Addr, Size]:
-  def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[Context], MemoryRegion[Addr, Timestamp, Val], AlignedRead)]
+  def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
+
+trait SizeOps[Size]:
+  def fromInt(size: Int): Size
+  def add(size1: Size, size2: Size): Size
+  def sub(size1: Size, size2: Size): Size
+  def mul(size1: Size, size2: Size): Size
+  def min(size1: Size, size2: Size): Size
+  def toTopped(size: Size): Topped[Int]
 
 final class AlignedMemory
   [
@@ -52,14 +56,14 @@ final class AlignedMemory
    memOps: LanguageSpecificMemOps[Context, Addr, Size],
    addressOffset: AddressOffset[Addr],
    addressLimits: AddressLimits[Addr, Size, WithJoin],
-   sizeIntOps: IntegerOps[Int, Size],
+   sizeOps: SizeOps[Size],
    effectStack: EffectStack
   )
   extends Memory[Key, Addr, Bytes[Val], Size, WithJoin] with VectorClock[Context]:
 
   type MemoryCtx = Context
-  private val pageSize: Size = sizeIntOps.integerLit(ConcreteMemory.pageSize)
-  private val maxPages: Size = sizeIntOps.integerLit(ConcreteMemory.maxPageNum)
+  private val pageSize: Size = sizeOps.fromInt(ConcreteMemory.pageSize)
+  private val maxPages: Size = sizeOps.fromInt(ConcreteMemory.maxPageNum)
 
   var memories: Map[Key, Mem[Context, Addr, Timestamp, Val, Size]] = Map()
 
@@ -71,30 +75,27 @@ final class AlignedMemory
   private def read0(key: Key, readAddr: Addr, length: Int, align: Int = 1): JOption[WithJoin, Bytes[Val]] =
     val mem = memories(key)
 
-    val regionsIterator = memOps.matchRegion(readAddr, sizeIntOps.integerLit(length), mem)
+    val regionsIterator = memOps.matchRegion(readAddr, sizeOps.fromInt(length), mem)
 
     val topBytes: ReadBytes[Val] = ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top)
     val readBytes: Bytes[Val] =
-      if(! regionsIterator.hasNext)
-        mem.fillBytes.get
-      else
-        regionsIterator
-          .map{
-            case (_, MemoryRegion(_, _, _, value, Topped.Actual(byteSize), byteOrder), AlignedRead.Aligned) =>
-              ReadBytes[Val](
-                value = Topped.Actual(List((value,byteSize))),
-                byteOrder = byteOrder
-              )
-            case b =>
-              topBytes
-          }
-          .atMost(10, orElse = topBytes)
-          .reduce(Join(_,_).get)
+      regionsIterator
+        .map{
+          case (_, MemoryRegion(_, _, ConstantSize(byteSize), _, value, byteOrder), AlignedRead.Aligned) =>
+            ReadBytes[Val](
+              value = Topped.Actual(List((value,byteSize))),
+              byteOrder = byteOrder
+            )
+          case b =>
+            topBytes
+        }
+        .atMost(10, orElse = topBytes)
+        .reduce(Join(_,_).get)
 
     readBytes.byteSize match
       case Topped.Actual(byteSize) =>
         if(length - byteSize <= 0) {
-          addressLimits.ifAddrLeSize(readAddr, sizeIntOps.sub(sizeIntOps.mul(mem.numPages, pageSize), sizeIntOps.integerLit(length))) {
+          addressLimits.ifAddrLeSize(readAddr, sizeOps.sub(sizeOps.mul(mem.numPages, pageSize), sizeOps.fromInt(length))) {
             readBytes
           }
         } else {
@@ -104,7 +105,7 @@ final class AlignedMemory
         JOptionA.NoneSome(ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top))
 
   extension[A](iter: Iterator[A])
-    def atMost(n: Int, orElse: A): Iterator[A] =
+    private def atMost(n: Int, orElse: A): Iterator[A] =
       new AbstractIterator[A]:
         var taken = 0
         override def next(): A =
@@ -127,26 +128,26 @@ final class AlignedMemory
   private def write0(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 1): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
-        val Mem(store, fillBytes, numPages, pageLimit) = memories(key)
+        val Mem(store, numPages, pageLimit) = memories(key)
 
-        addressLimits.ifAddrLeSize(addr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), sizeIntOps.integerLit(byteSize))) {
+        addressLimits.ifAddrLeSize(addr, sizeOps.sub(sizeOps.mul(numPages, pageSize), sizeOps.fromInt(byteSize))) {
 
           var newStore = store
           for (ctx <- memLocAllocator(key, addr)) {
             increment(ctx)
             newStore += PhysicalAddress(ctx, Recency.Recent) -> MemoryRegion(
               startAddr = addr,
-              alignment = Topped.Actual(alignment),
+              alignment = Powerset(alignment),
+              byteSize = sizeOps.fromInt(byteSize),
               timestamp = this.timestamp,
               value = value,
-              byteSize = Topped.Actual(byteSize),
               byteOrder = byteOrder
             )
             for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
               newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
             }
           }
-          memories += key -> Mem(newStore, fillBytes, numPages, pageLimit)
+          memories += key -> Mem(newStore, numPages, pageLimit)
 
           write0(
             key = key,
@@ -172,12 +173,36 @@ final class AlignedMemory
     memories += key -> mem.copy(store = store)
     JOptionA.NoneSome(())
 
-  override def fill(key: Key, addr: Addr, byteAmount: Size, value: Bytes[Val]): JOption[WithJoin, Unit] =
-    val Mem(store, fillBytes, numPages, pageLimit) = memories(key)
-    addressLimits.ifAddrLeSize(addr, sizeIntOps.sub(sizeIntOps.mul(numPages, pageSize), byteAmount)) {
-      memories += key -> Mem(store, Join(fillBytes, Some(value.toReadBytes)).get, numPages, pageLimit)
-      ()
-    }
+  override def fill(key: Key, addr: Addr, byteAmount: Size, bytes: Bytes[Val]): JOption[WithJoin, Unit] =
+    bytes match
+      case StoredBytes(values, byteOrder) =>
+        val Mem(store,  numPages, pageLimit) = memories(key)
+        addressLimits.ifAddrLeSize(addr, sizeOps.sub(sizeOps.mul(numPages, pageSize), byteAmount)) {
+          val joinedValue = values.map(_._1).reduce(Join(_, _).get)
+          val joinedByteSize = values.map((_,i) => Powerset(i)).reduce(Join(_,_).get).set
+          val size = Join(sizeOps.fromInt(joinedByteSize.min), sizeOps.fromInt(joinedByteSize.max)).get
+          val startAddr = Join(addr, addressLimits.addSizeToAddr(byteAmount, addr)).get
+          var newStore = store
+          for (ctx <- memLocAllocator(key, startAddr)) {
+            increment(ctx)
+            newStore += PhysicalAddress(ctx, Recency.Recent) -> MemoryRegion(
+              startAddr = startAddr,
+              alignment = Powerset(1),
+              byteSize = size,
+              timestamp = this.timestamp,
+              value = joinedValue,
+              byteOrder = byteOrder
+            )
+            for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+              newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
+            }
+          }
+
+          memories += key -> Mem(newStore, numPages, pageLimit)
+          ()
+        }
+
+      case ReadBytes(_,_) => throw IllegalArgumentException(s"Expected StoredBytes, but got $bytes")
 
   override def init(key: Key, targetAddr0: Addr, sourceAddr0: Addr, byteAmount0: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
     Profiler.addTime("AlignedMemory.init") {
@@ -189,13 +214,13 @@ final class AlignedMemory
           var result = JOptionA.Some[Unit](())
 
           for (atom@(value, byteSize) <- valueList) {
-            addressLimits.ifSizeLeLimit(byteAmount, sizeIntOps.integerLit(0)) {
+            addressLimits.ifSizeLeLimit(byteAmount, sizeOps.fromInt(0)) {
               // if byteAmount is 0, we are done writing.
             } {
-              addressLimits.ifAddrLeSize(sourceAddr, sizeIntOps.integerLit(0)) {
+              addressLimits.ifAddrLeSize(sourceAddr, sizeOps.fromInt(0)) {
                 result = Join(result, write(key, targetAddr, StoredBytes(List(atom), byteOrder)).asInstanceOf[JOptionA[Unit]]).get
                 targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr)
-                byteAmount = sizeIntOps.sub(byteAmount, sizeIntOps.integerLit(byteSize))
+                byteAmount = sizeOps.sub(byteAmount, sizeOps.fromInt(byteSize))
               }.orElseAndThen[Unit] {
                 // if sourceAddr > 0
                 sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr)
@@ -212,22 +237,22 @@ final class AlignedMemory
     memories(key).numPages
 
   override def grow(key: Key, deltaPages: Size): JOption[WithJoin, Size] =
-    val Mem(addressRanges, fillBytes, numPages, pageLimit) = memories(key)
-    val newNumPages = sizeIntOps.add(numPages, deltaPages)
+    val Mem(addressRanges, numPages, pageLimit) = memories(key)
+    val newNumPages = sizeOps.add(numPages, deltaPages)
 
-    val (resultPages, returnValue) = addressLimits.ifSizeLeLimit(newNumPages, sizeIntOps.min(maxPages, pageLimit)) {
+    val (resultPages, returnValue) = addressLimits.ifSizeLeLimit(newNumPages, sizeOps.min(maxPages, pageLimit)) {
       (newNumPages, JOptionA.Some(numPages))
     } {
       (numPages, JOptionA.None[Size]())
     }
-    memories += key -> Mem(addressRanges, fillBytes, resultPages, pageLimit)
+    memories += key -> Mem(addressRanges, resultPages, pageLimit)
 
     returnValue
 
   override def putNew(key: Key, initSize: Size, sizeLimit: Option[Size]): Unit =
-    memories += key -> Mem[Context,Addr,Timestamp,Val,Size](SortedMap.empty, None, initSize, sizeLimit.getOrElse(Join(initSize, maxPages).get))
+    memories += key -> Mem[Context,Addr,Timestamp,Val,Size](SortedMap.empty, initSize, sizeLimit.getOrElse(Join(initSize, maxPages).get))
 
-  override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+  override def addressIterator[_Addr: ClassTag](valueIterator: Any => Iterator[_Addr]): Iterator[_Addr] =
     memories.values.flatMap(_.addressIterator(valueIterator)).iterator
 
   case class AlignedMemoryState(state: Map[Key, Mem[Context, Addr, Timestamp, Val, Size]]):
@@ -247,7 +272,7 @@ final class AlignedMemory
     memories = memories.map { (key,mem) =>
       (key,mem.copy(store = mem.store.filter {
         case (physAddr@PhysicalAddress(_,Recency.Recent), _) =>
-          ! olderState.state.get(key).map(_.store.contains(physAddr)).getOrElse(false)
+          !olderState.state.get(key).exists(_.store.contains(physAddr))
         case _ => true
       }))
     }
@@ -263,31 +288,31 @@ final class AlignedMemory
   override def setBottom: Unit =
     memories = Map()
 
-case class Mem[Ctx, Addr, Timestamp, Val, Size](store: SortedMap[PhysicalAddress[Ctx], MemoryRegion[Addr, Timestamp, Val]],
-                                                fillBytes: Option[Bytes[Val]],
+  private object ConstantSize:
+    def unapply(size: Size): Option[Int] =
+      sizeOps.toTopped(size).toOption
+
+case class Mem[Ctx, Addr, Timestamp, Val, Size](store: SortedMap[PhysicalAddress[Ctx], MemoryRegion[Addr, Size, Timestamp, Val]],
                                                 numPages: Size,
                                                 pageLimit: Size):
-  def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+  def addressIterator[_Addr: ClassTag](valueIterator: Any => Iterator[_Addr]): Iterator[_Addr] =
     store.values.flatMap(_.addressIterator(valueIterator)).iterator ++
       valueIterator(numPages) ++
       valueIterator(pageLimit)
 
   override def equals(obj: Any): Boolean =
     obj match
-      case other: Mem[Ctx, Addr, Timestamp, Val, Size] @unchecked => MapEquals(this.store, other.store) && this.fillBytes.equals(other.fillBytes) && this.numPages.equals(other.numPages) && this.pageLimit.equals(other.pageLimit)
+      case other: Mem[Ctx, Addr, Timestamp, Val, Size] @unchecked => MapEquals(this.store, other.store) && this.numPages.equals(other.numPages) && this.pageLimit.equals(other.pageLimit)
       case _ => false
 
 
-case class MemoryRegion[Addr, Timestamp, Val](startAddr: Addr, alignment: Topped[Int], timestamp: Timestamp, value: Val, byteSize: Topped[Int], byteOrder: Topped[ByteOrder]):
-  def endAddr(using addrOffset: AddressOffset[Addr]): Topped[Addr] =
-    byteSize.map(addrOffset.addOffsetToAddr(_, startAddr))
-
-  def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
+case class MemoryRegion[Addr, Size, Timestamp, Val](startAddr: Addr, alignment: Powerset[Int], byteSize: Size, timestamp: Timestamp, value: Val, byteOrder: Topped[ByteOrder]):
+  def addressIterator[_Addr: ClassTag](valueIterator: Any => Iterator[_Addr]): Iterator[_Addr] =
     valueIterator(startAddr) ++ valueIterator(value)
 
   override def equals(obj: Any): Boolean =
     obj match
-      case other: MemoryRegion[Addr, Timestamp, Val] @unchecked =>
+      case other: MemoryRegion[Addr, Size, Timestamp, Val] @unchecked =>
         // Does not compare timestamp to avoid non-termination. Timestamp lattice is infinite and without widening.
         this.startAddr == other.startAddr && this.alignment == other.alignment && this.value == other.value && this.byteSize == other.byteSize && this.byteOrder == other.byteOrder
       case _ => false
@@ -328,39 +353,38 @@ given CombineMem[Context: Finite, Addr, Timestamp, Val, Size, W <: Widening](usi
       Unchanged(v1)
     else
       val result = for {
-        store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Timestamp, Val], W](v1.store, v2.store)
-        fillBytes <- Combine(v1.fillBytes, v2.fillBytes)
+        store <- CombineFiniteKeySortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], W](v1.store, v2.store)
         numPages <- combineSize(v1.numPages, v2.numPages)
         pageLimit <- combineSize(v1.pageLimit, v2.pageLimit)
-      } yield (Mem(store, fillBytes, numPages, pageLimit))
+      } yield Mem(store, numPages, pageLimit)
       result
 
-given CombineRegion[Addr, Timestamp, Val, W <: Widening](using combineAddr: Combine[Addr, W], joinTimestamp: Join[Timestamp], combineVal: Combine[Val,W]): Combine[MemoryRegion[Addr, Timestamp, Val], W] with
-  override def apply(v1: MemoryRegion[Addr, Timestamp, Val], v2: MemoryRegion[Addr, Timestamp, Val]): MaybeChanged[MemoryRegion[Addr, Timestamp, Val]] =
+given CombineRegion[Addr, Size, Timestamp, Val, W <: Widening](using combineAddr: Combine[Addr, W], combineSize: Combine[Size,W], joinTimestamp: Join[Timestamp], combineVal: Combine[Val,W]): Combine[MemoryRegion[Addr, Size, Timestamp, Val], W] with
+  override def apply(v1: MemoryRegion[Addr, Size, Timestamp, Val], v2: MemoryRegion[Addr, Size, Timestamp, Val]): MaybeChanged[MemoryRegion[Addr, Size, Timestamp, Val]] =
     if (v1 eq v2)
       Unchanged(v1)
     else
       val result = for {
         startAddr <- combineAddr(v1.startAddr, v2.startAddr)
         alignment <- Join(v1.alignment, v2.alignment)
+        byteSize <- combineSize(v1.byteSize, v2.byteSize)
         value <- combineVal(v1.value, v2.value)
-        byteSize <- Join(v1.byteSize, v2.byteSize)
         byteOrder <- Join(v1.byteOrder, v2.byteOrder)
-      } yield (MemoryRegion(startAddr, alignment, joinTimestamp(v1.timestamp, v2.timestamp).get, value, byteSize, byteOrder))
+      } yield MemoryRegion(startAddr, alignment, byteSize, joinTimestamp(v1.timestamp, v2.timestamp).get, value, byteOrder)
       result
 
 given CombineBytes[Addr, Val, W <: Widening](using combineVal: Combine[Val, W]): Combine[Bytes[Val], W] with
   override def apply(v1: Bytes[Val], v2: Bytes[Val]): MaybeChanged[Bytes[Val]] =
     (v1, v2) match
-      case (_,_) if(v1 eq v2) => Unchanged(v1)
+      case (_,_) if v1 eq v2 => Unchanged(v1)
       case (ReadBytes(val1, byteOrder1), ReadBytes(val2, byteOrder2)) =>
         for {
           value <- combineListOfValues(val1, val2)
           byteOrder <- Join(byteOrder1, byteOrder2)
-        } yield (ReadBytes(value, byteOrder))
+        } yield ReadBytes(value, byteOrder)
       case _ => throw CannotJoinException(s"Can only join ReadBytes, but got ($v1, $v2)")
 
-  def combineListOfValues(v1: Topped[List[(Val,Int)]], v2: Topped[List[(Val,Int)]]): MaybeChanged[Topped[List[(Val,Int)]]] =
+  private def combineListOfValues(v1: Topped[List[(Val,Int)]], v2: Topped[List[(Val,Int)]]): MaybeChanged[Topped[List[(Val,Int)]]] =
     (v1, v2) match
       case (Topped.Top, _) => Unchanged(v1)
       case (_, Topped.Top) => Changed(v2)

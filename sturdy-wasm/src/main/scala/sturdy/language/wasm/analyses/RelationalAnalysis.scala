@@ -517,6 +517,17 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(wasmOps.f64ops.pow(wasmOps.f64ops.floatingLit(2), exponent))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected f64 as arguments to exp2, but got $args")
+      case "read" =>
+        args match
+          case List(data@Num(Int32(fd)), buffer@Num(Int32(_)), count@Num(Int32(_))) =>
+            memory.fill(
+              MemoryAddr(0),
+              wasmOps.specialOps.valToAddr(buffer),
+              wasmOps.specialOps.valToSize(count),
+              BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
+            List(count)
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to read, but got $args")
       case "fwrite" =>
         args match
           case List(data@Num(Int32(_)), Num(Int32(size)), c@Num(Int32(count)), Num(Int32(stream))) =>
@@ -530,6 +541,40 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(c)
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
+      case "printf" =>
+        args match
+          case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
+            println(s"printf($strPtr, $varargs)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to printf, but got $args")
+      case "fprintf" =>
+        args match
+          case List(data@Num(Int32(fd)), Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
+            val res = List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp,_) =>
+              apronState.assign(tmp, ApronExpr.interval(Integer.MIN_VALUE, Integer.MAX_VALUE, I32Type))
+              ApronExpr.addr(tmp,I32Type)
+            )))))
+            println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
+            res
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
+      case "fileno" =>
+        args match
+          case List(Num(Int32(fd))) =>
+            val iv = apronState.getInterval(fd.asNumExpr)
+            val res = if(iv.cmp(Interval(0,2)) <= 0) {
+              args
+            } else {
+              List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp, _) =>
+                apronState.assign(tmp, ApronExpr.interval(-1, Integer.MAX_VALUE, I32Type))
+                ApronExpr.addr(tmp, I32Type)
+              )))))
+            }
+            println(s"fileno($fd) = ${res.head}")
+            res
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
       case "strlen" =>
         args match
           case List(ptr@Num(Int32(_))) => boundary:
@@ -553,6 +598,28 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             } do ()
             throw new Exception("Unreachable")
           case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+      case "toupper" =>
+        args match
+          case List(v@Num(Int32(char))) =>
+            val charExpr = char.asNumExpr
+            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('a'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('z'.toInt, I32Type))))) {
+              ApronExpr.intSub(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
+            } {
+              charExpr
+            }))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to toupper, but got $args")
+      case "tolower" =>
+        args match
+          case List(v@Num(Int32(char))) =>
+            val charExpr = char.asNumExpr
+            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('A'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('Z'.toInt, I32Type))))) {
+              ApronExpr.intAdd(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
+            } {
+              charExpr
+            }))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to tolower, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(_))) =>
@@ -560,7 +627,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             assert(v.asInstanceOf[Value], domLogger.currentDom)
             List()
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to assert, but got $args")
       case "__VERIFIER_nondet_bool" =>
         assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
       case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>

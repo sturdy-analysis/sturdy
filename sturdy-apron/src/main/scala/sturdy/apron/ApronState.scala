@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Abstract1, Coeff, Interval, Var}
+import apron.{Abstract1, Coeff, Interval, Var, Scalar}
 import gmp.{Mpfr, Mpq}
 import sturdy.apron
 import sturdy.apron.ApronExpr.{addr, booleanLit}
@@ -86,11 +86,11 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def getFloatInterval(expr: ApronExpr[Addr, Type])(using ResolveState): sturdy.apron.FloatInterval
 
-  def getIntInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Int,Int) =
+  inline def getIntInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Int,Int) =
     val (lower,upper) = getBigIntInterval(expr)
     (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
 
-  def getLongInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Long, Long) =
+  inline def getLongInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Long, Long) =
     val (lower, upper) = getBigIntInterval(expr)
     val inf = lower.getOrElse[BigInt](Long.MinValue).max(Long.MinValue).toLong
     val sup = upper.getOrElse[BigInt](Long.MaxValue).min(Long.MaxValue).toLong
@@ -220,7 +220,11 @@ class ApronRecencyState
 
   override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
     if(virtExpr.isConstant) {
-      relationalStore.getBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+      virtExpr match {
+        case ApronExpr.Constant(scalar: Scalar, _, _) => Interval(scalar,scalar)
+        case ApronExpr.Constant(iv: Interval, _, _) => iv
+        case _ => relationalStore.getBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+      }
     } else {
       val (physExpr, state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone().asInstanceOf)
       relationalStore.getBound(physExpr, state1)
@@ -228,7 +232,11 @@ class ApronRecencyState
 
   inline override def getFloatInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): apron.FloatInterval =
     if (virtExpr.isConstant) {
-      relationalStore.getFloatBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+      virtExpr match {
+        case ApronExpr.Constant(scalar: Scalar, floatSpecials, _) => sturdy.apron.FloatInterval(scalar, scalar, floatSpecials)
+        case ApronExpr.Constant(iv: Interval, floatSpecials, _) => sturdy.apron.FloatInterval(iv.inf(), iv.sup(), floatSpecials)
+        case _ => relationalStore.getFloatBound(virtExpr.asInstanceOf[ApronExpr[PhysicalAddress[Ctx], Type]], getResolveState)
+      }
     } else {
       val (physExpr,state1) = convertExpr.virtToPhysPure(virtExpr, getResolveState.clone.asInstanceOf)
       relationalStore.getFloatBound(physExpr, state1)
