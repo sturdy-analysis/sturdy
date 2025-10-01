@@ -16,7 +16,6 @@ import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.objects.{SizeOps, TypeOps}
 
 trait Interpreter:
-
   type J[A] <: MayJoin[A]
 
   type I8
@@ -96,14 +95,13 @@ trait Interpreter:
                                     Combine[F32, W], Combine[F64, W],
                                     Combine[RefValue, W]
                                    ): Combine[Value, W] with
-    import Value.*
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => Combine[I32, W](i1, i2).map(Int32.apply)
-      case (Int64(i1), Int64(i2)) => Combine[I64, W](i1, i2).map(Int64.apply)
-      case (Float32(i1), Float32(i2)) => Combine[F32, W](i1, i2).map(Float32.apply)
-      case (Float64(i1), Float64(i2)) => Combine[F64, W](i1, i2).map(Float64.apply)
-      case (ReferenceValue(r1), ReferenceValue(r2)) => Combine[RefValue, W](r1, r2).map(ReferenceValue.apply)
-      case _ => MaybeChanged(TopValue, v1)
+      case (Value.Int32(i1), Value.Int32(i2)) => Combine[I32, W](i1, i2).map(Value.Int32.apply)
+      case (Value.Int64(i1), Value.Int64(i2)) => Combine[I64, W](i1, i2).map(Value.Int64.apply)
+      case (Value.Float32(i1), Value.Float32(i2)) => Combine[F32, W](i1, i2).map(Value.Float32.apply)
+      case (Value.Float64(i1), Value.Float64(i2)) => Combine[F64, W](i1, i2).map(Value.Float64.apply)
+      case (Value.ReferenceValue(r1), Value.ReferenceValue(r2)) => Combine[RefValue, W](r1, r2).map(Value.ReferenceValue.apply)
+      case _ => MaybeChanged(Value.TopValue, v1)
 
   given ValueBytecodeOps
     (using failure: Failure
@@ -196,49 +194,41 @@ trait Interpreter:
     final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
     final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
 
+    // helper function to avoid duplication
+    // TODO: can the comparison parameters be combined somehow?
+    private inline def cmp(cmpI32: => (I32, I32) => Bool, cmpI64: => (I64, I64) => Bool, cmpF32: => (F32, F32) => Bool, cmpF64: => (F64, F64) => Bool, cmpRef: => (RefValue, RefValue) => Bool)(v1: Value, v2: Value): Value = (v1, v2) match
+      case (Value.Int32(i1), _) => boolean(cmpI32(i1, v2.asInt32))
+      case (Value.Int64(l1), _) => boolean(cmpI64(l1, v2.asInt64))
+      case (Value.Float32(f1), _) => boolean(cmpF32(f1, v2.asFloat32))
+      case (Value.Float64(d1), _) => boolean(cmpF64(d1, v2.asFloat64))
+      case (Value.ReferenceValue(r1), _) => boolean(cmpRef(r1, v2.asRef))
+      case (_, Value.Int32(i2)) => boolean(cmpI32(v1.asInt32, i2))
+      case (_, Value.Int64(l2)) => boolean(cmpI64(v1.asInt64, l2))
+      case (_, Value.Float32(f2)) => boolean(cmpF32(v1.asFloat32, f2))
+      case (_, Value.Float64(d2)) => boolean(cmpF64(v1.asFloat64, d2))
+      case (_, Value.ReferenceValue(r2)) => boolean(cmpRef(v1.asRef, r2))
+      case (Value.TopValue, Value.TopValue) => Value.TopValue // TODO: is this correct?
+      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
     final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
-      import Value.*
-      override def lt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.lt(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.lt(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.lt(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.lt(d1, d2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-      override def le(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.le(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.le(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.le(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.le(d1, d2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-      override def ge(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.ge(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.ge(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.ge(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.ge(d1, d2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-      override def gt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.gt(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.gt(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.gt(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def lt(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.lt, OrderingOps.lt, OrderingOps.lt, OrderingOps.lt, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def le(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.le, OrderingOps.le, OrderingOps.le, OrderingOps.le, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def ge(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.ge, OrderingOps.ge, OrderingOps.ge, OrderingOps.ge, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def gt(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.gt, OrderingOps.gt, OrderingOps.gt, OrderingOps.gt, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
 
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
-      import Value.*
-      override def equ(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(EqOps.equ(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(EqOps.equ(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(EqOps.equ(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(EqOps.equ(d1, d2))
-        case (ReferenceValue(r1), ReferenceValue(r2)) => boolean(EqOps.equ(r1, r2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-      override def neq(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(EqOps.neq(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(EqOps.neq(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(EqOps.neq(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(EqOps.neq(d1, d2))
-        case (ReferenceValue(r1), ReferenceValue(r2)) => boolean(EqOps.neq(r1, r2))
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      override def equ(v1: Value, v2: Value): Value =
+        cmp(EqOps.equ, EqOps.equ, EqOps.equ, EqOps.equ, EqOps.equ)(v1, v2)
+
+      override def neq(v1: Value, v2: Value): Value =
+        cmp(EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq)(v1, v2)
 
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
       override def instanceOf(v: Value, check: TypeRep): Value = v match
@@ -250,14 +240,13 @@ trait Interpreter:
         case _ => ??? // TODO
 
     final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
-      import Value.*
       override def is32Bit(v: Value): Value = v match
-        case Int32(v) => boolean(SizeOps.is32Bit(v))
-        case Int64(v) => boolean(SizeOps.is32Bit(v))
-        case Float32(v) => boolean(SizeOps.is32Bit(v))
-        case Float64(v) => boolean(SizeOps.is32Bit(v))
-        case ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
-        case TopValue => ??? // TODO: not implemented
+        case Value.Int32(v) => boolean(SizeOps.is32Bit(v))
+        case Value.Int64(v) => boolean(SizeOps.is32Bit(v))
+        case Value.Float32(v) => boolean(SizeOps.is32Bit(v))
+        case Value.Float64(v) => boolean(SizeOps.is32Bit(v))
+        case Value.ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
+        case Value.TopValue => ??? // TODO: not implemented
 
   type Instance <: GenericInstance
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, ObjType, RefValue, TypeRep, ExcV, J]
