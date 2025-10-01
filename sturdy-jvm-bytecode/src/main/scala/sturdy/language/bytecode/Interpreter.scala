@@ -10,9 +10,8 @@ import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
 import org.opalj.br.ClassType
 import sturdy.data.MayJoin
-import sturdy.effect.except.{ConcreteExcept, Except}
+import sturdy.effect.except.Except
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
-import sturdy.values.exceptions.ConcreteExceptional
 import sturdy.values.objects.{SizeOps, TypeOps}
 
 trait Interpreter:
@@ -40,7 +39,7 @@ trait Interpreter:
 
   type ExcV
 
-  implicit val except: Except[JvmExcept[Value], JvmExcept[Value], MayJoin.NoJoin] = ConcreteExcept[JvmExcept[Value]]()
+  implicit val except: Except[JvmExcept[Value], ExcV, J]
 
   enum Value:
     case TopValue
@@ -172,8 +171,8 @@ trait Interpreter:
 
       override def remainder(v1: Value, v2: Value): Value =
         checked(i64Ops.remainder)(v1, v2)
-    final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
-    final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
+    final val f32ops: FloatOps[Float, Value] = LiftedFloatOps(_.asFloat32, Value.Float32.apply)
+    final val f64ops: FloatOps[Double, Value] = LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
     // the jvm treats all the smaller types of byte, short, and char as ints, so we always just convert them back
     private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, NilCC)).andThen(Value.Int32.apply)
@@ -185,18 +184,18 @@ trait Interpreter:
     final val convert_i32_i8: ConvertIntByte[Value, Value] = LiftedConvert(_.asInt32, i32_from_i8)
     final val convert_i32_i16: ConvertIntShort[Value, Value] = LiftedConvert(_.asInt32, i32_from_i16)
     final val convert_i32_u16: ConvertIntChar[Value, Value] = LiftedConvert(_.asInt32, i32_from_u16)
-    final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
-    final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, Value.Float32.apply)
-    final val convert_i32_f64: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, Value.Float64.apply)
-    final val convert_i64_i32: ConvertLongInt[Value, Value] = new LiftedConvert(_.asInt64, Value.Int32.apply)
-    final val convert_i64_f32: ConvertLongFloat[Value, Value] = new LiftedConvert(_.asInt64, Value.Float32.apply)
-    final val convert_i64_f64: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asInt64, Value.Float64.apply)
-    final val convert_f32_i32: ConvertFloatInt[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int32.apply)
-    final val convert_f32_i64: ConvertFloatLong[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int64.apply)
-    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat32, Value.Float64.apply)
-    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int32.apply)
-    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
-    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
+    final val convert_i32_i64: ConvertIntLong[Value, Value] = LiftedConvert(_.asInt32, Value.Int64.apply)
+    final val convert_i32_f32: ConvertIntFloat[Value, Value] = LiftedConvert(_.asInt32, Value.Float32.apply)
+    final val convert_i32_f64: ConvertIntDouble[Value, Value] = LiftedConvert(_.asInt32, Value.Float64.apply)
+    final val convert_i64_i32: ConvertLongInt[Value, Value] = LiftedConvert(_.asInt64, Value.Int32.apply)
+    final val convert_i64_f32: ConvertLongFloat[Value, Value] = LiftedConvert(_.asInt64, Value.Float32.apply)
+    final val convert_i64_f64: ConvertLongDouble[Value, Value] = LiftedConvert(_.asInt64, Value.Float64.apply)
+    final val convert_f32_i32: ConvertFloatInt[Value, Value] = LiftedConvert(_.asFloat32, Value.Int32.apply)
+    final val convert_f32_i64: ConvertFloatLong[Value, Value] = LiftedConvert(_.asFloat32, Value.Int64.apply)
+    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = LiftedConvert(_.asFloat32, Value.Float64.apply)
+    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = LiftedConvert(_.asFloat64, Value.Int32.apply)
+    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = LiftedConvert(_.asFloat64, Value.Int64.apply)
+    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = LiftedConvert(_.asFloat64, Value.Float32.apply)
 
     // helper function to avoid duplication
     // TODO: can the comparison parameters be combined somehow?
@@ -212,7 +211,7 @@ trait Interpreter:
       case (_, Value.Float64(d2)) => boolean(cmpF64(v1.asFloat64, d2))
       case (_, Value.ReferenceValue(r2)) => boolean(cmpRef(v1.asRef, r2))
       case (Value.TopValue, Value.TopValue) => Value.TopValue // TODO: is this correct?
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      case _ => throw IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
       override def lt(v1: Value, v2: Value): Value =
@@ -237,20 +236,19 @@ trait Interpreter:
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
       override def instanceOf(v: Value, check: TypeRep): Value = v match
         case Value.ReferenceValue(r1) => boolean(refTypeOps.instanceOf(r1, check))
-        case _ => ??? // TODO
+        case x => throw IllegalArgumentException(s"expected reference value but got $x")
 
       override def typeOf(v: Value): TypeRep = v match
         case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
-        case _ => ??? // TODO
+        case x => throw IllegalArgumentException(s"expected reference value but got $x")
 
-    final val sizeOps: SizeOps[Value, Value] = new SizeOps[Value, Value]:
-      override def is32Bit(v: Value): Value = v match
-        case Value.Int32(v) => boolean(SizeOps.is32Bit(v))
-        case Value.Int64(v) => boolean(SizeOps.is32Bit(v))
-        case Value.Float32(v) => boolean(SizeOps.is32Bit(v))
-        case Value.Float64(v) => boolean(SizeOps.is32Bit(v))
-        case Value.ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
-        case Value.TopValue => ??? // TODO: not implemented
+    final val sizeOps: SizeOps[Value, Value] =
+      case Value.Int32(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Int64(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Float32(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Float64(v) => boolean(SizeOps.is32Bit(v))
+      case Value.ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
+      case Value.TopValue => ??? // TODO: not implemented
 
   type Instance <: GenericInstance
 

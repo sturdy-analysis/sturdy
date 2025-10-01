@@ -7,7 +7,7 @@ import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.{EffectStack, TrySturdy}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.JoinableDecidableCallFrame
-import sturdy.effect.except.JoinedExcept
+import sturdy.effect.except.{Except, JoinedExcept}
 import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
 import sturdy.effect.store.{AStoreThreaded, Store}
@@ -17,7 +17,7 @@ import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{Interpreter, abstractions, resolveMethod, selectMethod}
 import sturdy.language.bytecode.abstractions.{Addr, AddrSet, Exceptions, FieldIdent, InvokeContext, Numbers, Site, given}
-import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, given}
+import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening, given}
 import sturdy.values.booleans.given
 import sturdy.values.convert.given
@@ -55,6 +55,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type AType = ArrayType
 
   override final def topRef: RefValue = Topped.Top
+
+  override implicit val except: Except[JvmExcept[Value], ExcV, J] = JoinedExcept[JvmExcept[Value], ExcV]()
 
   given combineRef[W <: Widening]: Combine[RefValue, W] with
     override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] = (v1, v2) match
