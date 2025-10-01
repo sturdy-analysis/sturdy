@@ -203,7 +203,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
             fix.iter.innermost[FixIn, FixOut, Unit](StackedStates())
           )
         )
-        ).fixpoint
+      ).fixpoint
 
     override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
     Fixpoint.DEBUG = false

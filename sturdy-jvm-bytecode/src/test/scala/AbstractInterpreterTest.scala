@@ -1,5 +1,7 @@
 import org.opalj.br.{ClassFile, ClassType}
 import org.opalj.br.analyses.Project
+import org.opalj.br.analyses.Project.JavaClassFileReader
+import org.opalj.bytecode
 import org.opalj.io.process
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -17,8 +19,11 @@ class AbstractInterpreterTest extends AnyFunSuite:
 
 
     val pWithLibrary = Project(
-      new java.io.File(projectPath), // path to the JAR files/directories containing the project
-      org.opalj.bytecode.JavaBase
+      JavaClassFileReader().ClassFiles(java.io.File(projectPath)), // path to the JAR files/directories containing the project
+      JavaClassFileReader().ClassFiles(bytecode.JavaBase),
+      true,
+      Iterable.empty,
+      (_, ex) => cancel(s"project setup failed: $ex")
     )
 
     val simpleMath: ClassFile =
