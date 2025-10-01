@@ -26,7 +26,6 @@ trait Interpreter:
   type F32
   type F64
   type Bool
-
   type Addr
 
   type Mth
@@ -79,21 +78,23 @@ trait Interpreter:
       case _ => f.fail(TypeError, s"Expected ref but got $this")
 
   def topI32: I32
+
   def topI64: I64
+
   def topF32: F32
+
   def topF64: F64
+
   def topRef: RefValue
 
   given Top[Value] with
     override def top: Value = Value.TopValue
 
   def asBoolean(v: Value)(using Failure): Bool
+
   def boolean(b: Bool): Value
 
-  given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W],
-                                    Combine[F32, W], Combine[F64, W],
-                                    Combine[RefValue, W]
-                                   ): Combine[Value, W] with
+  given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W], Combine[RefValue, W]): Combine[Value, W] with
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
       case (Value.Int32(i1), Value.Int32(i2)) => Combine[I32, W](i1, i2).map(Value.Int32.apply)
       case (Value.Int64(i1), Value.Int64(i2)) => Combine[I64, W](i1, i2).map(Value.Int64.apply)
@@ -103,51 +104,49 @@ trait Interpreter:
       case _ => MaybeChanged(Value.TopValue, v1)
 
   given ValueBytecodeOps
-    (using failure: Failure
-    , i32Ops: IntegerOps[Int, I32]
-    , i64Ops: IntegerOps[Long, I64]
-    , f32Ops: FloatOps[Float, F32]
-    , f64Ops: FloatOps[Double, F64]
-    , convertI8I32: ConvertByteInt[I8, I32]
-    , convertI16I32: ConvertShortInt[I16, I32]
-    , convertU16I32: ConvertCharInt[U16, I32]
-    , convertI32I8: ConvertIntByte[I32, I8]
-    , convertI32I16: ConvertIntShort[I32, I16]
-    , convertI32U16: ConvertIntChar[I32, U16]
-    , convertI32I64: ConvertIntLong[I32, I64]
-    , convertI32F32: ConvertIntFloat[I32, F32]
-    , convertI32F64: ConvertIntDouble[I32, F64]
-    , convertI64I32: ConvertLongInt[I64, I32]
-    , convertI64F32: ConvertLongFloat[I64, F32]
-    , convertI64F64: ConvertLongDouble[I64, F64]
-    , convertF32I32: ConvertFloatInt[F32, I32]
-    , convertF32I64: ConvertFloatLong[F32, I64]
-    , convertF32F64: ConvertFloatDouble[F32, F64]
-    , convertF64I32: ConvertDoubleInt[F64, I32]
-    , convertF64I64: ConvertDoubleLong[F64, I64]
-    , convertF64F32: ConvertDoubleFloat[F64, F32]
-    , boolBranchOpsV: BooleanBranching[Bool, Value]
-    , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
-    , i32CompareOps: OrderingOps[I32, Bool]
-    , i64CompareOps: OrderingOps[I64, Bool]
-    , f32CompareOps: OrderingOps[F32, Bool]
-    , f64CompareOps: OrderingOps[F64, Bool]
-    , i32EqOps: EqOps[I32, Bool]
-    , i64EqOps: EqOps[I64, Bool]
-    , f32EqOps: EqOps[F32, Bool]
-    , f64EqOps: EqOps[F64, Bool]
-    , refEqOps: EqOps[RefValue, Bool]
-    , refTypeOps: TypeOps[RefValue, TypeRep, Bool]
-    , i32SizeOps: SizeOps[I32, Bool]
-    , i64SizeOps: SizeOps[I64, Bool]
-    , f32SizeOps: SizeOps[F32, Bool]
-    , f64SizeOps: SizeOps[F64, Bool]
-    , refSizeOps: SizeOps[RefValue, Bool]
-      ): BytecodeOps[Value, TypeRep] with
-
-
-    val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
-    val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
+  (using failure: Failure
+   , i32Ops: IntegerOps[Int, I32]
+   , i64Ops: IntegerOps[Long, I64]
+   , f32Ops: FloatOps[Float, F32]
+   , f64Ops: FloatOps[Double, F64]
+   , convertI8I32: ConvertByteInt[I8, I32]
+   , convertI16I32: ConvertShortInt[I16, I32]
+   , convertU16I32: ConvertCharInt[U16, I32]
+   , convertI32I8: ConvertIntByte[I32, I8]
+   , convertI32I16: ConvertIntShort[I32, I16]
+   , convertI32U16: ConvertIntChar[I32, U16]
+   , convertI32I64: ConvertIntLong[I32, I64]
+   , convertI32F32: ConvertIntFloat[I32, F32]
+   , convertI32F64: ConvertIntDouble[I32, F64]
+   , convertI64I32: ConvertLongInt[I64, I32]
+   , convertI64F32: ConvertLongFloat[I64, F32]
+   , convertI64F64: ConvertLongDouble[I64, F64]
+   , convertF32I32: ConvertFloatInt[F32, I32]
+   , convertF32I64: ConvertFloatLong[F32, I64]
+   , convertF32F64: ConvertFloatDouble[F32, F64]
+   , convertF64I32: ConvertDoubleInt[F64, I32]
+   , convertF64I64: ConvertDoubleLong[F64, I64]
+   , convertF64F32: ConvertDoubleFloat[F64, F32]
+   , boolBranchOpsV: BooleanBranching[Bool, Value]
+   , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+   , i32CompareOps: OrderingOps[I32, Bool]
+   , i64CompareOps: OrderingOps[I64, Bool]
+   , f32CompareOps: OrderingOps[F32, Bool]
+   , f64CompareOps: OrderingOps[F64, Bool]
+   , i32EqOps: EqOps[I32, Bool]
+   , i64EqOps: EqOps[I64, Bool]
+   , f32EqOps: EqOps[F32, Bool]
+   , f64EqOps: EqOps[F64, Bool]
+   , refEqOps: EqOps[RefValue, Bool]
+   , refTypeOps: TypeOps[RefValue, TypeRep, Bool]
+   , i32SizeOps: SizeOps[I32, Bool]
+   , i64SizeOps: SizeOps[I64, Bool]
+   , f32SizeOps: SizeOps[F32, Bool]
+   , f64SizeOps: SizeOps[F64, Bool]
+   , refSizeOps: SizeOps[RefValue, Bool]
+  ): BytecodeOps[Value, TypeRep] with
+    val branchOpsV: BooleanBranching[Value, Value] = LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
+    val branchOpsUnit: BooleanBranching[Value, Unit] = LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
     // throws an arithmetic exception if the 2nd operand is 0, performs the computation otherwise
     private def arithmeticExceptionChecked[I](extract: Value => I, inject: I => Value, mk0: 0 => I)(op: (I, I) => I)(v1: Value, v2: Value): Value =
@@ -159,14 +158,18 @@ trait Interpreter:
 
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply):
       private val checked = arithmeticExceptionChecked(_.asInt32, Value.Int32.apply, i32Ops.integerLit)
+
       override def div(v1: Value, v2: Value): Value =
         checked(i32Ops.div)(v1, v2)
+
       override def remainder(v1: Value, v2: Value): Value =
         checked(i32Ops.remainder)(v1, v2)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply):
       private val checked = arithmeticExceptionChecked(_.asInt64, Value.Int64.apply, i64Ops.integerLit)
+
       override def div(v1: Value, v2: Value): Value =
         checked(i64Ops.div)(v1, v2)
+
       override def remainder(v1: Value, v2: Value): Value =
         checked(i64Ops.remainder)(v1, v2)
     final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
@@ -174,7 +177,9 @@ trait Interpreter:
 
     // the jvm treats all the smaller types of byte, short, and char as ints, so we always just convert them back
     private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+
     private def i32_from_i16: I16 => Value = (convertI16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+
     private def i32_from_u16: U16 => Value = (convertU16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
 
     final val convert_i32_i8: ConvertIntByte[Value, Value] = LiftedConvert(_.asInt32, i32_from_i8)
@@ -248,4 +253,5 @@ trait Interpreter:
         case Value.TopValue => ??? // TODO: not implemented
 
   type Instance <: GenericInstance
+
   abstract class GenericInstance extends GenericInterpreter[Value, Addr, ObjType, RefValue, TypeRep, ExcV, J]
