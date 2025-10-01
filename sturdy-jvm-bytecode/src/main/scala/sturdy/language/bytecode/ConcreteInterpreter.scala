@@ -52,7 +52,6 @@ object ConcreteInterpreter extends Interpreter:
   override type MthName = String
   override type MthSig = MethodDescriptor
   override type ObjType = ClassFile
-  override type Idx = Int
   override type TypeRep = ReferenceType
   //override type NullVal = Null
   override type FieldName = FieldIdent
@@ -353,7 +352,7 @@ object ConcreteInterpreter extends Interpreter:
     given ConcreteDoubleOps: ConcreteDoubleOps with
       override def remainder(dividend: Double, divisor: Double): Double = dividend % divisor
 
-    override val bytecodeOps: BytecodeOps[Idx, Value, TypeRep] = implicitly
+    override val bytecodeOps: BytecodeOps[Value, TypeRep] = implicitly
     override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin] =
       LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteObjectOps(using objFieldAlloc, store, project)

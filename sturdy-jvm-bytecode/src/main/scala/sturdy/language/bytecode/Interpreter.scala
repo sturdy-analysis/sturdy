@@ -32,7 +32,6 @@ trait Interpreter:
   type Mth
   type MthName
   type MthSig
-  type Idx
 
   type TypeRep
   type FieldName
@@ -144,7 +143,7 @@ trait Interpreter:
     , f32SizeOps: SizeOps[F32, Bool]
     , f64SizeOps: SizeOps[F64, Bool]
     , refSizeOps: SizeOps[RefValue, Bool]
-      ): BytecodeOps[Idx, Value, TypeRep] with
+      ): BytecodeOps[Value, TypeRep] with
 
 
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
@@ -249,4 +248,4 @@ trait Interpreter:
         case Value.TopValue => ??? // TODO: not implemented
 
   type Instance <: GenericInstance
-  abstract class GenericInstance extends GenericInterpreter[Value, Addr, Idx, ObjType, RefValue, TypeRep, ExcV, J]
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, ObjType, RefValue, TypeRep, ExcV, J]

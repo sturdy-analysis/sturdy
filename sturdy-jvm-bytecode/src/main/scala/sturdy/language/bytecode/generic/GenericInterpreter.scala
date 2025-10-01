@@ -50,12 +50,12 @@ given Finite[FixIn] with {}
 
 given Finite[FixOut] with {}
 
-trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
+trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
   private type Fixed = FixIn => FixOut
 
-  val bytecodeOps: BytecodeOps[Idx, V, ReferenceType]
+  val bytecodeOps: BytecodeOps[V, ReferenceType]
 
   import bytecodeOps.*
 
@@ -110,8 +110,8 @@ trait GenericInterpreter[V, Addr, Idx, ObjType, ObjRep, TypeRep, ExcV, J[_] <: M
 
   private def fail(k: FailureKind, what: String) = failure.fail(k, what)
 
-  private lazy val num = GenericInterpreterNumerics[Idx, V, ReferenceType](bytecodeOps)
-  private lazy val native = GenericInterpreterNativeMethods[V, Addr, Idx, ObjType, Addr, Addr, ObjRep, TypeRep, ExcV, InvokeContext, J](this)
+  private lazy val num = GenericInterpreterNumerics[V, ReferenceType](bytecodeOps)
+  private lazy val native = GenericInterpreterNativeMethods[V, Addr, ObjType, Addr, Addr, ObjRep, TypeRep, ExcV, InvokeContext, J](this)
 
   def eval(inst: Instruction, mth: Method, pc: Int)(using Fixed): Unit =
     val site = Site.Instruction(mth, pc)

@@ -41,7 +41,6 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type Mth = Method
   override type MthName = String
   override type MthSig = MethodDescriptor
-  override type Idx = I32
   override type ExcV = JvmExceptAbstract[Value]
 
   override type Addr = AddrSet
@@ -287,7 +286,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
     given refSizeOps: SizeOps[RefValue, Bool] with
       override def is32Bit(v: RefValue): Bool = Topped.Actual(true)
 
-    override val bytecodeOps: BytecodeOps[Topped[FrameData], Value, ReferenceType] = implicitly
+    override val bytecodeOps: BytecodeOps[Value, ReferenceType] = implicitly
 
     override val objectOps: ObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, WithJoin] =
       new LiftedObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(

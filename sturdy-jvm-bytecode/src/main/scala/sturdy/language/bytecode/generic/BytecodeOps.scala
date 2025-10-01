@@ -6,7 +6,7 @@ import sturdy.values.integer.*
 import sturdy.values.ordering.*
 import sturdy.values.objects.*
 
-trait BytecodeOps[Idx, V, TypeRep]:
+trait BytecodeOps[V, TypeRep]:
   val i32ops: IntegerOps[Int, V]
   val i64ops: IntegerOps[Long, V]
   val f32ops: FloatOps[Float, V]

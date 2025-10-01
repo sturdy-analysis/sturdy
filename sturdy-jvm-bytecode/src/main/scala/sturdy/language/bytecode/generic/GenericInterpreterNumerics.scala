@@ -5,7 +5,7 @@ import sturdy.values.config
 import sturdy.values.convert.*
 import org.opalj.br.instructions.*
 
-class GenericInterpreterNumerics[Idx, V, TypeRep](bytecodeOps: BytecodeOps[Idx, V, TypeRep]):
+class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep]):
 
   import bytecodeOps.*
 
