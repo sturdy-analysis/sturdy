@@ -1,5 +1,6 @@
 package sturdy.language.wasm.abstractions
 
+import apron.Interval
 import sturdy.apron.{ApronBool, ApronCons, ApronExpr, ApronState, ApronVar}
 import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
@@ -7,10 +8,11 @@ import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.bytememory.{*, given}
 import sturdy.effect.bytememory.Bytes.*
 import sturdy.effect.failure.Failure
+import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.{Bool, I32, VirtAddr}
 import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
-import sturdy.language.wasm.generic.{FixIn, FrameData, MemoryAddr}
+import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, GlobalAddr, MemoryAddr, ModuleInstance}
 import sturdy.util.Lazy
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
@@ -18,8 +20,11 @@ import sturdy.values.ordering.UnsignedOrderingOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{AbstractReference, PhysicalAddress, PowVirtualAddress, Recency, ReferenceOps, VirtualAddress}
 
+import scala.collection.immutable.ArraySeq
+
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
+  import Type.*
   import ApronCons.*
   import ApronExpr.*
   import ApronBool.*
@@ -27,6 +32,39 @@ trait RelationalMemory extends RelationalValues:
   final type Addr = NumExpr | AllocationSites
   final type Size = ApronExpr[VirtAddr, Type]
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
+
+  case class StaticMemoryLayout(
+    tableRange: Interval,
+    dataRange: Interval,
+    globalRange: Interval,
+    globalData: Map[String, Interval],
+    stackRange: Interval,
+    heapRange: Interval
+  )
+
+  def staticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Option[StaticMemoryLayout] = {
+    val globalVars = globals.entries(())
+    for{
+      tableBase <- intervalOfExport("__table_base")
+      dataStart <- intervalOfExport("__dso_handle")
+      dataEnd <- intervalOfExport("__data_end")
+      globalBase <- intervalOfExport("__global_base")
+
+    } yield(StaticMemoryLayout(
+      tableRange = Interval(tableBase.inf(), apronState.getInterval(ApronExpr.intSub(ApronExpr.constant(dataStart, I32Type), ApronExpr.lit(1, I32Type), I32Type)).sup()),
+      dataRange = Interval(dataStart.inf(), dataEnd.sup()),
+      globalRange = ???,
+      globalData = ???,
+      stackRange = ???,
+      heapRange = ???
+    ))
+  }
+
+  inline def intervalOfExport(name: String)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Option[Interval] =
+    for(
+      case ExternalValue.Global(n) <- moduleInstance.findExport(name);
+      value <- globals.get((), GlobalAddr(n)).toOption
+    ) yield(apronState.getInterval(value.asInt32.asNumExpr))
 
   given RelationalAddressOffset(using f: Failure, lazyEffectStack: Lazy[EffectStack], apronState: ApronState[VirtAddr, Type], unsignedOrderingOps: UnsignedOrderingOps[I32, Bool]): AddressOffset[Addr] with
     override def addOffsetToAddr(newOffset: Int, addr: Addr): Addr = {
@@ -43,8 +81,7 @@ trait RelationalMemory extends RelationalValues:
                 case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
               })
             ), size)
-        case _ =>
-          val expr = addr.asNumExpr
+        case NumExpr(expr) =>
           val resAddr = ApronExpr.intAdd[VirtAddr, Type](expr, ApronExpr.lit[VirtAddr, Type](newOffset, expr._type), expr._type).simplify
           given Join[ApronExpr[VirtAddr, Type]] = apronState.join
           NumExpr(apronState.ifThenElse(effectStack)(unsignedOrderingOps.ltUnsigned(NumExpr(resAddr), NumExpr(ApronExpr.lit[VirtAddr, Type](newOffset, expr._type)))) {
@@ -109,10 +146,10 @@ trait RelationalMemory extends RelationalValues:
           // Hence, a malloc address does not overlap with a static address
           val sites = refOps.deref(reference)
           val allocSites = for {
-            phys <- sites.physicalAddresses;
-            heapCtx <- allocOrNull(phys.ctx)
-            region <- mem.store.get(PhysicalAddress(heapCtx, phys.recency))
-          } yield((PhysicalAddress(heapCtx, phys.recency), region, AlignedRead.Aligned))
+            case PhysicalAddress(AddrCtx.Heap(ctx@HeapCtx.Alloc(_,_)), recency) <- sites.physicalAddresses;
+            phys: PhysicalAddress[HeapCtx] = PhysicalAddress(ctx,recency)
+            region <- mem.store.get(phys)
+          } yield(phys, region, AlignedRead.Aligned)
           allocSites.iterator
         case NumExpr(readStart) =>
           val readStartIv = apronState.getIntInterval(readStart)
@@ -137,74 +174,57 @@ trait RelationalMemory extends RelationalValues:
               if (readEndHigh - readStartLow <= 20) {
                 for {
                   i <- math.max(0, readStartLow - 16).until(readEndHigh).iterator;
-                  physAddr = PhysicalAddress(HeapCtx.Static(i), Recency.Recent);
-                  region <- mem.store.get(physAddr).iterator
+                  phys = PhysicalAddress(HeapCtx.Static(i), Recency.Recent);
+                  region <- mem.store.get(phys).iterator
                   if (regionOverlaps(i, region))
-                } yield (physAddr, region, alignedRead(readStart, region))
+                } yield (phys, region, alignedRead(readStart, region))
               } else {
                 for {
-                  (physAddr, region) <- mem.store.iterator
+                  (phys, region) <- mem.store.iterator
                   if (
-                    physAddr.ctx match
+                    phys.ctx match
                       case HeapCtx.Static(i) => regionOverlaps(i, region)
                       case _ => false
                     )
-                } yield (physAddr, region, alignedRead(readStart, region))
-
+                } yield (phys, region, alignedRead(readStart, region))
               }
 
-            val staticRegionAtReadStart = mem.store.get(PhysicalAddress(HeapCtx.Static(readStartLow), Recency.Recent))
+            val staticRegionAtReadStart = mem.store.get(PhysicalAddress(HeapCtx.Static(readStartLow),Recency.Recent))
             val matchingDynamicRegions = for {
               (physAddr, region) <- mem.store.iterator
-              if (physAddr match
-                case PhysicalAddress(_: HeapCtx.Dynamic, _) => true
+              if (physAddr.ctx match
+                case _: HeapCtx.Dynamic => true
                 case _ => false
                 )
               if (
+
                 // Filter out dynamic regions that are certainly overwritten by the
                 // static region at the start of the read.
-                if(readStartLow == readStartHigh)
-                  staticRegionAtReadStart.exists(staticRegion =>
+                if(readStartLow == readStartHigh) {
+                  staticRegionAtReadStart.forall(staticRegion =>
                     concurrentOrNewerThan(region.timestamp, staticRegion.timestamp)
                   )
-                else
+                } else {
                   true
+                }
               )
               if {
                 val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
 
                 // Check if the **end** of the region overlaps with the read address range.
                 val regionEnd = ApronExpr.intAdd(regionStart, region.byteSize, regionStart._type)
-                apronState.assert(
-                  ApronBool.And(
-                    ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
-                    ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
-                  )
-                ) != Topped.Actual(false)
+
+                val condition = ApronBool.And(
+                  ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
+                  ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
+                )
+
+                val assert = apronState.assert(condition)
+
+                println(s"assert($condition) = $assert, $assert != false = ${assert != Topped.Actual(false)}")
+                assert != Topped.Actual(false)
               }
             } yield ((physAddr, region, alignedRead(readStart, region)))
-
-            // TODO: Remove, used for Debugging.
-//            for((physAddr, region) <- mem.store.iterator) {
-//              physAddr match
-//                case PhysicalAddress(_: HeapCtx.Dynamic, _) =>
-//                  if(readStartLow == readStartHigh && staticRegionAtReadStart.exists(staticRegion => concurrentOrNewerThan(region.timestamp, staticRegion.timestamp))) {
-//                    println("overwritten")
-//                  } else {
-//                    val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
-//
-//                    // Check if the **end** of the region overlaps with the read address range.
-//                    val regionEnd = ApronExpr.intAdd(regionStart, region.byteSize, regionStart._type)
-//                    val assert = apronState.assert(
-//                      ApronBool.And(
-//                        ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
-//                        ApronBool.Constraint(ApronCons.le(regionEnd, readEnd))
-//                      )
-//                    )
-//                    println("assert")
-//                  }
-//                case _ => ()
-//            }
 
             matchingStaticRegions ++ matchingDynamicRegions
           }
@@ -220,11 +240,6 @@ trait RelationalMemory extends RelationalValues:
 
     private inline def concurrentOrNewerThan[Timestamp: PartialOrder](timestamp1: Timestamp, timestamp2: Timestamp): Boolean =
       !PartialOrder[Timestamp].lteq(timestamp1, timestamp2)
-
-    private def allocOrNull(ctx: AddrCtx): Iterable[HeapCtx] =
-      ctx match
-        case (AddrCtx.Heap(heapCtx: (HeapCtx.Alloc | HeapCtx.Static))) => Some(heapCtx)
-        case _ => None
 
   given CombineAddr[W <: Widening](using combineI32: Combine[I32, W]): Combine[Addr, W] with
     def apply(v1: Addr, v2: Addr): MaybeChanged[Addr] = combineI32(v1, v2).map(_.asInstanceOf[Addr])

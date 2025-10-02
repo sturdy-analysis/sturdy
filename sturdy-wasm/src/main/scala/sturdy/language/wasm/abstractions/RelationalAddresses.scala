@@ -6,7 +6,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.CallFrame
 import sturdy.fix.DomLogger
-import sturdy.values.Finite
+import sturdy.values.{Finite, Join}
 import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
@@ -26,15 +26,30 @@ trait RelationalAddresses extends RelationalTypes:
         case Heap(ctx) => ctx.toString
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
-  enum HeapCtx:
+  enum HeapCtx extends AbstractAddr[HeapCtx]:
     case Dynamic(storeInstruction: FixIn)
     case Static(offset: Int)
+    case Global(name: String, offset: Int)
     case Alloc(allocSite: FixIn, offset: Int)
+
+    override def isEmpty: Boolean = false
+    override def isStrong: Boolean =
+      this match {
+        case _: Dynamic => false
+        case _: Static => true
+        case _: Global => true
+        case Alloc(_,_) => true
+      }
+
+    override def iterator: Iterator[HeapCtx] = Iterator(this)
+
+    override def reduce[A](f: HeapCtx => A)(using Join[A]): A = f(this)
 
     override def toString: String =
       this match
         case Dynamic(storeInstruction) => s"$storeInstruction"
         case Static(offset) => s"$offset"
+        case Global(name, offset) => s"$name+$offset"
         case Alloc(FixIn.Eval(_,allocSite), offset) => s"Alloc@${allocSite}+${offset}"
         case Alloc(in, offset) => s"Alloc@${in}+${offset}"
 

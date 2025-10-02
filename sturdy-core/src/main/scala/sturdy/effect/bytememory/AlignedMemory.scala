@@ -42,7 +42,7 @@ trait SizeOps[Size]:
 final class AlignedMemory
   [
     Key: Finite,
-    Context: Ordering: Finite,
+    Context <: AbstractAddr[_]: Ordering: Finite,
     Addr: Join: Widen,
     Val: ClassTag: Join: Widen,
     Size: Join: Widen
@@ -135,7 +135,7 @@ final class AlignedMemory
           var newStore = store
           for (ctx <- memLocAllocator(key, addr)) {
             increment(ctx)
-            newStore += PhysicalAddress(ctx, Recency.Recent) -> MemoryRegion(
+            val newRegion = MemoryRegion(
               startAddr = addr,
               alignment = Powerset(alignment),
               byteSize = sizeOps.fromInt(byteSize),
@@ -143,8 +143,15 @@ final class AlignedMemory
               value = value,
               byteOrder = byteOrder
             )
-            for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-              newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
+            if(ctx.isStrong) {
+                for (joinedRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+                  newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
+                }
+                newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
+            } else {
+              for (joinedRegion <- Join(Some(newRegion), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
+              }
             }
           }
           memories += key -> Mem(newStore, numPages, pageLimit)
@@ -185,7 +192,7 @@ final class AlignedMemory
           var newStore = store
           for (ctx <- memLocAllocator(key, startAddr)) {
             increment(ctx)
-            newStore += PhysicalAddress(ctx, Recency.Recent) -> MemoryRegion(
+            val newRegion = MemoryRegion(
               startAddr = startAddr,
               alignment = Powerset(1),
               byteSize = size,
@@ -193,8 +200,15 @@ final class AlignedMemory
               value = joinedValue,
               byteOrder = byteOrder
             )
-            for (oldRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-              newStore += PhysicalAddress(ctx, Recency.Old) -> oldRegion
+            if (ctx.isStrong) {
+              for (joinedRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
+              }
+              newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
+            } else {
+              for (joinedRegion <- Join(Some(newRegion), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
+                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
+              }
             }
           }
 

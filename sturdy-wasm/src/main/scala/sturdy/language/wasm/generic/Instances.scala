@@ -75,6 +75,9 @@ class ModuleInstance(val id: Option[Any] = None):
     exports.find ((name, externalVal) =>
         searched == externalVal
     ).map(_._1)
+    
+  def findExport(searched: String): Option[ExternalValue] =
+    exports.find((name, _) => name == searched).map(_._2)
 
   def exportedFunctions: Map[String, ExternalValue.Function] =
     exports.collect {

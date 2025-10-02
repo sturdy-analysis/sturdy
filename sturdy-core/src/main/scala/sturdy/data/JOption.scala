@@ -43,6 +43,10 @@ enum JOptionC[A] extends JOption[NoJoin, A]:
     case None() => None()
     case Some(a) => f(a)
 
+  def toOption: Option[A] = this match
+    case None() => scala.None
+    case Some(a) => scala.Some(a)
+
 object JOptionC:
   inline def none[A]: JOptionC[A] = JOptionC.None()
   inline def some[A](a: A): JOptionC[A] = JOptionC.Some(a)
