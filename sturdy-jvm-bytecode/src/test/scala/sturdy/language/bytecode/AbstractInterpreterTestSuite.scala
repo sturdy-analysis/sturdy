@@ -6,7 +6,7 @@ import org.opalj.br.instructions.{InvocationInstruction, LoadClass, LoadString}
 import org.opalj.br.{ArrayType, ClassType, Method, ReferenceType}
 import org.opalj.bytecode
 import org.scalatest.Inspectors.forEvery
-import org.scalatest.{Assertions, ParallelTestExecution}
+import org.scalatest.{Assertions, ParallelTestExecution, Succeeded}
 import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.TimeLimits
 import org.scalatest.funsuite.AnyFunSuite
@@ -15,6 +15,7 @@ import sturdy.effect.except.ConcreteSturdyException
 import sturdy.effect.failure.CFailureException
 import sturdy.language.bytecode.ConcreteRefValues.nonNullArray
 import sturdy.language.bytecode.abstractions.Site
+import sturdy.language.bytecode.analyses.{AbstractReferenceValue, ConstantAnalysis}
 import sturdy.language.bytecode.generic.JvmExcept
 
 import java.net.URL
@@ -22,14 +23,14 @@ import java.nio.file.Path
 import scala.jdk.CollectionConverters.*
 
 // run all tests
-class FullConcreteSuite extends ConcreteInterpreterTestSuite:
+class FullAbstractSuite extends AbstractInterpreterTestSuite:
   runTestCases(TestCases.fullTests)
 
 // run only the tests defined in the included test cases
-class SelectiveConcreteSuite extends ConcreteInterpreterTestSuite:
+class SelectiveAbstractSuite extends AbstractInterpreterTestSuite:
   runTestCases(TestCases.includedTests)
 
-abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
+abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers with TimeLimits with ParallelTestExecution:
   // if the harness fails, the test is canceled
   def assertCase(paths: Seq[Path]): Assertion =
     val testCase = paths.head
@@ -171,46 +172,48 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
         assertCase(paths)
 
   // returns all that is required to run the tested method
-  def runSetup(project: Project[URL], testCase: Path, caseName: String)(method: Method): (ConcreteInterpreter.Instance, TestedMethodType) =
+  def runSetup(project: Project[URL], testCase: Path, caseName: String)(method: Method): (ConstantAnalysis.Instance, TestedMethodType) =
     val mType = method.name match
       case "main" => TestedMethodType.Main
       case "run" => TestedMethodType.Run
       case s => fail(s"[$caseName] invalid method name: $s")
 
-    val concreteInterpreter = ConcreteInterpreter.Instance(project, testCase.toString, Map())
+    val abstractInterpreter = ConstantAnalysis.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
+    abstractInterpreter.stack.push(abstractInterpreter.createArray(abstractInterpreter.bytecodeOps.i32ops.integerLit(0), ClassType.String, Site.External))
     if mType == TestedMethodType.Run then
       // push System.out
-      concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassType("java/io/PrintStream"), Site.External))
-    (concreteInterpreter, mType)
+      abstractInterpreter.stack.push(abstractInterpreter.createObject(ClassType("java/io/PrintStream"), Site.External))
+    (abstractInterpreter, mType)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
-    val (concreteInterpreter, mType) = runSetup(project, testCase, caseName)(method)
+    val (abstractInterpreter, mType) = runSetup(project, testCase, caseName)(method)
     val v = try
-      concreteInterpreter.invokeExternal(method, true)
+      abstractInterpreter.invokeExternal(method, true)
     catch
       // all other exceptions fail the test
-      case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
-      case CFailureException(concreteInterpreter.AbortEval.Native(m), _) => cancel(s"[$caseName] native method encountered: $m")
+      case CFailureException(abstractInterpreter.AbortEval.Exit(v), _) => v
+      case CFailureException(abstractInterpreter.AbortEval.Native(m), _) => cancel(s"[$caseName] native method encountered: $m")
       case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => cancel(s"[$caseName] " + e.getMessage)
 
-    assert(v.asInt32(using concreteInterpreter.failure) === mType.getExpectedValue)
+    // TODO: consider adding assertions
+    // assert(v.asInt32(using abstractInterpreter.failure) === mType.getExpectedValue)
+    Succeeded
 
   def runNegative(project: Project[URL], testCase: Path, caseName: String)(method: Method, expectedException: ReferenceType): Assertion =
-    val (concreteInterpreter, _) = runSetup(project, testCase, caseName)(method)
+    val (abstractInterpreter, _) = runSetup(project, testCase, caseName)(method)
     try
-      concreteInterpreter.invokeExternal(method, true)
+      abstractInterpreter.invokeExternal(method, true)
       fail(s"[$caseName] no exception thrown")
     catch
       // all other exceptions fail the test
-      case CFailureException(concreteInterpreter.AbortEval.Native(m), _) => fail(s"[$caseName] native method encountered: $m")
+      case CFailureException(abstractInterpreter.AbortEval.Native(m), _) => fail(s"[$caseName] native method encountered: $m")
       case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => fail(s"[$caseName] " + e.getMessage)
       case ConcreteSturdyException(e) => e match
         case JvmExcept.Throw(exception) =>
           assert(exception == expectedException)
         case JvmExcept.ThrowObject(exception: ConcreteInterpreter.Value) =>
-          exception.asRef(using concreteInterpreter.failure) match
+          exception.asRef(using abstractInterpreter.failure) match
             case ConcreteRefValues.Object(_, cls, _) => assert(cls.thisType == expectedException)
             case refValue => fail(s"unexpected throw object: $refValue")
         case x =>

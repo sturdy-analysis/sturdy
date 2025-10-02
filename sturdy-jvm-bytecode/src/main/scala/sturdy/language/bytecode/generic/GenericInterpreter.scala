@@ -732,7 +732,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   private def checkAccessControlForRefType(refType: ReferenceType, mth: Method): Unit =
     runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy)), mth)
 
-  private def createArray(size: V, componentType: FieldType, site: Site): V =
+  def createArray(size: V, componentType: FieldType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
     val convertedArrayVals = arrayVals.zipWithIndex.map: tuple =>
       (defaultValue(componentType), Site.ArrayElementInitialization(site, tuple._2))
