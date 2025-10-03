@@ -209,12 +209,3 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
       // all other exceptions fail the test
       case CFailureException(abstractInterpreter.AbortEval.Native(m), _) => fail(s"[$caseName] native method encountered: $m")
       case e: UnsupportedOperationException if e.getMessage.contains("unsupported instruction") => fail(s"[$caseName] " + e.getMessage)
-      case ConcreteSturdyException(e) => e match
-        case JvmExcept.Throw(exception) =>
-          assert(exception == expectedException)
-        case JvmExcept.ThrowObject(exception: ConcreteInterpreter.Value) =>
-          exception.asRef(using abstractInterpreter.failure) match
-            case ConcreteRefValues.Object(_, cls, _) => assert(cls.thisType == expectedException)
-            case refValue => fail(s"unexpected throw object: $refValue")
-        case x =>
-          fail(s"unexpected throw: $x")
