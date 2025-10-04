@@ -834,42 +834,45 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     except.tryCatch {
       runBody(pc, mth)
     } {
-      case JvmExcept.Jump(targetPC) =>
-        run(targetPC, mth)
-      case JvmExcept.Ret(_) =>
-        ??? // TODO
-      case JvmExcept.Return(_) =>
-        ()
-      case JvmExcept.Throw(exception) =>
-        val currPC = frame.data
-        val body = mth.body.get
-        val handler = body.handlersForException(currPC, exception)(project.classHierarchy).headOption.getOrElse:
+      exceptionHandler(pc, mth)
+    }
+
+  private def exceptionHandler(pc: Int, mth: Method)(using Fixed): JvmExcept[V] => Unit =
+    case JvmExcept.Jump(targetPC) =>
+      run(targetPC, mth)
+    case JvmExcept.Ret(_) =>
+      ??? // TODO
+    case JvmExcept.Return(_) =>
+      ()
+    case JvmExcept.Throw(exception) =>
+      val currPC = frame.data
+      val body = mth.body.get
+      val handler = body.handlersForException(currPC, exception)(project.classHierarchy).headOption.getOrElse:
+        // no handler found, throw the exception again
+        stack.clearCurrentOperandFrame()
+        except.throws(JvmExcept.Throw(exception))
+      // handler has been found
+      val exceptionObject = createObject(exception, Site.Instruction(mth, pc))
+      stack.push(exceptionObject)
+      run(handler.handlerPC, mth)
+    case JvmExcept.ThrowObject(exception) =>
+      // if the exception is null, a NPE has to be thrown instead
+      if objectOps.isNull(exception) != i32ops.integerLit(0) then except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      // otherwise, handle the exception
+      val currPC = frame.data
+      val body = mth.body.get
+      val handler = body.exceptionHandlersFor(currPC)
+        // try to find handler for exception
+        .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
+        // try to find finally clause to invoke if no handler was found
+        .orElse(body.handlersFor(currPC).find(_.catchType.isEmpty))
+        .getOrElse:
           // no handler found, throw the exception again
           stack.clearCurrentOperandFrame()
-          except.throws(JvmExcept.Throw(exception))
-        // handler has been found
-        val exceptionObject = createObject(exception, Site.Instruction(mth, pc))
-        stack.push(exceptionObject)
-        run(handler.handlerPC, mth)
-      case JvmExcept.ThrowObject(exception) =>
-        // if the exception is null, a NPE has to be thrown instead
-        if objectOps.isNull(exception) != i32ops.integerLit(0) then except.throws(JvmExcept.Throw(ClassType.NullPointerException))
-        // otherwise, handle the exception
-        val currPC = frame.data
-        val body = mth.body.get
-        val handler = body.exceptionHandlersFor(currPC)
-          // try to find handler for exception
-          .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
-          // try to find finally clause to invoke if no handler was found
-          .orElse(body.handlersFor(currPC).find(_.catchType.isEmpty))
-          .getOrElse:
-            // no handler found, throw the exception again
-            stack.clearCurrentOperandFrame()
-            except.throws(JvmExcept.ThrowObject(exception))
-        // handler has been found
-        stack.push(exception)
-        run(handler.handlerPC, mth)
-    }
+          except.throws(JvmExcept.ThrowObject(exception))
+      // handler has been found
+      stack.push(exception)
+      run(handler.handlerPC, mth)
 
   // evaluates each instruction of the given method's body, starting with pc
   @tailrec
