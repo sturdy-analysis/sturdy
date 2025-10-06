@@ -622,8 +622,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // WIDE opcode 196
       case WIDE =>
-        // TODO: implement; ignoring it causes stack to overflow
-        throw UnsupportedOperationException("unsupported instruction: wide")
+        // opal should handle everything when loading the class, so we need to do nothing
+        ()
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
