@@ -17,7 +17,7 @@
   (import "env" "free" (func $free (type 3)))
   (func $__wasm_call_ctors (type 4))
   (func $process (type 5) (param i32 i32)
-    (local i32 i32 i32 i32)
+    (local i32 i32 i32 i32 i32 i32)
     local.get 1
     local.get 0
     i32.sub
@@ -28,166 +28,181 @@
       local.get 2
       i32.const -1
       i32.add
+      local.tee 4
       local.set 2
-      local.get 0
       local.get 3
-      i32.add
-      local.set 4
-      local.get 3
+      local.tee 5
       i32.const 1
       i32.add
-      local.tee 5
+      local.tee 6
       local.set 3
-      local.get 4
+      local.get 0
+      local.get 5
+      i32.add
       i32.load8_u
       i32.const 10
       i32.ne
       br_if 0 (;@1;)
     end
     local.get 0
-    local.get 5
+    local.get 6
     i32.add
-    local.set 4
+    local.set 7
     block  ;; label = @1
       local.get 1
       local.get 0
       i32.sub
-      local.get 2
+      local.get 4
       i32.const 61
       i32.div_u
       i32.const 61
       i32.mul
-      local.tee 2
-      i32.sub
       local.tee 3
+      i32.sub
+      local.tee 2
       i32.const -60
       i32.add
-      local.get 5
+      local.get 6
       i32.eq
       br_if 0 (;@1;)
-      local.get 4
-      local.get 3
-      local.get 5
+      local.get 7
+      local.get 2
+      local.get 6
       i32.sub
       i32.add
-      local.tee 3
+      local.tee 2
       local.get 1
       i32.ge_u
       br_if 0 (;@1;)
       local.get 0
       local.get 1
       i32.sub
-      local.get 2
+      local.get 3
       i32.add
-      local.get 5
+      local.get 6
       i32.add
       i32.const 60
       i32.add
+      local.set 5
+      local.get 2
       local.set 2
       loop  ;; label = @2
-        local.get 3
+        local.get 2
+        local.tee 2
         i32.const 1
         i32.add
-        local.get 3
         local.get 2
+        local.get 5
         call $memmove
         drop
-        local.get 3
+        local.get 2
         i32.const 10
         i32.store8
-        local.get 3
+        local.get 2
         i32.const 61
         i32.add
         local.tee 3
+        local.set 2
+        local.get 3
         local.get 1
         i32.lt_u
         br_if 0 (;@2;)
       end
     end
     block  ;; label = @1
-      local.get 4
+      local.get 7
       local.get 1
       i32.const -1
       i32.add
-      local.tee 3
+      local.tee 2
       i32.gt_u
       br_if 0 (;@1;)
+      local.get 2
+      local.set 3
+      local.get 7
+      local.set 2
       loop  ;; label = @2
-        local.get 4
-        i32.load8_s
-        i32.const 1072
-        i32.add
-        i32.load8_u
-        local.set 2
-        local.get 4
-        local.get 3
-        i32.load8_s
-        i32.const 1072
-        i32.add
-        i32.load8_u
-        i32.store8
-        local.get 3
         local.get 2
-        i32.store8
-        local.get 4
-        i32.const 1
+        local.tee 2
+        i32.load8_s
+        i32.const 1072
         i32.add
-        local.tee 4
+        i32.load8_u
+        local.set 5
+        local.get 2
+        local.get 3
+        local.tee 3
+        i32.load8_s
+        i32.const 1072
+        i32.add
+        i32.load8_u
+        i32.store8
+        local.get 3
+        local.get 5
+        i32.store8
         local.get 3
         i32.const -1
         i32.add
-        local.tee 3
+        local.tee 5
+        local.set 3
+        local.get 2
+        i32.const 1
+        i32.add
+        local.tee 0
+        local.set 2
+        local.get 0
+        local.get 5
         i32.le_u
         br_if 0 (;@2;)
       end
     end)
   (func $_start (type 6) (result i32)
-    (local i32 i32 i32 i32 i32 i32 i32 i32 i32 i32)
-    i32.const 0
-    local.set 0
+    (local i32 i32 i32 i32 i32 i32 i32 i32 i32 i32 i32)
     block  ;; label = @1
       i32.const 0
       i32.load offset=1060
-      local.tee 1
+      local.tee 0
       i32.load8_u
-      local.tee 2
+      local.tee 1
       i32.eqz
       br_if 0 (;@1;)
+      local.get 1
+      local.set 1
+      local.get 0
+      local.set 0
       loop  ;; label = @2
-        local.get 2
+        local.get 1
         i32.extend8_s
         call $toupper
         i32.const 1072
         i32.add
-        local.get 1
+        local.get 0
+        local.tee 0
         i32.load8_u offset=1
-        local.tee 2
         i32.store8
-        local.get 1
+        local.get 0
         i32.load8_s
         call $tolower
         i32.const 1072
         i32.add
-        local.get 2
+        local.get 0
+        i32.load8_u offset=1
         i32.store8
-        local.get 1
+        local.get 0
         i32.load8_u offset=2
-        local.set 2
-        local.get 1
+        local.tee 2
+        local.set 1
+        local.get 0
         i32.const 2
         i32.add
-        local.set 1
+        local.set 0
         local.get 2
         br_if 0 (;@2;)
       end
     end
     i32.const 8192
-    local.set 1
-    i32.const 8192
     call $malloc
     local.set 3
-    i32.const 7936
-    local.set 2
     block  ;; label = @1
       block  ;; label = @2
         i32.const 0
@@ -197,24 +212,46 @@
         local.get 3
         i32.const 7936
         call $read
-        local.tee 5
+        local.tee 0
         br_if 0 (;@2;)
+        i32.const 0
+        local.set 0
         local.get 3
-        local.set 6
+        local.set 1
+        local.get 3
+        local.set 5
         br 1 (;@1;)
       end
+      local.get 0
+      local.set 2
+      i32.const 7936
+      local.set 6
+      local.get 3
+      local.set 3
       i32.const 0
-      local.set 0
+      local.set 7
+      i32.const 8192
+      local.set 8
       loop  ;; label = @2
+        local.get 8
+        local.set 1
+        local.get 3
+        local.set 3
         block  ;; label = @3
-          local.get 5
-          local.get 0
-          i32.add
-          local.tee 0
-          local.get 2
-          i32.lt_u
-          br_if 0 (;@3;)
-          local.get 3
+          block  ;; label = @4
+            local.get 2
+            local.get 7
+            i32.add
+            local.tee 0
+            local.get 6
+            i32.ge_u
+            br_if 0 (;@4;)
+            local.get 1
+            local.set 2
+            local.get 3
+            local.set 1
+            br 1 (;@3;)
+          end
           local.get 1
           i32.const 1048576
           i32.add
@@ -226,196 +263,242 @@
           i32.gt_u
           select
           local.tee 1
+          local.set 2
+          local.get 3
+          local.get 1
           call $realloc
-          local.set 3
+          local.set 1
         end
         local.get 4
-        local.get 3
+        local.get 1
+        local.tee 1
         local.get 0
         i32.add
-        local.tee 6
-        local.get 1
+        local.tee 5
+        local.get 2
+        local.tee 8
         i32.const -256
         i32.add
-        local.tee 2
+        local.tee 6
         local.get 0
         i32.sub
         call $read
-        local.tee 5
+        local.tee 9
+        local.set 2
+        local.get 6
+        local.set 6
+        local.get 1
+        local.set 3
+        local.get 0
+        local.set 7
+        local.get 8
+        local.set 8
+        local.get 0
+        local.set 0
+        local.get 1
+        local.set 1
+        local.get 5
+        local.set 5
+        local.get 9
         br_if 0 (;@2;)
       end
     end
-    local.get 6
+    local.get 1
+    local.set 4
+    local.get 0
+    local.set 10
+    local.get 5
+    local.tee 0
     i32.const 62
     i32.store8
-    local.get 6
+    local.get 0
     i32.const -1
     i32.add
-    local.set 7
+    local.set 2
     loop  ;; label = @1
+      i32.const 0
+      local.set 0
       i32.const -1
-      local.set 6
-      i32.const -1
-      local.set 4
-      local.get 7
-      local.tee 8
+      local.set 1
+      local.get 2
+      local.tee 9
       local.set 2
       loop  ;; label = @2
-        local.get 6
-        local.tee 5
+        local.get 0
+        local.tee 7
         i32.const 1
         i32.add
-        local.set 6
-        local.get 4
-        local.tee 1
+        local.set 0
+        local.get 1
+        local.tee 8
         i32.const -1
         i32.add
-        local.set 4
+        local.set 1
         local.get 2
-        i32.load8_u
-        local.set 9
-        local.get 2
+        local.tee 6
         i32.const -1
         i32.add
-        local.tee 7
+        local.tee 3
         local.set 2
-        local.get 9
+        local.get 6
+        i32.load8_u
         i32.const 62
         i32.ne
         br_if 0 (;@2;)
       end
-      local.get 8
-      i32.const 2
+      local.get 9
+      i32.const 1
       i32.add
-      local.set 4
+      local.set 5
+      local.get 7
+      local.set 0
+      local.get 8
+      local.set 1
       loop  ;; label = @2
-        local.get 5
+        local.get 0
         i32.const -1
         i32.add
-        local.set 5
-        local.get 4
+        local.tee 7
+        local.set 0
         local.get 1
-        i32.add
-        local.set 2
-        local.get 1
+        local.tee 2
         i32.const 1
         i32.add
         local.tee 6
         local.set 1
+        local.get 5
         local.get 2
+        i32.add
         i32.load8_u
         i32.const 10
         i32.ne
         br_if 0 (;@2;)
       end
-      local.get 8
+      local.get 9
       local.get 6
       i32.add
-      i32.const 2
+      i32.const 1
       i32.add
-      local.set 2
+      local.set 8
       block  ;; label = @2
-        local.get 5
+        local.get 7
         i32.const 61
         i32.div_u
-        local.tee 5
+        local.tee 1
         i32.const -61
         i32.mul
-        local.tee 1
-        i32.const -62
+        local.tee 0
+        i32.const -61
         i32.add
         local.get 6
         i32.eq
         br_if 0 (;@2;)
-        local.get 1
+        local.get 0
         local.get 6
         i32.sub
-        local.get 2
-        i32.add
-        i32.const -2
-        i32.add
-        local.tee 1
         local.get 8
+        i32.add
+        i32.const -1
+        i32.add
+        local.tee 0
+        local.get 9
         i32.ge_u
         br_if 0 (;@2;)
-        local.get 5
+        local.get 1
         i32.const 61
         i32.mul
         local.get 6
         i32.add
-        i32.const 62
+        i32.const 61
         i32.add
-        local.set 5
+        local.set 2
+        local.get 0
+        local.set 0
         loop  ;; label = @3
-          local.get 1
+          local.get 0
+          local.tee 0
           i32.const 1
           i32.add
-          local.get 1
-          local.get 5
+          local.get 0
+          local.get 2
           call $memmove
           drop
-          local.get 1
+          local.get 0
           i32.const 10
           i32.store8
-          local.get 1
+          local.get 0
           i32.const 61
           i32.add
           local.tee 1
-          local.get 8
+          local.set 0
+          local.get 1
+          local.get 9
           i32.lt_u
           br_if 0 (;@3;)
         end
       end
       block  ;; label = @2
-        local.get 2
         local.get 8
+        local.get 9
         i32.const -1
         i32.add
-        local.tee 1
+        local.tee 0
         i32.gt_u
         br_if 0 (;@2;)
+        local.get 0
+        local.set 1
+        local.get 8
+        local.set 0
         loop  ;; label = @3
-          local.get 2
+          local.get 0
+          local.tee 0
           i32.load8_s
           i32.const 1072
           i32.add
           i32.load8_u
-          local.set 5
-          local.get 2
+          local.set 2
+          local.get 0
           local.get 1
+          local.tee 1
           i32.load8_s
           i32.const 1072
           i32.add
           i32.load8_u
           i32.store8
           local.get 1
-          local.get 5
-          i32.store8
           local.get 2
-          i32.const 1
-          i32.add
-          local.tee 2
+          i32.store8
           local.get 1
           i32.const -1
           i32.add
-          local.tee 1
+          local.tee 2
+          local.set 1
+          local.get 0
+          i32.const 1
+          i32.add
+          local.tee 6
+          local.set 0
+          local.get 6
+          local.get 2
           i32.le_u
           br_if 0 (;@3;)
         end
       end
-      local.get 7
       local.get 3
+      local.set 2
+      local.get 3
+      local.get 4
       i32.ge_u
       br_if 0 (;@1;)
     end
     i32.const 0
     i32.load
     call $fileno
-    local.get 3
-    local.get 0
+    local.get 4
+    local.get 10
     call $write
     drop
-    local.get 3
+    local.get 4
     call $free
     i32.const 0)
   (memory (;0;) 2)

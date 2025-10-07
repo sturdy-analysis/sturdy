@@ -6,7 +6,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.CallFrame
 import sturdy.fix.DomLogger
-import sturdy.values.{Finite, Join}
+import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
 
 trait RelationalAddresses extends RelationalTypes:
@@ -26,32 +26,23 @@ trait RelationalAddresses extends RelationalTypes:
         case Heap(ctx) => ctx.toString
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
-  enum HeapCtx extends AbstractAddr[HeapCtx]:
-    case Dynamic(storeInstruction: FixIn)
-    case Static(offset: Int)
-    case Global(name: String, offset: Int)
+  enum HeapCtx:
+    case Fill(site: FixIn)
+    case Global(name: String)
+    case Stack(function: FuncId, offset: Topped[Int])
     case Alloc(allocSite: FixIn, offset: Int)
-
-    override def isEmpty: Boolean = false
-    override def isStrong: Boolean =
-      this match {
-        case _: Dynamic => false
-        case _: Static => true
-        case _: Global => true
-        case Alloc(_,_) => true
-      }
-
-    override def iterator: Iterator[HeapCtx] = Iterator(this)
-
-    override def reduce[A](f: HeapCtx => A)(using Join[A]): A = f(this)
+    case Static(offset: Int)
+    case Dynamic(storeInstruction: FixIn)
 
     override def toString: String =
       this match
-        case Dynamic(storeInstruction) => s"$storeInstruction"
+        case Fill(site) => s"Fill@$site"
         case Static(offset) => s"$offset"
-        case Global(name, offset) => s"$name+$offset"
+        case Global(name) => s"G$name"
+        case Stack(fun,offset) => s"S$fun+$offset"
         case Alloc(FixIn.Eval(_,allocSite), offset) => s"Alloc@${allocSite}+${offset}"
         case Alloc(in, offset) => s"Alloc@${in}+${offset}"
+        case Dynamic(storeInstruction) => s"Dynamic@$storeInstruction"
 
 
   final type VirtAddr = VirtualAddress[AddrCtx]
@@ -105,13 +96,19 @@ trait RelationalAddresses extends RelationalTypes:
   given Finite[AddrCtx] with {}
 
   given Ordering[HeapCtx] = {
-    case (HeapCtx.Dynamic(storeInst1), HeapCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
+    case (HeapCtx.Fill(site1), HeapCtx.Fill(site2)) => Ordering[FixIn].compare(site1, site2)
     case (HeapCtx.Static(offset1), HeapCtx.Static(offset2)) => Ordering[Int].compare(offset1, offset2)
+    case (HeapCtx.Global(name1), HeapCtx.Global(name2)) => Ordering[String].compare(name1, name2)
+    case (HeapCtx.Stack(fun1,offset1), HeapCtx.Stack(fun2,offset2)) => Ordering[(FuncId,Topped[Int])].compare((fun1,offset1), (fun2,offset2))
     case (HeapCtx.Alloc(site1, offset1), HeapCtx.Alloc(site2, offset2)) => Ordering[(FixIn, Int)].compare((site1, offset1), (site2, offset2))
+    case (HeapCtx.Dynamic(storeInst1), HeapCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
     case (ctx1, ctx2) => Ordering.by[HeapCtx, Int] {
-      case _: HeapCtx.Static => 1
-      case _: HeapCtx.Alloc => 2
-      case _: HeapCtx.Dynamic => 3
+      case _: HeapCtx.Fill => 1
+      case _: HeapCtx.Static => 2
+      case _: HeapCtx.Global => 3
+      case _: HeapCtx.Stack => 4
+      case _: HeapCtx.Alloc => 5
+      case _: HeapCtx.Dynamic => 5
     }.compare(ctx1, ctx2)
   }
   given Finite[HeapCtx] with {}

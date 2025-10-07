@@ -34,7 +34,7 @@ import sturdy.values.types.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.util.{*, given}
 import swam.syntax.*
-import swam.{FuncType, OpCode, ReferenceType, ValType, syntax}
+import swam.{FuncType, GlobalType, OpCode, ReferenceType, ValType, syntax}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -234,12 +234,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
 
-    val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
-      Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc(rootFrameData),
-      moveMemLoc(rootFrameData)
-    )
-
     val globals: DecidableSymbolTable[Unit, GlobalAddr, Value] =
       if(config.relational)
         new RelationalSymbolTable(new AAllocatorFromContext(
@@ -248,6 +242,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         ))
       else
         JoinableDecidableSymbolTable[Unit, GlobalAddr, Value]()
+    given DecidableSymbolTable[Unit, GlobalAddr, Value] = globals
+
+    val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
+      Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+      heapAlloc(rootFrameData),
+      moveMemLoc(rootFrameData)
+    )
 
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
     val tables: IntervalSymbolTable[TableAddr, Index, RefV, Size]  = new IntervalSymbolTable[TableAddr, Index, RefV, Size]
@@ -302,6 +303,189 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           convertF64I64 = NonRelationalConvert[Double, Long, F64, VirtAddr, Type, Overflow && BitSign],
           convertF64F32 = NonRelationalConvert[Double, Float, F32, VirtAddr, Type, NilCC.type]
         )
+
+    // Hook to initialize static memory layout after global variables have been instantiated.
+    override protected def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc =
+      val loc = super.instantiateGlobals(module, modInst: ModuleInstance, globImports, globImportsTypes, initLoc)
+      optionStaticMemoryLayout = calculateStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
+      loc
+
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case "memcpy" =>
+        args match
+          case List(dst, src, len) =>
+            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToSize(len))
+            List(dst)
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
+      case "memmove" =>
+        // There is no difference between memcpy and memmove, since memory.copy does a weak update.
+        invokeHostFunction(HostFunction("memcpy", hostFunc.funcType), args)
+      case "malloc" =>
+        args match
+          case List(Num(Int32(size))) =>
+            val allocSite = domLogger.getDoms(1)
+            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
+            List(Num(Int32(AllocationSites(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+      case "free" =>
+        args match
+          case List(Num(Int32(ptr))) =>
+            println(s"free($ptr)")
+            List()
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
+      case "pow" =>
+        args match
+          case List(base, exponent) =>
+            List(wasmOps.f64ops.pow(base, exponent))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+      case "exp2" =>
+        args match
+          case List(exponent) =>
+            List(wasmOps.f64ops.pow(wasmOps.f64ops.floatingLit(2), exponent))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64 as arguments to exp2, but got $args")
+      case "read" =>
+        args match
+          case List(data@Num(Int32(fd)), buffer@Num(Int32(_)), count@Num(Int32(_))) =>
+            memory.fill(
+              MemoryAddr(0),
+              wasmOps.specialOps.valToAddr(buffer),
+              wasmOps.specialOps.valToSize(count),
+              BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
+            List(count)
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to read, but got $args")
+      case "fwrite" =>
+        args match
+          case List(data@Num(Int32(_)), Num(Int32(size)), c@Num(Int32(count)), Num(Int32(stream))) =>
+            val (l,h) = apronState.getIntInterval(count.asNumExpr)
+            if(l == h) {
+              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(data), l)
+              println(s"fwrite($data, $size, $count, $stream) = $bytes")
+            } else {
+              println(s"fwrite($data, $size, $count, $stream)")
+            }
+            List(c)
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
+      case "printf" =>
+        args match
+          case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
+            println(s"printf($strPtr, $varargs)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to printf, but got $args")
+      case "fprintf" =>
+        args match
+          case List(data@Num(Int32(fd)), Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
+            val res = List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp,_) =>
+              apronState.assign(tmp, ApronExpr.interval(Integer.MIN_VALUE, Integer.MAX_VALUE, I32Type))
+              ApronExpr.addr(tmp,I32Type)
+            )))))
+            println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
+            res
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
+      case "fileno" =>
+        args match
+          case List(Num(Int32(fd))) =>
+            val iv = apronState.getInterval(fd.asNumExpr)
+            val res = if(iv.cmp(Interval(0,2)) <= 0) {
+              args
+            } else {
+              List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp, _) =>
+                apronState.assign(tmp, ApronExpr.interval(-1, Integer.MAX_VALUE, I32Type))
+                ApronExpr.addr(tmp, I32Type)
+              )))))
+            }
+            println(s"fileno($fd) = ${res.head}")
+            res
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
+      case "strlen" =>
+        args match
+          case List(ptr@Num(Int32(_))) => boundary:
+            val topLen = List(Num(Int32(NumExpr(ApronExpr.top(I32Type)))))
+            val stringSeparator = Interval('\u0000'.toByte, '\u0000'.toByte)
+            val ptrAddr = wasmOps.specialOps.valToAddr(ptr)
+            var len = 0
+            while {
+              val optBytes = memory.read(MemoryAddr(0), wasmOps.addressOffset.addOffsetToAddr(len, ptrAddr), 1).asInstanceOf[JOptionA[BTS[Value]]]
+              len += 1
+              optBytes match
+                case JOptionA.Some(BTS.ReadBytes(Topped.Actual(List((Num(Int32(v)),1))), _)) =>
+                  val iv = apronState.getInterval(v.asNumExpr)
+                  if(iv.isEqual(stringSeparator))
+                    break(List(Num(Int32(NumExpr(ApronExpr.lit(len, I32Type))))))
+                  else if(stringSeparator.isLeq(iv))
+                    break(topLen)
+                  else /* if(!stringSeparator.isLeq(iv)) */
+                    true
+                case _ => break(topLen)
+            } do ()
+            throw new Exception("Unreachable")
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+      case "toupper" =>
+        args match
+          case List(v@Num(Int32(char))) =>
+            val charExpr = char.asNumExpr
+            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('a'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('z'.toInt, I32Type))))) {
+              ApronExpr.intSub(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
+            } {
+              charExpr
+            }))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to toupper, but got $args")
+      case "tolower" =>
+        args match
+          case List(v@Num(Int32(char))) =>
+            val charExpr = char.asNumExpr
+            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('A'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('Z'.toInt, I32Type))))) {
+              ApronExpr.intAdd(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
+            } {
+              charExpr
+            }))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to tolower, but got $args")
+      case "assert" =>
+        args match
+          case List(v@Num(Int32(_))) =>
+            given BooleanBranching[Value,Unit] = wasmOps.branchOpsUnit
+            assert(v.asInstanceOf[Value], domLogger.currentDom)
+            List()
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to assert, but got $args")
+      case "exit" =>
+        args match
+          case List(v@Num(Int32(code))) =>
+            failure.fail(WasmFailure.ProcExit, s"exit code = $code")
+            List()
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to exit, but got $args")
+      case "__VERIFIER_nondet_bool" =>
+        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
+      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
+      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
+      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
+      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
+        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
+      case "__VERIFIER_nondet_float" =>
+        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
+      case "__VERIFIER_nondet_double" =>
+        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
+      case "__blackhole_int" | "__blackhole_int_p" =>
+        args
+      case _ =>
+        throw new IllegalArgumentException(s"Unknown host function $hostFunc")
 
     private def addressIterator: Iterator[VirtAddr] =
       def valueIterator(value: Any): Iterator[VirtAddr] = value match
@@ -465,187 +649,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
       def groupedCount: Map[String, Int] =
         getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case "memcpy" =>
-        args match
-          case List(dst, src, len) =>
-            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToSize(len))
-            List(dst)
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
-      case "memmove" =>
-        args match
-          case List(dst, src, len) =>
-            val lenSize = wasmOps.specialOps.valToSize(len)
-            val (l,h) = apronState.getIntInterval(lenSize)
-            if(l == h) {
-              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), l).getOrElse(failure.fail(WasmFailure.MemoryAccessOutOfBounds, s"Cannot access memory at $src"))
-              bytes match
-                case Bytes.ReadBytes(Topped.Actual(bs), byteOrder) => memory.write(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), Bytes.StoredBytes(bs, byteOrder))
-                case _ => memory.fill(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), lenSize, Bytes.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
-            } else {
-              memory.fill(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), lenSize, Bytes.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),4)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
-            }
-            List(dst)
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
-      case "malloc" =>
-        args match
-          case List(Num(Int32(size))) =>
-            val allocSite = domLogger.getDoms(1)
-            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            List(Num(Int32(AllocationSites(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
-      case "free" =>
-        args match
-          case List(Num(Int32(ptr))) =>
-            println(s"free($ptr)")
-            List()
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
-      case "pow" =>
-        args match
-          case List(base, exponent) =>
-            List(wasmOps.f64ops.pow(base, exponent))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
-      case "exp2" =>
-        args match
-          case List(exponent) =>
-            List(wasmOps.f64ops.pow(wasmOps.f64ops.floatingLit(2), exponent))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected f64 as arguments to exp2, but got $args")
-      case "read" =>
-        args match
-          case List(data@Num(Int32(fd)), buffer@Num(Int32(_)), count@Num(Int32(_))) =>
-            memory.fill(
-              MemoryAddr(0),
-              wasmOps.specialOps.valToAddr(buffer),
-              wasmOps.specialOps.valToSize(count),
-              BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
-            List(count)
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to read, but got $args")
-      case "fwrite" =>
-        args match
-          case List(data@Num(Int32(_)), Num(Int32(size)), c@Num(Int32(count)), Num(Int32(stream))) =>
-            val (l,h) = apronState.getIntInterval(count.asNumExpr)
-            if(l == h) {
-              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(data), l)
-              println(s"fwrite($data, $size, $count, $stream) = $bytes")
-            } else {
-              println(s"fwrite($data, $size, $count, $stream)")
-            }
-            List(c)
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
-      case "printf" =>
-        args match
-          case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
-            println(s"printf($strPtr, $varargs)")
-            List(Num(Int32(topI32)))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to printf, but got $args")
-      case "fprintf" =>
-        args match
-          case List(data@Num(Int32(fd)), Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
-            val res = List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp,_) =>
-              apronState.assign(tmp, ApronExpr.interval(Integer.MIN_VALUE, Integer.MAX_VALUE, I32Type))
-              ApronExpr.addr(tmp,I32Type)
-            )))))
-            println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
-            res
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
-      case "fileno" =>
-        args match
-          case List(Num(Int32(fd))) =>
-            val iv = apronState.getInterval(fd.asNumExpr)
-            val res = if(iv.cmp(Interval(0,2)) <= 0) {
-              args
-            } else {
-              List(Num(Int32(NumExpr(apronState.withTempVars(I32Type)((tmp, _) =>
-                apronState.assign(tmp, ApronExpr.interval(-1, Integer.MAX_VALUE, I32Type))
-                ApronExpr.addr(tmp, I32Type)
-              )))))
-            }
-            println(s"fileno($fd) = ${res.head}")
-            res
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
-      case "strlen" =>
-        args match
-          case List(ptr@Num(Int32(_))) => boundary:
-            val topLen = List(Num(Int32(NumExpr(ApronExpr.top(I32Type)))))
-            val stringSeparator = Interval('\u0000'.toByte, '\u0000'.toByte)
-            val ptrAddr = wasmOps.specialOps.valToAddr(ptr)
-            var len = 0
-            while {
-              val optBytes = memory.read(MemoryAddr(0), wasmOps.addressOffset.addOffsetToAddr(len, ptrAddr), 1).asInstanceOf[JOptionA[BTS[Value]]]
-              len += 1
-              optBytes match
-                case JOptionA.Some(BTS.ReadBytes(Topped.Actual(List((Num(Int32(v)),1))), _)) =>
-                  val iv = apronState.getInterval(v.asNumExpr)
-                  if(iv.isEqual(stringSeparator))
-                    break(List(Num(Int32(NumExpr(ApronExpr.lit(len, I32Type))))))
-                  else if(stringSeparator.isLeq(iv))
-                    break(topLen)
-                  else /* if(!stringSeparator.isLeq(iv)) */
-                    true
-                case _ => break(topLen)
-            } do ()
-            throw new Exception("Unreachable")
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
-      case "toupper" =>
-        args match
-          case List(v@Num(Int32(char))) =>
-            val charExpr = char.asNumExpr
-            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('a'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('z'.toInt, I32Type))))) {
-              ApronExpr.intSub(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
-            } {
-              charExpr
-            }))))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to toupper, but got $args")
-      case "tolower" =>
-        args match
-          case List(v@Num(Int32(char))) =>
-            val charExpr = char.asNumExpr
-            List(Num(Int32(NumExpr(apronState.ifThenElse(ApronBool.And(ApronBool.Constraint(ApronCons.le(ApronExpr.lit('A'.toInt, I32Type), charExpr)), ApronBool.Constraint(ApronCons.le(charExpr, ApronExpr.lit('Z'.toInt, I32Type))))) {
-              ApronExpr.intAdd(charExpr, ApronExpr.lit('a'.toInt - 'A'.toInt, I32Type), I32Type)
-            } {
-              charExpr
-            }))))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to tolower, but got $args")
-      case "assert" =>
-        args match
-          case List(v@Num(Int32(_))) =>
-            given BooleanBranching[Value,Unit] = wasmOps.branchOpsUnit
-            assert(v.asInstanceOf[Value], domLogger.currentDom)
-            List()
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to assert, but got $args")
-      case "__VERIFIER_nondet_bool" =>
-        assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
-      case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(1).toInt, signedMax(1).toInt, I32Type))
-      case "__VERIFIER_nondet_short" | "__VERIFIER_nondet_ushort" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(2).toInt, signedMax(2).toInt, I32Type))
-      case "__VERIFIER_nondet_int" | "__VERIFIER_nondet_long" | "__VERIFIER_nondet_uint" | "__VERIFIER_nondet_ulong" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(4).toInt, signedMax(4).toInt, I32Type))
-      case "__VERIFIER_nondet_longlong" | "__VERIFIER_nondet_ulonglong" =>
-        assignFreshTempVar(ApronExpr.interval(signedMin(8).toLong, signedMax(8).toLong, I64Type))
-      case "__VERIFIER_nondet_float" =>
-        assignFreshTempVar(ApronExpr.interval(Float.MinValue, Float.MaxValue, FloatSpecials.Top, F32Type))
-      case "__VERIFIER_nondet_double" =>
-        assignFreshTempVar(ApronExpr.interval(Double.MinValue, Double.MaxValue, FloatSpecials.Top, F64Type))
-      case "__blackhole_int" | "__blackhole_int_p" =>
-        args
-      case _ =>
-        throw new IllegalArgumentException(s"Unknown host function $hostFunc")
 
     private def assignFreshTempVar(expr: ApronExpr[VirtAddr, Type]): List[Value] =
       List(apronState.withTempVars(expr._type)((v, _) =>

@@ -86,6 +86,13 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def getFloatInterval(expr: ApronExpr[Addr, Type])(using ResolveState): sturdy.apron.FloatInterval
 
+  inline def getInt(expr: ApronExpr[Addr, Type])(using ResolveState): Option[Int] =
+    val (lower, upper) = getBigIntInterval(expr)
+    if(lower == upper && lower.isDefined && lower.get.isValidInt)
+      Some(lower.get.toInt)
+    else
+      None
+
   inline def getIntInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Int,Int) =
     val (lower,upper) = getBigIntInterval(expr)
     (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
@@ -125,6 +132,15 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     (lower(0), upper(0))
 
   def assert(v: ApronBool[Addr, Type] | ApronCons[Addr,Type])(using ResolveState): Topped[Boolean]
+
+  inline def isLeq(expr: ApronExpr[Addr,Type], iv: Coeff)(using ResolveState): Topped[Boolean] =
+    val tpe = expr._type
+    assert(
+      ApronBool.And(
+        ApronBool.Constraint(ApronCons.le(ApronExpr.constant(iv.inf(), tpe), expr)),
+        ApronBool.Constraint(ApronCons.lt(expr, ApronExpr.constant(iv.sup(), tpe)))
+      )
+    )
 
   def makeNonRelational(addr: Addr)(using ResolveState): Unit
 
@@ -313,6 +329,16 @@ class ApronRecencyState
         rCombined <- combineExpr(widen, allocator).apply(r1, r2)
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
+    case (e1@ApronExpr.Addr(_, _, _), e2@ApronExpr.Binary(BinOp.Add, l2, r2, rt2, rd2, specials2, tpe2)) if(structuralEq(e1,l2) || structuralEq(e1,r2)) =>
+      if(structuralEq(e1,l2))
+        combineExpr(widen,allocator).apply(ApronExpr.Binary(BinOp.Add, e1, ApronExpr.lit(0, tpe2), rt2, rd2, specials2, tpe2), e2)
+      else
+        combineExpr(widen,allocator).apply(ApronExpr.Binary(BinOp.Add, ApronExpr.lit(0, tpe2), e1, rt2, rd2, specials2, tpe2), e2)
+    case (e1@ApronExpr.Binary(BinOp.Add, l1, r1, rt1, rd1, specials1, tpe1), e2@ApronExpr.Addr(_, _, _)) if(structuralEq(l1,e2) || structuralEq(r1,e2)) =>
+      if(structuralEq(l1,e2))
+        combineExpr(widen,allocator).apply(e1, ApronExpr.Binary(BinOp.Add, e2, ApronExpr.lit(0, tpe1), rt1, rd1, specials1, tpe1))
+      else
+        combineExpr(widen,allocator).apply(e1, ApronExpr.Binary(BinOp.Add, ApronExpr.lit(0, tpe1), e2, rt1, rd1, specials1, tpe1))
     case (e1,e2) if containsFailedAddrs(e1, relationalStore.leftState.getOrElse(relationalStore.internalState)) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>

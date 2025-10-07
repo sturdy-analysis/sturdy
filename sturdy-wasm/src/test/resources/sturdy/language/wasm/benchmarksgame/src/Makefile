@@ -10,7 +10,7 @@ clean:
 	rm -f $(WASM_FILES) $(WAST_FILES)
 
 %.wasm: %.c
-	clang-19 --target=wasm32 --no-standard-libraries -O3 -g -Wl,--allow-undefined,--export-all $< -o $@
+	clang-19 --target=wasm32 --no-standard-libraries -O1 -g -Wl,--allow-undefined,--export-all $< -o $@
 #	emcc -sSTANDALONE_WASM -sEXPORTED_FUNCTIONS=_main -sMALLOC=none -O3 -g \
 #		-Wl,--allow-undefined \
 #		 -Wno-limited-postlink-optimizations \

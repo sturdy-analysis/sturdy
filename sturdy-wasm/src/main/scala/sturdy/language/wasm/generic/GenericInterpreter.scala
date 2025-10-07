@@ -854,7 +854,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private inline def allocGlobalTypes(modInst: ModuleInstance, globTypes: Vector[GlobalType]): Unit =
     modInst.globalTypes = globTypes
 
-  private inline def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc = {
+  protected def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc = {
     var loc = initLoc
 
     modInst.globalAddrs = globImports

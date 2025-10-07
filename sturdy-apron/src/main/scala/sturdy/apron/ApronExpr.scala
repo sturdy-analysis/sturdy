@@ -81,7 +81,19 @@ enum ApronExpr[Addr, Type]:
         Unary(op, expr.mapAddrSame(f), roundingType, roundingDir, specials, _type)
       case Binary(op, expr1, expr2, roundingType, roundingDir, specials, _type) =>
         Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, specials, _type)
-        
+
+  def addrs: Set[Addr] = this match
+    case Addr(v, _, _) => Set(v.addr)
+    case _: Constant[Addr,Type] => Set()
+    case Unary(_, e, _, _, _, _) => e.addrs
+    case Binary(_, l, r, _, _, _, _) => l.addrs ++ r.addrs
+
+  def constants: Set[Coeff] = this match
+    case Addr(_, _, _) => Set()
+    case Constant(coeff, _, _) => Set(coeff)
+    case Unary(_, e, _, _, _, _) => e.constants
+    case Binary(_, l, r, _, _, _, _) => l.constants ++ r.constants
+
   def isConstant: Boolean =
     this match
       case _: ApronExpr.Addr[?,?] => false
@@ -98,12 +110,6 @@ enum ApronExpr[Addr, Type]:
     this match
       case Constant(iv, _, _) => Topped.Actual(iv.inf().cmp(iv.sup()) > 0)
       case _ => Topped.Top
-
-  def addrs: Set[Addr] = this match
-    case Addr(v, _, _) => Set(v.addr)
-    case Constant(_, _, _) => Set()
-    case Unary(_, e, _, _, _, _) => e.addrs
-    case Binary(_, l, r, _, _, _, _) => l.addrs ++ r.addrs
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString

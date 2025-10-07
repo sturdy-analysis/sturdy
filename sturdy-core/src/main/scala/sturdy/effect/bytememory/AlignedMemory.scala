@@ -30,6 +30,7 @@ enum AlignedRead:
 
 trait LanguageSpecificMemOps[Context, Addr, Size]:
   def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
+  def isSummaryRegion[Val, Timestamp: PartialOrder](ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val], recentRegion: Option[MemoryRegion[Addr, Size, Timestamp, Val]], oldRegion: Option[MemoryRegion[Addr, Size, Timestamp, Val]]): Boolean
 
 trait SizeOps[Size]:
   def fromInt(size: Int): Size
@@ -39,17 +40,21 @@ trait SizeOps[Size]:
   def min(size1: Size, size2: Size): Size
   def toTopped(size: Size): Topped[Int]
 
+enum ByteMemoryAllocationContext:
+  case Write
+  case Fill
+
 final class AlignedMemory
   [
     Key: Finite,
-    Context <: AbstractAddr[_]: Ordering: Finite,
+    Context: Ordering: Finite,
     Addr: Join: Widen,
     Val: ClassTag: Join: Widen,
     Size: Join: Widen
   ]
   (val
    defaultBytes: ReadBytes[Val],
-   memLocAllocator: Allocator[IterableOnce[Context],(Key,Addr)],
+   memLocAllocator: Allocator[IterableOnce[Context],(ByteMemoryAllocationContext,Key,Addr)],
    moveMemLoc: Allocator[Context, (Key,Context,Addr)]
   )
   (using
@@ -128,12 +133,12 @@ final class AlignedMemory
   private def write0(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 1): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
-        val Mem(store, numPages, pageLimit) = memories(key)
+        val Mem(store0, numPages, pageLimit) = memories(key)
 
         addressLimits.ifAddrLeSize(addr, sizeOps.sub(sizeOps.mul(numPages, pageSize), sizeOps.fromInt(byteSize))) {
 
-          var newStore = store
-          for (ctx <- memLocAllocator(key, addr)) {
+          var store = store0
+          for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Write, key, addr)) {
             increment(ctx)
             val newRegion = MemoryRegion(
               startAddr = addr,
@@ -143,18 +148,9 @@ final class AlignedMemory
               value = value,
               byteOrder = byteOrder
             )
-            if(ctx.isStrong) {
-                for (joinedRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-                  newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
-                }
-                newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
-            } else {
-              for (joinedRegion <- Join(Some(newRegion), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
-              }
-            }
+            store = writeRegion(ctx, newRegion, store)
           }
-          memories += key -> Mem(newStore, numPages, pageLimit)
+          memories += key -> Mem(store, numPages, pageLimit)
 
           write0(
             key = key,
@@ -167,6 +163,28 @@ final class AlignedMemory
         JOptionA.Some(())
 
       case bs: ReadBytes[Val] => throw IllegalArgumentException(s"Expected StoredBytes, but got $bytes")
+
+
+  private def writeRegion(ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val], store0: SortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val]]): SortedMap[PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val]] = {
+    var store = store0
+    val recentRegion = store.get(PhysicalAddress(ctx, Recency.Recent))
+    val oldRegion = store.get(PhysicalAddress(ctx, Recency.Old))
+    if (memOps.isSummaryRegion(ctx, newRegion, recentRegion, oldRegion)) {
+      // If the region represents multiple concrete memory addresses, join everything into old.
+      val joinedRegion = Join(Join(oldRegion, recentRegion).get, Some(newRegion)).get.get
+      store += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
+      store -= PhysicalAddress(ctx, Recency.Recent)
+    } else {
+      // If the region represents a single concrete memory addresses,
+      // retire the previous recent address and assign to the new recent address.
+      val joinedRegion = Join(recentRegion, oldRegion).get
+      for (region <- joinedRegion) {
+        store += PhysicalAddress(ctx, Recency.Old) -> region
+      }
+      store += PhysicalAddress(ctx, Recency.Recent) -> newRegion
+    }
+    store
+  }
 
   override def copy(key: Key, srcAddr: Addr, dstAddr: Addr, byteAmount: Size): JOptionA[Unit] =
     val mem = memories(key)
@@ -183,14 +201,14 @@ final class AlignedMemory
   override def fill(key: Key, addr: Addr, byteAmount: Size, bytes: Bytes[Val]): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes(values, byteOrder) =>
-        val Mem(store,  numPages, pageLimit) = memories(key)
+        val Mem(store0,  numPages, pageLimit) = memories(key)
+        var store = store0
         addressLimits.ifAddrLeSize(addr, sizeOps.sub(sizeOps.mul(numPages, pageSize), byteAmount)) {
           val joinedValue = values.map(_._1).reduce(Join(_, _).get)
           val joinedByteSize = values.map((_,i) => Powerset(i)).reduce(Join(_,_).get).set
           val size = Join(sizeOps.fromInt(joinedByteSize.min), sizeOps.fromInt(joinedByteSize.max)).get
           val startAddr = Join(addr, addressLimits.addSizeToAddr(byteAmount, addr)).get
-          var newStore = store
-          for (ctx <- memLocAllocator(key, startAddr)) {
+          for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Fill, key, startAddr)) {
             increment(ctx)
             val newRegion = MemoryRegion(
               startAddr = startAddr,
@@ -200,30 +218,20 @@ final class AlignedMemory
               value = joinedValue,
               byteOrder = byteOrder
             )
-            if (ctx.isStrong) {
-              for (joinedRegion <- Join(store.get(PhysicalAddress(ctx, Recency.Recent)), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
-              }
-              newStore += PhysicalAddress(ctx, Recency.Recent) -> newRegion
-            } else {
-              for (joinedRegion <- Join(Some(newRegion), store.get(PhysicalAddress(ctx, Recency.Old))).get) {
-                newStore += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
-              }
-            }
+            store = writeRegion(ctx, newRegion, store)
           }
 
-          memories += key -> Mem(newStore, numPages, pageLimit)
+          memories += key -> Mem(store, numPages, pageLimit)
           ()
         }
 
       case ReadBytes(_,_) => throw IllegalArgumentException(s"Expected StoredBytes, but got $bytes")
 
-  override def init(key: Key, targetAddr0: Addr, sourceAddr0: Addr, byteAmount0: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
+  override def init(key: Key, targetAddr: Addr, sourceAddr: Addr, byteAmount0: Size, dataBytes: Bytes[Val]): JOption[WithJoin, Unit] =
     Profiler.addTime("AlignedMemory.init") {
       dataBytes match
         case StoredBytes(valueList, byteOrder) =>
-          var targetAddr = targetAddr0
-          var sourceAddr = sourceAddr0
+          var offset = 0
           var byteAmount = byteAmount0
           var result = JOptionA.Some[Unit](())
 
@@ -231,14 +239,15 @@ final class AlignedMemory
             addressLimits.ifSizeLeLimit(byteAmount, sizeOps.fromInt(0)) {
               // if byteAmount is 0, we are done writing.
             } {
-              addressLimits.ifAddrLeSize(sourceAddr, sizeOps.fromInt(0)) {
-                result = Join(result, write(key, targetAddr, StoredBytes(List(atom), byteOrder)).asInstanceOf[JOptionA[Unit]]).get
-                targetAddr = addressOffset.addOffsetToAddr(+byteSize, targetAddr)
+              val effectiveSourceAddr = addressOffset.addOffsetToAddr(-offset, sourceAddr)
+              addressLimits.ifAddrLeSize(effectiveSourceAddr, sizeOps.fromInt(0)) {
+                val effectiveTargetAddr = addressOffset.addOffsetToAddr(offset, targetAddr)
+                result = Join(result, write(key, effectiveTargetAddr, StoredBytes(List(atom), byteOrder)).asInstanceOf[JOptionA[Unit]]).get
+
+                offset += byteSize
                 byteAmount = sizeOps.sub(byteAmount, sizeOps.fromInt(byteSize))
-              }.orElseAndThen[Unit] {
-                // if sourceAddr > 0
-                sourceAddr = addressOffset.addOffsetToAddr(-byteSize, sourceAddr)
-              } { opt => opt }
+              }
+              ()
             }
           }
 
