@@ -43,6 +43,7 @@ trait SizeOps[Size]:
 
 enum ByteMemoryAllocationContext:
   case Write
+  case Copy
   case Fill
 
 final class AlignedMemory
@@ -55,8 +56,7 @@ final class AlignedMemory
   ]
   (val
    defaultBytes: ReadBytes[Val],
-   memLocAllocator: Allocator[IterableOnce[Context],(ByteMemoryAllocationContext,Key,Addr)],
-   moveMemLoc: Allocator[Context, (Key,Context,Addr)]
+   memLocAllocator: Allocator[IterableOnce[Context],(ByteMemoryAllocationContext,Key,Addr)]
   )
   (using
    memOps: LanguageSpecificMemOps[Context, Addr, Size, Val],
@@ -193,9 +193,10 @@ final class AlignedMemory
     var store = mem.store
     for((physAddr, region,_) <- memOps.matchRegion(srcAddr, byteAmount, mem)) {
       val destAddr = addressOffset.moveAddress(region.startAddr, srcOffset = srcAddr, dstOffset = dstAddr)
-      val destCtx = moveMemLoc(key, physAddr.ctx, destAddr)
-      store += PhysicalAddress(destCtx, Recency.Recent) -> Join(store.get(PhysicalAddress(destCtx, Recency.Recent)), Some(region.copy(startAddr = destAddr))).get.get
-      store += PhysicalAddress(destCtx, Recency.Old) -> Join(store.get(PhysicalAddress(destCtx, Recency.Old)), Some(region.copy(startAddr = destAddr))).get.get
+      for (destCtx <- memLocAllocator(ByteMemoryAllocationContext.Copy, key, destAddr)) {
+        store += PhysicalAddress(destCtx, Recency.Recent) -> Join(store.get(PhysicalAddress(destCtx, Recency.Recent)), Some(region.copy(startAddr = destAddr))).get.get
+        store += PhysicalAddress(destCtx, Recency.Old) -> Join(store.get(PhysicalAddress(destCtx, Recency.Old)), Some(region.copy(startAddr = destAddr))).get.get
+      }
     }
     memories += key -> mem.copy(store = store)
     JOptionA.NoneSome(())

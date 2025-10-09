@@ -247,8 +247,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given heapAlloc: HeapAlloc = new HeapAlloc(rootFrameData)
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc,
-      moveMemLoc(rootFrameData)
+      heapAlloc
     )
 
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
@@ -319,7 +318,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "memcpy" =>
         args match
           case List(dst, src, len) =>
-            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToSize(len))
+            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToSize(len))
             List(dst)
           case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
       case "memmove" =>
@@ -362,19 +361,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(count)
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to read, but got $args")
-      case "fwrite" =>
+      case "fputs" =>
         args match
-          case List(data@Num(Int32(_)), Num(Int32(size)), c@Num(Int32(count)), Num(Int32(stream))) =>
-            val (l,h) = apronState.getIntInterval(count.asNumExpr)
-            if(l == h) {
-              val bytes = memory.read(MemoryAddr(0), wasmOps.specialOps.valToAddr(data), l)
-              println(s"fwrite($data, $size, $count, $stream) = $bytes")
-            } else {
-              println(s"fwrite($data, $size, $count, $stream)")
-            }
-            List(c)
+          case List(Num(Int32(strPtr)), Num(Int32(fd))) =>
+            println(s"fputs($strPtr, $fd)")
+            List(Num(Int32(topI32)))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to fputs, but got $args")
       case "printf" =>
         args match
           case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>

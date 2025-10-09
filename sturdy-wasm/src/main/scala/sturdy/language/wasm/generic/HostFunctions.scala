@@ -51,6 +51,7 @@ val stdlib: List[HostFunction] = List(
   HostFunction("fileno", FuncType(Vector(I32), Vector(I32))),
   HostFunction("read", FuncType(Vector(I32, I32, I32), Vector(I32))),
   HostFunction("fgets", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("fputs", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("write", FuncType(Vector(I32, I32, I32), Vector(I32))),
   HostFunction("fwrite", FuncType(Vector(I32, I32, I32, I32), Vector(I32))),
   HostFunction("printf", FuncType(Vector(I32, I32), Vector(I32))),

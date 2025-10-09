@@ -381,6 +381,9 @@ trait RelationalMemory extends RelationalValues:
               Iterable(HeapCtx.Fill(loc))
             case (ByteMemoryAllocationContext.Write, ApronExpr.Binary(BinOp.Add, baseAddr, ApronExpr.Constant(offset: apron.Scalar, _, _), _, _, _, _), Some(staticMemoryLayout)) =>
               Iterable(getHeapCtx(staticMemoryLayout, effectiveAddr, baseAddr, offset).getOrElse(defaultAddr))
+            case (ByteMemoryAllocationContext.Copy, ApronExpr.Binary(BinOp.Add, _, destAddr, _, _, _, _), Some(staticMemoryLayout)) =>
+              val offset = apron.DoubleScalar(0)
+              Iterable(getHeapCtx(staticMemoryLayout, ApronExpr.intAdd(destAddr, ApronExpr.constant(offset, I32Type), I32Type), destAddr, offset).getOrElse(defaultAddr))
             case _ =>
               Iterable(defaultAddr)
           }
@@ -466,25 +469,25 @@ trait RelationalMemory extends RelationalValues:
       case None => Topped.Top
     }
 
-  def moveMemLoc(rootFrameData: FrameData)(using apronState: ApronState[VirtAddr,Type], domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,HeapCtx,Addr), HeapCtx] =
-    AAllocatorFromContext((memoryAddr, ctx, destAddr) =>
-      (destAddr, optionStaticMemoryLayout) match
-        case (NumExpr(ApronExpr.Binary(BinOp.Add, ApronExpr.Binary(BinOp.Sub, addr, srcOffset, _, _, _, _), destOffset, _, _, _, _)), Some(staticMemoryLayout)) =>
-          val (l, u) = apronState.getIntInterval(destOffset)
-          val matchingGlobals = for {
-            (global,range) <- staticMemoryLayout.globalRanges
-            if(Interval(l,u).isLeq(range))
-          } yield(HeapCtx.Global(global))
-
-          if(matchingGlobals.size == 1)
-            matchingGlobals.head
-          else
-            if (l == u)
-              HeapCtx.Static(u)
-            else
-              ctx match
-                case _: HeapCtx.Dynamic => ctx
-                case _ => HeapCtx.Dynamic(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)))
-        case (AllocationSites(reference, _), _) =>
-          throw IllegalArgumentException("Moving malloc-allocated addresses is not supported by the analysis.")
-    )
+//  def moveMemLoc(rootFrameData: FrameData)(using apronState: ApronState[VirtAddr,Type], domLogger: DomLogger[FixIn]): AAllocatorFromContext[(MemoryAddr,HeapCtx,Addr), HeapCtx] =
+//    AAllocatorFromContext((memoryAddr, ctx, destAddr) =>
+//      (destAddr, optionStaticMemoryLayout) match
+//        case (NumExpr(ApronExpr.Binary(BinOp.Add, ApronExpr.Binary(BinOp.Sub, addr, srcOffset, _, _, _, _), destOffset, _, _, _, _)), Some(staticMemoryLayout)) =>
+//          val (l, u) = apronState.getIntInterval(destOffset)
+//          val matchingGlobals = for {
+//            (global,range) <- staticMemoryLayout.globalRanges
+//            if(Interval(l,u).isLeq(range))
+//          } yield(HeapCtx.Global(global))
+//
+//          if(matchingGlobals.size == 1)
+//            matchingGlobals.head
+//          else
+//            if (l == u)
+//              HeapCtx.Static(u)
+//            else
+//              ctx match
+//                case _: HeapCtx.Dynamic => ctx
+//                case _ => HeapCtx.Dynamic(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)))
+//        case (AllocationSites(reference, _), _) =>
+//          throw IllegalArgumentException("Moving malloc-allocated addresses is not supported by the analysis.")
+//    )
