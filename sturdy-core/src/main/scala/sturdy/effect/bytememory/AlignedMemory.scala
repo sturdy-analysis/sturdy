@@ -28,9 +28,10 @@ enum AlignedRead:
       case Aligned => Topped.Actual(true)
       case MaybeAligned => Topped.Top
 
-trait LanguageSpecificMemOps[Context, Addr, Size]:
-  def matchRegion[Val, Timestamp: PartialOrder](addr: Addr, size: Size, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
-  def isSummaryRegion[Val, Timestamp: PartialOrder](ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val], recentRegion: Option[MemoryRegion[Addr, Size, Timestamp, Val]], oldRegion: Option[MemoryRegion[Addr, Size, Timestamp, Val]]): Boolean
+trait LanguageSpecificMemOps[Context, Addr, Size, Val]:
+  def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterator[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
+  def isSummaryRegion[Timestamp: PartialOrder](ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val]): Boolean
+  def knownStartAddrAndSize(ctx: Context, startAddr: Addr, byteSize: Int): (Addr,Size)
 
 trait SizeOps[Size]:
   def fromInt(size: Int): Size
@@ -58,7 +59,7 @@ final class AlignedMemory
    moveMemLoc: Allocator[Context, (Key,Context,Addr)]
   )
   (using
-   memOps: LanguageSpecificMemOps[Context, Addr, Size],
+   memOps: LanguageSpecificMemOps[Context, Addr, Size, Val],
    addressOffset: AddressOffset[Addr],
    addressLimits: AddressLimits[Addr, Size, WithJoin],
    sizeOps: SizeOps[Size],
@@ -125,12 +126,12 @@ final class AlignedMemory
         override def hasNext: Boolean = iter.hasNext && taken <= n
 
 
-  override def write(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 1): JOption[WithJoin, Unit] =
+  override def write(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 0): JOption[WithJoin, Unit] =
     Profiler.addTime("AlignedMemory.write") {
       write0(key, addr, bytes, alignment)
     }
 
-  private def write0(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 1): JOption[WithJoin, Unit] =
+  private def write0(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 0): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
         val Mem(store0, numPages, pageLimit) = memories(key)
@@ -140,10 +141,11 @@ final class AlignedMemory
           var store = store0
           for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Write, key, addr)) {
             increment(ctx)
+            val (knownStartAddr,knownSize) = memOps.knownStartAddrAndSize(ctx, addr, byteSize)
             val newRegion = MemoryRegion(
-              startAddr = addr,
+              startAddr = knownStartAddr,
               alignment = Powerset(alignment),
-              byteSize = sizeOps.fromInt(byteSize),
+              byteSize = knownSize,
               timestamp = this.timestamp,
               value = value,
               byteOrder = byteOrder
@@ -169,7 +171,7 @@ final class AlignedMemory
     var store = store0
     val recentRegion = store.get(PhysicalAddress(ctx, Recency.Recent))
     val oldRegion = store.get(PhysicalAddress(ctx, Recency.Old))
-    if (memOps.isSummaryRegion(ctx, newRegion, recentRegion, oldRegion)) {
+    if (memOps.isSummaryRegion(ctx, newRegion)) {
       // If the region represents multiple concrete memory addresses, join everything into old.
       val joinedRegion = Join(Join(oldRegion, recentRegion).get, Some(newRegion)).get.get
       store += PhysicalAddress(ctx, Recency.Old) -> joinedRegion
@@ -212,7 +214,7 @@ final class AlignedMemory
             increment(ctx)
             val newRegion = MemoryRegion(
               startAddr = startAddr,
-              alignment = Powerset(1),
+              alignment = Powerset(0),
               byteSize = size,
               timestamp = this.timestamp,
               value = joinedValue,

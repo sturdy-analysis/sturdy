@@ -244,9 +244,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         JoinableDecidableSymbolTable[Unit, GlobalAddr, Value]()
     given DecidableSymbolTable[Unit, GlobalAddr, Value] = globals
 
+    given heapAlloc: HeapAlloc = new HeapAlloc(rootFrameData)
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
-      heapAlloc(rootFrameData),
+      heapAlloc,
       moveMemLoc(rootFrameData)
     )
 

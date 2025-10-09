@@ -123,7 +123,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       }
     }
 
-  given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
+  given overflowHandling: OverflowHandling = OverflowHandling.Fail
 
   given I32IntegerOps(using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOpsWithSignInterpretation[Int, I32] =
     new LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):

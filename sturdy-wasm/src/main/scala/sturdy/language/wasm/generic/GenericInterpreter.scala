@@ -19,10 +19,8 @@ import sturdy.data.given
 import swam.*
 import swam.ReferenceType.{ExternRef, FuncRef}
 import swam.syntax.*
-import swam.syntax.i32.Store8
 
 import scala.collection.immutable.VectorBuilder
-import scala.collection.mutable
 import WasmFailure.*
 import scodec.bits.ByteVector
 import sturdy.util.{Lazy, lazily}
@@ -405,7 +403,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val addr = addressOffset.addOffsetToAddr(inst.offset, startAddr)
 
     val memIdx = memoryIndex
-    memory.write(memIdx, addr, bytes).getOrElse(
+    memory.write(memIdx, addr, bytes, inst.align).getOrElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 

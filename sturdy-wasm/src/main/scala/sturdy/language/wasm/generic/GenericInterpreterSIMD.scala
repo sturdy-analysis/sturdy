@@ -154,24 +154,23 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
 
   def evalLoadVectorLane(inst: LoadVectorLane, memIdx: MemoryAddr, addr: Addr, vec: V)(using f: Failure)(using J[Bytes]): JOptionA[V] = {
       val shape = laneWidthToLaneShape(inst.laneWidth)
-      val bytes = mem.read(memIdx, addr, inst.laneWidth / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load lane"))
+      val bytes = mem.read(memIdx, addr, inst.laneWidth / 8, inst.align).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load lane"))
       val newVec = v128ops.replaceLane(shape, vec, inst.lane, decode(bytes, SomeCC(inst, false)))
       JOptionA.some(newVec)
   }
 
-  def evalStoreVector(inst: Inst, memIdx: MemoryAddr, addr: Addr, vec: V): JOption[J, Unit] = {
+  def evalStoreVector(inst: VectorStoreInst, memIdx: MemoryAddr, addr: Addr, vec: V): JOption[J, Unit] = {
     inst match {
       case storeVec: StoreVector =>
         val bytes = encode(vec, SomeCC(storeVec, false))
-        mem.write(memIdx, addr, bytes)
+        mem.write(memIdx, addr, bytes, inst.align)
       case storeVecLane: StoreVectorLane =>
         val shape = laneWidthToLaneShape(storeVecLane.laneWidth)
         val bytes = if storeVecLane.laneWidth <= VecBytes then
           encode(v128ops.extractLane(shape, Unsigned, vec, storeVecLane.lane), SomeCC(storeVecLane, false))
         else
           encode(v128ops.extractLane(shape, Raw, vec, storeVecLane.lane), SomeCC(storeVecLane, false))
-        mem.write(memIdx, addr, bytes)
-      case _ => throw new IllegalArgumentException(s"Unsupported SIMD store instruction: $inst")
+        mem.write(memIdx, addr, bytes, inst.align)
     }
   }
 
