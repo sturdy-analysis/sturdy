@@ -39,15 +39,27 @@ trait RelationalBaseIntegerOps
   given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
   given defaultResolveState: ResolveState = ResolveState.Internal
 
-  override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intAdd(v1, v2)).simplify
+  override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = {
+    (v1,v2) match {
+      case (ApronExpr.Constant(coeff, _, _), _) if(coeff.isZero) => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if(coeff.isZero) => v1
+      case _ => handleOverflow(intAdd(v1, v2))
+    }
+  }
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intSub(v1, v2)).simplify
+    (v1, v2) match {
+      case (ApronExpr.Constant(coeff, _, _), _) if (coeff.isZero) => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if (coeff.isZero) => v1
+      case _ => handleOverflow(intSub(v1, v2))
+    }
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    handleOverflow(intMul(v1, v2)).simplify
-
+    (v1, v2) match {
+      case (ApronExpr.Constant(coeff, _, _), _) if (coeff.isEqual(1)) => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if (coeff.isEqual(1)) => v1
+      case _ => handleOverflow(intMul(v1, v2))
+    }
 
   override def max(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     apronState.ifThenElse(lt(v1, v2)) {
@@ -92,7 +104,10 @@ trait RelationalBaseIntegerOps
     handleOverflow(res)
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    intMod(v1, v2)
+    v1 match {
+      case ApronExpr.Constant(coeff, _, _) if(coeff.isZero) => v1
+      case _ => intMod(v1, v2)
+    }
 
   override def modulo(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     apronState.ifThenElse(le(lit(0, v1._type), intMod(v1, v2))) {

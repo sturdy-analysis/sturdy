@@ -145,6 +145,7 @@ trait Interpreter:
     override def apply(v1: Value, v2: Value): MaybeChanged[Value] = {
       try {
         (v1, v2) match
+          case _ if v1 eq v2 => Unchanged(v1)
           case (Num(NumValue.Int32(i1)), Num(NumValue.Int32(i2))) => Combine[I32, W](i1, i2).map(makeI32)
           case (Num(NumValue.Int64(l1)), Num(NumValue.Int64(l2))) => Combine[I64, W](l1, l2).map(makeI64)
           case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)

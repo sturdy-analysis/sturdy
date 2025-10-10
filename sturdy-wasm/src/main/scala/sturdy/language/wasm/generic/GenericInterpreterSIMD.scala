@@ -118,7 +118,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
 
   def evalLoadVectorBytes(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
     inst match {
-      case v128.Load(_, _) => mem.read(memIdx, addr, VecBytes)
+      case load@v128.Load(_, _) => mem.read(memIdx, addr, VecBytes, load.align)
       case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")
     }
   }
@@ -127,7 +127,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     boundary:
       inst match
         case loadSplat: LoadVectorSplat =>
-          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load splat"))
+          val bytes = mem.read(memIdx, addr, loadSplat.shape.N / 8, loadSplat.align).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load splat"))
           val numV = decode(bytes, SomeCC(loadSplat, false))
           val vec = loadSplat.shape match {
             case VectorSplatShape.i8_splat => v128ops.splat(I8, numV)
@@ -138,7 +138,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           JOptionA.some(vec)
 
         case loadZero: LoadVectorZero =>
-          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load zero"))
+          val bytes = mem.read(memIdx, addr, loadZero.shape.N / 8, loadZero.align).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load zero"))
           val numV = decode(bytes, SomeCC(loadZero, false))
           val vec = loadZero.shape match {
             case VectorZeroShape.i32_zero => v128ops.zeroPad(I32, numV)
@@ -147,7 +147,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
           JOptionA.some(vec)
 
         case loadExtend: LoadVector =>
-          val bytes = mem.read(memIdx, addr, 8).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load extend"))
+          val bytes = mem.read(memIdx, addr, 8, loadExtend.align).getOrElse(f.fail(MemoryAccessOutOfBounds, "Memory access out of bounds during SIMD load extend"))
           val vec = decode(bytes, SomeCC(loadExtend, false))
           JOptionA.some(vec)
         case _ => throw new IllegalArgumentException(s"Unsupported SIMD load instruction: $inst")

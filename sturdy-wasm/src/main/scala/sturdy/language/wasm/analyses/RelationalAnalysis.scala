@@ -368,6 +368,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to fputs, but got $args")
+      case "fwrite" =>
+        args match
+          case List(Num(Int32(strPtr)), Num(Int32(size)), Num(Int32(count)),Num(Int32(fd))) =>
+            println(s"fwrite($strPtr, $size, $count, $fd)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
       case "printf" =>
         args match
           case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>

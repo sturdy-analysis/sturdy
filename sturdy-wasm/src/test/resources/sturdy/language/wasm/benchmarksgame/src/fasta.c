@@ -38,8 +38,8 @@ typedef struct
 // Repeatedly print string_To_Repeat until it has printed
 // number_Of_Characters_To_Create. The output is also wrapped to
 // MAXIMUM_LINE_WIDTH columns.
-static void repeat_And_Wrap_String(const char string_To_Repeat[],
-                                   const intnative_t number_Of_Characters_To_Create)
+void repeat_And_Wrap_String(const char string_To_Repeat[],
+                            const intnative_t number_Of_Characters_To_Create)
 {
     const intnative_t string_To_Repeat_Length=strlen(string_To_Repeat);
 
@@ -110,13 +110,13 @@ omp_lock_t rng_lock;
 #define RNG_FREE() do{}while(0)
 #endif
 
-static void rng_init(void)
+void rng_init(void)
 {
     RNG_LOCK_INIT();
     rng_tid = 0;
 }
 
-static intnative_t rng_gen_blk(uint32_t * buf, intnative_t len, int curr_tid)
+intnative_t rng_gen_blk(uint32_t * buf, intnative_t len, int curr_tid)
 {
     intnative_t gen_cnt = -1;//Error by default
     RNG_LOCK();
@@ -157,13 +157,13 @@ omp_lock_t out_lock;
 #define OUT_FREE() do{}while(0)
 #endif
 
-static void out_init(void)
+void out_init(void)
 {
     OUT_LOCK_INIT();
     rng_tid = 0;
 }
 
-static intnative_t out_write(char * buf, intnative_t len, int curr_tid)
+intnative_t out_write(char * buf, intnative_t len, int curr_tid)
 {
     intnative_t wr_cnt = -1;//Error by default
     OUT_LOCK();
@@ -181,7 +181,7 @@ static intnative_t out_write(char * buf, intnative_t len, int curr_tid)
     return wr_cnt; //-1 - thread error, 0 - IO error, 1 - ОК
 }
 
-static void generate_And_Wrap_Pseudorandom_DNA_Sequence(
+void generate_And_Wrap_Pseudorandom_DNA_Sequence(
     const nucleotide_info nucl_info[],
     const intnative_t nucl_num,
     const intnative_t char_num)

@@ -1,103 +1,21 @@
 (module $fasta.wasm
   (type $t0 (func (param i32 i32 i32) (result i32)))
   (type $t1 (func))
-  (type $t2 (func (param i32 i32) (result i32)))
-  (type $t3 (func (param i32) (result i32)))
-  (type $t4 (func (param i32 i32 i32 i32) (result i32)))
-  (type $t5 (func (param i32)))
-  (type $t6 (func (result i32)))
-  (type $t7 (func (param i32 i32)))
-  (type $t8 (func (param i32 i32 i32)))
-  (import "env" "fputs" (func $fputs (type $t2)))
+  (type $t2 (func (param i32) (result i32)))
+  (type $t3 (func (param i32 i32 i32 i32) (result i32)))
+  (type $t4 (func (param i32)))
+  (type $t5 (func (param i32 i32) (result i32)))
+  (type $t6 (func (param i32 i32)))
+  (type $t7 (func (param i32 i32 i32)))
+  (type $t8 (func (result i32)))
+  (import "env" "strlen" (func $strlen (type $t2)))
   (import "env" "memcpy" (func $memcpy (type $t0)))
-  (import "env" "strlen" (func $strlen (type $t3)))
-  (import "env" "fwrite" (func $fwrite (type $t4)))
-  (import "env" "exit" (func $exit (type $t5)))
+  (import "env" "fwrite" (func $fwrite (type $t3)))
+  (import "env" "exit" (func $exit (type $t4)))
+  (import "env" "fputs" (func $fputs (type $t5)))
   (func $__wasm_call_ctors (type $t1)
     nop)
-  (func $_start (type $t6) (result i32)
-    (local $l0 i32) (local $l1 i32)
-    global.get $__stack_pointer
-    i32.const 464
-    i32.sub
-    local.tee $l0
-    global.set $__stack_pointer
-    local.get $l0
-    i32.const 2500
-    i32.store offset=460
-    i32.const 1055
-    i32.const 0
-    i32.load
-    call $fputs
-    drop
-    local.get $l0
-    i32.const 160
-    i32.add
-    i32.const 1104
-    i32.const 288
-    call $memcpy
-    drop
-    local.get $l0
-    i32.const 160
-    i32.add
-    i32.const 5000
-    call $repeat_And_Wrap_String
-    call $rng_init
-    call $out_init
-    i32.const 1078
-    i32.const 0
-    i32.load
-    call $fputs
-    drop
-    local.get $l0
-    i32.const 32
-    i32.add
-    i32.const 1392
-    i32.const 120
-    call $memcpy
-    drop
-    local.get $l0
-    i32.const 32
-    i32.add
-    i32.const 15
-    i32.const 7500
-    call $generate_And_Wrap_Pseudorandom_DNA_Sequence
-    i32.const 1024
-    i32.const 0
-    i32.load
-    call $fputs
-    drop
-    local.get $l0
-    i32.const 24
-    i32.add
-    i32.const 0
-    local.tee $l1
-    i64.load offset=1544
-    i64.store
-    local.get $l0
-    i32.const 16
-    i32.add
-    local.get $l1
-    i64.load offset=1536
-    i64.store
-    local.get $l0
-    local.get $l1
-    i64.load offset=1528
-    i64.store offset=8
-    local.get $l0
-    local.get $l1
-    i64.load offset=1520
-    i64.store
-    local.get $l0
-    i32.const 4
-    i32.const 12500
-    call $generate_And_Wrap_Pseudorandom_DNA_Sequence
-    local.get $l0
-    i32.const 464
-    i32.add
-    global.set $__stack_pointer
-    i32.const 0)
-  (func $repeat_And_Wrap_String (type $t7) (param $p0 i32) (param $p1 i32)
+  (func $repeat_And_Wrap_String (type $t6) (param $p0 i32) (param $p1 i32)
     (local $l2 i32) (local $l3 i32) (local $l4 i32) (local $l5 i32)
     global.get $__stack_pointer
     i32.const 112
@@ -276,11 +194,176 @@
     i32.const 1568
     i32.const 0
     i32.store)
+  (func $rng_gen_blk (type $t0) (param $p0 i32) (param $p1 i32) (param $p2 i32) (result i32)
+    (local $l3 i32) (local $l4 i32) (local $l5 i32) (local $l6 i32) (local $l7 i32)
+    global.get $__stack_pointer
+    i32.const 16
+    i32.sub
+    local.tee $l3
+    local.get $p0
+    i32.store offset=12
+    local.get $l3
+    local.get $p1
+    i32.store offset=8
+    local.get $l3
+    local.get $p2
+    i32.store offset=4
+    local.get $l3
+    i32.const -1
+    i32.store
+    i32.const 1568
+    i32.load
+    local.get $l3
+    i32.load offset=4
+    i32.eq
+    if $I0
+      i32.const 1568
+      i32.const 1568
+      i32.load
+      i32.const 1
+      i32.add
+      local.tee $l4
+      i32.store
+      local.get $l4
+      i32.const 1556
+      i32.load
+      i32.ge_s
+      if $I1
+        i32.const 1568
+        i32.const 0
+        i32.store
+      end
+      local.get $l3
+      block $B2 (result i32)
+        local.get $l3
+        i32.load offset=8
+        i32.const 1564
+        i32.load
+        i32.lt_s
+        if $I3
+          local.get $l3
+          i32.load offset=8
+          br $B2
+        end
+        i32.const 1564
+        i32.load
+      end
+      i32.store
+      i32.const 1564
+      i32.const 1564
+      i32.load
+      local.get $l3
+      i32.load
+      i32.sub
+      i32.store
+      local.get $l3
+      local.get $l3
+      i32.load
+      i32.store offset=8
+      loop $L4
+        local.get $l3
+        local.get $l3
+        i32.load offset=8
+        local.tee $l5
+        i32.const 1
+        i32.sub
+        i32.store offset=8
+        local.get $l5
+        if $I5
+          i32.const 1552
+          i32.const 1552
+          i32.load
+          i32.const 3877
+          i32.mul
+          i32.const 29573
+          i32.add
+          i32.const 139968
+          i32.rem_u
+          i32.store
+          i32.const 1552
+          i32.load
+          local.set $l6
+          local.get $l3
+          local.get $l3
+          i32.load offset=12
+          local.tee $l7
+          i32.const 4
+          i32.add
+          i32.store offset=12
+          local.get $l7
+          local.get $l6
+          i32.store
+          br $L4
+        end
+      end
+    end
+    local.get $l3
+    i32.load)
   (func $out_init (type $t1)
     i32.const 1568
     i32.const 0
     i32.store)
-  (func $generate_And_Wrap_Pseudorandom_DNA_Sequence (type $t8) (param $p0 i32) (param $p1 i32) (param $p2 i32)
+  (func $out_write (type $t0) (param $p0 i32) (param $p1 i32) (param $p2 i32) (result i32)
+    (local $l3 i32) (local $l4 i32) (local $l5 i32)
+    global.get $__stack_pointer
+    i32.const 16
+    i32.sub
+    local.tee $l3
+    global.set $__stack_pointer
+    local.get $l3
+    local.get $p0
+    i32.store offset=12
+    local.get $l3
+    local.get $p1
+    i32.store offset=8
+    local.get $l3
+    local.get $p2
+    i32.store offset=4
+    local.get $l3
+    i32.const -1
+    i32.store
+    i32.const 1572
+    i32.load
+    local.get $l3
+    i32.load offset=4
+    i32.eq
+    if $I0
+      i32.const 1572
+      i32.const 1572
+      i32.load
+      i32.const 1
+      i32.add
+      local.tee $l4
+      i32.store
+      local.get $l4
+      i32.const 1560
+      i32.load
+      i32.ge_s
+      if $I1
+        i32.const 1572
+        i32.const 0
+        i32.store
+      end
+      local.get $l3
+      local.get $l3
+      i32.load offset=12
+      local.get $l3
+      i32.load offset=8
+      i32.const 1
+      i32.const 0
+      i32.load
+      call $fwrite
+      i32.store
+    end
+    local.get $l3
+    i32.load
+    local.set $l5
+    local.get $l3
+    i32.const 16
+    i32.add
+    global.set $__stack_pointer
+    local.get $l5)
+  (func $generate_And_Wrap_Pseudorandom_DNA_Sequence (type $t7) (param $p0 i32) (param $p1 i32) (param $p2 i32)
     (local $l3 i32) (local $l4 i32) (local $l5 i32) (local $l6 i32) (local $l7 f32) (local $l8 i32) (local $l9 i32) (local $l10 i32) (local $l11 i32) (local $l12 i32)
     global.get $__stack_pointer
     i32.const 308304
@@ -591,178 +674,95 @@
     i32.const 308304
     i32.add
     global.set $__stack_pointer)
-  (func $rng_gen_blk (type $t0) (param $p0 i32) (param $p1 i32) (param $p2 i32) (result i32)
-    (local $l3 i32) (local $l4 i32) (local $l5 i32) (local $l6 i32) (local $l7 i32)
+  (func $_start (type $t8) (result i32)
+    (local $l0 i32) (local $l1 i32)
     global.get $__stack_pointer
-    i32.const 16
+    i32.const 464
     i32.sub
-    local.tee $l3
-    local.get $p0
-    i32.store offset=12
-    local.get $l3
-    local.get $p1
-    i32.store offset=8
-    local.get $l3
-    local.get $p2
-    i32.store offset=4
-    local.get $l3
-    i32.const -1
-    i32.store
-    i32.const 1568
-    i32.load
-    local.get $l3
-    i32.load offset=4
-    i32.eq
-    if $I0
-      i32.const 1568
-      i32.const 1568
-      i32.load
-      i32.const 1
-      i32.add
-      local.tee $l4
-      i32.store
-      local.get $l4
-      i32.const 1556
-      i32.load
-      i32.ge_s
-      if $I1
-        i32.const 1568
-        i32.const 0
-        i32.store
-      end
-      local.get $l3
-      block $B2 (result i32)
-        local.get $l3
-        i32.load offset=8
-        i32.const 1564
-        i32.load
-        i32.lt_s
-        if $I3
-          local.get $l3
-          i32.load offset=8
-          br $B2
-        end
-        i32.const 1564
-        i32.load
-      end
-      i32.store
-      i32.const 1564
-      i32.const 1564
-      i32.load
-      local.get $l3
-      i32.load
-      i32.sub
-      i32.store
-      local.get $l3
-      local.get $l3
-      i32.load
-      i32.store offset=8
-      loop $L4
-        local.get $l3
-        local.get $l3
-        i32.load offset=8
-        local.tee $l5
-        i32.const 1
-        i32.sub
-        i32.store offset=8
-        local.get $l5
-        if $I5
-          i32.const 1552
-          i32.const 1552
-          i32.load
-          i32.const 3877
-          i32.mul
-          i32.const 29573
-          i32.add
-          i32.const 139968
-          i32.rem_u
-          i32.store
-          i32.const 1552
-          i32.load
-          local.set $l6
-          local.get $l3
-          local.get $l3
-          i32.load offset=12
-          local.tee $l7
-          i32.const 4
-          i32.add
-          i32.store offset=12
-          local.get $l7
-          local.get $l6
-          i32.store
-          br $L4
-        end
-      end
-    end
-    local.get $l3
-    i32.load)
-  (func $out_write (type $t0) (param $p0 i32) (param $p1 i32) (param $p2 i32) (result i32)
-    (local $l3 i32) (local $l4 i32) (local $l5 i32)
-    global.get $__stack_pointer
-    i32.const 16
-    i32.sub
-    local.tee $l3
+    local.tee $l0
     global.set $__stack_pointer
-    local.get $l3
-    local.get $p0
-    i32.store offset=12
-    local.get $l3
-    local.get $p1
-    i32.store offset=8
-    local.get $l3
-    local.get $p2
-    i32.store offset=4
-    local.get $l3
-    i32.const -1
-    i32.store
-    i32.const 1572
+    local.get $l0
+    i32.const 2500
+    i32.store offset=460
+    i32.const 1055
+    i32.const 0
     i32.load
-    local.get $l3
-    i32.load offset=4
-    i32.eq
-    if $I0
-      i32.const 1572
-      i32.const 1572
-      i32.load
-      i32.const 1
-      i32.add
-      local.tee $l4
-      i32.store
-      local.get $l4
-      i32.const 1560
-      i32.load
-      i32.ge_s
-      if $I1
-        i32.const 1572
-        i32.const 0
-        i32.store
-      end
-      local.get $l3
-      local.get $l3
-      i32.load offset=12
-      local.get $l3
-      i32.load offset=8
-      i32.const 1
-      i32.const 0
-      i32.load
-      call $fwrite
-      i32.store
-    end
-    local.get $l3
+    call $fputs
+    drop
+    local.get $l0
+    i32.const 160
+    i32.add
+    i32.const 1104
+    i32.const 288
+    call $memcpy
+    drop
+    local.get $l0
+    i32.const 160
+    i32.add
+    i32.const 5000
+    call $repeat_And_Wrap_String
+    call $rng_init
+    call $out_init
+    i32.const 1078
+    i32.const 0
     i32.load
-    local.set $l5
-    local.get $l3
+    call $fputs
+    drop
+    local.get $l0
+    i32.const 32
+    i32.add
+    i32.const 1392
+    i32.const 120
+    call $memcpy
+    drop
+    local.get $l0
+    i32.const 32
+    i32.add
+    i32.const 15
+    i32.const 7500
+    call $generate_And_Wrap_Pseudorandom_DNA_Sequence
+    i32.const 1024
+    i32.const 0
+    i32.load
+    call $fputs
+    drop
+    local.get $l0
+    i32.const 24
+    i32.add
+    i32.const 0
+    local.tee $l1
+    i64.load offset=1544
+    i64.store
+    local.get $l0
     i32.const 16
     i32.add
+    local.get $l1
+    i64.load offset=1536
+    i64.store
+    local.get $l0
+    local.get $l1
+    i64.load offset=1528
+    i64.store offset=8
+    local.get $l0
+    local.get $l1
+    i64.load offset=1520
+    i64.store
+    local.get $l0
+    i32.const 4
+    i32.const 12500
+    call $generate_And_Wrap_Pseudorandom_DNA_Sequence
+    local.get $l0
+    i32.const 464
+    i32.add
     global.set $__stack_pointer
-    local.get $l5)
+    i32.const 0)
   (memory $memory 2)
   (global $__stack_pointer (mut i32) (i32.const 67120))
   (global $rng_tid i32 (i32.const 1568))
-  (global $out_tid i32 (i32.const 1572))
-  (global $rng_cnt i32 (i32.const 1564))
   (global $rng_tnum i32 (i32.const 1556))
+  (global $rng_cnt i32 (i32.const 1564))
   (global $seed i32 (i32.const 1552))
+  (global $out_tid i32 (i32.const 1572))
   (global $out_tnum i32 (i32.const 1560))
   (global $__dso_handle i32 (i32.const 1024))
   (global $__data_end i32 (i32.const 1576))
@@ -775,13 +775,19 @@
   (global $__table_base i32 (i32.const 1))
   (export "memory" (memory $memory))
   (export "__wasm_call_ctors" (func $__wasm_call_ctors))
-  (export "_start" (func $_start))
+  (export "repeat_And_Wrap_String" (func $repeat_And_Wrap_String))
+  (export "rng_init" (func $rng_init))
   (export "rng_tid" (global $rng_tid))
-  (export "out_tid" (global $out_tid))
-  (export "rng_cnt" (global $rng_cnt))
+  (export "rng_gen_blk" (func $rng_gen_blk))
   (export "rng_tnum" (global $rng_tnum))
+  (export "rng_cnt" (global $rng_cnt))
   (export "seed" (global $seed))
+  (export "out_init" (func $out_init))
+  (export "out_write" (func $out_write))
+  (export "out_tid" (global $out_tid))
   (export "out_tnum" (global $out_tnum))
+  (export "generate_And_Wrap_Pseudorandom_DNA_Sequence" (func $generate_And_Wrap_Pseudorandom_DNA_Sequence))
+  (export "_start" (func $_start))
   (export "__dso_handle" (global $__dso_handle))
   (export "__data_end" (global $__data_end))
   (export "__stack_low" (global $__stack_low))

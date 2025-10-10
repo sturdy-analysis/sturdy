@@ -101,6 +101,11 @@ enum ApronExpr[Addr, Type]:
       case unary: Unary[?,?] => unary.e.isConstant
       case binary: Binary[?,?] => binary.l.isConstant && binary.r.isConstant
 
+  def isConstantEqual(n: Int): Boolean =
+    this match
+      case Constant(coeff, _, _) => coeff.isEqual(n)
+      case _ => false
+
   def isTop: Topped[Boolean] =
     this match
       case Constant(iv, _, _) => Topped.Actual(iv.inf().isInfty == -1 && iv.sup().isInfty == 1)
@@ -367,6 +372,11 @@ enum BinOp:
   case Div
   case Mod
   case Pow
+
+  def neutralElement: Int =
+    this match
+      case Add | Sub => 0
+      case Mul | Div | Mod | Pow => 1
 
   override def toString: String = this match
     case Add => "+"

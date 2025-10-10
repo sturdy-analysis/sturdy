@@ -413,8 +413,6 @@ given finitePhysicalAddr[Context](using Finite[Context]): Finite[PhysicalAddress
 given finiteVirtualAddr[Context](using Finite[PhysicalAddress[Context]]): Finite[VirtualAddress[Context]] with {}
 given structuralVirtualAddr[Context]: Structural[VirtualAddress[Context]] with {}
 
-
-
 type PowPhysicalAddress[Context] = PowersetAddr[PhysicalAddress[Context], PhysicalAddress[Context]]
 
 /**

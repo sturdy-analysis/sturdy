@@ -108,8 +108,15 @@ given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,
 enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
-  case EnterHostFunction(id: FuncId, hostFfunc: HostFunction)
+  case EnterHostFunction(id: FuncId, hostFunc: HostFunction)
   case MostGeneralClientLoop(modInst: ModuleInstance)
+
+  def funcId: Option[FuncId] =
+    this match
+      case Eval(_, InstLoc.InFunction(funcId, _)) => Some(funcId)
+      case EnterWasmFunction(funcId, _, _) => Some(funcId)
+      case EnterHostFunction(funcId, _) => Some(funcId)
+      case _ => None
 
   override def toString: String = this match
     case Eval(i, loc) => i match
