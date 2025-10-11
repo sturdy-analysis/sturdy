@@ -92,7 +92,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         .toMap
         Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, c, fieldAddrs), false))
 
-      override def getField(callingClass: ClassFile, ref: RefValue, identifier: FieldName)(using failure: Failure): Value = ref match
+      override def getField(callingClass: ClassFile, ref: RefValue, identifier: FieldName): Value = ref match
         // TODO: fix
         case Topped.Top => ??? // getFieldNonActual
         case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) => ???

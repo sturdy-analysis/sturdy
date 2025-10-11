@@ -9,7 +9,7 @@ class LiftedObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, 
   (using ops: ObjectOps[FieldName, OID, V, CF, UOV, Site, Mth, MthName, MthSig, UB, InvokeContext, J]) extends ObjectOps[FieldName, OID, V, CF, OV, Site, Mth, MthName, MthSig, B, InvokeContext, J]:
 
   override def makeObject(oid: OID, c: CF, vals: Seq[(V, Site, FieldName)]): OV = injectO(ops.makeObject(oid, c, vals))
-  override def getField(callingClass: CF, obj: OV, identifier: FieldName)(using Failure): V = ops.getField(callingClass, extractO(obj), identifier)
+  override def getField(callingClass: CF, obj: OV, identifier: FieldName): V = ops.getField(callingClass, extractO(obj), identifier)
   override def setField(callingClass: CF, obj: OV, identifier: FieldName, v: V): JOption[J, Unit] = ops.setField(callingClass, extractO(obj), identifier, v)
 
   override def invokeMethod(context: InvokeContext)(staticClass: CF, mthName: MthName, sig: MthSig, obj: OV, args: Seq[V])(invoke: (OV, Mth, Seq[V]) => V): V =

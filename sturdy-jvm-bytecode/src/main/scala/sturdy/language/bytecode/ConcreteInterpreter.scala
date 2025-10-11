@@ -135,7 +135,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: RefValue): Boolean = true
 
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL]): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -146,7 +146,7 @@ object ConcreteInterpreter extends Interpreter:
       }.toMap
       ConcreteRefValues.Object(oid, c, fieldAddrs)
 
-    override def getField(callingClass: ClassFile, obj: RefValue, identifier: FieldName)(using failure: Failure): Value = obj match
+    override def getField(callingClass: ClassFile, obj: RefValue, identifier: FieldName): Value = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
         val resolvedField = resolveField(callingClass.thisType, identifier)
         val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
