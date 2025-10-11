@@ -1,12 +1,11 @@
 package sturdy.values.objects
 
 import sturdy.data.{JOption, MayJoin}
-import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.ordering.EqOps
 
 trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, MthName, MthSig, Boolean, InvokeContext, FieldAccessContext, J[_] <: MayJoin[_]]:
-  def makeObject(oid: ObjectIdentifier, c: Class, vals: Seq[(Value, Site, FieldIdentifier)]): ObjectValue
+  def makeObject(oid: ObjectIdentifier, c: Class, fields: Seq[(Value, Site, FieldIdentifier)]): ObjectValue
 
   def getField(context: FieldAccessContext)(obj: ObjectValue, identifier: FieldIdentifier): Value
 

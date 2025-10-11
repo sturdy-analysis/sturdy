@@ -86,8 +86,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
     new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin]:
       given hierachy: ClassHierarchy = project.classHierarchy
 
-      override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
-        val fieldAddrs = vals.map: (v, site, name) =>
+      override def makeObject(oid: Addr, c: ClassFile, fields: Seq[(Value, Site, FieldName)]): RefValue =
+        val fieldAddrs = fields.map: (v, site, name) =>
           val addr = alloc(site)
           store.write(addr, v)
           (name, addr)
