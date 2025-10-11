@@ -579,8 +579,13 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // athrow opcode 191
       case ATHROW =>
-        val thrown = stack.popOrAbort()
-        except.throws(JvmExcept.ThrowObject(thrown))
+        val objectref = stack.popOrAbort()
+        // if the exception is null, a NPE has to be thrown instead
+        branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {
+          except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+        } {
+          except.throws(JvmExcept.ThrowObject(objectref))
+        }
 
       // checkcast opcode 192
       case CHECKCAST(referenceType) =>
@@ -858,8 +863,6 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       stack.push(exceptionObject)
       run(handler.handlerPC, mth)
     case JvmExcept.ThrowObject(exception) =>
-      // if the exception is null, a NPE has to be thrown instead
-      if objectOps.isNull(exception) != i32ops.integerLit(0) then except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       // otherwise, handle the exception
       val currPC = frame.data
       val body = mth.body.get
