@@ -99,7 +99,7 @@ object ConcreteInterpreter extends Interpreter:
     override def typeOf(v: RefValue): ReferenceType = v match
       case ConcreteRefValues.Object(_, cls, _) => cls.thisType
       case ConcreteRefValues.nonNullArray(_, _, arrayType, _) => arrayType
-      case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null") 
+      case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null")
 
     @tailrec
     private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
@@ -134,8 +134,10 @@ object ConcreteInterpreter extends Interpreter:
   given refSizeOps: SizeOps[RefValue, Boolean] with
     override def is32Bit(v: RefValue): Boolean = true
 
+  private type FieldAccessContext = ClassFile
+
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, ClassFile, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -146,9 +148,9 @@ object ConcreteInterpreter extends Interpreter:
       }.toMap
       ConcreteRefValues.Object(oid, c, fieldAddrs)
 
-    override def getField(callingClass: ClassFile, obj: RefValue, identifier: FieldName): Value = obj match
+    override def getField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName): Value = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(callingClass.thisType, identifier)
+        val resolvedField = resolveField(context.thisType, identifier)
         val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$identifier not bound"))
       case ConcreteRefValues.NullValue() =>
@@ -156,9 +158,9 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.nonNullArray(_, _, _, _) =>
         except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
 
-    override def setField(callingClass: ClassFile, obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
+    override def setField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(callingClass.thisType, identifier)
+        val resolvedField = resolveField(context.thisType, identifier)
         if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
@@ -355,8 +357,8 @@ object ConcreteInterpreter extends Interpreter:
       override def remainder(dividend: Double, divisor: Double): Double = dividend % divisor
 
     override val bytecodeOps: BytecodeOps[Value, TypeRep] = implicitly
-    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin] =
-      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin] =
+      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteObjectOps(using objFieldAlloc, store, project)
       )
     override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin] =

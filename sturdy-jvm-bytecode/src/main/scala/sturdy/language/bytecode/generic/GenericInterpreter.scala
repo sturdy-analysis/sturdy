@@ -59,7 +59,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   import bytecodeOps.*
 
-  val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, InvokeContext, J]
+  type FieldAccessContext = ClassFile
+
+  val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, InvokeContext, FieldAccessContext, J]
   val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, J]
 
   implicit val joinUnit: J[Unit]
@@ -458,7 +460,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val field = resolveField(mth.classFile.thisType, ident)
         if field.isStatic then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
-        val v = objectOps.getField(mth.classFile, obj, ident)
+        val v = objectOps.getField(mth.classFile)(obj, ident)
         stack.push(v)
 
       case PUTFIELD(declaringClass, name, fieldType) =>
@@ -471,7 +473,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
         if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
           except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
-        objectOps.setField(mth.classFile, obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
+        objectOps.setField(mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
@@ -756,7 +758,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     val newFrameData = 0
     // TODO: remove this println summary
     if (mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String), args(1), FieldIdent.StringValue)).map(_.get)
+      val string = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)).map(_.get)
       arrayOps.printString(string)
       return i32ops.integerLit(-1)
     // we are currently unable to properly deal with System.exit
@@ -790,14 +792,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ClassType("java/lang/String"),"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String), args.head, FieldIdent.StringValue)).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String), args(1), FieldIdent.StringValue)).map(vals => vals.get)
+        val baseString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args.head, FieldIdent.StringValue)).map(vals => vals.get)
+        val constantString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
           concattedString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
         val stringObj = createObject(ClassType.String, Site.Instruction(mth, 0))
-        objectOps.setField(getClassFile(ClassType.String), stringObj, FieldIdent.StringValue, stringArray)
+        objectOps.setField(getClassFile(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)
@@ -938,7 +940,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       i32ops.integerLit(value.length)
     )
     val stringObj = createObject(ClassType.String, site)
-    objectOps.setField(getClassFile(ClassType.String), stringObj, FieldIdent.StringValue, stringArray)
+    objectOps.setField(getClassFile(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
     stringObj
 
   // constructs the fields for an object allocation

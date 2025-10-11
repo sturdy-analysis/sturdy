@@ -5,12 +5,12 @@ import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.ordering.EqOps
 
-trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, MthName, MthSig, Boolean, InvokeContext, J[_] <: MayJoin[_]]:
+trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, MthName, MthSig, Boolean, InvokeContext, FieldAccessContext, J[_] <: MayJoin[_]]:
   def makeObject(oid: ObjectIdentifier, c: Class, vals: Seq[(Value, Site, FieldIdentifier)]): ObjectValue
 
-  def getField(callingClass: Class, obj: ObjectValue, identifier: FieldIdentifier): Value
+  def getField(context: FieldAccessContext)(obj: ObjectValue, identifier: FieldIdentifier): Value
 
-  def setField(callingClass: Class, obj: ObjectValue, identifier: FieldIdentifier, v: Value): JOption[J, Unit]
+  def setField(context: FieldAccessContext)(obj: ObjectValue, identifier: FieldIdentifier, v: Value): JOption[J, Unit]
 
   def invokeMethod(context: InvokeContext)(staticClass: Class, mthName: MthName, sig: MthSig, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
 

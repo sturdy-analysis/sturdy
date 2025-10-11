@@ -80,8 +80,10 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin] =
-    new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, WithJoin]:
+  private type FieldAccessContext = ClassFile
+
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin] =
+    new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin]:
       given hierachy: ClassHierarchy = project.classHierarchy
 
       override def makeObject(oid: Addr, c: ClassFile, vals: Seq[(Value, Site, FieldName)]): RefValue =
@@ -92,7 +94,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         .toMap
         Topped.Actual(AbstractReferenceValue.maybeNullObject(Object(oid, c, fieldAddrs), false))
 
-      override def getField(callingClass: ClassFile, ref: RefValue, identifier: FieldName): Value = ref match
+      override def getField(context: FieldAccessContext)(ref: RefValue, identifier: FieldName): Value = ref match
         // TODO: fix
         case Topped.Top => ??? // getFieldNonActual
         case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) => ???
@@ -100,7 +102,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case Topped.Actual(AbstractReferenceValue.NullValue()) => throw NullPointerException()
         case Topped.Actual(_) => ???
 
-      override def setField(callingClass: ClassFile, ref: RefValue, identifier: FieldName, v: Value): JOption[WithJoin, Unit] = ref match
+      override def setField(context: FieldAccessContext)(ref: RefValue, identifier: FieldName, v: Value): JOption[WithJoin, Unit] = ref match
         case Topped.Top => JOptionA.some(Value.TopValue)
         case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
           if (!obj.fields.contains(identifier))
@@ -290,8 +292,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
     override val bytecodeOps: BytecodeOps[Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, WithJoin] =
-      new LiftedObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin] =
+      new LiftedObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 
