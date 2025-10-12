@@ -2,6 +2,7 @@ package sturdy.language.bytecode
 
 import org.opalj.br.{ArrayType, ClassType, IntegerType, Method, MethodDescriptor}
 import org.scalatest.Assertions
+import sturdy.language.bytecode.util.ClassTypeValues
 
 import java.nio.file.{Files, NoSuchFileException, Path, Paths}
 import scala.jdk.CollectionConverters.*
@@ -86,7 +87,7 @@ final val supportedDelegatedMethods = Seq("runPositive", "runNegative")
 // predicate for finding the run method with signature (String[] x PrintStream) -> int
 def runSignaturePredicate(m: Method) =
   // get is safe since unapply always returns Some
-  m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType.String), ClassType("java/io/PrintStream")), IntegerType)
+  m.name == "run" && MethodDescriptor.unapply(m.descriptor).get == (Seq(ArrayType(ClassType.String), ClassTypeValues.PrintStream), IntegerType)
 
 enum TestedMethodType:
   case Main

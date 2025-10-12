@@ -15,6 +15,7 @@ import sturdy.fix
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
 import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.*
+import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.values.arrays.*
 import sturdy.values.booleans.ConcreteBooleanBranching
 import sturdy.values.config
@@ -156,7 +157,7 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.NullValue() =>
         except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case ConcreteRefValues.nonNullArray(_, _, _, _) =>
-        except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
+        except.throws(JvmExcept.Throw(ClassTypeValues.LinkageError))
 
     override def setField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
@@ -166,7 +167,7 @@ object ConcreteInterpreter extends Interpreter:
         else
           store.write(fields(resolvedField.getIdent), v)
           JOptionC.some(())
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
@@ -175,24 +176,24 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.Object(_, cf, _) => context match
         case (InvokeType.Interface, callingClass) =>
           if !hierarchy.isSubtypeOf(cf.thisType, staticClass.thisType) then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
           val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
           if resolvedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)
           if !(selectedMethod.isPublic || selectedMethod.isPrivate) then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
           if selectedMethod.isAbstract || selectedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
           invoke(obj, selectedMethod, args)
 
         case (InvokeType.Virtual, callingClass) =>
           val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
           if resolvedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)
           if selectedMethod.isAbstract then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
           invoke(obj, selectedMethod, args)
 
         case (InvokeType.Special(isInterfaceCall), callingClass) =>
@@ -206,7 +207,7 @@ object ConcreteInterpreter extends Interpreter:
             staticClass.thisType
           val selectedMethod = selectSpecial(c, resolvedMethod)
           if selectedMethod.isAbstract then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
           invoke(obj, selectedMethod, args)
 
       case _ =>
@@ -262,7 +263,7 @@ object ConcreteInterpreter extends Interpreter:
     override def arrayLength(array: RefValue): Value = array match
       case ConcreteRefValues.nonNullArray(_, _, _, size: Value) =>
         size
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -286,7 +287,7 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
         val arrayVals = vals.map(addr => getVal(array, vals.indexOf(addr)))
         arrayVals
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType("java/lang/NullPointerException")))
+      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 

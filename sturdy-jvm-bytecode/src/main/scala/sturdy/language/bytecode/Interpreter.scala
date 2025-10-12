@@ -151,7 +151,7 @@ trait Interpreter:
     private def arithmeticExceptionChecked[I](extract: Value => I, inject: I => Value, mk0: 0 => I)(op: (I, I) => I)(v1: Value, v2: Value): Value =
       branchOpsV.boolBranch(
         eqOps.equ(v2, inject(mk0(0))),
-        except.throws(JvmExcept.Throw(ClassType("java/lang/ArithmeticException"))),
+        except.throws(JvmExcept.Throw(ClassType.ArithmeticException)),
         inject(op(extract(v1), extract(v2)))
       )
 

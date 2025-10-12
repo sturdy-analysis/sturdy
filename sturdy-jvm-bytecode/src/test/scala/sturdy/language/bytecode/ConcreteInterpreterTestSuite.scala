@@ -16,6 +16,7 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.bytecode.ConcreteRefValues.nonNullArray
 import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.generic.JvmExcept
+import sturdy.language.bytecode.util.ClassTypeValues
 
 import java.net.URL
 import java.nio.file.Path
@@ -182,7 +183,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
     concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
     if mType == TestedMethodType.Run then
       // push System.out
-      concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassType("java/io/PrintStream"), Site.External))
+      concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassTypeValues.PrintStream, Site.External))
     (concreteInterpreter, mType)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =

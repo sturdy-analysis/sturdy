@@ -115,7 +115,7 @@ class GenericInterpreterNativeMethods[V, Addr, ObjType, OID, AID, ObjRep, TypeRe
         ???
       case "getPrimitiveClass" =>
         // not in docs
-        val clsObj = createObject(ClassType("java/lang/Class"), Site.Instruction(mth, 0))
+        val clsObj = createObject(ClassType.Class, Site.Instruction(mth, 0))
         clsObj
       case "getProtectionDomain" =>
         // returns protectionDomain of this class

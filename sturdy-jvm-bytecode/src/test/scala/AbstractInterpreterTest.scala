@@ -48,11 +48,11 @@ class AbstractInterpreterTest extends AnyFunSuite:
 //
 //  val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map(), Map(), Map())
 //  println(interp.invokeExternal(testMths.find(mth => mth.name == "throwTest0").get, true))
-//  val classClassFile = pWithLibrary.allClassFiles.find(cls => cls.thisType == ClassType("java/lang/Class"))
+//  val classClassFile = pWithLibrary.allClassFiles.find(cls => cls.thisType == ClassType.Class)
 //  println(classClassFile.get.methods.size)
 //  println(classClassFile.get.methodsWithBody.size)
 //  val nativeSource = org.opalj.bytecode.JavaBase
-//  val source = javaLibClassFileWrapper(ClassType("java/lang/Class"))
+//  val source = javaLibClassFileWrapper(ClassType.Class)
 //  val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
 //  println(cfs.methods.size)
 //  println(cfs.methodsWithBody.size)

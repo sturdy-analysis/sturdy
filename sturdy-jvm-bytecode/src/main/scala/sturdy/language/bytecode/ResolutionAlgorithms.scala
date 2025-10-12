@@ -8,6 +8,7 @@ import sturdy.data.MayJoin
 import sturdy.effect.except.Except
 import sturdy.language.bytecode.abstractions.FieldIdent
 import sturdy.language.bytecode.generic.JvmExcept
+import sturdy.language.bytecode.util.ClassTypeValues
 
 import java.net.URL
 import scala.annotation.tailrec
@@ -27,13 +28,13 @@ def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType
         // TODO: not sure whether this is correct
         arrayType.mostPreciseClassType
   if !accessControl(project.classFile(resC).get, d) then
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
   resC
 
 @tailrec
 def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIdent)(using project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Field =
   val c = project.classFile(ident.declaringClass).getOrElse:
-    except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
   var candidate: Option[Field] = None
   candidate = c.fields.find(ident.matchesField).orElse:
     project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(ident.matchesField)
@@ -42,35 +43,35 @@ def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIden
       if accessControl(field, d)(using project.classHierarchy) then
         field
       else
-        except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+        except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
     case None =>
       if c.superclassType.isEmpty then
-        except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+        except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchFieldError))
       resolveField(d, FieldIdent(c.superclassType.get, ident.name, ident.fieldType))
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
 def resolveMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
   if hierarchy.isInterface(calleeStatic).isYesOrUnknown then
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
   val resolved = project.resolveMethodReference(calleeStatic, name, descriptor).getOrElse:
-    except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchMethodError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchMethodError))
   // access control
   if resolved.isAccessibleBy(caller, project.nests) then
     resolved
   else
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
 def resolveInterfaceMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
   if hierarchy.isInterface(calleeStatic).isNoOrUnknown then
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
   val resolved = project.resolveInterfaceMethodReference(calleeStatic, name, descriptor).getOrElse:
-    except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchMethodError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchMethodError))
   // access control
   if resolved.isAccessibleBy(caller, project.nests) then
     resolved
   else
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
 
 def canOverride(mc: Method, ma: Method): Boolean =
   !mc.isStatic && !ma.isStatic && mc.name == ma.name && mc.descriptor == ma.descriptor && !mc.isPrivate &&
@@ -97,9 +98,9 @@ def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolv
   if maxSpecificMethods.size == 1 then
     maxSpecificMethods.head
   else if maxSpecificMethods.isEmpty then
-    except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
   else
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
 
 // method selection algorithm for invokespecial
 def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
@@ -127,9 +128,9 @@ def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod:
   if maxSpecificMethods.size == 1 then
     maxSpecificMethods.head
   else if maxSpecificMethods.isEmpty then
-    except.throws(JvmExcept.Throw(ClassType("java/lang/AbstractMethodError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
   else
-    except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
 
 def accessControl(e: Field | Method | ClassFile, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
   e match

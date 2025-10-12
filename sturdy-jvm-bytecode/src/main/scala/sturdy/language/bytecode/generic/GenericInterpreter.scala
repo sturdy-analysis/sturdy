@@ -16,6 +16,7 @@ import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.FixIn.Eval
+import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
@@ -438,12 +439,12 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val field = project.classHierarchy.allSuperclassesIterator(declaringClass, true)(project).flatMap(cfs => cfs.fields).find:
           ident.matchesField
         .getOrElse:
-          except.throws(JvmExcept.Throw(ClassType("java/lang/NoSuchFieldError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchFieldError))
         runAccessControl(field, mth)
         if field.isNotStatic then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
         if field.isFinal && !(field.classFile == mth.classFile && mth.isStaticInitializer) then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
         val addr = getStaticFieldAddr(mth.classFile.thisType, mth, site, ident)
         val v = stack.popOrAbort()
         store.write(addr, v)
@@ -455,11 +456,11 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         // typeOps currently can't deal with nulls, so this needs to be checked first
         branchOpsUnit.boolBranch(objectOps.isNull(obj)) {} {
           if typeOps.typeOf(obj).isArrayType then
-            except.throws(JvmExcept.Throw(ClassType("java/lang/LinkageError")))
+            except.throws(JvmExcept.Throw(ClassTypeValues.LinkageError))
         }
         val field = resolveField(mth.classFile.thisType, ident)
         if field.isStatic then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
         val v = objectOps.getField(mth.classFile)(obj, ident)
         stack.push(v)
 
@@ -470,9 +471,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val field = resolveField(mth.classFile.thisType, ident)
         runAccessControl(field, mth)
         if field.isStatic then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
         if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
         objectOps.setField(mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
       // Invoke Functions opcode 182 - 186
@@ -481,7 +482,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val cf = getClassFile(declaringClass)
         val candidate = findMethod(cf, name, methodDescriptor).get
         if candidate.isAbstract || candidate.isNotStatic then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/IncompatibleClassChangeError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val ret = invoke(candidate, args)
@@ -541,7 +542,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           if (project.isLibraryType(receiver.receiverType.mostPreciseClassType)) {
             val mthTypeSource = javaLibClassFileWrapper(ClassType("java/lang/invoke/MethodType"))
             val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
-            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ClassType("java/lang/Class"), ClassType("java/lang/invoke/MethodType")))
+            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ClassType.Class, ClassType("java/lang/invoke/MethodType")))
             stack.push(createNativeObj(inst.methodDescriptor.returnType.asClassType))
             stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asClassType))
             val mthTypeObj = invoke(mthTypeMth.get, true)
@@ -561,7 +562,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case NEW(classType) =>
         checkAccessControlForRefType(classType, mth)
         if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
-          except.throws(JvmExcept.Throw(ClassType("java/lang/InstantiationError")))
+          except.throws(JvmExcept.Throw(ClassTypeValues.InstantiationError))
         ensureInitialization(mth, site)(classType)
         stack.push(createObject(classType, site))
 
@@ -672,14 +673,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   // returns the class file of a given type or throws an exception
   def getClassFile(classType: ClassType): ClassFile =
     project.classFile(classType).getOrElse:
-      except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
+      except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
 
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
   def ensureInitialization(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
     try classInitializationState.get((), classType).option(initializeClass(mth, site)(classType)):
       case InitializationResult.Ongoing | InitializationResult.Success => ()
-      case InitializationResult.Failure() => except.throws(JvmExcept.Throw(ClassType("java/lang/NoClassDefFoundError")))
+      case InitializationResult.Failure() => except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
     catch case _: NoSuchElementException =>
       // this should happen iff this is the first initialization of a class, initialize tables
       classInitializationState.putNew(())
@@ -734,7 +735,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   private def runAccessControl(e: Field | Method | ClassFile, mth: Method): Unit =
     if !accessControl(e, mth.classFile.thisType)(using project.classHierarchy) then
-      except.throws(JvmExcept.Throw(ClassType("java/lang/IllegalAccessError")))
+      except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
 
   private def checkAccessControlForRefType(refType: ReferenceType, mth: Method): Unit =
     runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy)), mth)
@@ -796,7 +797,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     // TODO: better handling
     mth.name match
       case "makeConcatWithConstants" =>
-        //val testBase = objectOps.getField(args(0), (ClassType("java/lang/String"),"value")).get
+        //val testBase = objectOps.getField(args(0), (ClassType.String,"value")).get
         val baseString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args.head, FieldIdent.StringValue)).map(vals => vals.get)
         val constantString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)).map(vals => vals.get)
         val concattedString = (baseString ++ constantString).zipWithIndex

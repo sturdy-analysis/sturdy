@@ -17,6 +17,7 @@ import sturdy.language.bytecode.ConcreteRefValues.nonNullArray
 import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.analyses.{AbstractReferenceValue, ConstantAnalysis}
 import sturdy.language.bytecode.generic.JvmExcept
+import sturdy.language.bytecode.util.ClassTypeValues
 
 import java.net.URL
 import java.nio.file.Path
@@ -183,7 +184,7 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
     abstractInterpreter.stack.push(abstractInterpreter.createArray(abstractInterpreter.bytecodeOps.i32ops.integerLit(0), ClassType.String, Site.External))
     if mType == TestedMethodType.Run then
       // push System.out
-      abstractInterpreter.stack.push(abstractInterpreter.createObject(ClassType("java/io/PrintStream"), Site.External))
+      abstractInterpreter.stack.push(abstractInterpreter.createObject(ClassTypeValues.PrintStream, Site.External))
     (abstractInterpreter, mType)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
