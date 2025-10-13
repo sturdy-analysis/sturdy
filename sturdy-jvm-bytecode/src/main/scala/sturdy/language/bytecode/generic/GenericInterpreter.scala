@@ -14,7 +14,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
-import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeContext, InvokeType, Site, getIdent}
+import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
@@ -35,6 +35,9 @@ enum JvmExcept[V]:
   case Return(returnValue: V)
   case Throw(exception: ClassType)
   case ThrowObject(exception: V)
+
+// throw an exception given its class and a site
+type ThrowClass = Site => ClassType => Nothing
 
 enum FixIn:
   case Eval(inst: Instruction, mth: Method, pc: Int)
@@ -60,10 +63,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   import bytecodeOps.*
 
-  type FieldAccessContext = ClassFile
-
   val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, InvokeContext, FieldAccessContext, J]
-  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, J]
+  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, ArrayOpContext, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -183,8 +184,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case IALOAD | LALOAD | FALOAD | DALOAD | AALOAD | BALOAD | CALOAD | SALOAD =>
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
-        val v = arrayOps.getVal(arrayref, index).getOrElse:
-          except.throws(JvmExcept.ThrowObject(createObject(ClassType.ArrayIndexOutOfBoundsException, site)))
+        val v = arrayOps.getVal(site)(arrayref, index).getOrElse:
+          throwClass(site)(ClassType.ArrayIndexOutOfBoundsException)
         stack.push(v)
 
       // store local variable opcode 54 - 78
@@ -202,8 +203,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           case _ => stack.popOrAbort()
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
-        arrayOps.setVal(arrayref, index, value).getOrElse:
-          except.throws(JvmExcept.ThrowObject(createObject(ClassType.ArrayIndexOutOfBoundsException, site)))
+        arrayOps.setVal(site)(arrayref, index, value).getOrElse:
+          throwClass(site)(ClassType.ArrayIndexOutOfBoundsException)
 
       // operand stack management instructions (opcodes 87 - 95)
       case POP =>
@@ -439,12 +440,12 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val field = project.classHierarchy.allSuperclassesIterator(declaringClass, true)(project).flatMap(cfs => cfs.fields).find:
           ident.matchesField
         .getOrElse:
-          except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchFieldError))
-        runAccessControl(field, mth)
+          throwClass(site)(ClassTypeValues.NoSuchFieldError)
+        runAccessControl(site)(field, mth)
         if field.isNotStatic then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+          throwClass(site)(ClassTypeValues.IncompatibleClassChangeError)
         if field.isFinal && !(field.classFile == mth.classFile && mth.isStaticInitializer) then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+          throwClass(site)(ClassTypeValues.IllegalAccessError)
         val addr = getStaticFieldAddr(mth.classFile.thisType, mth, site, ident)
         val v = stack.popOrAbort()
         store.write(addr, v)
@@ -456,36 +457,36 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         // typeOps currently can't deal with nulls, so this needs to be checked first
         branchOpsUnit.boolBranch(objectOps.isNull(obj)) {} {
           if typeOps.typeOf(obj).isArrayType then
-            except.throws(JvmExcept.Throw(ClassTypeValues.LinkageError))
+            throwClass(site)(ClassTypeValues.LinkageError)
         }
-        val field = resolveField(mth.classFile.thisType, ident)
+        val field = resolveField(mth.classFile.thisType, ident)(using project, except, throwClass(site))
         if field.isStatic then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
-        val v = objectOps.getField(mth.classFile)(obj, ident)
+          throwClass(site)(ClassTypeValues.IncompatibleClassChangeError)
+        val v = objectOps.getField(site, mth.classFile)(obj, ident)
         stack.push(v)
 
       case PUTFIELD(declaringClass, name, fieldType) =>
         val ident = FieldIdent(declaringClass, name, fieldType)
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
-        val field = resolveField(mth.classFile.thisType, ident)
-        runAccessControl(field, mth)
+        val field = resolveField(mth.classFile.thisType, ident)(using project, except, throwClass(site))
+        runAccessControl(site)(field, mth)
         if field.isStatic then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+          throwClass(site)(ClassTypeValues.IncompatibleClassChangeError)
         if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
-        objectOps.setField(mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
+          throwClass(site)(ClassTypeValues.IllegalAccessError)
+        objectOps.setField(site, mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
       // Invoke Functions opcode 182 - 186
       case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
         ensureInitialization(mth, site)(declaringClass)
-        val cf = getClassFile(declaringClass)
-        val candidate = findMethod(cf, name, methodDescriptor).get
+        val cf = getClassFile(site)(declaringClass)
+        val candidate = findMethod(site)(cf, name, methodDescriptor).get
         if candidate.isAbstract || candidate.isNotStatic then
-          except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+          throwClass(site)(ClassTypeValues.IncompatibleClassChangeError)
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
-        val ret = invoke(candidate, args)
+        val ret = invoke(site)(candidate, args)
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -493,7 +494,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(InvokeType.Virtual, mth.classFile)(getClassFile(declaringClass.mostPreciseClassType), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(site, InvokeType.Virtual, mth.classFile)(getClassFile(site)(declaringClass.mostPreciseClassType), name, methodDescriptor, obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -501,7 +502,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(InvokeType.Special(isInterface), mth.classFile)(getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(site, InvokeType.Special(isInterface), mth.classFile)(getClassFile(site)(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -509,7 +510,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(InvokeType.Interface, mth.classFile)(getClassFile(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper)
+        val ret = objectOps.invokeMethod(site, InvokeType.Interface, mth.classFile)(getClassFile(site)(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -560,9 +561,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // NEW opcode 187
       case NEW(classType) =>
-        checkAccessControlForRefType(classType, mth)
-        if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
-          except.throws(JvmExcept.Throw(ClassTypeValues.InstantiationError))
+        checkAccessControlForRefType(site)(classType, mth)
+        if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(site)(classType).isAbstract then
+          throwClass(site)(ClassTypeValues.InstantiationError)
         ensureInitialization(mth, site)(classType)
         stack.push(createObject(classType, site))
 
@@ -571,19 +572,19 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         handleNewArray(componentType, site)
 
       case ANEWARRAY(componentType) =>
-        checkAccessControlForRefType(componentType, mth)
+        checkAccessControlForRefType(site)(componentType, mth)
         handleNewArray(componentType, site)
 
       case ARRAYLENGTH =>
         val array = stack.popOrAbort()
-        stack.push(arrayOps.arrayLength(array))
+        stack.push(arrayOps.arrayLength(site)(array))
 
       // athrow opcode 191
       case ATHROW =>
         val objectref = stack.popOrAbort()
         // if the exception is null, a NPE has to be thrown instead
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {
-          except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+          throwClass(site)(ClassType.NullPointerException)
         } {
           except.throws(JvmExcept.ThrowObject(objectref))
         }
@@ -594,9 +595,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {} {
           // not null
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy)
+          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))
           branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {} {
-            except.throws(JvmExcept.Throw(ClassType.ClassCastException))
+            throwClass(site)(ClassType.ClassCastException)
           }
         }
 
@@ -607,7 +608,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           stack.push(i32ops.integerLit(0))
         } {
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy)
+          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))
           // not null
           branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {
             stack.push(i32ops.integerLit(1))
@@ -635,11 +636,11 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
-        checkAccessControlForRefType(arrayType, mth)
+        checkAccessControlForRefType(site)(arrayType, mth)
         val dims = stack.popNOrAbort(dimensions)
         dims.foreach: dim =>
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
-            except.throws(JvmExcept.Throw(ClassType.NegativeArraySizeException))
+            throwClass(site)(ClassType.NegativeArraySizeException)
           } {}
         val arrayref = createMultiArray(arrayType, dims, site)
         stack.push(arrayref)
@@ -671,16 +672,16 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         ()
 
   // returns the class file of a given type or throws an exception
-  def getClassFile(classType: ClassType): ClassFile =
+  def getClassFile(site: Site)(classType: ClassType): ClassFile =
     project.classFile(classType).getOrElse:
-      except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
+      throwClass(site)(ClassTypeValues.NoClassDefFoundError)
 
   // ensures that the static initializer of a given class has been invoked
   // and its static fields have been added to the static address map and store
   def ensureInitialization(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
     try classInitializationState.get((), classType).option(initializeClass(mth, site)(classType)):
       case InitializationResult.Ongoing | InitializationResult.Success => ()
-      case InitializationResult.Failure() => except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
+      case InitializationResult.Failure() => throwClass(site)(ClassTypeValues.NoClassDefFoundError)
     catch case _: NoSuchElementException =>
       // this should happen iff this is the first initialization of a class, initialize tables
       classInitializationState.putNew(())
@@ -691,7 +692,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   def initializeClass(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
     // need to make sure the class is registered in the table to avoid exceptions
     classInitializationState.set((), classType, InitializationResult.Ongoing)
-    val cf = getClassFile(classType)
+    val cf = getClassFile(site)(classType)
     // ensure initialization of superclass first
     cf.superclassType.foreach:
       ensureInitialization(mth, site)(_)
@@ -708,18 +709,18 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     cf.staticInitializer.foreach: mth =>
       except.tryCatch {
         // static initializers are void
-        val _ = invoke(mth, Seq())
+        val _ = invoke(site)(mth, Seq())
       } {
         case JvmExcept.Throw(_) | JvmExcept.ThrowObject(_) =>
           classInitializationState.set((), classType, InitializationResult.Failure())
-          except.throws(JvmExcept.Throw(ClassType.ExceptionInInitializerError))
+          throwClass(site)(ClassType.ExceptionInInitializerError)
         case e => except.throws(e)
       }
     // if nothing was thrown, the initialization was successful
     classInitializationState.set((), classType, InitializationResult.Success)
 
   def createObject(classType: ClassType, site: Site): V =
-    val cf = getClassFile(classType)
+    val cf = getClassFile(site)(classType)
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(classType, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(buildFieldSeq(site))
     objectOps.makeObject(objAlloc(site), cf, fields)
@@ -727,18 +728,18 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   private def handleNewArray(componentType: FieldType, site: Site): Unit =
     val count = stack.popOrAbort()
     val arrayref = branchOpsV.boolBranch(compareOps.lt(count, i32ops.integerLit(0))) {
-      except.throws(JvmExcept.Throw(ClassType.NegativeArraySizeException))
+      throwClass(site)(ClassType.NegativeArraySizeException)
     } {
       createArray(count, componentType, site)
     }
     stack.push(arrayref)
 
-  private def runAccessControl(e: Field | Method | ClassFile, mth: Method): Unit =
+  private def runAccessControl(site: Site)(e: Field | Method | ClassFile, mth: Method): Unit =
     if !accessControl(e, mth.classFile.thisType)(using project.classHierarchy) then
-      except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+      throwClass(site)(ClassTypeValues.IllegalAccessError)
 
-  private def checkAccessControlForRefType(refType: ReferenceType, mth: Method): Unit =
-    runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy)), mth)
+  private def checkAccessControlForRefType(site: Site)(refType: ReferenceType, mth: Method): Unit =
+    runAccessControl(site)(getClassFile(site)(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))), mth)
 
   def createArray(size: V, componentType: FieldType, site: Site): V =
     val arrayVals = arrayOps.initArray(size)
@@ -756,15 +757,15 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       (elementSupplier(), Site.ArrayElementInitialization(site, tuple._2))
     arrayOps.makeArray(arrayAlloc(site), filledArray, arrayType, size)
 
-  def invokeWrapper(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
-    invoke(mth, obj +: args)
+  def invokeWrapper(site: Site)(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
+    invoke(site)(mth, obj +: args)
 
   // every invoke instruction will call this function
-  def invoke(mth: Method, args: Seq[V])(using Fixed): V =
+  def invoke(site: Site)(mth: Method, args: Seq[V])(using Fixed): V =
     val newFrameData = 0
     // TODO: remove this println summary
     if (mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)).map(_.get)
+      val string = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args(1), FieldIdent.StringValue)).map(_.get)
       arrayOps.printString(string)
       return i32ops.integerLit(-1)
     // we are currently unable to properly deal with System.exit
@@ -798,14 +799,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     mth.name match
       case "makeConcatWithConstants" =>
         //val testBase = objectOps.getField(args(0), (ClassType.String,"value")).get
-        val baseString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args.head, FieldIdent.StringValue)).map(vals => vals.get)
-        val constantString = arrayOps.getArray(objectOps.getField(getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)).map(vals => vals.get)
-        val concattedString = (baseString ++ constantString).zipWithIndex
         val site = Site.Instruction(mth, 0)
+        val baseString = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args.head, FieldIdent.StringValue)).map(vals => vals.get)
+        val constantString = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args(1), FieldIdent.StringValue)).map(vals => vals.get)
+        val concattedString = (baseString ++ constantString).zipWithIndex
         val stringArray = arrayOps.makeArray(arrayAlloc(site),
           concattedString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
         val stringObj = createObject(ClassType.String, Site.Instruction(mth, 0))
-        objectOps.setField(getClassFile(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
+        objectOps.setField(site, getClassFile(site)(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
         stack.push(stringObj)
       case _ =>
         native.evalNative(mth, args)
@@ -813,7 +814,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   // external entrypoint to invoke a function, expecting its arguments on the stack
   def invokeExternal(mth: Method, isStatic: Boolean): V = external:
     val args = stack.popNOrAbort(stack.size)
-    invoke(mth, args)
+    invoke(Site.External)(mth, args)
 
   def evalExternal(inst: Instruction): Unit = external:
     eval(inst, null, 0)
@@ -944,7 +945,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       i32ops.integerLit(value.length)
     )
     val stringObj = createObject(ClassType.String, site)
-    objectOps.setField(getClassFile(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
+    objectOps.setField(site, getClassFile(site)(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
     stringObj
 
   // constructs the fields for an object allocation
@@ -973,14 +974,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     handleIfInst(cmpOp(_, v2), target)
 
   // tries to find a method in the given class file or the first one while moving upwards in the inheritance hierarchy
-  private def findMethod(cf: ClassFile, name: String, descriptor: MethodDescriptor): Option[Method] =
+  private def findMethod(site: Site)(cf: ClassFile, name: String, descriptor: MethodDescriptor): Option[Method] =
     cf.findMethod(name, descriptor).orElse:
       cf.superclassType.flatMap: superCf =>
-        findMethod(getClassFile(superCf), name, descriptor)
+        findMethod(site)(getClassFile(site)(superCf), name, descriptor)
 
   private def getStaticFieldAddr(caller: ClassType, mth: Method, site: Site, ident: FieldIdent)(using Fixed): Addr =
     ensureInitialization(mth, site)(ident.declaringClass)
-    val resolvedField = resolveField(caller, ident)
+    val resolvedField = resolveField(caller, ident)(using project, except, throwClass(site))
     staticFieldTable.get((), resolvedField.getIdent).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
   enum AbortEval extends FailureKind:
@@ -988,3 +989,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     case Exit(v: V)
     // native method encountered
     case Native(m: Method)
+
+  given throwClass: ThrowClass = site => classType =>
+    val exc = createObject(classType, site)
+    except.throws(JvmExcept.ThrowObject(exc))

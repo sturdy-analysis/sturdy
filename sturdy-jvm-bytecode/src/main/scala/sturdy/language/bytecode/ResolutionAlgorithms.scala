@@ -17,7 +17,7 @@ import scala.annotation.tailrec
 // see https://docs.oracle.com/javase/specs/jvms/se24/html/jvms-5.html#jvms-5.4
 
 // 5.4.3.1 class and interface resolution
-def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): ClassType =
+def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): ClassType =
   val resC = c match
     case classType: ClassType =>
       classType
@@ -28,13 +28,13 @@ def resolveClass[Value, ExcV, J[_] <: MayJoin[_]](c: ReferenceType, d: ClassType
         // TODO: not sure whether this is correct
         arrayType.mostPreciseClassType
   if !accessControl(project.classFile(resC).get, d) then
-    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+    throwClass(ClassTypeValues.IllegalAccessError)
   resC
 
 @tailrec
-def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIdent)(using project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Field =
+def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIdent)(using project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Field =
   val c = project.classFile(ident.declaringClass).getOrElse:
-    except.throws(JvmExcept.Throw(ClassTypeValues.NoClassDefFoundError))
+    throwClass(ClassTypeValues.NoClassDefFoundError)
   var candidate: Option[Field] = None
   candidate = c.fields.find(ident.matchesField).orElse:
     project.classHierarchy.directSuperinterfacesOf(c.thisType).flatMap(project.classFile(_).get.fields).find(ident.matchesField)
@@ -43,42 +43,42 @@ def resolveField[Value, ExcV, J[_] <: MayJoin[_]](d: ClassType, ident: FieldIden
       if accessControl(field, d)(using project.classHierarchy) then
         field
       else
-        except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+        throwClass(ClassTypeValues.IllegalAccessError)
     case None =>
       if c.superclassType.isEmpty then
-        except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchFieldError))
+        throwClass(ClassTypeValues.NoSuchFieldError)
       resolveField(d, FieldIdent(c.superclassType.get, ident.name, ident.fieldType))
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
-def resolveMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
+def resolveMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
   if hierarchy.isInterface(calleeStatic).isYesOrUnknown then
-    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+    throwClass(ClassTypeValues.IncompatibleClassChangeError)
   val resolved = project.resolveMethodReference(calleeStatic, name, descriptor).getOrElse:
-    except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchMethodError))
+    throwClass(ClassTypeValues.NoSuchMethodError)
   // access control
   if resolved.isAccessibleBy(caller, project.nests) then
     resolved
   else
-    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+    throwClass(ClassTypeValues.IllegalAccessError)
 
 // attempt to resolve a static method reference consisting of a static callee, a name, and a descriptor
-def resolveInterfaceMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
+def resolveInterfaceMethod[Value, ExcV, J[_] <: MayJoin[_]](caller: ClassType, calleeStatic: ClassType, name: String, descriptor: MethodDescriptor)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
   if hierarchy.isInterface(calleeStatic).isNoOrUnknown then
-    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+    throwClass(ClassTypeValues.IncompatibleClassChangeError)
   val resolved = project.resolveInterfaceMethodReference(calleeStatic, name, descriptor).getOrElse:
-    except.throws(JvmExcept.Throw(ClassTypeValues.NoSuchMethodError))
+    throwClass(ClassTypeValues.NoSuchMethodError)
   // access control
   if resolved.isAccessibleBy(caller, project.nests) then
     resolved
   else
-    except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+    throwClass(ClassTypeValues.IllegalAccessError)
 
 def canOverride(mc: Method, ma: Method): Boolean =
   !mc.isStatic && !ma.isStatic && mc.name == ma.name && mc.descriptor == ma.descriptor && !mc.isPrivate &&
     Method.canDirectlyOverride(mc.classFile.thisType.packageName, ma.visibilityModifier, ma.classFile.thisType.packageName)
 
 // method selection algorithm for invokeinterface and invokevirtual
-def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
+def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
   if resolvedMethod.isPrivate then return resolvedMethod
 
   val dynCF = project.classFile(dynamicType).get
@@ -98,12 +98,12 @@ def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolv
   if maxSpecificMethods.size == 1 then
     maxSpecificMethods.head
   else if maxSpecificMethods.isEmpty then
-    except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
+    throwClass(ClassTypeValues.AbstractMethodError)
   else
-    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+    throwClass(ClassTypeValues.IncompatibleClassChangeError)
 
 // method selection algorithm for invokespecial
-def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J]): Method =
+def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
   val cf = project.classFile(c).get
   val candidate = cf.methods.find: mth =>
     !mth.isStatic && mth.name == resolvedMethod.name && mth.descriptor == resolvedMethod.descriptor
@@ -128,9 +128,9 @@ def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod:
   if maxSpecificMethods.size == 1 then
     maxSpecificMethods.head
   else if maxSpecificMethods.isEmpty then
-    except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
+    throwClass(ClassTypeValues.AbstractMethodError)
   else
-    except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
+    throwClass(ClassTypeValues.IncompatibleClassChangeError)
 
 def accessControl(e: Field | Method | ClassFile, d: ClassType)(using hierarchy: ClassHierarchy, project: Project[URL]): Boolean =
   e match

@@ -9,14 +9,14 @@ import sturdy.values.Structural
 import sturdy.values.objects.TypeOps
 import sturdy.values.ordering.EqOps
 
-trait ArrayOps[AID, Idx, V, AV, AType, Site, J[_] <: MayJoin[_]]:
+trait ArrayOps[AID, Idx, V, AV, AType, Site, Context, J[_] <: MayJoin[_]]:
   def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): AV
-  def getVal(array: AV, idx: Idx): JOption[J, V]
-  def setVal(array: AV, idx: Idx, v: V): JOption[J, Unit]
-  def arrayLength(array: AV): V
+  def getVal(ctx: Context)(array: AV, idx: Idx): JOption[J, V]
+  def setVal(ctx: Context)(array: AV, idx: Idx, v: V): JOption[J, Unit]
+  def arrayLength(ctx: Context)(array: AV): V
   def initArray(size: Idx): Seq[Any]
   def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
-  def getArray(array: AV): Seq[JOption[J, V]]
+  def getArray(ctx: Context)(array: AV): Seq[JOption[J, V]]
   def printString(letters: Seq[Idx]): Unit
 
 case class Array[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASize)

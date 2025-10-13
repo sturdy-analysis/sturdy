@@ -16,7 +16,7 @@ import sturdy.fix
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{Interpreter, abstractions, resolveMethod, selectMethod}
-import sturdy.language.bytecode.abstractions.{Addr, AddrSet, Exceptions, FieldIdent, InvokeContext, Numbers, Site, given}
+import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, Exceptions, FieldAccessContext, FieldIdent, InvokeContext, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening, given}
 import sturdy.values.booleans.given
@@ -80,8 +80,6 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
-  private type FieldAccessContext = ClassFile
-
   given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin] =
     new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin]:
       given hierachy: ClassHierarchy = project.classHierarchy
@@ -116,9 +114,9 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case Topped.Top => mkTopVal(sig.returnType)
         case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
           // TODO: test, add errors/exceptions
-          val resolvedMethod = resolveMethod(context._2.thisType, staticClass.thisType, mthName, sig)
-          val selectedMethod = selectMethod(obj.cls.thisType, resolvedMethod)
-          invoke(ref, selectedMethod, args)
+          // val resolvedMethod = resolveMethod(context._3.thisType, staticClass.thisType, mthName, sig)
+          // val selectedMethod = selectMethod(obj.cls.thisType, resolvedMethod)
+          invoke(ref, /* selectedMethod */ ???, args)
         case Topped.Actual(_) => ???
 
       override def makeNull(): RefValue = Topped.Actual(AbstractReferenceValue.NullValue())
@@ -129,7 +127,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case Topped.Actual(AbstractReferenceValue.NullValue()) => Topped.Actual(1)
         case Topped.Actual(_) => ???
 
-  given arrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, WithJoin] with
+  given arrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, ArrayOpContext, WithJoin] with
     override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map: (v, site) =>
         val addr = alloc(site)
@@ -138,7 +136,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
       .toVector
       Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
 
-    override def getVal(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
+    override def getVal(ctx: ArrayOpContext)(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
       case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
         if (idx >= array.vals.size)
           JOptionA.none
@@ -147,7 +145,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
       case (Topped.Actual(_), Topped.Actual(_)) => ???
       case _ => JOptionA.some(Value.TopValue)
 
-    override def setVal(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+    override def setVal(ctx: ArrayOpContext)(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
       (ref, idx) match
         case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
           if (idx >= array.vals.size)
@@ -158,7 +156,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case (Topped.Actual(_), Topped.Actual(_)) => ???
         case _ => JOptionA.none
 
-    override def arrayLength(ref: RefValue): Value = ref match
+    override def arrayLength(ctx: ArrayOpContext)(ref: RefValue): Value = ref match
       case Topped.Top => Value.Int32(topI32)
       case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => array.arraySize
       case Topped.Actual(_) => ???
@@ -181,10 +179,10 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case (Actual(_), Actual(_), Actual(_), Actual(_), Actual(_)) => ???
         case _ => JOptionA.none
 
-    override def getArray(ref: RefValue): Seq[JOption[WithJoin, Value]] =
+    override def getArray(ctx: ArrayOpContext)(ref: RefValue): Seq[JOption[WithJoin, Value]] =
       ref match
         case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) =>
-          array.vals.map(addr => getVal(ref, Topped.Actual(array.vals.indexOf(addr))))
+          array.vals.map(addr => getVal(ctx)(ref, Topped.Actual(array.vals.indexOf(addr))))
         case _ => ???
 
     override def printString(letters: Seq[Topped[Int]]): Unit =
@@ -297,8 +295,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 
-    override val arrayOps: ArrayOps[Addr, Value, Value, Value, ArrayType, Site, WithJoin] =
-      new LiftedArrayOps[Addr, Value, Value, Value, ArrayType, Site, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val arrayOps: ArrayOps[Addr, Value, Value, Value, ArrayType, Site, ArrayOpContext, WithJoin] =
+      new LiftedArrayOps[Addr, Value, Value, Value, ArrayType, Site, ArrayOpContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new arrayOps(using arrayValAlloc, store, jvV)
       )
 

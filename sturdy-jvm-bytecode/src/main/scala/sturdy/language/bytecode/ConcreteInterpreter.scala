@@ -13,7 +13,7 @@ import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.{ConcreteFixpoint, Fixpoint}
-import sturdy.language.bytecode.abstractions.{FieldIdent, InvokeContext, InvokeType, Site, getIdent}
+import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.*
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.values.arrays.*
@@ -135,10 +135,8 @@ object ConcreteInterpreter extends Interpreter:
   given refSizeOps: SizeOps[RefValue, Boolean] with
     override def is32Bit(v: RefValue): Boolean = true
 
-  private type FieldAccessContext = ClassFile
-
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, ClassFile, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure, throwClass: ThrowClass): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, c: ClassFile, fields: Seq[(Value, Site, FieldName)]): RefValue =
@@ -151,63 +149,63 @@ object ConcreteInterpreter extends Interpreter:
 
     override def getField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName): Value = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(context.thisType, identifier)
+        val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
         val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$identifier not bound"))
       case ConcreteRefValues.NullValue() =>
-        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+        throwClass(context._1)(ClassType.NullPointerException)
       case ConcreteRefValues.nonNullArray(_, _, _, _) =>
-        except.throws(JvmExcept.Throw(ClassTypeValues.LinkageError))
+        throwClass(context._1)(ClassTypeValues.LinkageError)
 
     override def setField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
       case ConcreteRefValues.Object(_, _, fields) =>
-        val resolvedField = resolveField(context.thisType, identifier)
+        val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
         if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
           store.write(fields(resolvedField.getIdent), v)
           JOptionC.some(())
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      case ConcreteRefValues.NullValue() => throwClass(context._1)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
     override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      case ConcreteRefValues.NullValue() => throwClass(context._1)(ClassType.NullPointerException)
       case ConcreteRefValues.Object(_, cf, _) => context match
-        case (InvokeType.Interface, callingClass) =>
+        case (site, InvokeType.Interface, callingClass) =>
           if !hierarchy.isSubtypeOf(cf.thisType, staticClass.thisType) then
-            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
-          val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
           if resolvedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
-          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)
+            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
           if !(selectedMethod.isPublic || selectedMethod.isPrivate) then
-            except.throws(JvmExcept.Throw(ClassTypeValues.IllegalAccessError))
+            throwClass(context._1)(ClassTypeValues.IllegalAccessError)
           if selectedMethod.isAbstract || selectedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
+            throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
-        case (InvokeType.Virtual, callingClass) =>
-          val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+        case (site, InvokeType.Virtual, callingClass) =>
+          val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
           if resolvedMethod.isStatic then
-            except.throws(JvmExcept.Throw(ClassTypeValues.IncompatibleClassChangeError))
-          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)
+            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
           if selectedMethod.isAbstract then
-            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
+            throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
-        case (InvokeType.Special(isInterfaceCall), callingClass) =>
+        case (site, InvokeType.Special(isInterfaceCall), callingClass) =>
           val resolvedMethod = if isInterfaceCall then
-            resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+            resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
           else
-            resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)
+            resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
           val c = if !resolvedMethod.isConstructor && !isInterfaceCall && callingClass.thisType.isSubtypeOf(staticClass.thisType) && callingClass.superclassType.isDefined && ACC_SUPER.isSet(callingClass.accessFlags) then
             callingClass.superclassType.get
           else
             staticClass.thisType
-          val selectedMethod = selectSpecial(c, resolvedMethod)
+          val selectedMethod = selectSpecial(c, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
           if selectedMethod.isAbstract then
-            except.throws(JvmExcept.Throw(ClassTypeValues.AbstractMethodError))
+            throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
       case _ =>
@@ -220,7 +218,7 @@ object ConcreteInterpreter extends Interpreter:
       case _ => 0
 
   given ConcreteArrayOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure): ArrayOps[Addr, Int, Value, RefValue, AType, Site, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure, throwClass: ThrowClass): ArrayOps[Addr, Int, Value, RefValue, AType, Site, ArrayOpContext, NoJoin] with
     override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
       val valAddrs = vals.map { (v, site) =>
         val addr = alloc(site)
@@ -229,20 +227,20 @@ object ConcreteInterpreter extends Interpreter:
       }.toVector
       ConcreteRefValues.nonNullArray(aid, valAddrs, arrayType, arraySize)
 
-    override def getVal(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
+    override def getVal(ctx: ArrayOpContext)(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
         else
           store.read(vals(idx))
       case ConcreteRefValues.NullValue() =>
-        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+        throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
     // returns some if setting the value was successful, none otherwise
     // it can only fail by being out of bounds
-    override def setVal(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
+    override def setVal(ctx: ArrayOpContext)(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
       case ConcreteRefValues.nonNullArray(_, vals, arrayType, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
@@ -251,19 +249,19 @@ object ConcreteInterpreter extends Interpreter:
           if arrayType.componentType.isReferenceType then
             val cType = arrayType.componentType.asReferenceType
             if !ConcreteTypeOps(using project).instanceOf(v.asRef, cType) then
-              except.throws(JvmExcept.Throw(ClassType.ArrayStoreException))
+              throwClass(ctx)(ClassType.ArrayStoreException)
 
           store.write(vals(idx), v)
           JOptionC.some(())
       case ConcreteRefValues.NullValue() =>
-        except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+        throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
-    override def arrayLength(array: RefValue): Value = array match
+    override def arrayLength(ctx: ArrayOpContext)(array: RefValue): Value = array match
       case ConcreteRefValues.nonNullArray(_, _, _, size: Value) =>
         size
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -283,11 +281,11 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $src, $dest")
 
-    override def getArray(array: RefValue): Seq[JOption[NoJoin, Value]] = array match
+    override def getArray(ctx: ArrayOpContext)(array: RefValue): Seq[JOption[NoJoin, Value]] = array match
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
-        val arrayVals = vals.map(addr => getVal(array, vals.indexOf(addr)))
+        val arrayVals = vals.map(addr => getVal(ctx)(array, vals.indexOf(addr)))
         arrayVals
-      case ConcreteRefValues.NullValue() => except.throws(JvmExcept.Throw(ClassType.NullPointerException))
+      case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
@@ -360,11 +358,11 @@ object ConcreteInterpreter extends Interpreter:
     override val bytecodeOps: BytecodeOps[Value, TypeRep] = implicitly
     override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin] =
       LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using ConcreteObjectOps(using objFieldAlloc, store, project)
+        using ConcreteObjectOps(using objFieldAlloc, store, project, failure, this.throwClass)
       )
-    override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin] =
-      LiftedArrayOps[Addr, Value, Value, Value, AType, Site, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
-        using ConcreteArrayOps(using arrayValAlloc, store)
+    override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, ArrayOpContext, MayJoin.NoJoin] =
+      LiftedArrayOps[Addr, Value, Value, Value, AType, Site, ArrayOpContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+        using ConcreteArrayOps(using arrayValAlloc, store, project, failure, this.throwClass)
       )
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]

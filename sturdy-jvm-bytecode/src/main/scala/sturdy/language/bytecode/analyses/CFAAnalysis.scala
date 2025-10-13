@@ -12,7 +12,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.{DecidableSymbolTable, JoinableDecidableSymbolTable}
 import sturdy.fix.Fixpoint
 import sturdy.language.bytecode.Interpreter
-import sturdy.language.bytecode.abstractions.{AddrSet, FieldIdent, InvokeContext, Site, given}
+import sturdy.language.bytecode.abstractions.{AddrSet, ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widen, Widening, finitely, given}
@@ -84,7 +84,7 @@ object CFAAnalysis extends Interpreter:
 
     override val bytecodeOps: BytecodeOps[CFAAnalysis.Value, ReferenceType] = ???
     override val objectOps: ObjectOps[FieldIdent, AddrSet, CFAAnalysis.Value, ClassFile, CFAAnalysis.Value, Site, Method, String, MethodDescriptor, CFAAnalysis.Value, InvokeContext, FieldAccessContext, J] = ???
-    override val arrayOps: ArrayOps[AddrSet, CFAAnalysis.Value, CFAAnalysis.Value, CFAAnalysis.Value, ArrayType, Site, J] = ???
+    override val arrayOps: ArrayOps[AddrSet, CFAAnalysis.Value, CFAAnalysis.Value, CFAAnalysis.Value, ArrayType, Site, ArrayOpContext, J] = ???
 
     override val joinUnit: WithJoin[Unit] = implicitly
     override val jvV: WithJoin[Value] = implicitly

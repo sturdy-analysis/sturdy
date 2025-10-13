@@ -7,5 +7,11 @@ enum InvokeType:
   case Special(isInterfaceCall: Boolean)
   case Virtual
 
-// type of invocation and class file the invocation is located in
-type InvokeContext = (InvokeType, ClassFile)
+// site of invocation, type of invocation and class file the invocation is located in
+type InvokeContext = (Site, InvokeType, ClassFile)
+
+// site of access and class file it is located in
+type FieldAccessContext = (Site, ClassFile)
+
+// site of operation
+type ArrayOpContext = Site
