@@ -35,14 +35,10 @@ trait Exceptions:
 
   given CombineJvmExceptAbstract[V, W <: Widening](using Combine[V, W]): Combine[JvmExceptAbstract[V], W] with
     override def apply(v1: JvmExceptAbstract[V], v2: JvmExceptAbstract[V]): MaybeChanged[JvmExceptAbstract[V]] =
-      val jret = CombineOption(v1.rets, v2.rets)
-      val jthrow = CombineOption(v1.throwObjects, v2.throwObjects)
-      val jreturn = CombineOption(v1.returns, v2.returns)
-      val exc = JvmExceptAbstract(
-        v1.jumps ++ v2.jumps,
-        jret.get,
-        jreturn.get,
-        v1.throws ++ v2.throws,
-        jthrow.get
-      )
-      MaybeChanged(exc, jret.hasChanged || jreturn.hasChanged || jthrow.hasChanged || exc.jumps.size != v1.jumps.size || exc.throws.size != v1.throws.size)
+      for
+        jumps <- MaybeChanged(v1.jumps ++ v2.jumps, v1.jumps)
+        rets <- CombineOption(v1.rets, v2.rets)
+        returns <- CombineOption(v1.returns, v2.returns)
+        throws <- MaybeChanged(v1.throws ++ v2.throws, v1.throws)
+        throwObjects <- CombineOption(v1.throwObjects, v2.throwObjects)
+      yield JvmExceptAbstract(jumps, rets, returns, throws, throwObjects)
