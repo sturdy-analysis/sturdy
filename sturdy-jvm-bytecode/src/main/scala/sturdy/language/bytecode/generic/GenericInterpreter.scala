@@ -33,7 +33,6 @@ enum JvmExcept[V]:
   case Jump(pc: Int)
   case Ret(pc: V)
   case Return(returnValue: V)
-  case Throw(exception: ClassType)
   case ThrowObject(exception: V)
 
 // throw an exception given its class and a site
@@ -711,7 +710,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         // static initializers are void
         val _ = invoke(site)(mth, Seq())
       } {
-        case JvmExcept.Throw(_) | JvmExcept.ThrowObject(_) =>
+        case JvmExcept.ThrowObject(_) =>
           classInitializationState.set((), classType, InitializationResult.Failure())
           throwClass(site)(ClassType.ExceptionInInitializerError)
         case e => except.throws(e)
@@ -853,17 +852,6 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       ??? // TODO
     case JvmExcept.Return(_) =>
       ()
-    case JvmExcept.Throw(exception) =>
-      val currPC = frame.data
-      val body = mth.body.get
-      val handler = body.handlersForException(currPC, exception)(project.classHierarchy).headOption.getOrElse:
-        // no handler found, throw the exception again
-        stack.clearCurrentOperandFrame()
-        except.throws(JvmExcept.Throw(exception))
-      // handler has been found
-      val exceptionObject = createObject(exception, Site.Instruction(mth, pc))
-      stack.push(exceptionObject)
-      run(handler.handlerPC, mth)
     case JvmExcept.ThrowObject(exception) =>
       // otherwise, handle the exception
       val currPC = frame.data
