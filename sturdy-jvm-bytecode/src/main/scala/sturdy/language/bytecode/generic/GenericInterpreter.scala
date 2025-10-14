@@ -778,14 +778,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         fail(AbortEval.Native(mth), "native method encountered")
       else
         throw UnsupportedOperationException(s"body of ${mth.toString} is empty")
+
     val locals = body.localVariableTable.map(_.map(lv => convertTypes(lv.fieldType))).getOrElse:
       ArraySeq.fill(body.maxLocals)(ValType.I32)
-
     val argsAndLocals = args.view ++ locals.map(defaultValue)
 
     stack.withNewFrame(0):
       frame.withNew(newFrameData, argsAndLocals.zipWithIndex.map((x, y) => (y, Some(x))), Site.Instruction(mth, newFrameData)):
-        run(0, mth)
+        enterMethod(0, mth)
         if mth.descriptor.returnType.isVoidType then
           voidOps.voidRep
         else
@@ -825,18 +825,18 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       eval(inst, mth, pc)
       FixOut.Eval()
     case FixIn.Jump(pc, mth) =>
-      run_open(pc, mth)
+      enterMethod_open(pc, mth)
       FixOut.Jump()
 
   inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
   // wraps run_open in fixed
-  def run(pc: Int, mth: Method)(using fixed: Fixed): Unit =
+  def enterMethod(pc: Int, mth: Method)(using fixed: Fixed): Unit =
     fixed(FixIn.Jump(pc, mth)) match
       case FixOut.Jump() => ()
       case out => throw new MatchError(out)
 
-  def run_open(pc: Int, mth: Method)(using Fixed): Unit =
+  def enterMethod_open(pc: Int, mth: Method)(using Fixed): Unit =
     except.tryCatch {
       runBody(pc, mth)
     } {
@@ -845,7 +845,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   private def exceptionHandler(pc: Int, mth: Method)(using Fixed): JvmExcept[V] => Unit =
     case JvmExcept.Jump(targetPC) =>
-      run(targetPC, mth)
+      enterMethod(targetPC, mth)
     case JvmExcept.Ret(_) =>
       ??? // TODO
     case JvmExcept.Return(_) =>
@@ -865,7 +865,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           except.throws(JvmExcept.ThrowObject(exception))
       // handler has been found
       stack.push(exception)
-      run(handler.handlerPC, mth)
+      enterMethod(handler.handlerPC, mth)
 
   // evaluates each instruction of the given method's body, starting with pc
   @tailrec
