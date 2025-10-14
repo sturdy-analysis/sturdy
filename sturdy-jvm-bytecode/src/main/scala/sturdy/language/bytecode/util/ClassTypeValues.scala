@@ -7,7 +7,7 @@ object ClassTypeValues:
   val AbstractMethodError: ClassType = ClassType("java/lang/AbstractMethodError")
   val IllegalAccessError: ClassType = ClassType("java/lang/IllegalAccessError")
   val IncompatibleClassChangeError: ClassType = ClassType("java/lang/IncompatibleClassChangeError")
-  val InstantiationError: ClassType = ClassType("java/io/PrintStream")
+  val InstantiationError: ClassType = ClassType("java/lang/InstantiationError")
   val LinkageError: ClassType = ClassType("java/lang/LinkageError")
   val NoClassDefFoundError: ClassType = ClassType("java/lang/NoClassDefFoundError")
   val NoSuchMethodError: ClassType = ClassType("java/lang/NoSuchMethodError")
