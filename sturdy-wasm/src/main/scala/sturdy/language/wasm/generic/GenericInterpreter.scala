@@ -66,6 +66,13 @@ case class FuncId(mod: ModuleInstance, funcIx: Int):
         case Some((name, _)) => name
         case None => funcIx.toString
 
+object FuncId:
+  def apply(name: String)(using module: ModuleInstance): FuncId =
+    module.findExport(name) match {
+      case Some(ExternalValue.Function(idx)) => FuncId(module, idx)
+      case _ => throw IllegalArgumentException(s"Cannot find function $name")
+    }
+
 given Ordering[FuncId] = Ordering.by[FuncId, (ModuleInstance,Int)](funcid => (funcid.mod, funcid.funcIx))
 
 enum InstLoc:
@@ -98,6 +105,12 @@ enum InstLoc:
       case InFunction(funcId, _) => funcId.mod
       case InInit(mod, _) => mod
       case InvokeExported(mod, _) => mod
+
+object InstLoc {
+  object InFunction {
+    def apply(name: String, pc: Int)(using module: ModuleInstance): InstLoc.InFunction = new InstLoc.InFunction(FuncId(name), pc)
+  }
+}
 
 given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,Int), (Int,String)]]] {
   case InstLoc.InFunction(fid,pc) => Left((fid,pc))

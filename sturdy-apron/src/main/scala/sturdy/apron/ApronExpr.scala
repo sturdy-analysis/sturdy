@@ -82,9 +82,9 @@ enum ApronExpr[Addr, Type]:
       case Binary(op, expr1, expr2, roundingType, roundingDir, specials, _type) =>
         Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, specials, _type)
 
-  def addrs: Set[Addr] = this match
-    case Addr(v, _, _) => Set(v.addr)
-    case _: Constant[Addr,Type] => Set()
+  def addrs: Iterable[Addr] = this match
+    case Addr(v, _, _) => Iterable(v.addr)
+    case _: Constant[Addr,Type] => Iterable()
     case Unary(_, e, _, _, _, _) => e.addrs
     case Binary(_, l, r, _, _, _, _) => l.addrs ++ r.addrs
 
@@ -374,7 +374,7 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
   inline def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
     ApronCons(op, f(e1), f(e2))
 
-  inline def addrs: Set[Addr] = e1.addrs ++ e2.addrs
+  inline def addrs: Iterable[Addr] = e1.addrs ++ e2.addrs
 
   inline def isConstant: Boolean = e1.isConstant && e2.isConstant
 
@@ -448,7 +448,7 @@ enum ApronBool[Addr, Type]:
   case And(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
   case Or(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
 
-  def addrs: Set[Addr] =
+  def addrs: Iterable[Addr] =
     this match
       case Constraint(cons) => cons.addrs
       case Constant(_) => Set()

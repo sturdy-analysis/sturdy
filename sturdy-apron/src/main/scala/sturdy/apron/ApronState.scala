@@ -3,10 +3,10 @@ package sturdy.apron
 import apron.{Abstract1, Coeff, DoubleScalar, Interval, Scalar, Var}
 import gmp.{Mpfr, Mpq}
 import sturdy.apron
-import sturdy.apron.ApronExpr.{Addr, Unary, Binary, Constant, addr, booleanLit, intAdd}
+import sturdy.apron.ApronExpr.{Addr, Binary, Constant, Unary, addr, booleanLit, intAdd}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
-import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
+import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore, RelationalStoreState}
 import sturdy.values.{Widen, *, given}
 import sturdy.values.booleans.{BooleanOps, given}
 import sturdy.values.ordering.{EqOps, given}
@@ -76,7 +76,8 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def join: Join[ApronExpr[Addr, Type]]
   def widen: Widen[ApronExpr[Addr, Type]]
-
+  def joinBoolExpr: Join[ApronBool[Addr,Type]]
+  def widenBoolExpr: Widen[ApronBool[Addr,Type]]
 
   /**
    * Simplifies expressions into the following normal form:
@@ -84,9 +85,9 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
    *     - `(lit + e) ~> (e + lit)`
    *     - `(lit * e) ~> (e * lit)`
    *     - `(lit - e) ~> (-(e) + lit)`
-   *   2. Converts subtraction to addtion:
+   *   2. Converts subtraction to addition:
    *     - `(e - lit) ~> (e + -lit)`
-   *   3. Collects constants in additions:
+   *   3. Collects constants in additions and multiplications:
    *     - `((e + lit1) + lit2) ~> e + (lit1 + lit2)`
    *     - `((e * lit1) * lit2) ~> e * (lit1 * lit2)`
    */
@@ -289,7 +290,24 @@ class ApronRecencyState
   def getNonRelationalValue(addr: VirtualAddress[Ctx])(using ResolveState): JOptionA[Val] =
     withState{ state =>
       val phys = relationalStore.physicalAddresses(addr.ctx, addr.n, state)
-      state.withNonRelationalState(relationalStore.nonRelationalStore.readPure(phys, _))
+      val snapshotInternal = relationalStore._internalState
+      val snapshotLeft = relationalStore._leftState
+      val snapshotRight = relationalStore._rightState
+      try {
+        relationalStore._internalState = state
+        relationalStore._leftState = null
+        relationalStore._rightState = null
+        val (res, nonRelStoreState) = relationalStore.nonRelationalStore.readPure(phys, state.nonRelationalStoreState)
+        (res, state.copy(
+          addressTranslationState = relationalStore._internalState.addressTranslationState,
+          abs1 = relationalStore._internalState.abs1,
+          nonRelationalStoreState = nonRelStoreState
+        ))
+      } finally {
+        relationalStore._internalState = snapshotInternal
+        relationalStore._leftState = snapshotLeft
+        relationalStore._rightState = snapshotRight
+      }
     }
 
   override def getInterval(virtExpr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Interval =
@@ -498,32 +516,71 @@ class ApronRecencyState
         }
       }
 
+  override def joinBoolExpr: Join[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = false, temporaryVariableAllocator)
+  override def widenBoolExpr: Widen[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = true, temporaryVariableAllocator)
+
+  private def combineBoolExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronBool[VirtualAddress[Ctx], Type], W] = {
+    case (e1,e2) if e1 eq e2 => Unchanged(e1)
+    case (ApronBool.Constant(b1), ApronBool.Constant(b2)) =>
+      for {
+        b <- Join(b1, b2)
+      } yield (ApronBool.Constant(b))
+    case (ApronBool.Constraint(ApronCons(op1, l1, r1)), ApronBool.Constraint(ApronCons(op2, l2, r2))) if op1 == op2 =>
+      for {
+        l <- combineExpr(widen, allocator)(l1, l2)
+        r <- combineExpr(widen, allocator)(r1, r2)
+      } yield (ApronBool.Constraint(ApronCons(op1, l, r)))
+    case (ApronBool.And(l1, r1), ApronBool.And(l2, r2)) if structurallyJoinable(l1, l2) && structurallyJoinable(r1, r2) =>
+      for {
+        l <- combineBoolExpr(widen, allocator)(l1, l2)
+        r <- combineBoolExpr(widen, allocator)(r1, r2)
+      } yield (ApronBool.And(l,r))
+    case (ApronBool.Or(l1, r1), ApronBool.Or(l2, r2)) if structurallyJoinable(l1, l2) && structurallyJoinable(r1, r2) =>
+      for {
+        l <- combineBoolExpr(widen, allocator)(l1, l2)
+        r <- combineBoolExpr(widen, allocator)(r1, r2)
+      } yield (ApronBool.Or(l, r))
+    case (e1, e2) =>
+      for {
+        b <- Join(assert(e1)(using ResolveState.Left), assert(e2)(using ResolveState.Right))
+      } yield (ApronBool.Constant(b))
+  }
+
   override def makeNonRelational(virtualAddress: VirtualAddress[Ctx])(using ResolveState): Unit =
     relationalStore.moveToNonRelationalStore(virtualAddress.physical)
 
   private def containsFailedAddrs(expr: ApronExpr[VirtualAddress[Ctx], Type])(using ResolveState): Boolean =
     expr.addrs.exists(virt => recencyStore.addressTranslation.recency(virt.ctx, virt.n, getResolveState) == PowRecency.Failed)
 
-  private def structuralEq(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
+  private def structurallyEq(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean =
     (e1, e2) match
       case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) => v1.ctx == v2.ctx && tpe1 == tpe2
       case (ApronExpr.Constant(_, _, tpe1), ApronExpr.Constant(_, _, tpe2)) => tpe1 == tpe2
       case (ApronExpr.Unary(op1, e1, rt1, rd1, _, tpe1), ApronExpr.Unary(op2, e2, rt2, rd2, _, tpe2)) =>
         op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2
       case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) =>
-        op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structuralEq(r1, r2) && structuralEq(l1, l2)
+        op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyEq(r1, r2) && structurallyEq(l1, l2)
       case (_,_) => false
 
-  private def structurallyJoinable(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean = {
-    (e1, e2) match {
-      case _ if(e1.isConstant && e2.isConstant || structuralEq(e1, e2)) => true
-      case (_: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type]), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) if(op2 == BinOp.Add || op2 == BinOp.Sub || op2 == BinOp.Mul) =>
-        e1._type == tpe2 && (structurallyJoinable(e1, l2) || structurallyJoinable(e1, r2))
-      case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), _: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type])) if(op1 == BinOp.Add || op1 == BinOp.Sub || op1 == BinOp.Mul) =>
-        tpe1 == e2._type && (structurallyJoinable(l1, e2) || structurallyJoinable(r1, e2))
-      case _ => false
-    }
+  private def structurallyJoinable(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean = (e1, e2) match {
+    case _ if(e1.isConstant && e2.isConstant || structurallyEq(e1, e2)) => true
+    case (_: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type]), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) if(op2 == BinOp.Add || op2 == BinOp.Sub || op2 == BinOp.Mul) =>
+      e1._type == tpe2 && (structurallyJoinable(e1, l2) || structurallyJoinable(e1, r2))
+    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), _: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type])) if(op1 == BinOp.Add || op1 == BinOp.Sub || op1 == BinOp.Mul) =>
+      tpe1 == e2._type && (structurallyJoinable(l1, e2) || structurallyJoinable(r1, e2))
+    case _ => false
   }
+
+  private def structurallyEq(e1: ApronBool[VirtualAddress[Ctx], Type], e2: ApronBool[VirtualAddress[Ctx], Type]): Boolean = (e1, e2) match {
+    case (ApronBool.Constraint(ApronCons(op1, _, _)), ApronBool.Constraint(ApronCons(op2, _, _))) => op1 == op2
+    case (ApronBool.And(l1, r1), ApronBool.And(l2, r2)) => structurallyEq(l1, l2) && structurallyEq(r1, r2)
+    case (ApronBool.Or(l1, r1), ApronBool.Or(l2, r2)) => structurallyEq(l1, l2) && structurallyEq(r1, r2)
+    case (ApronBool.Constant(_), ApronBool.Constant(_)) => true
+    case _ => false
+  }
+
+  private inline def structurallyJoinable(e1: ApronBool[VirtualAddress[Ctx], Type], e2: ApronBool[VirtualAddress[Ctx], Type]): Boolean =
+    structurallyEq(e1, e2)
 
   inline private def withState[A](using resolveState: ResolveState)(f: relationalStore.State => (A, relationalStore.State)): A =
     resolveState match

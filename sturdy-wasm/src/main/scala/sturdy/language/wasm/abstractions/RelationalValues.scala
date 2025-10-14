@@ -28,7 +28,7 @@ trait RelationalValues extends RelationalI32Values with PowersetReference:
     v.asInt32 match
       case NumExpr(i) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, lit(0, i._type)))
       case BoolExpr(cons) => cons
-      case HeapAddr(_,_) => ApronBool.Constant(Topped.Top)
+      case _: HeapAddr | _: StackAddr => ApronBool.Constant(Topped.Top)
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
@@ -39,4 +39,5 @@ trait RelationalValues extends RelationalI32Values with PowersetReference:
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Num(Float64(FloatingLit(d, F64Type)))
       case ConcreteInterpreter.Value.Ref(func : FunctionInstance) => Ref(Powerset(func))
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.ExternReference) => Ref(Powerset(ExternReference.ExternReference))
-      // case ConcreteInterpreter.Value.Ref(ExternReference.Null) => Ref(ExternReference.Null)
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.Null) => Ref(Powerset(ExternReference.Null))
+      case sturdy.language.wasm.ConcreteInterpreter.Value.Vec(v) => Vec(Topped.Actual(v))

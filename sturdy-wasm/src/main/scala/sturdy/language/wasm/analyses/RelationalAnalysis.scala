@@ -47,7 +47,7 @@ import sturdy.effect.bytememory.Bytes as BTS
 import sturdy.fix.{DomLogger, Logger}
 
 import java.math.BigInteger
-import scala.collection.immutable.List
+import scala.collection.immutable.{List, SortedMap}
 import scala.math
 import scala.util.boundary
 import scala.util.boundary.break
@@ -636,8 +636,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         heapCtx: Iterable[HeapCtx]
       )
 
-      var loads: Map[InstLoc, List[LoadInfo]] = Map()
-      var stores: Map[InstLoc, List[StoreInfo]] = Map()
+      var loads: SortedMap[InstLoc, List[LoadInfo]] = SortedMap()
+      var stores: SortedMap[InstLoc, List[StoreInfo]] = SortedMap()
 
       override def enter(dom: FixIn): Unit =
         dom match

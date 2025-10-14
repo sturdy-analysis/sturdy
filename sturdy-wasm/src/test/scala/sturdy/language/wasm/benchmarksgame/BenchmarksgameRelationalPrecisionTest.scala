@@ -1,7 +1,7 @@
 package sturdy.language.wasm.benchmarksgame
 
 import apron.*
-import com.github.tototoshi.csv.CSVWriter
+import com.github.tototoshi.csv.{CSVReader, CSVWriter, DefaultCSVFormat}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -11,7 +11,8 @@ import sturdy.language.wasm
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.analyses.{FixpointConfig, RelationalAnalysis, WasmConfig}
 import sturdy.language.wasm.abstractions.RelationalInfo.{*, given}
-import sturdy.language.wasm.generic.{FrameData, InstLoc, ModuleInstance}
+import sturdy.language.wasm.analyses.RelationalAnalysis.HeapCtx
+import sturdy.language.wasm.generic.{FixIn, FrameData, FuncId, InstLoc, ModuleInstance}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import swam.syntax
@@ -62,6 +63,8 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       Profiler.printLastMeasured()
       Profiler.reset()
 
+
+
       println(s"Relational: ${relationalMemoryLogger}\nNon-Relational: ${nonRelationalMemoryLogger}")
 
 //      val relationalInfos = relationalInfoLogger.getAllInstructionInfos
@@ -106,4 +109,26 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
 //        )
 //      )
     }
+
+    def parseLoadsCSV(p: java.nio.file.Path, moduleInstance: ModuleInstance): Map[InstLoc, Set[HeapCtx]] =
+      val reader = CSVReader.open(p.toString + ".loads.csv")(using new DefaultCSVFormat {
+        override val delimiter = ';'
+      })
+      reader.iterator.drop(1).map(parseLoadsCSVLine(using moduleInstance)).toMap
+
+    def parseLoadsCSVLine(using moduleInstance: ModuleInstance)(line: Seq[String]): (InstLoc, Set[HeapCtx]) =
+      val Seq(instLocStr, heapCtxStr) = line
+      val Array(func, pc) = instLocStr.split(':')
+      val instLoc = InstLoc.InFunction(func, pc.toInt)
+      val heapCtxs = heapCtxStr.split(',').map(parseHeapCtx).toSet
+      (instLoc, heapCtxs)
+
+    def parseHeapCtx(using moduleInstance: ModuleInstance)(heapCtxStr: String): HeapCtx =
+      heapCtxStr.take(1) match {
+        case "F" => HeapCtx.Fill(FixIn.MostGeneralClientLoop(moduleInstance))
+        case "G" => HeapCtx.Global(heapCtxStr.drop(1))
+        case "S" =>
+          val Array(funcName, offset) = heapCtxStr.drop(1).split(':')
+          HeapCtx.Stack(FuncId(funcName), Topped.Actual(offset.toInt))
+      }
   }

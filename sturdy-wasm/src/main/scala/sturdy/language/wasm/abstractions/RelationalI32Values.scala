@@ -60,7 +60,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final override def topI32: I32 = NumExpr(ApronExpr.constant(ApronExpr.topInterval, I32Type))
   final override def booleanToVal(b: Bool): Value = Num(Int32(BoolExpr(b)))
 
-  given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Combine[I32, W] with
+  given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], combineApronBool: Combine[ApronBool[VirtAddr,Type], W], apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
      (v1, v2) match
         case _ if(v1 eq v2) => Unchanged(v1)
@@ -71,7 +71,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
               case _ => true
           )
         case (_, NumExpr(expr)) if apronStateLazy.value.isBottom(expr)(using ResolveState.Right) == Topped.Actual(true) => Unchanged(v1)
-        case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
+        case (BoolExpr(b1), BoolExpr(b2)) => combineApronBool(b1, b2).map(BoolExpr.apply)
         case (AllocSitesLeft(alloc1), AllocSitesRight(alloc2)) => CombineAllocationSites(alloc1,alloc2)
         case (NumExpr(ApronExpr.Addr(ApronVar(sp1@VirtAddr(AddrCtx.Global(0), _, _)), _, _)), s2: StackAddr) =>
           CombineStackAddr(
@@ -279,7 +279,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     v match
       case NumExpr(e) => NumExpr(apronState.toNonRelational(e))
       case BoolExpr(e) => BoolExpr(apronState.toNonRelational(e))
-      case _: HeapAddr => v
+      case _: HeapAddr | _: StackAddr => v
 
   final class NonRelationalI32IntegerOps(using relationalIntOps: IntegerOpsWithSignInterpretation[Int, I32], apronState: ApronState[VirtAddr, Type])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, I32](extract = i32 => i32, inject = toNonRelational)

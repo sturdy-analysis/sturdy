@@ -36,8 +36,8 @@ final class RelationalStore
   val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(initialNonRelationalStore)
 
   var _internalState: State = RelationalStoreState(AddressTranslationState(initAddrTrans), initialAbs1, initialNonRelationalStore)
-  private var _leftState: State = null
-  private var _rightState: State = null
+  var _leftState: State = null
+  var _rightState: State = null
 
   inline def getType(powAddr: PowAddr, state: State = _internalState): JOptionA[Type] =
     getMetaData(powAddr, state).map(_._2)
@@ -166,7 +166,28 @@ final class RelationalStore
    */
   override def copyPure(fromPow: PowAddr, toPow: PowAddr, state0: State): State = Profiler.addTime("RelationalStore.copyPure") {
     var state = state0
-    state = state.modifyNonRelationalState(st => nonRelationalStore.copyPure(fromPow, toPow, st))
+
+    // If `copyPure` is called within a join, virtual addresses are resolved in
+    // `_leftState` and `_rightState`. This is wrong.
+    // Instead, we resolve these addresses in `state` by setting _internalState.
+    val snapshotInternal = _internalState
+    val snapshotLeft = _leftState
+    val snapshotRight = _rightState
+    try {
+      _internalState = state
+      _leftState = null
+      _rightState = null
+      val nonRelStoreState = nonRelationalStore.copyPure(fromPow, toPow, state.nonRelationalStoreState)
+      state = RelationalStoreState(
+        _internalState.addressTranslationState,
+        _internalState.abs1,
+        nonRelationalStore.copyPure(fromPow, toPow, state.nonRelationalStoreState)
+      )
+    } finally {
+      _internalState = snapshotInternal
+      _leftState = snapshotLeft
+      _rightState = snapshotRight
+    }
 
     val env = state.abs1.getEnvironment
     val toSet = toPow.iterator.map(ApronVar(_)).toSet
