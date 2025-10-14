@@ -18,6 +18,7 @@ import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{Interpreter, abstractions, resolveMethod, selectMethod}
 import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, Exceptions, FieldAccessContext, FieldIdent, InvokeContext, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
+import sturdy.language.bytecode.util.given
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening, given}
 import sturdy.values.booleans.given
 import sturdy.values.convert.given

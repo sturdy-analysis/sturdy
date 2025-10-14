@@ -1,6 +1,7 @@
 package sturdy.language.bytecode.util
 
 import org.opalj.br.ClassType
+import sturdy.values.Finite
 
 // class types used in this project that are not provided by opal
 object ClassTypeValues:
@@ -13,3 +14,5 @@ object ClassTypeValues:
   val NoSuchMethodError: ClassType = ClassType("java/lang/NoSuchMethodError")
   val NoSuchFieldError: ClassType = ClassType("java/lang/NoSuchFieldError")
   val PrintStream: ClassType = ClassType("java/io/PrintStream")
+
+given Finite[ClassType] with {}

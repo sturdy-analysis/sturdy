@@ -14,6 +14,7 @@ import sturdy.fix.Fixpoint
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.abstractions.{AddrSet, ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
+import sturdy.language.bytecode.util.given
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.{Combine, MaybeChanged, Powerset, Topped, Widen, Widening, finitely, given}
 import sturdy.values.exceptions.PowersetExceptional

@@ -104,8 +104,6 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   // may only be accessed after successful initialization
   val staticFieldTable: DecidableSymbolTable[Unit, FieldIdent, Addr]
 
-  given Finite[ClassType] with {}
-
   // needs to be lazy due to the initialization order, do not use the companion object here!
   implicit val effectStack: EffectStack = new EffectStack(EffectList(stack, failure, except, objFieldAlloc, objAlloc, arrayValAlloc, arrayAlloc, store, frame, staticFieldTable))
 
