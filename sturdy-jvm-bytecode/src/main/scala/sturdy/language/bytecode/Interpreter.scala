@@ -10,6 +10,7 @@ import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
+import sturdy.language.bytecode.abstractions.VoidOps
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.objects.{SizeOps, TypeOps}
 
@@ -47,6 +48,9 @@ trait Interpreter:
     case Float32(f: F32)
     case Float64(d: F64)
     case ReferenceValue(r: RefValue)
+    // unit value to represent void returns
+    // TODO: can this be dropped by remodeling invocations?
+    case Void
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -146,6 +150,9 @@ trait Interpreter:
     val branchOpsV: BooleanBranching[Value, Value] = LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
+    override final val voidOps: VoidOps[Value] = new VoidOps[Value]:
+      final override val voidRep: Value = Value.Void
+
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply)
     final val f32ops: FloatOps[Float, Value] = LiftedFloatOps(_.asFloat32, Value.Float32.apply)
@@ -226,6 +233,7 @@ trait Interpreter:
       case Value.Float64(v) => boolean(SizeOps.is32Bit(v))
       case Value.ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
       case Value.TopValue => ??? // TODO: not implemented
+      case Value.Void => ??? // TODO: not implemented
 
   type Instance <: GenericInstance
 
