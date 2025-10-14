@@ -4,6 +4,7 @@ import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
 import org.opalj.br.instructions.*
+import sturdy.language.bytecode.abstractions.Site
 
 class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep]):
 
@@ -65,7 +66,15 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
     case DNEG =>
       f64ops.negated(v1)
 
-  def evalNumericBinOp(inst: Instruction, v1: V, v2: V): V = inst match
+  // throws an arithmetic exception through the provided function if the 2nd operand is 0, performs the computation otherwise
+  private def div0Checked(throwArithmeticException: () => Nothing)(mk0: 0 => V, op: (V, V) => V)(v1: V, v2: V): V =
+    branchOpsV.boolBranch(eqOps.equ(v2, mk0(0))) {
+      throwArithmeticException()
+    } {
+      op(v1, v2)
+    }
+
+  def evalNumericBinOp(throwArithmeticException: () => Nothing)(inst: Instruction, v1: V, v2: V): V = inst match
     case IADD =>
       i32ops.add(v1, v2)
     case LADD =>
@@ -91,17 +100,17 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
     case DMUL =>
       f64ops.mul(v1, v2)
     case IDIV =>
-      i32ops.div(v1, v2)
+      div0Checked(throwArithmeticException)(i32ops.integerLit, i32ops.div)(v1, v2)
     case LDIV =>
-      i64ops.div(v1, v2)
+      div0Checked(throwArithmeticException)(i64ops.integerLit, i64ops.div)(v1, v2)
     case FDIV =>
       f32ops.div(v1, v2)
     case DDIV =>
       f64ops.div(v1, v2)
     case IREM =>
-      i32ops.remainder(v1, v2)
+      div0Checked(throwArithmeticException)(i32ops.integerLit, i32ops.remainder)(v1, v2)
     case LREM =>
-      i64ops.remainder(v1, v2)
+      div0Checked(throwArithmeticException)(i64ops.integerLit, i64ops.remainder)(v1, v2)
     case FREM =>
       f32ops.remainder(v1, v2)
     case DREM =>

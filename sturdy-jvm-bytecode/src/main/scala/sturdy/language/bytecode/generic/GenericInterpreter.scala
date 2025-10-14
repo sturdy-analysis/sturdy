@@ -327,7 +327,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       // Arithmetic Ops opcode 96 - 115
       case inst if 96 <= inst.opcode && inst.opcode <= 115 =>
         val (v1, v2) = stack.pop2OrAbort()
-        stack.push(num.evalNumericBinOp(inst, v1, v2))
+        stack.push(num.evalNumericBinOp(() => throwClass(site)(ClassType.ArithmeticException))(inst, v1, v2))
 
       // Negation Ops opcode 116 - 119
       case inst if 116 <= inst.opcode && inst.opcode <= 119 =>
@@ -337,7 +337,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       // Bitshift Ops opcode 120 - 131
       case inst if 120 <= inst.opcode && inst.opcode <= 131 =>
         val (v1, v2) = stack.pop2OrAbort()
-        stack.push(num.evalNumericBinOp(inst, v1, v2))
+        stack.push(num.evalNumericBinOp(() => throwClass(site)(ClassType.ArithmeticException))(inst, v1, v2))
 
       // iinc opcode 132
       case inst@IINC(lvIndex, constValue) =>
@@ -352,7 +352,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       // Numeric Comparison opcode 148 - 152
       case inst if 148 <= inst.opcode && inst.opcode <= 152 =>
         val (v1, v2) = stack.pop2OrAbort()
-        stack.push(num.evalNumericBinOp(inst, v1, v2))
+        stack.push(num.evalNumericBinOp(() => throwClass(site)(ClassType.ArithmeticException))(inst, v1, v2))
 
       // Branching opcode 153 - 166
       case IFEQ(branchoffset) =>

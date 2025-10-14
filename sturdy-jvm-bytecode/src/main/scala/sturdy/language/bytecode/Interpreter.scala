@@ -8,7 +8,6 @@ import sturdy.values.integer.*
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
-import org.opalj.br.ClassType
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
@@ -147,30 +146,8 @@ trait Interpreter:
     val branchOpsV: BooleanBranching[Value, Value] = LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
-    // throws an arithmetic exception if the 2nd operand is 0, performs the computation otherwise
-    private def arithmeticExceptionChecked[I](extract: Value => I, inject: I => Value, mk0: 0 => I)(op: (I, I) => I)(v1: Value, v2: Value): Value =
-      branchOpsV.boolBranch(
-        eqOps.equ(v2, inject(mk0(0))),
-        except.throws(JvmExcept.Throw(ClassType.ArithmeticException)),
-        inject(op(extract(v1), extract(v2)))
-      )
-
-    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply):
-      private val checked = arithmeticExceptionChecked(_.asInt32, Value.Int32.apply, i32Ops.integerLit)
-
-      override def div(v1: Value, v2: Value): Value =
-        checked(i32Ops.div)(v1, v2)
-
-      override def remainder(v1: Value, v2: Value): Value =
-        checked(i32Ops.remainder)(v1, v2)
-    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply):
-      private val checked = arithmeticExceptionChecked(_.asInt64, Value.Int64.apply, i64Ops.integerLit)
-
-      override def div(v1: Value, v2: Value): Value =
-        checked(i64Ops.div)(v1, v2)
-
-      override def remainder(v1: Value, v2: Value): Value =
-        checked(i64Ops.remainder)(v1, v2)
+    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply)
+    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply)
     final val f32ops: FloatOps[Float, Value] = LiftedFloatOps(_.asFloat32, Value.Float32.apply)
     final val f64ops: FloatOps[Double, Value] = LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
