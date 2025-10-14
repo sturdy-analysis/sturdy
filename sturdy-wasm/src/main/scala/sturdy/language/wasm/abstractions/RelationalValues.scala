@@ -28,7 +28,7 @@ trait RelationalValues extends RelationalI32Values with PowersetReference:
     v.asInt32 match
       case NumExpr(i) => ApronBool.Constraint(ApronCons.neq[VirtAddr, Type](i, lit(0, i._type)))
       case BoolExpr(cons) => cons
-      case AllocationSites(_,_) => ApronBool.Constant(Topped.Top)
+      case HeapAddr(_,_) => ApronBool.Constant(Topped.Top)
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match

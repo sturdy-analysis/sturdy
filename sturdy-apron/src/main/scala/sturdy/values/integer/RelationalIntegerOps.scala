@@ -15,7 +15,6 @@ import ApronBool.*
 import sturdy.effect.EffectStack
 import sturdy.util.Lazy
 import sturdy.{IsSound, Soundness}
-import sturdy.values.config.{BitSign, UnsupportedConfiguration}
 import sturdy.values.integer.OverflowHandling.WrapAround
 
 enum OverflowHandling:
@@ -41,23 +40,23 @@ trait RelationalBaseIntegerOps
 
   override def add(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = {
     (v1,v2) match {
-      case (ApronExpr.Constant(coeff, _, _), _) if(coeff.isZero) => v2
-      case (_, ApronExpr.Constant(coeff, _, _)) if(coeff.isZero) => v1
+      case (ApronExpr.Constant(coeff, _, _), _) if coeff.isZero => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if coeff.isZero => v1
       case _ => handleOverflow(intAdd(v1, v2))
     }
   }
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     (v1, v2) match {
-      case (ApronExpr.Constant(coeff, _, _), _) if (coeff.isZero) => v2
-      case (_, ApronExpr.Constant(coeff, _, _)) if (coeff.isZero) => v1
+      case (ApronExpr.Constant(coeff, _, _), _) if coeff.isZero => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if coeff.isZero => v1
       case _ => handleOverflow(intSub(v1, v2))
     }
 
   override def mul(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     (v1, v2) match {
-      case (ApronExpr.Constant(coeff, _, _), _) if (coeff.isEqual(1)) => v2
-      case (_, ApronExpr.Constant(coeff, _, _)) if (coeff.isEqual(1)) => v1
+      case (ApronExpr.Constant(coeff, _, _), _) if coeff.isEqual(1) => v2
+      case (_, ApronExpr.Constant(coeff, _, _)) if coeff.isEqual(1) => v1
       case _ => handleOverflow(intMul(v1, v2))
     }
 
@@ -105,7 +104,7 @@ trait RelationalBaseIntegerOps
 
   override def remainder(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     v1 match {
-      case ApronExpr.Constant(coeff, _, _) if(coeff.isZero) => v1
+      case ApronExpr.Constant(coeff, _, _) if coeff.isZero => v1
       case _ => intMod(v1, v2)
     }
 
@@ -150,7 +149,7 @@ trait RelationalBaseIntegerOps
   private def absoluteMax(iv: Interval): Scalar =
     max(abs(iv.inf), abs(iv.sup))
 
-  def abs(v: Scalar): Scalar =
+  private def abs(v: Scalar): Scalar =
     if(v.sgn() < 0) {
       v.neg(); v
     } else {
@@ -213,7 +212,7 @@ trait RelationalBaseIntegerOps
   def toSigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     intAdd(v, lit(signedMinValue(v._type.byteSize), v._type))
 
-  val infty = new MpqScalar();
+  private val infty = new MpqScalar();
   infty.setInfty(1)
 
   def castTo(v: ApronExpr[Addr,Type], toType: Type): ApronExpr[Addr, Type] =
@@ -242,7 +241,7 @@ trait RelationalBaseIntegerOps
         apronState.ifThenElse(inSignedRange) {
           v
         } {
-          Failure(IntegerOverflow, s"$v overflows bounds [${sMin},${sMax}]")
+          Failure(IntegerOverflow, s"$v overflows bounds [$sMin,$sMax]")
         }
 
   def interpretSignedAsUnsigned(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =

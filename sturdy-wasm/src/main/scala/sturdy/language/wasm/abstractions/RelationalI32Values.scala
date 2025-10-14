@@ -6,6 +6,8 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.language.wasm.Interpreter
 import sturdy.data.{*, given}
+import sturdy.fix.DomLogger
+import sturdy.language.wasm.generic.{FixIn, FrameData, FuncId}
 import sturdy.util.Lazy
 import sturdy.values.config.{BitSign, BytesSize, Overflow}
 import sturdy.values.convert.{&&, Convert, ConvertConfig, LiftedConvert, NilCC, SomeCC}
@@ -15,6 +17,8 @@ import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
+import scala.annotation.tailrec
+
 trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Type.*
   import Value.*
@@ -23,11 +27,12 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
-    case AllocationSites(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type])
+    case StackAddr(func: Powerset[FuncId], frameSize: ApronExpr[VirtAddr,Type], stackPointer: VirtAddr, offset: ApronExpr[VirtAddr,Type])
+    case HeapAddr(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type])
 
-    def addNull(): Option[AllocationSites] =
+    def addNull(): Option[HeapAddr] =
       this match
-        case AllocationSites(sites, size) => Some(AllocationSites(Join(sites, AbstractReference.Null).get, size))
+        case HeapAddr(sites, size) => Some(HeapAddr(Join(sites, AbstractReference.Null).get, size))
         case _ => None
 
   import RelI32.*
@@ -36,15 +41,17 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   final type Bool = ApronBool[VirtAddr, Type]
 
   extension (i32: I32)
-    inline def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
+    def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       i32 match
         case NumExpr(expr) => expr
         case BoolExpr(condition) => apronState.assert(condition)(using resolveState) match
           case Topped.Actual(true) => ApronExpr.lit(1, I32Type)
           case Topped.Actual(false) => ApronExpr.lit(0, I32Type)
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
-        case AllocationSites(AbstractReference.Null, _) => ApronExpr.lit(0, I32Type)
-        case AllocationSites(sites, _) => ApronExpr.top(I32Type)
+        case HeapAddr(AbstractReference.Null, _) => ApronExpr.lit(0, I32Type)
+        case HeapAddr(sites, _) => ApronExpr.top(I32Type)
+        case StackAddr(_, _, stackPointer, offset) =>
+          ApronExpr.intAdd(ApronExpr.addr(stackPointer,I32Type), offset, I32Type)
 
     def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       given ApronState[VirtAddr, Type] = lazyApronState.value
@@ -56,35 +63,51 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given CombineI32[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W], apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Combine[I32, W] with
     override def apply(v1: I32, v2: I32): MaybeChanged[I32] =
      (v1, v2) match
-        case _ if((v1 eq v2) || (v1 == v2)) => Unchanged(v1)
-        case (NumExpr(expr), _) if expr.isBottom == Topped.Actual(true) =>
+        case _ if(v1 eq v2) => Unchanged(v1)
+        case (NumExpr(expr), _) if apronStateLazy.value.isBottom(expr)(using ResolveState.Left) == Topped.Actual(true) =>
           MaybeChanged(v2,
             v2 match
-              case NumExpr(e2) => e2.isBottom != Topped.Actual(true)
+              case NumExpr(e2) => expr.isBottom != Topped.Actual(true)
               case _ => true
           )
-        case (_, NumExpr(expr)) if expr.isBottom == Topped.Actual(true) => Unchanged(v1)
+        case (_, NumExpr(expr)) if apronStateLazy.value.isBottom(expr)(using ResolveState.Right) == Topped.Actual(true) => Unchanged(v1)
         case (BoolExpr(b1), BoolExpr(b2)) if (b1 == b2) => Unchanged(BoolExpr(b1))
         case (AllocSitesLeft(alloc1), AllocSitesRight(alloc2)) => CombineAllocationSites(alloc1,alloc2)
+        case (NumExpr(ApronExpr.Addr(ApronVar(sp1@VirtAddr(AddrCtx.Global(0), _, _)), _, _)), s2: StackAddr) =>
+          CombineStackAddr(
+            StackAddr(Powerset(), ApronExpr.constant(ApronExpr.bottomInterval, I32Type), sp1, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
+            s2
+          )
+        case (s1: StackAddr, NumExpr(ApronExpr.Addr(ApronVar(sp2@VirtAddr(AddrCtx.Global(0), _, _)), _, _))) =>
+          CombineStackAddr(
+            s1,
+            StackAddr(Powerset(), ApronExpr.constant(ApronExpr.bottomInterval, I32Type), sp2, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
+          )
+        case (NumExpr(e1), s2: StackAddr) if(apronStateLazy.value.getInterval(e1)(using ResolveState.Left).isZero) =>
+          Changed(s2)
+        case (s1: StackAddr, NumExpr(e2)) if(apronStateLazy.value.getInterval(e2)(using ResolveState.Right).isZero) =>
+          Unchanged(s1)
+        case (s1: StackAddr, s2: StackAddr) => CombineStackAddr(s1,s2)
+        case (NumExpr(e1), NumExpr(e2)) => combineApronExpr(e1, e2).map(NumExpr.apply)
         case (_,_) =>
           given ApronState[VirtAddr,Type] = apronStateLazy.value
           combineApronExpr(v1.asNumExpr(using resolveState = ResolveState.Left), v2.asNumExpr(using resolveState = ResolveState.Right)).map(NumExpr.apply)
 
   private object AllocSitesLeft:
-    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Option[AllocationSites] =
+    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]]): Option[HeapAddr] =
       AllocSites.unapply(v)(using resolveState = ResolveState.Left)
 
   private object AllocSitesRight:
-    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx, Type, Value]]): Option[AllocationSites] =
+    inline def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx, Type, Value]]): Option[HeapAddr] =
       AllocSites.unapply(v)(using resolveState = ResolveState.Right)
 
   private object AllocSites:
-    def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]], resolveState: ResolveState): Option[AllocationSites] =
+    def unapply(v: RelI32)(using apronStateLazy: Lazy[ApronRecencyState[AddrCtx,Type,Value]], resolveState: ResolveState): Option[HeapAddr] =
       v match {
-        case allocationSites: AllocationSites => Some(allocationSites)
+        case allocationSites: HeapAddr => Some(allocationSites)
         case NumExpr(ApronExpr.Constant(coeff, _, _)) =>
           if(coeff.isZero)
-            Some(AllocationSites(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
+            Some(HeapAddr(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
           else
             None
         case NumExpr(expr@ApronExpr.Addr(x,_,_)) =>
@@ -92,7 +115,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           val iv = apronState.getInterval(expr)(using resolveState)
 
           apronState.getNonRelationalValue(x)(using resolveState).toOption match {
-            case Some(Value.Num(Int32(allocationSites: AllocationSites))) =>
+            case Some(Value.Num(Int32(allocationSites: HeapAddr))) =>
               if(iv.isBottom)
                 Some(allocationSites)
               else if(iv.isZero)
@@ -101,7 +124,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
                 None
             case Some(Value.Num(Int32(NumExpr(expr)))) if expr.isBottom == Topped.Actual(true) =>
               if(iv.isZero)
-                Some(AllocationSites(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
+                Some(HeapAddr(AbstractReference.Null, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)))
               else
                 None
             case Some(nonRelValue) =>
@@ -111,22 +134,69 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         case _ => None
       }
 
-  given CombineAllocationSites[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W]): Combine[AllocationSites, W] with
-    override def apply(v1: AllocationSites, v2: AllocationSites): MaybeChanged[AllocationSites] = {
+  given CombineAllocationSites[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W]): Combine[HeapAddr, W] with
+    override def apply(v1: HeapAddr, v2: HeapAddr): MaybeChanged[HeapAddr] = {
       if(v1 eq v2) {
         Unchanged(v1)
       } else {
         for {
           sites <- Combine(v1.sites, v2.sites);
           size <- combineApronExpr(v1.size, v2.size)
-        } yield (AllocationSites(sites, size))
+        } yield (HeapAddr(sites, size))
+      }
+    }
+
+  given CombineStackAddr[W <: Widening](using combineApronExpr: Combine[ApronExpr[VirtAddr,Type], W]): Combine[StackAddr, W] with
+    override def apply(v1: StackAddr, v2: StackAddr): MaybeChanged[StackAddr] = {
+      if(v1 eq v2) {
+        Unchanged(v1)
+      } else {
+        for {
+          func <- Join(v1.func, v2.func);
+          frameSize <- combineApronExpr(v1.frameSize, v2.frameSize)
+          stackPointerExpr <- combineApronExpr(ApronExpr.addr(v1.stackPointer, I32Type), ApronExpr.addr(v2.stackPointer, I32Type))
+          stackPointer = stackPointerExpr match { case ApronExpr.Addr(ApronVar(sp), _, _) => sp; case _ => throw IllegalArgumentException() }
+          offset <- combineApronExpr(v1.offset, v2.offset)
+        } yield (StackAddr(func, frameSize, stackPointer, offset))
       }
     }
 
   given overflowHandling: OverflowHandling = OverflowHandling.Fail
 
-  given I32IntegerOps(using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): IntegerOpsWithSignInterpretation[Int, I32] =
-    new LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
+  final class I32IntegerOps(rootFrameData: FrameData)
+                           (using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
+    extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
+      override def add(v1: I32, v2: I32): I32 =
+        (v1, v2) match
+          case (st: StackAddr, _) => st.copy(offset = ApronExpr.intAdd(st.offset, v2.asNumExpr, I32Type))
+          case (_, st: StackAddr) => st.copy(offset = ApronExpr.intAdd(st.offset, v1.asNumExpr, I32Type))
+          case (_, _) => NumExpr(intOps.add(v1.asNumExpr, v2.asNumExpr))
+
+      override def sub(v1: I32, v2: I32): I32 =
+        v1 match
+          case NumExpr(stackPointer@ApronExpr.Addr(ApronVar(VirtualAddress(ctx@AddrCtx.Global(0), _, _)), _, _)) =>
+            val newStackPointer = apronState.alloc(ctx)
+            apronState.assign(newStackPointer, ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type))
+            val dom = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+            StackAddr(
+              func = Powerset(dom.funcId.get),
+              frameSize = v2.asNumExpr,
+              stackPointer = newStackPointer,
+              offset = ApronExpr.lit(0, I32Type)
+            )
+          case StackAddr(_, _, oldStackPointer, _) =>
+            // New stack frame based on old stack address.
+            val newStackPointer = apronState.alloc(oldStackPointer.ctx)
+            apronState.assign(newStackPointer, ApronExpr.intSub(ApronExpr.addr(oldStackPointer, I32Type), v2.asNumExpr, I32Type))
+            val dom = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+            StackAddr(
+              func = Powerset(dom.funcId.get),
+              frameSize = v2.asNumExpr,
+              stackPointer = newStackPointer,
+              offset = ApronExpr.lit(0, I32Type)
+            )
+          case _ => NumExpr(intOps.sub(v1.asNumExpr, v2.asNumExpr))
+
       override def bitAnd(v1: I32, v2: I32): I32 =
         (v1, v2) match
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.And(e1, e2))
@@ -136,6 +206,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           case (BoolExpr(e1), BoolExpr(e2)) => BoolExpr(ApronBool.Or(e1, e2))
           case _ => NumExpr(intOps.bitOr(v1.asNumExpr, v2.asNumExpr))
 
+      @tailrec
       override def bitXor(v1: I32, v2: I32): I32 =
         (v1, v2) match
           case (BoolExpr(e1), NumExpr(e2)) =>
@@ -152,7 +223,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given I32EqOps(using eqOps: EqOps[ApronExpr[VirtAddr,Type], Bool], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack): EqOps[I32, Bool] with
     override def equ(v1: I32, v2: I32): Bool =
       (v1, v2) match
-        case (AllocationSites(sites, _), NumExpr(expr)) =>
+        case (HeapAddr(sites, _), NumExpr(expr)) =>
           if(apronState.getInterval(expr).isZero) {
             sites match {
               case _: AbstractReference.Null.type => ApronBool.Constant(Topped.Actual(true))
@@ -161,7 +232,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
             }
           } else
             equ(NumExpr(v1.asNumExpr), v2)
-        case (_: NumExpr, _: AllocationSites) =>
+        case (_: NumExpr, _: HeapAddr) =>
           equ(v2, v1)
         case (BoolExpr(c1), NumExpr(i2@ApronExpr.Constant(coeff, _, tpe))) =>
           val c1ContainsNaN = c1.constraint.exists { case ApronCons(_, e1, e2) => e1.floatSpecials.nan || e2.floatSpecials.nan }
@@ -208,7 +279,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     v match
       case NumExpr(e) => NumExpr(apronState.toNonRelational(e))
       case BoolExpr(e) => BoolExpr(apronState.toNonRelational(e))
-      case _: AllocationSites => v
+      case _: HeapAddr => v
 
   final class NonRelationalI32IntegerOps(using relationalIntOps: IntegerOpsWithSignInterpretation[Int, I32], apronState: ApronState[VirtAddr, Type])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, I32](extract = i32 => i32, inject = toNonRelational)

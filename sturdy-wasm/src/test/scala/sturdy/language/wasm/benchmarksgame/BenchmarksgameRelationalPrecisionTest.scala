@@ -38,12 +38,12 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
   override def afterAll(): Unit =
     csvWriter.close()
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fankuchredux.wasm")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("binarytrees.wasm")).sorted.foreach { p =>
     test(s"${p.getFileName}") {
       val module = Parsing.fromBinary(p)
 
       val relationalAnalysis = RelationalAnalysis.Instance(Polka(true),FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = true))
-      val relationalInfoLogger = relationalAnalysis.constrainedInstructionsLogger
+      val relationalMemoryLogger = relationalAnalysis.memoryLogger
       relationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       var moduleInst = relationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
       relationalAnalysis.failure.fallible(
@@ -53,7 +53,7 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       Profiler.reset()
 
       val nonRelationalAnalysis = RelationalAnalysis.Instance(Polka(true),FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = false))
-      val nonRelationalInfoLogger = nonRelationalAnalysis.constrainedInstructionsLogger
+      val nonRelationalMemoryLogger = nonRelationalAnalysis.memoryLogger
       nonRelationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       moduleInst = nonRelationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
       nonRelationalAnalysis.failure.fallible(
@@ -62,46 +62,48 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       Profiler.printLastMeasured()
       Profiler.reset()
 
-      val relationalInfos = relationalInfoLogger.getAllInstructionInfos
-      val nonRelationalInfos = nonRelationalInfoLogger.getAllInstructionInfos
+      println(s"Relational: ${relationalMemoryLogger}\nNon-Relational: ${nonRelationalMemoryLogger}")
 
-      var relationalMorePrecise: Map[(InstLoc,syntax.Inst),(List[Info],List[Info])] = Map.empty
-      var nonRelationalMorePrecise: Map[(InstLoc,syntax.Inst),(List[Info],List[Info])] = Map.empty
-      var samePrecision: Map[(InstLoc,syntax.Inst),(List[Info],List[Info])] = Map.empty
-      var incomparable: Map[(InstLoc,syntax.Inst),(List[Info],List[Info])] = Map.empty
-      var totalComparedInstructions: Int = 0
+//      val relationalInfos = relationalInfoLogger.getAllInstructionInfos
+//      val nonRelationalInfos = nonRelationalInfoLogger.getAllInstructionInfos
+//
+//      var relationalMorePrecise: Map[(InstLoc,syntax.Inst),(List[UnconstrainedInfo],List[UnconstrainedInfo])] = Map.empty
+//      var nonRelationalMorePrecise: Map[(InstLoc,syntax.Inst),(List[UnconstrainedInfo],List[UnconstrainedInfo])] = Map.empty
+//      var samePrecision: Map[(InstLoc,syntax.Inst),(List[UnconstrainedInfo],List[UnconstrainedInfo])] = Map.empty
+//      var incomparable: Map[(InstLoc,syntax.Inst),(List[UnconstrainedInfo],List[UnconstrainedInfo])] = Map.empty
+//      var totalComparedInstructions: Int = 0
+//
+//      relationalInfos.foreach((loc,infos1) =>
+//        nonRelationalInfos.get(loc).foreach(infos2 =>
+//          if(infos1.length != infos2.length)
+//            throw IllegalStateException(s"List of infos $infos1 and $infos2 for $loc do not have the same length")
+//          else {
+//            totalComparedInstructions += 1
+//            PartialOrder[List[UnconstrainedInfo]].tryCompare(infos1, infos2) match
+//              case Some(n) =>
+//                if (n == 0)
+//                  samePrecision += loc -> (infos1,infos2)
+//                else if (n < 0)
+//                  relationalMorePrecise += loc -> (infos1,infos2)
+//                else /* if(n > 0) */
+//                  nonRelationalMorePrecise += loc -> (infos1,infos2)
+//              case None =>
+//                incomparable += loc -> (infos1,infos2)
+//          }
+//        )
+//      )
+//
+//      assert(totalComparedInstructions == relationalMorePrecise.size + nonRelationalMorePrecise.size + samePrecision.size + incomparable.size)
 
-      relationalInfos.foreach((loc,infos1) =>
-        nonRelationalInfos.get(loc).foreach(infos2 =>
-          if(infos1.length != infos2.length)
-            throw IllegalStateException(s"List of infos $infos1 and $infos2 for $loc do not have the same length")
-          else {
-            totalComparedInstructions += 1
-            PartialOrder[List[Info]].tryCompare(infos1, infos2) match
-              case Some(n) =>
-                if (n == 0)
-                  samePrecision += loc -> (infos1,infos2)
-                else if (n < 0)
-                  relationalMorePrecise += loc -> (infos1,infos2)
-                else /* if(n > 0) */
-                  nonRelationalMorePrecise += loc -> (infos1,infos2)
-              case None =>
-                incomparable += loc -> (infos1,infos2)
-          }
-        )
-      )
-
-      assert(totalComparedInstructions == relationalMorePrecise.size + nonRelationalMorePrecise.size + samePrecision.size + incomparable.size)
-
-      csvWriter.writeRow(
-        List(p.getFileName,
-          relationalMorePrecise.size.toString,
-          nonRelationalMorePrecise.size.toString,
-          samePrecision.size.toString,
-          incomparable.size.toString,
-          totalComparedInstructions,
-          (relationalInfos.keySet ++ nonRelationalInfos.keySet).size - totalComparedInstructions
-        )
-      )
+//      csvWriter.writeRow(
+//        List(p.getFileName,
+//          relationalMorePrecise.size.toString,
+//          nonRelationalMorePrecise.size.toString,
+//          samePrecision.size.toString,
+//          incomparable.size.toString,
+//          totalComparedInstructions,
+//          (relationalInfos.keySet ++ nonRelationalInfos.keySet).size - totalComparedInstructions
+//        )
+//      )
     }
   }

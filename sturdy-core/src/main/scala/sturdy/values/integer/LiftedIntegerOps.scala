@@ -9,9 +9,9 @@ class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: Inte
   inline def integerLit(i: B): V = inject(ops.integerLit(i))
   inline def randomInteger(): V = inject(ops.randomInteger())
 
-  inline def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))
-  inline def sub(v1: V, v2: V): V = inject(ops.sub(extract(v1), extract(v2)))
-  inline def mul(v1: V, v2: V): V = inject(ops.mul(extract(v1), extract(v2)))
+  def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))
+  def sub(v1: V, v2: V): V = inject(ops.sub(extract(v1), extract(v2)))
+  def mul(v1: V, v2: V): V = inject(ops.mul(extract(v1), extract(v2)))
   inline def max(v1: V, v2: V): V = inject(ops.max(extract(v1), extract(v2)))
   inline def min(v1: V, v2: V): V = inject(ops.min(extract(v1), extract(v2)))
   inline def absolute(v: V): V = inject(ops.absolute(extract(v)))

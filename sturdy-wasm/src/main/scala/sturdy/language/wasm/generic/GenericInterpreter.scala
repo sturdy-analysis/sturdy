@@ -234,7 +234,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case GlobalSet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val v = stack.popOrAbort()
-      val _ = getGlobalValue(globalIdx)
       writeGlobalValue(globalIdx, v)
 
   private def toTableAddr(ix: Int): TableAddr = module.tableAddrs.lift(ix).getOrElse(fail(TableAccessOutOfBounds, ix.toString))
@@ -391,11 +390,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: LoadInst | LoadNInst): Unit =
-    val startAddr = valToAddr(stack.popOrAbort())
-    val addr = addressOffset.addOffsetToAddr(inst.offset, startAddr)
+    val baseAddr = valToAddr(stack.popOrAbort())
+    val effectiveAddr = addressOffset.addOffsetToAddr(inst.offset, baseAddr)
     val memIdx = memoryIndex
     val length = getBytesToRead(inst)
-    memory.read(memIdx, addr, length, inst.align).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr")) {
+    memory.read(memIdx, effectiveAddr, length, inst.align).orElseAndThen(fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $effectiveAddr")) {
       bytes =>
         val v = decode(bytes, SomeCC(inst, false))
         stack.push(v)
@@ -406,12 +405,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
-    val startAddr = valToAddr(stack.popOrAbort())
-    val addr = addressOffset.addOffsetToAddr(inst.offset, startAddr)
+    val baseAddr = valToAddr(stack.popOrAbort())
+    val effectiveAddr = addressOffset.addOffsetToAddr(inst.offset, baseAddr)
 
     val memIdx = memoryIndex
-    memory.write(memIdx, addr, bytes, inst.align).getOrElse(
-      fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
+    memory.write(memIdx, effectiveAddr, bytes, inst.align).getOrElse(
+      fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $effectiveAddr in current memory.")
     )
 
   def getBytesToRead(inst: MemoryInst): Int = inst match

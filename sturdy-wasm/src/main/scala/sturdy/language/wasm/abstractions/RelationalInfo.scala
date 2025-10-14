@@ -25,7 +25,7 @@ object RelationalInfo:
     override def lteq(x: IsConstrained, y: IsConstrained): Boolean =
       tryCompare(x, y).get <= 0
 
-  enum Info:
+  enum UnconstrainedInfo:
     case Numeric(interval: FloatInterval, tpe: Any, constrained: IsConstrained)
     case Boolean(value: Topped[scala.Boolean], constrained: IsConstrained)
     case AllocationSites(sites: AbstractReference[Powerset[PhysicalAddress[Any]]], size: Interval, sizeConstrained: IsConstrained)
@@ -40,10 +40,10 @@ object RelationalInfo:
 
     inline def isUnconstrained: scala.Boolean = !isConstrained
 
-  given PartialOrder[Info] with
-    import Info.*
+  given PartialOrder[UnconstrainedInfo] with
+    import UnconstrainedInfo.*
 
-    override def lteq(x: Info, y: Info): scala.Boolean =
+    override def lteq(x: UnconstrainedInfo, y: UnconstrainedInfo): scala.Boolean =
       (x, y) match
         case (Numeric(iv1, _, isConstrained1), Numeric(iv2, _, isConstrained2)) =>
           PartialOrder.lteq((isConstrained1, iv1), (isConstrained2, iv2))
@@ -64,24 +64,24 @@ object RelationalInfo:
         case (Constrained, Unconstrained) => Changed(Unconstrained)
         case (Unconstrained, _) => Unchanged(Unconstrained)
 
-  given Join[Info] = {
-    case (Info.Numeric(iv1, tpe1, constrained1), Info.Numeric(iv2, tpe2, constrained2)) if tpe1 == tpe2 =>
+  given Join[UnconstrainedInfo] = {
+    case (UnconstrainedInfo.Numeric(iv1, tpe1, constrained1), UnconstrainedInfo.Numeric(iv2, tpe2, constrained2)) if tpe1 == tpe2 =>
       for {
         iv <- Join(iv1, iv2)
         constrained <- joinIsConstrained(constrained1, constrained2)
-      } yield (Info.Numeric(iv, tpe1, constrained))
-    case (Info.Boolean(b1, constrained1), Info.Boolean(b2, constrained2)) =>
+      } yield (UnconstrainedInfo.Numeric(iv, tpe1, constrained))
+    case (UnconstrainedInfo.Boolean(b1, constrained1), UnconstrainedInfo.Boolean(b2, constrained2)) =>
       for {
         b <- Join(b1, b2)
         constrained <- joinIsConstrained(constrained1, constrained2)
-      } yield (Info.Boolean(b, constrained))
-    case (Info.AllocationSites(ref1, size1, constrained1), Info.AllocationSites(ref2, size2, constrained2)) =>
+      } yield (UnconstrainedInfo.Boolean(b, constrained))
+    case (UnconstrainedInfo.AllocationSites(ref1, size1, constrained1), UnconstrainedInfo.AllocationSites(ref2, size2, constrained2)) =>
       for {
         sites <- Join(ref1, ref2)
         size <- Join(size1, size2)
         constrained <- joinIsConstrained(constrained1, constrained2)
-      } yield (Info.AllocationSites(sites, size, constrained))
-    case (Info.Top, _) => Unchanged(Info.Top)
-    case (_, Info.Top) => Changed(Info.Top)
-    case (_, _) => Changed(Info.Top)
+      } yield (UnconstrainedInfo.AllocationSites(sites, size, constrained))
+    case (UnconstrainedInfo.Top, _) => Unchanged(UnconstrainedInfo.Top)
+    case (_, UnconstrainedInfo.Top) => Changed(UnconstrainedInfo.Top)
+    case (_, _) => Changed(UnconstrainedInfo.Top)
   }

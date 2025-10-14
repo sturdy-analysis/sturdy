@@ -107,14 +107,16 @@ enum ApronExpr[Addr, Type]:
       case _ => false
 
   def isTop: Topped[Boolean] =
-    this match
-      case Constant(iv, _, _) => Topped.Actual(iv.inf().isInfty == -1 && iv.sup().isInfty == 1)
-      case _ => Topped.Top
+    if(constants.exists(iv => iv.inf().isInfty == -1 && iv.sup().isInfty == 1))
+      Topped.Actual(true)
+    else
+      Topped.Top
 
   def isBottom: Topped[Boolean] =
-    this match
-      case Constant(iv, _, _) => Topped.Actual(iv.inf().cmp(iv.sup()) > 0)
-      case _ => Topped.Top
+    if(constants.exists(iv => iv.inf().cmp(iv.sup()) > 0))
+      Topped.Actual(true)
+    else
+      Topped.Top
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
@@ -149,45 +151,6 @@ enum ApronExpr[Addr, Type]:
       case exc: Exception =>
         throw new IllegalArgumentException(s"Exception while converting ApronExpr $expr with environment $env", exc)
     }
-
-  def simplify: ApronExpr[Addr, Type] =
-    this match
-      // lit1 ⊕ lit2 ~> |lit1⊕lit2|
-      case Binary(op, Constant(l2: DoubleScalar, sp2, tpe2), Constant(l3: DoubleScalar, sp3, tpe3), rdt1, rdd1, sp1, tpe1)
-        if(tpe1 == tpe2 && tpe2 == tpe3 && sp1 == sp2 && sp2 == sp3) =>
-        evaluateLiterals(op, l2, l3).map(ApronExpr.floatConstant(_, sp1, tpe1)).getOrElse(this)
-      // (e1 ⊕ lit1) ⊕ lit2 ~> e1 ⊕ |lit1⊕lit2|
-      case Binary(op1, Binary(op2, e2, Constant(l3: DoubleScalar, sp3, tpe3), rdt2, rdd2, sp2, tpe2), Constant(l4: DoubleScalar, sp4, tpe4), rdt1, rdd1, sp1, tpe1)
-        if (op1 == op2 && rdt1 == rdt2 && rdd1 == rdd2 && sp1 == sp2 && sp2 == sp3 && sp3 == sp4 && tpe1 == tpe2 && tpe2 == tpe3 && tpe3 == tpe4) =>
-        evaluateLiterals(op1, l3, l4).map(lit =>
-          Binary(op1, e2, ApronExpr.floatConstant(lit, sp1, tpe1), rdt1, rdd1, sp1, tpe1)
-        ).getOrElse(this)
-      case _ =>
-        this
-
-  private inline def evaluateLiterals(op: BinOp, l1: DoubleScalar, l2: DoubleScalar): Option[Scalar] =
-    op match {
-      case BinOp.Add => isPrecise(BigDecimal(l1.get) + BigDecimal(l2.get))
-      case BinOp.Sub => isPrecise(BigDecimal(l1.get) - BigDecimal(l2.get))
-      case BinOp.Mul => isPrecise(BigDecimal(l1.get) * BigDecimal(l2.get))
-      case BinOp.Div =>
-        if(l2.get == 0)
-          None
-        else
-          isPrecise(BigDecimal(l1.get) / BigDecimal(l2.get))
-      case BinOp.Mod => isPrecise(BigDecimal(l1.get) % BigDecimal(l2.get))
-      case BinOp.Pow =>
-        if(l2.get == l2.get.toInt)
-          isPrecise(BigDecimal(l1.get).pow(l2.get.toInt))
-        else
-          None
-    }
-
-  private def isPrecise(b: BigDecimal): Option[Scalar] =
-    if (b.isExactDouble)
-      Some(DoubleScalar(b.doubleValue))
-    else
-      None
 
 object ApronExpr:
   inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Integer, _type)
@@ -264,8 +227,11 @@ object ApronExpr:
   inline def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Binary(op, e1, e2, resultType.roundingType, resultType.roundingDir, floatSpecials, resultType)
 
-  inline def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, e1._type)
+  inline def intNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    intNegate(e1, e1._type)
+
+  inline def intNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, tpe)
 
   inline def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     intAdd(e1, e2, intOps.add(e1._type, e2._type))
@@ -322,7 +288,10 @@ object ApronExpr:
     binary(BinOp.Div, e1, e2, floatSpecials, floatOps.div(e1._type, e2._type))
 
   inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, floatSpecials, floatOps.negated(e1._type))
+    floatNegate(e1, floatSpecials, floatOps.negated(e1._type))
+
+  inline def floatNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, tpe: Type): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, floatSpecials, tpe)
 
   inline def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
     unary(UnOp.Sqrt, e1, floatSpecials, floatOps.sqrt(e1._type))

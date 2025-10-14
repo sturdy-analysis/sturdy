@@ -33,7 +33,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.util.{*, given}
-import swam.syntax.*
+import swam.syntax.{LoadNInst, StoreNInst, *}
 import swam.{FuncType, GlobalType, OpCode, ReferenceType, ValType, syntax}
 
 import java.nio.ByteBuffer
@@ -76,9 +76,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       ): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
 
     override def valToAddr(v: Value): Addr = v match
-      case Num(Int32(n@NumExpr(_))) => n
-      case Num(Int32(a@AllocationSites(_, _))) => a
-      case Num(Int32(b@BoolExpr(_))) => NumExpr(b.asNumExpr)
+      case Num(Int32(n:NumExpr)) => n
+      case Num(Int32(a:HeapAddr)) => a
+      case Num(Int32(b:BoolExpr)) => NumExpr(b.asNumExpr)
+      case Num(Int32(s:StackAddr)) => s
       case TopValue => NumExpr(constant(ApronExpr.topInterval, I32Type))
       case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
@@ -166,13 +167,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, Type]] =
         v match
           case Num(Int32(NumExpr(expr))) => Some(expr)
-          case Num(Int32(BoolExpr(_))) => None
-          case Num(Int32(AllocationSites(_, _))) => None
+          case Num(Int32(_: BoolExpr)) => None
+          case Num(Int32(_: HeapAddr)) => None
+          case Num(Int32(_: StackAddr)) => None
           case Num(Int64(expr)) => Some(expr)
           case Num(Float32(expr)) => Some(expr)
           case Num(Float64(expr)) => Some(expr)
-          case Value.Vec(_) => None
-          case Value.Ref(_) => None
+          case _: Value.Vec => None
+          case _: Value.Ref => None
           case Value.TopValue => None
 
       override def makeRelationalExpr(expr: ApronExpr[VirtAddr, Type]): Value =
@@ -189,8 +191,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(_: Int64) => Some((FloatSpecials.Bottom, I64Type))
           case Num(Float32(expr)) => Some((expr.floatSpecials, expr._type))
           case Num(Float64(expr)) => Some((expr.floatSpecials, expr._type))
-          case Value.Vec(_) => None
-          case Value.Ref(_) => None
+          case _: Value.Vec => None
+          case _: Value.Ref => None
           case Value.TopValue => None
 
     given domLogger: DomLogger[FixIn] = new DomLogger
@@ -271,6 +273,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         }
       )
 
+    given I32IntegerOps = new I32IntegerOps(rootFrameData)
+
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
       if (config.relational)
         ValueWasmOps
@@ -329,7 +333,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Num(Int32(size))) =>
             val allocSite = domLogger.getDoms(1)
             val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            List(Num(Int32(AllocationSites(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
+            List(Num(Int32(HeapAddr(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
           case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "free" =>
         args match
@@ -495,7 +499,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Int32(n) => valueIterator(n)
         case NumExpr(n) => valueIterator(n)
         case BoolExpr(n) => valueIterator(n)
-        case AllocationSites(sites, size) => valueIterator(sites) ++ valueIterator(size)
+        case HeapAddr(sites, size) => valueIterator(sites) ++ valueIterator(size)
         case Int64(n) => valueIterator(n)
         case Float32(n) => valueIterator(n)
         case Float64(n) => valueIterator(n)
@@ -609,24 +613,91 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         println(s"RETURN $id(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
 
 
+    def memoryLogger: MemoryLogger =
+      val memLogger = new MemoryLogger()
+      this.fixpoint.addContextFreeLogger(memLogger)
+      memLogger
+
+    class MemoryLogger(using memOps: LanguageSpecificMemOps[HeapCtx, Addr, Size, Value]) extends fix.Logger[FixIn, FixOut[Value]]:
+      case class LoadInfo(
+        loadInst: (LoadInst | LoadNInst),
+        baseAddr: Addr,
+        effectiveAddr: Addr,
+        size: Size,
+        alignment: Int,
+        matchingRegions: Iterable[(PhysicalAddress[HeapCtx], MemoryRegion[Addr, Size, memory.Timestamp, Value], AlignedRead)]
+      )
+
+      case class StoreInfo(
+        storeInst: (StoreInst | StoreNInst),
+        baseAddr: Addr,
+        effectiveAddr: Addr,
+        alignment: Int,
+        heapCtx: Iterable[HeapCtx]
+      )
+
+      var loads: Map[InstLoc, List[LoadInfo]] = Map()
+      var stores: Map[InstLoc, List[StoreInfo]] = Map()
+
+      override def enter(dom: FixIn): Unit =
+        dom match
+          case FixIn.Eval(load: (LoadInst | LoadNInst), loc) =>
+            val baseAddr = wasmOps.specialOps.valToAddr(stack.peek().toOption.get)
+            val effectiveAddr = wasmOps.addressOffset.addOffsetToAddr(load.offset, baseAddr)
+            val size = ApronExpr.lit(getBytesToRead(load), I32Type): Size
+            val memIdx = memoryIndex
+            val mem = memory.memories(memIdx)
+            val matchingRegions = memOps.matchRegion(effectiveAddr, size, load.align, mem)
+            val loadInfo = LoadInfo(
+              loadInst = load,
+              baseAddr = baseAddr,
+              effectiveAddr = effectiveAddr,
+              size = size,
+              alignment = load.align,
+              matchingRegions
+            )
+            loads += loc -> (loadInfo :: loads.getOrElse(loc, List()))
+
+          case FixIn.Eval(store: (StoreInst | StoreNInst), loc) =>
+            val List(_value, addr) = stack.peekNOrAbort(2)
+            val baseAddr = wasmOps.specialOps.valToAddr(addr)
+            val effectiveAddr = wasmOps.addressOffset.addOffsetToAddr(store.offset, baseAddr)
+            val memIdx = memoryIndex
+            val heapCtx = Iterable.from(heapAlloc.alloc((ByteMemoryAllocationContext.Write, memIdx, effectiveAddr)))
+            val storeInfo = StoreInfo(
+              storeInst = store,
+              baseAddr = baseAddr,
+              effectiveAddr = effectiveAddr,
+              alignment = store.align,
+              heapCtx = heapCtx
+            )
+            stores += loc -> (storeInfo :: stores.getOrElse(loc, List()))
+
+          case _ => ()
+
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = ()
+
+      override def toString: String =
+        s"MemoryLogger(loads: $loads, stores: $stores)"
+
     def constrainedInstructionsLogger: ConstrainedInstructionsLogger =
       val intervalLogger = new ConstrainedInstructionsLogger
       this.fixpoint.addContextFreeLogger(intervalLogger)
       intervalLogger
 
-    class ConstrainedInstructionsLogger extends InstructionResultLogger[Info, Value](stack):
+    class ConstrainedInstructionsLogger extends InstructionResultLogger[UnconstrainedInfo, Value](stack):
       override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
 
-      def getInfo(value: Value): Info = Profiler.disableMeasurement {
+      def getInfo(value: Value): UnconstrainedInfo = Profiler.disableMeasurement {
         value match
           case Num(Int32(v32)) => v32 match
-            case NumExpr(v) => Info.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
-            case BoolExpr(v) => Info.Boolean(apronState.assert(v), isConstrained(v))
-            case AllocationSites(ref, size) => Info.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
-          case Num(Int64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
-          case Num(Float32(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
-          case Num(Float64(v)) => Info.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))
-          case Value.Ref(_) | Value.Vec(_) | Value.TopValue => Info.Top
+            case NumExpr(v) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
+            case BoolExpr(v) => UnconstrainedInfo.Boolean(apronState.assert(v), isConstrained(v))
+            case HeapAddr(ref, size) => UnconstrainedInfo.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
+          case Num(Int64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
+          case Num(Float32(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
+          case Num(Float64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))
+          case Value.Ref(_) | Value.Vec(_) | Value.TopValue => UnconstrainedInfo.Top
       }
 
       private def isConstrained(v: ApronExpr[VirtAddr, Type] | ApronBool[VirtAddr, Type]): IsConstrained =
@@ -638,14 +709,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         else
           IsConstrained.Constrained
 
-      def getAllInstructionInfos: Map[(InstLoc,syntax.Inst), List[Info]] =
+      def getAllInstructionInfos: Map[(InstLoc,syntax.Inst), List[UnconstrainedInfo]] =
         for((loc,info) <- instructionInfo)
           yield ((loc,instructions(loc)), info)
 
-      def getConstrained: Map[InstLoc, List[Info]] =
+      def getConstrained: Map[InstLoc, List[UnconstrainedInfo]] =
         instructionInfo.filter((_, infos) => infos.forall(_.isConstrained))
 
-      def grouped: Map[String, Map[InstLoc, List[Info]]] =
+      def grouped: Map[String, Map[InstLoc, List[UnconstrainedInfo]]] =
         getConstrained.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
 
       def groupedCount: Map[String, Int] =

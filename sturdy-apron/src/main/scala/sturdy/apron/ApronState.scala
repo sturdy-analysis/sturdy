@@ -1,9 +1,9 @@
 package sturdy.apron
 
-import apron.{Abstract1, Coeff, Interval, Scalar, Var, DoubleScalar}
+import apron.{Abstract1, Coeff, DoubleScalar, Interval, Scalar, Var}
 import gmp.{Mpfr, Mpq}
 import sturdy.apron
-import sturdy.apron.ApronExpr.{addr, booleanLit}
+import sturdy.apron.ApronExpr.{Addr, Unary, Binary, Constant, addr, booleanLit, intAdd}
 import sturdy.effect.{EffectList, EffectStack, SturdyFailure}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.{RecencyClosure, RecencyStore, RelationalStore}
@@ -42,6 +42,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def addConstraints(constraints: ApronCons[Addr,Type]*)(using ResolveState): Unit
   def addCondition(condition: ApronBool[Addr,Type])(using ResolveState): Unit
 
+  def isBottom(expr: ApronExpr[Addr,Type])(using ResolveState): Topped[Boolean]
   def isUnconstrained(expr: ApronExpr[Addr,Type] | ApronCons[Addr,Type] | ApronBool[Addr,Type])(using ResolveState): Boolean
 
   def effects: EffectStack
@@ -75,6 +76,50 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def join: Join[ApronExpr[Addr, Type]]
   def widen: Widen[ApronExpr[Addr, Type]]
+
+
+  /**
+   * Simplifies expressions into the following normal form:
+   *   1. Sorts literals to the right if possible:
+   *     - `(lit + e) ~> (e + lit)`
+   *     - `(lit * e) ~> (e * lit)`
+   *     - `(lit - e) ~> (-(e) + lit)`
+   *   2. Converts subtraction to addtion:
+   *     - `(e - lit) ~> (e + -lit)`
+   *   3. Collects constants in additions:
+   *     - `((e + lit1) + lit2) ~> e + (lit1 + lit2)`
+   *     - `((e * lit1) * lit2) ~> e * (lit1 * lit2)`
+   */
+  def simplify(expr: ApronExpr[Addr, Type])(using ResolveState): ApronExpr[Addr, Type] =
+    expr match
+
+      // (lit + e) ~> (e + lit)
+      // (lit * e) ~> (e * lit)
+      case Binary(op: (BinOp.Add.type | BinOp.Mul.type), e1: Constant[Addr,Type], e2: (ApronExpr.Addr[Addr,Type] | Unary[Addr,Type] | Binary[Addr,Type]), rdt, rdd, sp, tpe) =>
+        simplify(Binary(op, simplify(e2), e1, rdt, rdd, sp, tpe))
+
+      // (lit - e) ~> (-(e) + lit)
+      case Binary(BinOp.Sub, e1: Constant[Addr,Type], e2: (ApronExpr.Addr[Addr,Type] | Unary[Addr,Type] | Binary[Addr,Type]), rdt, rdd, sp, tpe) =>
+        simplify(Binary(BinOp.Add, simplify(ApronExpr.Unary(UnOp.Negate, e2, rdt, rdd, e2.floatSpecials, e2._type)), e1, rdt, rdd, sp, tpe))
+
+      // -(lit) ~> lit.neg()
+      case Unary(UnOp.Negate, Constant(coeff, sp2, tpe2), rdt, rdd, sp1, tpe1) =>
+        val newCoeff = coeff.copy()
+        newCoeff.neg()
+        Constant(newCoeff, sp1, tpe1)
+
+      // (e - const) ~> (e + -const)
+      case Binary(BinOp.Sub, e1, lit1, rdt, rdd, sp, tpe)
+        if lit1.isConstant =>
+          simplify(Binary(BinOp.Add, simplify(e1), simplify(ApronExpr.Unary(UnOp.Negate, lit1, rdt, rdd, lit1.floatSpecials, lit1._type)), rdt, rdd, sp, tpe))
+
+      // (e1 + const1) + const2 ~> e1 + (const1 + const2)
+      case Binary(BinOp.Add, Binary(BinOp.Add, e1, lit1, rdt1, rdd1, sp1, tpe1), lit2, rdt2, rdd2, sp2, tpe2)
+        if (lit1.isConstant && lit2.isConstant && rdt1 == rdt2 && rdd1 == rdd2 && sp1 == sp2 && tpe1 == tpe2) =>
+          Binary(BinOp.Add, e1, Binary(BinOp.Add, lit1, lit2, rdt1, rdd1, sp1, tpe1), rdt2, rdd2, sp2, tpe2)
+
+      case _ =>
+        expr
 
   def toNonRelational(expr: ApronExpr[Addr,Type])(using ResolveState): ApronExpr[Addr,Type] =
     ApronExpr.Constant(getInterval(expr), specials = expr.floatSpecials, tpe = expr._type)
@@ -214,6 +259,19 @@ class ApronRecencyState
           addCondition(e2)
         }
 
+  override def isBottom(expr: ApronExpr[VirtualAddress[Ctx], Type])(using resolveState: ResolveState): Topped[Boolean] = {
+    val state = getResolveState
+    if(expr.isBottom == Topped.Actual(true) ||
+       expr.addrs.exists(virt =>
+         relationalStore.physicalAddresses(virt.ctx, virt.n, state).iterator.exists(phys =>
+           !state.abs1.getEnvironment.hasVar(ApronVar(phys))
+         ))
+    )
+      Topped.Actual(true)
+    else
+      Topped.Top
+  }
+
   override def isUnconstrained(expr: ApronExpr[VirtualAddress[Ctx], Type] | ApronCons[VirtualAddress[Ctx], Type] | ApronBool[VirtualAddress[Ctx], Type])(using ResolveState): Boolean =
     expr match
       case ApronExpr.Addr(ApronVar(virtAddr), _, _) =>
@@ -289,38 +347,49 @@ class ApronRecencyState
   override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, temporaryVariableAllocator)
   override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, temporaryVariableAllocator)
 
-  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = Profiler.addTime("ApronState.combineExpr") {
-  case (e1, e2) if (e1 == e2) =>
+  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = (e1, e2) => Profiler.addTime("ApronState.combineExpr") {
+    val e1Simplified = simplify(e1)(using ResolveState.Left)
+    val e2Simplified = simplify(e2)(using ResolveState.Right)
+    val result = combineExpr0(widen, allocator).apply(e1Simplified, e2Simplified)
+    result
+  }
+
+  private def combineExpr0[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
+    case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
 
-    case (e1, e2) if (e1.isBottom == Topped.Actual(true)) =>
+    // (⊥ ⊔ e2) = e2
+    case (e1, e2) if (isBottom(e1)(using ResolveState.Left) == Topped.Actual(true)) =>
       for {
         specials <- Join(e1.floatSpecials, e2.floatSpecials)
         tpe <- Join(e1._type, e2._type)
         result = e2.setFloatSpecials(specials).setType(tpe)
-        joined <- if(widen) MaybeChanged(result, !getInterval(e2)(using ResolveState.Right).isBottom) else Unchanged(result)
+        joined <- MaybeChanged(result, !getInterval(e2)(using ResolveState.Right).isBottom)
       } yield(joined)
 
-    case (e1, e2) if (e2.isBottom == Topped.Actual(true)) =>
+    // (e1 ⊔ ⊥) = e1
+    case (e1, e2) if (isBottom(e2)(using ResolveState.Right) == Topped.Actual(true)) =>
       for {
         specials <- Join(e1.floatSpecials, e2.floatSpecials)
         tpe <- Join(e1._type, e2._type)
         result = e1.setFloatSpecials(specials).setType(tpe)
-        joined <- if(widen) MaybeChanged(result, !getInterval(e1)(using ResolveState.Left).isBottom) else Unchanged(result)
+        joined <- MaybeChanged(result, !getInterval(e1)(using ResolveState.Left).isBottom)
       } yield(joined)
 
+    // (⊤ ⊔ e2) = ⊤
     case (e1, e2) if (e1.isTop == Topped.Actual(true)) =>
       for {
         specials <- Join(e1.floatSpecials, e2.floatSpecials)
         tpe <- Join(e1._type, e2._type)
       } yield(e1.setFloatSpecials(specials).setType(tpe))
 
+    // (e1 ⊔ ⊤) = ⊤
     case (e1, e2) if (e2.isTop == Topped.Actual(true)) =>
       for {
         specials <- Join(e1.floatSpecials, e2.floatSpecials)
         tpe <- Join(e1._type, e2._type)
         result = e2.setFloatSpecials(specials).setType(tpe)
-        joined <- if(widen) MaybeChanged(result, !getInterval(e1)(using ResolveState.Left).isTop) else Unchanged(result)
+        joined <- MaybeChanged(result, !getInterval(e1)(using ResolveState.Left).isTop)
       } yield(joined)
 
     case (ApronExpr.Addr(v1, specials1, tpe1), ApronExpr.Addr(v2, specials2, tpe2)) if v1.ctx == v2.ctx =>
@@ -332,20 +401,41 @@ class ApronRecencyState
       MaybeChanged(ApronExpr.Addr(v1, joinedSpecials.get, joinedType.get), joinedSpecials.hasChanged || joinedType.hasChanged)
 
     // u(e1) ⊔ u(e2) = u(e1 ⊔ e2)
-    case (ApronExpr.Unary(op1, e1, rt1, rd1, specials1, tpe1), ApronExpr.Unary(op2, e2, rt2, rd2, specials2, tpe2)) if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(e1, e2)) =>
+    case (ApronExpr.Unary(op1, e1, rt1, rd1, specials1, tpe1), ApronExpr.Unary(op2, e2, rt2, rd2, specials2, tpe2))
+      if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(e1, e2)) =>
       for {
-        eCombined <- combineExpr(widen, allocator).apply(e1, e2)
+        eCombined <- combineExpr0(widen, allocator).apply(e1, e2)
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Unary(op1, eCombined, rt1, rd1, specialsCombined, tpe1))
 
     // ((l1 ⊕ r1) ⊔ (l2 ⊕ r2)) = ((l1 ⊔ l2) ⊕ (r1 ⊔ r2)))
-    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, specials1, tpe1), ApronExpr.Binary(op2, l2, r2, rt2, rd2, specials2, tpe2)) if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(l1, l2) && structurallyJoinable(r1, r2)) =>
+    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, specials1, tpe1), ApronExpr.Binary(op2, l2, r2, rt2, rd2, specials2, tpe2))
+      if(op1 == op2 && rt1 == rt2 && rd1 == rd2 && tpe1 == tpe2 && structurallyJoinable(l1, l2) && structurallyJoinable(r1, r2)) =>
       for {
-        lCombined <- combineExpr(widen, allocator).apply(l1, l2)
-        rCombined <- combineExpr(widen, allocator).apply(r1, r2)
+        lCombined <- combineExpr0(widen, allocator).apply(l1, l2)
+        rCombined <- combineExpr0(widen, allocator).apply(r1, r2)
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
 
+    // (leaf ⊔ (l2 ⊕ r2)) = (leaf ⊕ neutral(⊕)) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,l2)
+    // (leaf ⊔ (l2 ⊕ r2)) = (neutral(⊕) ⊕ leaf) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,r2)
+    case (e1: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]), e2@ApronExpr.Binary(op, l2, r2, rt2, rd2, specials2, tpe2))
+      if !widen && (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(e1,l2) || structurallyJoinable(e1,r2)) =>
+        if(structurallyJoinable(e1,l2))
+          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, e1, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), rt2, rd2, specials2, tpe2),e2)
+        else
+          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), e1, rt2, rd2, specials2, tpe2),e2)
+
+    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (leaf ⊕ neutral(⊕)) if structurallyJoinable(leaf,l1)
+    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (neutral(⊕) ⊕ leaf) if structurallyJoinable(leaf,r1)
+    case (e1@ApronExpr.Binary(op, l1, r1, rt1, rd1, specials1, tpe1), e2: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]))
+      if (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(l1,e2) || structurallyJoinable(r1,e2)) =>
+        if(structurallyJoinable(l1,e2))
+          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, e2, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), rt1, rd1, specials1, tpe1))
+        else
+          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), e2, rt1, rd1, specials1, tpe1))
+
+    // (const1 ⊔ const2) = interval(const1) ⊔ interval(const2)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
       val iv1 = getInterval(e1)(using ResolveState.Left)
       val iv2 = getInterval(e2)(using ResolveState.Right)
@@ -357,28 +447,6 @@ class ApronRecencyState
         Join[(Interval, FloatSpecials, Type)]((iv1, e1.floatSpecials, e1._type), (iv2, e2.floatSpecials, e2._type)).map(
           ApronExpr.Constant(_, _, _)
         )
-
-    // (leaf ⊔ (l2 ⊕ r2))
-    case (e1: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]), ApronExpr.Binary(op, l2, r2, rt2, rd2, specials2, tpe2))
-      if((op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) &&
-        ((structurallyJoinable(e1,l2) && Interval(DoubleScalar(op.neutralElement), DoubleScalar(op.neutralElement)).isLeq(getInterval(r2)(using ResolveState.Right))) ||
-         (structurallyJoinable(e1,r2) && Interval(DoubleScalar(op.neutralElement), DoubleScalar(op.neutralElement)).isLeq(getInterval(l2)(using ResolveState.Right))))
-        ) =>
-        if(structurallyJoinable(e1,l2))
-          combineExpr(widen,allocator).apply(e1,l2).map(ApronExpr.Binary(op, _, r2, rt2, rd2, specials2, tpe2))
-        else
-          combineExpr(widen,allocator).apply(e1,r2).map(ApronExpr.Binary(op, l2, _, rt2, rd2, specials2, tpe2))
-
-    // ((l1 ⊕ r1) ⊔ leaf)
-    case (ApronExpr.Binary(op, l1, r1, rt1, rd1, specials1, tpe1), e2: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]))
-      if((op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) &&
-        ((structurallyJoinable(l1,e2) && Interval(DoubleScalar(op.neutralElement), DoubleScalar(op.neutralElement)).isLeq(getInterval(r1)(using ResolveState.Left))) ||
-          (structurallyJoinable(r1,e2) && Interval(DoubleScalar(op.neutralElement), DoubleScalar(op.neutralElement)).isLeq(getInterval(l1)(using ResolveState.Left))))
-        ) =>
-        if(structurallyJoinable(l1,e2))
-          combineExpr(widen,allocator).apply(l1,e2).map(ApronExpr.Binary(op, _, r1, rt1, rd1, specials1, tpe1))
-        else
-          combineExpr(widen,allocator).apply(r1,e2).map(ApronExpr.Binary(op, l1, _, rt1, rd1, specials1, tpe1))
 
     case (e1,e2) if containsFailedAddrs(e1)(using ResolveState.Left) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
@@ -429,7 +497,6 @@ class ApronRecencyState
           Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
         }
       }
-  }
 
   override def makeNonRelational(virtualAddress: VirtualAddress[Ctx])(using ResolveState): Unit =
     relationalStore.moveToNonRelationalStore(virtualAddress.physical)
