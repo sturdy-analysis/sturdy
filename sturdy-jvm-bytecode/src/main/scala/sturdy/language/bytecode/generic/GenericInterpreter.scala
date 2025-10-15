@@ -513,48 +513,6 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       case INVOKEDYNAMIC(_, _, _) =>
         throw UnsupportedOperationException("unsupported instruction: invokedynamic")
-      /*
-        // TODO: this is only implemented for methods named "makeConcatWithConstants"
-        val (bootstrapMethod, name, _) = INVOKEDYNAMIC.unapply(inst).value
-        val receiver = bootstrapMethod.handle
-        receiver match
-          case InvokeStaticMethodHandle(receiverType, _, name, methodDescriptor) =>
-            if (name == "makeConcatWithConstants"){
-              if(stack.size < 2){
-                val test3 = bootstrapMethod.arguments.head.toJava
-                val test4 = test3.drop(2).dropRight(1)
-                eval(LoadString(test4), mth, pc)
-              }
-
-              val source = javaLibClassFileWrapper(receiverType.mostPreciseClassType)
-              val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-              val invokedMth = cfs.findMethod(name, methodDescriptor).get
-              val args = stack.popNOrAbort(2)
-              evalNativeStatic(invokedMth, args)
-            }
-          case _ => ??? // TODO: not implemented
-      */
-      /*
-      receiver match
-        case receiver: InvokeStaticMethodHandle =>
-          if (project.isLibraryType(receiver.receiverType.mostPreciseClassType)) {
-            val mthTypeSource = javaLibClassFileWrapper(ClassType("java/lang/invoke/MethodType"))
-            val mthTypeCFS: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, mthTypeSource).head
-            val mthTypeMth = mthTypeCFS.findMethod("methodType", MethodDescriptor(ClassType.Class, ClassType("java/lang/invoke/MethodType")))
-            stack.push(createNativeObj(inst.methodDescriptor.returnType.asClassType))
-            stack.push(createNativeObj(inst.methodDescriptor.parameterType(0).asClassType))
-            val mthTypeObj = invoke(mthTypeMth.get, true)
-
-            val source = javaLibClassFileWrapper(receiver.receiverType.mostPreciseClassType)
-            val cfs: ClassFile = org.opalj.br.reader.Java8Framework.ClassFile(nativeSource, source).head
-            val mth = cfs.findMethod(receiver.name, receiver.methodDescriptor).get
-            invoke(mth, true)
-
-          }
-          else{
-            ???
-          }
-      */
 
       // NEW opcode 187
       case NEW(classType) =>
@@ -790,23 +748,6 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           voidOps.voidRep
         else
           stack.popOrAbort()
-
-  def evalNativeStatic(mth: Method, args: Seq[V]): Unit =
-    // TODO: better handling
-    mth.name match
-      case "makeConcatWithConstants" =>
-        //val testBase = objectOps.getField(args(0), (ClassType.String,"value")).get
-        val site = Site.Instruction(mth, 0)
-        val baseString = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args.head, FieldIdent.StringValue)).map(vals => vals.get)
-        val constantString = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args(1), FieldIdent.StringValue)).map(vals => vals.get)
-        val concattedString = (baseString ++ constantString).zipWithIndex
-        val stringArray = arrayOps.makeArray(arrayAlloc(site),
-          concattedString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))), ArrayType(IntegerType), i32ops.integerLit(concattedString.size))
-        val stringObj = createObject(ClassType.String, Site.Instruction(mth, 0))
-        objectOps.setField(site, getClassFile(site)(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
-        stack.push(stringObj)
-      case _ =>
-        native.evalNative(mth, args)
 
   // external entrypoint to invoke a function, expecting its arguments on the stack
   def invokeExternal(mth: Method, isStatic: Boolean): V = external:
