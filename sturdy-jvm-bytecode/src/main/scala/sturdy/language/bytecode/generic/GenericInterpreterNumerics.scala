@@ -4,57 +4,36 @@ import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
 import org.opalj.br.instructions.*
-import sturdy.language.bytecode.abstractions.Site
 
 class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep]):
 
   import bytecodeOps.*
 
   def evalNumericOp(inst: Instruction): V = inst match
-    case inst: ICONST_M1.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_0.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_1.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_2.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_3.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_4.type =>
-      i32ops.integerLit(inst.value)
-    case inst: ICONST_5.type =>
-      i32ops.integerLit(inst.value)
-    case inst: LCONST_0.type =>
-      i64ops.integerLit(inst.value)
-    case inst: LCONST_1.type =>
-      i64ops.integerLit(inst.value)
-    case inst: FCONST_0.type =>
-      f32ops.floatingLit(inst.value)
-    case inst: FCONST_1.type =>
-      f32ops.floatingLit(inst.value)
-    case inst: FCONST_2.type =>
-      f32ops.floatingLit(inst.value)
-    case inst: DCONST_0.type =>
-      f64ops.floatingLit(inst.value)
-    case inst: DCONST_1.type =>
-      f64ops.floatingLit(inst.value)
-    case inst: BIPUSH =>
-      i32ops.integerLit(inst.value)
-    case inst: SIPUSH =>
-      i32ops.integerLit(inst.value)
-    case inst: LoadInt =>
-      i32ops.integerLit(inst.value)
-    case inst: LoadInt_W =>
-      i32ops.integerLit(inst.value)
-    case inst: LoadLong =>
-      i64ops.integerLit(inst.value)
-    case inst: LoadFloat =>
-      f32ops.floatingLit(inst.value)
-    case inst: LoadFloat_W =>
-      f32ops.floatingLit(inst.value)
-    case inst: LoadDouble =>
-      f64ops.floatingLit(inst.value)
+    case IConstInstruction(value) =>
+      i32ops.integerLit(value)
+    case LConstInstruction(value) =>
+      i64ops.integerLit(value)
+    case FConstInstruction(value) =>
+      f32ops.floatingLit(value)
+    case DConstInstruction(value) =>
+      f64ops.floatingLit(value)
+    case BIPUSH(value) =>
+      i32ops.integerLit(value)
+    case SIPUSH(value) =>
+      i32ops.integerLit(value)
+    case LoadInt(value) =>
+      i32ops.integerLit(value)
+    case LoadInt_W(value) =>
+      i32ops.integerLit(value)
+    case LoadLong(value) =>
+      i64ops.integerLit(value)
+    case LoadFloat(value) =>
+      f32ops.floatingLit(value)
+    case LoadFloat_W(value) =>
+      f32ops.floatingLit(value)
+    case LoadDouble(value) =>
+      f64ops.floatingLit(value)
 
   def evalNumericUnOp(inst: Instruction, v1: V): V = inst match
     case INEG =>
@@ -169,6 +148,7 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
         branchOpsV.boolBranch(isGt) {
           i32ops.integerLit(1)
         } {
+          // must be equal if v1 is not less or greater than v2
           i32ops.integerLit(0)
         }
       }
