@@ -9,19 +9,19 @@ import sturdy.values.Structural
 import sturdy.values.objects.TypeOps
 import sturdy.values.ordering.EqOps
 
-trait ArrayOps[AID, Idx, V, AV, AType, Site, Context, J[_] <: MayJoin[_]]:
-  def makeArray(aid: AID, vals: Seq[(V, Site)], arrayType: AType, arraySize: V): AV
-  def getVal(ctx: Context)(array: AV, idx: Idx): JOption[J, V]
-  def setVal(ctx: Context)(array: AV, idx: Idx, v: V): JOption[J, Unit]
-  def arrayLength(ctx: Context)(array: AV): V
-  def initArray(size: Idx): Seq[Any]
-  def arraycopy(src: AV, srcPos: Idx, dest: AV, destPos: Idx, length: Idx): JOption[J, Unit]
-  def getArray(ctx: Context)(array: AV): Seq[JOption[J, V]]
-  def printString(letters: Seq[Idx]): Unit
+trait ArrayOps[ArrayIdentifier, Index, Value, ArrayValue, ArrayType, Site, ArrayOpContext, J[_] <: MayJoin[_]]:
+  def makeArray(aid: ArrayIdentifier, vals: Seq[(Value, Site)], arrayType: ArrayType, arraySize: Value): ArrayValue
+  def getVal(ctx: ArrayOpContext)(array: ArrayValue, idx: Index): JOption[J, Value]
+  def setVal(ctx: ArrayOpContext)(array: ArrayValue, idx: Index, v: Value): JOption[J, Unit]
+  def arrayLength(ctx: ArrayOpContext)(array: ArrayValue): Value
+  def initArray(size: Index): Seq[Any]
+  def arraycopy(src: ArrayValue, srcPos: Index, dest: ArrayValue, destPos: Index, length: Index): JOption[J, Unit]
+  def getArray(ctx: ArrayOpContext)(array: ArrayValue): Seq[JOption[J, Value]]
+  def printString(letters: Seq[Index]): Unit
 
-case class Array[AID, ArrayElemAddr, AType, ASize](aid: AID, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASize)
+case class Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize](aid: ArrayIdentifier, vals: Vector[ArrayElemAddr], arrayType: ArrayType, arraySize: ArraySize)
 
-given structuralArray[AID, Addr, AType, ASize]: Structural[Array[AID, Addr, AType, ASize]] with {}
+given structuralArray[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize]: Structural[Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize]] with {}
 
 /*given ConcreteArrayOps[Addr, AID, V, AType, Site]
   (using alloc: Allocator[Addr, Site], store: Store[Addr, V, NoJoin]): ArrayOps[AID, Int, V, ConcreteRefValue, AType, Site, NoJoin] with
@@ -67,6 +67,6 @@ given structuralArray[AID, Addr, AType, ASize]: Structural[Array[AID, Addr, ATyp
     val arrayVals = array.vals.map(addr => getVal(array, array.vals.indexOf(addr)))
     arrayVals*/
 
-given ArrayEqOps[AID, Addr, AType, V]: EqOps[Array[AID, Addr, AType, V], Boolean] with
-  override def equ(v1: Array[AID, Addr, AType, V], v2: Array[AID, Addr, AType, V]): Boolean = v1.aid == v2.aid
-  override def neq(v1: Array[AID, Addr, AType, V], v2: Array[AID, Addr, AType, V]): Boolean = v1.aid != v2.aid
+given ArrayEqOps[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize]: EqOps[Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize], Boolean] with
+  override def equ(v1: Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize], v2: Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize]): Boolean = v1.aid == v2.aid
+  override def neq(v1: Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize], v2: Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize]): Boolean = v1.aid != v2.aid
