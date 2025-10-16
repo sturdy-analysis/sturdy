@@ -12,7 +12,7 @@ import sturdy.effect.failure.{CollectedFailures, Failure}
 import sturdy.effect.operandstack.JoinableDecidableOperandStack
 import sturdy.effect.store.{AStoreThreaded, Store}
 import sturdy.effect.symboltable.JoinableDecidableSymbolTable
-import sturdy.fix
+import sturdy.{fix, values}
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{Interpreter, abstractions, resolveMethod, selectMethod}
@@ -50,7 +50,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type FieldName = FieldIdent
 
   type Obj = Object[Addr, ObjType, Addr, FieldName]
-  type Arr = Array[Addr, Addr, AType, Value]
+  type Arr = Array[Addr, Addr, AType, I32]
   override type RefValue = Topped[AbstractReferenceValue[Arr, Obj]]
   override type TypeRep = ReferenceType
   override type AType = ArrayType
@@ -129,13 +129,16 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case Topped.Actual(_) => ???
 
   given arrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, ArrayOpContext, WithJoin] with
-    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
-      val valAddrs = vals.map: (v, site) =>
-        val addr = alloc(site)
-        store.write(addr, v)
-        addr
-      .toVector
-      Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, valAddrs, arrayType, arraySize), false))
+    override def makeArray(aid: Addr, valueSupplier: Int => (Value, Site), arrayType: AType, arraySize: I32): RefValue =
+      arraySize match
+        case values.Topped.Actual(size) =>
+          val values = Range.Int(0, size, 1).map: index =>
+            val (v, site) = valueSupplier(index)
+            val addr = alloc(site)
+            store.write(addr, v)
+            addr
+          Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, values, arrayType, arraySize), false))
+        case values.Topped.Top => ??? // TODO
 
     override def getVal(ctx: ArrayOpContext)(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
       case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
@@ -159,11 +162,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
     override def arrayLength(ctx: ArrayOpContext)(ref: RefValue): Value = ref match
       case Topped.Top => Value.Int32(topI32)
-      case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => array.arraySize
+      case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => Value.Int32(array.arraySize)
       case Topped.Actual(_) => ???
-
-    override def initArray(size: I32): Seq[Any] =
-      Seq.fill(size.get) {}
 
     override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
       import Topped.Actual
@@ -251,7 +251,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
               else
                 Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy))
             case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
-              val array: Array[Addr, Addr, AType, Value] = tmp.array
+              val array = tmp.array
               if (target == null)
                 Topped.Actual(false)
               else

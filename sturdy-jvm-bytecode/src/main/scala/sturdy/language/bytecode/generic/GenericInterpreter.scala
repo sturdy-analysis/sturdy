@@ -697,20 +697,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     runAccessControl(site)(getClassFile(site)(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))), mth)
 
   def createArray(size: V, componentType: FieldType, site: Site): V =
-    val arrayVals = arrayOps.initArray(size)
-    val convertedArrayVals = arrayVals.zipWithIndex.map: tuple =>
-      (defaultValue(componentType), Site.ArrayElementInitialization(site, tuple._2))
-    arrayOps.makeArray(arrayAlloc(site), convertedArrayVals, ArrayType(componentType), size)
+    arrayOps.makeArray(arrayAlloc(site), index => (defaultValue(componentType), Site.ArrayElementInitialization(site, index)), ArrayType(componentType), size)
 
   private def createMultiArray(arrayType: ArrayType, dims: List[V], site: Site): V =
     val (size, elementSupplier) = dims match
       case size :: Nil => (size, () => defaultValue(arrayType.componentType))
       case size :: xs => (size, () => createMultiArray(arrayType.componentType.asArrayType, xs, site))
       case Nil => throw IllegalStateException("dims.size must be >= 1 at all times")
-    val initialArray = arrayOps.initArray(size)
-    val filledArray = initialArray.zipWithIndex.map: tuple =>
-      (elementSupplier(), Site.ArrayElementInitialization(site, tuple._2))
-    arrayOps.makeArray(arrayAlloc(site), filledArray, arrayType, size)
+    arrayOps.makeArray(arrayAlloc(site), index => (elementSupplier(), Site.ArrayElementInitialization(site, index)), arrayType, size)
 
   def invokeWrapper(site: Site)(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
     invoke(site)(mth, obj +: args)

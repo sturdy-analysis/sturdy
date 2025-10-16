@@ -33,7 +33,7 @@ import scala.util.boundary.break
 
 enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, ArrayElemAddr, AType, ASizeType]:
   case Object(oid: ObjectAddr, cls: Class, fields: Map[FieldName, ObjFieldAddr])
-  case nonNullArray(aid: ArrayAddr, vals: Vector[ArrayElemAddr], arrayType: AType, arraySize: ASizeType)
+  case nonNullArray(aid: ArrayAddr, vals: Seq[ArrayElemAddr], arrayType: AType, arraySize: ASizeType)
   case NullValue()
 
 object ConcreteInterpreter extends Interpreter:
@@ -60,7 +60,7 @@ object ConcreteInterpreter extends Interpreter:
   override type AType = ArrayType
   //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
 
-  override type RefValue = ConcreteRefValues[Addr, ClassFile, FieldName, Addr, Addr, Addr, AType, Value]
+  override type RefValue = ConcreteRefValues[Addr, ClassFile, FieldName, Addr, Addr, Addr, AType, Int]
 
   override type ExcV = JvmExcept[Value]
 
@@ -219,13 +219,13 @@ object ConcreteInterpreter extends Interpreter:
 
   given ConcreteArrayOps
   (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure, throwClass: ThrowClass): ArrayOps[Addr, Int, Value, RefValue, AType, Site, ArrayOpContext, NoJoin] with
-    override def makeArray(aid: Addr, vals: Seq[(Value, Site)], arrayType: AType, arraySize: Value): RefValue =
-      val valAddrs = vals.map { (v, site) =>
+    override def makeArray(aid: Addr, valueSupplier: Int => (Value, Site), arrayType: AType, arraySize: Int): RefValue =
+      val values = Range.Int(0, arraySize, 1).map: index =>
+        val (v, site) = valueSupplier(index)
         val addr = alloc(site)
         store.write(addr, v)
         addr
-      }.toVector
-      ConcreteRefValues.nonNullArray(aid, valAddrs, arrayType, arraySize)
+      ConcreteRefValues.nonNullArray(aid, values, arrayType, arraySize)
 
     override def getVal(ctx: ArrayOpContext)(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
@@ -259,17 +259,14 @@ object ConcreteInterpreter extends Interpreter:
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
     override def arrayLength(ctx: ArrayOpContext)(array: RefValue): Value = array match
-      case ConcreteRefValues.nonNullArray(_, _, _, size: Value) =>
-        size
+      case ConcreteRefValues.nonNullArray(_, _, _, size: I32) =>
+        Value.Int32(size)
       case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
-    override def initArray(size: Int): Seq[Any] =
-      Seq.fill(size) {}
-
     override def arraycopy(src: RefValue, srcPos: Int, dest: RefValue, destPos: Int, length: Int): JOption[MayJoin.NoJoin, Unit] = (src, dest) match
-      case (ConcreteRefValues.nonNullArray(_, srcVals: Vector[Addr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Vector[Addr], _, _)) =>
+      case (ConcreteRefValues.nonNullArray(_, srcVals: Seq[Addr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Seq[Addr], _, _)) =>
         boundary:
           for (i <- 0 until length) do
             if srcPos + i >= srcVals.size || destPos + i >= destVals.size then

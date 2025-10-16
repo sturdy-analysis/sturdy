@@ -180,7 +180,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
 
     val concreteInterpreter = ConcreteInterpreter.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Vector(), ArrayType(ReferenceType("java/lang/String")), ConcreteInterpreter.Value.Int32(0))))
+    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((Site.External, 1), Seq(), ArrayType(ReferenceType("java/lang/String")), 0)))
     if mType == TestedMethodType.Run then
       // push System.out
       concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassTypeValues.PrintStream, Site.External))
