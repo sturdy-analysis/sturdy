@@ -140,7 +140,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
           Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, values, arrayType, arraySize), false))
         case values.Topped.Top => ??? // TODO
 
-    override def getVal(ctx: ArrayOpContext)(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
+    override def get(ctx: ArrayOpContext)(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
       case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
         if (idx >= array.vals.size)
           JOptionA.none
@@ -149,7 +149,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
       case (Topped.Actual(_), Topped.Actual(_)) => ???
       case _ => JOptionA.some(Value.TopValue)
 
-    override def setVal(ctx: ArrayOpContext)(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
+    override def set(ctx: ArrayOpContext)(ref: RefValue, idx: I32, v: Value): JOption[WithJoin, Unit] =
       (ref, idx) match
         case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
           if (idx >= array.vals.size)
@@ -160,7 +160,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case (Topped.Actual(_), Topped.Actual(_)) => ???
         case _ => JOptionA.none
 
-    override def arrayLength(ctx: ArrayOpContext)(ref: RefValue): Value = ref match
+    override def length(ctx: ArrayOpContext)(ref: RefValue): Value = ref match
       case Topped.Top => Value.Int32(topI32)
       case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => Value.Int32(array.arraySize)
       case Topped.Actual(_) => ???

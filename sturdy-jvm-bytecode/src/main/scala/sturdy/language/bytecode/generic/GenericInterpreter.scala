@@ -181,7 +181,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case IALOAD | LALOAD | FALOAD | DALOAD | AALOAD | BALOAD | CALOAD | SALOAD =>
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
-        val v = arrayOps.getVal(site)(arrayref, index).getOrElse:
+        val v = arrayOps.get(site)(arrayref, index).getOrElse:
           throwClass(site)(ClassType.ArrayIndexOutOfBoundsException)
         stack.push(v)
 
@@ -200,7 +200,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           case _ => stack.popOrAbort()
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()
-        arrayOps.setVal(site)(arrayref, index, value).getOrElse:
+        arrayOps.set(site)(arrayref, index, value).getOrElse:
           throwClass(site)(ClassType.ArrayIndexOutOfBoundsException)
 
       // operand stack management instructions (opcodes 87 - 95)
@@ -532,7 +532,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       case ARRAYLENGTH =>
         val array = stack.popOrAbort()
-        stack.push(arrayOps.arrayLength(site)(array))
+        stack.push(arrayOps.length(site)(array))
 
       // athrow opcode 191
       case ATHROW =>

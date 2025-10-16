@@ -227,7 +227,7 @@ object ConcreteInterpreter extends Interpreter:
         addr
       ConcreteRefValues.nonNullArray(aid, values, arrayType, arraySize)
 
-    override def getVal(ctx: ArrayOpContext)(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
+    override def get(ctx: ArrayOpContext)(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
       case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
@@ -240,7 +240,7 @@ object ConcreteInterpreter extends Interpreter:
 
     // returns some if setting the value was successful, none otherwise
     // it can only fail by being out of bounds
-    override def setVal(ctx: ArrayOpContext)(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
+    override def set(ctx: ArrayOpContext)(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
       case ConcreteRefValues.nonNullArray(_, vals, arrayType, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
@@ -258,7 +258,7 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
-    override def arrayLength(ctx: ArrayOpContext)(array: RefValue): Value = array match
+    override def length(ctx: ArrayOpContext)(array: RefValue): Value = array match
       case ConcreteRefValues.nonNullArray(_, _, _, size: I32) =>
         Value.Int32(size)
       case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
