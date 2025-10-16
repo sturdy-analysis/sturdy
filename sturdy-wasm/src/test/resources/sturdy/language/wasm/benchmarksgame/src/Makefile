@@ -10,8 +10,8 @@ clean:
 	rm -f $(WASM_FILES) $(WAST_FILES)
 
 %.wasm: %.c
-	clang-19 --target=wasm32 --no-standard-libraries -O0 -g -Wl,--allow-undefined,--export-all,--no-gc-sections $< -o $@
-	wasm-opt $@ -O1 -g -o $@
+	clang-19 --target=wasm32 --no-standard-libraries -O3 -g -Wl,--allow-undefined,--export-all,--no-gc-sections $< -o $@
+#	wasm-opt $@ -O1 -g -o $@
 
 %.wast: %.wasm
 	wasm2wat $< --generate-names -o $@

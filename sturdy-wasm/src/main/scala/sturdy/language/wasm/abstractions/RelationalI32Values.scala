@@ -24,10 +24,11 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Value.*
   import NumValue.*
 
+  case class Frame(func: FuncId, size: Int)
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
-    case StackAddr(func: Powerset[FuncId], frameSize: ApronExpr[VirtAddr,Type], stackPointer: VirtAddr, offset: ApronExpr[VirtAddr,Type])
+    case StackAddr(frame: Powerset[Frame], stackPointer: VirtAddr, offset: ApronExpr[VirtAddr,Type])
     case HeapAddr(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type])
 
     def addNull(): Option[HeapAddr] =
@@ -50,7 +51,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
           case Topped.Top => ApronExpr.interval(0, 1, I32Type)
         case HeapAddr(AbstractReference.Null, _) => ApronExpr.lit(0, I32Type)
         case HeapAddr(sites, _) => ApronExpr.top(I32Type)
-        case StackAddr(_, _, stackPointer, offset) =>
+        case StackAddr(_, stackPointer, offset) =>
           ApronExpr.intAdd(ApronExpr.addr(stackPointer,I32Type), offset, I32Type)
 
     def asNumExprLazy(using lazyApronState: Lazy[ApronState[VirtAddr, Type]], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
@@ -75,13 +76,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         case (AllocSitesLeft(alloc1), AllocSitesRight(alloc2)) => CombineAllocationSites(alloc1,alloc2)
         case (NumExpr(ApronExpr.Addr(ApronVar(sp1@VirtAddr(AddrCtx.Global(0), _, _)), _, _)), s2: StackAddr) =>
           CombineStackAddr(
-            StackAddr(Powerset(), ApronExpr.constant(ApronExpr.bottomInterval, I32Type), sp1, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
+            StackAddr(Powerset(), sp1, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
             s2
           )
         case (s1: StackAddr, NumExpr(ApronExpr.Addr(ApronVar(sp2@VirtAddr(AddrCtx.Global(0), _, _)), _, _))) =>
           CombineStackAddr(
             s1,
-            StackAddr(Powerset(), ApronExpr.constant(ApronExpr.bottomInterval, I32Type), sp2, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
+            StackAddr(Powerset(), sp2, ApronExpr.constant(ApronExpr.bottomInterval, I32Type)),
           )
         case (NumExpr(e1), s2: StackAddr) if(apronStateLazy.value.getInterval(e1)(using ResolveState.Left).isZero) =>
           Changed(s2)
@@ -152,50 +153,71 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         Unchanged(v1)
       } else {
         for {
-          func <- Join(v1.func, v2.func);
-          frameSize <- combineApronExpr(v1.frameSize, v2.frameSize)
+          frame <- Join(v1.frame, v2.frame);
           stackPointerExpr <- combineApronExpr(ApronExpr.addr(v1.stackPointer, I32Type), ApronExpr.addr(v2.stackPointer, I32Type))
           stackPointer = stackPointerExpr match { case ApronExpr.Addr(ApronVar(sp), _, _) => sp; case _ => throw IllegalArgumentException() }
           offset <- combineApronExpr(v1.offset, v2.offset)
-        } yield (StackAddr(func, frameSize, stackPointer, offset))
+        } yield (StackAddr(frame, stackPointer, offset))
       }
     }
 
   given overflowHandling: OverflowHandling = OverflowHandling.Fail
 
-  final class I32IntegerOps(rootFrameData: FrameData)
+  final class I32IntegerOps(rootFrameData: FrameData, stackRange: => Interval)
                            (using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def add(v1: I32, v2: I32): I32 =
         (v1, v2) match
-          case (st: StackAddr, _) => st.copy(offset = ApronExpr.intAdd(st.offset, v2.asNumExpr, I32Type))
-          case (_, st: StackAddr) => st.copy(offset = ApronExpr.intAdd(st.offset, v1.asNumExpr, I32Type))
+          case (st: StackAddr, _) =>
+            st.copy(offset = ApronExpr.intAdd(st.offset, v2.asNumExpr, I32Type))
+          case (_, st: StackAddr) =>
+            st.copy(offset = ApronExpr.intAdd(st.offset, v1.asNumExpr, I32Type))
+          case (NumExpr(stackPointer@ApronExpr.Constant(const: Scalar, _, _)), _) if(const.isEqual(stackRange.sup())) =>
+            stackAddr(
+              ApronExpr.intAdd(stackPointer, v2.asNumExpr, I32Type),
+              ApronExpr.intNegate(v2.asNumExpr)
+            )
           case (_, _) => NumExpr(intOps.add(v1.asNumExpr, v2.asNumExpr))
 
       override def sub(v1: I32, v2: I32): I32 =
         v1 match
           case NumExpr(stackPointer@ApronExpr.Addr(ApronVar(VirtualAddress(ctx@AddrCtx.Global(0), _, _)), _, _)) =>
-            val newStackPointer = apronState.alloc(ctx)
-            apronState.assign(newStackPointer, ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type))
-            val dom = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
-            StackAddr(
-              func = Powerset(dom.funcId.get),
-              frameSize = v2.asNumExpr,
-              stackPointer = newStackPointer,
-              offset = ApronExpr.lit(0, I32Type)
+            stackAddr(
+              ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type),
+              v2.asNumExpr
             )
-          case StackAddr(_, _, oldStackPointer, _) =>
-            // New stack frame based on old stack address.
-            val newStackPointer = apronState.alloc(oldStackPointer.ctx)
-            apronState.assign(newStackPointer, ApronExpr.intSub(ApronExpr.addr(oldStackPointer, I32Type), v2.asNumExpr, I32Type))
-            val dom = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
-            StackAddr(
-              func = Powerset(dom.funcId.get),
-              frameSize = v2.asNumExpr,
-              stackPointer = newStackPointer,
-              offset = ApronExpr.lit(0, I32Type)
+          case NumExpr(stackPointer@ApronExpr.Constant(const: Scalar, _, _)) if(const.isEqual(stackRange.sup())) =>
+            stackAddr(
+              ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type),
+              v2.asNumExpr
             )
+          case sa: StackAddr =>
+            val v2Iv = apronState.getInterval(v2.asNumExpr)
+            if(v2Iv.inf().sgn() >= 0) {
+              // if v2 >= 0
+              stackAddr(
+                ApronExpr.intSub(ApronExpr.addr(sa.stackPointer, I32Type), v2.asNumExpr, I32Type),
+                v2.asNumExpr
+              )
+            } else {
+              // if v2 < 0 => sp + -v2
+              add(sa, NumExpr(apronState.simplify(ApronExpr.intNegate(v2.asNumExpr, I32Type))))
+            }
+
           case _ => NumExpr(intOps.sub(v1.asNumExpr, v2.asNumExpr))
+
+
+      private def stackAddr(stackPointerExpr: ApronExpr[VirtAddr, Type], frameSizeExpr: ApronExpr[VirtAddr,Type]): StackAddr =
+        val newStackPointer = apronState.alloc(AddrCtx.Global(0))
+        apronState.assign(newStackPointer, stackPointerExpr)
+        val dom = domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module))
+        val frameSize = apronState.getInt(frameSizeExpr).getOrElse(throw IllegalArgumentException(s"Expected frame size $frameSizeExpr to be constant."))
+        val frame = Frame(dom.funcId.get, frameSize)
+        StackAddr(
+          frame = Powerset(frame),
+          stackPointer = newStackPointer,
+          offset = ApronExpr.lit(0, I32Type)
+        )
 
       override def bitAnd(v1: I32, v2: I32): I32 =
         (v1, v2) match

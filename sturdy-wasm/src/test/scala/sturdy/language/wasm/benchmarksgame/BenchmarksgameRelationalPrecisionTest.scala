@@ -12,13 +12,14 @@ import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.analyses.{FixpointConfig, RelationalAnalysis, WasmConfig}
 import sturdy.language.wasm.abstractions.RelationalInfo.{*, given}
 import sturdy.language.wasm.analyses.RelationalAnalysis.HeapCtx
-import sturdy.language.wasm.generic.{FixIn, FrameData, FuncId, InstLoc, ModuleInstance}
+import sturdy.language.wasm.generic.{*, given}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import swam.syntax
 
 import java.io.File
 import java.nio.file.{Files, Paths}
+import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, BeforeAndAfterAll:
@@ -63,11 +64,12 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
       Profiler.printLastMeasured()
       Profiler.reset()
 
+      val expected = parseMemOpsCSV(p, moduleInst)
 
+      println(relationalMemoryLogger.computePrecision(expected))
+      println(nonRelationalMemoryLogger.computePrecision(expected))
 
-      println(s"Relational: ${relationalMemoryLogger}\nNon-Relational: ${nonRelationalMemoryLogger}")
-
-//      val relationalInfos = relationalInfoLogger.getAllInstructionInfos
+      //      val relationalInfos = relationalInfoLogger.getAllInstructionInfos
 //      val nonRelationalInfos = nonRelationalInfoLogger.getAllInstructionInfos
 //
 //      var relationalMorePrecise: Map[(InstLoc,syntax.Inst),(List[UnconstrainedInfo],List[UnconstrainedInfo])] = Map.empty
@@ -110,17 +112,15 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
 //      )
     }
 
-    def parseLoadsCSV(p: java.nio.file.Path, moduleInstance: ModuleInstance): Map[InstLoc, Set[HeapCtx]] =
-      val reader = CSVReader.open(p.toString + ".loads.csv")(using new DefaultCSVFormat {
-        override val delimiter = ';'
-      })
-      reader.iterator.drop(1).map(parseLoadsCSVLine(using moduleInstance)).toMap
+    def parseMemOpsCSV(p: java.nio.file.Path, moduleInstance: ModuleInstance): SortedMap[InstLoc, Set[HeapCtx]] =
+      val reader = CSVReader.open(p.toString + ".memops.csv")
+      SortedMap.from(reader.iterator.drop(1).map(parseLoadsCSVLine(using moduleInstance)))
 
     def parseLoadsCSVLine(using moduleInstance: ModuleInstance)(line: Seq[String]): (InstLoc, Set[HeapCtx]) =
-      val Seq(instLocStr, heapCtxStr) = line
+      val Seq(instLocStr, _memOp, heapCtxStr) = line
       val Array(func, pc) = instLocStr.split(':')
       val instLoc = InstLoc.InFunction(func, pc.toInt)
-      val heapCtxs = heapCtxStr.split(',').map(parseHeapCtx).toSet
+      val heapCtxs = heapCtxStr.split(',').map(_.trim).map(parseHeapCtx).toSet
       (instLoc, heapCtxs)
 
     def parseHeapCtx(using moduleInstance: ModuleInstance)(heapCtxStr: String): HeapCtx =
@@ -128,7 +128,11 @@ class BenchmarksgameRelationalPrecisionTest extends AnyFunSuite, Matchers, Befor
         case "F" => HeapCtx.Fill(FixIn.MostGeneralClientLoop(moduleInstance))
         case "G" => HeapCtx.Global(heapCtxStr.drop(1))
         case "S" =>
-          val Array(funcName, offset) = heapCtxStr.drop(1).split(':')
+          val Array(funcName, offset) = heapCtxStr.drop(1).split('+')
           HeapCtx.Stack(FuncId(funcName), Topped.Actual(offset.toInt))
+        case "H" =>
+          val Array(func, pc, offset) = heapCtxStr.drop(1).split(Array(':','+'))
+          val instLoc = InstLoc.InFunction(func, pc.toInt)
+          HeapCtx.Heap(instLoc, offset.toInt)
       }
   }

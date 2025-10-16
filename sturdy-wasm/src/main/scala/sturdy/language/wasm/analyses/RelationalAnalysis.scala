@@ -33,7 +33,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.types.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.util.{*, given}
-import swam.syntax.{LoadNInst, StoreNInst, *}
+import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst, *}
 import swam.{FuncType, GlobalType, OpCode, ReferenceType, ValType, syntax}
 
 import java.nio.ByteBuffer
@@ -273,7 +273,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         }
       )
 
-    given I32IntegerOps = new I32IntegerOps(rootFrameData)
+    given I32IntegerOps = new I32IntegerOps(rootFrameData, optionStaticMemoryLayout.map(_.stackRange).getOrElse(ApronExpr.bottomInterval))
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
       if (config.relational)
@@ -311,7 +311,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     // Hook to initialize static memory layout after global variables have been instantiated.
     override protected def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc =
       val loc = super.instantiateGlobals(module, modInst: ModuleInstance, globImports, globImportsTypes, initLoc)
-      optionStaticMemoryLayout = calculateStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
+      optionStaticMemoryLayout = parseStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
       loc
 
 
@@ -322,7 +322,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "memcpy" =>
         args match
           case List(dst, src, len) =>
-            memory.copy(MemoryAddr(0), wasmOps.specialOps.valToAddr(src), wasmOps.specialOps.valToAddr(dst), wasmOps.specialOps.valToSize(len))
+            val effectiveSrcAddr = wasmOps.addressOffset.addOffsetToAddr(0, wasmOps.specialOps.valToAddr(src))
+            memory.copy(
+              key = MemoryAddr(0),
+              srcAddr = effectiveSrcAddr,
+              dstAddr = wasmOps.specialOps.valToAddr(dst),
+              byteAmount = wasmOps.specialOps.valToSize(len)
+            )
             List(dst)
           case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
       case "memmove" =>
@@ -331,9 +337,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "malloc" =>
         args match
           case List(Num(Int32(size))) =>
-            val allocSite = domLogger.getDoms(1)
-            val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(allocSite,0)): AddrCtx)
-            List(Num(Int32(HeapAddr(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
+            domLogger.getDoms(1) match {
+              case FixIn.Eval(_, allocationSite) =>
+                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,0)): AddrCtx)
+                List(Num(Int32(HeapAddr(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
+              case dom => throw Error(s"Malloc: Expected FixIn.Eval, but got $dom")
+            }
           case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
       case "free" =>
         args match
@@ -638,6 +647,56 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
       var loads: SortedMap[InstLoc, List[LoadInfo]] = SortedMap()
       var stores: SortedMap[InstLoc, List[StoreInfo]] = SortedMap()
+
+      def loadContexts: SortedMap[InstLoc, (LoadInst | LoadNInst, Set[HeapCtx])] =
+        loads.view.mapValues(loadInfos =>
+          val loadInst = loadInfos.head.loadInst
+          val heapCtxs = loadInfos.iterator.flatMap(_.matchingRegions.map(_._1.ctx).toSet).toSet
+          (loadInst,heapCtxs)
+        ).to(SortedMap)
+
+      def storeContexts: SortedMap[InstLoc, (StoreInst | StoreNInst, Set[HeapCtx])] =
+        stores.view.mapValues(storeInfos =>
+          val storeInst = storeInfos.head.storeInst
+          val heapCtxs = storeInfos.iterator.flatMap(_.heapCtx.toSet).toSet
+          (storeInst,heapCtxs)
+        ).to(SortedMap)
+
+      type MemOpsMap = SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[HeapCtx])]
+      def heapCtxs: MemOpsMap =
+        loadContexts ++ storeContexts
+
+      case class Precision(
+        notAnalyzed: Set[InstLoc],
+        precise: MemOpsMap,
+        imprecise: MemOpsMap,
+        deadCode: MemOpsMap
+      ):
+        override def toString: String =
+          "Precision:" +
+            s"not analyzed:\n${notAnalyzed.mkString("\n")}" +
+            s"precise:\n${memOpsMapToString(precise)}\n" +
+            s"imprecise:\n${memOpsMapToString(imprecise)}\n" +
+            s"deadCode:\n${memOpsMapToString(deadCode)}\n"
+
+      def computePrecision(expected: SortedMap[InstLoc, Set[HeapCtx]]): Precision = {
+        val allContexts = heapCtxs
+        val notAnalyzed = expected.keySet.filter(loc => !allContexts.contains(loc))
+        val (executable, deadCode) = allContexts.partition((loc,_) => expected.contains(loc))
+        val (precise, imprecise) = executable.partition { case (instLoc, (inst, heapCtxs)) => heapCtxs == expected(instLoc)}
+        Precision(notAnalyzed, precise, imprecise, deadCode)
+      }
+
+      def memOpsMapToString(memOps: MemOpsMap): String =
+        memOps.iterator.map { case (loc, (inst, heapCtxs)) => s"$loc; ${memoryInstToString(inst)}; ${heapCtxs.toList.sorted.mkString(",")}" }.mkString("\n")
+
+      private inline def memoryInstToString(memoryInst: (LoadInst | LoadNInst | StoreInst | StoreNInst)): String =
+        memoryInst match
+          case Load(tpe, align, offset) => s"$tpe.load offset=$offset align=$align"
+          case LoadN(tpe, n, align, offset) => s"$tpe.load n=$n offset=$offset align=$align"
+          case Store(tpe, align, offset) => s"$tpe.store offset=$offset align=$align"
+          case StoreN(tpe, n, align, offset) => s"$tpe.store n=$n offset=$offset align=$align"
+          case _ => throw IllegalArgumentException(s"Unexpected memory instruction $memoryInst")
 
       override def enter(dom: FixIn): Unit =
         dom match

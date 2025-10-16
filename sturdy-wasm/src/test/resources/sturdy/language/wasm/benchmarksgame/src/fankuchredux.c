@@ -24,8 +24,11 @@ int flip()
    register int i;
    register elem *x, *y, c;
 
-   for (x = t, y = s, i = max_n; i--; )
-      *x++ = *y++;
+//   for (x = t, y = s, i = max_n; i--; )
+//      *x++ = *y++;
+   x = t;
+   y = s;
+   memcpy(x, y, max_n);
    i = 1;
    do {
       for (x = t, y = t + t[0]; x < y; )

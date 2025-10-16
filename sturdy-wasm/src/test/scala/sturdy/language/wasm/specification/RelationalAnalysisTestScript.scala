@@ -41,10 +41,10 @@ val csvWriter = {
 object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
-//  new RelationalAnalysisTestScript(Polka(true), relational = true),
+  new RelationalAnalysisTestScript(Polka(true), relational = true),
   new RelationalAnalysisTestScript(Octagon(), relational = true),
-//  new RelationalAnalysisTestScript(Box(), relational = true),
-//  new RelationalAnalysisTestScript(Polka(true), relational = false),
+  new RelationalAnalysisTestScript(Box(), relational = true),
+  new RelationalAnalysisTestScript(Polka(true), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()
@@ -81,7 +81,7 @@ class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true)
 
   Fixpoint.DEBUG = false
   Files.list(Paths.get(uri)).toScala(List).filter(p =>
-    p.toString.endsWith("call.wast")
+    p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
       val anl = analysis()

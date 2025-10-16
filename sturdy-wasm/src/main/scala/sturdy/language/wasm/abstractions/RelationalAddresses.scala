@@ -30,7 +30,7 @@ trait RelationalAddresses extends RelationalTypes:
     case Fill(site: FixIn)
     case Global(name: String)
     case Stack(function: FuncId, offset: Topped[Int])
-    case Alloc(allocSite: FixIn, offset: Int)
+    case Heap(allocSite: InstLoc, offset: Int)
     case Static(offset: Int)
     case Dynamic(storeInstruction: FixIn)
 
@@ -40,8 +40,7 @@ trait RelationalAddresses extends RelationalTypes:
         case Static(offset) => s"$offset"
         case Global(name) => s"G$name"
         case Stack(fun,offset) => s"S$fun+$offset"
-        case Alloc(FixIn.Eval(_,allocSite), offset) => s"Alloc@${allocSite}+${offset}"
-        case Alloc(in, offset) => s"Alloc@${in}+${offset}"
+        case Heap(allocSite, offset) => s"H${allocSite}+${offset}"
         case Dynamic(storeInstruction) => s"Dynamic@$storeInstruction"
 
 
@@ -51,7 +50,9 @@ trait RelationalAddresses extends RelationalTypes:
   final type PowPhysAddr = PowersetAddr[PhysAddr, PhysAddr]
 
   def tempRelationalAlloc(rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[Type, AddrCtx] = AAllocatorFromContext {
-    tpe => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
+    tpe => 
+      val res = AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
+      res
   }
   def localAlloc(ssa: Boolean, rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), AddrCtx] = AAllocatorFromContext(
     (i, data, _) =>
@@ -92,15 +93,15 @@ trait RelationalAddresses extends RelationalTypes:
     case (HeapCtx.Static(offset1), HeapCtx.Static(offset2)) => Ordering[Int].compare(offset1, offset2)
     case (HeapCtx.Global(name1), HeapCtx.Global(name2)) => Ordering[String].compare(name1, name2)
     case (HeapCtx.Stack(fun1,offset1), HeapCtx.Stack(fun2,offset2)) => Ordering[(FuncId,Topped[Int])].compare((fun1,offset1), (fun2,offset2))
-    case (HeapCtx.Alloc(site1, offset1), HeapCtx.Alloc(site2, offset2)) => Ordering[(FixIn, Int)].compare((site1, offset1), (site2, offset2))
+    case (HeapCtx.Heap(site1, offset1), HeapCtx.Heap(site2, offset2)) => Ordering[(InstLoc, Int)].compare((site1, offset1), (site2, offset2))
     case (HeapCtx.Dynamic(storeInst1), HeapCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
     case (ctx1, ctx2) => Ordering.by[HeapCtx, Int] {
       case _: HeapCtx.Fill => 1
-      case _: HeapCtx.Static => 2
-      case _: HeapCtx.Global => 3
-      case _: HeapCtx.Stack => 4
-      case _: HeapCtx.Alloc => 5
-      case _: HeapCtx.Dynamic => 5
+      case _: HeapCtx.Global => 2
+      case _: HeapCtx.Stack => 3
+      case _: HeapCtx.Heap => 4
+      case _: HeapCtx.Static => 5
+      case _: HeapCtx.Dynamic => 6
     }.compare(ctx1, ctx2)
   }
   given Finite[HeapCtx] with {}

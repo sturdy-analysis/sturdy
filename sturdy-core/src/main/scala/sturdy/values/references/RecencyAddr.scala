@@ -161,7 +161,9 @@ trait AddressTranslation[Context: Finite] extends Effect:
           PowRecency.Recent
         else if (old.contains(n))
           PowRecency.Old
-        else throw Error(s"Virtual address ${ctx}@${n} is not bound to a physical address")
+        else {
+          throw Error(s"Virtual address ${ctx}@${n} is not bound to a physical address")
+        }
       case None => throw Error(s"Virtual address ${ctx}@${n} is not bound to a physical address")
 
   inline def setRecency(virt: VirtualAddress[Context], powRecency: PowRecency): Unit =

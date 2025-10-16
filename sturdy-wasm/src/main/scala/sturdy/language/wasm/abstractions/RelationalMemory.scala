@@ -42,12 +42,12 @@ trait RelationalMemory extends RelationalValues:
 
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
 
-  def calculateStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Option[StaticMemoryLayout] = {
+  def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Option[StaticMemoryLayout] = {
     for{
       tableBase <- intervalOfExport("__table_base")
       globalBase <- intervalOfExport("__global_base")
       dataEnd <- intervalOfExport("__data_end")
-      globalRanges = calculateGlobalRanges(globalBase, dataEnd)
+      globalRanges = parseGlobalRanges(globalBase, dataEnd)
       stackLow <- intervalOfExport("__stack_low")
       stackHigh <- intervalOfExport("__stack_high")
       heapBase <- intervalOfExport("__heap_base")
@@ -68,7 +68,7 @@ trait RelationalMemory extends RelationalValues:
       value <- globals.get((), GlobalAddr(n)).toOption
     ) yield apronState.getInterval(value.asInt32.asNumExpr)
 
-  private def calculateGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Vector[(String,Interval)] = {
+  private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, GlobalAddr, Value]): Vector[(String,Interval)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
     var globalStarts = for {
@@ -82,11 +82,16 @@ trait RelationalMemory extends RelationalValues:
 
     globalStarts = globalStarts.sortBy((_name, iv) => iv.inf())
 
-    globalStarts.zip(globalStarts.tail).map {
+    val globalRanges = globalStarts.zip(globalStarts.tail).map {
       case ((name, iv),(_, ivNext)) =>
         val end = apronState.getInterval(ApronExpr.intSub(ApronExpr.constant(ivNext, I32Type), ApronExpr.lit(1, I32Type), I32Type))
         (name, Interval(iv.inf(), end.inf()))
     }
+
+    if(globalRanges.headOption.exists(_._1 == "__data_end"))
+      Vector()
+    else
+      globalRanges
   }
 
   given RelationalAddressOffset(using f: Failure, lazyEffectStack: Lazy[EffectStack], apronState: ApronState[VirtAddr, Type]): AddressOffset[Addr] with
@@ -97,12 +102,12 @@ trait RelationalMemory extends RelationalValues:
           HeapAddr(
             reference.mapAddr(sites =>
               PowVirtualAddress(sites.iterator.map {
-                case VirtualAddress(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset)), n, addrTrans) =>
-                  apronState.alloc(AddrCtx.Heap(HeapCtx.Alloc(site, initOffset + newOffset)))
+                case VirtualAddress(AddrCtx.Heap(HeapCtx.Heap(site, initOffset)), n, addrTrans) =>
+                  apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(site, initOffset + newOffset)))
                 case virt => throw new IllegalArgumentException(s"Expected HeapCtx.Alloc, but got ${virt.ctx}")
               })
             ), size)
-        case st@StackAddr(func, frameSize, stackPointer, offset) =>
+        case st@StackAddr(func, stackPointer, offset) =>
           st.copy(offset = apronState.simplify(ApronExpr.intAdd(offset, ApronExpr.lit(newOffset, I32Type), I32Type)))
         case NumExpr(baseAddr) =>
           val effectiveAddr = apronState.simplify(ApronExpr.intAdd(baseAddr, ApronExpr.lit(newOffset, I32Type), I32Type))
@@ -124,6 +129,7 @@ trait RelationalMemory extends RelationalValues:
         case (NumExpr(addrExpr), NumExpr(srcOffsetExpr), NumExpr(dstOffsetExpr)) =>
           val tpe = addrExpr._type
           NumExpr(ApronExpr.intAdd(ApronExpr.intSub(addrExpr, srcOffsetExpr, tpe), dstOffsetExpr, tpe))
+        case (_, _, dst: StackAddr) => dst
         case _ => throw IllegalArgumentException(s"moveAddress only supports numeric expressions, but got ($addr,$srcOffset,$dstOffset)")
       }
 
@@ -132,8 +138,8 @@ trait RelationalMemory extends RelationalValues:
     override def addSizeToAddr(size: Size, addr: Addr): Addr =
       addr match
         case NumExpr(addrExpr) => NumExpr(ApronExpr.intAdd(addrExpr, size, Type.I32Type))
-        case st@StackAddr(_, _,_,offset) => throw IllegalArgumentException("Adding a size to stack address is not supported by the analysis.")
-        case HeapAddr(_,_) => throw IllegalArgumentException("Adding a size to allocation-sites is not supported by the analysis.")
+        case _: StackAddr => throw IllegalArgumentException("Adding a size to stack address is not supported by the analysis.")
+        case _: HeapAddr => throw IllegalArgumentException("Adding a size to allocation-sites is not supported by the analysis.")
 
     override def ifAddrLeSize[A: WithJoin](addr: Addr, size: Size)(f: => A): JOptionA[A] =
       given Join[A] = implicitly[WithJoin[A]].j
@@ -175,18 +181,18 @@ trait RelationalMemory extends RelationalValues:
 
           val sites = refOps.deref(reference)
           for {
-            case PhysicalAddress(AddrCtx.Heap(ctx@HeapCtx.Alloc(_,_)), recency) <- sites.physicalAddresses;
+            case PhysicalAddress(AddrCtx.Heap(ctx@HeapCtx.Heap(_,_)), recency) <- sites.physicalAddresses;
             phys: PhysicalAddress[HeapCtx] = PhysicalAddress(ctx,recency)
             region <- mem.store.get(phys)
           } yield(phys, region, AlignedRead.Aligned)
-        case StackAddr(functions, _, stackPointer, offset) =>
+        case StackAddr(frames, stackPointer, offset) =>
           // Can possibly read from HeapCtx.Fill, HeapCtx.Stack, and HeapCtx.Dynamic
 
           val readStart = ApronExpr.intAdd(ApronExpr.addr(stackPointer, I32Type), offset, I32Type)
           val readEnd = ApronExpr.intAdd(readStart, size, I32Type)
           val matchingRegions = for {
             case (physAddr@PhysicalAddress(ctx:(HeapCtx.Fill | HeapCtx.Stack | HeapCtx.Dynamic), _),region) <- mem.store
-            if readRangeOverlapsStackRegion(functions, stackPointer, offset, readStart, readEnd, ctx, region) != Topped.Actual(false)
+            if readRangeOverlapsStackRegion(frames, stackPointer, offset, readStart, readEnd, ctx, region) != Topped.Actual(false)
           } yield (physAddr, region)
 
           val overwritingRegions = matchingRegions.filter((phys, region) =>
@@ -252,7 +258,7 @@ trait RelationalMemory extends RelationalValues:
     ): Topped[Boolean] =
       val regionStart = region.startAddr match {
         case NumExpr(expr) => expr
-        case StackAddr(_, _, stackPointer, offset) => ApronExpr.intAdd(ApronExpr.addr(stackPointer, I32Type), offset, I32Type)
+        case StackAddr(_, stackPointer, offset) => ApronExpr.intAdd(ApronExpr.addr(stackPointer, I32Type), offset, I32Type)
         case _ => throw IllegalArgumentException()
       }
       val regionEnd = ApronExpr.intAdd(regionStart, region.regionByteSize, regionStart._type)
@@ -295,7 +301,7 @@ trait RelationalMemory extends RelationalValues:
       }
 
     private def readRangeOverlapsStackRegion[Timestamp](
-      funcs: Powerset[FuncId],
+      frames: Powerset[Frame],
       stackPointer: VirtAddr,
       offset: ApronExpr[VirtAddr, Type],
       readStart: ApronExpr[VirtAddr, Type],
@@ -305,7 +311,7 @@ trait RelationalMemory extends RelationalValues:
     ): Topped[Boolean] =
       ctx match {
         case HeapCtx.Stack(func, _) =>
-          if(!funcs.set.contains(func))
+          if(!frames.set.map(_.func).contains(func))
             Topped.Actual(false)
           else
             // For stack regions, we only compare the offset within the stack frame.
@@ -359,7 +365,7 @@ trait RelationalMemory extends RelationalValues:
             case Topped.Top => true
             case Topped.Actual(byteSize) =>
               apronState.assert(ApronCons.eq(ApronExpr.lit(byteSize, I32Type), region.regionByteSize)) != Topped.Actual(true)
-        case _: HeapCtx.Alloc => false // TODO: We do not support malloc-allocated arrays for now.
+        case _: HeapCtx.Heap => false // TODO: We do not support malloc-allocated arrays for now.
       }
 
     private def alignedRead[Timestamp,Val](ctx: HeapCtx, readStart: ApronExpr[VirtAddr, Type], alignment: Int, memoryRegion: MemoryRegion[Addr, Size, Timestamp, Val]): AlignedRead =
@@ -406,22 +412,21 @@ trait RelationalMemory extends RelationalValues:
           (byteMemoryAllocationContext, effectiveAddr, optionStaticMemoryLayout) match {
             case (ByteMemoryAllocationContext.Fill, _, _) =>
               Iterable(HeapCtx.Fill(loc))
-            case (ByteMemoryAllocationContext.Write, ApronExpr.Binary(BinOp.Add, baseAddr, offset: ApronExpr.Constant[VirtAddr,Type],_, _, _, _), Some(staticMemoryLayout)) =>
-              Iterable(getHeapCtx(staticMemoryLayout, effectiveAddr, baseAddr, apronState.getInterval(offset)).getOrElse(defaultAddr))
+            case (ByteMemoryAllocationContext.Write, ApronExpr.Binary(BinOp.Add, baseAddr, offset,_, _, _, _), Some(staticMemoryLayout)) =>
+              val ctx = getHeapCtx(staticMemoryLayout, loc, effectiveAddr, baseAddr, apronState.getInterval(offset)).getOrElse(defaultAddr)
+              Iterable(ctx)
             case (ByteMemoryAllocationContext.Copy, ApronExpr.Binary(BinOp.Add, _, destAddr, _, _, _, _), Some(staticMemoryLayout)) =>
               val offset = Interval(DoubleScalar(0), DoubleScalar(0))
-              Iterable(getHeapCtx(staticMemoryLayout, ApronExpr.intAdd(destAddr, ApronExpr.constant(offset, I32Type), I32Type), destAddr, offset).getOrElse(defaultAddr))
+              val ctx = getHeapCtx(staticMemoryLayout, loc, ApronExpr.intAdd(destAddr, ApronExpr.constant(offset, I32Type), I32Type), destAddr, offset).getOrElse(defaultAddr)
+              Iterable(ctx)
             case _ =>
               Iterable(defaultAddr)
           }
 
-        case StackAddr(funcs, _, stackPointer, offset) =>
-          val offsetIv = apronState.getIntInterval(offset)
-
+        case StackAddr(frames, stackPointer, offset) =>
           for {
-            func <- funcs.set
-            offset = if(offsetIv._1 == offsetIv._2) Topped.Actual(offsetIv._1) else Topped.Top
-          } yield(HeapCtx.Stack(func, offset))
+            frame <- frames.set
+          } yield(HeapCtx.Stack(frame.func, getStackOffset(offset)))
 
         case HeapAddr(reference, _) =>
           val sites = refOps.deref(reference)
@@ -431,7 +436,7 @@ trait RelationalMemory extends RelationalValues:
           }.toSet
     }
 
-    private def getHeapCtx(staticMemoryLayout: StaticMemoryLayout, effectiveAddr: ApronExpr[VirtAddr,Type], baseAddr: ApronExpr[VirtAddr, Type], offset: Interval): Option[HeapCtx] = {
+    private def getHeapCtx(staticMemoryLayout: StaticMemoryLayout, dom: FixIn, effectiveAddr: ApronExpr[VirtAddr,Type], baseAddr: ApronExpr[VirtAddr, Type], offset: Interval): Option[HeapCtx] = {
 
       val effectiveAddrIv = apronState.getInterval(effectiveAddr)
       val offsetMatchesGlobal = for {
@@ -464,27 +469,35 @@ trait RelationalMemory extends RelationalValues:
           if(addrMatchesGlobal.size == 1) {
             addrMatchesGlobal.headOption
           } else {
-            val priorCtxs = contextLog.getOrElse(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), Set())
-            if(priorCtxs.size == 1) {
-              priorCtxs.headOption
+
+            if(effectiveAddrIv.isLeq(staticMemoryLayout.stackRange)) {
+              for{
+                case FixIn.Eval(_, InstLoc.InFunction(func, _)) <- Some(dom)
+              } yield HeapCtx.Stack(func, getStackOffset(effectiveAddr))
             } else {
-              None
+
+              val priorCtxs = contextLog.getOrElse(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), Set())
+              if (priorCtxs.size == 1) {
+                priorCtxs.headOption
+              } else {
+                None
+              }
             }
           }
         }
       }
     }
 
-//  private inline def getStackOffset(baseAddr: ApronExpr[VirtAddr,Type], offset: Interval)(using apronState: ApronState[VirtAddr,Type]): Topped[Int] =
-//    baseAddr match
-//      case _: ApronExpr.Addr[VirtAddr,Type] => toppedFromOption(apronState.getInt(ApronExpr.constant(offset, I32Type)))
-//      case ApronExpr.Binary(BinOp.Add, _: ApronExpr.Addr[VirtAddr,Type], const@ApronExpr.Constant(_, _, _), _, _, _, _) =>
-//        toppedFromOption(apronState.getInt(ApronExpr.intAdd(const, ApronExpr.constant(offset, I32Type), I32Type)))
-//      case ApronExpr.Binary(BinOp.Sub, _: ApronExpr.Addr[VirtAddr,Type], const@ApronExpr.Constant(_, _, _), _, _, _, _) =>
-//        toppedFromOption(apronState.getInt(ApronExpr.intSub(const, ApronExpr.constant(offset, I32Type), I32Type)))
-//      case ApronExpr.Binary(BinOp.Add, ApronExpr.Binary(BinOp.Mul, _, _, _, _, _, _), _: ApronExpr.Addr[VirtAddr,Type], _, _, _, _) => // Array access
-//        toppedFromOption(apronState.getInt(ApronExpr.constant(offset, I32Type)))
-//      case _ => Topped.Top
+  private def getStackOffset(offset: ApronExpr[VirtAddr,Type])(using apronState: ApronState[VirtAddr,Type]): Topped[Int] =
+    Topped.Actual(addScalarAdditionOperands(offset))
+
+  private def addScalarAdditionOperands(expr: ApronExpr[VirtAddr,Type])(using apronState: ApronState[VirtAddr,Type]): Int =
+    expr match
+      case ApronExpr.Constant(_: Scalar, _, _) =>
+        apronState.getInt(expr).getOrElse(0)
+      case ApronExpr.Binary(BinOp.Add, l, r, _, _, _, _) =>
+        addScalarAdditionOperands(l) + addScalarAdditionOperands(r)
+      case _ => 0
 
   private inline def toppedFromOption[A](opt: Option[A]): Topped[A] =
     opt match {
