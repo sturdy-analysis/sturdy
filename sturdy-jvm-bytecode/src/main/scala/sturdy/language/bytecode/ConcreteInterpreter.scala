@@ -265,30 +265,6 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
-    override def arraycopy(src: RefValue, srcPos: Int, dest: RefValue, destPos: Int, length: Int): JOption[MayJoin.NoJoin, Unit] = (src, dest) match
-      case (ConcreteRefValues.nonNullArray(_, srcVals: Seq[Addr], _, _), ConcreteRefValues.nonNullArray(_, destVals: Seq[Addr], _, _)) =>
-        boundary:
-          for (i <- 0 until length) do
-            if srcPos + i >= srcVals.size || destPos + i >= destVals.size then
-              break(JOptionC.none)
-            else
-              val toCopy = store.read(srcVals(srcPos + i)).get
-              store.write(destVals(destPos + i), toCopy)
-        JOptionC.some(())
-      case _ =>
-        throw UnsupportedOperationException(s"attempted array operations on $src, $dest")
-
-    override def getArray(ctx: ArrayOpContext)(array: RefValue): Seq[JOption[NoJoin, Value]] = array match
-      case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
-        val arrayVals = vals.map(addr => getVal(ctx)(array, vals.indexOf(addr)))
-        arrayVals
-      case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
-      case _ =>
-        throw UnsupportedOperationException(s"attempted array operations on $array")
-
-    override def printString(letters: Seq[Int]): Unit =
-      println(letters.map(l => l.toChar))
-
   given RefEqOps[AID, OID, ASize]: EqOps[RefValue, Boolean] with
     override def equ(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
       case (ConcreteRefValues.Object(oid1, _, _), ConcreteRefValues.Object(oid2, _, _)) =>

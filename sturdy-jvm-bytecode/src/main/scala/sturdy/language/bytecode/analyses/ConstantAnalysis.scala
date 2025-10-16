@@ -165,30 +165,6 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
       case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => Value.Int32(array.arraySize)
       case Topped.Actual(_) => ???
 
-    override def arraycopy(src: RefValue, srcPos: I32, dest: RefValue, destPos: I32, length: I32): JOption[WithJoin, Unit] =
-      import Topped.Actual
-      (src, dest, srcPos, destPos, length) match
-        case (Actual(AbstractReferenceValue.maybeNullArray(src, _)), Actual(AbstractReferenceValue.maybeNullArray(dest, _)), Actual(srcPos), Actual(destPos), Actual(length)) =>
-          boundary:
-            for (i <- 0 until length)
-              if (srcPos + i >= src.vals.size || destPos + i >= dest.vals.size)
-                boundary.break(JOptionA.none)
-              else
-                val toCopy = store.read(src.vals(srcPos + i)).get
-                store.write(dest.vals(destPos + i), toCopy)
-          JOptionA.some(())
-        case (Actual(_), Actual(_), Actual(_), Actual(_), Actual(_)) => ???
-        case _ => JOptionA.none
-
-    override def getArray(ctx: ArrayOpContext)(ref: RefValue): Seq[JOption[WithJoin, Value]] =
-      ref match
-        case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) =>
-          array.vals.map(addr => getVal(ctx)(ref, Topped.Actual(array.vals.indexOf(addr))))
-        case _ => ???
-
-    override def printString(letters: Seq[Topped[Int]]): Unit =
-      println(letters.map(l => l.get.toChar))
-
   private type singleAddr = abstractions.Addr
   type InitialStore = Map[singleAddr, Value]
 

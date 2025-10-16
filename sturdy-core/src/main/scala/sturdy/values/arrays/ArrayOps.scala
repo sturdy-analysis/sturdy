@@ -9,9 +9,6 @@ trait ArrayOps[ArrayIdentifier, Index, Value, ArrayValue, ArrayType, Site, Array
   def getVal(ctx: ArrayOpContext)(array: ArrayValue, idx: Index): JOption[J, Value]
   def setVal(ctx: ArrayOpContext)(array: ArrayValue, idx: Index, v: Value): JOption[J, Unit]
   def arrayLength(ctx: ArrayOpContext)(array: ArrayValue): Value
-  def arraycopy(src: ArrayValue, srcPos: Index, dest: ArrayValue, destPos: Index, length: Index): JOption[J, Unit]
-  def getArray(ctx: ArrayOpContext)(array: ArrayValue): Seq[JOption[J, Value]]
-  def printString(letters: Seq[Index]): Unit
 
 case class Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize](aid: ArrayIdentifier, vals: Seq[ArrayElemAddr], arrayType: ArrayType, arraySize: ArraySize)
 

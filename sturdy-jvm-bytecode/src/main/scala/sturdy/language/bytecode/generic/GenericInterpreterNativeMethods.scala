@@ -62,12 +62,13 @@ class GenericInterpreterNativeMethods[V, Addr, ObjType, OID, AID, ObjRep, TypeRe
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
       case "arraycopy" =>
+        ??? // TODO
         val src = args(0)
         val srcPos = args(1)
         val dest = args(2)
         val destPos = args(3)
         val length = args(4)
-        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
+        // arrayOps.arraycopy(src, srcPos, dest, destPos, length)
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
 
@@ -184,11 +185,12 @@ class GenericInterpreterNativeMethods[V, Addr, ObjType, OID, AID, ObjRep, TypeRe
         //temporary
         bytecodeOps.i32ops.integerLit(-1)
       case "arraycopy" =>
+        ??? // TODO
         val src = args.head
         val srcPos = args(1)
         val dest = args(2)
         val destPos = args(3)
         val length = args(4)
-        arrayOps.arraycopy(src, srcPos, dest, destPos, length)
+        // arrayOps.arraycopy(src, srcPos, dest, destPos, length)
         //temporary
         bytecodeOps.i32ops.integerLit(-1)

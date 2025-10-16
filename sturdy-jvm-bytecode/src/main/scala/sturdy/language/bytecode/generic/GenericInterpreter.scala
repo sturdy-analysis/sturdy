@@ -714,8 +714,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     val newFrameData = 0
     // TODO: remove this println summary
     if (mth.name == "println" || mth.name == "print")
-      val string = arrayOps.getArray(site)(objectOps.getField(site, getClassFile(site)(ClassType.String))(args(1), FieldIdent.StringValue)).map(_.get)
-      arrayOps.printString(string)
+      val array = objectOps.getField(site, getClassFile(site)(ClassType.String))(args(1), FieldIdent.StringValue)
+      println(array)
       return voidOps.voidRep
     // we are currently unable to properly deal with System.exit
     if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
