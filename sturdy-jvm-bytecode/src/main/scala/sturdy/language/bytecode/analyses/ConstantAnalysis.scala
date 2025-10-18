@@ -15,7 +15,7 @@ import sturdy.effect.symboltable.JoinableDecidableSymbolTable
 import sturdy.{fix, values}
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
-import sturdy.language.bytecode.{Interpreter, abstractions, resolveMethod, selectMethod}
+import sturdy.language.bytecode.{Interpreter, abstractions}
 import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, Exceptions, FieldAccessContext, FieldIdent, InvokeContext, Numbers, Site, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.language.bytecode.util.given
@@ -30,7 +30,6 @@ import sturdy.values.arrays.{Array, ArrayOps, LiftedArrayOps}
 import sturdy.values.references.{PowersetAddr, given}
 
 import java.net.URL
-import scala.util.boundary
 
 enum AbstractReferenceValue[A, O]:
   case maybeNullObject(obj: O, maybeNull: Boolean)
@@ -183,7 +182,6 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         )
       ).fixpoint
 
-    override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
     Fixpoint.DEBUG = false
 
     override val joinUnit: WithJoin[Unit] = implicitly

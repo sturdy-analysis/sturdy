@@ -12,7 +12,7 @@ import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
-import sturdy.fix.{ConcreteFixpoint, Fixpoint}
+import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, getIdent}
 import sturdy.language.bytecode.generic.*
 import sturdy.language.bytecode.util.ClassTypeValues
@@ -28,8 +28,6 @@ import sturdy.values.ordering.EqOps
 
 import java.net.URL
 import scala.annotation.tailrec
-import scala.util.boundary
-import scala.util.boundary.break
 
 enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, ArrayElemAddr, AType, ASizeType]:
   case Object(oid: ObjectAddr, cls: Class, fields: Map[FieldName, ObjFieldAddr])
@@ -345,7 +343,6 @@ object ConcreteInterpreter extends Interpreter:
       )
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]
-    override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
 
     override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
       case JvmExcept.Jump(targetPC) =>

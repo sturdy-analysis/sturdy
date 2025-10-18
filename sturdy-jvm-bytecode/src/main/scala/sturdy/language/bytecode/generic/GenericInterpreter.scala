@@ -55,7 +55,6 @@ given Finite[FixOut] with {}
 
 trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
-  val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
   type Fixed = FixIn => FixOut
 
   val bytecodeOps: BytecodeOps[V, ReferenceType]
@@ -755,7 +754,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   inline def evalFix(inst: Instruction, mth: Method, pc: Int)(using fixed: Fixed): FixOut =
     fixed(FixIn.Eval(inst, mth, pc))
 
-  private def fixed: Fixed = fixpointSuper:
+  private def fixed: Fixed = fixpoint:
     case FixIn.Eval(inst, mth, pc) =>
       eval(inst, mth, pc)
       FixOut.Eval()

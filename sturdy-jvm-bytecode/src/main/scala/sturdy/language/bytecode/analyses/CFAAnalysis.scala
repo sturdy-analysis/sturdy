@@ -81,7 +81,6 @@ object CFAAnalysis extends Interpreter:
 
   class Instance(implicit val project: Project[URL]) extends GenericInstance:
     override val fixpoint: Fixpoint[FixIn, FixOut] = ???
-    override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
 
     override val bytecodeOps: BytecodeOps[CFAAnalysis.Value, ReferenceType] = ???
     override val objectOps: ObjectOps[FieldIdent, AddrSet, CFAAnalysis.Value, ClassFile, CFAAnalysis.Value, Site, Method, String, MethodDescriptor, CFAAnalysis.Value, InvokeContext, FieldAccessContext, J] = ???
