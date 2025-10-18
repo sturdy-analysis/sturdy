@@ -280,6 +280,9 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         using new arrayOps(using arrayValAlloc, store, jvV)
       )
 
+    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConstantAnalysis.Value] => Unit =
+      ??? // TODO
+
   private def mkTopVal(ty: Type): Value = ty match
     case ByteType => Value.Int32(topI32)
     case ShortType => Value.Int32(topI32)

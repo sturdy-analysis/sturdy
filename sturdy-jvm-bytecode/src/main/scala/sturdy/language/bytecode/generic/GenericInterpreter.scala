@@ -56,7 +56,7 @@ given Finite[FixOut] with {}
 trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoin[_]]:
   val fixpoint: fix.Fixpoint[FixIn, FixOut]
   val fixpointSuper: fix.Fixpoint[FixIn, FixOut]
-  private type Fixed = FixIn => FixOut
+  type Fixed = FixIn => FixOut
 
   val bytecodeOps: BytecodeOps[V, ReferenceType]
 
@@ -778,29 +778,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       exceptionHandler(pc, mth)
     }
 
-  private def exceptionHandler(pc: Int, mth: Method)(using Fixed): JvmExcept[V] => Unit =
-    case JvmExcept.Jump(targetPC) =>
-      enterMethod(targetPC, mth)
-    case JvmExcept.Ret(_) =>
-      ??? // TODO
-    case JvmExcept.Return(_) =>
-      ()
-    case JvmExcept.ThrowObject(exception) =>
-      // otherwise, handle the exception
-      val currPC = frame.data
-      val body = mth.body.get
-      val handler = body.exceptionHandlersFor(currPC)
-        // try to find handler for exception
-        .find(handlerException => typeOps.instanceOf(exception, handlerException.catchType.get) == i32ops.integerLit(1))
-        // try to find finally clause to invoke if no handler was found
-        .orElse(body.handlersFor(currPC).find(_.catchType.isEmpty))
-        .getOrElse:
-          // no handler found, throw the exception again
-          stack.clearCurrentOperandFrame()
-          except.throws(JvmExcept.ThrowObject(exception))
-      // handler has been found
-      stack.push(exception)
-      enterMethod(handler.handlerPC, mth)
+  def exceptionHandler(pc: Int, mth: Method)(using Fixed): JvmExcept[V] => Unit
 
   // evaluates each instruction of the given method's body, starting with pc
   @tailrec

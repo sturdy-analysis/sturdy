@@ -346,3 +346,27 @@ object ConcreteInterpreter extends Interpreter:
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]
     override val fixpointSuper: Fixpoint[FixIn, FixOut] = fixpoint
+
+    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
+      case JvmExcept.Jump(targetPC) =>
+        enterMethod(targetPC, mth)
+      case JvmExcept.Ret(_) =>
+        ??? // TODO
+      case JvmExcept.Return(_) =>
+        ()
+      case JvmExcept.ThrowObject(exception) =>
+        // otherwise, handle the exception
+        val currPC = frame.data
+        val body = mth.body.get
+        val handler = body.exceptionHandlersFor(currPC)
+          // try to find handler for exception
+          .find(handlerException => bytecodeOps.typeOps.instanceOf(exception, handlerException.catchType.get) == bytecodeOps.i32ops.integerLit(1))
+          // try to find finally clause to invoke if no handler was found
+          .orElse(body.handlersFor(currPC).find(_.catchType.isEmpty))
+          .getOrElse:
+            // no handler found, throw the exception again
+            stack.clearCurrentOperandFrame()
+            except.throws(JvmExcept.ThrowObject(exception))
+        // handler has been found
+        stack.push(exception)
+        enterMethod(handler.handlerPC, mth)
