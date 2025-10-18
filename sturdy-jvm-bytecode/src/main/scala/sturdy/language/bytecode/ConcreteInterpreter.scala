@@ -102,6 +102,12 @@ object ConcreteInterpreter extends Interpreter:
       case ConcreteRefValues.nonNullArray(_, _, arrayType, _) => arrayType
       case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null")
 
+    override def ifInstanceOf[A](v: RefValue, ty: ReferenceType)(ifTrue: () => A)(ifFalse: () => A): A =
+      if instanceOf(v, ty) then
+        ifTrue()
+      else
+        ifFalse()
+
     @tailrec
     private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
       case c: ClassType =>

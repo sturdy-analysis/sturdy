@@ -226,6 +226,10 @@ trait Interpreter:
         case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
         case x => throw IllegalArgumentException(s"expected reference value but got $x")
 
+      override def ifInstanceOf[A](v: Value, ty: TypeRep)(ifTrue: () => A)(ifFalse: () => A): A = v match
+        case Value.ReferenceValue(r) => refTypeOps.ifInstanceOf(r, ty)(ifTrue)(ifFalse)
+        case x => throw IllegalArgumentException(s"expected reference value but got $x")
+
     final val sizeOps: SizeOps[Value, Value] =
       case Value.Int32(v) => boolean(SizeOps.is32Bit(v))
       case Value.Int64(v) => boolean(SizeOps.is32Bit(v))

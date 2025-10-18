@@ -250,6 +250,9 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         else
           ??? // TODO
 
+      override def ifInstanceOf[A](v: RefValue, ty: ReferenceType)(ifTrue: () => A)(ifFalse: () => A): A =
+        ??? // TODO
+
     given intSizeOps: SizeOps[I32, Bool] with
       override def is32Bit(v: I32): Bool = Topped.Actual(true)
 

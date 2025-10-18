@@ -4,8 +4,10 @@ import sturdy.values.Topped
 import sturdy.values.integer.NumericInterval
 
 trait TypeOps[V, TypeRep, B]:
+  // TODO: is this made obsolete by ifInstanceOf?
   def instanceOf(v: V, target: TypeRep): B
   def typeOf(v: V): TypeRep
+  def ifInstanceOf[A](v: V, ty: TypeRep)(ifTrue: () => A)(ifFalse: () => A): A
 
 object TypeOps:
   def instanceOf[V, TypeRep, B](v: V, target: TypeRep)(using ops: TypeOps[V, TypeRep, B]): B =
