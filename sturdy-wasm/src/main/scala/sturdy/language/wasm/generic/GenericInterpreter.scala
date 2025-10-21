@@ -238,8 +238,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val v = stack.popOrAbort()
       callFrame.setLocalOrElse(ix, v, fail(UnboundLocal, ix.toString))
     case LocalTee(ix) =>
-      val v = stack.peekOrAbort()
+      val v = stack.popOrAbort()
       callFrame.setLocalOrElse(ix, v, fail(UnboundLocal, ix.toString))
+      stack.push(callFrame.getLocalOrElse(ix, fail(UnboundLocal, ix.toString)))
     case GlobalGet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val global = getGlobalValue(globalIdx)

@@ -197,7 +197,8 @@ class ApronRecencyState
     Val: Join: Widen
   ]
   (
-    temporaryVariableAllocator: Allocator[Ctx, Type],
+    val temporaryVariableAllocator: Allocator[Ctx, Type],
+    val combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
     val recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     val relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   )(using
@@ -362,17 +363,17 @@ class ApronRecencyState
 
   override def effects: EffectStack = effectStack
 
-  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, temporaryVariableAllocator)
-  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, temporaryVariableAllocator)
+  override def join: Join[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(false, combineExpressionAllocator)
+  override def widen: Widen[ApronExpr[VirtualAddress[Ctx], Type]] = combineExpr(true, combineExpressionAllocator)
 
-  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = (e1, e2) => Profiler.addTime("ApronState.combineExpr") {
+  def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] = (e1, e2) => Profiler.addTime("ApronState.combineExpr") {
     val e1Simplified = simplify(e1)(using ResolveState.Left)
     val e2Simplified = simplify(e2)(using ResolveState.Right)
     val result = combineExpr0(widen, allocator).apply(e1Simplified, e2Simplified)
     result
   }
 
-  private def combineExpr0[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
+  private def combineExpr0[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
     case (e1, e2) if (e1 == e2) =>
       Unchanged(e1)
 
@@ -469,7 +470,7 @@ class ApronRecencyState
     case (e1,e2) if containsFailedAddrs(e1)(using ResolveState.Left) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
-          val ctx = allocator(joinedType)
+          val ctx = allocator(e1, e2)
           val failedVirt = relationalStore.withLeftState(recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed, _))
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
           val iv1 = getInterval(failedExpr)(using ResolveState.Left)
@@ -480,7 +481,7 @@ class ApronRecencyState
     case (e1,e2) if containsFailedAddrs(e2)(using ResolveState.Right) =>
       Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap(
         (joinedSpecials, joinedType) =>
-          val ctx = allocator(joinedType)
+          val ctx = allocator(e1, e2)
           val failedVirt = relationalStore.withRightState(recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Failed, _))
           val failedExpr = ApronExpr.Addr(failedVirt, joinedSpecials, joinedType)
           val iv1 = getInterval(e1)(using ResolveState.Left)
@@ -497,10 +498,7 @@ class ApronRecencyState
         Unchanged(e1)
       } else {
         Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
-          val ctx = (e1,e2) match
-            case (ApronExpr.Addr(ApronVar(addr),_,_), _) => addr.ctx
-            case (_, ApronExpr.Addr(ApronVar(addr),_,_)) => addr.ctx
-            case _ => allocator(joinedType)
+          val ctx = allocator(e1, e2)
           val result = relationalStore.withLeftState { state1 =>
             val (phys1, state2) = convertExpr.virtToPhysPure(e1, state1)
             val (result, state3) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state2)
@@ -516,10 +514,10 @@ class ApronRecencyState
         }
       }
 
-  override def joinBoolExpr: Join[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = false, temporaryVariableAllocator)
-  override def widenBoolExpr: Widen[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = true, temporaryVariableAllocator)
+  override def joinBoolExpr: Join[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = false, combineExpressionAllocator)
+  override def widenBoolExpr: Widen[ApronBool[VirtualAddress[Ctx], Type]] = combineBoolExpr(widen = true, combineExpressionAllocator)
 
-  private def combineBoolExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronBool[VirtualAddress[Ctx], Type], W] = {
+  private def combineBoolExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])]): Combine[ApronBool[VirtualAddress[Ctx], Type], W] = {
     case (e1,e2) if e1 eq e2 => Unchanged(e1)
     case (ApronBool.Constant(b1), ApronBool.Constant(b2)) =>
       for {
@@ -603,13 +601,15 @@ class ApronRecencyState
 class NonRelationalApronState[Ctx: Ordering, Type: ApronType: Join: Widen, Val: Join: Widen]
   (
     temporaryVariableAllocator: Allocator[Ctx, Type],
+    combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
     recencyStore: RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
     relationalStore: RelationalStore[Ctx, Type, PowersetAddr[PhysicalAddress[Ctx], PhysicalAddress[Ctx]], Val]
   )(using
     StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
-  extends ApronRecencyState[Ctx, Type, Val](temporaryVariableAllocator, recencyStore, relationalStore):
-  override def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, Type]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
+  extends ApronRecencyState[Ctx, Type, Val](temporaryVariableAllocator, combineExpressionAllocator, recencyStore, relationalStore):
+  
+  override def combineExpr[W <: Widening](widen: Boolean, allocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])]): Combine[ApronExpr[VirtualAddress[Ctx], Type], W] =
     (e1: ApronExpr[VirtualAddress[Ctx],Type], e2: ApronExpr[VirtualAddress[Ctx],Type]) =>
       val iv1 = getInterval(e1)(using ResolveState.Left)
       val iv2 = getInterval(e2)(using ResolveState.Right)

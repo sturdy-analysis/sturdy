@@ -116,8 +116,9 @@ object RelationalAnalysis extends Interpreter,
 
   class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
-    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
-    implicit val localRelationaAlloc: AAllocatorFromContext[(String, String, Option[Any]), AddrCtx] = AAllocatorFromContext((v, fun, _) => AddrCtx.Local(v,fun))
+    given tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
+    given combineExprAlloc: AAllocatorFromContext[(ApronExpr[VirtAddr,RelType],ApronExpr[VirtAddr,RelType]), AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
+    given localRelationaAlloc: AAllocatorFromContext[(String, String, Option[Any]), AddrCtx] = AAllocatorFromContext((v, fun, _) => AddrCtx.Local(v,fun))
 
     given Manager = apronManager
 
@@ -155,7 +156,7 @@ object RelationalAnalysis extends Interpreter,
     import relationalStore.given
     val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
-    apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
+    apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, combineExprAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState
     given defaultResolveState: ResolveState = ResolveState.Internal
 

@@ -1,7 +1,6 @@
 package sturdy.effect.store
 
-import sturdy.data.JOption
-import sturdy.data.MayJoin
+import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.effect.Effect
 
 /**
@@ -35,7 +34,7 @@ trait StoreWithPureOps[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]:
   def movePure(from: Addr, to: Addr, state0: State): State =
     val (result, state1) = readPure(from, state0)
     var state = state1
-    result.map(value =>
+    result.toOption.foreach(value =>
       state = writePure(to, value, state)
       state = freePure(from, state)
     )
@@ -43,7 +42,7 @@ trait StoreWithPureOps[Addr, V, J[_] <: MayJoin[_]] extends Store[Addr, V, J]:
   def copyPure(from: Addr, to: Addr, state0: State): State =
     val (result, state1) = readPure(from, state0)
     var state = state1
-    result.map(value =>
+    result.toOption.foreach(value =>
       state = writePure(to, value, state)
     )
     state

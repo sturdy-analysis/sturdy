@@ -30,17 +30,17 @@ trait RelationalAddresses extends RelationalTypes:
     case Fill(site: FixIn)
     case Global(name: String)
     case Stack(function: FuncId, offset: Topped[Int])
-    case Heap(allocSite: InstLoc, offset: Int)
+    case Heap(allocSite: InstLoc, offset: Topped[Int])
     case Static(offset: Int)
     case Dynamic(storeInstruction: FixIn)
 
     override def toString: String =
       this match
         case Fill(site) => s"Fill@$site"
-        case Static(offset) => s"$offset"
         case Global(name) => s"G$name"
         case Stack(fun,offset) => s"S$fun+$offset"
         case Heap(allocSite, offset) => s"H${allocSite}+${offset}"
+        case Static(offset) => s"$offset"
         case Dynamic(storeInstruction) => s"Dynamic@$storeInstruction"
 
 
@@ -54,6 +54,15 @@ trait RelationalAddresses extends RelationalTypes:
       val res = AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
       res
   }
+
+  def combineExprAlloc(rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type]), AddrCtx] = AAllocatorFromContext {
+    case (ApronExpr.Addr(ApronVar(VirtualAddress(ctx: AddrCtx.Temp, _, _)), _, _),_) => ctx
+    case (_, ApronExpr.Addr(ApronVar(VirtualAddress(ctx: AddrCtx.Temp, _, _)), _, _)) => ctx
+    case (e1, e2) =>
+      val tpe = Join(e1._type, e2._type).get
+      AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.MostGeneralClientLoop(rootFrameData.module)), tpe)
+  }
+
   def localAlloc(ssa: Boolean, rootFrameData: FrameData)(using domLogger: DomLogger[FixIn]): AAllocatorFromContext[(Int, FrameData, Option[InstLoc]), AddrCtx] = AAllocatorFromContext(
     (i, data, _) =>
       if ssa then
@@ -93,7 +102,7 @@ trait RelationalAddresses extends RelationalTypes:
     case (HeapCtx.Static(offset1), HeapCtx.Static(offset2)) => Ordering[Int].compare(offset1, offset2)
     case (HeapCtx.Global(name1), HeapCtx.Global(name2)) => Ordering[String].compare(name1, name2)
     case (HeapCtx.Stack(fun1,offset1), HeapCtx.Stack(fun2,offset2)) => Ordering[(FuncId,Topped[Int])].compare((fun1,offset1), (fun2,offset2))
-    case (HeapCtx.Heap(site1, offset1), HeapCtx.Heap(site2, offset2)) => Ordering[(InstLoc, Int)].compare((site1, offset1), (site2, offset2))
+    case (HeapCtx.Heap(site1, offset1), HeapCtx.Heap(site2, offset2)) => Ordering[(InstLoc, Topped[Int])].compare((site1, offset1), (site2, offset2))
     case (HeapCtx.Dynamic(storeInst1), HeapCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
     case (ctx1, ctx2) => Ordering.by[HeapCtx, Int] {
       case _: HeapCtx.Fill => 1

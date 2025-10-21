@@ -70,10 +70,14 @@ object ApronJoins:
             s2ExtEnv
 
         val combined =
-          if (widen)
+          if (widen) {
+            // This widens recent variables more precisely.
+            // For example, [xr = 1] ∇ [xr = 2] = [ 1 <= xr < infty ]
+            combinable2.join(manager, combinable1)
             combinable1.widening(manager, combinable2)
-          else
+          } else {
             combinable1.joinCopy(manager, combinable2)
+          }
 
         MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
       }

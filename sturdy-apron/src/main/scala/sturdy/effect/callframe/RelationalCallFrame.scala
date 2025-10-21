@@ -163,6 +163,7 @@ object RelationalCallFrame:
      initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx], Type]])]
    )(using
      temporaryVariableAllocator: Allocator[Ctx, Type],
+     combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
      localVariableAllocator: Allocator[Ctx, (Var, Data, Option[CallSite])],
      apronManager: Manager,
      effectStack: EffectStack

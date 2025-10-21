@@ -22,11 +22,11 @@
     local.get $l3
     i32.const 4112
     i32.add
-    local.set $l0
+    local.set $l0 ;; initial_r
     local.get $l3
     i32.const 16
     i32.add
-    local.set $l5
+    local.set $l5 ;; initial_i
     i32.const 32768
     call $env.malloc
     local.set $l23
@@ -38,12 +38,12 @@
       local.tee $l6
       f64.const -0x1p+0 (;=-1;)
       f64.add
-      f64.store
+      f64.store ;; initial_i[xy] = -1.0
       local.get $l0
       local.get $l6
       f64.const -0x1.8p+0 (;=-1.5;)
       f64.add
-      f64.store
+      f64.store ;; initial_r[xy]
       local.get $l0
       i32.const 8
       i32.add
@@ -54,14 +54,14 @@
       local.tee $l6
       f64.const -0x1.8p+0 (;=-1.5;)
       f64.add
-      f64.store
+      f64.store ;; initial_r[xy]
       local.get $l5
       i32.const 8
       i32.add
       local.get $l6
       f64.const -0x1p+0 (;=-1;)
       f64.add
-      f64.store
+      f64.store ;; initial_i[xy]
       local.get $l5
       i32.const 16
       i32.add

@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 
 class LiftedIntegerOps[B, V, I](extract: V => I, inject: I => V)(using ops: IntegerOps[B, I]) extends IntegerOps[B, V]:
-  inline def integerLit(i: B): V = inject(ops.integerLit(i))
+  def integerLit(i: B): V = inject(ops.integerLit(i))
   inline def randomInteger(): V = inject(ops.randomInteger())
 
   def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))

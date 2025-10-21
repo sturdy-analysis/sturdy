@@ -51,12 +51,32 @@ final class RelationalStore
       metaData <- JOptionA(relationalValue.getMetaData(value))
     } yield metaData
 
-  override def readPure(powAddr: PowAddr, state: State): (JOptionA[Val],State) = Profiler.addTime("RelationalStore.writePure") {
-    val v1 = getMetaData(powAddr, state).flatMap((floatSpecials, tpe) =>
-      JOptionA.Some(powAddr.reduce(addr => relationalValue.makeRelationalExpr(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe))))
-    )
-    val v2 = nonRelationalStore.readPure(powAddr, state.nonRelationalStoreState)._1
-    joinClosingOver[JOptionA[Val]]((v1, state), (v2, state)).get
+  override def readPure(powAddr: PowAddr, state0: State): (JOptionA[Val],State) = Profiler.addTime("RelationalStore.writePure") {
+
+    // This avoids forgetting newly allocated virtual addresses when joining values
+    val snapshotInternal = _internalState
+    val snapshotLeft = _leftState
+    val snapshotRight = _rightState
+    try {
+      _internalState = state0
+      _leftState = null
+      _rightState = null
+
+      val v1 = getMetaData(powAddr, _internalState).flatMap((floatSpecials, tpe) =>
+        JOptionA.Some(powAddr.reduce(addr => relationalValue.makeRelationalExpr(ApronExpr.Addr(ApronVar(addr), floatSpecials, tpe))))
+      )
+      val v2 = powAddr.reduce(addr =>
+        JOptionA(_internalState.nonRelationalStoreState.get(addr))
+      )
+
+      val result = Join(v1, v2).get
+
+      (result, _internalState)
+    } finally {
+      _internalState = snapshotInternal
+      _leftState = snapshotLeft
+      _rightState = snapshotRight
+    }
   }
 
   override def writePure(powAddr: PowAddr, v: Val, state1: State): State =
@@ -130,24 +150,37 @@ final class RelationalStore
   override def movePure(fromPow: PowAddr, toPow: PowAddr, state0: State): State = Profiler.addTime("RelationalStore.movePure") {
     var state = state0
     if (fromPow.isStrong && fromPow.iterator.size == 1 && toPow.iterator.size == 1) {
-      state = state.modifyNonRelationalState(nonRelationalStore.movePure(fromPow, toPow, _))
 
       val from = fromPow.iterator.next()
       val to = toPow.iterator.next()
 
-      var fromIv = Interval()
-      var toIv = Interval()
+      // This avoids forgetting addresses that get allocated when values in the non-relational store are joined during `movePure`.
+      val snapshotInternal = _internalState
+      val snapshotLeft = _leftState
+      val snapshotRight = _rightState
+      try {
+        _internalState = state
+        _leftState = null
+        _rightState = null
+
+        _internalState.nonRelationalStoreState.get(from).foreach { value =>
+          val joined = _internalState.nonRelationalStoreState.get(to).map(Join(_, value).get).getOrElse(value)
+          _internalState = _internalState.copy(nonRelationalStoreState = _internalState.nonRelationalStoreState - from + (to -> joined))
+        }
+
+      } finally {
+        state = _internalState
+        _internalState = snapshotInternal
+        _leftState = snapshotLeft
+        _rightState = snapshotRight
+      }
 
       val env = state.abs1.getEnvironment
       (env.hasVar(from), env.hasVar(to)) match
         case (true, true) =>
-          fromIv = state.abs1.getBound(manager, from)
           state.abs1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
-          toIv = state.abs1.getBound(manager, to)
         case (true, false) =>
-          fromIv = state.abs1.getBound(manager, from)
           state.abs1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
-          toIv = state.abs1.getBound(manager, to)
         case (false, true) | (false, false) => // Nothing to do
 
     } else {
@@ -177,12 +210,15 @@ final class RelationalStore
       _internalState = state
       _leftState = null
       _rightState = null
-      val nonRelStoreState = nonRelationalStore.copyPure(fromPow, toPow, state.nonRelationalStoreState)
-      state = RelationalStoreState(
-        _internalState.addressTranslationState,
-        _internalState.abs1,
-        nonRelationalStore.copyPure(fromPow, toPow, state.nonRelationalStoreState)
-      )
+
+      for (from <- fromPow.iterator; to <- toPow.iterator) {
+        _internalState.nonRelationalStoreState.get(from).foreach { value =>
+          val joined = _internalState.nonRelationalStoreState.get(to).map(Join(_, value).get).getOrElse(value)
+          _internalState = _internalState.copy(nonRelationalStoreState = _internalState.nonRelationalStoreState + (to -> joined))
+        }
+      }
+
+      state = _internalState
     } finally {
       _internalState = snapshotInternal
       _leftState = snapshotLeft

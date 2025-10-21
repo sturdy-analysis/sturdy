@@ -13,6 +13,7 @@
 typedef int elem;
 
 elem s[16], t[16];
+elem c[16] = {0};
 
 int maxflips = 0;
 int max_n;
@@ -51,7 +52,6 @@ void rotate(int n)
 void tk(int n)
 {
    int i = 0, f;
-   elem c[16] = {0};
 
    while (i < n) {
       rotate(i);

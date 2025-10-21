@@ -50,9 +50,11 @@ final class RelationalStack
   private def combineValues(widen: Boolean, idx: Int, v1: Val, v2: Val): MaybeChanged[Val] =
     (relationalValue.getRelationalExpr(v1), relationalValue.getRelationalExpr(v2)) match
       case (Some(e1), Some(e2)) =>
-        val allocator = AAllocatorFromContext[Type, Ctx](
-          (tpe: Type) => stackAllocator((idx, tpe))
-        )
+        val allocator = AAllocatorFromContext[(ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type]), Ctx] {
+          case (e1, e2) =>
+            val tpe = Join(e1._type, e2._type).get
+            stackAllocator((idx, tpe))
+        }
         apronState.combineExpr(widen, allocator)(e1, e2).map(relationalValue.makeRelationalExpr)
       case (Some(_), None) | (None, Some(_)) | (None, None) =>
         if(widen)

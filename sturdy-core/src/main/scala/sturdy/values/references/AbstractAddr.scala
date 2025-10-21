@@ -31,6 +31,7 @@ case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends Abstra
 object PowersetAddr:
   def apply[A, AA <: AbstractAddr[A]](addr: AA): PowersetAddr[A, AA] = PowersetAddr(Set(addr))
   def apply[A, AA <: AbstractAddr[A]](addr: AA, addrs: AA*): PowersetAddr[A, AA] = PowersetAddr(Set(addr) ++ addrs)
+  def from[A, AA <: AbstractAddr[A]](addrs: Iterable[AA]): PowersetAddr[A,AA] = PowersetAddr(addrs.toSet)
 
 given joinPowersetAddr[A, AA <: AbstractAddr[A]]: Join[PowersetAddr[A, AA]] with
   override def apply(v1: PowersetAddr[A, AA], v2: PowersetAddr[A, AA]): MaybeChanged[PowersetAddr[A, AA]] =

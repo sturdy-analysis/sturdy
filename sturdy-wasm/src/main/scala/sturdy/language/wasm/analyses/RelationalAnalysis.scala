@@ -6,7 +6,7 @@ import sturdy.apron.ApronExpr.*
 import sturdy.control.{ControlEvent, ControlObservable, FixpointControlEvent, RecordingControlObserver}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectList, EffectStack, TrySturdy, bytememory}
-import sturdy.effect.bytememory.{*, given}
+import sturdy.effect.bytememory.{Bytes as BTS, *, given}
 import sturdy.effect.callframe.{ConcreteCallFrame, DecidableCallFrame, JoinableDecidableCallFrame, MutableCallFrame, RelationalCallFrame}
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
@@ -34,7 +34,7 @@ import sturdy.values.types.{*, given}
 import sturdy.values.simd.{*, given}
 import sturdy.util.{*, given}
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst, *}
-import swam.{FuncType, GlobalType, OpCode, ReferenceType, ValType, syntax}
+import swam.{FuncType, GlobalType, NumType, OpCode, ReferenceType, ValType, syntax}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -43,7 +43,6 @@ import WasmFailure.*
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
 import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
-import sturdy.effect.bytememory.Bytes as BTS
 import sturdy.fix.{DomLogger, Logger}
 
 import java.math.BigInteger
@@ -59,13 +58,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   import Value.*
   import NumValue.*
   import Type.*
-  import RelI32.*
+  import RelI32.{NumExpr, BoolExpr, StackAddr, HeapAddr}
   import RelationalInfo.{*,given}
 
   val topSize: Top[Size] = new Top[Size]:
     override def top: Size = constant(ApronExpr.topInterval, I32Type)
 
-  override def topV128: V128 = ???
+  override def topV128: V128 = Topped.Top
 
   given RelationalSpecialWasmOperations
       (using domLogger: DomLogger[FixIn],
@@ -77,11 +76,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def valToAddr(v: Value): Addr = v match
       case Num(Int32(n:NumExpr)) => n
-      case Num(Int32(a:HeapAddr)) => a
       case Num(Int32(b:BoolExpr)) => NumExpr(b.asNumExpr)
+      case Num(Int32(g:RelI32.GlobalAddr)) => g
       case Num(Int32(s:StackAddr)) => s
+      case Num(Int32(a:HeapAddr)) => a
       case TopValue => NumExpr(constant(ApronExpr.topInterval, I32Type))
-      case _ => f.fail(TypeError, s"Expected i32 but got $this")
+      case _ => f.fail(TypeError, s"Expected i32 but got $v")
 
     override def valToIdx(v: Value): Index =
       val expr = v.asInt32.asNumExpr
@@ -134,7 +134,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     override def refToVal(r: RefV): Value = Ref(r)
     override def liftBytes(b: Seq[Byte]): Bytes =
-      Bytes.StoredBytes(
+      BTS.StoredBytes(
         value = b.map(x =>
           (Num(Int32(NumExpr(ApronExpr.lit(byteToUnsignedInt(x), I8Type)))), 1)
         ).toList,
@@ -156,7 +156,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     override def jvElem: WithJoin[Elem] = implicitly
     //    override def widenState: Widen[State] = implicitly
 
-    var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
+    private var exprConverter: ApronExprConverter[AddrCtx, Type, Value] = null
     var apronState: ApronRecencyState[AddrCtx, Type, Value] = null
     given Lazy[ApronRecencyState[AddrCtx, Type, Value]] = Lazy(apronState)
     given Lazy[ApronExprConverter[AddrCtx, Type, Value]] = Lazy(exprConverter)
@@ -170,6 +170,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(Int32(_: BoolExpr)) => None
           case Num(Int32(_: HeapAddr)) => None
           case Num(Int32(_: StackAddr)) => None
+          case Num(Int32(_: RelI32.GlobalAddr)) => None
           case Num(Int64(expr)) => Some(expr)
           case Num(Float32(expr)) => Some(expr)
           case Num(Float64(expr)) => Some(expr)
@@ -204,13 +205,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       initialNonRelationalStore = Map()
     )
     import relationalStore.given
-    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
+    private val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
     apronState =
       if(config.relational)
-        new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+        new ApronRecencyState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), combineExprAlloc(rootFrameData), recencyStore, relationalStore)
       else
-        new NonRelationalApronState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), recencyStore, relationalStore)
+        new NonRelationalApronState[AddrCtx, Type, Value](tempRelationalAlloc(rootFrameData), combineExprAlloc(rootFrameData), recencyStore, relationalStore)
     given ApronRecencyState[AddrCtx, Type, Value] = apronState
 
     val callFrame: MutableCallFrame[FrameData, Int, Value, InstLoc, MayJoin.NoJoin] =
@@ -248,7 +249,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     given heapAlloc: HeapAlloc = new HeapAlloc(rootFrameData)
     val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
-      Bytes.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
+      BTS.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
       heapAlloc
     )
 
@@ -273,7 +274,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         }
       )
 
-    given I32IntegerOps = new I32IntegerOps(rootFrameData, optionStaticMemoryLayout.map(_.stackRange).getOrElse(ApronExpr.bottomInterval))
+    given I32IntegerOps = new I32IntegerOps(
+      rootFrameData = rootFrameData,
+      globals = optionStaticMemoryLayout.map(_.globalRanges).getOrElse(Vector()),
+      stackRange = optionStaticMemoryLayout.map(_.stackRange).getOrElse(ApronExpr.bottomInterval))
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
       if (config.relational)
@@ -334,29 +338,83 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "memmove" =>
         // There is no difference between memcpy and memmove, since memory.copy does a weak update.
         invokeHostFunction(HostFunction("memcpy", hostFunc.funcType), args)
+
+      case "memset" =>
+        args match
+          case List(ptr@Num(Int32(_)), value@Num(Int32(_)), size@Num(Int32(_))) =>
+            memory.fill(
+              MemoryAddr(0),
+              wasmOps.specialOps.valToAddr(ptr),
+              wasmOps.specialOps.valToSize(size),
+              BTS.StoredBytes(List((value,1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN))
+            )
+            List(ptr)
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
+      case "memcmp" =>
+        args match
+          case List(Num(Int32(ptr1)), Num(Int32(ptr2)), Num(Int32(count))) =>
+            List(Num(Int32(NumExpr(ApronExpr.top(I32Type)))))
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected (i32,i32,i32) as argument to $hostFunc, but got $args")
       case "malloc" =>
         args match
           case List(Num(Int32(size))) =>
             domLogger.getDoms(1) match {
               case FixIn.Eval(_, allocationSite) =>
-                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,0)): AddrCtx)
-                List(Num(Int32(HeapAddr(AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false), size.asNumExpr))))
+                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,Topped.Actual(0))): AddrCtx)
+                val heapAddr = HeapAddr(
+                  sites = AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false),
+                  size = size.asNumExpr,
+                  offset = ApronExpr.lit(0, I32Type)
+                )
+                List(Num(Int32(heapAddr)))
               case dom => throw Error(s"Malloc: Expected FixIn.Eval, but got $dom")
             }
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to $hostFunc, but got $args")
+      case "realloc" =>
+        args match
+          case List(Num(Int32(sourceAddr: HeapAddr)), Num(Int32(size))) =>
+            domLogger.getDoms(1) match {
+              case FixIn.Eval(_, allocationSite) =>
+                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,Topped.Actual(0))): AddrCtx)
+                val reallocedAddr: HeapAddr = HeapAddr(
+                  sites = sourceAddr.sites.mapAddr(sites => sites.add(virt)),
+                  size = size.asNumExpr,
+                  offset = Join(sourceAddr.offset, ApronExpr.lit(0, I32Type)).get
+                )
+                memory.copy(MemoryAddr(0), sourceAddr, reallocedAddr: Addr, sourceAddr.size)
+                List(Num(Int32(reallocedAddr)))
+              case dom => throw Error(s"Malloc: Expected FixIn.Eval, but got $dom")
+            }
+          case List(ptr@Num(Int32(_)), Num(Int32(size))) =>
+            List(ptr)
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as argument to $hostFunc, but got $args")
+      case "calloc" =>
+        args match
+          case List(Num(Int32(num)), sizeVal@Num(Int32(size))) =>
+            invokeHostFunction(HostFunction("malloc", FuncType(Vector(NumType.I32), Vector(NumType.I32))), List(Num(Int32(NumExpr(ApronExpr.intMul(num.asNumExpr, size.asNumExpr, I32Type)))))) match
+              case List(ptr@Num(Int32(_))) =>
+                memory.fill(
+                  MemoryAddr(0),
+                  wasmOps.specialOps.valToAddr(ptr),
+                  wasmOps.specialOps.valToSize(sizeVal),
+                  BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.lit(0, I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN))
+                )
+                List(ptr)
+              case ret => failure.fail(WasmFailure.TypeError, s"Expected i32 as result of malloc, but got $ret")
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as argument to $hostFunc, but got $args")
       case "free" =>
         args match
           case List(Num(Int32(ptr))) =>
             println(s"free($ptr)")
             List()
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to free, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to $hostFunc, but got $args")
       case "pow" =>
         args match
           case List(base, exponent) =>
             List(wasmOps.f64ops.pow(base, exponent))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to pow, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected f64,f64 as arguments to $hostFunc, but got $args")
       case "exp2" =>
         args match
           case List(exponent) =>
@@ -373,28 +431,48 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN)))
             List(count)
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to read, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
+      case "write" =>
+        args match
+          case List(data@Num(Int32(fd)), Num(Int32(buffer)), sizeVal@Num(Int32(size))) =>
+            println(s"write($data, $buffer, $size)")
+            List(sizeVal)
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
+      case "fgets" =>
+        args match
+          case List(buffer@Num(Int32(_)), count@Num(Int32(_)), Num(Int32(stream))) =>
+            println(s"fgets($buffer, $count, $stream)")
+            memory.fill(
+              MemoryAddr(0),
+              wasmOps.specialOps.valToAddr(buffer),
+              wasmOps.specialOps.valToSize(count),
+              BTS.StoredBytes(List((Num(Int32(NumExpr(ApronExpr.top(I8Type)))),1)), Topped.Actual(ByteOrder.LITTLE_ENDIAN))
+            )
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "fputs" =>
         args match
           case List(Num(Int32(strPtr)), Num(Int32(fd))) =>
             println(s"fputs($strPtr, $fd)")
             List(Num(Int32(topI32)))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to fputs, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
       case "fwrite" =>
         args match
           case List(Num(Int32(strPtr)), Num(Int32(size)), Num(Int32(count)),Num(Int32(fd))) =>
             println(s"fwrite($strPtr, $size, $count, $fd)")
             List(Num(Int32(topI32)))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to fwrite, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "printf" =>
         args match
           case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
             println(s"printf($strPtr, $varargs)")
             List(Num(Int32(topI32)))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to printf, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
       case "fprintf" =>
         args match
           case List(data@Num(Int32(fd)), Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
@@ -405,7 +483,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
             res
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "fileno" =>
         args match
           case List(Num(Int32(fd))) =>
@@ -421,7 +499,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             println(s"fileno($fd) = ${res.head}")
             res
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to fprintf, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "strlen" =>
         args match
           case List(ptr@Num(Int32(_))) => boundary:
@@ -444,7 +522,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
                 case _ => break(topLen)
             } do ()
             throw new Exception("Unreachable")
-          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to malloc, but got $args")
+          case _ => failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to $hostFunc, but got $args")
       case "toupper" =>
         args match
           case List(v@Num(Int32(char))) =>
@@ -455,7 +533,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               charExpr
             }))))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to toupper, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "tolower" =>
         args match
           case List(v@Num(Int32(char))) =>
@@ -466,7 +544,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               charExpr
             }))))
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to tolower, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(_))) =>
@@ -474,14 +552,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             assert(v.asInstanceOf[Value], domLogger.currentDom)
             List()
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to assert, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "exit" =>
         args match
           case List(v@Num(Int32(code))) =>
             failure.fail(WasmFailure.ProcExit, s"exit code = $code")
             List()
           case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to exit, but got $args")
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "__VERIFIER_nondet_bool" =>
         assignFreshTempVar(ApronExpr.interval(0, 1, I32Type))
       case "__VERIFIER_nondet_char" | "__VERIFIER_nondet_uchar" =>
@@ -508,7 +586,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Int32(n) => valueIterator(n)
         case NumExpr(n) => valueIterator(n)
         case BoolExpr(n) => valueIterator(n)
-        case HeapAddr(sites, size) => valueIterator(sites) ++ valueIterator(size)
+        case HeapAddr(sites, size, offset) => valueIterator(sites) ++ valueIterator(size) ++ valueIterator(offset)
         case Int64(n) => valueIterator(n)
         case Float32(n) => valueIterator(n)
         case Float64(n) => valueIterator(n)
@@ -529,7 +607,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       effectStack.addressIterator[VirtAddr](valueIterator)
 
     def garbageCollect(): Unit =
-      val alive = PowVirtualAddress(this.addressIterator)
+      val alive = PowVirtualAddress.from(this.addressIterator)
       val dead = relationalStore.deadPhysicalAddresses(alive, relationalStore.internalState)
       val stateBefore = effectStack.getState
       recencyStore.collectGarbage(alive)
@@ -578,8 +656,17 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 //        val iv = apronState.getInterval(expr)
 //        iv.inf().isEqual(iv.sup())
 
+    def toNonRelational(using apronState: ApronState[VirtAddr, Type])(v: Value): Value =
+      v match {
+        case Value.Num(NumValue.Int32(x)) => Value.Num(NumValue.Int32(i32ToNonRelational(x)))
+        case Value.Num(NumValue.Int64(x)) => Value.Num(NumValue.Int64(apronState.toNonRelational(x)))
+        case Value.Num(NumValue.Float32(x)) => Value.Num(NumValue.Float32(apronState.toNonRelational(x)))
+        case Value.Num(NumValue.Float64(x)) => Value.Num(NumValue.Float64(apronState.toNonRelational(x)))
+        case _ => v
+      }
+
     private class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
-      val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
+      private val stack: mutable.Stack[(FixIn, IndexedSeq[(Value,Value)], effectStack.State)] = mutable.Stack.empty
 
       override def enter(dom: FixIn): Unit =
         dom match
@@ -593,12 +680,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         val args = params.indices.map {
           i =>
             val v = callFrame.getLocal(i).get
-            (v, getInterval(v))
+            (v, toNonRelational(v))
         }
 
         val state = effectStack.getState
         print("  ".repeat(stack.size))
-        println(s"CALL ${id}(${args.mkString(",")}) @ ${state.hashCode()}")
+        println(s"CALL $id(${args.mkString(",")}) @ ${state.hashCode()}")
         stack.push((dom, args, state))
 
 
@@ -606,14 +693,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         dom match
           case FixIn.EnterWasmFunction(id, _, _) => exitFunction(id, codom)
           case FixIn.EnterHostFunction(id, _) => exitFunction(id, codom)
-          case _ => {}
+          case _ => ()
 
-      private def exitFunction(id: FuncId, codom: TrySturdy[FixOut[Value]]) =
+      private def exitFunction(id: FuncId, codom: TrySturdy[FixOut[Value]]): Unit =
         val (_, args, inState) = stack.pop
         val result =
           codom.map {
-            case FixOut.ExitWasmFunction(returns) => FixOut.ExitWasmFunction(returns.map(v => (v, getInterval(v))))
-            case FixOut.ExitHostFunction(returns) => FixOut.ExitHostFunction(returns.map(v => (v, getInterval(v))))
+            case FixOut.ExitWasmFunction(returns) => FixOut.ExitWasmFunction(returns.map(v => (v, toNonRelational(v))))
+            case FixOut.ExitHostFunction(returns) => FixOut.ExitHostFunction(returns.map(v => (v, toNonRelational(v))))
             case FixOut.Eval() => FixOut.Eval()
             case FixOut.MostGeneralClient() => FixOut.MostGeneralClient()
           }
@@ -629,7 +716,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     class MemoryLogger(using memOps: LanguageSpecificMemOps[HeapCtx, Addr, Size, Value]) extends fix.Logger[FixIn, FixOut[Value]]:
       case class LoadInfo(
-        loadInst: (LoadInst | LoadNInst),
+        loadInst: LoadInst | LoadNInst,
         baseAddr: Addr,
         effectiveAddr: Addr,
         size: Size,
@@ -638,31 +725,31 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       )
 
       case class StoreInfo(
-        storeInst: (StoreInst | StoreNInst),
+        storeInst: StoreInst | StoreNInst,
         baseAddr: Addr,
         effectiveAddr: Addr,
         alignment: Int,
         heapCtx: Iterable[HeapCtx]
       )
 
-      var loads: SortedMap[InstLoc, List[LoadInfo]] = SortedMap()
-      var stores: SortedMap[InstLoc, List[StoreInfo]] = SortedMap()
+      private var loads: SortedMap[InstLoc, List[LoadInfo]] = SortedMap()
+      private var stores: SortedMap[InstLoc, List[StoreInfo]] = SortedMap()
 
-      def loadContexts: SortedMap[InstLoc, (LoadInst | LoadNInst, Set[HeapCtx])] =
+      private def loadContexts: SortedMap[InstLoc, (LoadInst | LoadNInst, Set[HeapCtx])] =
         loads.view.mapValues(loadInfos =>
           val loadInst = loadInfos.head.loadInst
           val heapCtxs = loadInfos.iterator.flatMap(_.matchingRegions.map(_._1.ctx).toSet).toSet
           (loadInst,heapCtxs)
         ).to(SortedMap)
 
-      def storeContexts: SortedMap[InstLoc, (StoreInst | StoreNInst, Set[HeapCtx])] =
+      private def storeContexts: SortedMap[InstLoc, (StoreInst | StoreNInst, Set[HeapCtx])] =
         stores.view.mapValues(storeInfos =>
           val storeInst = storeInfos.head.storeInst
           val heapCtxs = storeInfos.iterator.flatMap(_.heapCtx.toSet).toSet
           (storeInst,heapCtxs)
         ).to(SortedMap)
 
-      type MemOpsMap = SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[HeapCtx])]
+      private type MemOpsMap = SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[HeapCtx])]
       def heapCtxs: MemOpsMap =
         loadContexts ++ storeContexts
 
@@ -688,9 +775,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       }
 
       def memOpsMapToString(memOps: MemOpsMap): String =
-        memOps.iterator.map { case (loc, (inst, heapCtxs)) => s"$loc; ${memoryInstToString(inst)}; ${heapCtxs.toList.sorted.mkString(",")}" }.mkString("\n")
+        memOps.iterator.map { case (loc, (inst, heapCtxs)) => s"$loc, ${memoryInstToString(inst)}, ${heapCtxs.toList.sorted.mkString(";")}" }.mkString("\n")
 
-      private inline def memoryInstToString(memoryInst: (LoadInst | LoadNInst | StoreInst | StoreNInst)): String =
+      private inline def memoryInstToString(memoryInst: LoadInst | LoadNInst | StoreInst | StoreNInst): String =
         memoryInst match
           case Load(tpe, align, offset) => s"$tpe.load offset=$offset align=$align"
           case LoadN(tpe, n, align, offset) => s"$tpe.load n=$n offset=$offset align=$align"
@@ -752,7 +839,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(Int32(v32)) => v32 match
             case NumExpr(v) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
             case BoolExpr(v) => UnconstrainedInfo.Boolean(apronState.assert(v), isConstrained(v))
-            case HeapAddr(ref, size) => UnconstrainedInfo.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
+            case HeapAddr(ref, size, _) => UnconstrainedInfo.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
+            case _: RelI32.GlobalAddr | _: StackAddr => ???
           case Num(Int64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
           case Num(Float32(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
           case Num(Float64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))
@@ -791,7 +879,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     private def signedMax(numBytes: Int): BigInt = BigInt(2).pow(8 * numBytes - 1) - 1
 
-    val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
+    val observedConfig: WasmConfig = config.withObservers(Seq(this.triggerControlEvent))
 
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint[FixIn, FixOut[Value]] {
       override type Ctx = observedConfig.ctx.Ctx

@@ -17,14 +17,13 @@ trait JOption[J[_] <: MayJoin[_], A]:
 
   def map[B](f: A => B): JOption[J, B]
   def flatMap[B](f: A => JOption[J, B]): JOption[J, B]
-
-
+  def toOption: Option[A]
 
 case class SomeJOption[J[_] <: MayJoin[_], A](a: A) extends JOption[J, A]:
   override def option[B](default: => B)(f: A => B): J[B] ?=> B = f(a)
   override def map[B](f: A => B): JOption[J, B] = SomeJOption(f(a))
   override def flatMap[B](f: A => JOption[J, B]): JOption[J, B] = f(a)
-
+  override def toOption: Option[A] = Some(a)
 
 
 enum JOptionC[A] extends JOption[NoJoin, A]:
@@ -43,7 +42,7 @@ enum JOptionC[A] extends JOption[NoJoin, A]:
     case None() => None()
     case Some(a) => f(a)
 
-  def toOption: Option[A] = this match
+  override def toOption: Option[A] = this match
     case None() => scala.None
     case Some(a) => scala.Some(a)
 
@@ -98,7 +97,7 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
       case NoneSome(a) => JOptionC.Some(a)
       case Some(a) => JOptionC.Some(a)
 
-  def toOption: Option[A] =
+  override def toOption: Option[A] =
     this match
       case None() => scala.None
       case NoneSome(a) => scala.Some(a)
@@ -174,6 +173,8 @@ enum JOptionPowerset[A] extends JOption[WithJoin, A]:
       NoneSome(Powerset(bs))
     else
       Some(Powerset(bs))
+
+  override def toOption: Option[A] = throw new UnsupportedOperationException()
 
   import sturdy.values.JoinPowerset
   def joinDeep(that: JOptionPowerset[A]): JOptionPowerset[A] = (this, that) match

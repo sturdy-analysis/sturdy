@@ -58,6 +58,7 @@ object RecencyRelationalStore:
     ]
     (using
       temporaryVariableAllocator: Allocator[Ctx, Type],
+      combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
       apronManager: Manager,
       effectStack: EffectStack
     ):
@@ -65,6 +66,6 @@ object RecencyRelationalStore:
       var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = null
       given Lazy[ApronState[VirtualAddress[Ctx], Type]] = lazily(apronState)
       val (recencyStore, relationalStore) = apply[Ctx, Type, ApronExpr[VirtualAddress[Ctx],Type]]
-      apronState = new ApronRecencyState(temporaryVariableAllocator, recencyStore, relationalStore)
+      apronState = new ApronRecencyState(temporaryVariableAllocator, combineExpressionAllocator, recencyStore, relationalStore)
 
       apronState
