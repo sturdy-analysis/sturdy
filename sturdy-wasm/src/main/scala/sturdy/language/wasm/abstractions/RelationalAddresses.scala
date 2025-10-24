@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.apron.{ApronExpr, ApronState, ApronVar, BinOp}
+import sturdy.apron.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.allocation.AAllocatorFromContext
@@ -14,7 +14,7 @@ trait RelationalAddresses extends RelationalTypes:
     case CallFrame(callFramePosition: Int, programPos: Option[FixIn], function: FrameData)
     case Global(addr: Int | String)
     case Stack(stackPosition: Int, programPosition: FixIn, function: FrameData)
-    case Heap(ctx: HeapCtx)
+    case ByteMemory(ctx: ByteMemoryCtx)
     case Temp(programPosition: FixIn, tpe: Type)
 
     override def toString: String =
@@ -23,14 +23,14 @@ trait RelationalAddresses extends RelationalTypes:
         case CallFrame(callFramePosition, None, function) => s"L$callFramePosition@$function"
         case Global(addr) => s"G$addr"
         case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"
-        case Heap(ctx) => ctx.toString
+        case ByteMemory(ctx) => ctx.toString
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
-  enum HeapCtx:
+  enum ByteMemoryCtx:
     case Fill(site: FixIn)
     case Global(name: String)
-    case Stack(function: FuncId, offset: Topped[Int])
-    case Heap(allocSite: InstLoc, offset: Topped[Int])
+    case Stack(function: FuncId, offset: Int)
+    case Heap(allocSite: InstLoc, offset: Int)
     case Static(offset: Int)
     case Dynamic(storeInstruction: FixIn)
 
@@ -91,28 +91,28 @@ trait RelationalAddresses extends RelationalTypes:
       case _: AddrCtx.CallFrame => 1
       case _: AddrCtx.Global => 2
       case _: AddrCtx.Stack => 3
-      case _: AddrCtx.Heap => 4
+      case _: AddrCtx.ByteMemory => 4
       case _: AddrCtx.Temp => 5
     }.compare(ctx1, ctx2)
   }
   given Finite[AddrCtx] with {}
 
-  given Ordering[HeapCtx] = {
-    case (HeapCtx.Fill(site1), HeapCtx.Fill(site2)) => Ordering[FixIn].compare(site1, site2)
-    case (HeapCtx.Static(offset1), HeapCtx.Static(offset2)) => Ordering[Int].compare(offset1, offset2)
-    case (HeapCtx.Global(name1), HeapCtx.Global(name2)) => Ordering[String].compare(name1, name2)
-    case (HeapCtx.Stack(fun1,offset1), HeapCtx.Stack(fun2,offset2)) => Ordering[(FuncId,Topped[Int])].compare((fun1,offset1), (fun2,offset2))
-    case (HeapCtx.Heap(site1, offset1), HeapCtx.Heap(site2, offset2)) => Ordering[(InstLoc, Topped[Int])].compare((site1, offset1), (site2, offset2))
-    case (HeapCtx.Dynamic(storeInst1), HeapCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
-    case (ctx1, ctx2) => Ordering.by[HeapCtx, Int] {
-      case _: HeapCtx.Fill => 1
-      case _: HeapCtx.Global => 2
-      case _: HeapCtx.Stack => 3
-      case _: HeapCtx.Heap => 4
-      case _: HeapCtx.Static => 5
-      case _: HeapCtx.Dynamic => 6
+  given Ordering[ByteMemoryCtx] = {
+    case (ByteMemoryCtx.Fill(site1), ByteMemoryCtx.Fill(site2)) => Ordering[FixIn].compare(site1, site2)
+    case (ByteMemoryCtx.Static(offset1), ByteMemoryCtx.Static(offset2)) => Ordering[Int].compare(offset1, offset2)
+    case (ByteMemoryCtx.Global(name1), ByteMemoryCtx.Global(name2)) => Ordering[String].compare(name1, name2)
+    case (ByteMemoryCtx.Stack(fun1,offset1), ByteMemoryCtx.Stack(fun2,offset2)) => Ordering[(FuncId,Int)].compare((fun1,offset1), (fun2,offset2))
+    case (ByteMemoryCtx.Heap(site1, offset1), ByteMemoryCtx.Heap(site2, offset2)) => Ordering[(InstLoc,Int)].compare((site1, offset1), (site2, offset2))
+    case (ByteMemoryCtx.Dynamic(storeInst1), ByteMemoryCtx.Dynamic(storeInst2)) => Ordering[FixIn].compare(storeInst1, storeInst2)
+    case (ctx1, ctx2) => Ordering.by[ByteMemoryCtx, Int] {
+      case _: ByteMemoryCtx.Fill => 1
+      case _: ByteMemoryCtx.Global => 2
+      case _: ByteMemoryCtx.Stack => 3
+      case _: ByteMemoryCtx.Heap => 4
+      case _: ByteMemoryCtx.Static => 5
+      case _: ByteMemoryCtx.Dynamic => 6
     }.compare(ctx1, ctx2)
   }
-  given Finite[HeapCtx] with {}
+  given Finite[ByteMemoryCtx] with {}
 
   given Ordering[VirtAddr] = VirtualAddressOrdering

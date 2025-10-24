@@ -1,4 +1,4 @@
-{ lib, stdenv, binutils, fetchFromGitHub, gmp, mpfr, ppl, jdk21_headless }:
+{ lib, stdenv, binutils, fetchFromGitHub, clang_14, gmp, mpfr, ppl, jdk21_headless, zip }:
 
 stdenv.mkDerivation rec {
   name = "apron";
@@ -14,10 +14,15 @@ stdenv.mkDerivation rec {
   patchPhase = ''
     substituteInPlace configure \
       --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\""
+    substituteInPlace japron/Makefile \
+      --replace "\$(CC) \$(CFLAGSN) -c \$(IFLAGS) \$< -o \$@" "\$(CC) \$(CFLAGSN) -c \$(IFLAGS) \$< -o \$@ && \$(CC) \$(CFLAGSN) -S -emit-llvm \$(IFLAGS) \$< -o \$(patsubst %.o,%.s,\$@)" \
+      --replace "\$(CC) \$(CFLAGSN) -c \$(IFLAGS) -Igmp \$< -o \$@" "\$(CC) \$(CFLAGSN) -c \$(IFLAGS) -Igmp \$< -o \$@ && \$(CC) \$(CFLAGSN) -S -emit-llvm \$(IFLAGS) -Igmp \$< -o \$(patsubst %.o,%.s,\$@)" \
+      --replace "\$(INSTALLd) \$(APRON_LIB)" "\$(INSTALLd) \$(APRON_LIB) && (find gmp -name '*.s' | ${zip}/bin/zip gmp.zip -@) && \$(INSTALL) gmp.zip \$(APRON_LIB) && (find apron -name '*.s' | ${zip}/bin/zip apron.zip -@) && \$(INSTALL) apron.zip \$(APRON_LIB)"
+    cat -e -t -v japron/Makefile
   '';
 
   configurePhase = ''
-    ./configure -prefix $out
+    CC=${clang_14}/bin/clang ./configure -prefix $out
   '';
 
   buildInputs = [ gmp mpfr ppl jdk21_headless ];

@@ -31,7 +31,7 @@ enum AlignedRead:
 trait LanguageSpecificMemOps[Context, Addr, Size, Val]:
   def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, alignment: Int, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterable[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
   def isSummaryRegion[Timestamp: PartialOrder](ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val]): Boolean
-  def knownStartAddrAndSize(ctx: Context, startAddr: Addr, byteSize: Int): (Addr,Size)
+  def computeStartAddrAndSize(ctx: Context, startAddr: Addr, byteSize: Int): (Addr,Size)
 
 trait SizeOps[Size]:
   def fromInt(size: Int): Size
@@ -121,7 +121,7 @@ final class AlignedMemory
           var store = store0
           for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Write, key, addr)) {
             increment(ctx)
-            val (knownStartAddr,knownSize) = memOps.knownStartAddrAndSize(ctx, addr, byteSize)
+            val (knownStartAddr,knownSize) = memOps.computeStartAddrAndSize(ctx, addr, byteSize)
             val newRegion = MemoryRegion(
               startAddr = knownStartAddr,
               alignment = Powerset(alignment),

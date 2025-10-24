@@ -132,50 +132,25 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
 
   def getFloatInterval(expr: ApronExpr[Addr, Type])(using ResolveState): sturdy.apron.FloatInterval
 
-  inline def getInt(expr: ApronExpr[Addr, Type])(using ResolveState): Option[Int] =
-    val (lower, upper) = getBigIntInterval(expr)
-    if(lower == upper && lower.isDefined && lower.get.isValidInt)
-      Some(lower.get.toInt)
+  inline def getInt(expr: ApronExpr[Addr, Type])(using ResolveState): Option[Int] = {
+    val iv = getInterval(expr)
+    if(iv.isScalar)
+      ApronExpr.toInt(iv.inf())
     else
       None
+  }
 
   inline def getIntInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Int,Int) =
-    val (lower,upper) = getBigIntInterval(expr)
-    (lower.getOrElse[BigInt](Integer.MIN_VALUE).toInt, upper.getOrElse[BigInt](Integer.MAX_VALUE).toInt)
+    val iv = getInterval(expr)
+    (ApronExpr.toInt(iv.inf()).getOrElse(Int.MinValue), ApronExpr.toInt(iv.sup()).getOrElse(Int.MaxValue))
 
   inline def getLongInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Long, Long) =
-    val (lower, upper) = getBigIntInterval(expr)
-    val inf = lower.getOrElse[BigInt](Long.MinValue).max(Long.MinValue).toLong
-    val sup = upper.getOrElse[BigInt](Long.MaxValue).min(Long.MaxValue).toLong
-    (inf,sup)
+    val iv = getInterval(expr)
+    (ApronExpr.toLong(iv.inf()).getOrElse(Long.MinValue), ApronExpr.toLong(iv.sup()).getOrElse(Long.MaxValue))
 
   def getBigIntInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Option[BigInt],Option[BigInt]) =
     val iv = getInterval(expr)
-    val lower =
-      if (iv.inf().isInfty() != 0)
-        None
-      else
-        val mpq = Mpq()
-        iv.inf().toMpq(mpq, 0)
-        Some(BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue())))
-
-    val upper =
-      if (iv.sup().isInfty() != 0)
-        None
-      else
-        val mpq = Mpq()
-        iv.sup().toMpq(mpq, 0)
-        Some(BigInt(mpq.getNum.bigIntegerValue().divide(mpq.getDen.bigIntegerValue())))
-
-    (lower, upper)
-
-  def getDoubleInterval(expr: ApronExpr[Addr, Type])(using ResolveState): (Double, Double) =
-    val iv = getInterval(expr)
-    val lower: Array[Double] = Array(0.0)
-    iv.inf().toDouble(lower, Mpfr.RNDZ)
-    val upper: Array[Double] = Array(0.0)
-    iv.inf().toDouble(upper, Mpfr.RNDZ)
-    (lower(0), upper(0))
+    (ApronExpr.toBigInt(iv.inf()), ApronExpr.toBigInt(iv.sup()))
 
   def assert(v: ApronBool[Addr, Type] | ApronCons[Addr,Type])(using ResolveState): Topped[Boolean]
 
@@ -436,23 +411,23 @@ class ApronRecencyState
         specialsCombined <- Join(specials1, specials2)
       } yield(ApronExpr.Binary(op1, lCombined, rCombined, rt1, rd1, specialsCombined, tpe1))
 
-    // (leaf ⊔ (l2 ⊕ r2)) = (leaf ⊕ neutral(⊕)) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,l2)
-    // (leaf ⊔ (l2 ⊕ r2)) = (neutral(⊕) ⊕ leaf) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,r2)
-    case (e1: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]), e2@ApronExpr.Binary(op, l2, r2, rt2, rd2, specials2, tpe2))
-      if !widen && (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(e1,l2) || structurallyJoinable(e1,r2)) =>
-        if(structurallyJoinable(e1,l2))
-          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, e1, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), rt2, rd2, specials2, tpe2),e2)
-        else
-          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), e1, rt2, rd2, specials2, tpe2),e2)
-
-    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (leaf ⊕ neutral(⊕)) if structurallyJoinable(leaf,l1)
-    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (neutral(⊕) ⊕ leaf) if structurallyJoinable(leaf,r1)
-    case (e1@ApronExpr.Binary(op, l1, r1, rt1, rd1, specials1, tpe1), e2: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]))
-      if (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(l1,e2) || structurallyJoinable(r1,e2)) =>
-        if(structurallyJoinable(l1,e2))
-          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, e2, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), rt1, rd1, specials1, tpe1))
-        else
-          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), e2, rt1, rd1, specials1, tpe1))
+//    // (leaf ⊔ (l2 ⊕ r2)) = (leaf ⊕ neutral(⊕)) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,l2)
+//    // (leaf ⊔ (l2 ⊕ r2)) = (neutral(⊕) ⊕ leaf) ⊔ (l2 ⊕ r2) if structurallyJoinable(leaf,r2)
+//    case (e1: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]), e2@ApronExpr.Binary(op, l2, r2, rt2, rd2, specials2, tpe2))
+//      if !widen && (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(e1,l2) || structurallyJoinable(e1,r2)) =>
+//        if(structurallyJoinable(e1,l2))
+//          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, e1, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), rt2, rd2, specials2, tpe2),e2)
+//        else
+//          combineExpr0(widen,allocator).apply(ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e1.floatSpecials, e1._type), e1, rt2, rd2, specials2, tpe2),e2)
+//
+//    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (leaf ⊕ neutral(⊕)) if structurallyJoinable(leaf,l1)
+//    // ((l1 ⊕ r1) ⊔ leaf) = (l2 ⊕ r2) ⊔ (neutral(⊕) ⊕ leaf) if structurallyJoinable(leaf,r1)
+//    case (e1@ApronExpr.Binary(op, l1, r1, rt1, rd1, specials1, tpe1), e2: (ApronExpr.Constant[VirtualAddress[Ctx], Type] | ApronExpr.Addr[VirtualAddress[Ctx], Type]))
+//      if (op == BinOp.Add || op == BinOp.Sub || op == BinOp.Mul) && (structurallyJoinable(l1,e2) || structurallyJoinable(r1,e2)) =>
+//        if(structurallyJoinable(l1,e2))
+//          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, e2, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), rt1, rd1, specials1, tpe1))
+//        else
+//          combineExpr0(widen,allocator).apply(e1,ApronExpr.Binary(op, ApronExpr.lit(op.neutralElement, e2.floatSpecials, e2._type), e2, rt1, rd1, specials1, tpe1))
 
     // (const1 ⊔ const2) = interval(const1) ⊔ interval(const2)
     case (e1, e2) if(e1.isConstant && e2.isConstant) =>
@@ -562,10 +537,10 @@ class ApronRecencyState
 
   private def structurallyJoinable(e1: ApronExpr[VirtualAddress[Ctx], Type], e2: ApronExpr[VirtualAddress[Ctx], Type]): Boolean = (e1, e2) match {
     case _ if(e1.isConstant && e2.isConstant || structurallyEq(e1, e2)) => true
-    case (_: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type]), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) if(op2 == BinOp.Add || op2 == BinOp.Sub || op2 == BinOp.Mul) =>
-      e1._type == tpe2 && (structurallyJoinable(e1, l2) || structurallyJoinable(e1, r2))
-    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), _: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type])) if(op1 == BinOp.Add || op1 == BinOp.Sub || op1 == BinOp.Mul) =>
-      tpe1 == e2._type && (structurallyJoinable(l1, e2) || structurallyJoinable(r1, e2))
+//    case (_: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type]), ApronExpr.Binary(op2, l2, r2, rt2, rd2, _, tpe2)) if(op2 == BinOp.Add || op2 == BinOp.Sub || op2 == BinOp.Mul) =>
+//      e1._type == tpe2 && (structurallyJoinable(e1, l2) || structurallyJoinable(e1, r2))
+//    case (ApronExpr.Binary(op1, l1, r1, rt1, rd1, _, tpe1), _: (ApronExpr.Addr[VirtualAddress[Ctx], Type] | ApronExpr.Constant[VirtualAddress[Ctx], Type])) if(op1 == BinOp.Add || op1 == BinOp.Sub || op1 == BinOp.Mul) =>
+//      tpe1 == e2._type && (structurallyJoinable(l1, e2) || structurallyJoinable(r1, e2))
     case _ => false
   }
 

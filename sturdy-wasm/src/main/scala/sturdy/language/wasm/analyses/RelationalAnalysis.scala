@@ -248,7 +248,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given DecidableSymbolTable[Unit, GlobalAddr, Value] = globals
 
     given heapAlloc: HeapAlloc = new HeapAlloc(rootFrameData)
-    val memory: AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, HeapCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
+    val memory: AlignedMemory[MemoryAddr, ByteMemoryCtx, Addr, Value, ApronExpr[VirtAddr, Type]] = new AlignedMemory[MemoryAddr, ByteMemoryCtx, Addr, Value, ApronExpr[VirtAddr, Type]](
       BTS.ReadBytes(Topped.Top, Topped.Actual(ByteOrder.LITTLE_ENDIAN)),
       heapAlloc
     )
@@ -360,11 +360,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Num(Int32(size))) =>
             domLogger.getDoms(1) match {
               case FixIn.Eval(_, allocationSite) =>
-                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,Topped.Actual(0))): AddrCtx)
+                val virt = apronState.alloc(AddrCtx.ByteMemory(ByteMemoryCtx.Heap(allocationSite,0)): AddrCtx)
                 val heapAddr = HeapAddr(
                   sites = AbstractReference.Addr(PowVirtualAddress(virt), definitelyManaged = false),
                   size = size.asNumExpr,
-                  offset = ApronExpr.lit(0, I32Type)
+                  initialOffset = Powerset(),
+                  otherOffset = ApronExpr.lit(0, I32Type)
                 )
                 List(Num(Int32(heapAddr)))
               case dom => throw Error(s"Malloc: Expected FixIn.Eval, but got $dom")
@@ -375,11 +376,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Num(Int32(sourceAddr: HeapAddr)), Num(Int32(size))) =>
             domLogger.getDoms(1) match {
               case FixIn.Eval(_, allocationSite) =>
-                val virt = apronState.alloc(AddrCtx.Heap(HeapCtx.Heap(allocationSite,Topped.Actual(0))): AddrCtx)
+                val virt = apronState.alloc(AddrCtx.ByteMemory(ByteMemoryCtx.Heap(allocationSite,0)): AddrCtx)
                 val reallocedAddr: HeapAddr = HeapAddr(
                   sites = sourceAddr.sites.mapAddr(sites => sites.add(virt)),
                   size = size.asNumExpr,
-                  offset = Join(sourceAddr.offset, ApronExpr.lit(0, I32Type)).get
+                  initialOffset = sourceAddr.initialOffset,
+                  otherOffset = Join(sourceAddr.otherOffset, ApronExpr.lit(0, I32Type)).get
                 )
                 memory.copy(MemoryAddr(0), sourceAddr, reallocedAddr: Addr, sourceAddr.size)
                 List(Num(Int32(reallocedAddr)))
@@ -586,7 +588,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case Int32(n) => valueIterator(n)
         case NumExpr(n) => valueIterator(n)
         case BoolExpr(n) => valueIterator(n)
-        case HeapAddr(sites, size, offset) => valueIterator(sites) ++ valueIterator(size) ++ valueIterator(offset)
+        case HeapAddr(sites, size, _, otherOffset) => valueIterator(sites) ++ valueIterator(size) ++ valueIterator(otherOffset)
         case Int64(n) => valueIterator(n)
         case Float32(n) => valueIterator(n)
         case Float64(n) => valueIterator(n)
@@ -714,14 +716,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       this.fixpoint.addContextFreeLogger(memLogger)
       memLogger
 
-    class MemoryLogger(using memOps: LanguageSpecificMemOps[HeapCtx, Addr, Size, Value]) extends fix.Logger[FixIn, FixOut[Value]]:
+    class MemoryLogger(using memOps: LanguageSpecificMemOps[ByteMemoryCtx, Addr, Size, Value]) extends fix.Logger[FixIn, FixOut[Value]]:
       case class LoadInfo(
         loadInst: LoadInst | LoadNInst,
         baseAddr: Addr,
         effectiveAddr: Addr,
         size: Size,
         alignment: Int,
-        matchingRegions: Iterable[(PhysicalAddress[HeapCtx], MemoryRegion[Addr, Size, memory.Timestamp, Value], AlignedRead)]
+        matchingRegions: Iterable[(PhysicalAddress[ByteMemoryCtx], MemoryRegion[Addr, Size, memory.Timestamp, Value], AlignedRead)]
       )
 
       case class StoreInfo(
@@ -729,27 +731,27 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         baseAddr: Addr,
         effectiveAddr: Addr,
         alignment: Int,
-        heapCtx: Iterable[HeapCtx]
+        heapCtx: Iterable[ByteMemoryCtx]
       )
 
       private var loads: SortedMap[InstLoc, List[LoadInfo]] = SortedMap()
       private var stores: SortedMap[InstLoc, List[StoreInfo]] = SortedMap()
 
-      private def loadContexts: SortedMap[InstLoc, (LoadInst | LoadNInst, Set[HeapCtx])] =
+      private def loadContexts: SortedMap[InstLoc, (LoadInst | LoadNInst, Set[ByteMemoryCtx])] =
         loads.view.mapValues(loadInfos =>
           val loadInst = loadInfos.head.loadInst
           val heapCtxs = loadInfos.iterator.flatMap(_.matchingRegions.map(_._1.ctx).toSet).toSet
           (loadInst,heapCtxs)
         ).to(SortedMap)
 
-      private def storeContexts: SortedMap[InstLoc, (StoreInst | StoreNInst, Set[HeapCtx])] =
+      private def storeContexts: SortedMap[InstLoc, (StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
         stores.view.mapValues(storeInfos =>
           val storeInst = storeInfos.head.storeInst
           val heapCtxs = storeInfos.iterator.flatMap(_.heapCtx.toSet).toSet
           (storeInst,heapCtxs)
         ).to(SortedMap)
 
-      private type MemOpsMap = SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[HeapCtx])]
+      private type MemOpsMap = SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]
       def heapCtxs: MemOpsMap =
         loadContexts ++ storeContexts
 
@@ -766,7 +768,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             s"imprecise:\n${memOpsMapToString(imprecise)}\n" +
             s"deadCode:\n${memOpsMapToString(deadCode)}\n"
 
-      def computePrecision(expected: SortedMap[InstLoc, Set[HeapCtx]]): Precision = {
+      def computePrecision(expected: SortedMap[InstLoc, Set[ByteMemoryCtx]]): Precision = {
         val allContexts = heapCtxs
         val notAnalyzed = expected.keySet.filter(loc => !allContexts.contains(loc))
         val (executable, deadCode) = allContexts.partition((loc,_) => expected.contains(loc))
@@ -839,8 +841,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(Int32(v32)) => v32 match
             case NumExpr(v) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
             case BoolExpr(v) => UnconstrainedInfo.Boolean(apronState.assert(v), isConstrained(v))
-            case HeapAddr(ref, size, _) => UnconstrainedInfo.AllocationSites(ref.mapAddr(sites => new Powerset(sites.physicalAddresses.asInstanceOf)), apronState.getInterval(size), isConstrained(size))
-            case _: RelI32.GlobalAddr | _: StackAddr => ???
+            case _: RelI32.GlobalAddr | _: StackAddr | _: HeapAddr => ???
           case Num(Int64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
           case Num(Float32(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
           case Num(Float64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))

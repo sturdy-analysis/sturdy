@@ -1,7 +1,7 @@
 package sturdy.apron
 
 import apron.*
-import gmp.{Mpq, Mpz}
+import gmp.{Mpfr, Mpq, Mpz}
 import sturdy.apron.ApronExpr.{mpqScalar, topInterval}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.floating.{*, given}
@@ -207,6 +207,32 @@ object ApronExpr:
       val d = numerator.gcd(denominator)
       new MpqScalar(numerator.divide(d), denominator.divide(d))
     }
+
+  def toInt(scalar: Scalar): Option[Int] =
+    val result = Array(0.0d)
+    if(scalar.isInfty == 0 && scalar.toDouble(result, Mpfr.RNDZ) == 0 && result(0).isValidInt) {
+      Some(result(0).toInt)
+    } else {
+      None
+    }
+
+  def toLong(scalar: Scalar): Option[Long] =
+    val result = Mpq()
+    if(scalar.isInfty == 0 && scalar.toMpq(result, Mpfr.RNDZ) == 0 && result.denRef.cmp(1) == 0)
+      try {
+        Some(result.numRef.bigIntegerValue().longValueExact())
+      } catch {
+        case _: ArithmeticException => None
+      }
+    else
+      None
+
+  def toBigInt(scalar: Scalar): Option[BigInt] =
+    val result = Mpq()
+    if(scalar.isInfty == 0 && scalar.toMpq(result, Mpfr.RNDZ) == 0 && result.denRef.cmp(1) == 0)
+      Some(result.numRef.bigIntegerValue())
+    else
+      None
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, FloatSpecials.Integer, tpe)
