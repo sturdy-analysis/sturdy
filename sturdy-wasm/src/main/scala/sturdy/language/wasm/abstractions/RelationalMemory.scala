@@ -83,11 +83,14 @@ trait RelationalMemory extends RelationalValues:
 
     globalStarts = globalStarts.sortBy((_name, iv) => iv.inf())
 
-    val globalRanges = globalStarts.zip(globalStarts.tail).map {
+    var globalRanges = globalStarts.zip(globalStarts.tail).map {
       case ((name, iv),(_, ivNext)) =>
         val end = apronState.getInterval(ApronExpr.intSub(ApronExpr.constant(ivNext, I32Type), ApronExpr.lit(1, I32Type), I32Type))
         (name, Interval(iv.inf(), end.inf()))
     }
+
+    if(globalRanges.headOption.exists((name, iv) => name == ".rodata" && iv.isBottom))
+      globalRanges = globalRanges.tail
 
     if(globalRanges.headOption.exists(_._1 == "__data_end"))
       Vector()
