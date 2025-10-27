@@ -208,7 +208,7 @@ trait AddressTranslation[Context: Finite] extends Effect:
 
   def allocNoRetire[State](using HasAddressTranslationState[Context,State])(ctx: Context, recency: PowRecency, state: State): (VirtualAddress[Context],State) =
     val virt = freshVirt(ctx)
-    val cu  state1 = setRecencyPure(virt, recency,state)
+    val state1 = setRecencyPure(virt, recency,state)
     (virt,state1)
 
   def joinRecentIntoOld[State](using HasAddressTranslationState[Context,State])(virt: VirtualAddress[Context], state: State): State =

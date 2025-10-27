@@ -14,4 +14,4 @@ clean:
 #	wasm-opt $@ -O1 -g -o $@
 
 %.wast: %.wasm
-	wasm2wat $< --generate-names -o $@
+	wasm2wat $< --generate-names --enable-all -o $@

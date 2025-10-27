@@ -225,6 +225,7 @@ extern double pow(double, double);
 extern double sqrt(double);
 
 extern void exit (int status);
+extern void abort (void);
 
 typedef __SWORD_TYPE ssize_t;
 struct _IO_FILE;
@@ -234,6 +235,7 @@ extern ssize_t read(int fd, void *buf, size_t nbytes);
 extern size_t fwrite(const void *data, size_t size, size_t count, FILE *stream);
 extern int fputs(const char* str, FILE* fp);
 extern char* fgets (char *buf, int n, FILE* fp);
+extern int putchar(int c);
 extern int fileno(FILE* fp);
 extern int fprintf(FILE *stream, const char* format, ...);
 extern int printf(const char* str, ...);

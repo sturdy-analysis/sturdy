@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WebAssembly Square function</title>
+</head>
+<body>
+<div id="textcontent"></div>
+<script>
+    let imports = {
+        env: {
+            memmove: function() {},
+            toupper: function() {},
+            tolower: function() {},
+            malloc: function() {},
+            fileno: function() {},
+            read: function() {},
+            realloc: function() {},
+            write: function() {},
+            free: function() {}
+        }
+    }
+    fetch("reverse-complement.wasm").then(bytes => bytes.arrayBuffer())
+        .then(mod => WebAssembly.compile(mod))
+        .then(module => new WebAssembly.Instance(module, imports))
+        .then(instance => {
+            instance.exports._start();
+        });
+</script>
+</body>
+</html>

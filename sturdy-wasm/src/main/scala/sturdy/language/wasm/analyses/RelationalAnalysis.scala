@@ -441,6 +441,27 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(sizeVal)
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
+      case "putchar" =>
+        args match
+          case List(Num(Int32(char))) =>
+            println(s"putchar($char)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
+      case "puts" =>
+        args match
+          case List(Num(Int32(strPtr))) =>
+            println(s"fputs($strPtr)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
+      case "fputs" =>
+        args match
+          case List(Num(Int32(strPtr)), Num(Int32(fd))) =>
+            println(s"fputs($strPtr, $fd)")
+            List(Num(Int32(topI32)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
       case "fgets" =>
         args match
           case List(buffer@Num(Int32(_)), count@Num(Int32(_)), Num(Int32(stream))) =>
@@ -454,13 +475,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
-      case "fputs" =>
-        args match
-          case List(Num(Int32(strPtr)), Num(Int32(fd))) =>
-            println(s"fputs($strPtr, $fd)")
-            List(Num(Int32(topI32)))
-          case _ =>
-            failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
       case "fwrite" =>
         args match
           case List(Num(Int32(strPtr)), Num(Int32(size)), Num(Int32(count)),Num(Int32(fd))) =>

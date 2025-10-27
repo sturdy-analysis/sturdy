@@ -239,8 +239,10 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
                            (using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def integerLit(i: Int): I32 = {
-        globals.find((name, iv) => iv.inf().isEqual(i)) match
-          case Some((name,iv)) => GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.lit(0, I32Type))
+        globals.find((name, iv) => Interval(i,i).isLeq(iv)) match
+          case Some((name,iv)) =>
+            val offset = apronState.getInterval(ApronExpr.intSub(ApronExpr.lit(i, I32Type), ApronExpr.constant(iv.inf(), I32Type), I32Type))
+            GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
           case None => super.integerLit(i)
       }
 

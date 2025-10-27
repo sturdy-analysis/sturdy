@@ -2,6 +2,7 @@ package sturdy.language.wasm.benchmarksgame
 
 import apron.*
 import com.github.tototoshi.csv.{CSVReader, CSVWriter, DefaultCSVFormat}
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{BeforeAndAfterAll, Suites}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -15,55 +16,84 @@ import sturdy.language.wasm.generic.{*, given}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import swam.syntax
+import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.net.URI
+import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
-class BenchmarksgameRelationalPrecisionTests extends Suites(
-  BenchmarksgameRelationalPrecisionTest(Box())
-)
+val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
-class BenchmarksgameRelationalPrecisionTest(manager: Manager) extends AnyFunSuite, Matchers, BeforeAndAfterAll:
+class BenchmarksgameRelationalPrecisionTests extends Suites(
+  BenchmarksgameRelationalPrecisionTest(manager = Polka(true), relational = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Octagon(), relational = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = false)
+), BeforeAndAfterAll:
+
+  override def beforeAll(): Unit =
+    writer.writeRow(List("program", "analysis", "precise_loads", "imprecise_loads", "precise_stores", "imprecise_stores"))
+
+  override def afterAll(): Unit =
+    writer.close
+
+class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolean) extends AnyFunSpec, Matchers:
 
   val funcName = "_start"
-  val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
+
   val fixpointConfig: FixpointConfig = FixpointConfig(
     stack = StackConfig.StackedStates(),
     iter = sturdy.fix.iter.Config.Innermost
   )
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("k-nucleotide.wasm")).sorted.foreach { p =>
-    test(s"${p.getFileName}") {
-      val module = Parsing.fromBinary(p)
+  // These programs contain structs, which our analysis does not yet support.
+  val excluded: Set[Path] = Set("k-nucleotide.wasm", "pidigits.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
+    Paths.get(uri).resolve(prog)
+  )
 
-      val relationalAnalysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = true))
-      val relationalMemoryLogger = relationalAnalysis.memoryLogger
-      relationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-      var moduleInst = relationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
-      relationalAnalysis.failure.fallible(
-        relationalAnalysis.invokeExported(moduleInst, funcName, List.empty)
-      )
-      Profiler.printLastMeasured()
-      Profiler.reset()
+  val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
-      val nonRelationalAnalysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = false))
-      val nonRelationalMemoryLogger = nonRelationalAnalysis.memoryLogger
-      nonRelationalAnalysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-      moduleInst = nonRelationalAnalysis.instantiateModule(module, moduleId = Some(p.getFileName))
-      nonRelationalAnalysis.failure.fallible(
-        nonRelationalAnalysis.invokeExported(moduleInst, funcName, List.empty)
-      )
-      Profiler.printLastMeasured()
-      Profiler.reset()
+  describe(analysisName) {
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("spectral-norm.wasm") && !excluded.contains(p)).sorted.foreach { p =>
+      it(s"${p.getFileName}") {
+        val module = Parsing.fromBinary(p)
 
-      val expected = parseMemOpsCSV(p, moduleInst)
+        val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational))
+        val relationalMemoryLogger = analysis.memoryLogger
+        analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+        var moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
+        analysis.failure.fallible(
+          analysis.invokeExported(moduleInst, funcName, List.empty)
+        )
+        Profiler.printLastMeasured()
+        Profiler.reset()
 
-      println(relationalMemoryLogger.computePrecision(expected))
-      println(nonRelationalMemoryLogger.computePrecision(expected))
+        val expected = parseMemOpsCSV(p, moduleInst)
+
+        writePrecision(p, analysis, relationalMemoryLogger, expected)
+      }
     }
   }
+
+  def writePrecision(programPath: Path, analysis: RelationalAnalysis.Instance, memoryLogger: analysis.MemoryLogger, expected: SortedMap[InstLoc, Set[ByteMemoryCtx]]): Unit =
+    val program = programPath.getFileName
+    val precision: memoryLogger.Precision = memoryLogger.computePrecision(expected)
+    val preciseLoads = filterLoads(precision.precise)
+    val impreciseLoads = filterLoads(precision.imprecise)
+    val preciseStores = filterStores(precision.precise)
+    val impreciseStores= filterStores(precision.imprecise)
+
+    writer.writeRow(List(program, analysisName, s"${preciseLoads.size}", s"${impreciseLoads.size}", s"${preciseStores.size}", s"${impreciseStores.size}"))
+
+  inline def filterLoads(map: SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]): SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
+    map.filter { case (key, (_: (LoadInst | LoadNInst), _)) => true; case _ => false }
+
+  inline def filterStores(map: SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]): SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
+    map.filter { case (key, (_: (StoreInst | StoreNInst), _)) => true; case _ => false }
+
 
   def parseMemOpsCSV(p: java.nio.file.Path, moduleInstance: ModuleInstance): SortedMap[InstLoc, Set[ByteMemoryCtx]] =
     val reader = CSVReader.open(p.toString + ".memops.csv")

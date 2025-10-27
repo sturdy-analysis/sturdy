@@ -71,7 +71,7 @@ int _start()
 
     N = __VERIFIER_nondet_int();
 
-    minDepth = __VERIFIER_nondet_int();
+    minDepth = 4;
 
     if ((minDepth + 2) > N)
         maxDepth = minDepth + 2;

@@ -50,14 +50,17 @@ val stdlib: List[HostFunction] = List(
   HostFunction("tolower", FuncType(Vector(I32), Vector(I32))),
   HostFunction("fileno", FuncType(Vector(I32), Vector(I32))),
   HostFunction("read", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("puts", FuncType(Vector(I32), Vector(I32))),
   HostFunction("fgets", FuncType(Vector(I32, I32, I32), Vector(I32))),
   HostFunction("fputs", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("write", FuncType(Vector(I32, I32, I32), Vector(I32))),
+  HostFunction("putchar", FuncType(Vector(I32), Vector(I32))),
   HostFunction("fwrite", FuncType(Vector(I32, I32, I32, I32), Vector(I32))),
   HostFunction("printf", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("fprintf", FuncType(Vector(I32, I32, I32), Vector(I32))),
   HostFunction("qsort", FuncType(Vector(I32, I32, I32, I32), Vector())),
   HostFunction("exit", FuncType(Vector(I32), Vector())),
+  HostFunction("abort", FuncType(Vector(), Vector())),
 )
 
 val wasi_snapshot_preview1: List[HostFunction] = List(

@@ -35,8 +35,9 @@ final class RelationalStack
 
   private def combineFrames(widen: Boolean, ops1: List[Val], ops2: List[Val]): MaybeChanged[List[Val]] =
     var hasChanged = false
-    if(ops1.length != ops2.length)
-      throw CannotJoinException(s"stack frames $ops1 and $ops2 need to have the same length")
+//  In WebAssembly this can happen when stack-widening two loop states with different stack heights.
+//    if(ops1.length != ops2.length)
+//      throw CannotJoinException(s"stack frames $ops1 and $ops2 need to have the same length")
     val joinedFrame = ops1.zipAll[Val, Val](ops2, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
       case ((v1, null),_) => v1
       case ((null, v2),_) => v2

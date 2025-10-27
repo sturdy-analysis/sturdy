@@ -17,7 +17,8 @@
 char *pairs = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
 char tbl[128];
 
-void __attribute__ ((noinline)) process(char *from, char *to) {
+__attribute__ ((noinline))
+void process(char *from, char *to) {
    while (*from++ != '\n');
 
    size_t len = to - from;

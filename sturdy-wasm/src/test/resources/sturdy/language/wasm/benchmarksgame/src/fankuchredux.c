@@ -75,13 +75,6 @@ int _start()
 {
    int i;
 
-   /*
-   if (argc < 2) {
-      //fprintf(stderr, "usage: %s number\n", v[0]);
-      exit(1);
-   }
-   */
-
    max_n = __VERIFIER_nondet_int();
    if (max_n < 3 || max_n > 15) {
       fprintf(stderr, "range: must be 3 <= n <= 12\n");
@@ -90,6 +83,7 @@ int _start()
 
    for (i = 0; i < max_n; i++) s[i] = i;
    tk(max_n);
+
    printf("%d\nPfannkuchen(%d) = %d\n", checksum, max_n, maxflips);
 
    return 0;
