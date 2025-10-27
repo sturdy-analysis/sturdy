@@ -57,7 +57,7 @@ class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolea
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("spectral-norm.wasm") && !excluded.contains(p)).sorted.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
         val module = Parsing.fromBinary(p)
 
