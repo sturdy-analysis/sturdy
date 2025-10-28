@@ -50,7 +50,6 @@ given RelationalBreakIf[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,
     apronState.addConstraints(cond.negated)(using ResolveState.Internal)
 
   override def assertCondition(cond: ApronCons[VirtualAddress[Ctx], Type], state: State): Unit =
-    try {throw IllegalArgumentException()} catch { case _: IllegalArgumentException => }
     apronState.recencyStore.setState(state)
     apronState.addConstraints(cond)(using ResolveState.Internal)
 

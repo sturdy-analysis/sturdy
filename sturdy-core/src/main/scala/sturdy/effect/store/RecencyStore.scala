@@ -163,6 +163,7 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
 
 object RecencyClosure:
   def apply[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V](recencyStore: RecencyStore[Context, Virt, V]): RecencyClosure[Context, Virt, V] = new RecencyClosure(recencyStore, new Stateless {})
+  val DEBUG = System.getProperty("RECENCY_CLOSURE_DEBUG", "false").toBoolean
 
 private final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Context]], V, EffectState](val recencyStore: RecencyStore[Context, Virt, V], val recencyStoreState: recencyStore.store.State, val effectState: EffectState):
   val store = recencyStore.store
@@ -204,16 +205,20 @@ private final class RecencyClosureState[Context: Ordering, Virt <: AbstractAddr[
   }
 
   override def toString: String =
-    val snapshotInternalState = store.internalStateOption.getOrElse(store.nullState)
-    val snapshotLeftState = store.leftState.getOrElse(store.nullState)
-    val snapshotRightState = store.rightState.getOrElse(store.nullState)
-    try {
-      store.setInternalState(this.recencyStoreState.asInstanceOf[store.State])
-      store.setLeftState(store.nullState)
-      store.setRightState(store.nullState)
-      f"RecencyClosureState(${hashCode()}, ${recencyStoreState}, ${effectState})"
-    } finally {
-      store.setInternalState(snapshotInternalState)
-      store.setLeftState(snapshotLeftState)
-      store.setRightState(snapshotRightState)
+    if(RecencyClosure.DEBUG) {
+      val snapshotInternalState = store.internalStateOption.getOrElse(store.nullState)
+      val snapshotLeftState = store.leftState.getOrElse(store.nullState)
+      val snapshotRightState = store.rightState.getOrElse(store.nullState)
+      try {
+        store.setInternalState(this.recencyStoreState.asInstanceOf[store.State])
+        store.setLeftState(store.nullState)
+        store.setRightState(store.nullState)
+        f"RecencyClosureState(${hashCode()}, ${recencyStoreState}, ${effectState})"
+      } finally {
+        store.setInternalState(snapshotInternalState)
+        store.setLeftState(snapshotLeftState)
+        store.setRightState(snapshotRightState)
+      }
+    } else {
+      s"RecencyClosureState(${hashCode()})"
     }

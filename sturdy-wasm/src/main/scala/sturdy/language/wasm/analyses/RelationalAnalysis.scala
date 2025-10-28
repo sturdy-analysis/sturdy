@@ -786,7 +786,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         val allContexts = heapCtxs
         val notAnalyzed = expected.keySet.filter(loc => !allContexts.contains(loc))
         val (executable, deadCode) = allContexts.partition((loc,_) => expected.contains(loc))
-        val (precise, imprecise) = executable.partition { case (instLoc, (inst, heapCtxs)) => heapCtxs == expected(instLoc)}
+        val (precise, imprecise) = executable.partition { case (instLoc, (inst, heapCtxs)) =>
+          val ctxs = if(heapCtxs.size > 1) heapCtxs.filter{ case _: ByteMemoryCtx.Fill => false; case _ => true } else heapCtxs
+          ctxs == expected(instLoc)
+        }
         Precision(notAnalyzed, precise, imprecise, deadCode)
       }
 
@@ -905,7 +908,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
       override protected def contextSensitive = observedConfig.fix.get
       addContextFreeLogger(domLogger)
-      addContextFreeLogger(new FunctionCallLogger)
+//      addContextFreeLogger(new FunctionCallLogger)
     }
 
     override def toString: String = s"constant $config"

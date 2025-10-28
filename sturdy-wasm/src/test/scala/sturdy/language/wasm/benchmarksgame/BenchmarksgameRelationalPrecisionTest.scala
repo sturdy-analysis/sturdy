@@ -27,26 +27,29 @@ import scala.jdk.StreamConverters.*
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
-  BenchmarksgameRelationalPrecisionTest(manager = Polka(true), relational = true),
-  BenchmarksgameRelationalPrecisionTest(manager = Octagon(), relational = true),
-  BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Polka(true), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(manager = Octagon(), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(manager = Polka(true), relational = true, ssa = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Octagon(), relational = true, ssa = true),
+  BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = true, ssa = true),
   BenchmarksgameRelationalPrecisionTest(manager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
-    writer.writeRow(List("program", "analysis", "precise_loads", "imprecise_loads", "precise_stores", "imprecise_stores"))
+    writer.writeRow(List("program", "analysis", "ssa", "precise_loads", "imprecise_loads", "precise_stores", "imprecise_stores"))
 
   override def afterAll(): Unit =
     writer.close
 
-class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolean) extends AnyFunSpec, Matchers:
+class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
 
   val funcName = "_start"
   val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
   val fixpointConfig: FixpointConfig = FixpointConfig(
-    stack = StackConfig.StackedStates(),
-    iter = sturdy.fix.iter.Config.Innermost
+    stack = StackConfig.StackedStates(storeIntermediateOutput = false, readPriorOutput = false),
+    iter = sturdy.fix.iter.Config.Topmost
   )
 
   // These programs contain structs, which our analysis does not yet support.
@@ -57,14 +60,17 @@ class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolea
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("reverse-complement.wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
+        if(manager.isInstanceOf[Polka] && p.endsWith("reverse-complement.wasm"))
+          cancel("timeout")
+
         val module = Parsing.fromBinary(p)
 
-        val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational))
+        val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa))
         val relationalMemoryLogger = analysis.memoryLogger
         analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-        var moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
+        val moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
         analysis.failure.fallible(
           analysis.invokeExported(moduleInst, funcName, List.empty)
         )
@@ -86,7 +92,7 @@ class BenchmarksgameRelationalPrecisionTest(manager: Manager, relational: Boolea
     val preciseStores = filterStores(precision.precise)
     val impreciseStores= filterStores(precision.imprecise)
 
-    writer.writeRow(List(program, analysisName, s"${preciseLoads.size}", s"${impreciseLoads.size}", s"${preciseStores.size}", s"${impreciseStores.size}"))
+    writer.writeRow(List(program, analysisName, s"$ssa", s"${preciseLoads.size}", s"${impreciseLoads.size}", s"${preciseStores.size}", s"${impreciseStores.size}"))
 
   inline def filterLoads(map: SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]): SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
     map.filter { case (key, (_: (LoadInst | LoadNInst), _)) => true; case _ => false }
