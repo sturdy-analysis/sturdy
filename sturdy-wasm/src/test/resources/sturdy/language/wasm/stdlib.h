@@ -219,6 +219,8 @@ extern int memcmp (const void *__s1, const void *__s2, size_t __n) __THROW __att
 extern unsigned long strlen(const char*);
 
 extern int __VERIFIER_nondet_int();
+extern int blackhole_int(int);
+extern void* blackhole_void_p(void*);
 extern void assert(int condition);
 
 extern double pow(double, double);

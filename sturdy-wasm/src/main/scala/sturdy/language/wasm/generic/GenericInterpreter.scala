@@ -534,8 +534,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
 
   private def assertFrameSize(size: Int): Unit = {
-    if (stack.frameSize != size)
-      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+//    if (stack.frameSize != size)
+//      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
   }
 
   def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =

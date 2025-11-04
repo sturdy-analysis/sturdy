@@ -725,6 +725,27 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         println(s"RETURN $id(${args.mkString(",")}) @ ${inState.hashCode} = $result @ ${outState.hashCode()}")
 
 
+    def abstractDomainSizeLogger: AbstractDomainSizeLogger =
+      val logger = new AbstractDomainSizeLogger()
+      this.fixpoint.addContextFreeLogger(logger)
+      logger
+
+    class AbstractDomainSizeLogger extends fix.Logger[FixIn, FixOut[Value]]:
+      private var maxEnvSize: Int = 0
+      private var maxByteSize: Int = 0
+      def getEnvSize: Int = maxEnvSize
+      def getByteSize: Int = maxByteSize
+
+      override def enter(dom: FixIn): Unit = updateSizes()
+      override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = updateSizes()
+
+      private def updateSizes(): Unit =
+        if (relationalStore._internalState != null) {
+          maxEnvSize = scala.math.max(maxEnvSize, relationalStore._internalState.abs1.getEnvironment.getSize)
+          maxByteSize = scala.math.max(maxByteSize, relationalStore._internalState.abs1.getSize(apronManager))
+        }
+
+
     def memoryLogger: MemoryLogger =
       val memLogger = new MemoryLogger()
       this.fixpoint.addContextFreeLogger(memLogger)

@@ -21,6 +21,7 @@
           jupyter
           ipython
           pandas
+          seaborn
         ]);
         apron = pkgs.apron;
         elina = pkgs.elina;

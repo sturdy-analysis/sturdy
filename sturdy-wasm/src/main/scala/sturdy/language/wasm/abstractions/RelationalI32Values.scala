@@ -23,7 +23,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   import Type.*
   import Value.*
   import NumValue.*
-
+  
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)

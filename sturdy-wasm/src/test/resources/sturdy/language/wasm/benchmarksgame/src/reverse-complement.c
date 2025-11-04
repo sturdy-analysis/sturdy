@@ -14,7 +14,7 @@
 //#include <string.h>
 #include "../../stdlib.h"
 
-char *pairs = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
+char pairs[] = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
 char tbl[128];
 
 __attribute__ ((noinline))
