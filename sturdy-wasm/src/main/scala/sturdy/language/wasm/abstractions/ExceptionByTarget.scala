@@ -16,8 +16,8 @@ trait ExceptionByTarget extends Interpreter:
 
   given JoinBreakIfState(using combineValue: Join[Value], breakIfOps: BreakIf[Bool]): Join[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      breakIfOps.joinClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v1.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))
+      breakIfOps.joinClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v2.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))
 
   given WidenBreakIfState(using combineValue: Widen[Value], breakIfOps: BreakIf[Bool]): Widen[BreakIfState[Value]] with
     override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      breakIfOps.widenClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v1.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))
+      breakIfOps.widenClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v2.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))

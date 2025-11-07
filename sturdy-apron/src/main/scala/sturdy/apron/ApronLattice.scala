@@ -1,6 +1,6 @@
 package sturdy.apron
 
-import apron.{Abstract1, Coeff, Environment, Interval, Manager, StringVar}
+import apron.*
 import sturdy.util.{Lazy, Profiler}
 import sturdy.values.{Combine, Top, Widen, Widening}
 
@@ -21,14 +21,16 @@ given Abstract1Widen: Widen[Abstract1] with
 object ApronJoins:
   def combineAbstract1(s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] =
     Profiler.addTime("Abstract1.combine") {
-      if(s1.getEnvironment.isEqual(s2.getEnvironment)) {
+      val result = if(s1.getEnvironment.isEqual(s2.getEnvironment)) {
         if(s2.isIncluded(s2.getCreationManager, s1)) {
           Unchanged(s1)
         } else {
-          if(widen)
-            Changed(s1.widening(s1.getCreationManager, s2))
-          else
+          if(widen) {
+            val s2Copy = s2.joinCopy(s2.getCreationManager, s1)
+            Changed(s1.widening(s1.getCreationManager, s2Copy))
+          } else {
             Changed(s1.joinCopy(s1.getCreationManager, s2))
+          }
         }
       } else if(s1.isBottom(s1.getCreationManager)) {
         MaybeChanged(s1, hasChanged = !s2.isBottom(s2.getCreationManager))
@@ -45,13 +47,16 @@ object ApronJoins:
         val s1ExtEnv = if(lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
         val s2ExtEnv = if(lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
 
+        val model1 = getModel(s1)
+        val model2 = getModel(s2)
+
         val env2_minus_env1 = minus(env2, env1).getVars
         val combinable1 =
           if (env2_minus_env1.nonEmpty) {
             s1ExtEnv.assignCopy(
               manager,
               env2_minus_env1,
-              env2_minus_env1.map(v => ApronExpr.constant(s2ExtEnv.getBound(manager, v), null).toIntern(lce)),
+              env2_minus_env1.map(v => ApronExpr.constant(model2.getCoeff(env2.dimOfVar(v)), null).toIntern(lce)),
               null
             )
           } else
@@ -63,7 +68,7 @@ object ApronJoins:
             s2ExtEnv.assignCopy(
               manager,
               env1_minus_env2,
-              env1_minus_env2.map(v => ApronExpr.constant(s1ExtEnv.getBound(manager, v), null).toIntern(lce)),
+              env1_minus_env2.map(v => ApronExpr.constant(model1.getCoeff(env1.dimOfVar(v)).sup(), null).toIntern(lce)),
               null
             )
           else
@@ -78,10 +83,32 @@ object ApronJoins:
           } else {
             combinable1.joinCopy(manager, combinable2)
           }
-
+        
         MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
       }
+      
+      result
     }
+
+  def getModel(abs1: Abstract1): apron.Linexpr0 = {
+    val manager = abs1.getCreationManager
+    manager match {
+      case _: apron.Polka => abs1.toGenerator(manager).iterator.flatMap {
+        case gen if(gen.getGenerator0Ref.kind == Generator1.VERTEX) => Some(gen.getGenerator0Ref.coord)
+        case _ => None
+      }.next()
+      case _: apron.Octagon =>
+        val box = abs1.toBox(manager)
+        val gen = abs1.toGenerator(manager)
+        val lin = abs1.toLincons(manager)
+
+        abs1.toGenerator(manager).iterator.flatMap {
+          case gen if(gen.getGenerator0Ref.kind == Generator1.VERTEX) => Some(gen.getGenerator0Ref.coord)
+          case _ => None
+        }.next()
+      case _: apron.Box => Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
+    }
+  }
 
   def minus[A](env1: Environment, env2: Environment): Environment =
     var env = env1

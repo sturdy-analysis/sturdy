@@ -508,7 +508,10 @@ final class RelationalStore
   override def getState: State =
     _internalState.copy(abs1 = copyAbstract1(_internalState.abs1))
 
-  override def setState(olderState: State): Unit = Profiler.addTime("RelationalStore.setState") {
+  override def setState(olderState: State): Unit = setState(olderState, widening = true)
+  def setState(olderState: State, widening: Boolean): Unit =
+
+      Profiler.addTime("RelationalStore.setState") {
     // Prioritize recent variables from olderState, but do not forget about old variables in _internalState.
     // To do this, we remove all recent variables in olderState from _internalState and then widen _internalState with olderState.
 
@@ -524,9 +527,12 @@ final class RelationalStore
     }), false)
 
     // Then widen the `_internalState` into the `olderState`.
-    _internalState = widen(olderState, _internalState).get
+    _internalState =
+      if(widening)
+        widen(olderState, _internalState).get
+      else
+        join(olderState, _internalState).get
 
-    //    assertVirtualAddressesIncludedIn(beforeState.addressTranslationState, _internalState.addressTranslationState)
     assertVirtualAddressesIncludedIn(olderState.addressTranslationState, _internalState.addressTranslationState)
   }
 

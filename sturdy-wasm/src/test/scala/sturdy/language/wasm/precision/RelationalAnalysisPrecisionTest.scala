@@ -2,150 +2,100 @@ package sturdy.language.wasm.precision
 
 import apron.*
 import cats.effect.{Blocker, IO}
-
-import scala.collection.mutable
-import scala.io.Source
-import scala.jdk.StreamConverters.*
-import org.scalatest.Assertions.*
-import org.scalatest.{BeforeAndAfterAll, Suites}
-import org.scalatest.exceptions.TestFailedException
+import org.scalatest.Suites
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.apron.{RoundingDir, RoundingMode}
-import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
-import sturdy.effect.failure.{AFallible, CFallible, given}
-import sturdy.{*, given}
-import sturdy.fix.{Fixpoint, StackConfig}
-import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
-import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
-import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
-import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
-import sturdy.util.Profiler
-import sturdy.values.{*, given}
-import sturdy.values.integer.given
+import sturdy.apron.*
+import sturdy.control.{ControlEventGraphBuilder, PrintingControlObserver}
+import sturdy.effect.failure.{AFallible, FailureKind}
+import sturdy.fix
+import sturdy.fix.StackConfig
+import sturdy.fix.context.Sensitivity
+import sturdy.language.wasm
+import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.abstractions.Fix.{*, given}
+import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
+import sturdy.language.wasm.analyses.RelationalAnalysis.*
+import sturdy.language.wasm.analyses.RelationalAnalysis.Type.*
+import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, WasmConfig}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
+import sturdy.util.{LinearStateOperationCounter, Profiler}
+import sturdy.values.floating.FloatSpecials
+import sturdy.values.integer.IntegerDivisionByZero
+import sturdy.values.{Abstractly, Topped}
 import swam.syntax.Module
 import swam.text.*
-import swam.text.unresolved.{FreshId, NoId, SomeId}
 
-import java.io.File
+import java.math.BigInteger
 import java.nio.file.{Files, Path, Paths}
-import com.github.tototoshi.csv.*
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+import scala.reflect.{ClassTag, TypeTest}
 
-object SlowTest extends org.scalatest.Tag("SlowTest")
-
-class RelationalAnalysisPrecisionTests extends Suites(
-  new RelationalAnalysisTest(Polka(true), relational = true),
-  new RelationalAnalysisTest(Octagon(), relational = true),
-  new RelationalAnalysisTest(Box(), relational = true),
-  new RelationalAnalysisTest(Polka(true), relational = false),
+final class RelationalAnalysisPrecisionTests extends Suites(
+  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
+  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true),
+  new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true),
+  new RelationalAnalysisPrecisionTest(manager = new Box, relational = true),
+  new RelationalAnalysisPrecisionTest(manager = new Box, relational = false),
 )
 
-class RelationalAnalysisTest(manager: Manager, relational: Boolean = true) extends AnyFlatSpec, Matchers:
-  behavior of (manager.getClass.getSimpleName)
+final class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolean, ssa: Boolean = false) extends AnyFlatSpec, Matchers:
+  behavior of ((if(relational) "Relational" else "Non-Relational") + (if(ssa) "-SSA" else "") + " analysis with " + manager.getClass.getSimpleName)
 
-  val precisionTestPath = Paths.get(this.getClass.getResource("/sturdy/language/wasm/precision.wast").toURI);
+  val precisionPath = Paths.get(this.getClass.getResource("/sturdy/language/wasm/precision.wast").toURI);
+  val precisionModule = wasm.Parsing.fromText(precisionPath)
 
-  val precisionTest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(precisionTestPath)}
+  import NumValue.*
+  import RelationalAnalysis.RelI32.*
+  import RelationalAnalysis.Type.*
+  import Value.*
 
-  val analysis = new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive, relational = relational))
+  def i32(expr: ApronExpr[VirtAddr, Type]) = Num(Int32(NumExpr(expr)))
+  def i32Iv(lower: Double, upper: Double) = i32(ApronExpr.interval(lower,upper, I32Type))
+  def i64(expr: ApronExpr[VirtAddr, Type]) = Num(Int64(expr))
 
-  type AValue = RelationalAnalysis.Value
-  val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
-  var currentModule: ModuleInstance = null
-  var imports: Map[String, ModuleInstance] = Map()
+  def iv(lower: Scalar, upper: Scalar, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, FloatSpecials.Bottom), tpe)
+  def doubleIv(lower: Double, upper: Double, floatSpecials: FloatSpecials, tpe: Type): ApronExpr[VirtAddr, Type] = ApronExpr.constant(FloatInterval(lower, upper, floatSpecials), tpe)
+  val topi32 = Num(Int32(NumExpr(iv(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom, I32Type))))
+  val topi64 = Num(Int64(iv(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom, I64Type)))
 
-  val convertVals: unresolved.Expr => List[RelationalAnalysis.Value] = constExprToAVals
+  testFunction("x_minus_x_eq_zero", List())
+  testFunction("max_upper_bound", List())
+  testFunction("loop_to_100", List())
+  testFunction("loop_to_n", List())
+  testFunction("input_of_recrusive_id_is_same_as_output", List())
+  testFunction("addition", List())
+  testFunction("plus_five", List())
+  testFunction("abs_if_join_on_stack", List())
+  testFunction("abs_if_join_on_local", List())
+  testFunction("abs_br_if_join_on_local", List())
+  testFunction("fac_positive", List())
+  testFunction("fac_acc_positive", List())
+  testFunction("fib_positive", List())
+  testFunction("even_returns_boolean", List())
 
-  type AResult = AFallible[List[AValue]]
 
-  def run(filename: Path, commands: Seq[Command]): Unit =
-    commands.foreach { command =>
-      eval(command)
-      analysis.garbageCollect()
+  def testFunction(funcName: String, args: List[Value]) =
+    it must s"$funcName($args)" in {
+
+      val config = WasmConfig(
+        fix = FixpointConfig(StackConfig.StackedStates()),
+        relational = relational,
+        localSSA = ssa,
+        soundOverflowHandling = false // Needed for recursive functions
+      )
+      val analysis = new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, config)
+      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+
+      val modInst = analysis.instantiateModule(precisionModule)
+      val result = analysis.failure.fallible {
+        analysis.invokeExported(modInst, funcName, args).map(analysis.getInterval)
+      }
+
+      analysis.failedAssertions shouldBe Map[FixIn, Topped[Boolean]]()
+
+      Profiler.printLastMeasured()
+      Profiler.reset()
+
     }
-
-  def getAModule(module: Option[String]): ModuleInstance = module match
-    case None => currentModule
-    case Some(name) => modules(name)
-
-  def eval(c: Command): Unit =
-    c match
-    case ValidModule(m) =>
-      // validate and compile module
-      val mod = Parsing.fromUnresolved(m)
-      val id = m.id match
-        case SomeId(name) => Some(name)
-        case _ => None
-      loadModule(id, mod)
-    case Register(s, id) =>
-      imports += s -> getAModule(id)
-    case BinaryModule(id, bytes) =>
-      val mod = Parsing.fromBytes(bytes)
-      loadModule(id, mod)
-    case QuotedModule(id, text) => {}
-    case AssertReturn(action, expectedRes) =>
-      val aRes = runAAction(action, convertVals)
-      ???
-    case AssertReturnCanonicalNaN(action) => // skip
-    case AssertReturnArithmeticNaN(action) => // skip
-    case AssertTrap(action: Action, message: String) => // skip
-    case AssertModuleTrap(mod,_) => // skip
-    case _: AssertUnlinkable => // skip
-    case _: AssertInvalid => // skip
-    case _: AssertMalformed => // skip
-    case _: AssertExhaustion => // skip
-    case _: Meta => // skip
-
-  def loadModule(id: Option[String], mod: Module): Unit =
-    RoundingMode.withRoundingMode(RoundingDir.Nearest) {
-      val aModInst = analysis.instantiateModule(mod, imports)
-      id match
-        case None => // nothing
-        case Some(name) => modules += name -> aModInst
-      currentModule = aModInst
-    }
-
-  def runAAction(a: Action, convertVals: unresolved.Expr => List[RelationalAnalysis.Value]): AResult = a match {
-    case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
-    case Get(modName, name) => evalAGet(modName, name)
-  }
-
-  def evalAInvoke(module: Option[String], fun: String, vals: List[AValue]): AResult =
-    val modInst = getAModule(module)
-    analysis.failure.fallible {
-      analysis.invokeExported(modInst, fun, vals)
-    }
-
-  def evalAGet(module: Option[String], name: String): AResult =
-    val modInst = getAModule(module)
-    val exp = modInst.exports.find(_._1 == name)
-    assert(exp.isDefined, s"export $name not found in ${module.getOrElse("current")}")
-    exp.get._2 match
-      case Global(addr) =>
-        val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
-        val value = analysis.getGlobalValue(globalIdx)
-        AFallible.Unfailing(List(value))
-      case ext =>
-        throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
-
-  def constExprToAVals(e: unresolved.Expr): List[RelationalAnalysis.Value] =
-    e.map(constExprToAVal).toList
-
-  def constExprToAVal(inst: unresolved.Inst): RelationalAnalysis.Value = Abstractly(constExprToVal(inst))
-
-  def constExprToTops(e: unresolved.Expr): List[RelationalAnalysis.Value] =
-    e.map(constExprToTop).toList
-
-  def constExprToTop(inst: unresolved.Inst): RelationalAnalysis.Value =
-    inst match
-      case unresolved.i32.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int32(RelationalAnalysis.topI32))
-      case unresolved.i64.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int64(RelationalAnalysis.topI64))
-      case unresolved.f32.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(RelationalAnalysis.topF32))
-      case unresolved.f64.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(RelationalAnalysis.topF64))
-      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
-
-class NumTestCases:
-  var n: Int = 0
-  def increment(): Unit = n += 1
-  override def toString: String = n.toString

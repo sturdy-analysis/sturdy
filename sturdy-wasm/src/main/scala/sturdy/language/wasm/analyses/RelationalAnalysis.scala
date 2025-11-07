@@ -274,6 +274,13 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         }
       )
 
+    given overflowHandling: OverflowHandling = {
+      if(config.soundOverflowHandling)
+        OverflowHandling.WrapAround
+      else
+        OverflowHandling.Fail
+    }
+
     given I32IntegerOps = new I32IntegerOps(
       rootFrameData = rootFrameData,
       globals = optionStaticMemoryLayout.map(_.globalRanges).getOrElse(Vector()),
@@ -318,6 +325,12 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       optionStaticMemoryLayout = parseStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
       loc
 
+    var assertions: Map[ApronBool[PhysAddr, Type], Topped[Boolean]] = Map()
+    def failedAssertions: Map[ApronBool[PhysAddr, Type], Topped[Boolean]] =
+      assertions.filter {
+        case (_,Topped.Top) | (_, Topped.Actual(false)) => true
+        case (_,Topped.Actual(true)) => false
+      }
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
       case "proc_exit" =>
@@ -561,11 +574,31 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             }))))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
+      case "i32.interval" =>
+        args match
+          case List(Num(Int32(x)), Num(Int32(y))) =>
+            val ivX = apronState.getInterval(x.asNumExpr)
+            val ivY = apronState.getInterval(y.asNumExpr)
+            x.asNumExpr.addrs.foreach(apronState.makeNonRelational)
+            y.asNumExpr.addrs.foreach(apronState.makeNonRelational)
+            List(Num(Int32(RelI32.NumExpr(ApronExpr.constant(Join(ivX, ivY).get, I32Type)))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32, i32 as arguments to $hostFunc, but got $args")
+      case "f32.interval" =>
+        args match
+          case List(Num(Float32(x)), Num(Float32(y))) =>
+            val ivX = apronState.getInterval(x)
+            val ivY = apronState.getInterval(y)
+            List(Num(Float32(ApronExpr.constant(Join(ivX, ivY).get, I32Type))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f32, f32 as arguments to $hostFunc, but got $args")
       case "assert" =>
         args match
-          case List(v@Num(Int32(_))) =>
-            given BooleanBranching[Value,Unit] = wasmOps.branchOpsUnit
-            assert(v.asInstanceOf[Value], domLogger.currentDom)
+          case List(v@Num(Int32(RelI32.BoolExpr(condition)))) =>
+            val (cond,_) = apronState.convertExpr.virtToPhysPure(condition, relationalStore._internalState.clone)
+            val currentResult = apronState.assert(condition)
+            val assertionResult = assertions.get(cond).map(Join(_,currentResult).get).getOrElse(currentResult)
+            assertions += cond -> assertionResult
             List()
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")

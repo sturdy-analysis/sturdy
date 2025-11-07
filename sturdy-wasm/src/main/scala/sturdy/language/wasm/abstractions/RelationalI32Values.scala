@@ -233,10 +233,8 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       }
     }
 
-  given overflowHandling: OverflowHandling = OverflowHandling.WrapAround
-
   final class I32IntegerOps(rootFrameData: FrameData, globals: => Vector[(String,Interval)], stackRange: => Interval)
-                           (using intOps: IntegerOps[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
+                           (using intOps: IntegerOpsWithSignInterpretation[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def integerLit(i: Int): I32 = {
         globals.find((name, iv) => Interval(i,i).isLeq(iv)) match
@@ -380,7 +378,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   given I32OrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): OrderingOps[I32, Bool] =
     LiftedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asNumExpr, inject = ApronBool.Constraint(_))
 
-  given I32UnsignedOrderingOps(using ApronState[VirtAddr, Type], Failure, EffectStack): UnsignedOrderingOps[I32, Bool] =
+  given I32UnsignedOrderingOps(using UnsignedOrderingOps[ApronExpr[VirtAddr,Type], ApronCons[VirtAddr, Type]], ApronState[VirtAddr, Type], Failure, EffectStack): UnsignedOrderingOps[I32, Bool] =
     LiftedUnsignedOrderingOps[I32, Bool, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](extract = _.asNumExpr, inject = ApronBool.Constraint(_))
 
   given I32ConvertIntLong(using ApronState[VirtAddr, Type], ConvertIntLong[ApronExpr[VirtAddr, Type], I64]): ConvertIntLong[I32, I64] =

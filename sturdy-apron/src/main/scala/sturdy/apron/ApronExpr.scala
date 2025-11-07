@@ -481,6 +481,14 @@ enum ApronBool[Addr, Type]:
       case And(e1, e2) => e1.addrs ++ e2.addrs
       case Or(e1, e2) => e1.addrs ++ e2.addrs
 
+  def mapAddr[OtherAddr: Ordering: ClassTag](f: Addr => OtherAddr): ApronBool[OtherAddr,Type] =
+    this match {
+      case Constraint(cons) => Constraint(cons.mapAddr(f))
+      case Constant(b) => Constant(b)
+      case And(e1, e2) => And(e1.mapAddr(f), e2.mapAddr(f))
+      case Or(e1, e2) => Or(e1.mapAddr(f), e2.mapAddr(f))
+    }
+
   def negated: ApronBool[Addr,Type] =
     this match
       case Constraint(cons) => Constraint(cons.negated)

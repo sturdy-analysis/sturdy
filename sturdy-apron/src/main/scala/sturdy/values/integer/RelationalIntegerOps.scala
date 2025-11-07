@@ -48,7 +48,7 @@ trait RelationalBaseIntegerOps
 
   override def sub(v1: ApronExpr[Addr, Type], v2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     (v1, v2) match {
-      case (ApronExpr.Constant(coeff, _, _), _) if coeff.isZero => v2
+      case (ApronExpr.Constant(coeff, _, _), _) if coeff.isZero => ApronExpr.intNegate(v2)
       case (_, ApronExpr.Constant(coeff, _, _)) if coeff.isZero => v1
       case _ => handleOverflow(intSub(v1, v2))
     }

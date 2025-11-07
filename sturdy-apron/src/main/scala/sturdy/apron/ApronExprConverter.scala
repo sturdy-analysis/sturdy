@@ -60,6 +60,15 @@ case class ApronExprConverter
       (cons, state)
     }
 
+  def virtToPhysPure(condVirtAddr: ApronBool[VirtualAddress[Ctx], Type], state0: State): (ApronBool[PhysicalAddress[Ctx], Type],State) =
+    var state = state0
+    val condPhysAddr = condVirtAddr.mapAddr { addr0 =>
+      val (addr1, state1) = virtToPhysPure(addr0, state)
+      state = state1
+      addr1
+    }
+    (condPhysAddr, state)
+
   def virtToPhys(virtAddr: VirtualAddress[Ctx]): PhysicalAddress[Ctx] =
     relationalStore.withInternalState(virtToPhysPure(virtAddr, _))
 
@@ -68,6 +77,9 @@ case class ApronExprConverter
 
   def virtToPhys(constrVirtAddr: ApronCons[VirtualAddress[Ctx], Type]): ApronCons[PhysicalAddress[Ctx], Type] =
     relationalStore.withInternalState(virtToPhysPure(constrVirtAddr, _))
+
+  def virtToPhys(condVirtAddr: ApronBool[VirtualAddress[Ctx], Type]): ApronBool[PhysicalAddress[Ctx], Type] =
+    relationalStore.withInternalState(virtToPhysPure(condVirtAddr, _))
 
   def physToVirtPure(phys: PhysicalAddress[Ctx], state: State): (VirtualAddress[Ctx],State) =
     val region = state.addressTranslationState.mapping.getOrElse(phys.ctx,

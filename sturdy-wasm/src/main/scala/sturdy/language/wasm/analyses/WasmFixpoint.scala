@@ -15,7 +15,7 @@ import sturdy.report.Properties
 import sturdy.values.Finite
 import sturdy.values.{Finite, Join, Widen}
 
-case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive, localSSA: Boolean = false, relational: Boolean = true):
+case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive, localSSA: Boolean = false, relational: Boolean = true, soundOverflowHandling: Boolean = true):
   override def toString: String = s"$fix $ctx"
 
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): WasmConfig =

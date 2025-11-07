@@ -38,6 +38,8 @@ val stdlib: List[HostFunction] = List(
   HostFunction("realloc", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("calloc", FuncType(Vector(I32, I32), Vector(I32))),
   HostFunction("free", FuncType(Vector(I32), Vector())),
+  HostFunction("i32.interval", FuncType(Vector(I32, I32), Vector(I32))),
+  HostFunction("f32.interval", FuncType(Vector(F32, F32), Vector(F32))),
   HostFunction("assert", FuncType(Vector(I32), Vector())),
   HostFunction("pow", FuncType(Vector(F64, F64), Vector(F64))),
   HostFunction("exp2", FuncType(Vector(F64), Vector(F64))),
