@@ -24,7 +24,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
   type Value = NumericInterval[Int]
   given Widen[NumericInterval[Int]] = NumericIntervalWiden[Int](Set(10, 20, 30, 40, 50, 60, 70, 80, 90), 0, 100)
 
-  val man = new apron.Polka(true)
+  given man: apron.Manager = new apron.Polka(true)
   given initialState: Abstract1 = new Abstract1(man, new Environment())
 
   given failure: Failure = new CollectedFailures[FailureKind]
@@ -50,7 +50,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
       Some((FloatSpecials.Bottom, BaseType[Int]))
 
   given relationalValue: StatefullRelationalExprT[Value, PAddr, Type, RelationalStoreState[Ctx, Map[PAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, Ctx, Type].asInstanceOf
-  val relationalStore: RelationalStore[Ctx, Type, PowPAddr, Value] = new RelationalStore(Map(), man, initialState, Map())
+  val relationalStore: RelationalStore[Ctx, Type, PowPAddr, Value] = new RelationalStore(Map(), initialState, Map())
   import relationalStore.given
   val recencyStore: RecencyStore[Ctx, PowVAddr, Value] = new RecencyStore[Ctx, PowVAddr, Value](relationalStore)
   exprConverter = ApronExprConverter(recencyStore, relationalStore)

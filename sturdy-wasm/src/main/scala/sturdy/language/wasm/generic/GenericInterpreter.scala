@@ -131,6 +131,13 @@ enum FixIn:
       case EnterHostFunction(funcId, _) => Some(funcId)
       case _ => None
 
+  def instLoc: InstLoc =
+    this match
+      case Eval(_, instLoc) => instLoc
+      case EnterWasmFunction(funcId, _, _) => new InstLoc.InFunction(funcId, 0)
+      case EnterHostFunction(funcId, _) => new InstLoc.InFunction(funcId, 0)
+      case MostGeneralClientLoop(mod) => InstLoc.InInit(mod, 0)
+
   override def toString: String = this match
     case Eval(i, loc) => i match
       case Block(_, _) => s"Block @$loc"

@@ -94,7 +94,7 @@ class ApronBench {
 
   @Benchmark
   def apronJoinsCombineAbstract1: Abstract1 =
-    ApronJoins.combineAbstract1(abs1, abs2, widen=false).get
+    ApronJoins.combineAbstract1(manager, abs1, abs2, widen=false).get
 }
 
 object ApronBench:

@@ -474,18 +474,31 @@ class ApronRecencyState
       } else {
         Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
           val ctx = allocator(e1, e2)
-          val result = relationalStore.withLeftState { state1 =>
-            val (phys1, state2) = convertExpr.virtToPhysPure(e1, state1)
-            val (result, state3) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state2)
-            (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), phys1, state3))
+          if(relationalStore._leftState != null && relationalStore._rightState != null) {
+            val result = relationalStore.withLeftState { state1 =>
+              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+              val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State])
+              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3))
+            }
+            relationalStore.withRightState { state1 =>
+              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+              val (phys2, state3) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
+              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state3))
+            }
+            // Check if expression has grown happens when combining Abstract1
+            Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+          } else {
+            val result = relationalStore.withInternalState { state1 =>
+              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+              val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State].clone())
+              val state4 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3)
+              val (phys2, state5) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
+              val state6 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state5)
+              (result, if(widen) relationalStore.widen(state5, state6).get else relationalStore.join(state5, state6).get)
+            }
+            Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
           }
-          relationalStore.withRightState { state1 =>
-            val (phys2, state2) = convertExpr.virtToPhysPure(e2, state1)
-            val (result, state3) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state2)
-            (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), phys2, state3))
-          }
-          // Check if expression has grown happens when combining Abstract1
-          Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+
         }
       }
 
@@ -572,6 +585,13 @@ class ApronRecencyState
 
   override def toString: String =
     relationalStore.toString
+
+  def toStringWithRenaming(renaming: Map[String, String]): String =
+    var result = relationalStore.toString
+    for((from,to) <- renaming) {
+      result = result.replaceAll(from, to)
+    }
+    result
 
 class NonRelationalApronState[Ctx: Ordering, Type: ApronType: Join: Widen, Val: Join: Widen]
   (

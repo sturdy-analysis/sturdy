@@ -33,14 +33,26 @@ import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
 
 final class RelationalAnalysisPrecisionTests extends Suites(
-  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
-  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true),
-  new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true),
-  new RelationalAnalysisPrecisionTest(manager = new Box, relational = true),
-  new RelationalAnalysisPrecisionTest(manager = new Box, relational = false),
+//  new SSATests,
+  new VirtualRecencyTests,
+  new NonRelationalTests
 )
 
-final class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolean, ssa: Boolean = false) extends AnyFlatSpec, Matchers:
+final class SSATests extends Suites(
+  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
+  new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true, ssa = true),
+  new RelationalAnalysisPrecisionTest(manager = new Box, relational = true, ssa = true)
+)
+
+final class VirtualRecencyTests extends Suites(
+  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true),
+  new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true),
+  new RelationalAnalysisPrecisionTest(manager = new Box, relational = true)
+)
+
+final class NonRelationalTests extends RelationalAnalysisPrecisionTest(manager = new Box, relational = false)
+
+class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolean, ssa: Boolean = false) extends AnyFlatSpec, Matchers:
   behavior of ((if(relational) "Relational" else "Non-Relational") + (if(ssa) "-SSA" else "") + " analysis with " + manager.getClass.getSimpleName)
 
   val precisionPath = Paths.get(this.getClass.getResource("/sturdy/language/wasm/precision.wast").toURI);
@@ -60,23 +72,39 @@ final class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: 
   val topi32 = Num(Int32(NumExpr(iv(MpqScalar(Int.MinValue), MpqScalar(Int.MaxValue), FloatSpecials.Bottom, I32Type))))
   val topi64 = Num(Int64(iv(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom, I64Type)))
 
-  testFunction("x_minus_x_eq_zero", List())
-  testFunction("max_upper_bound", List())
-  testFunction("loop_to_100", List())
-  testFunction("loop_to_n", List())
-  testFunction("input_of_recrusive_id_is_same_as_output", List())
-  testFunction("addition", List())
-  testFunction("plus_five", List())
-  testFunction("abs_if_join_on_stack", List())
-  testFunction("abs_if_join_on_local", List())
-  testFunction("abs_br_if_join_on_local", List())
-  testFunction("fac_positive", List())
-  testFunction("fac_acc_positive", List())
-  testFunction("fib_positive", List())
-  testFunction("even_returns_boolean", List())
+//  testFunction("embedded_max", expectedNumberOfAssertions = 2)
+//  testFunction("sin_bounds", expectedNumberOfAssertions = 2)
+//  testFunction("loop_to_100", expectedNumberOfAssertions = 2)
+//  testFunction("plus_five", expectedNumberOfAssertions = 2)
+//  testFunction("abs_if_join_on_stack", expectedNumberOfAssertions = 1)
+//  testFunction("abs_if_join_on_local", expectedNumberOfAssertions = 1)
+//  testFunction("abs_br_if_join_on_local", expectedNumberOfAssertions = 1)
 
+  // Recursive Tests
+  testFunction("fac_positive", expectedNumberOfAssertions = 1)
+  testFunction("fac_acc_positive", expectedNumberOfAssertions = 1)
+  testFunction("fib_positive", expectedNumberOfAssertions = 1)
+  testFunction("even_returns_boolean", expectedNumberOfAssertions = 2)
 
-  def testFunction(funcName: String, args: List[Value]) =
+  // Mopsa Tests
+  testFunction("x_minus_x_eq_zero", expectedNumberOfAssertions = 1)
+  testFunction("builtin_max", expectedNumberOfAssertions = 2)
+  testFunction("loop_to_n", expectedNumberOfAssertions = 1)
+  testFunction("2x_plus_y_minus_x_eq_x_plus_y", expectedNumberOfAssertions = 1)
+  testFunction("input_of_recrusive_id_is_same_as_output", expectedNumberOfAssertions = 1)
+  testFunction("addition_loop", expectedNumberOfAssertions = 1)
+
+  // The following examples are taken from "Static Inference of Numeric Invariants by Abstract Interpretation"
+  testFunction("static_inference_numeric_invariants_example_5_1", expectedNumberOfAssertions = 1)
+  testFunction("static_inference_numeric_invariants_example_5_2", expectedNumberOfAssertions = 1)
+  testFunction("static_inference_numeric_invariants_example_5_11", expectedNumberOfAssertions = 1)
+
+  // The following examples are taken from "Static Analysis Of Binary Code With Memory Indirections Using Polyhedra"
+  // Section 7.3
+  testFunction("static_analysis_binary_code_example_12", expectedNumberOfAssertions = 1)
+  testFunction("static_analysis_binary_code_example_13", expectedNumberOfAssertions = 1)
+
+  def testFunction(funcName: String, args: List[Value] = List(), expectedNumberOfAssertions: Int) =
     it must s"$funcName($args)" in {
 
       val config = WasmConfig(
@@ -88,11 +116,12 @@ final class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: 
       val analysis = new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, config)
       analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
-      val modInst = analysis.instantiateModule(precisionModule)
+      val modInst = analysis.instantiateModule(precisionModule, moduleId = Some("precision"))
       val result = analysis.failure.fallible {
         analysis.invokeExported(modInst, funcName, args).map(analysis.getInterval)
       }
 
+      analysis.assertions.size shouldBe expectedNumberOfAssertions
       analysis.failedAssertions shouldBe Map[FixIn, Topped[Boolean]]()
 
       Profiler.printLastMeasured()

@@ -25,11 +25,11 @@ final class RelationalStore
     Val : Join: Widen
   ]
   (initAddrTrans: Map[Context, RecencyRegion],
-   val manager: Manager,
    initialAbs1: Abstract1,
    initialNonRelationalStore: Map[PhysicalAddress[Context], Val])
   (using
-    relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]]
+   manager: Manager,
+   relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]]
   )
   extends StoreWithPureOps[PowAddr, Val, WithJoin] with AddressTranslation[Context]:
 
@@ -628,7 +628,7 @@ final class RelationalStore
 
           // Joining A and the non-relational store can have side-effects on `_leftState`, `_rightState`.
           // To avoid loosing these updates, we join the non-relational store a second time.
-          for {
+          val result = for {
             joinedA <- combineA(s1._1, s2._1)
             preJoinedNonRelStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
             finalJoinedNonRelationalStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
@@ -637,6 +637,7 @@ final class RelationalStore
             joinedState = RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore)
 //              optimize(RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore))
           } yield (joinedA, joinedState)
+          result
         } finally {
           _internalState = snapshotCurrentState
           _leftState = snapshotLeftJoin

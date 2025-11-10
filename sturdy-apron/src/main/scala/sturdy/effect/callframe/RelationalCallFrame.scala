@@ -4,7 +4,7 @@ import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, StatelessRelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
-import sturdy.effect.EffectStack
+import sturdy.effect.{ComputationJoiner, EffectStack}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
 import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
@@ -74,6 +74,7 @@ final class RelationalCallFrame
         )
     }
 
+
   override def setLocal(idx: Int, v: Val): JOptionC[Unit] =
     addressCallFrame.getLocal(idx).map(_virts =>
       val name = findName(idx)
@@ -89,7 +90,18 @@ final class RelationalCallFrame
       case Some(idx) => setLocal(idx, v)
 
   override def getLocal(x: Int): JOptionC[Val] =
-    addressCallFrame.getLocal(x).flatMap(getByVirt).asInstanceOf
+    addressCallFrame.getLocal(x).flatMap{ virts =>
+      val result = getByVirt(virts)
+      if(virts.physicalAddresses.size > 1) {
+        for (value <- result.toOption;
+             expr <- relationalValue.getRelationalExpr(value)) {
+          expr match
+            case ApronExpr.Addr(tempAddr, _, _) => addressCallFrame.setLocal(x, PowVirtualAddress(tempAddr))
+            case _ => ()
+        }
+      }
+      result
+    }.asInstanceOf
 
   override def getLocalByName(x: Var): JOptionC[Val] =
     addressCallFrame.getLocalByName(x).flatMap(getByVirt).asInstanceOf
@@ -134,6 +146,9 @@ final class RelationalCallFrame
         Unchanged(call)
       else
         Changed(call)
+
+  override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] =
+    addressCallFrame.makeComputationJoiner[A]
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     addressCallFrame.getState.iterator.flatMap(valueIterator)

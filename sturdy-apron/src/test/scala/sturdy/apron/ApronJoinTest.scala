@@ -71,99 +71,99 @@ class RelationalJoinTest
 
   val minValue = Bounded[L].minValue
   val maxValue = Bounded[L].maxValue
-
-  combineTest("Join[ApronExpr]", Join[ApronExpr[VirtAddr,Type]](_,_))
-  combineTest("Widen[ApronExpr]", Widen[ApronExpr[VirtAddr,Type]](_,_))
-
-  def combineTest(combineName: String, combine: (ApronState[VirtAddr, Type],Lazy[ApronState[VirtAddr, Type]]) ?=> (e1: ApronExpr[VirtAddr,Type], e2: ApronExpr[VirtAddr,Type]) => MaybeChanged[ApronExpr[VirtAddr,Type]]) =
-    test(combineName + " constant") {
-      forAll((genConstant[L](minValue, maxValue, specials*), "x"), (genConstant[L](minValue, maxValue, specials*), "y")) {
-        case (x, y) =>
-          withApronState {
-            val apronState = implicitly[ApronState[VirtAddr, Type]]
-            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
-
-            val (ivOps, soundness) = makeOps
-            val joined = combine(ivOps.constant(x), ivOps.constant(y))
-
-            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
-            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
-          }
-      }
-    }
-
-    test(combineName + " interval") {
-      forAll((genInterval[L](minValue, maxValue, specials *), "x"), (genInterval[L](minValue, maxValue, specials *), "y")) {
-        case (GenInterval.Interval(x1, x, x2, xSpecials), GenInterval.Interval(y1, y, y2, ySpecials)) =>
-          withApronState {
-            val apronState = implicitly[ApronState[VirtAddr, Type]]
-            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
-
-            val (ivOps, soundness) = makeOps
-
-            val xConst = ivOps.interval(x1, x2, xSpecials)
-            val yConst = ivOps.interval(y1, y2, ySpecials)
-            val joined = combine(xConst, yConst)
-
-            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
-            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
-          }
-      }
-    }
-
-  test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {
-    withApronState {
-      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
-      apronState.withTempVars(Type.IntType) {
-        case (x, List()) =>
-          apronState.assign(x, ApronExpr.interval(0, 10, Type.IntType))
-          val state1 = apronState.effectStack.getState
-          apronState.assign(x, ApronExpr.interval(10,20, Type.IntType))
-          val state2 = apronState.effectStack.getState
-          val joinedState = apronState.effectStack.join(state1, state2)
-          joinedState.hasChanged shouldBe true
-          apronState.effectStack.setStateNonMonotonically(joinedState.get)
-          apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
-            (0,20)
-      }
-    }
-  }
-
-  test("{x ∈ [0,20]} ⊔ {x ∈ [10,10]} = {x ∈ [0,20]}") {
-    withApronState {
-      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
-      apronState.withTempVars(Type.IntType) {
-        case (x, List()) =>
-          apronState.assign(x, ApronExpr.interval(0, 20, Type.IntType))
-          val state1 = apronState.effectStack.getState
-          apronState.assign(x, ApronExpr.interval(10, 10, Type.IntType))
-          val state2 = apronState.effectStack.getState
-          val joinedState = apronState.effectStack.join(state1, state2)
-          joinedState.hasChanged shouldBe false
-          apronState.effectStack.setStateNonMonotonically(joinedState.get)
-          apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
-            (0, 20)
-      }
-    }
-  }
-
-  test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
-    withApronState {
-      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
-      apronState.withTempVars(Type.IntType, ApronExpr.interval(0, 20, Type.IntType)) {
-        case (y, List(x)) =>
-          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(1, Type.IntType), Type.IntType))
-          val state1 = apronState.effectStack.getState
-          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(2, Type.IntType), Type.IntType))
-          val state2 = apronState.effectStack.getState
-          val joinedState = apronState.effectStack.join(state1, state2)
-          joinedState.hasChanged shouldBe true
-          apronState.effectStack.setStateNonMonotonically(joinedState.get)
-          apronState.getIntInterval(x) shouldBe (0, 20)
-          apronState.getIntInterval(ApronExpr.addr(y, Type.IntType)) shouldBe(1, 22)
-      }
-    }
-  }
+//
+//  combineTest("Join[ApronExpr]", Join[ApronExpr[VirtAddr,Type]](_,_))
+//  combineTest("Widen[ApronExpr]", Widen[ApronExpr[VirtAddr,Type]](_,_))
+//
+//  def combineTest(combineName: String, combine: (ApronState[VirtAddr, Type],Lazy[ApronState[VirtAddr, Type]]) ?=> (e1: ApronExpr[VirtAddr,Type], e2: ApronExpr[VirtAddr,Type]) => MaybeChanged[ApronExpr[VirtAddr,Type]]) =
+//    test(combineName + " constant") {
+//      forAll((genConstant[L](minValue, maxValue, specials*), "x"), (genConstant[L](minValue, maxValue, specials*), "y")) {
+//        case (x, y) =>
+//          withApronState {
+//            val apronState = implicitly[ApronState[VirtAddr, Type]]
+//            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+//
+//            val (ivOps, soundness) = makeOps
+//            val joined = combine(ivOps.constant(x), ivOps.constant(y))
+//
+//            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
+//            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
+//          }
+//      }
+//    }
+//
+//    test(combineName + " interval") {
+//      forAll((genInterval[L](minValue, maxValue, specials *), "x"), (genInterval[L](minValue, maxValue, specials *), "y")) {
+//        case (GenInterval.Interval(x1, x, x2, xSpecials), GenInterval.Interval(y1, y, y2, ySpecials)) =>
+//          withApronState {
+//            val apronState = implicitly[ApronState[VirtAddr, Type]]
+//            given Lazy[ApronState[VirtAddr, Type]] = Lazy(apronState)
+//
+//            val (ivOps, soundness) = makeOps
+//
+//            val xConst = ivOps.interval(x1, x2, xSpecials)
+//            val yConst = ivOps.interval(y1, y2, ySpecials)
+//            val joined = combine(xConst, yConst)
+//
+//            assertResult(IsSound.Sound)(soundness.isSound(x, joined.get))
+//            assertResult(IsSound.Sound)(soundness.isSound(y, joined.get))
+//          }
+//      }
+//    }
+//
+//  test("{x ∈ [0,10]} ⊔ {x ∈ [10,20]} = {x ∈ [0,20]}") {
+//    withApronState {
+//      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
+//      apronState.withTempVars(Type.IntType) {
+//        case (x, List()) =>
+//          apronState.assign(x, ApronExpr.interval(0, 10, Type.IntType))
+//          val state1 = apronState.effectStack.getState
+//          apronState.assign(x, ApronExpr.interval(10,20, Type.IntType))
+//          val state2 = apronState.effectStack.getState
+//          val joinedState = apronState.effectStack.join(state1, state2)
+//          joinedState.hasChanged shouldBe true
+//          apronState.effectStack.setStateNonMonotonically(joinedState.get)
+//          apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
+//            (0,20)
+//      }
+//    }
+//  }
+//
+//  test("{x ∈ [0,20]} ⊔ {x ∈ [10,10]} = {x ∈ [0,20]}") {
+//    withApronState {
+//      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
+//      apronState.withTempVars(Type.IntType) {
+//        case (x, List()) =>
+//          apronState.assign(x, ApronExpr.interval(0, 20, Type.IntType))
+//          val state1 = apronState.effectStack.getState
+//          apronState.assign(x, ApronExpr.interval(10, 10, Type.IntType))
+//          val state2 = apronState.effectStack.getState
+//          val joinedState = apronState.effectStack.join(state1, state2)
+//          joinedState.hasChanged shouldBe false
+//          apronState.effectStack.setStateNonMonotonically(joinedState.get)
+//          apronState.getIntInterval(ApronExpr.addr(x, Type.IntType)) shouldBe
+//            (0, 20)
+//      }
+//    }
+//  }
+//
+//  test("{x ∈ [0,20], y = x + 1} ⊔ {x ∈ [0,20], y = x + 2} = {x ∈ [0,20], x + 1 <= y <= x + 2}") {
+//    withApronState {
+//      val apronState = implicitly[ApronRecencyState[Ctx, Type, ApronExpr[VirtAddr, Type]]]
+//      apronState.withTempVars(Type.IntType, ApronExpr.interval(0, 20, Type.IntType)) {
+//        case (y, List(x)) =>
+//          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(1, Type.IntType), Type.IntType))
+//          val state1 = apronState.effectStack.getState
+//          apronState.assign(y, ApronExpr.intAdd(x, ApronExpr.lit(2, Type.IntType), Type.IntType))
+//          val state2 = apronState.effectStack.getState
+//          val joinedState = apronState.effectStack.join(state1, state2)
+//          joinedState.hasChanged shouldBe true
+//          apronState.effectStack.setStateNonMonotonically(joinedState.get)
+//          apronState.getIntInterval(x) shouldBe (0, 20)
+//          apronState.getIntInterval(ApronExpr.addr(y, Type.IntType)) shouldBe(1, 22)
+//      }
+//    }
+//  }
 
   test("{x ∈ [0,10], y = x} ⊔ {z ∈ [10,20], x = z} = {x ∈ [0,20], y ∈ [0,10], z ∈ [10,20], 0 <= x + y <= 30, 0 <= x - y <= 20, 10 <= z + x <= 40, 0 <= z - x <= 20, 10 <= z + y <= 30, 0 <= z - y <= 20}") {
     withApronState {

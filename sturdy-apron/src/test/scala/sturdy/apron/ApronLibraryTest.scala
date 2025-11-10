@@ -231,7 +231,7 @@ class ApronLibraryTest extends AnyFunSuite:
     abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
     abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
 
-    val joined = ApronJoins.combineAbstract1(abs1, abs2, widen=false).get
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, widen=false).get
 
     joined.getBound(manager, x) shouldBe Interval(1,2)
     joined.getBound(manager, y) shouldBe Interval(1,3)

@@ -48,6 +48,12 @@ class RecencyStore[Context: Ordering, Virt <: AbstractAddr[VirtualAddress[Contex
       PowersetAddr(PhysicalAddress(ctx, Recency.Old)))
     addressTranslation.alloc(ctx)
 
+  def allocPure(ctx: Context, state0: State): (VirtualAddress[Context], State) =
+    val state1 = store.movePure(
+      PowersetAddr(PhysicalAddress(ctx, Recency.Recent)),
+      PowersetAddr(PhysicalAddress(ctx, Recency.Old)), state0)
+    addressTranslation.allocPure(ctx, state1)
+
   inline def joinRecentIntoOld(virt: Virt): Unit =
     store.modifyInternalState(joinRecentIntoOldPure(virt, _))
 

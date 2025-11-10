@@ -149,7 +149,6 @@ object RelationalAnalysis extends Interpreter,
 
     val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] = new RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] (
       initAddrTrans = Map(),
-      manager = apronManager,
       initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
       initialNonRelationalStore = Map()
     )

@@ -39,7 +39,6 @@ object RecencyRelationalStore:
     given relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Ctx], Type, RelationalStoreState[Ctx, Map[PhysicalAddress[Ctx], (FloatSpecials, Type)]]] = RelationalValueApronExprPhysicalAddress[Val, Ctx, Type].asInstanceOf
     val relationalStore: RelationalStore[Ctx, Type, PowPhysAddr, Val] = new RelationalStore[Ctx, Type, PowPhysAddr, Val](
       Map(),
-      apronManager,
       Abstract1(apronManager, new Environment()),
       Map()
     )

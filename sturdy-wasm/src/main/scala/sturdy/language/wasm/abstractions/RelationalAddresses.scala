@@ -19,7 +19,7 @@ trait RelationalAddresses extends RelationalTypes:
 
     override def toString: String =
       this match
-        case CallFrame(callFramePosition, Some(programPos), function) => s"L$callFramePosition@$function:$programPos"
+        case CallFrame(callFramePosition, Some(fixin), function) => s"L$callFramePosition@${fixin.instLoc}"
         case CallFrame(callFramePosition, None, function) => s"L$callFramePosition@$function"
         case Global(addr) => s"G$addr"
         case Stack(stackPosition, programPosition, function) => s"S$stackPosition@$function:$programPosition"

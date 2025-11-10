@@ -145,6 +145,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
+    given Manager = apronManager
 
     var dummy: List[Value] = List()
 
@@ -200,7 +201,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
 
     val relationalStore: RelationalStore[AddrCtx, Type, PowPhysAddr, Value] = new RelationalStore[AddrCtx, Type, PowPhysAddr, Value](
       Map(),
-      manager = apronManager,
       initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
       initialNonRelationalStore = Map()
     )
@@ -589,9 +589,17 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case List(Num(Float32(x)), Num(Float32(y))) =>
             val ivX = apronState.getInterval(x)
             val ivY = apronState.getInterval(y)
-            List(Num(Float32(ApronExpr.constant(Join(ivX, ivY).get, I32Type))))
+            List(Num(Float32(ApronExpr.constant(Join(ivX, ivY).get, F32Type))))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected f32, f32 as arguments to $hostFunc, but got $args")
+      case "f64.interval" =>
+        args match
+          case List(Num(Float64(x)), Num(Float64(y))) =>
+            val ivX = apronState.getInterval(x)
+            val ivY = apronState.getInterval(y)
+            List(Num(Float64(ApronExpr.constant(Join(ivX, ivY).get, F64Type))))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected f64, f64 as arguments to $hostFunc, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(RelI32.BoolExpr(condition)))) =>
