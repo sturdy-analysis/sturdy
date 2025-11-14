@@ -220,7 +220,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           initData = rootFrameData,
           initVars = Iterable.empty,
           localVariableAllocator = localAlloc(ssa = config.localSSA, rootFrameData),
-          apronState
+          apronState,
+          ssa = config.localSSA
         )
       else
         new JoinableDecidableCallFrame(
@@ -325,11 +326,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       optionStaticMemoryLayout = parseStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
       loc
 
-    var assertions: Map[ApronBool[PhysAddr, Type], Topped[Boolean]] = Map()
-    def failedAssertions: Map[ApronBool[PhysAddr, Type], Topped[Boolean]] =
+    var assertions: Map[FixIn, (Bool, Topped[Boolean])] = Map()
+    def failedAssertions: Map[FixIn, (Bool, Topped[Boolean])] =
       assertions.filter {
-        case (_,Topped.Top) | (_, Topped.Actual(false)) => true
-        case (_,Topped.Actual(true)) => false
+        case (_,(_,Topped.Top)) | (_, (_,Topped.Actual(false))) => true
+        case (_,(_,Topped.Actual(true))) => false
       }
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match
@@ -371,7 +372,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "malloc" =>
         args match
           case List(Num(Int32(size))) =>
-            domLogger.getDoms(1) match {
+            domLogger.getDoms(0) match {
               case FixIn.Eval(_, allocationSite) =>
                 val virt = apronState.alloc(AddrCtx.ByteMemory(ByteMemoryCtx.Heap(allocationSite,0)): AddrCtx)
                 val heapAddr = HeapAddr(
@@ -387,7 +388,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "realloc" =>
         args match
           case List(Num(Int32(sourceAddr: HeapAddr)), Num(Int32(size))) =>
-            domLogger.getDoms(1) match {
+            domLogger.getDoms(0) match {
               case FixIn.Eval(_, allocationSite) =>
                 val virt = apronState.alloc(AddrCtx.ByteMemory(ByteMemoryCtx.Heap(allocationSite,0)): AddrCtx)
                 val reallocedAddr: HeapAddr = HeapAddr(
@@ -600,13 +601,20 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             List(Num(Float64(ApronExpr.constant(Join(ivX, ivY).get, F64Type))))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected f64, f64 as arguments to $hostFunc, but got $args")
+      case "i32.phi" =>
+        args match
+          case List(Num(Int32(x)), Num(Int32(y))) =>
+            List(Num(Int32(Join(x,y).get)))
+          case _ =>
+            failure.fail(WasmFailure.TypeError, s"Expected i32, i32 as arguments to $hostFunc, but got $args")
       case "assert" =>
         args match
           case List(v@Num(Int32(RelI32.BoolExpr(condition)))) =>
-            val (cond,_) = apronState.convertExpr.virtToPhysPure(condition, relationalStore._internalState.clone)
-            val currentResult = apronState.assert(condition)
-            val assertionResult = assertions.get(cond).map(Join(_,currentResult).get).getOrElse(currentResult)
-            assertions += cond -> assertionResult
+            val dom = domLogger.getDoms(0)
+            val intervals = SortedMap.from(relationalStore._internalState.abs1.getEnvironment.getVars.zip(relationalStore._internalState.abs1.toBox(apronManager)))
+            val currentResult = apronState.assert(condition).binary(_ && _, Topped.Actual(!relationalStore._internalState.abs1.isBottom(apronManager)))
+            val assertionResult = assertions.get(dom).map((_,previousResult) => Join(previousResult,currentResult).get).getOrElse(currentResult)
+            assertions += dom -> (condition,assertionResult)
             List()
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")

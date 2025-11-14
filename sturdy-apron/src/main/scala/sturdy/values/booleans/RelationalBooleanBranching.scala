@@ -63,6 +63,7 @@ given RelationalBreakIfBool[Ctx, Type, Val](using apronState: ApronRecencyState[
     br(apronState.relationalStore.getState)
 
   override def breakIf(cond: ApronBool[VirtualAddress[Ctx], Type])(break: State => Unit): Unit =
+//    breakIfDebug(cond)(break)
     val res = apronState.assert(cond)(using ResolveState.Internal)
     apronState.ifThenElse(effectStack)(cond) {
       break(apronState.relationalStore.getState)
@@ -78,3 +79,12 @@ given RelationalBreakIfBool[Ctx, Type, Val](using apronState: ApronRecencyState[
   override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = apronState.relationalStore.joinClosingOver
 
   override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = apronState.relationalStore.widenClosingOver
+
+def breakIfDebug[Ctx, Type, Val](using apronState: ApronRecencyState[Ctx,Type,Val], effectStack: EffectStack)(cond: ApronBool[VirtualAddress[Ctx], Type])(break: apronState.relationalStore.State => Unit): Unit =
+  val res = apronState.assert(cond)(using ResolveState.Internal)
+  apronState.ifThenElse(effectStack)(cond) {
+    break(apronState.relationalStore.getState)
+  } {
+
+  }
+  apronState.addCondition(cond.negated)(using ResolveState.Internal)

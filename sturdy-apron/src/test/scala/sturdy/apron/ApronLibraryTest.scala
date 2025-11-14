@@ -49,6 +49,32 @@ class ApronLibraryTest extends AnyFunSuite:
     asItvs.foreach(println)
   }
 
+  test("{0 <= x <= 10, z = x} ⊔ {10 <= y <= 20, z = y}") {
+
+    val manager = new Polka(false)
+
+    val abs1 = Abstract1(manager, new Environment(Array("x", "z"), Array[String]()))
+    val abs2 = Abstract1(manager, new Environment(Array("y", "z"), Array[String]()))
+
+    abs1.assign(manager, "x", Texpr1Intern(abs1.getEnvironment, Texpr1CstNode(Interval(0,10))), null)
+    abs1.assign(manager, "z", Texpr1Intern(abs1.getEnvironment, Texpr1VarNode("x")), null)
+
+    abs2.assign(manager, "y", Texpr1Intern(abs2.getEnvironment, Texpr1CstNode(Interval(10, 20))), null)
+    abs2.assign(manager, "z", Texpr1Intern(abs2.getEnvironment, Texpr1VarNode("y")), null)
+
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, widen=false).get
+
+    joined.getBound(manager, "x") shouldBe Interval(0, 10)
+    joined.getBound(manager, "y") shouldBe Interval(10, 20)
+    joined.getBound(manager, "z") shouldBe Interval(0, 20)
+
+    // z <= x
+    joined.getBound(manager, Texpr1Intern(joined.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1VarNode("z"), Texpr1VarNode("x")))) shouldBe Interval(0,20)
+
+    // y <= z
+    joined.getBound(manager, Texpr1Intern(joined.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1VarNode("y"), Texpr1VarNode("z")))) shouldBe Interval(0,10)
+  }
+
   test("{x ∈ [1,2], y ∈ [3,4], z ∈ [6,7]}.fold([x,y,z]) = { x ∈ [1,7] }") {
 
     val x = ApronVar("x")

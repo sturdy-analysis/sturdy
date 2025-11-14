@@ -474,31 +474,44 @@ class ApronRecencyState
       } else {
         Join((e1.floatSpecials, e1._type), (e2.floatSpecials, e2._type)).flatMap { case (joinedSpecials, joinedType) =>
           val ctx = allocator(e1, e2)
-          if(relationalStore._leftState != null && relationalStore._rightState != null) {
+//          if(widen) {
             val result = relationalStore.withLeftState { state1 =>
-              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
-              val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State])
-              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3))
+              val (result, state2) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state1)
+              val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2)
+              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), phys1, state3))
             }
             relationalStore.withRightState { state1 =>
-              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
-              val (phys2, state3) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
-              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state3))
+              val (result, state2) = recencyStore.addressTranslation.allocNoRetire(ctx, PowRecency.Old, state1)
+              val (phys2, state3) = convertExpr.virtToPhysPure(e2, state2)
+              (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Old)), phys2, state3))
             }
             // Check if expression has grown happens when combining Abstract1
             Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
-          } else {
-            val result = relationalStore.withInternalState { state1 =>
-              val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
-              val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State].clone())
-              val state4 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3)
-              val (phys2, state5) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
-              val state6 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state5)
-              (result, if(widen) relationalStore.widen(state5, state6).get else relationalStore.join(state5, state6).get)
-            }
-            Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
-          }
-
+//          } else {
+//            if (relationalStore._leftState != null && relationalStore._rightState != null) {
+//              val result = relationalStore.withLeftState { state1 =>
+//                val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+//                val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State])
+//                (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3))
+//              }
+//              relationalStore.withRightState { state1 =>
+//                val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+//                val (phys2, state3) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
+//                (result, relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state3))
+//              }
+//              Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+//            } else {
+//              val result = relationalStore.withInternalState { state1 =>
+//                val (result, state2) = recencyStore.allocPure(ctx, state1.asInstanceOf[recencyStore.State])
+//                val (phys1, state3) = convertExpr.virtToPhysPure(e1, state2.asInstanceOf[relationalStore.State].clone())
+//                val state4 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys1, state3)
+//                val (phys2, state5) = convertExpr.virtToPhysPure(e2, state2.asInstanceOf[relationalStore.State])
+//                val state6 = relationalStore.writePure(PowersetAddr(PhysicalAddress(ctx, Recency.Recent)), phys2, state5)
+//                (result, if (widen) relationalStore.widen(state5, state6).get else relationalStore.join(state5, state6).get)
+//              }
+//              Unchanged(ApronExpr.Addr(result, joinedSpecials, joinedType))
+//            }
+//          }
         }
       }
 
@@ -531,6 +544,9 @@ class ApronRecencyState
         b <- Join(assert(e1)(using ResolveState.Left), assert(e2)(using ResolveState.Right))
       } yield (ApronBool.Constant(b))
   }
+
+  def joinAddrsInto(addrs: PowVirtualAddress[Ctx], into: VirtualAddress[Ctx]): Unit =
+    relationalStore.copy(new PowersetAddr(addrs.physicalAddresses), into.physical)
 
   override def makeNonRelational(virtualAddress: VirtualAddress[Ctx])(using ResolveState): Unit =
     relationalStore.moveToNonRelationalStore(virtualAddress.physical)

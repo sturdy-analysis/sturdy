@@ -245,6 +245,33 @@ final class RelationalStore
     state
   }
 
+  def expandPure(fromPow: PowAddr, to: PhysicalAddress[Context], state0: State): State =
+    var state = state0
+
+    val snapshotInternal = _internalState
+    val snapshotLeft = _leftState
+    val snapshotRight = _rightState
+    try {
+      _internalState = state
+      _leftState = null
+      _rightState = null
+
+      val joined = fromPow.iterator.flatMap(from => _internalState.nonRelationalStoreState.get(from)).reduce(Join(_,_).get)
+      state = _internalState.copy(nonRelationalStoreState = _internalState.nonRelationalStoreState + (to -> joined))
+    } finally {
+      _internalState = snapshotInternal
+      _leftState = snapshotLeft
+      _rightState = snapshotRight
+    }
+
+    val joinedAbs1 = fromPow.iterator.map(from =>
+      state.abs1.expandCopy(manager, from, Array[Var](ApronVar(to)))
+    ).reduce((abs1,abs2) =>
+      abs1.join(manager, abs2)
+      abs1
+    )
+
+    state.copy(abs1 = joinedAbs1)
 
   /**
    * Does not actually delete addresses from store.
@@ -399,12 +426,21 @@ final class RelationalStore
         if (!cons.e1.floatSpecials.isBottom || !cons.e2.floatSpecials.isBottom)
           Topped.Top
         else {
-          if (state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
-            Topped.Actual(false)
-          else if (state.abs1.meetCopy(manager, resolvedCons.negated.toApron(state.abs1.getEnvironment)).isBottom(manager))
-            Topped.Actual(true)
-          else
-            Topped.Top
+          if(resolvedCons.op == CompareOp.Eq) {
+            if(state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
+              Topped.Actual(false)
+            else if(state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Lt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment), ApronCons(CompareOp.Gt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager))
+              Topped.Actual(true)
+            else
+              Topped.Top
+          } else {
+            if (state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
+              Topped.Actual(false)
+            else if (state.abs1.meetCopy(manager, resolvedCons.negated.toApron(state.abs1.getEnvironment)).isBottom(manager))
+              Topped.Actual(true)
+            else
+              Topped.Top
+          }
         }
   }
 
@@ -509,9 +545,7 @@ final class RelationalStore
     _internalState.copy(abs1 = copyAbstract1(_internalState.abs1))
 
   override def setState(olderState: State): Unit = setState(olderState, widening = true)
-  def setState(olderState: State, widening: Boolean): Unit =
-
-      Profiler.addTime("RelationalStore.setState") {
+  def setState(olderState: State, widening: Boolean): Unit = Profiler.addTime("RelationalStore.setState") {
     // Prioritize recent variables from olderState, but do not forget about old variables in _internalState.
     // To do this, we remove all recent variables in olderState from _internalState and then widen _internalState with olderState.
 
@@ -626,17 +660,24 @@ final class RelationalStore
           _leftState = s1._2.clone
           _rightState = s2._2.clone
 
+
           // Joining A and the non-relational store can have side-effects on `_leftState`, `_rightState`.
           // To avoid loosing these updates, we join the non-relational store a second time.
+          val joinedA = combineA(s1._1, s2._1)
+          val preJoinedNonRelStore = combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
+          val finalJoinedNonRelationalStore = combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
+          val joinedAddrTrans = combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
+          val joinedAbs1 = combineAbs1(_leftState.abs1, _rightState.abs1)
+
           val result = for {
-            joinedA <- combineA(s1._1, s2._1)
-            preJoinedNonRelStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
-            finalJoinedNonRelationalStore <- combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
-            joinedAddrTrans <- combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
-            joinedAbs1 <- combineAbs1(_leftState.abs1, _rightState.abs1)
-            joinedState = RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore)
-//              optimize(RelationalStoreState(joinedAddrTrans, joinedAbs1, finalJoinedNonRelationalStore))
-          } yield (joinedA, joinedState)
+            a <- joinedA
+            _ <- preJoinedNonRelStore
+            nonRelationalStore <- finalJoinedNonRelationalStore
+            addrTrans <- joinedAddrTrans
+            abs1 <- joinedAbs1
+            joinedState = (a, RelationalStoreState(addrTrans, abs1, nonRelationalStore))
+          } yield joinedState
+
           result
         } finally {
           _internalState = snapshotCurrentState

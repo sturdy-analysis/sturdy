@@ -1,15 +1,21 @@
 package sturdy.apron
 
 import apron.*
+import gmp.Mpfr
+import org.apache.commons.math3.exception.MathIllegalStateException
+import org.apache.commons.math3.optim.linear.{LinearConstraint, LinearConstraintSet, LinearObjectiveFunction, Relationship, SimplexSolver}
+import org.apache.commons.math3.optim.MaxIter
 import sturdy.util.{Lazy, Profiler}
 import sturdy.values.{Combine, Top, Topped, Widen, Widening}
 
+import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 import scala.reflect.ClassTag
 // import sturdy.apron.Apron.debugJoinWiden
 import sturdy.data.{given}
 import sturdy.effect.failure.Failure
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
+import scala.jdk.CollectionConverters.*
 
 given Abstract1Join(using manager: Manager): Join[Abstract1] with
   override def apply(v1: Abstract1, v2: Abstract1): MaybeChanged[Abstract1] =
@@ -43,12 +49,11 @@ object ApronJoins:
         val env2 = s2.getEnvironment
 
         val lce = env1.lce(env2)
+        val s1ExtEnv = if(lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
+        val s2ExtEnv = if(lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
 
         val model1 = getModel(manager, s1)
         val model2 = getModel(manager, s2)
-
-        val s1ExtEnv = if(lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
-        val s2ExtEnv = if(lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
 
         val env2_minus_env1 = minus(env2, env1).getVars
         val combinable1 =
@@ -68,7 +73,7 @@ object ApronJoins:
             s2ExtEnv.assignCopy(
               manager,
               env1_minus_env2,
-              env1_minus_env2.map(v => ApronExpr.constant(model1.getCoeff(env1.dimOfVar(v)).sup(), null).toIntern(lce)),
+              env1_minus_env2.map(v => ApronExpr.constant(model1.getCoeff(env1.dimOfVar(v)), null).toIntern(lce)),
               null
             )
           else
@@ -86,7 +91,7 @@ object ApronJoins:
         
         MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
       }
-      
+
       result
     }
 
@@ -98,60 +103,32 @@ object ApronJoins:
       }.next()
       case _: Octagon =>
         val env = abs1.getEnvironment
-        val boxManager = Box()
-        // Start with a model that is the lower bounds of single variables
-        val model: Abstract1 = Abstract1(boxManager, env, env.getVars, abs1.toBox(manager).map(iv => Interval(iv.inf(), iv.inf())))
-        val linearConstraints = abs1.toLincons(manager).filter(cons => !(cons.getLincons0Ref.getSize == 1 || cons.getLincons0Ref.getCoeffs.exists(_.isZero)))
 
-        for(constraint <- linearConstraints; if(! model.satisfy(boxManager, constraint))) {
-          val linTerms = constraint.getLinterms
-          val a_x = linTerms(0)
-          val b_y = linTerms(1)
-          val a = if(a_x.getCoefficient.isEqual(1)) 1 else -1
-          val b = if(b_y.getCoefficient.isEqual(1)) 1 else -1
-          val x_var = a_x.getVariable
-          val y_var = b_y.getVariable
-          val x_scalar = model.getBound(boxManager, x_var).sup()
-          val y_scalar = model.getBound(boxManager, y_var).sup()
-          val x_topped = if(x_scalar.isInfty == 0) Topped.Actual(x_scalar) else Topped.Top
-          val y_topped = if(y_scalar.isInfty == 0) Topped.Actual(y_scalar) else Topped.Top
-          val c = constraint.getCst
+        val coefficents = env.getVars.map(_ => 0d)
+        val d = Array[Double](0d)
+        val constraints = LinearConstraintSet(ArraySeq.unsafeWrapArray(abs1.toLincons(manager).map[LinearConstraint](apronLinCons =>
+          val coeffs = coefficents.clone()
+          for(linTerm <- apronLinCons.getLincons0Ref.getLinterms) {
+            linTerm.coeff.inf().toDouble(d,Mpfr.RNDN)
+            coeffs(linTerm.dim) = d(0)
+          }
+          apronLinCons.getCst.inf().toDouble(d,Mpfr.RNDN)
+          val constraint = LinearConstraint(coeffs, Relationship.GEQ, -d(0))
+          constraint
+        )).asJava)
 
-          val min_constant = if(c.cmp(DoubleScalar(0)) < 0) c else DoubleScalar(0)
-
-          val neg_a_x = a_x.clone(); neg_a_x.coeff.neg()
-          val neg_b_y = b_y.clone(); neg_b_y.coeff.neg()
-          val neg_c = c.copy(); neg_c.neg()
-
-          inline def times(a: Int, x: Var): Linterm1 = Linterm1(x, DoubleScalar(a))
-          inline def add(a_x: Linterm1, c: Coeff) = model.getBound(boxManager, Linexpr1(env, Array(a_x), c)).inf()
-
-          val (x_new, y_new) = (a, x_topped, b, y_topped) match
-            case ( 1, Topped.Top,       1, Topped.Top)       => throw IllegalStateException("Satisfied")
-            case ( 1, Topped.Top,      -1, Topped.Top)       => (DoubleScalar(Double.PositiveInfinity), min_constant)
-            case ( 1, Topped.Top,       1, Topped.Actual(y)) => throw IllegalStateException("Satisfied")
-            case ( 1, Topped.Top,      -1, Topped.Actual(y)) => throw IllegalStateException("Satisfied")
-            case (-1, Topped.Top,       1, Topped.Top)       => (min_constant, DoubleScalar(Double.PositiveInfinity))
-            case (-1, Topped.Top,      -1, Topped.Top)       => (DoubleScalar(0), min_constant)
-            case (-1, Topped.Top,       1, Topped.Actual(y)) => (add(times(1,y_var),c), y)
-            case (-1, Topped.Top,      -1, Topped.Actual(y)) => (add(times(-1,y_var),c), y)
-            case ( 1, Topped.Actual(x), 1, Topped.Top)       => throw IllegalStateException("Satisfied")
-            case ( 1, Topped.Actual(x),-1, Topped.Top)       => (x, add(times(1,x_var),c))
-            case ( 1, Topped.Actual(x), 1, Topped.Actual(y)) => (add(times(-1,y_var), neg_c), y)
-            case ( 1, Topped.Actual(x),-1, Topped.Actual(y)) => (add(times(1,y_var), neg_c), y)
-            case (-1, Topped.Actual(x), 1, Topped.Top)       => throw IllegalStateException("Satisfied")
-            case (-1, Topped.Actual(x),-1, Topped.Top)       => (x, add(times(1,x_var), c))
-            case (-1, Topped.Actual(x), 1, Topped.Actual(y)) => (add(times(1,y_var), c), y)
-            case (-1, Topped.Actual(x),-1, Topped.Actual(y)) => (add(times(-1,y_var), c), y)
-            case _ => throw IllegalStateException(s"Unexpected case ($a, $x_topped, $b, $y_topped)")
-
-          model.assign(boxManager, x_var, Texpr1Intern(env, Texpr1CstNode(x_new)), null)
-          model.assign(boxManager, y_var, Texpr1Intern(env, Texpr1CstNode(y_new)), null)
-
-          assert(model.satisfy(boxManager, constraint))
+        val objectiveFunction = LinearObjectiveFunction(coefficents, 0)
+        val solver = SimplexSolver()
+        try {
+          val solution = solver.optimize(objectiveFunction, constraints, MaxIter(1000))
+          Linexpr0(solution.getPointRef.map[Coeff](DoubleScalar(_)), DoubleScalar(0))
+        } catch {
+          case exception:MathIllegalStateException =>
+            println(exception)
+            Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
         }
 
-        Linexpr0(model.toBox(boxManager).map[Coeff](_.inf()), DoubleScalar(0))
+        //Linexpr0(model.toBox(boxManager).map[Coeff](_.inf()), DoubleScalar(0))
       case _: Box => Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
     }
   }

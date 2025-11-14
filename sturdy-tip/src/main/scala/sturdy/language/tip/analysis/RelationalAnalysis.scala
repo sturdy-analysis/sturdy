@@ -118,7 +118,7 @@ object RelationalAnalysis extends Interpreter,
 
     given tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
     given combineExprAlloc: AAllocatorFromContext[(ApronExpr[VirtAddr,RelType],ApronExpr[VirtAddr,RelType]), AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
-    given localRelationaAlloc: AAllocatorFromContext[(String, String, Option[Any]), AddrCtx] = AAllocatorFromContext((v, fun, _) => AddrCtx.Local(v,fun))
+    given localRelationaAlloc: AAllocatorFromContext[(String, String), AddrCtx] = AAllocatorFromContext((v, fun) => AddrCtx.Local(v,fun))
 
     given Manager = apronManager
 

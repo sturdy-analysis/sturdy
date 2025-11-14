@@ -41,6 +41,7 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
   .settings(
     name := "sturdy_apron",
     libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-math3" % "3.6.1",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     ),

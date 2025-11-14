@@ -27,13 +27,13 @@ import scala.jdk.StreamConverters.*
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
-//  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
-//  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
-//  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false),
-//  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
+  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
   BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
-//  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
+  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =

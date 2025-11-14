@@ -596,10 +596,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(mod, ix, hostFunc) =>
-        val vars = args.view.map(Some.apply)
-        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
-          enterHostFunction(FuncId(mod, ix), hostFunc)
-        }))
+        // Don't create a new call-frame, because this reduces precision. Instead, inline host function summary at call-site
+        val res = invokeHostFunction(hostFunc, args)
+        stack.pushN(res)
+    //        val vars = args.view.map(Some.apply)
+//        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
+//          enterHostFunction(FuncId(mod, ix), hostFunc)
+//        }))
       case FunctionInstance.Null =>
         fail(WasmFailure.InvocationError, "Cannot invoke \"null\" function")
 

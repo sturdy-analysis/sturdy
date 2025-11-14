@@ -228,7 +228,7 @@ given RelationalFloatOps
     } else if (iv2.isBottom || iv2.sup().cmp(iv1.inf()) <= 0) {
       v1.setFloatSpecials(resultSpecials)
     } else {
-      apronState.ifThenElse(lt(v1,v2)) {
+      apronState.ifThenElse(le(v1,v2)) {
         v2
       } {
         v1
@@ -257,7 +257,7 @@ given RelationalFloatOps
     else if (iv2.sup().cmp(iv1.inf()) <= 0)
       v2.setFloatSpecials(resultSpecials)
     else
-      apronState.ifThenElse(lt(v1, v2)) {
+      apronState.ifThenElse(le(v1, v2)) {
         v1
       } {
         v2
