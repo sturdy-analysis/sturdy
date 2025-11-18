@@ -57,6 +57,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
     ifThenElse(effects)(condition)(f)(g)
   def ifThenElse[A: Join](effectStack: EffectStack)(condition: ApronBool[Addr, Type])(f: => A)(g: => A): A =
     given resolveState: ResolveState = ResolveState.Internal
+    addConditionToWideningThresholds(condition)
     assert(condition) match
       case Topped.Actual(true) =>
         addCondition(condition)
@@ -73,6 +74,12 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
           g
         }
 
+  def addConditionToWideningThresholds(condition: ApronBool[Addr,Type]): Unit = {
+    val constraints = for(cons <- condition.constraints; c <- Iterable(ApronCons.le(cons.e1, cons.e2), ApronCons.lt(cons.e1, cons.e2), ApronCons.gt(cons.e1, cons.e2), ApronCons.ge(cons.e1, cons.e2))) yield(c)
+    addConstraintsToWideningThresholds(constraints)
+  }
+
+  def addConstraintsToWideningThresholds(constraints: Iterable[ApronCons[Addr,Type]]): Unit
 
   def join: Join[ApronExpr[Addr, Type]]
   def widen: Widen[ApronExpr[Addr, Type]]
@@ -235,6 +242,17 @@ class ApronRecencyState
         } {
           addCondition(e2)
         }
+
+  override def addConstraintsToWideningThresholds(constraints: Iterable[ApronCons[VirtualAddress[Ctx], Type]]): Unit =
+    relationalStore.modifyInternalState(state0 =>
+      var state = state0.clone
+      val physConstraints = constraints.map(virtCons =>
+        val (physCons,state1) = convertExpr.virtToPhysPure(virtCons, state)
+        state = state1
+        physCons
+      )
+      relationalStore.addConstraintsToWideningThresholdsPure(state0, physConstraints.toSeq*)
+    )
 
   override def isBottom(expr: ApronExpr[VirtualAddress[Ctx], Type])(using resolveState: ResolveState): Topped[Boolean] = {
     val state = getResolveState

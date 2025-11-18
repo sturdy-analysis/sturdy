@@ -339,7 +339,7 @@
         (br $continue)
       )
     )
-    (call $assert (i32.ge_s (local.get $i) (local.get $n)))
+    (call $assert (i32.eq (local.get $i) (local.get $n)))
   )
 
   (func $recursive_id (param $x i32) (result i32)

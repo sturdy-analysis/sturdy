@@ -42,6 +42,10 @@ given tripplePartialOrder[A,B,C](using poA: PartialOrder[A], poB: PartialOrder[B
   override def lteq(x: (A, B, C), y: (A, B, C)): Boolean =
     poA.lteq(x._1, y._1) && poB.lteq(x._2, y._2) && poC.lteq(x._3, y._3)
 
+given quadruppelPartialOrder[A,B,C,D](using poA: PartialOrder[A], poB: PartialOrder[B], poC: PartialOrder[C], poD: PartialOrder[D]): PartialOrder[(A,B,C,D)] with
+  override def lteq(x: (A, B, C, D), y: (A, B, C, D)): Boolean =
+    poA.lteq(x._1, y._1) && poB.lteq(x._2, y._2) && poC.lteq(x._3, y._3) && poD.lteq(x._4, y._4)
+
 given listPartialOrder[A](using poA: PartialOrder[A]): PartialOrder[List[A]] with
   override def lteq(xs: List[A], ys: List[A]): Boolean =
     if(xs.size == ys.size) {

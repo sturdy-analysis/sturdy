@@ -666,6 +666,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
                addr <- valueIterator(ops) ++ valueIterator(cond))
           yield addr
         case physAddr: PhysAddr @unchecked => Iterator.empty
+        case AbstractReference.Null => Iterator.empty
         case _ =>
           throw IllegalArgumentException("Unknown Value " + value)
 
@@ -928,7 +929,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case Num(Int32(v32)) => v32 match
             case NumExpr(v) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I32Type.signedTop), I32Type, isConstrained(v))
             case BoolExpr(v) => UnconstrainedInfo.Boolean(apronState.assert(v), isConstrained(v))
-            case _: RelI32.GlobalAddr | _: StackAddr | _: HeapAddr => ???
+            case RelI32.GlobalAddr(nameAndStart, offset) => UnconstrainedInfo.GlobalAddr(nameAndStart, isConstrained(offset))
+            case StackAddr(function, frameSize, _stackPointer, initialOffset, otherOffset) => UnconstrainedInfo.StackAddr(function, isConstrained(frameSize), initialOffset, isConstrained(otherOffset))
+            case HeapAddr(sites, size, initialOffset, otherOffset) => UnconstrainedInfo.HeapAddr(sites.mapAddr(virts => new Powerset(virts.physicalAddresses.asInstanceOf[Set[PhysicalAddress[Any]]])), isConstrained(size), isConstrained(otherOffset))
           case Num(Int64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(I64Type.signedTop), I64Type, isConstrained(v))
           case Num(Float32(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F32Type.signedTop), F32Type, isConstrained(v))
           case Num(Float64(v)) => UnconstrainedInfo.Numeric(apronState.getFloatInterval(v).meet(F64Type.signedTop), F64Type, isConstrained(v))

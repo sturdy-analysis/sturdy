@@ -496,12 +496,12 @@ enum ApronBool[Addr, Type]:
       case And(e1, e2) => Or(e1.negated, e2.negated)
       case Or(e1, e2) => And(e1.negated, e2.negated)
 
-  def constraint: Iterable[ApronCons[Addr, Type]] =
+  def constraints: Iterable[ApronCons[Addr, Type]] =
     this match
       case Constraint(cons) => Iterable(cons)
       case Constant(b) => Iterable()
-      case And(e1, e2) => e1.constraint ++ e2.constraint
-      case Or(e1, e2) => e1.constraint ++ e2.constraint
+      case And(e1, e2) => e1.constraints ++ e2.constraints
+      case Or(e1, e2) => e1.constraints ++ e2.constraints
 
   override def toString: String =
     this match

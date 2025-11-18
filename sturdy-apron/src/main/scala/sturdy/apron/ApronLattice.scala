@@ -17,16 +17,19 @@ import sturdy.effect.failure.Failure
 import sturdy.values.{Changed, Join, MaybeChanged, Unchanged}
 import scala.jdk.CollectionConverters.*
 
-given Abstract1Join(using manager: Manager): Join[Abstract1] with
-  override def apply(v1: Abstract1, v2: Abstract1): MaybeChanged[Abstract1] =
-    ApronJoins.combineAbstract1(manager, v1, v2, false)
+given Abstract1Join(using manager: Manager): Join[(Abstract1,Set[Lincons1])] with
+  override def apply(v1: (Abstract1,Set[Lincons1]), v2: (Abstract1,Set[Lincons1])): MaybeChanged[(Abstract1,Set[Lincons1])] = {
+    val joinedThresholds = v1._2 ++ v2._2
+    ApronJoins.combineAbstract1(manager, v1._1, v2._1, joinedThresholds, false).map((_,joinedThresholds))
+  }
 
-given Abstract1Widen(using manager: Manager): Widen[Abstract1] with
-  override def apply(v1: Abstract1, v2: Abstract1): MaybeChanged[Abstract1] =
-    ApronJoins.combineAbstract1(manager, v1, v2, true)
+given Abstract1Widen(using manager: Manager): Widen[(Abstract1,Set[Lincons1])] with
+  override def apply(v1: (Abstract1,Set[Lincons1]), v2: (Abstract1,Set[Lincons1])): MaybeChanged[(Abstract1,Set[Lincons1])] =
+    val joinedThresholds = v1._2 ++ v2._2
+    ApronJoins.combineAbstract1(manager, v1._1, v2._1, joinedThresholds, true).map((_,joinedThresholds))
 
 object ApronJoins:
-  def combineAbstract1(manager: Manager, s1: Abstract1, s2: Abstract1, widen: Boolean): MaybeChanged[Abstract1] =
+  def combineAbstract1(manager: Manager, s1: Abstract1, s2: Abstract1, thresholds: Set[Lincons1], widen: Boolean): MaybeChanged[Abstract1] =
     Profiler.addTime("Abstract1.combine") {
       val result = if(s1.getEnvironment.isEqual(s2.getEnvironment)) {
         if(s2.isIncluded(manager, s1)) {
@@ -34,7 +37,7 @@ object ApronJoins:
         } else {
           if(widen) {
             val s2Copy = s2.joinCopy(manager, s1)
-            Changed(s1.widening(manager, s2Copy))
+            Changed(s1.wideningThreshold(manager, s2Copy, thresholds.toArray.filter(lincons => lincons.getEnvironment.isIncluded(s1.getEnvironment)).map(lincons => lincons.extendEnvironmentCopy(s1.getEnvironment))))
           } else {
             Changed(s1.joinCopy(manager, s2))
           }
@@ -48,48 +51,55 @@ object ApronJoins:
         val env1 = s1.getEnvironment
         val env2 = s2.getEnvironment
 
-        val lce = env1.lce(env2)
-        val s1ExtEnv = if(lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
-        val s2ExtEnv = if(lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
+        if(env1.getSize == 0) {
+          MaybeChanged(s2, env1.getSize != env2.getSize)
+        } else if (env2.getSize == 0) {
+          Unchanged(s1)
+        } else {
 
-        val model1 = getModel(manager, s1)
-        val model2 = getModel(manager, s2)
+          val lce = env1.lce(env2)
+          val s1ExtEnv = if (lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
+          val s2ExtEnv = if (lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
 
-        val env2_minus_env1 = minus(env2, env1).getVars
-        val combinable1 =
-          if (env2_minus_env1.nonEmpty) {
-            s1ExtEnv.assignCopy(
-              manager,
-              env2_minus_env1,
-              env2_minus_env1.map(v => ApronExpr.constant(model2.getCoeff(env2.dimOfVar(v)), null).toIntern(lce)),
-              null
-            )
-          } else
-            s1ExtEnv
+          lazy val model1 = getModel(manager, s1)
+          lazy val model2 = getModel(manager, s2)
 
-        val env1_minus_env2 = minus(env1, env2).getVars
-        val combinable2 =
-          if (env1_minus_env2.nonEmpty)
-            s2ExtEnv.assignCopy(
-              manager,
-              env1_minus_env2,
-              env1_minus_env2.map(v => ApronExpr.constant(model1.getCoeff(env1.dimOfVar(v)), null).toIntern(lce)),
-              null
-            )
-          else
-            s2ExtEnv
+          val env2_minus_env1 = minus(env2, env1).getVars
+          val combinable1 =
+            if (env2_minus_env1.nonEmpty) {
+              s1ExtEnv.assignCopy(
+                manager,
+                env2_minus_env1,
+                env2_minus_env1.map(v => ApronExpr.constant(model2.getCoeff(env2.dimOfVar(v)), null).toIntern(lce)),
+                null
+              )
+            } else
+              s1ExtEnv
 
-        val combined =
-          if (widen) {
-            // This widens recent variables more precisely.
-            // For example, [xr = 1] ∇ [xr = 2] = [ 1 <= xr < infty ]
-            combinable2.join(manager, combinable1)
-            combinable1.widening(manager, combinable2)
-          } else {
-            combinable1.joinCopy(manager, combinable2)
-          }
-        
-        MaybeChanged(combined, ! (lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+          val env1_minus_env2 = minus(env1, env2).getVars
+          val combinable2 =
+            if (env1_minus_env2.nonEmpty)
+              s2ExtEnv.assignCopy(
+                manager,
+                env1_minus_env2,
+                env1_minus_env2.map(v => ApronExpr.constant(model1.getCoeff(env1.dimOfVar(v)), null).toIntern(lce)),
+                null
+              )
+            else
+              s2ExtEnv
+
+          val combined =
+            if (widen) {
+              // This widens recent variables more precisely.
+              // For example, [xr = 1] ∇ [xr = 2] = [ 1 <= xr < infty ]
+              combinable2.join(manager, combinable1)
+              combinable1.wideningThreshold(manager, combinable2, thresholds.toArray.filter(lincons => lincons.getEnvironment.isIncluded(lce)).map(lincons => lincons.extendEnvironmentCopy(lce)))
+            } else {
+              combinable1.joinCopy(manager, combinable2)
+            }
+
+          MaybeChanged(combined, !(lce.isEqual(env1) && combined.isIncluded(manager, s1ExtEnv)))
+        }
       }
 
       result

@@ -44,7 +44,7 @@ class RelationalAnalysisSoundnessTests extends Suites(
   new RelationalAnalysisTestScript(Polka(true), relational = true),
   new RelationalAnalysisTestScript(Octagon(), relational = true),
   new RelationalAnalysisTestScript(Box(), relational = true),
-  new RelationalAnalysisTestScript(Polka(true), relational = false),
+  new RelationalAnalysisTestScript(Box(), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()
@@ -216,7 +216,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
     case AssertTrap(action: Action, message: String) =>
       totalTestCases.increment()
       val state = aInterp.effectStack.getState
-      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setStateNonMonotonically(state) }
+      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setState(state) }
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))

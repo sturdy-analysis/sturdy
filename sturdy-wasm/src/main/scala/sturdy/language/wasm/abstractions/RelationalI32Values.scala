@@ -359,7 +359,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         case (_: NumExpr, _: HeapAddr) =>
           equ(v2, v1)
         case (BoolExpr(c1), NumExpr(i2@ApronExpr.Constant(coeff, _, tpe))) =>
-          val c1ContainsNaN = c1.constraint.exists { case ApronCons(_, e1, e2) => e1.floatSpecials.nan || e2.floatSpecials.nan }
+          val c1ContainsNaN = c1.constraints.exists { case ApronCons(_, e1, e2) => e1.floatSpecials.nan || e2.floatSpecials.nan }
           if (coeff.isEqual(0) && !c1ContainsNaN)
             c1.negated
           else if (coeff.isScalar && !c1ContainsNaN /* && ! coeff.isEqual(0) */ )

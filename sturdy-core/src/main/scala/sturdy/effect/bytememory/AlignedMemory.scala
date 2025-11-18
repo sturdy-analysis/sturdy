@@ -70,6 +70,8 @@ final class AlignedMemory
   type MemoryCtx = Context
   private val pageSize: Size = sizeOps.fromInt(ConcreteMemory.pageSize)
   private val maxPages: Size = sizeOps.fromInt(ConcreteMemory.maxPageNum)
+  var zeroAddr: Option[Addr] = None
+  var zeroValue: Option[Val] = None
 
   var memories: Map[Key, Mem[Context, Addr, Timestamp, Val, Size]] = Map()
 
@@ -85,7 +87,7 @@ final class AlignedMemory
     val matchingRegions = memOps.matchRegion(readAddr, sizeOps.fromInt(length), align, mem)
 
     if(matchingRegions.isEmpty) {
-      throw Error(s"AlignedMemory.read($key, $readAddr, $length, $align) does not resolve to any regions")
+      JOptionA.None()
     } else if(matchingRegions.exists { case (_, _, AlignedRead.MaybeAligned) => true; case (_, region, _) if(region.elementByteSize.isTop) => true; case _ => false }) {
       JOptionA.NoneSome(ReadBytes[Val](value = Topped.Top, byteOrder = Topped.Top))
     } else {
@@ -186,6 +188,13 @@ final class AlignedMemory
       case StoredBytes(values, byteOrder) =>
         val Mem(store0,  numPages, pageLimit) = memories(key)
         var store = store0
+
+        // Save zero address and zero value needed for future memory.grow
+        addressLimits.ifAddrLeSize(startAddr, sizeOps.fromInt(0)) {
+          zeroAddr = Some(startAddr)
+          zeroValue = Some(values.head._1)
+        }
+
         addressLimits.ifAddrLeSize(startAddr, sizeOps.sub(sizeOps.mul(numPages, pageSize), byteAmount)) {
           val (joinedValue, joinedElementByteSize) = values.map((value,elementByteSize) => (value, Topped.Actual(elementByteSize))).reduce(Join(_, _).get)
           for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Fill, key, startAddr)) {
@@ -241,15 +250,31 @@ final class AlignedMemory
     memories(key).numPages
 
   override def grow(key: Key, deltaPages: Size): JOption[WithJoin, Size] =
-    val Mem(addressRanges, numPages, pageLimit) = memories(key)
+    val Mem(store0, numPages, pageLimit) = memories(key)
+    var store = store0
+
     val newNumPages = sizeOps.add(numPages, deltaPages)
+    val startAddr = addressLimits.addSizeToAddr(sizeOps.mul(numPages, pageSize), zeroAddr.getOrElse(throw IllegalStateException("No zero address saved.")))
 
     val (resultPages, returnValue) = addressLimits.ifSizeLeLimit(newNumPages, sizeOps.min(maxPages, pageLimit)) {
+      for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Fill, key, startAddr)) {
+        increment(ctx)
+        val newRegion = MemoryRegion(
+          startAddr = startAddr,
+          alignment = Powerset(0),
+          elementByteSize = Topped.Actual(1),
+          regionByteSize = sizeOps.mul(deltaPages, pageSize),
+          value = zeroValue.getOrElse(throw IllegalStateException("No zero value saved.")),
+          byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN),
+          timestamp = this.timestamp
+        )
+        store = writeRegion(ctx, newRegion, store)
+      }
       (newNumPages, JOptionA.Some(numPages))
     } {
       (numPages, JOptionA.None[Size]())
     }
-    memories += key -> Mem(addressRanges, resultPages, pageLimit)
+    memories += key -> Mem(store, resultPages, pageLimit)
 
     returnValue
 

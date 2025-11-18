@@ -62,7 +62,7 @@ class ApronLibraryTest extends AnyFunSuite:
     abs2.assign(manager, "y", Texpr1Intern(abs2.getEnvironment, Texpr1CstNode(Interval(10, 20))), null)
     abs2.assign(manager, "z", Texpr1Intern(abs2.getEnvironment, Texpr1VarNode("y")), null)
 
-    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, widen=false).get
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, Set(), widen=false).get
 
     joined.getBound(manager, "x") shouldBe Interval(0, 10)
     joined.getBound(manager, "y") shouldBe Interval(10, 20)
@@ -257,7 +257,7 @@ class ApronLibraryTest extends AnyFunSuite:
     abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
     abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
 
-    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, widen=false).get
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, Set(), widen=false).get
 
     joined.getBound(manager, x) shouldBe Interval(1,2)
     joined.getBound(manager, y) shouldBe Interval(1,3)

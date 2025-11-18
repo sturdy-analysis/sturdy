@@ -303,11 +303,7 @@ trait RelationalMemory extends RelationalValues:
 
       (ctx, optionStaticMemoryLayout) match {
         case (ByteMemoryCtx.Static(i), _) =>
-          if (readEndIv.sup().cmp(i) <= 0 || DoubleScalar(i).cmp(readStartIv.inf()) < 0) {
-            Topped.Actual(false)
-          } else {
-            overlaps(readStart,readEnd, regionStart, regionEnd)
-          }
+          overlaps(readStart,readEnd, regionStart, regionEnd)
         case (ByteMemoryCtx.Global(name), Some(staticMemoryLayout)) =>
           val globalIv = staticMemoryLayout.getGlobalRange(name).get
           if (readEndIv.sup().cmp(globalIv.inf()) <= 0 || globalIv.sup().cmp(readStartIv.inf()) < 0) {
@@ -454,14 +450,18 @@ trait RelationalMemory extends RelationalValues:
       }
 
     private def alignedRead[Timestamp,Val](ctx: ByteMemoryCtx, readStart: ApronExpr[VirtAddr, Type], alignment: Int, memoryRegion: MemoryRegion[Addr, Size, Timestamp, Val]): AlignedRead =
-      if(memoryRegion.alignment.set.forall(_ == alignment))
-        AlignedRead.Aligned
-      else if(memoryRegion.alignment.set.head == 0)
-        AlignedRead.Aligned
-      else
+//      if(memoryRegion.alignment.set.forall(_ == alignment))
+//        AlignedRead.Aligned
+//      else if(memoryRegion.alignment.set.head == 0)
+//        AlignedRead.Aligned
+//      else
         val alignment = ApronExpr.lit[VirtAddr,Type](scala.math.pow(2,memoryRegion.alignment.set.head).toInt, I32Type)
         // aligned if readStart ≡ regionStart (mod 2^memoryRegion.alignment)
-        val res = apronState.assert(ApronCons.eq(ApronExpr.intMod(readStart, alignment, I32Type), ApronExpr.lit(0, I32Type))) match
+        val res = apronState.assert(
+          ApronBool.And(
+            ApronBool.Constraint(ApronCons.eq(ApronExpr.intMod(readStart, alignment, I32Type), ApronExpr.lit(0, I32Type))),
+            ApronBool.Constraint(ApronCons.eq(ApronExpr.intMod(memoryRegion.startAddr.asNumExpr, alignment, I32Type), ApronExpr.lit(0, I32Type)))
+          )) match
           case Topped.Actual(true) => AlignedRead.Aligned
           case _ => AlignedRead.MaybeAligned
         res

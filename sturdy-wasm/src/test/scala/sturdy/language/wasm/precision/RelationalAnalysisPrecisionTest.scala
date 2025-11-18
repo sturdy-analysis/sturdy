@@ -44,13 +44,13 @@ final class RelationalAnalysisPrecisionTests extends Suites(
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
-    writer.writeRow(List("domain", "relational", "ssa",  "test", "precise", "env_size", "byte_size", "time"))
+    writer.writeRow(List("domain", "relational", "ssa",  "test", "precise", "env_size", "byte_size"))
 
   override def afterAll(): Unit =
     writer.close
 
 final class SSATests(using writer: CSVWriter) extends Suites(
-//  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
+  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
   new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true, ssa = true),
   new RelationalAnalysisPrecisionTest(manager = new Box, relational = true, ssa = true)
 )
@@ -85,50 +85,50 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
   val topi64 = Num(Int64(iv(MpqScalar(BigInteger.valueOf(Long.MinValue)), MpqScalar(BigInteger.valueOf(Long.MaxValue)), FloatSpecials.Bottom, I64Type)))
 
   describe(analysisName + " with " + domain) {
-//    describe("Own Tests") {
-//      testFunction("linear_constraint", expectedNumberOfAssertions = 1)
-//      testFunction("sin_bounds", expectedNumberOfAssertions = 2)
-//
-//      testFunction("max_select", expectedNumberOfAssertions = 2)
-//      testFunction("builtin_max", expectedNumberOfAssertions = 2)
-//
-//      testFunction("abs_if_join_on_stack", expectedNumberOfAssertions = 1)
-//      testFunction("abs_if_join_on_local", expectedNumberOfAssertions = 1)
-//      testFunction("abs_br_if_join_on_local", expectedNumberOfAssertions = 1)
-//      testFunction("abs_select", expectedNumberOfAssertions = 1)
-//
-//      testFunction("plus_two_function_call", expectedNumberOfAssertions = 1)
-//
-//      describe("Reassignment Tests") {
-//        testFunction("plus_five", expectedNumberOfAssertions = 2)
-//        testFunction("reassignment", expectedNumberOfAssertions = 3)
-//        testFunction("swap", expectedNumberOfAssertions = 2)
-//      }
-//
-//      describe("Loop Tests") {
-//        testFunction("loop_to_100", expectedNumberOfAssertions = 2)
-//        testFunction("loop_condition_at_end", expectedNumberOfAssertions = 2)
-//        testFunction("loop_over_int_array", expectedNumberOfAssertions = 2)
-//        testFunction("mandelbrot_loop", expectedNumberOfAssertions = 1)
-//      }
-//
-//      describe("Recursive Tests") {
-//        testFunction("tail_rec_loop_to_100", expectedNumberOfAssertions = 1)
-//        testFunction("tail_rec_loop_to_n", expectedNumberOfAssertions = 1)
-//        testFunction("fac_positive", expectedNumberOfAssertions = 1)
-//        testFunction("fac_acc_positive", expectedNumberOfAssertions = 1)
-//        testFunction("fib_positive", expectedNumberOfAssertions = 1)
-//        testFunction("even_returns_boolean", expectedNumberOfAssertions = 2)
-//      }
-//    }
+    describe("Own Tests") {
+      testFunction("linear_constraint", expectedNumberOfAssertions = 1)
+      testFunction("sin_bounds", expectedNumberOfAssertions = 2)
+
+      testFunction("max_select", expectedNumberOfAssertions = 2)
+      testFunction("builtin_max", expectedNumberOfAssertions = 2)
+
+      testFunction("abs_if_join_on_stack", expectedNumberOfAssertions = 1)
+      testFunction("abs_if_join_on_local", expectedNumberOfAssertions = 1)
+      testFunction("abs_br_if_join_on_local", expectedNumberOfAssertions = 1)
+      testFunction("abs_select", expectedNumberOfAssertions = 1)
+
+      testFunction("plus_two_function_call", expectedNumberOfAssertions = 1)
+
+      describe("Reassignment Tests") {
+        testFunction("plus_five", expectedNumberOfAssertions = 2)
+        testFunction("reassignment", expectedNumberOfAssertions = 3)
+        testFunction("swap", expectedNumberOfAssertions = 2)
+      }
+
+      describe("Loop Tests") {
+        testFunction("loop_to_100",  expectedNumberOfAssertions = 2)
+        testFunction("loop_condition_at_end", expectedNumberOfAssertions = 2)
+        testFunction("loop_over_int_array", expectedNumberOfAssertions = 2)
+        testFunction("mandelbrot_loop", expectedNumberOfAssertions = 1)
+      }
+
+      describe("Recursive Tests") {
+        testFunction("tail_rec_loop_to_100", expectedNumberOfAssertions = 1)
+        testFunction("tail_rec_loop_to_n", expectedNumberOfAssertions = 1)
+        testFunction("fac_positive", expectedNumberOfAssertions = 1)
+        testFunction("fac_acc_positive", expectedNumberOfAssertions = 1)
+        testFunction("fib_positive", expectedNumberOfAssertions = 1)
+        testFunction("even_returns_boolean", expectedNumberOfAssertions = 2)
+      }
+    }
 
     describe("Mopsa Tests") {
-//      testFunction("x_minus_x_eq_zero", expectedNumberOfAssertions = 1)
-//      testFunction("max_if", expectedNumberOfAssertions = 2)
-//      testFunction("loop_to_n", expectedNumberOfAssertions = 1)
-//      testFunction("2x_plus_y_minus_x_eq_x_plus_y", expectedNumberOfAssertions = 1)
-//      testFunction("input_of_recrusive_id_is_same_as_output", expectedNumberOfAssertions = 1)
-      testFunction("peano_addition_loop", expectedNumberOfAssertions = 1)
+      testFunction("x_minus_x_eq_zero", expectedNumberOfAssertions = 1)
+      testFunction("max_if", expectedNumberOfAssertions = 2)
+      testFunction("loop_to_n", expectedNumberOfAssertions = 1)
+      testFunction("2x_plus_y_minus_x_eq_x_plus_y", expectedNumberOfAssertions = 1)
+      testFunction("input_of_recrusive_id_is_same_as_output", expectedNumberOfAssertions = 1)
+//      testFunction("peano_addition_loop", expectedNumberOfAssertions = 1)
     }
 
     describe("Static Inference of Numeric Invariants by Abstract Interpretation") {

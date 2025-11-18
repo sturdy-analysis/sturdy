@@ -8,7 +8,7 @@ trait VectorClock[Key: Finite]:
   var clocks: HashMap[Key, Int] = HashMap.empty
 
   final case class Timestamp(timestamp: HashMap[Key, Int]):
-    override def toString: String = s"t${super.hashCode().toString}"
+    override def toString: String = s"t${timestamp.values.sum}"
   def timestamp: Timestamp = Timestamp(clocks)
   def setTimestamp(newTimestamp: Timestamp): Unit = clocks = newTimestamp.timestamp
 

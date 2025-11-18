@@ -11,7 +11,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, *, given}
 
 import scala.annotation.tailrec
-import scala.collection.immutable.BitSet
+import scala.collection.immutable.{BitSet, HashMap}
 import scala.reflect.ClassTag
 
 /**
@@ -35,7 +35,7 @@ final class RelationalStore
 
   val nonRelationalStore: AStoreThreaded[PhysicalAddress[Context], PowAddr, Val] = AStoreThreaded(initialNonRelationalStore)
 
-  var _internalState: State = RelationalStoreState(AddressTranslationState(initAddrTrans), initialAbs1, initialNonRelationalStore)
+  var _internalState: State = RelationalStoreState(AddressTranslationState(initAddrTrans), initialAbs1, Set(), initialNonRelationalStore)
   var _leftState: State = null
   var _rightState: State = null
 
@@ -118,6 +118,12 @@ final class RelationalStore
             }
           }
         case Recency.Failed => throw new IllegalArgumentException("Cannot assign to physical address on failed branch")
+
+      state = addConstraintsToWideningThresholdsPure(
+        state,
+        ApronCons.le(ApronExpr.Addr(to,physExpr.floatSpecials,physExpr._type), physExpr),
+        ApronCons.ge(ApronExpr.Addr(to,physExpr.floatSpecials,physExpr._type), physExpr)
+      )
     }
     state
   }
@@ -399,6 +405,107 @@ final class RelationalStore
       state
   }
 
+  def addConstraintsToWideningThresholds(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
+    modifyInternalState(state => addConstraintsToWideningThresholdsPure(state, constraints*))
+
+  def addConstraintsToWideningThresholdsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
+    constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
+
+  def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State = {
+    val resolvedConstraint = replaceMissingAddrs(constraint, state)
+    val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
+    tconsToLincons(state.abs1, cons) match {
+      // Don't save constant constraints.
+      // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
+      case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
+        state.copy(wideningThresholds = state.wideningThresholds + lincons + toOld(lincons))
+      case _ => state
+    }
+  }
+
+  def toOld(lincons1: Lincons1): Lincons1 =
+    Lincons1(lincons1.getKind,Linexpr1(toOld(lincons1.getEnvironment), lincons1.getLinterms.map[Linterm1](toOld), lincons1.getCst))
+  def toOld(linterm1: Linterm1): Linterm1 =
+    Linterm1(toOld(linterm1.getVariable), linterm1.coeff)
+  def toOld(variable: Var): Var =
+    val ctx = variable.asInstanceOf[ApronVar[PhysicalAddress[Context]]].ctx
+    ApronVar(PhysicalAddress(ctx, Recency.Old))
+  def toOld(environment: Environment): Environment =
+    environment.add(environment.getIntVars.map(toOld).filter(!environment.hasVar(_)), environment.getRealVars.map(toOld).filter(!environment.hasVar(_)))
+
+  private def tconsToLincons(abs1: Abstract1, tcons: Tcons1): Option[Lincons1] =
+    for {
+      (terms,const) <- texprToLinexpr(abs1, tcons.toTexpr1Node)
+      scalarTerms <- toScalarTerms(terms)
+      scalarConst <- toScalar(const)
+    } yield Lincons1(tcons.getKind, Linexpr1(abs1.getEnvironment, terms.iterator.map(Linterm1(_,_)).toArray, scalarConst), tcons.getScalar)
+
+  private def texprToLinexpr(abs1: Abstract1, expr: Texpr1Node): Option[(HashMap[Var, Coeff], Coeff)] =
+    expr match {
+      case _ if(expr.getVars.isEmpty) =>
+        Some((HashMap(),abs1.getBound(manager, Texpr1Intern(abs1.getEnvironment, expr))))
+      case varNode: Texpr1VarNode =>
+        Some((HashMap(varNode.getVariable -> DoubleScalar(1)), DoubleScalar(0)))
+      case unNode: Texpr1UnNode =>
+        unNode.op match {
+          case Texpr1UnNode.OP_NEG =>
+            for {
+              (terms,const) <- texprToLinexpr(abs1, unNode.getArgument)
+            } yield (terms.map((x,coeff) => (x, negateCoeff(coeff))), negateCoeff(const))
+        }
+      case binNode: Texpr1BinNode =>
+        binNode.op match {
+          case Texpr1BinNode.OP_ADD =>
+            for {
+              (leftTerms,leftConst) <- texprToLinexpr(abs1, binNode.getLeftArgument)
+              (rightTerms,rightConst) <- texprToLinexpr(abs1, binNode.getRightArgument)
+            } yield (
+              leftTerms.merged(rightTerms){ case ((x,coeff1),(_,coeff2)) => (x, addCoeffs(abs1, coeff1, coeff2)) },
+              addCoeffs(abs1, leftConst, rightConst)
+            )
+          case Texpr1BinNode.OP_SUB =>
+            for {
+              (leftTerms,leftConst) <- texprToLinexpr(abs1, binNode.getLeftArgument)
+              (rightTerms,rightConst) <- texprToLinexpr(abs1, binNode.getRightArgument)
+              negRightTerms = rightTerms.map((x,coeff) => (x,negateCoeff(coeff)))
+            } yield (
+              leftTerms.merged(negRightTerms){ case ((x,coeff1),(_,coeff2)) => (x, addCoeffs(abs1, coeff1, coeff2)) },
+              addCoeffs(abs1, leftConst, negateCoeff(rightConst))
+            )
+
+          case Texpr1BinNode.OP_MUL =>
+            (binNode.getLeftArgument, binNode.getRightArgument) match {
+              case (coeff: Texpr1CstNode, variable: Texpr1VarNode) => Some((HashMap(variable.getVariable -> coeff.getConstant), DoubleScalar(0)))
+              case (variable: Texpr1VarNode, coeff: Texpr1CstNode) => Some((HashMap(variable.getVariable -> coeff.getConstant), DoubleScalar(0)))
+              case _ => None
+            }
+          case _ => None
+        }
+      case _ => None
+    }
+
+  private inline def toScalarTerms(terms: HashMap[Var, Coeff]): Option[Array[Linterm1]] =
+    if (terms.forall((_, coeff) => coeff.isScalar)) {
+      Some(terms.map((variable, coeff) => Linterm1(variable, coeff.inf())).toArray)
+    } else {
+      None
+    }
+
+  private inline def toScalar(coeff: Coeff): Option[Scalar] =
+    if(coeff.isScalar) Some(coeff.inf()) else None
+
+  private inline def addCoeffs(abs1: Abstract1, coeff1: Coeff, coeff2: Coeff): Coeff =
+    abs1.getBound(manager, Texpr1Intern(abs1.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_ADD, Texpr1CstNode(coeff1), Texpr1CstNode(coeff2))))
+
+  private inline def multiplyCoeffs(abs1: Abstract1, coeff1: Coeff, coeff2: Coeff): Coeff =
+    abs1.getBound(manager, Texpr1Intern(abs1.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_MUL, Texpr1CstNode(coeff1), Texpr1CstNode(coeff2))))
+
+  private inline def negateCoeff(coeff: Coeff): Coeff =
+    val copy = coeff.copy()
+    copy.neg()
+    copy
+
+
   def isBottom(state: State): Boolean =
     state.abs1.isBottom(manager)
 
@@ -426,21 +533,34 @@ final class RelationalStore
         if (!cons.e1.floatSpecials.isBottom || !cons.e2.floatSpecials.isBottom)
           Topped.Top
         else {
-          if(resolvedCons.op == CompareOp.Eq) {
-            if(state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
-              Topped.Actual(false)
-            else if(state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Lt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment), ApronCons(CompareOp.Gt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager))
-              Topped.Actual(true)
-            else
-              Topped.Top
-          } else {
-            if (state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
-              Topped.Actual(false)
-            else if (state.abs1.meetCopy(manager, resolvedCons.negated.toApron(state.abs1.getEnvironment)).isBottom(manager))
-              Topped.Actual(true)
-            else
-              Topped.Top
-          }
+          resolvedCons.op match
+            case CompareOp.Eq =>
+              if(state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
+                Topped.Actual(false)
+              else if(
+                  state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Lt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager) &&
+                  state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Gt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager)
+                )
+                Topped.Actual(true)
+              else
+                Topped.Top
+            case CompareOp.Neq =>
+              if(
+                state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Lt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager) &&
+                state.abs1.meetCopy(manager, Array(ApronCons(CompareOp.Gt, resolvedCons.e1, resolvedCons.e2).toApron(state.abs1.getEnvironment))).isBottom(manager)
+              )
+                Topped.Actual(false)
+              else if(state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
+                Topped.Actual(true)
+              else
+                Topped.Top
+            case _ =>
+              if (state.abs1.meetCopy(manager, resolvedCons.toApron(state.abs1.getEnvironment)).isBottom(manager))
+                Topped.Actual(false)
+              else if (state.abs1.meetCopy(manager, resolvedCons.negated.toApron(state.abs1.getEnvironment)).isBottom(manager))
+                Topped.Actual(true)
+              else
+                Topped.Top
         }
   }
 
@@ -649,7 +769,7 @@ final class RelationalStore
   override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = combineRelationalStoreState
   override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = combineRelationalStoreState
 
-  def combineRelationalStoreState[A,W <: Widening](using combineA: Combine[A,W], combineAddrTrans: Combine[AddressTranslationState[Context], W], combineAbs1: Combine[Abstract1,W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[(A,State), W] =
+  def combineRelationalStoreState[A,W <: Widening](using combineA: Combine[A,W], combineAddrTrans: Combine[AddressTranslationState[Context], W], combineAbs1: Combine[(Abstract1,Set[Lincons1]),W], combineNonRelStore: Combine[nonRelationalStore.State,W]): Combine[(A,State), W] =
     (s1: (A,State), s2: (A,State)) =>
       Profiler.addTime("RelationalStoreState.combine") {
         val snapshotCurrentState = _internalState
@@ -667,15 +787,15 @@ final class RelationalStore
           val preJoinedNonRelStore = combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
           val finalJoinedNonRelationalStore = combineNonRelStore(_leftState.nonRelationalStoreState, _rightState.nonRelationalStoreState)
           val joinedAddrTrans = combineAddrTrans(_leftState.addressTranslationState, _rightState.addressTranslationState)
-          val joinedAbs1 = combineAbs1(_leftState.abs1, _rightState.abs1)
+          val joinedAbs1 = combineAbs1((_leftState.abs1, _leftState.wideningThresholds), (_rightState.abs1, _rightState.wideningThresholds))
 
           val result = for {
             a <- joinedA
             _ <- preJoinedNonRelStore
             nonRelationalStore <- finalJoinedNonRelationalStore
             addrTrans <- joinedAddrTrans
-            abs1 <- joinedAbs1
-            joinedState = (a, RelationalStoreState(addrTrans, abs1, nonRelationalStore))
+            abs1Thresholds <- joinedAbs1
+            joinedState = (a, RelationalStoreState(addrTrans, abs1Thresholds._1, abs1Thresholds._2, nonRelationalStore))
           } yield joinedState
 
           result
@@ -754,10 +874,10 @@ inline def copyAbstract1(abstract1: Abstract1): Abstract1 = Profiler.addTime("Ab
     new Abstract1(abstract1.getCreationManager, abstract1)
 }
 
-case class RelationalStoreState[Context,Value](addressTranslationState: AddressTranslationState[Context], abs1: Abstract1, nonRelationalStoreState: Map[PhysicalAddress[Context], Value]):
+case class RelationalStoreState[Context,Value](addressTranslationState: AddressTranslationState[Context], abs1: Abstract1, wideningThresholds: Set[Lincons1], nonRelationalStoreState: Map[PhysicalAddress[Context], Value]):
   override def equals(obj: Any): Boolean =  Profiler.addTime("RelationalStoreState.equals") {
     obj match
-      case RelationalStoreState(addrTrans2, abs2, nonRel2) =>
+      case RelationalStoreState(addrTrans2, abs2, _, nonRel2) =>
         addressTranslationState == addrTrans2 &&
           MapEquals(nonRelationalStoreState, nonRel2.asInstanceOf[Map[PhysicalAddress[Context], Value]], _ == _) &&
           abs1.getEnvironment.isEqual(abs2.getEnvironment) &&
@@ -786,4 +906,4 @@ case class RelationalStoreState[Context,Value](addressTranslationState: AddressT
     copy(addressTranslationState = newAddressTranslationState)
 
   override def clone(): RelationalStoreState[Context, Value] =
-    RelationalStoreState(addressTranslationState, copyAbstract1(abs1), nonRelationalStoreState)
+    RelationalStoreState(addressTranslationState, copyAbstract1(abs1), wideningThresholds, nonRelationalStoreState)
