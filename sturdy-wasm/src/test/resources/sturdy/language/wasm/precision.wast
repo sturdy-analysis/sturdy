@@ -206,13 +206,13 @@
     (call $assert (i32.eq (local.get $y) (local.get $n)))
   )
 
-  (func $fac (export "fac") (param i32) (result i32)
-    (if (result i32) (i32.le_s (local.get 0) (i32.const 1))
+  (func $fac (param $x i32) (result i32)
+    (if (result i32) (i32.le_s (local.get $x) (i32.const 1))
       (then (i32.const 1))
       (else
         (i32.mul
-          (local.get 0)
-          (call $fac (i32.sub (local.get 0) (i32.const 1)))
+          (local.get $x)
+          (call $fac (i32.sub (local.get $x) (i32.const 1)))
         )
       )
     )
@@ -225,13 +225,13 @@
   )
 
 
-  (func $fac-acc (export "fac-acc") (param i32 i32) (result i32)
-    (if (result i32) (i32.eqz (local.get 0))
-      (then (local.get 1))
+  (func $fac-acc (param $x i32) (param $y i32) (result i32)
+    (if (result i32) (i32.eqz (local.get $x))
+      (then (local.get $y))
       (else
         (call $fac-acc
-          (i32.sub (local.get 0) (i32.const 1))
-          (i32.mul (local.get 0) (local.get 1))
+          (i32.sub (local.get $x) (i32.const 1))
+          (i32.mul (local.get $x) (local.get $y))
         )
       )
     )
@@ -243,13 +243,13 @@
     (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
   )
 
-  (func $fib (export "fib") (param i32) (result i32)
-    (if (result i32) (i32.le_u (local.get 0) (i32.const 1))
+  (func $fib (param $x i32) (result i32)
+    (if (result i32) (i32.le_u (local.get $x) (i32.const 1))
       (then (i32.const 1))
       (else
         (i32.add
-          (call $fib (i32.sub (local.get 0) (i32.const 2)))
-          (call $fib (i32.sub (local.get 0) (i32.const 1)))
+          (call $fib (i32.sub (local.get $x) (i32.const 2)))
+          (call $fib (i32.sub (local.get $x) (i32.const 1)))
         )
       )
     )
@@ -258,6 +258,25 @@
   (func (export "fib_positive") (local $x i32) (local $y i32)
     (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
     (local.set $y (call $fib (local.get $x)))
+    (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
+  )
+
+  (func $fib-acc (param $x i32) (param $y i32) (param $z i32) (result i32)
+    (if (result i32) (i32.le_u (local.get $x) (i32.const 1))
+      (then (local.get $z))
+      (else
+        (call $fib-acc
+          (i32.sub (local.get $x) (i32.const 1))
+          (local.get $z)
+          (i32.add (local.get $z) (local.get $y))
+        )
+      )
+    )
+  )
+
+  (func (export "fib_acc_positive") (local $x i32) (local $y i32)
+    (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
+    (local.set $y (call $fib-acc (local.get $x) (i32.const 0) (i32.const 1)))
     (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
   )
 

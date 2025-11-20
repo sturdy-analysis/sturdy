@@ -37,7 +37,7 @@ object ApronJoins:
         } else {
           if(widen) {
             val s2Copy = s2.joinCopy(manager, s1)
-            Changed(s1.wideningThreshold(manager, s2Copy, thresholds.toArray.filter(lincons => lincons.getEnvironment.isIncluded(s1.getEnvironment)).map(lincons => lincons.extendEnvironmentCopy(s1.getEnvironment))))
+            Changed(s1.wideningThreshold(manager, s2Copy, thresholds.filter(lincons => lincons.getEnvironment.isIncluded(s1.getEnvironment)).map(lincons => lincons.extendEnvironmentCopy(s1.getEnvironment)).toArray))
           } else {
             Changed(s1.joinCopy(manager, s2))
           }
@@ -93,7 +93,7 @@ object ApronJoins:
               // This widens recent variables more precisely.
               // For example, [xr = 1] ∇ [xr = 2] = [ 1 <= xr < infty ]
               combinable2.join(manager, combinable1)
-              combinable1.wideningThreshold(manager, combinable2, thresholds.toArray.filter(lincons => lincons.getEnvironment.isIncluded(lce)).map(lincons => lincons.extendEnvironmentCopy(lce)))
+              combinable1.wideningThreshold(manager, combinable2, thresholds.filter(lincons => lincons.getEnvironment.isIncluded(lce)).map(lincons => lincons.extendEnvironmentCopy(lce)).toArray)
             } else {
               combinable1.joinCopy(manager, combinable2)
             }

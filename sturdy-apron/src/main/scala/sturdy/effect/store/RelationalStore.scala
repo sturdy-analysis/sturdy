@@ -418,20 +418,10 @@ final class RelationalStore
       // Don't save constant constraints.
       // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
       case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
-        state.copy(wideningThresholds = state.wideningThresholds + lincons + toOld(lincons))
+        state.copy(wideningThresholds = state.wideningThresholds + minimizeEnvironment(lincons) + minimizeEnvironment(toOld(lincons)))
       case _ => state
     }
   }
-
-  def toOld(lincons1: Lincons1): Lincons1 =
-    Lincons1(lincons1.getKind,Linexpr1(toOld(lincons1.getEnvironment), lincons1.getLinterms.map[Linterm1](toOld), lincons1.getCst))
-  def toOld(linterm1: Linterm1): Linterm1 =
-    Linterm1(toOld(linterm1.getVariable), linterm1.coeff)
-  def toOld(variable: Var): Var =
-    val ctx = variable.asInstanceOf[ApronVar[PhysicalAddress[Context]]].ctx
-    ApronVar(PhysicalAddress(ctx, Recency.Old))
-  def toOld(environment: Environment): Environment =
-    environment.add(environment.getIntVars.map(toOld).filter(!environment.hasVar(_)), environment.getRealVars.map(toOld).filter(!environment.hasVar(_)))
 
   private def tconsToLincons(abs1: Abstract1, tcons: Tcons1): Option[Lincons1] =
     for {
@@ -439,6 +429,13 @@ final class RelationalStore
       scalarTerms <- toScalarTerms(terms)
       scalarConst <- toScalar(const)
     } yield Lincons1(tcons.getKind, Linexpr1(abs1.getEnvironment, terms.iterator.map(Linterm1(_,_)).toArray, scalarConst), tcons.getScalar)
+
+  private def minimizeEnvironment(lincons: Lincons1): Lincons1 =
+    val terms = lincons.getLinterms
+    val variables = terms.map(linterm => linterm.getVariable).toSet
+    var env = lincons.getEnvironment
+    env = env.remove(env.getVars.filter(x => !variables.contains(x)))
+    Lincons1(lincons.getKind, Linexpr1(env, lincons.getLinterms, lincons.getCst), lincons.getScalar)
 
   private def texprToLinexpr(abs1: Abstract1, expr: Texpr1Node): Option[(HashMap[Var, Coeff], Coeff)] =
     expr match {
@@ -452,6 +449,7 @@ final class RelationalStore
             for {
               (terms,const) <- texprToLinexpr(abs1, unNode.getArgument)
             } yield (terms.map((x,coeff) => (x, negateCoeff(coeff))), negateCoeff(const))
+          case _ => None
         }
       case binNode: Texpr1BinNode =>
         binNode.op match {
@@ -504,6 +502,17 @@ final class RelationalStore
     val copy = coeff.copy()
     copy.neg()
     copy
+
+  def toOld(lincons1: Lincons1): Lincons1 =
+    Lincons1(lincons1.getKind,Linexpr1(toOld(lincons1.getEnvironment), lincons1.getLinterms.map[Linterm1](toOld), lincons1.getCst))
+  def toOld(linterm1: Linterm1): Linterm1 =
+    Linterm1(toOld(linterm1.getVariable), linterm1.coeff)
+  def toOld(variable: Var): Var =
+    val ctx = variable.asInstanceOf[ApronVar[PhysicalAddress[Context]]].ctx
+    ApronVar(PhysicalAddress(ctx, Recency.Old))
+  def toOld(environment: Environment): Environment =
+    environment.add(environment.getIntVars.map(toOld).filter(!environment.hasVar(_)), environment.getRealVars.map(toOld).filter(!environment.hasVar(_)))
+
 
 
   def isBottom(state: State): Boolean =

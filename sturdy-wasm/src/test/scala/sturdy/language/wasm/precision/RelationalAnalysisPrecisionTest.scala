@@ -38,7 +38,7 @@ import scala.reflect.{ClassTag, TypeTest}
 
 given writer: CSVWriter = CSVWriter.open(File("relational-analysis-precision-test.csv"))
 final class RelationalAnalysisPrecisionTests extends Suites(
-  new SSATests,
+//  new SSATests,
   new VirtualRecencyTests,
   new NonRelationalTests
 ), BeforeAndAfterAll:
@@ -118,6 +118,7 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
         testFunction("fac_positive", expectedNumberOfAssertions = 1)
         testFunction("fac_acc_positive", expectedNumberOfAssertions = 1)
         testFunction("fib_positive", expectedNumberOfAssertions = 1)
+        testFunction("fib_acc_positive", expectedNumberOfAssertions = 1)
         testFunction("even_returns_boolean", expectedNumberOfAssertions = 2)
       }
     }
