@@ -41,20 +41,20 @@
     (call $assert (f64.le (f64.const -5.0) (local.get $x) ))
   )
 
-  (func (export "builtin_max") (local $x f32) (local $y f32) (local $z f32)
-    (local.set $x (call $f32.interval (f32.const -100) (f32.const 100)))
-    (local.set $y (call $f32.interval (f32.const -100) (f32.const 100)))
-    (local.set $z (f32.max (local.get $x) (local.get $y)))
-    (call $assert (f32.ge (local.get $z) (local.get $x)))
-    (call $assert (f32.ge (local.get $z) (local.get $y)))
-  )
-
   (func (export "max_select") (local $x i32) (local $y i32) (local $z i32)
     (local.set $x (call $i32.interval (i32.const -100) (i32.const 100)))
     (local.set $y (call $i32.interval (i32.const -100) (i32.const 100)))
     (local.set $z (select (local.get $y) (local.get $x) (i32.le_s (local.get $x) (local.get $y)) ))
     (call $assert (i32.ge_s (local.get $z) (local.get $x)))
     (call $assert (i32.ge_s (local.get $z) (local.get $y)))
+  )
+
+  (func (export "builtin_max") (local $x f32) (local $y f32) (local $z f32)
+    (local.set $x (call $f32.interval (f32.const -100) (f32.const 100)))
+    (local.set $y (call $f32.interval (f32.const -100) (f32.const 100)))
+    (local.set $z (f32.max (local.get $x) (local.get $y)))
+    (call $assert (f32.ge (local.get $z) (local.get $x)))
+    (call $assert (f32.ge (local.get $z) (local.get $y)))
   )
 
   (func (export "abs_if_join_on_stack") (local $x i32) (local $y i32)
@@ -138,6 +138,24 @@
         (call $assert (i32.le_s (local.get $address) (i32.add (local.get $array) (i32.mul (i32.const 4) (i32.const 1000)))))
         (local.set $i (i32.add (local.get $i) (i32.const 1)))
         (br $continue)
+      )
+    )
+  )
+
+  (func (export "mandelbrot_loop") (local $x i32) (local $y i32)
+    (block $outerExit
+      (loop $outerLoop
+        (br_if $outerExit (i32.ge_s (local.get $y) (i32.const 100)))
+        (block $innerExit
+          (loop $innerLoop
+            (br_if $innerExit (i32.ge_s (local.get $x) (i32.const 200)))
+            (call $assert (i32.le_s (i32.add (i32.mul (local.get $y) (i32.const 200)) (local.get $x)) (i32.mul (i32.const 100) (i32.const 200))))
+            (local.set $x (i32.add (local.get $x) (i32.const 1)))
+            (br $innerLoop)
+          )
+        )
+        (local.set $y (i32.add (local.get $y) (i32.const 1)))
+        (br $outerLoop)
       )
     )
   )
@@ -280,6 +298,19 @@
     (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
   )
 
+  (func (export "fib_addition_of_predecessors") (local $x i32) (local $y i32)
+    (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
+    (local.set $y (call $fib (local.get $x)))
+    (call $assert
+      (i32.eq
+        (call $fib (local.get $x))
+        (i32.add (call $fib (i32.sub (local.get $x) (i32.const 1)))
+                 (call $fib (i32.sub (local.get $x) (i32.const 2)))
+        )
+      )
+    )
+  )
+
   (func $even (export "even") (param i32) (result i32)
     (if (result i32) (i32.eq (local.get 0) (i32.const 0))
       (then (i32.const 1))
@@ -311,24 +342,43 @@
     (call $assert (i32.le_s (local.get $y) (i32.const 1)))
   )
 
-  (func (export "mandelbrot_loop") (local $x i32) (local $y i32)
-    (block $outerExit
-      (loop $outerLoop
-        (br_if $outerExit (i32.ge_s (local.get $y) (i32.const 100)))
-        (block $innerExit
-          (loop $innerLoop
-            (br_if $innerExit (i32.ge_s (local.get $x) (i32.const 200)))
-            (call $assert (i32.le_s (i32.add (i32.mul (local.get $y) (i32.const 200)) (local.get $x)) (i32.mul (i32.const 100) (i32.const 200))))
-            (local.set $x (i32.add (local.get $x) (i32.const 1)))
-            (br $innerLoop)
-          )
+  (func $recursive-peano-addition (param $x i32) (param $y i32) (result i32)
+    (if (result i32) (i32.eqz (local.get $x))
+      (then (local.get $y))
+      (else
+        (call $recursive-peano-addition
+          (i32.sub (local.get $x) (i32.const 1))
+          (i32.add (local.get $y) (local.get 1))
         )
-        (local.set $y (i32.add (local.get $y) (i32.const 1)))
-        (br $outerLoop)
       )
     )
   )
 
+  (func (export "recursive_peano_addition") (local $x i32) (local $y i32) (local $z i32)
+    (local.set $x (call $i32.interval (i32.const -100) (i32.const 100)))
+    (local.set $y (call $i32.interval (i32.const -100) (i32.const 100)))
+    (local.set $z (call $recursive-peano-addition (local.get $x) (local.get $y)))
+    (call $assert (i32.eq (local.get $z) (i32.add (local.get $x) (local.get $y))))
+  )
+
+  (func $gauss-sum (param $x i32) (result i32)
+    (if (result i32) (i32.le_s (local.get $x) (i32.const 0))
+      (then (i32.const 0))
+      (else (i32.add (local.get $x) (call $gauss-sum (i32.sub (local.get $x) (i32.const -1)))))
+    )
+  )
+
+  (func (export "gauss_sum_positive") (local $x i32) (local $y i32)
+    (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
+    (local.set $y (call $gauss-sum (local.get $x)))
+    (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
+  )
+
+  (func (export "gauss_sum_greater_than_input") (local $x i32) (local $y i32)
+    (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
+    (local.set $y (call $gauss-sum (local.get $x)))
+    (call $assert (i32.ge_s (local.get $y) (local.get $x)))
+  )
 
   ;; Mopsa Tests
   (func (export "x_minus_x_eq_zero") (local $x i32) (local $y i32)
@@ -361,24 +411,24 @@
     (call $assert (i32.eq (local.get $i) (local.get $n)))
   )
 
-  (func $recursive_id (param $x i32) (result i32)
+  (func (export "2x_plus_y_minus_x_eq_x_plus_y") (local $x i32) (local $y i32) (local $z i32)
+    (local.set $x (call $i32.interval (i32.const -100) (i32.const 100)))
+    (local.set $y (call $i32.interval (i32.const -100) (i32.const 100)))
+    (local.set $z (i32.add (i32.mul (i32.const 2) (local.get $x)) (local.get $y)))
+    (call $assert (i32.eq (i32.sub (local.get $z) (local.get $x)) (i32.add (local.get $x) (local.get $y))))
+  )
+
+  (func $recursive-id (param $x i32) (result i32)
     (if $l1 (result i32) (i32.le_s (local.get $x) (i32.const 0))
       (then (local.get $x))
-      (else (i32.add (i32.const 1) (call $recursive_id (i32.sub (local.get $x) (i32.const 1)))))
+      (else (i32.add (i32.const 1) (call $recursive-id (i32.sub (local.get $x) (i32.const 1)))))
     )
     return
   )
 
-    (func (export "2x_plus_y_minus_x_eq_x_plus_y") (local $x i32) (local $y i32) (local $z i32)
-      (local.set $x (call $i32.interval (i32.const -100) (i32.const 100)))
-      (local.set $y (call $i32.interval (i32.const -100) (i32.const 100)))
-      (local.set $z (i32.add (i32.mul (i32.const 2) (local.get $x)) (local.get $y)))
-      (call $assert (i32.eq (i32.sub (local.get $z) (local.get $x)) (i32.add (local.get $x) (local.get $y))))
-    )
-
   (func (export "input_of_recrusive_id_is_same_as_output") (local $x i32) (local $y i32)
     (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
-    (local.set $y (call $recursive_id (local.get $x)))
+    (local.set $y (call $recursive-id (local.get $x)))
     (call $assert (i32.eq (local.get $x) (local.get $y)))
   )
 

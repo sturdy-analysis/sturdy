@@ -118,8 +118,12 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
         testFunction("fac_positive", expectedNumberOfAssertions = 1)
         testFunction("fac_acc_positive", expectedNumberOfAssertions = 1)
         testFunction("fib_positive", expectedNumberOfAssertions = 1)
+        testFunction("fib_addition_of_predecessors", expectedNumberOfAssertions = 1)
         testFunction("fib_acc_positive", expectedNumberOfAssertions = 1)
         testFunction("even_returns_boolean", expectedNumberOfAssertions = 2)
+        testFunction("recursive_peano_addition", expectedNumberOfAssertions = 1)
+        testFunction("gauss_sum_positive", expectedNumberOfAssertions = 1)
+        testFunction("gauss_sum_greater_than_input", expectedNumberOfAssertions = 1)
       }
     }
 
@@ -129,18 +133,18 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
       testFunction("loop_to_n", expectedNumberOfAssertions = 1)
       testFunction("2x_plus_y_minus_x_eq_x_plus_y", expectedNumberOfAssertions = 1)
       testFunction("input_of_recrusive_id_is_same_as_output", expectedNumberOfAssertions = 1)
-//      testFunction("peano_addition_loop", expectedNumberOfAssertions = 1)
+      testFunction("peano_addition_loop", expectedNumberOfAssertions = 1)
     }
 
     describe("Static Inference of Numeric Invariants by Abstract Interpretation") {
       testFunction("static_inference_numeric_invariants_example_5_1", expectedNumberOfAssertions = 1)
       testFunction("static_inference_numeric_invariants_example_5_2", expectedNumberOfAssertions = 1)
-//      testFunction("static_inference_numeric_invariants_example_5_11", expectedNumberOfAssertions = 2)
+      testFunction("static_inference_numeric_invariants_example_5_11", expectedNumberOfAssertions = 2)
     }
 
     describe("Static Analysis Of Binary Code With Memory Indirections Using Polyhedra") {
       // Example 12 is a soundness test, not a precision test
-//      testFunction("static_analysis_binary_code_example_12", expectedNumberOfAssertions = 1)
+      testFunction("static_analysis_binary_code_example_12", expectedNumberOfAssertions = 1)
       testFunction("static_analysis_binary_code_example_13", expectedNumberOfAssertions = 2)
     }
   }

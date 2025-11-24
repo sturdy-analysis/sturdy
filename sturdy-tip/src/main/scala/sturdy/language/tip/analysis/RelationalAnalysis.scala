@@ -300,15 +300,4 @@ object RelationalAnalysis extends Interpreter,
     val domLogger: DomLogger[FixIn] = new DomLogger
     val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
 
-    final override val fixpoint =
-      fix.log(controlEventLogger(this),
-        callSiteSensitive(callSites,
-          fix.log(fix.manyLogger(List(domLogger)),
-            fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.topmost(observedStackConfig), fix.iter.topmost(observedStackConfig))
-            )
-          )
-        )
-      ).fixpoint
-
     override def newInstance: sturdy.Executor = new Instance(apronManager, initStore, stackConfig, callSites)
