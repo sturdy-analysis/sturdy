@@ -112,31 +112,32 @@ object ApronJoins:
         case _ => None
       }.next()
       case _: Octagon =>
-        val env = abs1.getEnvironment
-
-        val coefficents = env.getVars.map(_ => 0d)
-        val d = Array[Double](0d)
-        val constraints = LinearConstraintSet(ArraySeq.unsafeWrapArray(abs1.toLincons(manager).map[LinearConstraint](apronLinCons =>
-          val coeffs = coefficents.clone()
-          for(linTerm <- apronLinCons.getLincons0Ref.getLinterms) {
-            linTerm.coeff.inf().toDouble(d,Mpfr.RNDN)
-            coeffs(linTerm.dim) = d(0)
-          }
-          apronLinCons.getCst.inf().toDouble(d,Mpfr.RNDN)
-          val constraint = LinearConstraint(coeffs, Relationship.GEQ, -d(0))
-          constraint
-        )).asJava)
-
-        val objectiveFunction = LinearObjectiveFunction(coefficents, 0)
-        val solver = SimplexSolver()
-        try {
-          val solution = solver.optimize(objectiveFunction, constraints, MaxIter(1000))
-          Linexpr0(solution.getPointRef.map[Coeff](DoubleScalar(_)), DoubleScalar(0))
-        } catch {
-          case exception:MathIllegalStateException =>
-            println(exception)
-            Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
-        }
+        Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
+//        val env = abs1.getEnvironment
+//
+//        val coefficents = env.getVars.map(_ => 0d)
+//        val d = Array[Double](0d)
+//        val constraints = LinearConstraintSet(ArraySeq.unsafeWrapArray(abs1.toLincons(manager).map[LinearConstraint](apronLinCons =>
+//          val coeffs = coefficents.clone()
+//          for(linTerm <- apronLinCons.getLincons0Ref.getLinterms) {
+//            linTerm.coeff.inf().toDouble(d,Mpfr.RNDN)
+//            coeffs(linTerm.dim) = d(0)
+//          }
+//          apronLinCons.getCst.inf().toDouble(d,Mpfr.RNDN)
+//          val constraint = LinearConstraint(coeffs, Relationship.GEQ, -d(0))
+//          constraint
+//        )).asJava)
+//
+//        val objectiveFunction = LinearObjectiveFunction(coefficents, 0)
+//        val solver = SimplexSolver()
+//        try {
+//          val solution = solver.optimize(objectiveFunction, constraints, MaxIter(1000))
+//          Linexpr0(solution.getPointRef.map[Coeff](DoubleScalar(_)), DoubleScalar(0))
+//        } catch {
+//          case exception:MathIllegalStateException =>
+//            println(exception)
+//            Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
+//        }
 
         //Linexpr0(model.toBox(boxManager).map[Coeff](_.inf()), DoubleScalar(0))
       case _: Box => Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))

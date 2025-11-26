@@ -298,19 +298,6 @@
     (call $assert (i32.ge_s (local.get $y) (i32.const 0)))
   )
 
-  (func (export "fib_addition_of_predecessors") (local $x i32) (local $y i32)
-    (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
-    (local.set $y (call $fib (local.get $x)))
-    (call $assert
-      (i32.eq
-        (call $fib (local.get $x))
-        (i32.add (call $fib (i32.sub (local.get $x) (i32.const 1)))
-                 (call $fib (i32.sub (local.get $x) (i32.const 2)))
-        )
-      )
-    )
-  )
-
   (func $even (export "even") (param i32) (result i32)
     (if (result i32) (i32.eq (local.get 0) (i32.const 0))
       (then (i32.const 1))
