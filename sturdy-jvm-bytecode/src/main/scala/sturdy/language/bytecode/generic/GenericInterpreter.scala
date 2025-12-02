@@ -87,7 +87,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     // initialization was successful
     case Success
     // class is marked as erroneous
-    case Failure(/* TODO: hold the exception that must have been thrown */)
+    case Failure
 
   given Join[InitializationResult] with
     override def apply(v1: InitializationResult, v2: InitializationResult): MaybeChanged[InitializationResult] =
@@ -635,7 +635,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   def ensureInitialization(mth: Method, site: Site)(classType: ClassType)(using Fixed): Unit =
     try classInitializationState.get((), classType).option(initializeClass(mth, site)(classType)):
       case InitializationResult.Ongoing | InitializationResult.Success => ()
-      case InitializationResult.Failure() => throwClass(site)(ClassTypeValues.NoClassDefFoundError)
+      case InitializationResult.Failure => throwClass(site)(ClassTypeValues.NoClassDefFoundError)
     catch case _: NoSuchElementException =>
       // this should happen iff this is the first initialization of a class, initialize tables
       classInitializationState.putNew(())
@@ -666,7 +666,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val _ = invoke(site)(mth, Seq())
       } {
         case JvmExcept.ThrowObject(_) =>
-          classInitializationState.set((), classType, InitializationResult.Failure())
+          classInitializationState.set((), classType, InitializationResult.Failure)
+          // TODO: throw correct error according to step 11
           throwClass(site)(ClassType.ExceptionInInitializerError)
         case e => except.throws(e)
       }
