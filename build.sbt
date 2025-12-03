@@ -94,6 +94,19 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
     )
   )
 
+lazy val sturdy_tip_xdai = (project in file("sturdy-tip-xdai"))
+  .dependsOn(sturdy_core % "compile->compile")
+  //.dependsOn(sturdy_apron % "compile->compile")
+  .settings(
+    name := "sturdy_tip",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "1.1.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
 lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
