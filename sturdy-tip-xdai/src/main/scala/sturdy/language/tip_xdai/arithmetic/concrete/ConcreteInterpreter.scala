@@ -1,13 +1,11 @@
 package sturdy.language.tip_xdai.arithmetic.concrete
 
 import sturdy.data.MayJoin.NoJoin
-import sturdy.data.WithJoin
 import sturdy.effect.failure.Failure
 import sturdy.language.tip_xdai.arithmetic.GenericInterpreter
 import sturdy.language.tip_xdai.core.{TypeError, Value}
-import sturdy.values.Topped
 import sturdy.values.integer.{ConcreteIntegerOps, IntegerOps, LiftedIntegerOps}
-import sturdy.values.ordering.{LiftedOrderingOps, OrderingOps, ToppedCertainOrderingOps}
+import sturdy.values.ordering.OrderingOps
 
 trait ConcreteInterpreter extends GenericInterpreter[Value, NoJoin]:
 

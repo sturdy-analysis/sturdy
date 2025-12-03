@@ -11,7 +11,7 @@ import sturdy.effect.print.{CPrint, Print}
 import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.userinput.{CUserInput, UserInput}
 import sturdy.fix.{Combinator, ConcreteFixpoint, Contextual, Fixpoint}
-import sturdy.language.tip_xdai.core.{AllocationSite, Call, CoreGenericInterpreter, FixIn, FixOut, FunValue, Function, Value}
+import sturdy.language.tip_xdai.core.{AllocationSite, Call, CoreGenericInterpreter, FixIn, FixOut, Function, Value}
 import sturdy.language.tip_xdai.references.concrete.ConcreteAddr
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.functions.{FunctionOps, *, given}
@@ -24,9 +24,18 @@ import sturdy.values.records.{concreteRecordOps, *, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
-import sturdy.language.tip_xdai.record.concrete.ConcreteInterpreter as RecordConcreteInterp
-import sturdy.language.tip_xdai.arithmetic.concrete.{IntValue, ConcreteInterpreter as ArithmeticConcreteInterp}
-import sturdy.language.tip_xdai.references.concrete.ConcreteInterpreter as ReferencesConcreteInterp
+import sturdy.language.tip_xdai.core.{StructuralFunction, given}
+import sturdy.language.tip_xdai.core.concrete.{FunValue, ConcreteEqOps as CoreConcreteEqOps, given }
+import sturdy.language.tip_xdai.record.concrete.{RecordValue, ConcreteInterpreter as RecordConcreteInterp, ConcreteEqOps as RecordConcreteEqOps, given }
+import sturdy.language.tip_xdai.arithmetic.concrete.{IntValue, ConcreteInterpreter as ArithmeticConcreteInterp, ConcreteEqOps as ArithmeticConcreteEqOps, given }
+import sturdy.language.tip_xdai.references.concrete.{RefValue, ConcreteInterpreter as ReferencesConcreteInterp, ConcreteEqOps as ReferencesConcreteEqOps, given }
+
+class ConcreteEqOps extends CoreConcreteEqOps
+  with ArithmeticConcreteEqOps
+  with RecordConcreteEqOps
+  with ReferencesConcreteEqOps:
+
+  override def boolToInt(b: Boolean): Value = IntValue(if (b) 1 else 0)
 
 case class ConcreteInterpreter(nextInput: () => Value) extends CoreGenericInterpreter[Value, NoJoin]
   with ArithmeticConcreteInterp
@@ -41,9 +50,7 @@ case class ConcreteInterpreter(nextInput: () => Value) extends CoreGenericInterp
 
   override lazy val failure: ConcreteFailure = new ConcreteFailure
 
-  override val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
-    override def equ(v1: Value, v2: Value): Value = if (v1 == v2) IntValue(1) else IntValue(0)
-    override def neq(v1: Value, v2: Value): Value = if (v1 != v2) IntValue(1) else IntValue(0)
+  override val eqOps: EqOps[Value, Value] = new ConcreteEqOps
 
   override val functionOps: FunctionOps[Function, Seq[Value], Value, Value] = new FunctionOps[Function, Seq[Value], Value, Value]:
     def funValue(fun: Function): Value = FunValue(fun)
@@ -51,8 +58,8 @@ case class ConcreteInterpreter(nextInput: () => Value) extends CoreGenericInterp
   
   override val branchOps: BooleanBranching[Value, Unit] = new BooleanBranching[Value, Unit]:
     override def boolBranch(v: Value, thn: => Unit, els: => Unit): Unit = v match
-      case IntValue(0) => thn
-      case IntValue(_) => els
+        case IntValue(0) => els
+        case IntValue(_) => thn
       //case BoolValue(b) => if (b) thn else els
 
   // References & Records

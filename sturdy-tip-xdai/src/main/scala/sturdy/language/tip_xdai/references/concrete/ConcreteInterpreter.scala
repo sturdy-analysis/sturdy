@@ -17,12 +17,12 @@ case class Field(name: String)
 given Finite[Field] with {}
 
 trait ConcreteInterpreter extends GenericInterpreter[Value, ConcreteAddr, NoJoin]:
-  private def unlift(v: Value): RefV = v match
-    case r: RefV => r
+  private def unlift(v: Value): RefValue = v match
+    case r: RefValue => r
     case _ => failure(TypeError, s"Expected Reference but got $this")
   
   override val refOps: ReferenceOps[ConcreteAddr, Value] = new ReferenceOps[ConcreteAddr, Value]:
-    def mkNullRef: Value = RefV(Reference.Null)
-    def mkRef(trg: ConcreteAddr): Value = RefV(Reference.Addr(trg, managed = false))
-    def mkManagedRef(trg: ConcreteAddr): Value = RefV(Reference.Addr(trg, managed = true))
+    def mkNullRef: Value = RefValue(Reference.Null)
+    def mkRef(trg: ConcreteAddr): Value = RefValue(Reference.Addr(trg, managed = false))
+    def mkManagedRef(trg: ConcreteAddr): Value = RefValue(Reference.Addr(trg, managed = true))
     def deref(v: Value): ConcreteAddr = unlift(v).ref.getOrElse(failure.fail(NullDereference, ""))

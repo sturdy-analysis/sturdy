@@ -23,6 +23,7 @@ import sturdy.values.references.ReferenceOps
 import scala.collection.immutable.ArraySeq
 
 trait AllocationSite
+given Structural[AllocationSite] with {}
 
 trait TipFailure extends FailureKind
 case object UnboundVariable extends TipFailure
@@ -86,10 +87,10 @@ trait CoreGenericInterpreter[V, J[_] <: MayJoin[_]]:
   implicit def jv: J[V]
 
   // value components
-  val eqOps: EqOps[V, V]; import eqOps.*
-  val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
+  val eqOps: EqOps[V, V]
+  val functionOps: FunctionOps[Function, Seq[V], V, V]
 
-  implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
+  implicit val branchOps: BooleanBranching[V, Unit]
 
   // effect components
   val callFrame: DecidableCallFrame[String, String, V, Call] with MutableCallFrame[String, String, V, Call, NoJoin]
@@ -128,11 +129,12 @@ trait CoreGenericInterpreter[V, J[_] <: MayJoin[_]]:
   def eval_open(e: Exp)(using Fixed): V = e match
     case Input() => input.read()
     case Var(x) => functions.get(x) match
-      case Some(fun) => funValue(fun)
+      case Some(fun) => functionOps.funValue(fun)
       case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-    case Eq(e1, e2) => equ(eval(e1), eval(e2))
+    case Eq(e1, e2) =>
+      eqOps.equ(eval(e1), eval(e2))
     case site@Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call(site))
+      functionOps.invokeFun(eval(fun), args.map(eval(_)))(call(site))
 //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
 //      unmanagedRefValue(addr)
 
@@ -141,9 +143,9 @@ trait CoreGenericInterpreter[V, J[_] <: MayJoin[_]]:
       val v = eval(e)
       assign(lhs, v)
     case If(cond: Exp, thn: Stm, els: Option[Stm]) =>
-      boolBranch(eval(cond), run(thn), els.map(run(_)).getOrElse(()))
+      branchOps.boolBranch(eval(cond), run(thn), els.map(run(_)).getOrElse(()))
     case While(cond, body) =>
-      boolBranch(eval(cond), {run(body); run(s)}, {})
+      branchOps.boolBranch(eval(cond), {run(body); run(s)}, {})
     case Block(body) =>
       body.foreach(run(_))
     case Output(e) =>

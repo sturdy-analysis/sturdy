@@ -1,17 +1,13 @@
 package sturdy.language.tip_xdai
 
-import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.language.tip_xdai.Parser.*
-import sturdy.language.tip_xdai.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip_xdai.arithmetic.concrete.IntValue
 
 import java.nio.file.Path
 import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.util.{Failure, Success, Try}
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 

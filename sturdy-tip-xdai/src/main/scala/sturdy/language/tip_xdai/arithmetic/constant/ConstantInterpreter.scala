@@ -7,14 +7,15 @@ import sturdy.values.Topped
 import sturdy.values.integer.{ConcreteIntegerOps, IntegerOps, LiftedIntegerOps, ToppedIntegerOps}
 import sturdy.values.ordering.{LiftedOrderingOps, OrderingOps, ToppedCertainOrderingOps}
 import sturdy.values.integer.given_OrderingOps_Int_Boolean
+import sturdy.language.tip_xdai.core.abstr.TopValue
 
 private def constantIntFromToppedInt(value: Topped[Int]): Value = value match
-  case Topped.Top => Value.Top
+  case Topped.Top => TopValue
   case Topped.Actual(i) => ConstantIntV(i)
 
 private def toppedIntAsConstantInt(v: Value): Topped[Int] = v match
   case ConstantIntV(i) => Topped.Actual(i)
-  case Value.Top => Topped.Top
+  case TopValue => Topped.Top
   case _ => throw IllegalArgumentException(s"Can not convert $v to int")
 
 trait ConstantInterpreter[Addr] extends GenericInterpreter[Value, WithJoin]:
