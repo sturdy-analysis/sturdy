@@ -3,8 +3,7 @@ package sturdy.language.tip_xdai.references.concrete
 import sturdy.data.MayJoin
 import sturdy.data.MayJoin.NoJoin
 import sturdy.language.tip_xdai.core.*
-import sturdy.language.tip_xdai.references.GenericInterpreter
-import sturdy.language.tip_xdai.references.UnboundAddr
+import sturdy.language.tip_xdai.references.{AllocationSite, GenericInterpreter, UnboundAddr}
 import sturdy.values.Finite
 import sturdy.values.integer.IntegerOps
 import sturdy.values.ordering.OrderingOps

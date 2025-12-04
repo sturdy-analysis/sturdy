@@ -5,7 +5,7 @@ import sturdy.effect.Effect
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.Store
 import sturdy.language.tip_xdai.core.*
-import sturdy.language.tip_xdai.references.UnboundAddr
+import sturdy.language.tip_xdai.references.{ UnboundAddr, AllocationSite }
 import sturdy.values.records.RecordOps
 import sturdy.values.references.ReferenceOps
 

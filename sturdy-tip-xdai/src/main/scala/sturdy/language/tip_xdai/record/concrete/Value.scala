@@ -17,9 +17,9 @@ given Structural[RecordValue] with {}
 
 trait ConcreteEqOps extends CoreConcreteEqOps:
   override def equ(v1: Value, v2: Value): Value = (v1, v2) match
-    case (RecordValue(r1), RecordValue(r2)) => boolToInt(EqOps.equ(r1, r2))
+    case (RecordValue(r1), RecordValue(r2)) => boolToValue(EqOps.equ(r1, r2))
     case _ => super.equ(v1, v2)
 
   override def neq(v1: Value, v2: Value): Value = (v1, v2) match
-    case (RecordValue(r1), RecordValue(r2)) => boolToInt(EqOps.neq(r1, r2))
+    case (RecordValue(r1), RecordValue(r2)) => boolToValue(EqOps.neq(r1, r2))
     case _ => super.neq(v1, v2)

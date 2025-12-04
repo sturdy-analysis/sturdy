@@ -11,8 +11,12 @@ import sturdy.data.noJoin
 import sturdy.effect.Effect
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.store.Store
+import sturdy.values.Structural
 
+
+trait AllocationSite
 case class AllocSite(e: Alloc) extends AllocationSite
+given Structural[AllocationSite] with {}
 
 case object UnboundAddr extends TipFailure
 

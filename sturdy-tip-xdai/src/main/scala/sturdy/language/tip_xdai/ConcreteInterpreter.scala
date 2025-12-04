@@ -11,7 +11,7 @@ import sturdy.effect.print.{CPrint, Print}
 import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.userinput.{CUserInput, UserInput}
 import sturdy.fix.{Combinator, ConcreteFixpoint, Contextual, Fixpoint}
-import sturdy.language.tip_xdai.core.{AllocationSite, Call, CoreGenericInterpreter, FixIn, FixOut, Function, Value}
+import sturdy.language.tip_xdai.core.{Call, CoreGenericInterpreter, FixIn, FixOut, Function, Value}
 import sturdy.language.tip_xdai.references.concrete.ConcreteAddr
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.functions.{FunctionOps, *, given}
@@ -28,6 +28,7 @@ import sturdy.language.tip_xdai.core.{StructuralFunction, given}
 import sturdy.language.tip_xdai.core.concrete.{FunValue, ConcreteEqOps as CoreConcreteEqOps, given }
 import sturdy.language.tip_xdai.record.concrete.{RecordValue, ConcreteInterpreter as RecordConcreteInterp, ConcreteEqOps as RecordConcreteEqOps, given }
 import sturdy.language.tip_xdai.arithmetic.concrete.{IntValue, ConcreteInterpreter as ArithmeticConcreteInterp, ConcreteEqOps as ArithmeticConcreteEqOps, given }
+import sturdy.language.tip_xdai.references.AllocationSite
 import sturdy.language.tip_xdai.references.concrete.{RefValue, ConcreteInterpreter as ReferencesConcreteInterp, ConcreteEqOps as ReferencesConcreteEqOps, given }
 
 class ConcreteEqOps extends CoreConcreteEqOps
@@ -35,7 +36,7 @@ class ConcreteEqOps extends CoreConcreteEqOps
   with RecordConcreteEqOps
   with ReferencesConcreteEqOps:
 
-  override def boolToInt(b: Boolean): Value = IntValue(if (b) 1 else 0)
+  override def boolToValue(b: Boolean): Value = IntValue(if (b) 1 else 0)
 
 case class ConcreteInterpreter(nextInput: () => Value) extends CoreGenericInterpreter[Value, NoJoin]
   with ArithmeticConcreteInterp

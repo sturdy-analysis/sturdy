@@ -18,12 +18,9 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.ordering.{EqOps, OrderingOps}
 import sturdy.values.records.RecordOps
-import sturdy.values.references.ReferenceOps
+import sturdy.values.references.{AllocationSiteAddr, ReferenceOps}
 
 import scala.collection.immutable.ArraySeq
-
-trait AllocationSite
-given Structural[AllocationSite] with {}
 
 trait TipFailure extends FailureKind
 case object UnboundVariable extends TipFailure

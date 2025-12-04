@@ -7,17 +7,13 @@ import sturdy.language.tip.{Program, Stm}
 import sturdy.language.tip.{FixIn, FixOut}
 import sturdy.fix.{*, given}
 import sturdy.language.tip.Exp
-import sturdy.effect.ObservableJoin
 import sturdy.effect.callframe.DecidableCallFrame
-import sturdy.effect.except.ObservableExcept
-import sturdy.effect.store.Store
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.fix.context.CallSiteLogger
-import sturdy.fix.context.FiniteCallString
 import sturdy.fix.context.Parameters
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
-import sturdy.values.{Widen, Finite, Join}
+import sturdy.values.{Widen, Finite}
 
 def isFunOrWhile(dom: FixIn): Int = dom match
   case FixIn.EnterFunction(_) => 0

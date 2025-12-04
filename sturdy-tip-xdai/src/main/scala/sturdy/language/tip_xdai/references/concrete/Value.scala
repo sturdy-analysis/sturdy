@@ -1,9 +1,10 @@
 package sturdy.language.tip_xdai.references.concrete
 
 import sturdy.effect.except.Except
-import sturdy.language.tip_xdai.core.concrete.{ ConcreteEqOps as CoreConcreteEqOps, given }
-import sturdy.language.tip_xdai.core.{AllocationSite, Value}
+import sturdy.language.tip_xdai.core.concrete.{ConcreteEqOps as CoreConcreteEqOps, given}
+import sturdy.language.tip_xdai.core.Value
 import sturdy.language.tip_xdai.record.concrete.RecordValue
+import sturdy.language.tip_xdai.references.AllocationSite
 import sturdy.values.ordering.EqOps
 import sturdy.values.{Finite, Structural, Topped}
 import sturdy.values.references.Reference
@@ -21,9 +22,9 @@ given Structural[RefValue] with {}
 
 trait ConcreteEqOps extends CoreConcreteEqOps:
   override def equ(v1: Value, v2: Value): Value = (v1, v2) match
-    case (RefValue(r1), RefValue(r2)) => boolToInt(EqOps.equ(r1, r2))
+    case (RefValue(r1), RefValue(r2)) => boolToValue(EqOps.equ(r1, r2))
     case _ => super.equ(v1, v2)
 
   override def neq(v1: Value, v2: Value): Value = (v1, v2) match
-    case (RefValue(r1), RefValue(r2)) => boolToInt(EqOps.neq(r1, r2))
+    case (RefValue(r1), RefValue(r2)) => boolToValue(EqOps.neq(r1, r2))
     case _ => super.neq(v1, v2)
