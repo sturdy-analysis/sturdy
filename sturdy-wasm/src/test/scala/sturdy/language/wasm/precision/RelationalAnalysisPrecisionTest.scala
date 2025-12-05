@@ -123,6 +123,7 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
         testFunction("recursive_peano_addition", expectedNumberOfAssertions = 1)
         testFunction("gauss_sum_positive", expectedNumberOfAssertions = 1)
         testFunction("gauss_sum_greater_than_input", expectedNumberOfAssertions = 1)
+        testFunction("array_fill", expectedNumberOfAssertions = 1)
       }
     }
 

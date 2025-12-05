@@ -5,6 +5,8 @@
   (import "env" "pow" (func $f64.pow (param f64 f64) (result f64)))
   (import "env" "assert" (func $assert (param i32)))
 
+  (memory $memory 1)
+
   (func (export "linear_constraint") (local $x i32) (local $y i32) (local $z i32)
     (local.set $x (call $i32.interval (i32.const -100) (i32.const 100)))
     (local.set $y (i32.const 3))
@@ -365,6 +367,24 @@
     (local.set $x (call $i32.interval (i32.const 0) (i32.const 100)))
     (local.set $y (call $gauss-sum (local.get $x)))
     (call $assert (i32.ge_s (local.get $y) (local.get $x)))
+  )
+
+  (func $array-fill (param $ptr i32) (param $len i32) (param $value i32) (result i32)
+    (if (result i32) (i32.ge_s (local.get $len) (i32.const 1))
+      (then
+        (i32.store (i32.sub (i32.add (local.get $ptr) (local.get $len)) (i32.const 1)) (local.get $value))
+        (call $array-fill (local.get $ptr) (i32.sub (local.get $len) (i32.const 1)) (local.get $value))
+      )
+      (else (local.get $ptr))
+    )
+  )
+
+  (func (export "array_fill") (local $ptr i32) (local $len i32) (local $value i32) (local $ret i32)
+     (local.set $ptr (call $i32.interval (i32.const 0) (i32.const 100)))
+     (local.set $len (call $i32.interval (i32.const 0) (i32.const 100)))
+     (local.set $value (call $i32.interval (i32.const -100) (i32.const 100)))
+     (local.set $ret (call $array-fill (local.get $ptr) (local.get $len) (local.get $value)))
+     (call $assert (i32.eq (local.get $ptr) (local.get $ret)))
   )
 
   ;; Mopsa Tests

@@ -406,12 +406,10 @@ final class RelationalStore
   }
 
   def addConstraintsToWideningThresholds(constraints: ApronCons[PhysicalAddress[Context], Type]*): Unit =
-    ()
-//    modifyInternalState(state => addConstraintsToWideningThresholdsPure(state, constraints*))
+    modifyInternalState(state => addConstraintsToWideningThresholdsPure(state, constraints*))
 
   def addConstraintsToWideningThresholdsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
-    state
-    //constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
+    constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
 
   def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State = {
     val resolvedConstraint = replaceMissingAddrs(constraint, state)

@@ -138,8 +138,6 @@ object ApronJoins:
 //            println(exception)
 //            Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
 //        }
-
-        //Linexpr0(model.toBox(boxManager).map[Coeff](_.inf()), DoubleScalar(0))
       case _: Box => Linexpr0(abs1.toBox(manager).map[Coeff](_.inf()), DoubleScalar(0))
     }
   }
