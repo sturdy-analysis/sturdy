@@ -97,7 +97,8 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       val mod = Parsing.fromBytes(bytes)
       loadModule(id, mod)
     case QuotedModule(id, text) =>
-      ???
+      val mod = Parsing.fromString(text)
+      loadModule(id, mod)
     case AssertReturn(action, expectedRes) =>
       val res = runAction(action)
       assert(!res.isFailing, s"$action failed $res")

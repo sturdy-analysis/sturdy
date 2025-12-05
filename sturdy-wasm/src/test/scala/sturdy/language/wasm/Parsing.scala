@@ -55,6 +55,20 @@ object Parsing:
       case e: TimeoutException => throw new WasmParseError(s"Parsing of $path timed out")
     }
 
+  def fromString(module: String): Module =
+    implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+    implicit val timer: Timer[IO] = cats.effect.IO.timer(scala.concurrent.ExecutionContext.global)
+    try {
+      Blocker[IO].use { blocker =>
+        for {
+          compiler <- Compiler[IO](blocker)
+          mod <- compiler.compile(module)
+        } yield mod
+      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+    } catch {
+      case e: TimeoutException => throw new WasmParseError(s"Parsing of $module timed out")
+    }
+
   def fromBytes(bytes: Array[Byte]): Module =
     implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
     implicit val timer: Timer[IO] = cats.effect.IO.timer(scala.concurrent.ExecutionContext.global)
