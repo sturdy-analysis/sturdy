@@ -68,6 +68,7 @@ class ModuleInstance(val id: Option[Any] = None):
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
+  val tagTypes: Vector[TagType] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
@@ -157,7 +158,7 @@ enum ExternalValue:
   case Table(addr: Int)
   case Memory(addr: Int)
   case Global(addr: Int)
-
+  case Tag(addr: Int)
 
 
 given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with

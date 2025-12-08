@@ -46,12 +46,14 @@ given frameDataIsSound: Soundness[FrameData, FrameData] with
 object FrameData:
   val empty: FrameData = FrameData(None, 0, null)
 
+// Add Exception Type
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
   case Return
 
 given Finite[JumpTarget] with {}
 
+//rename WasmException to ...
 case class WasmException[V](target: JumpTarget, operands: List[V], breakIfState: JOptionA[BreakIfState[V]])
 case class BreakIfState[V](condition: V, state: Any)
 
@@ -747,13 +749,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case ReferenceType.FuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
 
-  def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
-    (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
+  case class ResolvedImports(funcs: Vector[FunctionInstance], globs: Vector[GlobalAddr], globTpes: Vector[GlobalType], tabs: Vector[TableAddr], mems: Vector[MemoryAddr], tags: Vector[TagType])
+  def resolveImports(module: Module, imports: Imports, hostModules: HostModules): ResolvedImports =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
     val globTpes: VectorBuilder[GlobalType] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
+    val tags: VectorBuilder[TagType] = VectorBuilder()
 
     module.imports.foreach { imp =>
       // handle host functions
@@ -785,6 +788,29 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
                 }
               case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+//          case Import.Tag(_, _, tagType) =>
+////          // TODO: what to do, how to do it?
+//            exp match
+//              case ExternalValue.Tag(addr) =>
+//                val fromTpe = from.tagTypes(addr)
+//                if (fromTpe != tagType) {
+//                  throw new Error(s"Type mismatch: expected tag of type $tagType but found ${fromTpe}.")
+//                }
+//                // insert into into tags
+//                tags += from.tagTypes(addr)
+//              case _ => throw new Error(s"Import mismatch: expected a tag but found $exp")
+               case Import.Tag(_, _, tagType) => exp match
+                case ExternalValue.Tag(addr) =>
+            // Get the tag type directly from the exporting module's tag types array
+                  val fromTpe = from.tagTypes.lift(addr).getOrElse(
+                    throw new Error(s"Tag at index $addr not found in module ${imp.moduleName}.")
+                  )
+                  if (fromTpe != tagType) {
+                  throw new Error(s"Type mismatch: expected tag of type $tagType but found ${fromTpe}.")
+                  }
+            // Store the tag type (similar to how globals store both addr and type)
+                    tags += tagType
+          case _ => throw new Error(s"Import mismatch: expected a tag but found $exp")
           case Import.Global(_, _, globType) =>
             exp match
               case ExternalValue.Global(addr) =>
@@ -813,7 +839,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    (funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result())
+    ResolvedImports(funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result(), tags.result())
 
   // we assume a valid module here
   def instantiateModule(module: Module,
@@ -822,7 +848,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                         hostModules: HostModules = defaultHostModules): ModuleInstance = external {
     initializeThis()
 
-    val (funcImports, globImports, globTypes, tabImports, memImpors) = resolveImports(module, imports, hostModules)
+    val resolvedImports = resolveImports(module, imports, hostModules)
 
     val modInst = ModuleInstance(moduleId)
 
@@ -830,14 +856,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     allocExports(module, modInst)
 
     // Then allocate data of current module
-    allocFunctions(module, modInst, funcImports)
-    allocTables(module, modInst, tabImports)
-    allocMemory(module, modInst, memImpors)
+    allocFunctions(module, modInst, resolvedImports.funcs)
+    allocTables(module, modInst, resolvedImports.tabs)
+    allocMemory(module, modInst, resolvedImports.mems)
 
     // Push initial frame to stack
     var loc = InstLoc.InInit(modInst, 0)
     callFrame.withNew(FrameData(None, 1, modInst), Iterable.empty, loc) {
-      loc = instantiateGlobals(module, modInst, globImports, globTypes, loc)
+      loc = instantiateGlobals(module, modInst, resolvedImports.globs, resolvedImports.globTpes, loc)
       instantiateElements(module, modInst, loc)
       loc = instantiateData(module, modInst, loc)
     }
@@ -863,6 +889,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case ExternalKind.Global => (fieldName, ExternalValue.Global(index))
           case ExternalKind.Memory => (fieldName, ExternalValue.Memory(index))
           case ExternalKind.Table => (fieldName, ExternalValue.Table(index))
+          case ExternalKind.Tag => (fieldName, ExternalValue.Tag(index))
         }
     }
   }
