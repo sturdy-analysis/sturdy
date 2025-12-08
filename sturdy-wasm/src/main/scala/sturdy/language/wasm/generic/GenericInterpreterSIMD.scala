@@ -44,8 +44,7 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
   def evalSIMD(inst: Inst): V = inst match {
     case unop: VectorUnop => evalSIMDUnop(unop, stack.popOrAbort())
     case binop: VectorBinop => evalBinop(binop)
-    case testop: VVectorTestop => evalVVectorTestop(testop)
-    case testop: VectorTestop => v128ops.vectorAllTrue(testop.shape.toLaneShape, stack.popOrAbort())
+    case testop: VectorTestop => evalVectorTestop(testop)
     case relop: VectorRelop => evalRelop(relop)
     case convertop: VectorConvertop => evalSIMDConvertop(convertop, stack.popOrAbort())
     case ternop: VectorTernop => evalTernop(ternop)
@@ -113,8 +112,13 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     }
   }
 
-  private def evalVVectorTestop(testop: VVectorTestop): V =
-    v128ops.vectorAnyTrue(V128, stack.popOrAbort())
+  private def evalVectorTestop(testop: VectorTestop): V =
+    testop match {
+      case ivecTestOp: IVectorTestop =>
+        ivecTestOp.operation match
+          case VecTestopType.AllTrue => v128ops.vectorAllTrue(ivecTestOp.shape.toLaneShape, stack.popOrAbort())
+      case v128.AnyTrue => v128ops.vectorAnyTrue(V128, stack.popOrAbort())
+    }
 
   def evalLoadVectorBytes(inst: Inst, memIdx: MemoryAddr, addr: Addr): JOption[J, Bytes] = {
     inst match {

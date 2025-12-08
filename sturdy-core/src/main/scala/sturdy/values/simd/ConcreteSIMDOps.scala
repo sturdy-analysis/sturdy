@@ -723,12 +723,8 @@ given ConcreteSIMDOps[V]
       if !lanes.contains(codec.allZeroes) then galoisI32.asAbstract(1) else galoisI32.asAbstract(0)
     case _ => f.fail(UnsupportedConfiguration, s"SIMD all true does not support shape: $shape")
 
-  override def vectorAnyTrue(shape: LaneShape, v: Array[Byte]): V = shape match
-    case LaneShape.V128 =>
-      val codec = summon[LaneCodec[Byte]]
-      val lanes = extractLanes(v, codec)
-      if lanes.exists(_ != codec.allZeroes) then galoisI32.asAbstract(1) else galoisI32.asAbstract(0)
-    case _ => f.fail(UnsupportedConfiguration, s"SIMD any true does not support shape: $shape")
+  override def vectorAnyTrue(shape: LaneShape, v: Array[Byte]): V =
+    if(v.forall(b => b == 0)) then galoisI32.asAbstract(0) else galoisI32.asAbstract(1)
 
   private def vectorUnop[T: LaneCodec](v: Array[Byte])(op: T => T): Array[Byte] =
     val codec = summon[LaneCodec[T]]

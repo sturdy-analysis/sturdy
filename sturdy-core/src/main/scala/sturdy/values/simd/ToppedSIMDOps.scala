@@ -23,7 +23,7 @@ given ToppedSIMDOps[V]
   override def vectorNearest(shape: LaneShape, v: Topped[Array[Byte]]): Topped[Array[Byte]] = v.unary(ops.vectorNearest(shape, _))
   override def vectorPopCount(shape: LaneShape, v: Topped[Array[Byte]]): Topped[Array[Byte]] = v.unary(ops.vectorPopCount(shape, _))
   override def vectorNot(shape: LaneShape, v: Topped[Array[Byte]]): Topped[Array[Byte]] = v.unary(ops.vectorNot(shape, _))
-  override def vectorBitmask(shape: LaneShape, v: Topped[Array[Byte]]): V = if v.isTop then getValueTop(shape) else ops.vectorBitmask(shape, v.get)
+  override def vectorBitmask(shape: LaneShape, v: Topped[Array[Byte]]): V = if v.isTop then galoisI32.asAbstract(Topped.Top) else ops.vectorBitmask(shape, v.get)
 
   // Binary operations
   override def vectorAdd(shape: LaneShape, overflow: Overflow, sign: BitSign, v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): Topped[Array[Byte]] = v1.binary(ops.vectorAdd(shape, overflow, sign, _, _), v2)
