@@ -159,7 +159,8 @@ class ConstantAnalysisTestSpecInterpreter(spectest: Option[Module] = None, val a
         val mod = Parsing.fromBytes(bytes)
         loadModule(id, mod)
       case QuotedModule(id, text) =>
-        ???
+        val mod = Parsing.fromString(text)
+        loadModule(id, mod)
       case AssertReturn(action, expectedRes) =>
         val aRes = runAAction(action, convertVals)
         val res = runCAction(action)

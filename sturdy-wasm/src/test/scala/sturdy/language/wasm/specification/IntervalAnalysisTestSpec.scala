@@ -32,6 +32,7 @@ import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
 import swam.validation.Validator
 
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -43,7 +44,9 @@ class IntervalAnalysisTestSpec extends AnyFlatSpec, Matchers:
   behavior of "TestScript interval analysis"
 
   val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
-  val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
+  val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
+  val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
+  val uriSIMD: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
 
   val spectest = Parsing.fromText(pathSpectest)
 
@@ -60,19 +63,24 @@ class IntervalAnalysisTestSpec extends AnyFlatSpec, Matchers:
     )
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
-    for (aInterp <- analyses) {
-      it must s"execute ${p.getFileName} with ${aInterp()}" in {
-        println(s"Executing TestScript interval analysis on ${p.getFileName}")
-        val script = Parsing.testscript(p)
-        val interp = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp())
-        interp.run(script)
-        val interpTop = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
-        interpTop.run(script)
+
+  def runTests(uri: URI, msg: String => String): Unit =
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+      for (aInterp <- analyses) {
+        it must s"execute ${p.getFileName} with ${aInterp()}" in {
+          println(s"Executing TestScript interval analysis on ${p.getFileName}")
+          val script = Parsing.testscript(p)
+          val interp = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp())
+          interp.run(script)
+          val interpTop = IntervalAnalysisTestSpecInterpreter(Some(spectest), aInterp(), true)
+          interpTop.run(script)
+        }
       }
     }
-  }
 
+  runTests(uriWasm1, s => s"execute WASM1 script $s")
+  runTests(uriWasm2, s => s"execute WASM2 script $s")
+  runTests(uriSIMD, s => s"execute SIMD script $s")
 
 class IntervalAnalysisTestSpecInterpreter(spectest: Option[Module] = None, aInterp: IntervalAnalysis.Instance, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
@@ -141,7 +149,8 @@ class IntervalAnalysisTestSpecInterpreter(spectest: Option[Module] = None, aInte
       val mod = Parsing.fromBytes(bytes)
       loadModule(id, mod)
     case QuotedModule(id, text) =>
-      ???
+      val mod = Parsing.fromString(text)
+      loadModule(id, mod)
     case AssertReturn(action, expectedRes) =>
       val aRes = runAAction(action, convertVals)
       val res = runCAction(action)
