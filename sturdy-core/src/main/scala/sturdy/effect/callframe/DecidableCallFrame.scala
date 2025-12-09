@@ -103,11 +103,11 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
 
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
-    private val snapshot = vars
+    private val snapshot = vars.clone()
     private var fVars: Array[V] = _
 
     override def inbetween(fFailed: Boolean): Unit =
-      fVars = vars
+      fVars = vars.clone()
       vars = snapshot
 
     override def retainNone(): Unit =

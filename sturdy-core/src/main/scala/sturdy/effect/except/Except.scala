@@ -16,10 +16,7 @@ trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effect, ObservableExcept[Exc]:
 
   final def tryCatch[A](f: => A)(handle: Exc => A): J[A] ?=> A =
     tryStart()
-    try tries(try f finally catchStart()).either { a =>
-      println()
-      a
-    } { e =>
+    try tries(try f finally catchStart()).either(identity) { e =>
       exceptional.handle(e) { exc =>
         handlingStart(exc)
         try handle(exc)
