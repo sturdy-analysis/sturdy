@@ -1,14 +1,33 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.WithJoin
+import sturdy.data.{*, given}
+import sturdy.effect.EffectStack
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{JumpTarget, WasmException}
+import sturdy.language.wasm.generic.{FixIn, JumpTarget, WasmException}
+import sturdy.util.Lazy
+import sturdy.values.{Join, Widen}
 import sturdy.values.exceptions.{Exceptional, ExceptionalByTarget}
-import swam.LabelIdx
 
 trait ExceptionByTarget extends Interpreter:
-  final type ExcV = Map[JumpTarget, List[Value]]
+  final type ExcV = Map[JumpTarget, ExceptionState]
+  case class ExceptionState(operands: List[Value], effectState: Any)
 
-  given Exceptional[WasmException[Value], ExcV, WithJoin] =
-    new ExceptionalByTarget(e => (e.target, e.operands), WasmException.apply)
+  given JoinExceptionState(using lazyEffectStack: Lazy[EffectStack], joinValue: Join[Value]): Join[ExceptionState] =
+    (state1, state2) =>
+      for {
+        operands <- Join(state1.operands, state2.operands)
+        effectState <- lazyEffectStack.value.joinIn(FixIn.Exception)(state1.effectState, state2.effectState)
+      } yield(ExceptionState(operands, effectState))
+
+  given WidenExceptionState(using lazyEffectStack: Lazy[EffectStack], widenValue: Widen[Value]): Widen[ExceptionState] =
+    (state1, state2) =>
+      for {
+        operands <- Widen(state1.operands, state2.operands)
+        effectState <- lazyEffectStack.value.joinIn(FixIn.Exception)(state1.effectState, state2.effectState)
+      } yield(ExceptionState(operands, effectState))
+
+  given Exceptional[WasmException[Value], ExcV, WithJoin] = ExceptionalByTarget[WasmException[Value], JumpTarget, ExceptionState](
+    e => (e.target, ExceptionState(e.operands, e.state)),
+    (target,state) => WasmException(target, state.operands, state.effectState)
+  )
 

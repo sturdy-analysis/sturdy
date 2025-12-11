@@ -1,16 +1,12 @@
 package sturdy.effect.except
 
 import sturdy.data.{*, given}
-import sturdy.effect.{Effect, SturdyException}
+import sturdy.effect.{ComputationJoiner, Effect, EffectStack, SturdyException, SturdyThrowable, TrySturdy}
 import sturdy.values.{Join, Widen}
 import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
-import sturdy.effect.ComputationJoiner
-import sturdy.effect.SturdyThrowable
-import sturdy.effect.TrySturdy
-
 import scala.reflect.ClassTag
 
 case object AbstractSturdyException extends SturdyException:

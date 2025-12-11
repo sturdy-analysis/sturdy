@@ -1,23 +1,24 @@
-package sturdy.language.wasm.simple
+package sturdy.language.wasm.regression
 
 import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.assertResult
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import sturdy.control.*
 import sturdy.effect.failure.AFallible.Unfailing
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.fix
-import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.context.Sensitivity
+import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
-import sturdy.language.wasm.{ConcreteInterpreter, ControlEventGraphBuilderDebug, testCfgDifference}
+import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
 import sturdy.util.{LinearStateOperationCounter, Profiler}
 import sturdy.values.Topped.Top
 import sturdy.values.integer.{IntegerDivisionByZero, NumericIntervalAbstractly}
@@ -31,23 +32,27 @@ import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
 
 
-class ConstantAnalysisExceptionTest extends AnyFlatSpec, Matchers:
-  behavior of "Wasm constant analysis"
+class ConstantAnalysisRegressionTests extends AnyFunSuite, Matchers:
   Fixpoint.DEBUG = false
   Fixpoint.DEBUG_PRIOR_OUTPUT = false
   Fixpoint.DEBUG_INVARIANTS = false
 
+  runAnalysis("debug.wast", Unfailing(List(Value.Int32(Top))))
+  runAnalysis("br_if_broken.wast", Unfailing(List(Value.Int32(Top))))
 
-  private val uri = this.getClass.getResource("/sturdy/language/wasm/debug.wast").toURI;
-  private val path = Paths.get(uri)
+  def runAnalysis(watFile: String, expected: AFallible[List[Value]]): Unit =
+    test(watFile) {
+      val uri = this.getClass.getResource("/sturdy/language/wasm/regression/"+watFile).toURI;
+      val path = Paths.get(uri)
+      val module = wasm.Parsing.fromText(path)
+      val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(StackedStates(storeNonrecursiveOutput = false, readPriorOutput = true))))
+      val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+      interp.addControlObserver(new PrintingControlObserver()(println))
 
-  private val module = wasm.Parsing.fromText(path)
-  private val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(FixpointConfig(StackedStates(storeNonrecursiveOutput = false, readPriorOutput = true))))
-  private val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
+      val modInst = interp.initializeModule(module, moduleId = Some("mod"))
+      val r = interp.failure.fallible(interp.invokeExported(modInst, "main", List(Value.Int32(Top))))
 
-  private val modInst = interp.initializeModule(module, moduleId=Some("mod"))
-  val r = interp.failure.fallible(interp.invokeExported(modInst, "main",List(Value.Int32(Top))))
+      val cfg = graphBuilder.get
 
-  private val cfg = graphBuilder.get
-
-  assert(r == Unfailing(List(Value.Int32(Top))))
+      assert(r == expected)
+    }

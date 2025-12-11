@@ -16,6 +16,8 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends Effect:
   def peek(): JOption[J, V]
   def peekN(n: Int): JOption[J, List[V]]
 
+  def frameSize: Int
+
   /** Computes `f` in a new operand frame, discarding all remaining operands. */
   def withNewStack[A](f: => A): A
 
