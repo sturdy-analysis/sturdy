@@ -29,6 +29,7 @@ import swam.syntax.*
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 import WasmFailure.*
+import sturdy.util.{Lazy, lazily}
 
 import java.nio.ByteOrder
 
@@ -66,7 +67,7 @@ enum JumpTarget:
 
 given Finite[JumpTarget] with {}
 
-case class WasmException[V](target: JumpTarget, operands: List[V])
+case class WasmException[V](target: JumpTarget, operands: List[V], state: Any)
 
 type Imports = Map[String, ModuleInstance]
 
@@ -108,6 +109,7 @@ given Ordering[InstLoc] = Ordering.by[InstLoc, Either[(FuncId,Int), Either[(Int,
 
 enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
+  case Exception
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
   case EnterHostFunction(id: FuncId, hostFfunc: HostFunction)
   case MostGeneralClientLoop(modInst: ModuleInstance)
@@ -118,12 +120,14 @@ enum FixIn:
       case Loop(_, _) => s"Loop @$loc"
       case If(_, _, _) => s"If @$loc"
       case _ => s"$i @$loc"
+    case Exception => "Exception"
     case EnterWasmFunction(id, _, _) => s"Enter $id"
     case EnterHostFunction(id, _) => s"Enter $id"
     case MostGeneralClientLoop(modInst) => s"Most general client for $modInst"
 
 given Ordering[FixIn] = {
   case (FixIn.Eval(_, loc1), FixIn.Eval(_, loc2)) => Ordering[InstLoc].compare(loc1, loc2)
+  case (FixIn.Exception, FixIn.Exception) => 0
   case (FixIn.EnterWasmFunction(fun1, _, _), FixIn.EnterWasmFunction(fun2, _, _)) => Ordering[FuncId].compare(fun1, fun2)
   case (FixIn.EnterHostFunction(fun1, _), FixIn.EnterHostFunction(fun2, _)) => Ordering[FuncId].compare(fun1, fun2)
   case (FixIn.MostGeneralClientLoop(mod1), FixIn.MostGeneralClientLoop(mod2)) => Ordering.by[ModuleInstance, Option[Int]](
@@ -135,9 +139,10 @@ given Ordering[FixIn] = {
   ).compare(mod1, mod2)
   case (in1, in2) => Ordering.by[FixIn, Int]{
     case _: FixIn.Eval => 1
-    case _: FixIn.EnterWasmFunction => 2
-    case _: FixIn.EnterHostFunction => 3
-    case _: FixIn.MostGeneralClientLoop => 4
+    case _: FixIn.Exception.type => 2
+    case _: FixIn.EnterWasmFunction => 3
+    case _: FixIn.EnterHostFunction => 4
+    case _: FixIn.MostGeneralClientLoop => 5
   }.compare(in1, in2)
 }
 
@@ -181,13 +186,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     new EffectStack(EffectList(stack, memory, globals, funTable, callFrame, except, failure), {
       case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(funTable, memory, globals, callFrame)
       case _: FixIn.Eval => EffectList(funTable, stack, memory, globals, callFrame)
+      case _: FixIn.Exception.type => EffectList(funTable, memory, globals, callFrame)
     }, {
       case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => EffectList(funTable, stack, memory, globals, failure)
       case _: FixIn.Eval => EffectList(funTable, stack, memory, globals, callFrame, except)
+      case _: FixIn.Exception.type => EffectList(funTable, memory, globals, callFrame)
     })
 
   val effectStack: EffectStack = newEffectStack
   given EffectStack = effectStack
+  given Lazy[EffectStack] = lazily(effectStack)
 
   private given Failure = failure
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)
@@ -337,7 +345,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      throws(WasmException(JumpTarget.Return, operands))
+      val state = effectStack.getInState(FixIn.Exception)
+      throws(WasmException(JumpTarget.Return, operands, state))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func, loc)
@@ -351,14 +360,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    throws(WasmException(JumpTarget.Jump(labelIndex), operands))
+    val state = effectStack.getInState(FixIn.Exception)
+    throws(WasmException(JumpTarget.Jump(labelIndex), operands, state))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
 
-  private inline def assertFrameSize(size: Int): Unit = {}
-//    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
-//      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+  private inline def assertFrameSize(size: Int): Unit =
+    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
+      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
 
   def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
     stack.withNewFrame(arities.params) {
@@ -375,18 +385,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException(JumpTarget.Jump(labelIndex), operands) =>
+          case WasmException(JumpTarget.Jump(labelIndex), operands, state) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
+              effectStack.setInState(FixIn.Exception, state)
               assertFrameSize(arities.jumpOperands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
               assertFrameSize(arities.results)
             } else {
               assertFrameSize(0)
-              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands))
+              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
             }
-          case WasmException(JumpTarget.Return, _) =>
+          case WasmException(JumpTarget.Return, _, state) =>
             assertFrameSize(0)
             throws(ex)
         }
@@ -417,9 +428,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
-        case WasmException(JumpTarget.Return, operands) =>
+        case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
-        case WasmException(JumpTarget.Jump(_), _) =>
+          effectStack.setInState(FixIn.Exception, state)
+        case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
     }
