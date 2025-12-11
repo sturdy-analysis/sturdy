@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.control.{BasicControlEvent, ControlEvent, ControlObservable}
+import sturdy.control.{BasicControlEvent, ControlEvent, ControlObservable, ExceptionControlEvent}
 import sturdy.effect.{EffectStack, ObservableJoin, TrySturdy}
 import sturdy.effect.except.{LiftedExceptObserver, ObservableExcept}
 import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
@@ -36,8 +36,10 @@ trait Control extends Interpreter:
     new Logger:
       override def enter(dom: FixIn): Unit = dom match
         case FixIn.EnterWasmFunction(id, _, _) =>
+          observable.triggerControlEvent(ExceptionControlEvent.BeginTry())
           observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter"))
         case FixIn.EnterHostFunction(id, _) =>
+          observable.triggerControlEvent(ExceptionControlEvent.BeginTry())
           observable.triggerControlEvent(BasicControlEvent.BeginSection(id)("enter host"))
         case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
           val label = c match
@@ -48,14 +50,18 @@ trait Control extends Interpreter:
           observable.triggerControlEvent(BasicControlEvent.BeginSection(loc)(label))
         case FixIn.Eval(inst, loc) =>
           observable.triggerControlEvent(BasicControlEvent.Atomic(loc)(inst.toString))
+        case FixIn.MostGeneralClientLoop(mod) =>
+          // We use function index -1 to create an artificial node for the MostGeneralClientLoop
+          observable.triggerControlEvent(BasicControlEvent.BeginSection(FuncId(mod, -1))("Most general client"))
         case _ => // nothing
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = dom match
         case FixIn.EnterWasmFunction(_, _, _) | FixIn.EnterHostFunction(_, _) =>
           observable.triggerControlEvent(BasicControlEvent.EndSection())
+          observable.triggerControlEvent(ExceptionControlEvent.EndTry())
         case FixIn.Eval(c: (Block | Loop | If | Call | CallIndirect), loc) =>
           observable.triggerControlEvent(BasicControlEvent.EndSection())
-        //case MostGeneralClientLoop(_) => observable.triggerControlEvent(FixpointControlEvent.Restart())
+        case FixIn.MostGeneralClientLoop(_) => observable.triggerControlEvent(BasicControlEvent.EndSection())
         case _ => // nothing
 
 // TODO : Fix the MostGeneralClientLoop iteration that breaks the CFG construction (sometimes?)

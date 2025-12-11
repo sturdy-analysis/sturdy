@@ -152,32 +152,33 @@ final class RelationalCallFrame
 
   def combineCallFrame[W <: Widening]: Combine[State, W] = (s1: State, s2: State) =>
     var changed = false
-    val joined = s1.zip(s2).zip(addressCallFrame.getFrameNames.toList.sortBy((x,idx) => idx)).map {
-      case ((virts1, virts2), (variable,idx)) =>
-        val phys1 = apronState.relationalStore.withLeftState(st => (virts1.physicalAddressesPure(st.addressTranslationState),st))
-        val phys2 = apronState.relationalStore.withRightState(st => (virts2.physicalAddressesPure(st.addressTranslationState),st))
-        if(ssa && phys1 != phys2) {
-          val ctx = localVariableAllocator((variable,addressCallFrame.data))
-          val (result1,result1Phys) = apronState.relationalStore.withLeftState(state1 =>
-            val (result,state2) = apronState.recencyStore.allocPure(ctx, state1.asInstanceOf[apronState.recencyStore.State])
-            val physFrom = virts1.physicalAddressesPure(state2.asInstanceOf[apronState.relationalStore.State].addressTranslationState)
-            val state3 = apronState.relationalStore.expandPure(PowersetAddr(physFrom), PhysicalAddress(result.ctx, Recency.Recent), state2.asInstanceOf[apronState.relationalStore.State])
-            ((PowVirtualAddress(result),PhysicalAddress(result.ctx, Recency.Recent)),state3)
-          )
-          val result2 = apronState.relationalStore.withRightState(state1 =>
-            val (result,state2) = apronState.recencyStore.allocPure(ctx, state1.asInstanceOf[apronState.recencyStore.State])
-            val physFrom = virts2.physicalAddressesPure(state2.asInstanceOf[apronState.relationalStore.State].addressTranslationState)
-            val state3 = apronState.relationalStore.expandPure(PowersetAddr(physFrom), PhysicalAddress(result.ctx, Recency.Recent), state2.asInstanceOf[apronState.relationalStore.State])
-            (PowVirtualAddress(result),state3)
-          )
-          changed ||= !phys1.contains(result1Phys)
-          result1.union(result2)
-        } else {
-          val joined = Join(virts1,virts2)
-          changed ||= joined.hasChanged
-          joined.get
-        }
-    }
+    val joined = s1.unionWith(s2, (idx, virts1, virts2) =>
+      val variable = addressCallFrame.getFrameNames.find(_._2 == idx).get._1
+      val phys1 = apronState.relationalStore.withLeftState(st => (virts1.physicalAddressesPure(st.addressTranslationState),st))
+      val phys2 = apronState.relationalStore.withRightState(st => (virts2.physicalAddressesPure(st.addressTranslationState),st))
+      if(ssa && phys1 != phys2) {
+        val ctx = localVariableAllocator((variable,addressCallFrame.data))
+        val (result1,result1Phys) = apronState.relationalStore.withLeftState(state1 =>
+          val (result,state2) = apronState.recencyStore.allocPure(ctx, state1.asInstanceOf[apronState.recencyStore.State])
+          val physFrom = virts1.physicalAddressesPure(state2.asInstanceOf[apronState.relationalStore.State].addressTranslationState)
+          val state3 = apronState.relationalStore.expandPure(PowersetAddr(physFrom), PhysicalAddress(result.ctx, Recency.Recent), state2.asInstanceOf[apronState.relationalStore.State])
+          ((PowVirtualAddress(result),PhysicalAddress(result.ctx, Recency.Recent)),state3)
+        )
+        val result2 = apronState.relationalStore.withRightState(state1 =>
+          val (result,state2) = apronState.recencyStore.allocPure(ctx, state1.asInstanceOf[apronState.recencyStore.State])
+          val physFrom = virts2.physicalAddressesPure(state2.asInstanceOf[apronState.relationalStore.State].addressTranslationState)
+          val state3 = apronState.relationalStore.expandPure(PowersetAddr(physFrom), PhysicalAddress(result.ctx, Recency.Recent), state2.asInstanceOf[apronState.relationalStore.State])
+          (PowVirtualAddress(result),state3)
+        )
+        changed ||= !phys1.contains(result1Phys)
+        result1.union(result2)
+      } else {
+        val joined = Join(virts1,virts2)
+        changed ||= joined.hasChanged
+        joined.get
+      }
+    )
+    
     MaybeChanged(joined, changed)
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =

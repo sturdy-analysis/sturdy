@@ -42,9 +42,9 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 
 class RelationalAnalysisSoundnessTests extends Suites(
   new RelationalAnalysisTestScript(Polka(true), relational = true),
-//  new RelationalAnalysisTestScript(Octagon(), relational = true),
-//  new RelationalAnalysisTestScript(Box(), relational = true),
-//  new RelationalAnalysisTestScript(Box(), relational = false),
+  new RelationalAnalysisTestScript(Octagon(), relational = true),
+  new RelationalAnalysisTestScript(Box(), relational = true),
+  new RelationalAnalysisTestScript(Box(), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()

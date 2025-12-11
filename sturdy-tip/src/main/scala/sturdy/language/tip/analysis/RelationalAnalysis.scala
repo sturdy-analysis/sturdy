@@ -19,6 +19,7 @@ import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
 import sturdy.language.tip.abstractions.{CfgConfig, Control, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
+import sturdy.language.tip.analysis.IntervalAnalysis.{callSiteSensitive, controlEventLogger}
 import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, AddrCtx, RelType}
 import sturdy.util.Lazy
 import sturdy.util.lazily
@@ -114,7 +115,13 @@ object RelationalAnalysis extends Interpreter,
     val addrs = self.store.virtualAddresses
     AbstractReference.NullAddr(addrs, false)
 
-  class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+  class Instance(
+    apronManager: Manager,
+    initStore: InitStore,
+    stackConfig: StackConfig,
+    callSites: Int,
+    iterConfig: fix.iter.Config = fix.iter.Config.Innermost
+  ) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
     given tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
     given combineExprAlloc: AAllocatorFromContext[(ApronExpr[VirtAddr,RelType],ApronExpr[VirtAddr,RelType]), AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
@@ -265,6 +272,20 @@ object RelationalAnalysis extends Interpreter,
         case Value.IntValue(expr) => Value.IntValue(ApronExpr.constant(apronState.getInterval(expr), expr._type))
         case v => v
 
+    val cfgLogger = controlLogger[CallString](callSites > 0)
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
+
+    final override val fixpoint =
+      fix.log(controlEventLogger(this),
+        callSiteSensitive(callSites,
+          fix.log(cfgLogger.logger,
+            fix.dispatch(isFunOrWhile, Seq(
+              iterConfig.get(observedStackConfig), iterConfig.get(observedStackConfig)
+            ))
+          )
+        )
+      ).fixpoint
+
     class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
       val stack: mutable.Stack[(FixIn, IndexedSeq[(Value, Value)], effectStack.State)] = mutable.Stack.empty
 
@@ -298,6 +319,5 @@ object RelationalAnalysis extends Interpreter,
 
     val funLogger: FunctionCallLogger = new FunctionCallLogger
     val domLogger: DomLogger[FixIn] = new DomLogger
-    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
 
     override def newInstance: sturdy.Executor = new Instance(apronManager, initStore, stackConfig, callSites)

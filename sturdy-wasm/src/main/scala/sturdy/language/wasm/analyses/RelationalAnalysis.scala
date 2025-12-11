@@ -259,19 +259,22 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
 
     override def newEffectStack: EffectStack =
-      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except, failure))
-      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, tables, callFrame))
-      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame))
-      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, failure))
-      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, tables, callFrame, except))
+      lazy val allEffects = RecencyClosure(recencyStore, EffectList(stack, memory, globals, elems, tables, callFrame, except, failure))
+      lazy val inEffectsFunction = RecencyClosure(recencyStore, EffectList(memory, globals, elems, tables, callFrame))
+      lazy val inEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, elems, tables, callFrame))
+      lazy val outEffectsFunction = RecencyClosure(recencyStore, EffectList(stack, memory, globals, elems, tables, failure))
+      lazy val outEffectsEval = RecencyClosure(recencyStore, EffectList(stack, memory, globals, elems, tables, callFrame, except))
+      lazy val effectsException = RecencyClosure(recencyStore, EffectList(memory, globals, elems, tables, callFrame))
 
       new EffectStack(allEffects,
         {
           case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => inEffectsFunction
           case _: FixIn.Eval => inEffectsEval
+          case _: FixIn.Exception.type => effectsException
         }, {
           case _: FixIn.EnterWasmFunction | _: FixIn.MostGeneralClientLoop => outEffectsFunction
           case _: FixIn.Eval => outEffectsEval
+          case _: FixIn.Exception.type => effectsException
         }
       )
 
@@ -662,9 +665,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case cons: ApronCons[VirtAddr, Type] @unchecked => cons.addrs.iterator
         case bool: ApronBool[VirtAddr, Type] @unchecked => bool.addrs.iterator
         case excV: ExcV @unchecked =>
-          for ((ops, cond) <- excV.values.iterator;
-               addr <- valueIterator(ops) ++ valueIterator(cond))
-          yield addr
+          for(exceptionStates <- excV.values.iterator;
+              value <- exceptionStates.operands.iterator;
+              addr <- valueIterator(value))
+          yield(addr)
         case physAddr: PhysAddr @unchecked => Iterator.empty
         case AbstractReference.Null => Iterator.empty
         case _ =>

@@ -118,7 +118,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.ExternReference) => Value.Ref(Powerset(ExternReference.ExternReference))
       case ConcreteInterpreter.Value.Vec(v) => Value.Vec(Topped.Actual(v))
 
-  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends GenericInstance:
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
+    GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
 
     var dummy: List[Value] = List()
