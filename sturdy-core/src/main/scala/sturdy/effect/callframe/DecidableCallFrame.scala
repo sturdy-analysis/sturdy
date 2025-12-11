@@ -7,7 +7,7 @@ import sturdy.effect.TrySturdy
 import sturdy.values.{Join, Widen}
 import sturdy.{IsSound, Soundness, seqIsSound}
 
-
+import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 
 trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Site, NoJoin]
@@ -54,7 +54,7 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
 
   def setLocal(ix: Int, v: V): JOptionC[Unit] =
     if (ix >= 0 && ix < vars.length) {
-      vars = vars.updated(ix, v)
+      vars(ix) = v
       JOptionC.Some(())
     } else {
       JOptionC.none
@@ -92,11 +92,9 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
 class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars), Concrete
 
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
-  override type State = List[V]
-  override def getState: State = if(vars == null) List() else vars.toList
-  override def setState(s: State): Unit =
-    if(vars == null) vars = s.toArray
-    else  s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+  override type State = ArraySeq[V]
+  override def getState: State = if(vars == null) ArraySeq() else ArraySeq.unsafeWrapArray(vars.clone)
+  override def setState(s: State): Unit = vars = s.unsafeArray.clone.asInstanceOf
   override def setBottom: Unit = vars = null
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
