@@ -166,11 +166,9 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
       IsSound.NotSound(s"${classOf[SignStore].getName}: Expected all concrete keys to be contained, but $missing are missing in $store.")
     }
     // all concrete entries must be approximated by the corresponding abstract entries
-    cMap.foreachEntry { (k,v) =>
-      val subSound = Soundness.isSound(v, store(k))
-      if (subSound.isNotSound)
-        return subSound
-    }
+    cMap.map((k, v) => Soundness.isSound(v, store(k))).find(_.isNotSound) match
+      case None => ()
+      case Some(s) => return s
     // all "must" entries in the abstract store must be present in the concrete store
     val musts = store.filter {
       case (_,Must(_)) => true
