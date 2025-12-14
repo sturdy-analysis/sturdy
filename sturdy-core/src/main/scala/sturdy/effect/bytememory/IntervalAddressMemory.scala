@@ -33,11 +33,32 @@ class IntervalAddressMemory[Key, B: ClassTag](emptyB: B, rangeLimit: Int)(using 
   override def grow(key: Key, delta: Topped[Int]): JOption[WithJoin, Topped[Int]] =
     constantAddressMemory.grow(key, delta)
 
-  override def fill(key: Key, addr: NumericInterval[Int], size: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] = ???
+  override def fill(key: Key, addr: NumericInterval[Int], size: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] =
+    size match {
+      case Topped.Actual(size) if(addr.low == addr.high) =>
+        var result = JOptionA.Some(())
+        for(i <- addr.low.to(size)) {
+          result = Join(result, constantAddressMemory.write(key, Topped.Actual(i), value)).get
+        }
+        result
+      case _ => constantAddressMemory.write(key, Topped.Top, value)
+    }
 
   override def copy(key: Key, srcAddr: NumericInterval[Int], dstAddr: NumericInterval[Int], size: Topped[Int]): JOption[WithJoin, Unit] = ???
 
-  override def init(key: Key, tableAddr: NumericInterval[Int], dataAddr: NumericInterval[Int], size: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] = ???
+  override def init(key: Key, targetAddr: NumericInterval[Int], sourceAddr: NumericInterval[Int], size: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] =
+    size match {
+      case Topped.Actual(size) if (targetAddr.low == targetAddr.high && sourceAddr.low == sourceAddr.high) =>
+        var result = JOptionA.Some(())
+        for (i <- 0 until size) {
+          result = Join(result, constantAddressMemory.write(key, Topped.Actual(targetAddr.low + i), Seq(dataBytes(sourceAddr.low + i)))).get
+        }
+        result
+      case _ =>
+        val byte = dataBytes.reduce(Join(_,_).get)
+        constantAddressMemory.write(key, Topped.Top, Seq(byte))
+    }
+
 
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     constantAddressMemory.putNew(key, initSize, sizeLimit)
