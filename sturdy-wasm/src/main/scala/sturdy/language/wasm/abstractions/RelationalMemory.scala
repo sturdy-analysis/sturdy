@@ -69,6 +69,9 @@ trait RelationalMemory extends RelationalValues:
       value <- globals.get((), generic.GlobalAddr(n)).toOption
     ) yield apronState.getInterval(value.asInt32.asNumExpr)
 
+  /**
+   * 
+   */
   private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
