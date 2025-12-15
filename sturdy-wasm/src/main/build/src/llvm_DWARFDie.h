@@ -33,6 +33,14 @@ JNIEXPORT jlongArray JNICALL Java_llvm_DWARFDie_getChildHandles
 
 /*
  * Class:     llvm_DWARFDie
+ * Method:    getAddrSizeFromUnit
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_llvm_DWARFDie_getAddrSizeFromUnit
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     llvm_DWARFDie
  * Method:    getTagAsInteger
  * Signature: ()I
  */

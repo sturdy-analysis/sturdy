@@ -4,6 +4,13 @@ import apron.Interval
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOptional
 
+def tryPrintDieName(die: DWARFDie): Unit = {
+  die.getNameAttr.toScala match {
+    case Some(value) => println(value)
+    case None => println("<unknown name>")
+  }
+}
+
 @main
 def main(): Unit = {
   val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/fankuchredux.wasm"
@@ -31,38 +38,76 @@ def findAllGlobals(unit: DWARFUnit): Vector[Variable] = {
 }
 def getNameAndTypeSize(die: DWARFDie): Variable = {
   assert(die.hasTag(DwarfTag.variable))
-
+  println("Die has Tag: " + die.getTag)
   val name = die.getNameAttr.toScala match {
     case Some(str) => str
     case None => "<unknown variable name>"
   }
-  println(name)
+  println("Die has Name: " + name)
   val typeDie = die.getTypeAttr.toScala match {
     case Some(value) => value
     case None => sys.error("encountered variable DIE without a type attribute")
   }
+  val typeSize = getTypeSize(typeDie)
+  println(typeSize)
 
-  null
+  (name, apron.Interval(0, typeSize))
 }
 def getTypeSize(die: DWARFDie): Int = {
+  println("Die has Tag (getTypeSize): " + die.getTag)
   assert(die.getTag.isTypeTag) //only consider TypeTags:
   die.getTag match {
-    case DwarfTag.base_type => die.getByteSizeAttr.toScala match {
+    case DwarfTag.base_type => die.getByteSizeAttr.toScala match
       case Some(value) => value.toInt
-      case None => sys.error("base_type Die did not have byte_size Attribute")
-    }
-    case DwarfTag.pointer_type => 8 //Pointer Size in Bytes
-    case DwarfTag.array_type => ???
-    case DwarfTag.subrange_type => ???
-    case DwarfTag.const_type => ???
-    case DwarfTag.volatile_type => ???
-    case DwarfTag.restrict_type => ???
-    case DwarfTag.typedef => ???
+      case None => sys.error("base_type die did not have byte_size attribute")
+
+    case DwarfTag.pointer_type => die.getAddrSize //for webassembly this should always be 4
+
+    case DwarfTag.array_type => die.getTypeAttr.toScala match
+      case None => sys.error("array_type did not have type attribute")
+      case Some(typeDie) =>
+        println("array_type typeDie has Tag: " + typeDie.getTag)
+        tryPrintDieName(typeDie)
+        println(die.children.asScala.toList.map(_.getTag))
+        die.children().asScala.toList match
+        case Nil => sys.error("array_type has unknown size")
+        //multidimensional array types are allowed to have multiple child Dies (one for each dimension)
+        case subrangeDies@head::tail => subrangeDies.foldRight(1)((subrangeDie, acc) => getTypeSize(subrangeDie) * acc)
+
+    case DwarfTag.subrange_type => die.getCountAttr.toScala match
+      case Some(value) => value.toInt
+      case None => sys.error("subrange_type did not have count attribute")
+
+    case DwarfTag.const_type => die.getTypeAttr.toScala match
+      case Some(typeDie) => getTypeSize(typeDie)
+      case None => sys.error("const_type did not have type attribute")
+
+    case DwarfTag.volatile_type => die.getTypeAttr.toScala match
+      case Some(typeDie) => getTypeSize(typeDie)
+      case None => sys.error("volatile_type did not have type attribute")
+
+    case DwarfTag.restrict_type => die.getTypeAttr.toScala match
+      case Some(typeDie) => getTypeSize(typeDie)
+      case None => sys.error("restrict_type did not have type attribute")
+
+    case DwarfTag.typedef => die.getTypeAttr.toScala match
+      case Some(typeDie) => getTypeSize(typeDie)
+      case None => sys.error("typedef did not have type attribute")
+
+    case DwarfTag.structure_type => die.getByteSizeAttr.toScala match
+      case Some(value) => value.toInt
+      case None => sys.error("structure_type did not have byte_size attribute")
+
+    case DwarfTag.union_type => die.getByteSizeAttr.toScala match
+      case Some(value) => value.toInt
+      case None => sys.error("union_type did not have byte_size attribute")
+
     case DwarfTag.subroutine_type => ???
-    case DwarfTag.structure_type => ???
-    case DwarfTag.union_type => ???
-    case DwarfTag.enumeration_type => ???
-    case DwarfTag.ptr_to_member_type => ???
+    case DwarfTag.enumeration_type => die.getByteSizeAttr.toScala match {
+      case Some(value) => value.toInt
+      case None => sys.error("enumeration_type did not have byte_size attribute")
+    }
+    case DwarfTag.ptr_to_member_type => sys.error("ptr_to_member_type is not expected when compiling C to WASM")
     case DwarfTag.unspecified_type => ???
     case _ => sys.error("expected a die containing type information but got '" + die.getTag + "' instead.")
   }

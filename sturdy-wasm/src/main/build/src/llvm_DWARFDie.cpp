@@ -32,7 +32,7 @@ JNIEXPORT jlongArray JNICALL Java_llvm_DWARFDie_getChildHandles(JNIEnv *env, job
 
     std::vector<jlong> data;
     if (die.hasChildren()) {
-        for (llvm::DWARFDie child = die.getFirstChild(); child.isValid(); child = child.getSibling()) {
+        for (const auto child : die.children()) {
             auto* handle = new DWARFDieHandle(child);
             data.push_back(std::bit_cast<jlong>(handle));
         }
@@ -47,7 +47,8 @@ JNIEXPORT jlongArray JNICALL Java_llvm_DWARFDie_getChildHandles(JNIEnv *env, job
 
 JNIEXPORT jint JNICALL Java_llvm_DWARFDie_getTagAsInteger(JNIEnv *env, jobject obj) {
     const auto die = getDie(env, obj);
-    return die.getTag();
+    auto res = die.getTag();
+    return res;
 }
 
 JNIEXPORT void JNICALL Java_llvm_DWARFDie_devTest(JNIEnv *env, jobject obj) {
@@ -92,4 +93,9 @@ JNIEXPORT jstring JNICALL Java_llvm_DWARFDie_getAttrAsString(JNIEnv *env, jobjec
     if (!attr) return nullptr;
 
     return env->NewStringUTF(foundAttr->getAsCString().get());
+}
+
+JNIEXPORT jint JNICALL Java_llvm_DWARFDie_getAddrSizeFromUnit(JNIEnv *env, jobject obj) {
+    const auto die = getDie(env, obj);
+    return die.getDwarfUnit()->getAddressByteSize();
 }

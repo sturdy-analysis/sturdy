@@ -33,6 +33,7 @@ public class DWARFDie implements AutoCloseable {
      * @return array of handles pointing to native DWARFDie Wrapper Objects
      */
     private native long[] getChildHandles();
+    private native int getAddrSizeFromUnit();
     /**
      * @return returns an int representing a
      */
@@ -87,5 +88,12 @@ public class DWARFDie implements AutoCloseable {
         if (attrVal == Long.MAX_VALUE) return Optional.empty();
         return Optional.of(attrVal);
     }
-    
+    public Optional<Long> getCountAttr() {
+        long attrVal = getAttrAsLong(DwarfAttr.count.getValue());
+        if (attrVal == Long.MAX_VALUE) return Optional.empty();
+        return Optional.of(attrVal);
+    }
+    public int getAddrSize() {
+        return getAddrSizeFromUnit();
+    }
 }
