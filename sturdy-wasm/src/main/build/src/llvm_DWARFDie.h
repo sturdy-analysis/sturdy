@@ -73,6 +73,14 @@ JNIEXPORT jlong JNICALL Java_llvm_DWARFDie_getAttrAsLong
 
 /*
  * Class:     llvm_DWARFDie
+ * Method:    getOffset
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_llvm_DWARFDie_getOffset
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     llvm_DWARFDie
  * Method:    devTest
  * Signature: ()V
  */

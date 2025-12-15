@@ -150,7 +150,7 @@ public enum DwarfTag {
                 DwarfTag.ptr_to_member_type,
                 DwarfTag.unspecified_type
         );
-        System.out.println("Checking if " + this + " is a type Tag.");
+        //System.out.println("Checking if " + this + " is a type Tag.");
         return TypeTags.contains(this);
     }
     public int getValue() {

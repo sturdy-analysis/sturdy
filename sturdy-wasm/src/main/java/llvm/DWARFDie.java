@@ -41,6 +41,7 @@ public class DWARFDie implements AutoCloseable {
     private native String getAttrAsString(int dwarfAttr); /*DwarfAttr.value*/
     private native long getAttrAsDWARFDieHandle(int dwarfAttr); /*DwarfAttr.value*/
     private native long getAttrAsLong(int dwarfAttr); /*DwarfAttr.value*/
+    public native long getOffset();
     /**
      * just a function to have to be able to quickly test stuff without having to regenerate the JNI headers
      */
@@ -95,5 +96,11 @@ public class DWARFDie implements AutoCloseable {
     }
     public int getAddrSize() {
         return getAddrSizeFromUnit();
+    }
+    public Optional<Long> getLocationAttr() {
+        throw new RuntimeException("getLocationAttr does not work at the moment");
+        //long attrVal = getAttrAsLong(DwarfAttr.location.getValue());
+        //if (attrVal == Long.MAX_VALUE) return Optional.empty();
+        //return Optional.of(attrVal);
     }
 }

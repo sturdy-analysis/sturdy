@@ -1,5 +1,4 @@
 import llvm.*
-import apron.Interval
 
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOptional
@@ -21,40 +20,51 @@ def main(): Unit = {
   val unitGlobals = dwarfUnits.map {
     findAllGlobals
   }
+  unitGlobals.foreach { thisCUList =>
+    println("====NEW CU====")
+    println("with " + thisCUList.size + " global variables")
+    thisCUList.foreach { case (str, size) =>
+      println(s"$str has size: $size")
+    }
+  }
 }
 
-type Variable = (String, Interval)
-def findAllGlobals(unit: DWARFUnit): Vector[Variable] = {
+def findAllGlobals(unit: DWARFUnit): List[(String, (Int, Int))] = {
   val root = unit.getUnitDIE
 
-  if !root.hasChildren then return Vector.empty
+  if !root.hasChildren then return Nil
 
   val toplevelDIEs = root.children().asScala.toList
   val toplevelVariableDIEs = toplevelDIEs.filter(_.hasTag(DwarfTag.variable))
 
   toplevelVariableDIEs.map(getNameAndTypeSize)
-
-  Vector.empty
 }
-def getNameAndTypeSize(die: DWARFDie): Variable = {
+def getNameAndTypeSize(die: DWARFDie): (String, (Int, Int)) = {
   assert(die.hasTag(DwarfTag.variable))
-  println("Die has Tag: " + die.getTag)
+  //println("Die has Tag: " + die.getTag)
   val name = die.getNameAttr.toScala match {
     case Some(str) => str
     case None => "<unknown variable name>"
+    //TODO: current understanding: some values do not get a name since they are never assigned to a variable with a name
+    // examples encountered: printf() calls containing directly written const char* strings
   }
+  println("Die has offset: " + die.getOffset.toHexString)
   println("Die has Name: " + name)
+  die.devTest()
   val typeDie = die.getTypeAttr.toScala match {
     case Some(value) => value
     case None => sys.error("encountered variable DIE without a type attribute")
   }
+  var baseLocation = 0
+  //baseLocation = typeDie.getLocationAttr.toScala match
+  //  case Some(value) => value.toInt
+  //  case None => sys.error("encountered top level variable DIE without a location attribute")
   val typeSize = getTypeSize(typeDie)
-  println(typeSize)
+  //println(typeSize)
 
-  (name, apron.Interval(0, typeSize))
+  (name, (baseLocation, baseLocation + typeSize))
 }
 def getTypeSize(die: DWARFDie): Int = {
-  println("Die has Tag (getTypeSize): " + die.getTag)
   assert(die.getTag.isTypeTag) //only consider TypeTags:
   die.getTag match {
     case DwarfTag.base_type => die.getByteSizeAttr.toScala match
@@ -66,9 +76,6 @@ def getTypeSize(die: DWARFDie): Int = {
     case DwarfTag.array_type => die.getTypeAttr.toScala match
       case None => sys.error("array_type did not have type attribute")
       case Some(typeDie) =>
-        println("array_type typeDie has Tag: " + typeDie.getTag)
-        tryPrintDieName(typeDie)
-        println(die.children.asScala.toList.map(_.getTag))
         die.children().asScala.toList match
         case Nil => sys.error("array_type has unknown size")
         //multidimensional array types are allowed to have multiple child Dies (one for each dimension)
@@ -102,13 +109,16 @@ def getTypeSize(die: DWARFDie): Int = {
       case Some(value) => value.toInt
       case None => sys.error("union_type did not have byte_size attribute")
 
-    case DwarfTag.subroutine_type => ???
-    case DwarfTag.enumeration_type => die.getByteSizeAttr.toScala match {
+
+    case DwarfTag.enumeration_type => die.getByteSizeAttr.toScala match
       case Some(value) => value.toInt
       case None => sys.error("enumeration_type did not have byte_size attribute")
-    }
+
     case DwarfTag.ptr_to_member_type => sys.error("ptr_to_member_type is not expected when compiling C to WASM")
+
+
     case DwarfTag.unspecified_type => ???
+    case DwarfTag.subroutine_type => ???
     case _ => sys.error("expected a die containing type information but got '" + die.getTag + "' instead.")
   }
 }

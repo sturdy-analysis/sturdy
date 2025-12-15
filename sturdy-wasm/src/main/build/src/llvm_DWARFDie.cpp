@@ -53,10 +53,40 @@ JNIEXPORT jint JNICALL Java_llvm_DWARFDie_getTagAsInteger(JNIEnv *env, jobject o
 
 JNIEXPORT void JNICALL Java_llvm_DWARFDie_devTest(JNIEnv *env, jobject obj) {
     const auto die = getDie(env, obj);
-    const auto attr = die.find(llvm::dwarf::Attribute::DW_AT_name);
-    if (!attr) return;
+    const auto attr = die.find(llvm::dwarf::Attribute::DW_AT_location);
+    if (!attr) {std::cout << "not found" << std::endl; return;}
+    const auto block = attr.value().getAsBlock();
+    if (!block) {std::cout << "could not get as block" << std::endl; return;}
+    llvm::ArrayRef<uint8_t> blockArray = block.value();
+    llvm::DWARFLocationExpression locExpr;
+    locExpr.Expr.assign(blockArray.begin(), blockArray.end());
+    locExpr.Range = std::nullopt;
 
-    std::cout << "Global Var Name: " << attr->getAsCString().get() << std::endl;
+    const uint8_t *data = locExpr.Expr.data();
+    const size_t size = locExpr.Expr.size();
+    size_t offset = 0;
+
+    while (offset < size) {
+        switch (const uint8_t opcode = data[offset++]) {
+            case llvm::dwarf::DW_OP_addr: {
+                uint64_t operand = 0;
+                // read the next 8 bytes (for 64-bit DW_OP_addr) or adjust based on target
+                memcpy(&operand, &data[offset], sizeof(uint64_t));
+                offset += sizeof(uint64_t);
+                std::cout << "DW_OP_addr symbolic: 0x" << std::hex << operand << std::endl;
+                break;
+            }
+            case llvm::dwarf::DW_OP_WASM_location: {
+                uint8_t kind = data[offset++];
+                // read index depending on kind (ULEB128 or U32)
+                std::cout << "DW_OP_WASM_location symbolic" << std::endl;
+                break;
+            }
+            default:
+                std::cout << "Opcode: " << static_cast<int>(opcode) << std::endl;
+                break;
+        }
+    }
 }
 
 JNIEXPORT jlong JNICALL Java_llvm_DWARFDie_getAttrAsDWARFDieHandle(JNIEnv *env, jobject obj, jint attrVal) {
@@ -90,7 +120,7 @@ JNIEXPORT jstring JNICALL Java_llvm_DWARFDie_getAttrAsString(JNIEnv *env, jobjec
     const auto die = getDie(env, obj);
     const auto attr = intToAttribute(attrVal);
     const auto foundAttr = die.find(attr);
-    if (!attr) return nullptr;
+    if (!foundAttr) return nullptr;
 
     return env->NewStringUTF(foundAttr->getAsCString().get());
 }
@@ -98,4 +128,9 @@ JNIEXPORT jstring JNICALL Java_llvm_DWARFDie_getAttrAsString(JNIEnv *env, jobjec
 JNIEXPORT jint JNICALL Java_llvm_DWARFDie_getAddrSizeFromUnit(JNIEnv *env, jobject obj) {
     const auto die = getDie(env, obj);
     return die.getDwarfUnit()->getAddressByteSize();
+}
+
+JNIEXPORT jlong JNICALL Java_llvm_DWARFDie_getOffset(JNIEnv *env, jobject obj) {
+    const auto die = getDie(env, obj);
+    return toJLong(die.getOffset());
 }
