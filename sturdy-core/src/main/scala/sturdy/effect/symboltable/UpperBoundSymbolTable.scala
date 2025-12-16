@@ -1,6 +1,6 @@
 package sturdy.effect.symboltable
 
-import sturdy.data.{*, given}
+import sturdy.data.{JOptionA, *, given}
 import sturdy.effect.Effect
 import sturdy.values.*
 import sturdy.IsSound
@@ -15,7 +15,8 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   protected var tables: Map[Key, Entry] = Map()
 
   override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
-    JOptionA.noneSome(tables(key))
+    tables.get(key).map(entry => if entry == emptyEntry then JOptionA.none else JOptionA.noneSome(entry)).getOrElse(JOptionA.none)
+    //JOptionA.noneSome(tables(key))
 
   override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
