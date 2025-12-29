@@ -1,4 +1,5 @@
 import llvm.*
+import apron.Interval
 
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOptional

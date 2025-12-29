@@ -31,13 +31,14 @@ trait RelationalMemory extends RelationalValues:
   final type Size = ApronExpr[VirtAddr, Type]
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
 
+  //TODO: refactor StaticMemoryLayout into its own file and change the Interval Class used
   case class StaticMemoryLayout(
     tableRange: Interval,
     dataRange: Interval,
     globalRanges: Vector[(String, Interval)],
     stackRange: Interval,
     stackPointer: generic.GlobalAddr,
-    heapRange: Interval
+    heapRange: Interval //TODO: use sturdy NumericInterval
   ):
     def getGlobalRange(name: String): Option[Interval] = globalRanges.find((global, _) => name == global).map(_._2)
 
