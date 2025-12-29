@@ -8,5 +8,5 @@ if ! command -v javac >/dev/null 2>&1; then
 fi
 
 echo "generating JNI .h files into /src/main/build/"
-javac -h ../../build/src NativeCleaner.java DWARFContext.java DWARFUnit.java DWARFDie.java DwarfTag.java DwarfAttr.java
+javac -h ../build/src NativeCleaner.java DWARFContext.java DWARFUnit.java DWARFDie.java DwarfTag.java DwarfAttr.java
 echo "generated JNI .h files into /src/main/build/"

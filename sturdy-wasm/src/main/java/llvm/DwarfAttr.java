@@ -1,4 +1,4 @@
-package llvm;
+package swam.binary.custom.dwarf.llvm;
 
 public enum DwarfAttr {
     sibling(0x1),

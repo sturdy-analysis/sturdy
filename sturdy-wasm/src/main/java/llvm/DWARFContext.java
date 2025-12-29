@@ -1,6 +1,5 @@
-package llvm;
+package swam.binary.custom.dwarf.llvm;
 
-import java.awt.*;
 import java.io.File;
 import java.lang.ref.Cleaner;
 import java.util.Arrays;
@@ -16,14 +15,8 @@ public class DWARFContext implements AutoCloseable {
     private final long handle; //DWARFContextHandle*
     /*It can NOT be converted to a local variable in the constructor because the C++ code accesses it!*/
     public DWARFContext(String path) {
-        System.out.println(path);
         //TODO: fix absolute/relative path issues
-        if (path.startsWith(".")) {
-            System.out.println("...");
-            handle = createFromFile(path.substring(1));
-        } else {
-            handle = createFromFile(path);
-        }
+        handle = createFromFile(path);
         //System.out.println("Current working dierectory (scala):\t" + System.getProperty("user.dir"));
         if (handle == 0) { throw new RuntimeException("Failed to create DWARFContext"); }
         cleanable = CLEANER.register(this, new NativeCleaner(handle, DWARFContext::destroy));        

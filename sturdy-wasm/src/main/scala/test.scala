@@ -1,5 +1,4 @@
-import llvm.*
-import apron.Interval
+import swam.binary.custom.dwarf.llvm.{DWARFContext, DWARFDie, DWARFUnit, DwarfTag}
 
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.RichOptional
@@ -14,7 +13,6 @@ def tryPrintDieName(die: DWARFDie): Unit = {
 @main
 def main(): Unit = {
   val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/fankuchredux.wasm"
-  val RELATIVEFILEPATH = "/src/test/resources/wasm/benchmarksgame/src/fankuchredux.wasm"
 
   val dwarfContext = new DWARFContext(ABSOLUTEFILEPATH)
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList

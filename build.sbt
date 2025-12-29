@@ -107,7 +107,7 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
     )
   )
 
-val swam = file("sturdy-wasm/swam").toURI()
+val swam = file("sturdy-wasm/swam").toURI
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")

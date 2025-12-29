@@ -48,7 +48,7 @@ object Parsing:
           validator <- Validator[IO](blocker)
           loader = new ModuleLoader[IO]()
           binaryParser = new ModuleParser[IO](validator)
-          mod <- binaryParser.parse(loader.sections(path, blocker))
+          mod <- binaryParser.parse(loader.sections(path, blocker), Some(path.toString)) // pass the path in order to create a DWARFContext if possible
         } yield mod
       }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
     } catch {
