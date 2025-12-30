@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 /**
  * Observer pattern.
- * Implemented by interpreters to sen events to observers.
+ * Implemented by interpreters to send events to observers.
  */
 trait ControlObservable[Atom, Section, Exc, Fx] extends JoinObserver, ExceptObserver[Exc]:
   private val observers: ListBuffer[ControlObserver[Atom, Section, Exc, Fx]] = ListBuffer.empty

@@ -185,8 +185,8 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case virts: PowVirtAddr => virts.iterator
         case expr: ApronExpr[VirtAddr,Type] => expr.addrs.iterator
         case excV: ExcV =>
-          for(listVals <- excV.values.iterator;
-              value <- listVals.iterator;
+          for(exceptionStates <- excV.values.iterator;
+              value <- exceptionStates.operands.iterator;
               addr <- valueIterator(value))
             yield(addr)
         case physAddr: PhysAddr => Iterator.empty

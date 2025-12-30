@@ -60,10 +60,12 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
+    
     override val fixpoint =
       fix.log(controlEventLogger(this),
         fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
-          parameterSensitive(this, fix.iter.innermost(stackConfig)))).fixpoint
+          parameterSensitive(this, fix.iter.innermost(observedStackConfig)))).fixpoint
     override def newInstance: sturdy.Executor = new Instance(initEnvironment, initStore, stackConfig)
 
   class DAIInstance(initEnvironment: Environment, initStore: InitStore) extends Instance(initEnvironment, initStore, StackConfig.StackedStates()):
