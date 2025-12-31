@@ -402,16 +402,16 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         branchOpsUnit.boolBranch(compareOps.lt(index, i32ops.integerLit(low))) {} {
           branchOpsUnit.boolBranch(compareOps.gt(index, i32ops.integerLit(high))) {} {
             // not greater than high or less than low
-            val indexMap = jumpOffsets.zipWithIndex.map(pair => (i32ops.integerLit(pair._2), pair._1)).toMap
-            target = indexMap(i32ops.sub(index, i32ops.integerLit(low)))
+            val pos = i32ops.sub(index, i32ops.integerLit(low))
+            target = jumpOffsets.iterator.zipWithIndex.find(pair => i32ops.integerLit(pair._2) == pos).map(_._1).getOrElse:
+              throw IllegalArgumentException("tableswitch jump index not found")
           }
         }
         except.throws(JvmExcept.Jump(pc + target))
 
       case LOOKUPSWITCH(defaultOffset, npairs) =>
         val key = stack.popOrAbort()
-        val transformedIndices = npairs.map(pair => (i32ops.integerLit(pair.key), pair.value)).toMap
-        val offset = transformedIndices.getOrElse(key, defaultOffset)
+        val offset = npairs.find(pair => i32ops.integerLit(pair.key) == key).map(_.value).getOrElse(defaultOffset)
         except.throws(JvmExcept.Jump(pc + offset))
 
       // return instructions
