@@ -13,7 +13,7 @@ import sturdy.effect.store.{CStore, Store}
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.ConcreteFixpoint
-import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, getIdent}
+import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, StaticMethodDeclaration, getIdent}
 import sturdy.language.bytecode.generic.*
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.values.arrays.*
@@ -48,8 +48,7 @@ object ConcreteInterpreter extends Interpreter:
   override type Addr = (Site, Int)
 
   override type Mth = Method
-  override type MthName = String
-  override type MthSig = MethodDescriptor
+  override type StaticMth = StaticMethodDeclaration
   override type ObjType = ClassFile
   override type TypeRep = ReferenceType
   //override type NullVal = Null
@@ -140,7 +139,7 @@ object ConcreteInterpreter extends Interpreter:
     override def is32Bit(v: RefValue): Boolean = true
 
   given ConcreteObjectOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure, throwClass: ThrowClass): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, NoJoin] with
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure, throwClass: ThrowClass): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Mth, StaticMth, I32, InvokeContext, FieldAccessContext, NoJoin] with
     given hierarchy: ClassHierarchy = project.classHierarchy
 
     override def makeObject(oid: Addr, c: ClassFile, fields: Seq[(Value, Site, FieldName)]): RefValue =
@@ -173,13 +172,13 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted object operations on $obj")
 
-    override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MthSig, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
+    override def invokeMethod(context: InvokeContext)(staticMethod: StaticMth, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
       case ConcreteRefValues.NullValue() => throwClass(context._1)(ClassType.NullPointerException)
       case ConcreteRefValues.Object(_, cf, _) => context match
         case (site, InvokeType.Interface, callingClass) =>
-          if !hierarchy.isSubtypeOf(cf.thisType, staticClass.thisType) then
+          if !hierarchy.isSubtypeOf(cf.thisType, staticMethod.declaringClass) then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
-          val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
+          val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
           if resolvedMethod.isStatic then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
@@ -190,7 +189,7 @@ object ConcreteInterpreter extends Interpreter:
           invoke(obj, selectedMethod, args)
 
         case (site, InvokeType.Virtual, callingClass) =>
-          val resolvedMethod = resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
+          val resolvedMethod = resolveMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
           if resolvedMethod.isStatic then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
@@ -200,13 +199,13 @@ object ConcreteInterpreter extends Interpreter:
 
         case (site, InvokeType.Special(isInterfaceCall), callingClass) =>
           val resolvedMethod = if isInterfaceCall then
-            resolveInterfaceMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
+            resolveInterfaceMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
           else
-            resolveMethod(callingClass.thisType, staticClass.thisType, mthName, sig)(using hierarchy, project, except, throwClass(context._1))
-          val c = if !resolvedMethod.isConstructor && !isInterfaceCall && callingClass.thisType.isSubtypeOf(staticClass.thisType) && callingClass.superclassType.isDefined && ACC_SUPER.isSet(callingClass.accessFlags) then
+            resolveMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
+          val c = if !resolvedMethod.isConstructor && !isInterfaceCall && callingClass.thisType.isSubtypeOf(staticMethod.declaringClass) && callingClass.superclassType.isDefined && ACC_SUPER.isSet(callingClass.accessFlags) then
             callingClass.superclassType.get
           else
-            staticClass.thisType
+            staticMethod.declaringClass
           val selectedMethod = selectSpecial(c, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
           if selectedMethod.isAbstract then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)
@@ -333,8 +332,8 @@ object ConcreteInterpreter extends Interpreter:
       override def remainder(dividend: Double, divisor: Double): Double = dividend % divisor
 
     override val bytecodeOps: BytecodeOps[Value, TypeRep] = implicitly
-    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin] =
-      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, MthName, MthSig, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, StaticMth, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin] =
+      LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, StaticMth, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteObjectOps(using objFieldAlloc, store, project, failure, this.throwClass)
       )
     override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, ArrayOpContext, MayJoin.NoJoin] =

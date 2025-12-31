@@ -14,7 +14,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
-import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, getIdent}
+import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, StaticMethodDeclaration, getIdent}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
@@ -61,7 +61,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   import bytecodeOps.*
 
-  val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, String, MethodDescriptor, V, InvokeContext, FieldAccessContext, J]
+  val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, StaticMethodDeclaration, V, InvokeContext, FieldAccessContext, J]
   val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, ArrayOpContext, J]
 
   implicit val joinUnit: J[Unit]
@@ -490,7 +490,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Virtual, mth.classFile)(getClassFile(site)(declaringClass.mostPreciseClassType), name, methodDescriptor, obj, args)(invokeWrapper(site))
+        val ret = objectOps.invokeMethod(site, InvokeType.Virtual, mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -498,7 +498,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Special(isInterface), mth.classFile)(getClassFile(site)(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper(site))
+        val ret = objectOps.invokeMethod(site, InvokeType.Special(isInterface), mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 
@@ -506,7 +506,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val numArgs = methodDescriptor.parametersCount
         val args = stack.popNOrAbort(numArgs)
         val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Interface, mth.classFile)(getClassFile(site)(declaringClass), name, methodDescriptor, obj, args)(invokeWrapper(site))
+        val ret = objectOps.invokeMethod(site, InvokeType.Interface, mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
         if !methodDescriptor.returnType.isVoidType then
           stack.push(ret)
 

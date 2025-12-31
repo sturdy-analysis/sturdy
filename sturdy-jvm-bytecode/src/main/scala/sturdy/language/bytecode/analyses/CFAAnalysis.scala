@@ -13,7 +13,7 @@ import sturdy.effect.symboltable.{DecidableSymbolTable, JoinableDecidableSymbolT
 import sturdy.fix.Fixpoint
 import sturdy.language.bytecode.Interpreter
 import sturdy.language.bytecode.abstractions
-import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, Site, given}
+import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, Site, StaticMethodDeclaration, given}
 import sturdy.language.bytecode.analyses.ConstantAnalysis.JvmExceptAbstract
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.language.bytecode.util.given
@@ -56,8 +56,7 @@ object CFAAnalysis extends Interpreter:
 
   // representations
   override type Mth = Method
-  override type MthName = String
-  override type MthSig = MethodDescriptor
+  override type StaticMth = StaticMethodDeclaration
   override type FieldName = FieldIdent
   // TODO: where exactly are these used?
   override type TypeRep = ReferenceType
@@ -101,7 +100,7 @@ object CFAAnalysis extends Interpreter:
     override val fixpoint: Fixpoint[FixIn, FixOut] = ???
 
     override val bytecodeOps: BytecodeOps[Value, ReferenceType] = ???
-    override val objectOps: ObjectOps[FieldIdent, AddrSet, Value, ClassFile, Value, Site, Method, String, MethodDescriptor, Value, InvokeContext, FieldAccessContext, J] = ???
+    override val objectOps: ObjectOps[FieldIdent, AddrSet, Value, ClassFile, Value, Site, Method, StaticMth, Value, InvokeContext, FieldAccessContext, J] = ???
     override val arrayOps: ArrayOps[AddrSet, Value, Value, Value, ArrayType, Site, ArrayOpContext, J] = ???
 
     override val joinUnit: WithJoin[Unit] = implicitly

@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassHierarchy, ClassType, DoubleType, FloatType, IntegerType, LongType, Method, MethodDescriptor, ReferenceType, ShortType, Type}
+import org.opalj.br.{ArrayType, BooleanType, ByteType, CharType, ClassFile, ClassHierarchy, ClassType, DoubleType, FloatType, IntegerType, LongType, Method, ReferenceType, ShortType, Type}
 import sturdy.data.{*, given}
 import sturdy.data.MayJoin.WithJoin
 import sturdy.effect.{EffectStack, TrySturdy}
@@ -16,7 +16,7 @@ import sturdy.{fix, values}
 import sturdy.fix.StackConfig.StackedStates
 import sturdy.fix.{Fixpoint, Logger}
 import sturdy.language.bytecode.{Interpreter, abstractions}
-import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, Exceptions, FieldAccessContext, FieldIdent, InvokeContext, Numbers, Site, given}
+import sturdy.language.bytecode.abstractions.{Addr, AddrSet, ArrayOpContext, Exceptions, FieldAccessContext, FieldIdent, InvokeContext, Numbers, Site, StaticMethodDeclaration, given}
 import sturdy.language.bytecode.generic.{BytecodeFailure, BytecodeOps, FixIn, FixOut, JvmExcept, given}
 import sturdy.language.bytecode.util.given
 import sturdy.values.{Combine, MaybeChanged, Structural, Topped, Widening, given}
@@ -39,8 +39,7 @@ enum AbstractReferenceValue[A, O]:
 object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type J[A] = WithJoin[A]
   override type Mth = Method
-  override type MthName = String
-  override type MthSig = MethodDescriptor
+  override type StaticMth = StaticMethodDeclaration
   override type ExcV = JvmExceptAbstract[Value]
 
   override type Addr = AddrSet
@@ -80,8 +79,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
   given structuralRef[A, O]: Structural[AbstractReferenceValue[A, O]] with {}
 
-  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin] =
-    new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, String, MethodDescriptor, I32, InvokeContext, FieldAccessContext, WithJoin]:
+  given objOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], project: Project[URL], f: Failure, eff: EffectStack): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, StaticMth, I32, InvokeContext, FieldAccessContext, WithJoin] =
+    new ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Method, StaticMth, I32, InvokeContext, FieldAccessContext, WithJoin]:
       given hierachy: ClassHierarchy = project.classHierarchy
 
       override def makeObject(oid: Addr, c: ClassFile, fields: Seq[(Value, Site, FieldName)]): RefValue =
@@ -110,8 +109,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
             JOptionA.some(())
         case Topped.Actual(_) => ???
 
-      override def invokeMethod(context: InvokeContext)(staticClass: ClassFile, mthName: String, sig: MethodDescriptor, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value = ref match
-        case Topped.Top => mkTopVal(sig.returnType)
+      override def invokeMethod(context: InvokeContext)(staticMethodDeclaration: StaticMth, ref: RefValue, args: Seq[Value])(invoke: (RefValue, Method, Seq[Value]) => Value): Value = ref match
+        case Topped.Top => mkTopVal(staticMethodDeclaration.descriptor.returnType)
         case Topped.Actual(AbstractReferenceValue.maybeNullObject(obj, _)) =>
           // TODO: test, add errors/exceptions
           // val resolvedMethod = resolveMethod(context._3.thisType, staticClass.thisType, mthName, sig)
@@ -268,8 +267,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
     override val bytecodeOps: BytecodeOps[Value, ReferenceType] = implicitly
 
-    override val objectOps: ObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin] =
-      new LiftedObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, String, MethodDescriptor, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val objectOps: ObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, StaticMth, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin] =
+      new LiftedObjectOps[FieldName, Addr, ConstantAnalysis.Value, ClassFile, ConstantAnalysis.Value, Site, Method, StaticMth, ConstantAnalysis.Value, InvokeContext, FieldAccessContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 

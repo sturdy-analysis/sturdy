@@ -4,14 +4,14 @@ import sturdy.data.{JOption, MayJoin}
 import sturdy.values.Structural
 import sturdy.values.ordering.EqOps
 
-trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, MthName, MthSig, Boolean, InvokeContext, FieldAccessContext, J[_] <: MayJoin[_]]:
+trait ObjectOps[FieldIdentifier, ObjectIdentifier, Value, Class, ObjectValue, Site, Method, StaticMethodDeclaration, Boolean, InvokeContext, FieldAccessContext, J[_] <: MayJoin[_]]:
   def makeObject(oid: ObjectIdentifier, c: Class, fields: Seq[(Value, Site, FieldIdentifier)]): ObjectValue
 
   def getField(context: FieldAccessContext)(obj: ObjectValue, identifier: FieldIdentifier): Value
 
   def setField(context: FieldAccessContext)(obj: ObjectValue, identifier: FieldIdentifier, v: Value): JOption[J, Unit]
 
-  def invokeMethod(context: InvokeContext)(staticClass: Class, mthName: MthName, sig: MthSig, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
+  def invokeMethod(context: InvokeContext)(staticMethod: StaticMethodDeclaration, obj: ObjectValue, args: Seq[Value])(invoke: (ObjectValue, Method, Seq[Value]) => Value): Value
 
   def makeNull(): ObjectValue
 

@@ -28,8 +28,7 @@ trait Interpreter:
   type Addr
 
   type Mth
-  type MthName
-  type MthSig
+  type StaticMth
 
   type TypeRep
   type FieldName
