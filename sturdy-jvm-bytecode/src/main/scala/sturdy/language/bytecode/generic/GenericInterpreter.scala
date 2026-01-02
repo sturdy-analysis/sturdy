@@ -131,17 +131,15 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       // LDC opcode 18
       case inst: LoadInt =>
         stack.push(num.evalNumericOp(inst))
-
       case inst: LoadFloat =>
         stack.push(num.evalNumericOp(inst))
-
       case LoadClass(_) =>
         val cls = createObject(ClassType.Class, Site.Instruction(mth, pc, variant = 1))
         stack.push(cls)
-
       case LoadString(value) =>
         stack.push(makeStringObj(site)(value))
-
+      case LoadDynamic(_, _, _) =>
+        ??? // TODO
       case LoadMethodHandle(_) =>
         ??? // TODO
       case LoadMethodType(_) =>
