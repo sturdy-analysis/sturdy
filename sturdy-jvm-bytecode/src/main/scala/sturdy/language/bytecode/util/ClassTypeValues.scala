@@ -14,5 +14,6 @@ object ClassTypeValues:
   val NoSuchMethodError: ClassType = ClassType("java/lang/NoSuchMethodError")
   val NoSuchFieldError: ClassType = ClassType("java/lang/NoSuchFieldError")
   val PrintStream: ClassType = ClassType("java/io/PrintStream")
+  val VerifyError: ClassType = ClassType("java/lang/VerifyError")
 
 given Finite[ClassType] with {}

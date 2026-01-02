@@ -202,6 +202,8 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
     val (concreteInterpreter, _) = runSetup(project, testCase, caseName)(method)
     try
       concreteInterpreter.invokeExternal(method, true)
+      if expectedException == ClassTypeValues.VerifyError then
+        cancel(s"[$caseName] should have thrown a VerifyError, but this is not our responsibility")
       fail(s"[$caseName] no exception thrown")
     catch
       // all other exceptions fail the test
@@ -211,6 +213,6 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
         case JvmExcept.ThrowObject(exception: ConcreteInterpreter.Value) =>
           exception.asRef(using concreteInterpreter.failure) match
             case ConcreteRefValues.Object(_, cls, _) => assert(cls.thisType == expectedException)
-            case refValue => fail(s"unexpected throw object: $refValue")
+            case refValue => fail(s"unexpected object thrown: $refValue")
         case x =>
           fail(s"unexpected throw: $x")
