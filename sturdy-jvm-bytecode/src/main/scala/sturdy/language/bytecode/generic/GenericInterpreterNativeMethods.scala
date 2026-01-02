@@ -1,10 +1,8 @@
 package sturdy.language.bytecode.generic
 
-import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, MethodDescriptor, ReferenceType}
-import sturdy.data.{JOption, JOptionC, MayJoin}
+import org.opalj.br.{ClassType, Method}
+import sturdy.data.MayJoin
 import sturdy.language.bytecode.abstractions.Site
-import sturdy.values.arrays.{Array, ArrayOps}
-import sturdy.values.objects.{Object, ObjectOps}
 
 // class to deal with important native methods, e.g., the class Class
 // TODO: clean up, improve, fix
