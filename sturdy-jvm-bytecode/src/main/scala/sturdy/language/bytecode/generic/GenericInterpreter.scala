@@ -485,28 +485,13 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           stack.push(ret)
 
       case INVOKEVIRTUAL(declaringClass, name, methodDescriptor) =>
-        val numArgs = methodDescriptor.parametersCount
-        val args = stack.popNOrAbort(numArgs)
-        val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Virtual, mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
-        if !methodDescriptor.returnType.isVoidType then
-          stack.push(ret)
+        handleObjectInvocation(mth, site)(declaringClass, name, methodDescriptor)(InvokeType.Virtual)
 
       case INVOKESPECIAL(declaringClass, isInterface, name, methodDescriptor) =>
-        val numArgs = methodDescriptor.parametersCount
-        val args = stack.popNOrAbort(numArgs)
-        val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Special(isInterface), mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
-        if !methodDescriptor.returnType.isVoidType then
-          stack.push(ret)
+        handleObjectInvocation(mth, site)(declaringClass, name, methodDescriptor)(InvokeType.Special(isInterface))
 
       case INVOKEINTERFACE(declaringClass, name, methodDescriptor) =>
-        val numArgs = methodDescriptor.parametersCount
-        val args = stack.popNOrAbort(numArgs)
-        val obj = stack.popOrAbort()
-        val ret = objectOps.invokeMethod(site, InvokeType.Interface, mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
-        if !methodDescriptor.returnType.isVoidType then
-          stack.push(ret)
+        handleObjectInvocation(mth, site)(declaringClass, name, methodDescriptor)(InvokeType.Interface)
 
       case INVOKEDYNAMIC(_, _, _) =>
         throw UnsupportedOperationException("unsupported instruction: invokedynamic")
@@ -677,6 +662,15 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     val inheritedFields = project.classHierarchy.allSuperclassesIterator(classType, true)(project).map(cfs => cfs.fields).toSeq.distinct
     val fields = inheritedFields.flatMap(buildFieldSeq(site))
     objectOps.makeObject(objAlloc(site), cf, fields)
+
+  // handle invoke{interface, special, virtual}, including all side effects
+  private def handleObjectInvocation(mth: Method, site: Site)(declaringClass: ReferenceType, name: String, methodDescriptor: MethodDescriptor)(invType: InvokeType)(using Fixed): Unit =
+    val numArgs = methodDescriptor.parametersCount
+    val args = stack.popNOrAbort(numArgs)
+    val obj = stack.popOrAbort()
+    val ret = objectOps.invokeMethod(site, invType, mth.classFile)(StaticMethodDeclaration(declaringClass.mostPreciseClassType, name, methodDescriptor), obj, args)(invokeWrapper(site))
+    if !methodDescriptor.returnType.isVoidType then
+      stack.push(ret)
 
   private def handleNewArray(componentType: FieldType, site: Site): Unit =
     val count = stack.popOrAbort()
