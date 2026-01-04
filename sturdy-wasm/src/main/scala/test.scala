@@ -15,6 +15,7 @@ def main(): Unit = {
   val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/fankuchredux.wasm"
 
   val dwarfContext = new DWARFContext(ABSOLUTEFILEPATH)
+  //dwarfContext.devTest()
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
   val unitGlobals = dwarfUnits.map {
     findAllGlobals
@@ -47,8 +48,8 @@ def getNameAndTypeSize(die: DWARFDie): (String, (Int, Int)) = {
     //TODO: current understanding: some values do not get a name since they are never assigned to a variable with a name
     // examples encountered: printf() calls containing directly written const char* strings
   }
-  println("Die has offset: " + die.getOffset.toHexString)
-  println("Die has Name: " + name)
+  //println("Die has offset: " + die.getOffset.toHexString)
+  //println("Die has Name: " + name)
   die.devTest()
   val typeDie = die.getTypeAttr.toScala match {
     case Some(value) => value
@@ -67,7 +68,9 @@ def getTypeSize(die: DWARFDie): Int = {
   assert(die.getTag.isTypeTag) //only consider TypeTags:
   die.getTag match {
     case DwarfTag.base_type => die.getByteSizeAttr.toScala match
-      case Some(value) => value.toInt
+      case Some(value) =>
+        println(die.getEncodingAttr.toScala)
+        value.toInt
       case None => sys.error("base_type die did not have byte_size attribute")
 
     case DwarfTag.pointer_type => die.getAddrSize //for webassembly this should always be 4
