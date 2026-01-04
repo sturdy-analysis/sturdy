@@ -77,7 +77,7 @@ trait RelationalMemory extends RelationalValues:
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
     var globalStarts = for {
-      case (name, ExternalValue.Global(n)) <- moduleInstance.exports;
+      case (name, ExternalValue.Global(n)) <- moduleInstance.exports
       if !specialGlobals.contains(name)
       value <- globals.get((), generic.GlobalAddr(n)).toOption
     } yield (name, apronState.getInterval(value.asInt32.asNumExpr))
@@ -96,10 +96,14 @@ trait RelationalMemory extends RelationalValues:
     if(globalRanges.headOption.exists((name, iv) => name == ".rodata" && iv.isBottom))
       globalRanges = globalRanges.tail
 
-    if(globalRanges.headOption.exists(_._1 == "__data_end"))
+    if(globalRanges.headOption.exists(_._1 == "__data_end")) {
+      println("<empty>")
       Vector()
-    else
+    } else {
+      println(globalRanges)
       globalRanges
+    }
+    //moduleInstance
   }
 
   given RelationalAddressOffset(using f: Failure, lazyEffectStack: Lazy[EffectStack], apronState: ApronState[VirtAddr, Type]): AddressOffset[Addr] with
