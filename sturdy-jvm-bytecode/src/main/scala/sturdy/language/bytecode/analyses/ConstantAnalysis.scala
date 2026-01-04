@@ -213,30 +213,6 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
     private given Failure = failure
 
     given constantTypeOps[OID, AID](using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
-      override def instanceOf(v: RefValue, target: TypeRep): Bool =
-        if (v.isActual)
-          val tmp = v.get
-          tmp match
-            case tmp: AbstractReferenceValue.maybeNullObject[constantArray, constantObj] =>
-              val obj: Object[Addr, ClassFile, Addr, FieldName] = ??? // tmp.obj
-              if (target == null)
-                Topped.Actual(false)
-              else
-                Topped.Actual(obj.cls.thisType.isSubtypeOf(target.mostPreciseClassType)(project.classHierarchy))
-            case tmp: AbstractReferenceValue.maybeNullArray[constantArray, constantObj] =>
-              val array = tmp.array
-              if (target == null)
-                Topped.Actual(false)
-              else
-                Topped.Actual(array.arrayType == target.asArrayType)
-            case tmp: AbstractReferenceValue.NullValue[constantArray, constantObj] =>
-              if (target == null)
-                Topped.Actual(true)
-              else
-                Topped.Actual(false)
-        else
-          ???
-
       override def typeOf(v: RefValue): ReferenceType =
         if v.isActual then
           val refVal = v.get

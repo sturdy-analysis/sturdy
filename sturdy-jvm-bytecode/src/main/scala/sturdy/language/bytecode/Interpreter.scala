@@ -217,10 +217,6 @@ trait Interpreter:
         cmp(EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq)(v1, v2)
 
     final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
-      override def instanceOf(v: Value, check: TypeRep): Value = v match
-        case Value.ReferenceValue(r1) => boolean(refTypeOps.instanceOf(r1, check))
-        case x => throw IllegalArgumentException(s"expected reference value but got $x")
-
       override def typeOf(v: Value): TypeRep = v match
         case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
         case x => throw IllegalArgumentException(s"expected reference value but got $x")

@@ -1,9 +1,8 @@
 package sturdy.values.objects
 
 trait TypeOps[V, TypeRep, B]:
-  // TODO: is this made obsolete by ifInstanceOf?
-  def instanceOf(v: V, target: TypeRep): B
   def typeOf(v: V): TypeRep
+
   def ifInstanceOf[A](v: V, ty: TypeRep)(ifTrue: () => A)(ifFalse: () => A): A
 
 trait SizeOps[V, B]:

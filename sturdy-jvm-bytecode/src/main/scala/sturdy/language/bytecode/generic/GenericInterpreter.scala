@@ -533,9 +533,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           // not null
           // this performs access control, the type should be resolved by opal
           resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))
-          branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {} {
-            throwClass(site)(ClassType.ClassCastException)
-          }
+          typeOps.ifInstanceOf(objectref, referenceType)(() => ())(() => throwClass(site)(ClassType.ClassCastException))
         }
 
       // instanceof opcode 193
@@ -547,10 +545,10 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           // this performs access control, the type should be resolved by opal
           resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass(site))
           // not null
-          branchOpsUnit.boolBranch(typeOps.instanceOf(objectref, referenceType)) {
-            stack.push(i32ops.integerLit(1))
+          typeOps.ifInstanceOf(objectref, referenceType) {
+            () => stack.push(i32ops.integerLit(1))
           } {
-            stack.push(i32ops.integerLit(0))
+            () => stack.push(i32ops.integerLit(0))
           }
         }
 
