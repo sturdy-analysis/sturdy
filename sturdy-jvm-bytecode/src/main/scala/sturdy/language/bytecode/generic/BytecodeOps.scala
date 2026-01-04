@@ -14,7 +14,7 @@ trait BytecodeOps[V, TypeRep]:
   val f64ops: FloatOps[Double, V]
   val compareOps: OrderingOps[V, V]
   val eqOps: EqOps[V, V]
-  val typeOps: TypeOps[V, TypeRep, V]
+  val typeOps: TypeOps[V, TypeRep]
   val sizeOps: SizeOps[V, V]
   val voidOps: VoidOps[V]
 

@@ -84,26 +84,20 @@ object ConcreteInterpreter extends Interpreter:
     else
       Value.Int32(0)
 
-  given ConcreteTypeOps(using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
+  given ConcreteTypeOps(using project: Project[URL]): TypeOps[RefValue, TypeRep] with
     // null is currently not supported since java lacks a bottom type we could use here
     override def typeOf(v: RefValue): ReferenceType = v match
       case ConcreteRefValues.Object(_, cls, _) => cls.thisType
       case ConcreteRefValues.nonNullArray(_, _, arrayType, _) => arrayType
       case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null")
 
-    override def ifInstanceOf[A](v: RefValue, target: ReferenceType)(ifTrue: () => A)(ifFalse: () => A): A = v match
+    override def ifInstanceOf[A](v: RefValue, target: ReferenceType)(ifTrue: => A)(ifFalse: => A): A = v match
       case ConcreteRefValues.Object(_, cf, _) =>
-        if checkInstanceOf(cf.thisType, target) then
-          ifTrue()
-        else
-          ifFalse()
+        if checkInstanceOf(cf.thisType, target) then ifTrue else ifFalse
       case ConcreteRefValues.nonNullArray(_, _, ty, _) =>
-        if checkInstanceOf(ty, target) then
-          ifTrue()
-        else
-          ifFalse()
+        if checkInstanceOf(ty, target) then ifTrue else ifFalse
       case ConcreteRefValues.NullValue() =>
-        ifTrue()
+        ifTrue
 
     @tailrec
     private def checkInstanceOf(objRef: ReferenceType, t: ReferenceType)(using ClassHierarchy): Boolean = objRef match
@@ -251,7 +245,9 @@ object ConcreteInterpreter extends Interpreter:
           // reference types need to be checked, null should pass the type check so no need for special handling
           if arrayType.componentType.isReferenceType then
             val cType = arrayType.componentType.asReferenceType
-            ConcreteTypeOps(using project).ifInstanceOf(v.asRef, cType)(() => ())(() => throwClass(ctx)(ClassType.ArrayStoreException))
+            ConcreteTypeOps(using project).ifInstanceOf(v.asRef, cType) {} {
+              throwClass(ctx)(ClassType.ArrayStoreException)
+            }
 
           store.write(vals(idx), v)
           JOptionC.some(())
@@ -342,7 +338,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]
 
-    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit =
+    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
       case JvmExcept.Jump(targetPC) =>
         enterMethod(targetPC, mth)
       case JvmExcept.Ret(_) =>
@@ -355,7 +351,7 @@ object ConcreteInterpreter extends Interpreter:
         val body = mth.body.get
         val handler = body.exceptionHandlersFor(currPC)
           // try to find handler for exception; get is safe to use since finally handlers are not included
-          .find(handlerException => bytecodeOps.typeOps.ifInstanceOf(exception, handlerException.catchType.get)(() => true)(() => false))
+          .find(handlerException => bytecodeOps.typeOps.ifInstanceOf(exception, handlerException.catchType.get)(true)(false))
           // try to find finally clause to invoke if no handler was found
           .orElse(body.handlersFor(currPC).find(_.catchType.isEmpty))
           .getOrElse:

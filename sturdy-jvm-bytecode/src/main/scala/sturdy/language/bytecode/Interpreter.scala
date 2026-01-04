@@ -139,7 +139,7 @@ trait Interpreter:
    , f32EqOps: EqOps[F32, Bool]
    , f64EqOps: EqOps[F64, Bool]
    , refEqOps: EqOps[RefValue, Bool]
-   , refTypeOps: TypeOps[RefValue, TypeRep, Bool]
+   , refTypeOps: TypeOps[RefValue, TypeRep]
    , i32SizeOps: SizeOps[I32, Bool]
    , i64SizeOps: SizeOps[I64, Bool]
    , f32SizeOps: SizeOps[F32, Bool]
@@ -216,12 +216,12 @@ trait Interpreter:
       override def neq(v1: Value, v2: Value): Value =
         cmp(EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq)(v1, v2)
 
-    final val typeOps: TypeOps[Value, TypeRep, Value] = new TypeOps[Value, TypeRep, Value]:
+    final val typeOps: TypeOps[Value, TypeRep] = new TypeOps[Value, TypeRep]:
       override def typeOf(v: Value): TypeRep = v match
         case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
         case x => throw IllegalArgumentException(s"expected reference value but got $x")
 
-      override def ifInstanceOf[A](v: Value, ty: TypeRep)(ifTrue: () => A)(ifFalse: () => A): A = v match
+      override def ifInstanceOf[A](v: Value, ty: TypeRep)(ifTrue: => A)(ifFalse: => A): A = v match
         case Value.ReferenceValue(r) => refTypeOps.ifInstanceOf(r, ty)(ifTrue)(ifFalse)
         case x => throw IllegalArgumentException(s"expected reference value but got $x")
 

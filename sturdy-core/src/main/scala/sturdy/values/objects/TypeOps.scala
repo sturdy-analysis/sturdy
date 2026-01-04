@@ -1,9 +1,9 @@
 package sturdy.values.objects
 
-trait TypeOps[V, TypeRep, B]:
+trait TypeOps[V, TypeRep]:
   def typeOf(v: V): TypeRep
 
-  def ifInstanceOf[A](v: V, ty: TypeRep)(ifTrue: () => A)(ifFalse: () => A): A
+  def ifInstanceOf[A](v: V, ty: TypeRep)(ifTrue: => A)(ifFalse: => A): A
 
 trait SizeOps[V, B]:
   def is32Bit(v: V): B

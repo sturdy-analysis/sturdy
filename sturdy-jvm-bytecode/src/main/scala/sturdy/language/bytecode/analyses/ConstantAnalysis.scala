@@ -212,7 +212,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
     private given Failure = failure
 
-    given constantTypeOps[OID, AID](using project: Project[URL]): TypeOps[RefValue, TypeRep, Bool] with
+    given constantTypeOps[OID, AID](using project: Project[URL]): TypeOps[RefValue, TypeRep] with
       override def typeOf(v: RefValue): ReferenceType =
         if v.isActual then
           val refVal = v.get
@@ -223,7 +223,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         else
           ??? // TODO
 
-      override def ifInstanceOf[A](v: RefValue, ty: ReferenceType)(ifTrue: () => A)(ifFalse: () => A): A =
+      override def ifInstanceOf[A](v: RefValue, ty: ReferenceType)(ifTrue: => A)(ifFalse: => A): A =
         ??? // TODO
 
     given intSizeOps: SizeOps[I32, Bool] with
