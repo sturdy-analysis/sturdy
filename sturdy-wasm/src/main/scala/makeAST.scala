@@ -16,16 +16,16 @@ def makeAST(DWARFUnit: DWARFUnit): AST = {
   DWARFUnit.getUnitDIE.children().forEach { die =>
     die.getTag match {
       case DwarfTag.variable =>
-        println(die.getNameAttr.get())
+        //println(die.getNameAttr.orElseGet(() => "<unknown variable name>"))
         globals = globals.appended(
           GlobalVariable(
-            die.getNameAttr.get(),
+            die.getNameAttr.orElseGet(() => "<unknown variable name>"),
             makeTypeAST(die.getTypeAttr.get()),
             die.getLocationAttr.get(0)
           )
         )
-      case DwarfTag.subprogram => println("subprogram currently ignored")
-      case tag@_ => println("ignoring Die with tag: " + tag)
+      case DwarfTag.subprogram => //println("subprogram currently ignored")
+      case tag@_ => //println("ignoring Die with tag: " + tag)
     }
   }
   AST(globals, functions)
@@ -61,7 +61,8 @@ def makeTypeAST(die: llvmDWARFDie): CType = {
         die.getNameAttr.get(),
         die.getByteSizeAttr.get().toInt,
         die.children().asScala.toList.map { memberDie =>
-          memberType(
+          //information for member fields of structure type
+          (
             memberDie.getNameAttr.get(),
             memberDie.getDataMemberLocation.get().toInt,
             makeTypeAST(memberDie.getTypeAttr.get())
