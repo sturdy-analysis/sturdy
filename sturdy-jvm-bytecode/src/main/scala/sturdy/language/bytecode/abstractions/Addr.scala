@@ -32,7 +32,7 @@ type AddrSet = PowersetAddr[Addr, Addr]
 
 // enum to represent different sites, replacing the old case classes
 enum Site:
-  case Instruction(mth: Method, pc: Int, variant: Int = 0)
+  case Instruction(mth: Method, pc: Int)
   case ArrayElementInitialization(s: Site, ix: Int)
   case FieldInitialization(s: Site, ident: FieldIdent)
   case StaticInitialization(ident: FieldIdent)

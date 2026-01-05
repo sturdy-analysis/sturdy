@@ -27,7 +27,6 @@ import sturdy.values.{Finite, Join, MaybeChanged, Widen}
 
 import java.net.URL
 import scala.annotation.tailrec
-import scala.collection.immutable.ArraySeq
 
 enum JvmExcept[V]:
   case Jump(pc: Int)
@@ -135,7 +134,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case inst: LoadFloat =>
         stack.push(num.evalNumericOp(inst))
       case LoadClass(_) =>
-        val cls = createObject(ClassType.Class, Site.Instruction(mth, pc, variant = 1))
+        val cls = createObject(ClassType.Class, site)
         stack.push(cls)
       case LoadString(value) =>
         stack.push(makeStringObj(site)(value))
@@ -152,7 +151,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case inst: LoadFloat_W =>
         stack.push(num.evalNumericOp(inst))
       case LoadClass_W(_) =>
-        val cls = createObject(ClassType.Class, Site.Instruction(mth, pc, variant = 1))
+        val cls = createObject(ClassType.Class, site)
         stack.push(cls)
       case LoadString_W(value) =>
         stack.push(makeStringObj(site)(value))
