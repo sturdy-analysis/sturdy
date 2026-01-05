@@ -724,12 +724,12 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       else
         throw UnsupportedOperationException(s"body of ${mth.toString} is empty")
 
-    val locals = body.localVariableTable.map(_.map(lv => convertTypes(lv.fieldType))).getOrElse:
-      ArraySeq.fill(body.maxLocals)(ValType.I32)
-    val argsAndLocals = args.view ++ locals.map(defaultValue)
+    // TODO: this always hits orElse in testing, does the reader configuration need to be adjusted?
+    val locals = body.localVariableTable.map(_.map(lv => defaultValue(lv.fieldType))).getOrElse:
+      Seq.fill(body.maxLocals)(i32ops.integerLit(0))
 
     stack.withNewFrame(0):
-      frame.withNew(newFrameData, argsAndLocals.zipWithIndex.map((x, y) => (y, Some(x))), Site.Instruction(mth, newFrameData)):
+      frame.withNew(newFrameData, (args ++ locals).zipWithIndex.map((x, y) => (y, Some(x))), Site.Instruction(mth, newFrameData)):
         enterMethod(0, mth)
         if mth.descriptor.returnType.isVoidType then
           voidOps.voidRep
@@ -788,27 +788,12 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       val nextPC = currInst.indexOfNextInstruction(pc)(body)
       runBody(nextPC, mth)
 
-  def convertTypes(opalType: FieldType): ValType = opalType match
-    case _: ByteType => ValType.I32
-    case _: ShortType => ValType.I32
-    case _: IntegerType => ValType.I32
-    case _: FloatType => ValType.F32
-    case _: LongType => ValType.I64
-    case _: DoubleType => ValType.F64
-    case _: BooleanType => ValType.I32
-    case _: CharType => ValType.I32
-    case _: ClassType => ValType.Obj
-    case _: ArrayType => ValType.Array
-
-  def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => i32ops.integerLit(0)
-    case ValType.I64 => i64ops.integerLit(0)
-    case ValType.F32 => f32ops.floatingLit(0)
-    case ValType.F64 => f64ops.floatingLit(0)
-    case ValType.Obj => objectOps.makeNull()
-    case ValType.Array => objectOps.makeNull()
-
-  def defaultValue: FieldType => V = convertTypes.andThen(defaultValue)
+  private def defaultValue: FieldType => V =
+    case _: CTIntType => i32ops.integerLit(0)
+    case LongType => i64ops.integerLit(0)
+    case FloatType => f32ops.floatingLit(0)
+    case DoubleType => f64ops.floatingLit(0)
+    case _: ReferenceType => objectOps.makeNull()
 
   // determines the value of a field
   // its constant value if it exists, the type's default value otherwise

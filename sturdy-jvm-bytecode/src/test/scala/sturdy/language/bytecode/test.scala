@@ -6,19 +6,11 @@ import org.opalj.br.instructions.*
 import org.opalj.io.process
 import org.scalatest.funsuite.AnyFunSuite
 import sturdy.language.bytecode.analyses.ConstantAnalysis
-import sturdy.language.bytecode.generic.ValType
 
 import java.io.{DataInputStream, File, FileInputStream}
 import java.nio.file.Paths
 
 class test extends AnyFunSuite:
-  def convertTypes(opalTypes: FieldType): ValType = opalTypes match
-    case IntegerType => ValType.I32
-    case FloatType => ValType.F32
-    case LongType => ValType.I64
-    case DoubleType => ValType.F64
-    case _ => ValType.I32
-
   test("test"):
     //edit this
     val projectUri = this.getClass.getResource("/sturdy/language/bytecode/simple").toURI
