@@ -181,10 +181,11 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
 
     val abstractInterpreter = ConstantAnalysis.Instance(project, testCase.toString, Map())
     // args for invocation of main
-    abstractInterpreter.stack.push(abstractInterpreter.createArray(abstractInterpreter.bytecodeOps.i32ops.integerLit(0), ClassType.String, Site.External))
+    implicit val site: Site = Site.External
+    abstractInterpreter.stack.push(abstractInterpreter.createArray(abstractInterpreter.bytecodeOps.i32ops.integerLit(0), ClassType.String))
     if mType == TestedMethodType.Run then
       // push System.out
-      abstractInterpreter.stack.push(abstractInterpreter.createObject(ClassTypeValues.PrintStream, Site.External))
+      abstractInterpreter.stack.push(abstractInterpreter.createObject(ClassTypeValues.PrintStream))
     (abstractInterpreter, mType)
 
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
