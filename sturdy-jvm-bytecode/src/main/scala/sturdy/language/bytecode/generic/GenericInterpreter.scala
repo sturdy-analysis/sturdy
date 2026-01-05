@@ -89,13 +89,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     // class is marked as erroneous
     case Failure
 
+  // TODO: are these correct?
   given Join[InitializationResult] with
     override def apply(v1: InitializationResult, v2: InitializationResult): MaybeChanged[InitializationResult] =
-      ??? // TODO
+      MaybeChanged(v1, v2)
 
   given Widen[InitializationResult] with
     override def apply(v1: InitializationResult, v2: InitializationResult): MaybeChanged[InitializationResult] =
-      ??? // TODO
+      Join[InitializationResult].apply(v1, v2)
 
   // holds the initialization results of classes
   val classInitializationState: DecidableSymbolTable[Unit, ClassType, InitializationResult]
