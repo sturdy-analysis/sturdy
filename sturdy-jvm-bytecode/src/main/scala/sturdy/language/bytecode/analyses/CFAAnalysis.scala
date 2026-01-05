@@ -126,7 +126,7 @@ object CFAAnalysis extends Interpreter:
     override val classInitializationState: DecidableSymbolTable[Unit, ClassType, InitializationResult] = JoinableDecidableSymbolTable[Unit, ClassType, InitializationResult]()
     override val staticFieldTable: DecidableSymbolTable[Unit, FieldIdent, AddrSet] = JoinableDecidableSymbolTable[Unit, FieldName, AddrSet]()
 
-    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[Value] => Unit =
+    override def exceptionHandler(mth: Method)(using Fixed): Exc => Unit =
       case JvmExcept.Jump(targetPC) =>
         enterMethod(targetPC, mth)
       case JvmExcept.Ret(_) =>

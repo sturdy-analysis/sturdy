@@ -40,6 +40,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
   override type J[A] = WithJoin[A]
   override type Mth = Method
   override type StaticMth = StaticMethodDeclaration
+  private type Exc = JvmExcept[Value]
   override type ExcV = JvmExceptAbstract[Value]
 
   override type Addr = AddrSet
@@ -55,7 +56,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
 
   override final def topRef: RefValue = Topped.Top
 
-  override implicit val except: Except[JvmExcept[Value], ExcV, J] = JoinedExcept[JvmExcept[Value], ExcV]()
+  override implicit val except: Except[Exc, ExcV, J] = JoinedExcept[Exc, ExcV]()
 
   given combineRef[W <: Widening]: Combine[RefValue, W] with
     override def apply(v1: RefValue, v2: RefValue): MaybeChanged[RefValue] = (v1, v2) match
@@ -253,7 +254,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         using new arrayOps(using arrayValAlloc, store, jvV)
       )
 
-    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConstantAnalysis.Value] => Unit =
+    override def exceptionHandler(mth: Method)(using Fixed): Exc => Unit =
       ??? // TODO
 
   private def mkTopVal(ty: Type): Value = ty match

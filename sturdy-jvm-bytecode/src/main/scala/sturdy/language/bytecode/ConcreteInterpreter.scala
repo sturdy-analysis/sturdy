@@ -338,7 +338,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]
 
-    override def exceptionHandler(pc: FrameData, mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
+    override def exceptionHandler(mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
       case JvmExcept.Jump(targetPC) =>
         enterMethod(targetPC, mth)
       case JvmExcept.Ret(_) =>

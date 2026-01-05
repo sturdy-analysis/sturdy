@@ -767,10 +767,10 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     except.tryCatch {
       runBody(pc, mth)
     } {
-      exceptionHandler(pc, mth)
+      exceptionHandler(mth)
     }
 
-  def exceptionHandler(pc: Int, mth: Method)(using Fixed): JvmExcept[V] => Unit
+  def exceptionHandler(mth: Method)(using Fixed): JvmExcept[V] => Unit
 
   // evaluates each instruction of the given method's body, starting with pc
   @tailrec
