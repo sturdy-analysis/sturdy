@@ -24,7 +24,26 @@ def makeAST(DWARFUnit: DWARFUnit): AST = {
             die.getLocationAttr.get(0)
           )
         )
-      case DwarfTag.subprogram => //println("subprogram currently ignored")
+      case DwarfTag.subprogram =>
+        //TODO: skip inlined subprograms
+
+
+        //functions = functions.appended(
+        //  Subprogram(
+        //    die.getNameAttr.orElseGet(() => "<unknown function name>"),
+        //    die
+        //      .children()
+        //      .asScala.toList
+        //      .filter(die => die.hasTag(DwarfTag.formal_parameter))
+        //      .map { parameterDie =>
+        //        Parameter(
+        //          parameterDie.getNameAttr.orElseGet(() => "<unknown parameter name>"),
+        //          makeTypeAST(parameterDie.getTypeAttr.get())
+        //        )
+        //      },
+        //    Seq() //TODO: add AST creation for body of subprogram (local variables, lexical blocks, etc.)
+        //  )
+        //)
       case tag@_ => //println("ignoring Die with tag: " + tag)
     }
   }

@@ -1,4 +1,4 @@
-import swam.binary.custom.dwarf.DWARFDiePrinter
+import swam.binary.custom.dwarf.DWARFLogging
 import swam.binary.custom.dwarf.llvm.{DWARFContext, DWARFDie, DWARFUnit, DwarfTag}
 
 import scala.jdk.CollectionConverters.*
@@ -20,8 +20,15 @@ def main(): Unit = {
   //dwarfContext.devTest()
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
   val ast = makeAST(dwarfUnits.head)
+  println("==============================")
+  println("GLOBALS: ")
   ast.globals.foreach { globalVar =>
-    println(DWARFDiePrinter.printDWARFDie(globalVar))
+    println(DWARFLogging.formatCConcept(globalVar))
+  }
+  println("==============================")
+  println("FUNCTIONS: ")
+  ast.functions.foreach { subprogram =>
+    println(DWARFLogging.formatCConcept(subprogram))
   }
 
   return
