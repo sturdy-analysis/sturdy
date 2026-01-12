@@ -141,7 +141,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN)
       )
     private def byteToUnsignedInt(b: Byte): Int = b & 0xff
-
+    
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this

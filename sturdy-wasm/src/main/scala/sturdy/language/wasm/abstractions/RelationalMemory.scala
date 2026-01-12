@@ -13,12 +13,13 @@ import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.{Bool, I32, VirtAddr}
 import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
 import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, FuncId, InstLoc, MemoryAddr, ModuleInstance}
-import sturdy.language.wasm.generic as generic
+import sturdy.language.wasm.generic
 import sturdy.util.Lazy
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
+import swam.binary.custom.dwarf.CType
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -32,15 +33,18 @@ trait RelationalMemory extends RelationalValues:
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
 
   //TODO: refactor StaticMemoryLayout into its own file and change the Interval Class used
-  case class StaticMemoryLayout(
-    tableRange: Interval,
-    dataRange: Interval,
-    globalRanges: Vector[(String, Interval)],
-    stackRange: Interval,
-    stackPointer: generic.GlobalAddr,
-    heapRange: Interval //TODO: use sturdy NumericInterval
-  ):
-    def getGlobalRange(name: String): Option[Interval] = globalRanges.find((global, _) => name == global).map(_._2)
+  //case class StaticMemoryLayout(
+  //  tableRange: Interval,
+  //  dataRange: Interval, //replace with vector strings
+  //  globalRanges: Vector[(String, Interval)],
+  //  stackRange: Interval, //replace with vector of functions
+  //  stackPointer: generic.GlobalAddr,
+  //  heapRange: Interval //TODO: use sturdy NumericInterval
+  //                             //do globals first
+  //                             //also do strings (address should be lower than globalbase and higher than DSO_handle
+  //                             //TODO add functions to staticmemorylayout
+  //):
+  //  def getGlobalRange(name: String): Option[Interval] = globalRanges.find((global, _) => name == global).map(_._2)
 
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
 
@@ -73,7 +77,7 @@ trait RelationalMemory extends RelationalValues:
   /**
    * 
    */
-  private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval)] = {
+  private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval/*,CType*/)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
     var globalStarts = for {
@@ -542,7 +546,7 @@ trait RelationalMemory extends RelationalValues:
 
       val effectiveAddrIv = apronState.getInterval(effectiveAddr)
       val offsetMatchesGlobal = for {
-        (globalName, globalRange) <- staticMemoryLayout.globalRanges
+        (globalName: String, globalRange: Interval/*, cType: CType*/) <- staticMemoryLayout.globalRanges
         if offset.isLeq(globalRange) || effectiveAddrIv.isLeq(globalRange)
       } yield ByteMemoryCtx.Global(globalName)
 
@@ -553,7 +557,7 @@ trait RelationalMemory extends RelationalValues:
 
         val constantMatchesGlobal = for {
           const <- baseAddr.constants
-          (globalName, globalRange) <- staticMemoryLayout.globalRanges
+          (globalName: String, globalRange: Interval/*, cType: CType*/) <- staticMemoryLayout.globalRanges
           if const.cmp(globalRange) == 0 || const.cmp(globalRange) == 1 // if const is equal or included in globalRange
         } yield ByteMemoryCtx.Global(globalName)
 
