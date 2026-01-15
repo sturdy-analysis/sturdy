@@ -420,7 +420,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         except.throws(JvmExcept.Return(returnValue))
       case RETURN =>
         stack.clearCurrentOperandFrame()
-        except.throws(JvmExcept.Return(voidOps.voidRep))
+        except.throws(JvmExcept.Return(voidOps.value()))
 
       // Load and Store Statics opcode 178 - 179
       case GETSTATIC(declaringClass, name, fieldType) =>
@@ -708,14 +708,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     if (mth.name == "println" || mth.name == "print")
       val array = objectOps.getField(site, getClassFile(ClassType.String))(args(1), FieldIdent.StringValue)
       println(array)
-      return voidOps.voidRep
+      return voidOps.value()
     // we are currently unable to properly deal with System.exit
     if mth.classFile.thisType.simpleName == "System" && mth.name == "exit" then
       fail(AbortEval.Exit(args.head), "System.exit")
 
     if native.nativeFunList.contains(mth.name) then
       val ret = native.invokeClassMethod(mth, args)
-      return if mth.descriptor.returnType.isVoidType then voidOps.voidRep else ret
+      return if mth.descriptor.returnType.isVoidType then voidOps.value() else ret
 
     val body = mth.body.getOrElse:
       if mth.isNative then
@@ -731,7 +731,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       frame.withNew(newFrameData, (args ++ locals).zipWithIndex.map((x, y) => (y, Some(x))), Site.Instruction(mth, newFrameData)):
         enterMethod(0, mth)
         if mth.descriptor.returnType.isVoidType then
-          voidOps.voidRep
+          voidOps.value()
         else
           stack.popOrAbort()
 

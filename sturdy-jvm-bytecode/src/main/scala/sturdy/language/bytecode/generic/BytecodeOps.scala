@@ -1,11 +1,11 @@
 package sturdy.language.bytecode.generic
 
-import sturdy.language.bytecode.abstractions.VoidOps
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.floating.*
 import sturdy.values.integer.*
 import sturdy.values.ordering.*
 import sturdy.values.objects.*
+import sturdy.values.unit.UnitOps
 
 trait BytecodeOps[V, TypeRep]:
   val i32ops: IntegerOps[Int, V]
@@ -16,7 +16,7 @@ trait BytecodeOps[V, TypeRep]:
   val eqOps: EqOps[V, V]
   val typeOps: TypeOps[V, TypeRep]
   val sizeOps: SizeOps[V, V]
-  val voidOps: VoidOps[V]
+  val voidOps: UnitOps[V]
 
   val convert_i32_i8: ConvertIntByte[V, V]
   val convert_i32_i16: ConvertIntShort[V, V]

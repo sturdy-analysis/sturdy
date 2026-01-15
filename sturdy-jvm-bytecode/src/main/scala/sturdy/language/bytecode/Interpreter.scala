@@ -10,9 +10,9 @@ import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
-import sturdy.language.bytecode.abstractions.VoidOps
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.objects.{SizeOps, TypeOps}
+import sturdy.values.unit.UnitOps
 
 trait Interpreter:
   type J[A] <: MayJoin[A]
@@ -149,8 +149,7 @@ trait Interpreter:
     val branchOpsV: BooleanBranching[Value, Value] = LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
-    override final val voidOps: VoidOps[Value] = new VoidOps[Value]:
-      final override val voidRep: Value = Value.Void
+    override final val voidOps: UnitOps[Value] = () => Value.Void
 
     final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply)
     final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply)
