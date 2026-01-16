@@ -10,6 +10,7 @@ import sturdy.values.ordering.*
 import generic.BytecodeFailure.*
 import sturdy.data.MayJoin
 import sturdy.effect.except.Except
+import sturdy.values.config.Bits
 import sturdy.values.{Combine, MaybeChanged, Top, Widening}
 import sturdy.values.objects.{SizeOps, TypeOps}
 import sturdy.values.unit.UnitOps
@@ -157,9 +158,9 @@ trait Interpreter:
     final val f64ops: FloatOps[Double, Value] = LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
     // the jvm treats all the smaller types of byte, short, and char as ints, so we always just convert them back
-    private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+    private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, Bits.Signed)).andThen(Value.Int32.apply)
 
-    private def i32_from_i16: I16 => Value = (convertI16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+    private def i32_from_i16: I16 => Value = (convertI16I32.apply(_, Bits.Signed)).andThen(Value.Int32.apply)
 
     private def i32_from_u16: U16 => Value = (convertU16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
 

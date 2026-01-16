@@ -4,6 +4,7 @@ import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config
 import sturdy.values.convert.*
 import org.opalj.br.instructions.*
+import sturdy.values.config.Overflow
 
 class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep]):
 
@@ -179,8 +180,8 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
     case D2F =>
       convert_f64_f32(v, NilCC)
     case I2B =>
-      convert_i32_i8(v, NilCC)
+      convert_i32_i8(v, Overflow.Allow)
     case I2C =>
-      convert_i32_u16(v, NilCC)
+      convert_i32_u16(v, Overflow.Allow)
     case I2S =>
-      convert_i32_i16(v, NilCC)
+      convert_i32_i16(v, Overflow.Allow)

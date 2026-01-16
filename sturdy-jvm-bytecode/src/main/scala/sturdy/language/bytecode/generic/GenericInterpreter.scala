@@ -21,6 +21,7 @@ import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
+import sturdy.values.config.Overflow
 import sturdy.values.convert.NilCC
 import sturdy.values.objects.ObjectOps
 import sturdy.values.{Finite, Join, MaybeChanged, Widen}
@@ -191,9 +192,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
       case inst@(IASTORE | LASTORE | FASTORE | DASTORE | AASTORE | BASTORE | CASTORE | SASTORE) =>
         // truncate values if needed
         val value = inst match
-          case BASTORE => convert_i32_i8(stack.popOrAbort(), NilCC)
-          case CASTORE => convert_i32_u16(stack.popOrAbort(), NilCC)
-          case SASTORE => convert_i32_i16(stack.popOrAbort(), NilCC)
+          case BASTORE => convert_i32_i8(stack.popOrAbort(), Overflow.Allow)
+          case CASTORE => convert_i32_u16(stack.popOrAbort(), Overflow.Allow)
+          case SASTORE => convert_i32_i16(stack.popOrAbort(), Overflow.Allow)
           case _ => stack.popOrAbort()
         val index = stack.popOrAbort()
         val arrayref = stack.popOrAbort()

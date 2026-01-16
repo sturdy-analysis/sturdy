@@ -5,8 +5,7 @@ import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, jo
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
-import sturdy.values.config.Bits
-import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.config.{Bits, Overflow}
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 
@@ -1214,22 +1213,22 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
     else Topped.Top
 
 given ConvertNumericIntervalsByteInt[B, I](using convert: ConvertByteInt[B, I])(using Numeric[B], Ordering[B], Numeric[I], Ordering[I]): ConvertByteInt[NumericInterval[B], NumericInterval[I]] with
-  override def apply(from: NumericInterval[B], conf: NilCC.type): NumericInterval[I] = ??? // TODO
+  override def apply(from: NumericInterval[B], conf: Bits): NumericInterval[I] = ??? // TODO
 
 given ConvertNumericIntervalsShortInt[S, I](using convert: ConvertShortInt[S, I])(using Numeric[S], Ordering[S], Numeric[I], Ordering[I]): ConvertShortInt[NumericInterval[S], NumericInterval[I]] with
-  override def apply(from: NumericInterval[S], conf: NilCC.type): NumericInterval[I] = ??? // TODO
+  override def apply(from: NumericInterval[S], conf: Bits): NumericInterval[I] = ??? // TODO
 
 given ConvertNumericIntervalsCharInt[C, I](using convert: ConvertCharInt[C, I])(using Numeric[C], Ordering[C], Numeric[I], Ordering[I]): ConvertCharInt[NumericInterval[C], NumericInterval[I]] with
   override def apply(from: NumericInterval[C], conf: NilCC.type): NumericInterval[I] = ??? // TODO
 
 given ConvertNumericIntervalsIntByte[I, B](using convert: ConvertIntByte[I, B])(using Numeric[I], Ordering[I], Numeric[B], Ordering[B]): ConvertIntByte[NumericInterval[I], NumericInterval[B]] with
-  override def apply(from: NumericInterval[I], conf: NilCC.type): NumericInterval[B] = ??? // TODO
+  override def apply(from: NumericInterval[I], conf: Overflow): NumericInterval[B] = ??? // TODO
 
 given ConvertNumericIntervalsIntShort[I, S](using convert: ConvertIntShort[I, S])(using Numeric[I], Ordering[I], Numeric[S], Ordering[S]): ConvertIntShort[NumericInterval[I], NumericInterval[S]] with
-  override def apply(from: NumericInterval[I], conf: NilCC.type): NumericInterval[S] = ??? // TODO
+  override def apply(from: NumericInterval[I], conf: Overflow): NumericInterval[S] = ??? // TODO
 
 given ConvertNumericIntervalsIntChar[I, C](using convert: ConvertIntChar[I, C])(using Numeric[I], Ordering[I], Numeric[C], Ordering[C]): ConvertIntChar[NumericInterval[I], NumericInterval[C]] with
-  override def apply(from: NumericInterval[I], conf: NilCC.type): NumericInterval[C] = ??? // TODO
+  override def apply(from: NumericInterval[I], conf: Overflow): NumericInterval[C] = ??? // TODO
 
 given ConvertNumericIntervalsIntLong[I, L](using convert: ConvertIntLong[I, L])(using Numeric[I], Ordering[I], Numeric[L], Ordering[L])
   : ConvertIntLong[NumericInterval[I], NumericInterval[L]] with
