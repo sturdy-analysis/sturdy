@@ -62,7 +62,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   import bytecodeOps.*
 
   val objectOps: ObjectOps[FieldIdent, Addr, V, ClassFile, V, Site, Method, StaticMethodDeclaration, V, InvokeContext, FieldAccessContext, J]
-  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, Site, ArrayOpContext, J]
+  val arrayOps: ArrayOps[Addr, V, V, V, ArrayType, ArrayOpContext, J]
 
   implicit val joinUnit: J[Unit]
   implicit val jvV: J[V]
@@ -690,14 +690,14 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass)), mth)
 
   def createArray(size: V, componentType: FieldType)(using site: Site): V =
-    arrayOps.makeArray(arrayAlloc(site), index => (defaultValue(componentType), Site.ArrayElementInitialization(site, index)), ArrayType(componentType), size)
+    arrayOps.makeArray(site)(arrayAlloc(site), defaultValue(componentType), ArrayType(componentType), size)
 
   private def createMultiArray(arrayType: ArrayType, dims: List[V])(using site: Site): V =
     val (size, elementSupplier) = dims match
       case size :: Nil => (size, () => defaultValue(arrayType.componentType))
       case size :: xs => (size, () => createMultiArray(arrayType.componentType.asArrayType, xs))
       case Nil => throw IllegalStateException("dims.size must be >= 1 at all times")
-    arrayOps.makeArray(arrayAlloc(site), index => (elementSupplier(), Site.ArrayElementInitialization(site, index)), arrayType, size)
+    arrayOps.makeArray(site)(arrayAlloc(site), elementSupplier(), arrayType, size)
 
   def invokeWrapper(using Site)(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
     invoke(mth, obj +: args)
@@ -814,14 +814,11 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   // copied from the loadstring/loadstring_w cases of eval
   def makeStringObj(value: String)(using site: Site): V =
-    val string = value.toCharArray.map(l => l.toInt).toSeq
-    val convString = string.map(l => i32ops.integerLit(l)).zipWithIndex
-    val stringArray = arrayOps.makeArray(
-      arrayAlloc(site),
-      convString.map(vals => (vals._1, Site.ArrayElementInitialization(site, vals._2))),
-      ArrayType(CharType),
-      i32ops.integerLit(value.length)
-    )
+    val stringArray = arrayOps.makeArray(site)(arrayAlloc(site), defaultValue(CharType), ArrayType(CharType), i32ops.integerLit(value.length))
+    // insert string in array
+    value.zipWithIndex.foreach: (v, index) =>
+      arrayOps.set(site)(stringArray, i32ops.integerLit(index), i32ops.integerLit(v.toInt))
+    // create object and set field
     val stringObj = createObject(ClassType.String)
     objectOps.setField(site, getClassFile(ClassType.String))(stringObj, FieldIdent.StringValue, stringArray)
     stringObj

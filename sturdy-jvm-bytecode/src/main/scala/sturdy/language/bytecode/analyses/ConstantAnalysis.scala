@@ -127,17 +127,15 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case Topped.Actual(AbstractReferenceValue.NullValue()) => Topped.Actual(1)
         case Topped.Actual(_) => ???
 
-  given arrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, Site, ArrayOpContext, WithJoin] with
-    override def makeArray(aid: Addr, valueSupplier: Int => (Value, Site), arrayType: AType, arraySize: I32): RefValue =
-      arraySize match
-        case values.Topped.Actual(size) =>
-          val values = Range.Int(0, size, 1).map: index =>
-            val (v, site) = valueSupplier(index)
-            val addr = alloc(site)
-            store.write(addr, v)
-            addr
-          Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, values, arrayType, arraySize), false))
-        case values.Topped.Top => ??? // TODO
+  given arrayOps(using alloc: Allocator[Addr, Site], store: Store[Addr, Value, WithJoin], jvV: WithJoin[Value]): ArrayOps[Addr, I32, Value, RefValue, ArrayType, ArrayOpContext, WithJoin] with
+    override def makeArray(ctx: ArrayOpContext)(aid: Addr, defaultValue: => Value, arrayType: AType, arraySize: I32): RefValue = arraySize match
+      case Topped.Actual(size) =>
+        val values = Range.Int(0, size, 1).map: index =>
+          val addr = alloc(ctx)
+          store.write(addr, defaultValue)
+          addr
+        Topped.Actual(AbstractReferenceValue.maybeNullArray(Array(aid, values, arrayType, arraySize), false))
+      case Topped.Top => ??? // TODO
 
     override def get(ctx: ArrayOpContext)(ref: RefValue, idx: I32): JOption[WithJoin, Value] = (ref, idx) match
       case (Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)), Topped.Actual(idx)) =>
@@ -249,8 +247,8 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         using objOps(using objFieldAlloc, store, project, failure, effectStack)
       )
 
-    override val arrayOps: ArrayOps[Addr, Value, Value, Value, ArrayType, Site, ArrayOpContext, WithJoin] =
-      new LiftedArrayOps[Addr, Value, Value, Value, ArrayType, Site, ArrayOpContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val arrayOps: ArrayOps[Addr, Value, Value, Value, ArrayType, ArrayOpContext, WithJoin] =
+      new LiftedArrayOps[Addr, Value, Value, Value, ArrayType, ArrayOpContext, WithJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using new arrayOps(using arrayValAlloc, store, jvV)
       )
 

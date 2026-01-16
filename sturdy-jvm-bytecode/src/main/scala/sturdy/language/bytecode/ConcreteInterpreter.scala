@@ -215,12 +215,11 @@ object ConcreteInterpreter extends Interpreter:
       case _ => 0
 
   given ConcreteArrayOps
-  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure, throwClass: ThrowClass): ArrayOps[Addr, Int, Value, RefValue, AType, Site, ArrayOpContext, NoJoin] with
-    override def makeArray(aid: Addr, valueSupplier: Int => (Value, Site), arrayType: AType, arraySize: Int): RefValue =
+  (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], f: Failure, throwClass: ThrowClass): ArrayOps[Addr, Int, Value, RefValue, AType, ArrayOpContext, NoJoin] with
+    override def makeArray(ctx: ArrayOpContext)(aid: Addr, defaultValue: => Value, arrayType: AType, arraySize: Int): RefValue =
       val values = Range.Int(0, arraySize, 1).map: index =>
-        val (v, site) = valueSupplier(index)
-        val addr = alloc(site)
-        store.write(addr, v)
+        val addr = alloc(Site.ArrayElementInitialization(ctx, index))
+        store.write(addr, defaultValue)
         addr
       ConcreteRefValues.nonNullArray(aid, values, arrayType, arraySize)
 
@@ -331,8 +330,8 @@ object ConcreteInterpreter extends Interpreter:
       LiftedObjectOps[FieldName, Addr, Value, ObjType, Value, Site, Mth, StaticMth, Value, InvokeContext, FieldAccessContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteObjectOps(using objFieldAlloc, store, project, failure, this.throwClass)
       )
-    override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, Site, ArrayOpContext, MayJoin.NoJoin] =
-      LiftedArrayOps[Addr, Value, Value, Value, AType, Site, ArrayOpContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
+    override val arrayOps: ArrayOps[Addr, Value, Value, Value, AType, ArrayOpContext, MayJoin.NoJoin] =
+      LiftedArrayOps[Addr, Value, Value, Value, AType, ArrayOpContext, MayJoin.NoJoin, RefValue, I32](_.asRef, Value.ReferenceValue.apply, _.asInt32, Value.Int32.apply)(
         using ConcreteArrayOps(using arrayValAlloc, store, project, failure, this.throwClass)
       )
 

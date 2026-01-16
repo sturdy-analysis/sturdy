@@ -4,8 +4,8 @@ import sturdy.data.{JOption, MayJoin}
 import sturdy.values.Structural
 import sturdy.values.ordering.EqOps
 
-trait ArrayOps[ArrayIdentifier, Index, Value, ArrayValue, ArrayType, ArrayElemAllocSite, ArrayOpContext, J[_] <: MayJoin[_]]:
-  def makeArray(aid: ArrayIdentifier, valueSupplier: Int => (Value, ArrayElemAllocSite), arrayType: ArrayType, arraySize: Index): ArrayValue
+trait ArrayOps[ArrayIdentifier, Index, Value, ArrayValue, ArrayType, ArrayOpContext, J[_] <: MayJoin[_]]:
+  def makeArray(ctx: ArrayOpContext)(aid: ArrayIdentifier, defaultValue: => Value, arrayType: ArrayType, arraySize: Index): ArrayValue
 
   def get(ctx: ArrayOpContext)(array: ArrayValue, idx: Index): JOption[J, Value]
 

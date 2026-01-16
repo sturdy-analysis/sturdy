@@ -101,7 +101,7 @@ object CFAAnalysis extends Interpreter:
 
     override val bytecodeOps: BytecodeOps[Value, ReferenceType] = ???
     override val objectOps: ObjectOps[FieldIdent, AddrSet, Value, ClassFile, Value, Site, Method, StaticMth, Value, InvokeContext, FieldAccessContext, J] = ???
-    override val arrayOps: ArrayOps[AddrSet, Value, Value, Value, ArrayType, Site, ArrayOpContext, J] = ???
+    override val arrayOps: ArrayOps[AddrSet, Value, Value, Value, ArrayType, ArrayOpContext, J] = ???
 
     override val joinUnit: WithJoin[Unit] = implicitly
     override val jvV: WithJoin[Value] = implicitly
