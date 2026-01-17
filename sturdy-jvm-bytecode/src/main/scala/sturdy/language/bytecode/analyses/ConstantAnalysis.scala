@@ -162,10 +162,7 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
       case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => Value.Int32(array.arraySize)
       case Topped.Actual(_) => ???
 
-  private type singleAddr = abstractions.Addr
-  type InitialStore = Map[singleAddr, Value]
-
-  class Instance(files: Project[URL], path: String, initStore: InitialStore) extends GenericInstance:
+  class Instance(proj: Project[URL], initStore: Map[abstractions.Addr, Value]) extends GenericInstance:
     override val fixpoint: fix.Fixpoint[FixIn, FixOut] =
       fix.log(new Logger[FixIn, FixOut]:
         override def enter(dom: FixIn): Unit = ()
@@ -200,9 +197,9 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
     override val staticAlloc: Allocator[AddrSet, Site] = AAllocatorFromContext:
       case Site.StaticInitialization(ident) => PowersetAddr(Addr.Static(ident))
       case _ => ??? // TODO
-    override val store: AStoreThreaded[singleAddr, AddrSet, Value] = new AStoreThreaded(initStore)
+    override val store: AStoreThreaded[abstractions.Addr, Addr, Value] = new AStoreThreaded(initStore)
     override val frame = JoinableDecidableCallFrame(0, List())
-    override val project: Project[URL] = files
+    override val project: Project[URL] = proj
 
     override val classInitializationState: JoinableDecidableSymbolTable[Unit, ClassType, InitializationResult] = JoinableDecidableSymbolTable[Unit, ClassType, InitializationResult]()
     override val staticFieldTable: JoinableDecidableSymbolTable[Unit, FieldName, AddrSet] = JoinableDecidableSymbolTable[Unit, FieldName, AddrSet]()

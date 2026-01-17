@@ -178,7 +178,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
       case "run" => TestedMethodType.Run
       case s => fail(s"[$caseName] invalid method name: $s")
 
-    val concreteInterpreter = ConcreteInterpreter.Instance(project, testCase.toString, Map())
+    val concreteInterpreter = ConcreteInterpreter.Instance(project, Map())
     // args for invocation of main
     implicit val site: Site = Site.External
     concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((site, 1), Seq(), ArrayType(ReferenceType("java/lang/String")), 0)))

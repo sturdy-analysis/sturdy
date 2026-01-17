@@ -277,9 +277,7 @@ object ConcreteInterpreter extends Interpreter:
     override def neq(v1: RefValue, v2: RefValue): Boolean =
       !this.equ(v1, v2)
 
-  private type InitialStore = Map[Addr, Value]
-
-  class Instance(files: Project[URL], path: String, initStore: InitialStore) extends GenericInstance:
+  class Instance(proj: Project[URL], initStore: Map[Addr, Value]) extends GenericInstance:
     val newFrameData: FrameData = 0
     val args: List[Value] = List()
 
@@ -301,7 +299,7 @@ object ConcreteInterpreter extends Interpreter:
     override val classInitializationState: ConcreteSymbolTable[Unit, ClassType, InitializationResult] = ConcreteSymbolTable()
     override val staticFieldTable: ConcreteSymbolTable[Unit, FieldName, Addr] = ConcreteSymbolTable()
 
-    override implicit val project: Project[URL] = files
+    override implicit val project: Project[URL] = proj
 
     // adjust the given instances, the current sturdy-core implementation does not reflect the required semantics
     // config can be ignored here

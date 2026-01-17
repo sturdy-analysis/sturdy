@@ -179,7 +179,7 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
       case "run" => TestedMethodType.Run
       case s => fail(s"[$caseName] invalid method name: $s")
 
-    val abstractInterpreter = ConstantAnalysis.Instance(project, testCase.toString, Map())
+    val abstractInterpreter = ConstantAnalysis.Instance(project, Map())
     // args for invocation of main
     implicit val site: Site = Site.External
     abstractInterpreter.stack.push(abstractInterpreter.createArray(abstractInterpreter.bytecodeOps.i32ops.integerLit(0), ClassType.String))

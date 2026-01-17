@@ -1,7 +1,7 @@
 package sturdy.language.bytecode.analyses
 
 import org.opalj.br.analyses.Project
-import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, MethodDescriptor, ReferenceType}
+import org.opalj.br.{ArrayType, ClassFile, ClassType, Method, ReferenceType}
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.callframe.{DecidableMutableCallFrame, JoinableDecidableCallFrame}
@@ -96,7 +96,9 @@ object CFAAnalysis extends Interpreter:
         nullState <- CombineNullState[W](v1.nullState, v1.nullState)
       } yield Topped.Actual(PointsToRefValue(objects, arrays, nullState))
 
-  class Instance(implicit val project: Project[URL]) extends GenericInstance:
+  class Instance(proj: Project[URL]) extends GenericInstance:
+    implicit val project: Project[URL] = proj
+
     override val fixpoint: Fixpoint[FixIn, FixOut] = ???
 
     override val bytecodeOps: BytecodeOps[Value, ReferenceType] = ???

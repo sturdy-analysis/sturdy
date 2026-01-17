@@ -20,8 +20,8 @@ class FullProgramTest extends AnyFunSuite:
 
 
     for(mth <- mainMethods.filter(meth => meth.classFile.thisType.simpleName == "QuickSort")){
-      val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
-      val absInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
+      val interp = new ConcreteInterpreter.Instance(pWithLibrary, Map())
+      val absInterp = new ConstantAnalysis.Instance(pWithLibrary, Map())
       println("- - - - - - - - - - - - - - - - -")
       println("Executing Method: " ++ mth.name ++ " from " ++ mth.classFile.thisType.simpleName)
       println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)

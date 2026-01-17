@@ -33,7 +33,7 @@ class NewTest extends AnyFunSuite:
     println("- - - - - - - - - - - - - - -")
     for (mth <- testMths) {
       try {
-        val interp = new ConcreteInterpreter.Instance(pWithLibrary, projectPath, Map())
+        val interp = new ConcreteInterpreter.Instance(pWithLibrary, Map())
         //val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
         if (mth.parameterTypes.nonEmpty)
           val args = InitParams(mth, interp)
