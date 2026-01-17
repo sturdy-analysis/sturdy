@@ -51,11 +51,8 @@ object ConcreteInterpreter extends Interpreter:
   override type StaticMth = StaticMethodDeclaration
   override type ObjType = ClassFile
   override type TypeRep = ReferenceType
-  //override type NullVal = Null
   override type FieldName = FieldIdent
-  //override type ObjRep = Object[ObjAddr, ClassFile, FieldAddr, FieldName]
   override type AType = ArrayType
-  //override type ArrayRep = Array[ArrayAddr, FieldAddr, ArrayType, Value]
 
   override type RefValue = ConcreteRefValues[Addr, ClassFile, FieldName, Addr, Addr, Addr, AType, Int]
 
@@ -71,15 +68,12 @@ object ConcreteInterpreter extends Interpreter:
 
   override def topF64: Double = throw UnsupportedOperationException()
 
-  //override def topObj: Object[ConcreteInterpreter.ObjAddr, ClassFile, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.FieldName] = throw new UnsupportedOperationException
-  //override def topArray: Array[ConcreteInterpreter.ArrayAddr, ConcreteInterpreter.FieldAddr, ConcreteInterpreter.AType, ConcreteInterpreter.Value] = throw new UnsupportedOperationException
-  //override def topNull: Null = throw new UnsupportedOperationException
   override def topRef: RefValue = throw UnsupportedOperationException()
 
   override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
 
   override def boolean(b: Boolean): Value =
-    if (b)
+    if b then
       Value.Int32(1)
     else
       Value.Int32(0)
@@ -93,9 +87,9 @@ object ConcreteInterpreter extends Interpreter:
 
     override def ifInstanceOf[A](v: RefValue, target: ReferenceType)(ifTrue: => A)(ifFalse: => A): A = v match
       case ConcreteRefValues.Object(_, cf, _) =>
-        if checkInstanceOf(cf.thisType, target) then ifTrue else ifFalse
+        if checkInstanceOf(cf.thisType, target)(using project.classHierarchy) then ifTrue else ifFalse
       case ConcreteRefValues.nonNullArray(_, _, ty, _) =>
-        if checkInstanceOf(ty, target) then ifTrue else ifFalse
+        if checkInstanceOf(ty, target)(using project.classHierarchy) then ifTrue else ifFalse
       case ConcreteRefValues.NullValue() =>
         ifTrue
 
@@ -115,22 +109,15 @@ object ConcreteInterpreter extends Interpreter:
             )
       case x: ArrayType => throw UnsupportedOperationException(s"ArrayType deconstruction failed unexpectedly with value $x")
 
-    given ClassHierarchy = project.classHierarchy
+  given SizeOps[I32, Boolean] = _ => true
 
-  given intSizeOps: SizeOps[I32, Boolean] with
-    override def is32Bit(v: I32): Boolean = true
+  given SizeOps[F32, Boolean] = _ => true
 
-  given floatSizeOps: SizeOps[F32, Boolean] with
-    override def is32Bit(v: F32): Boolean = true
+  given SizeOps[I64, Boolean] = _ => false
 
-  given longSizeOps: SizeOps[I64, Boolean] with
-    override def is32Bit(v: I64): Boolean = false
+  given SizeOps[F64, Boolean] = _ => false
 
-  given doubleSizeOps: SizeOps[F64, Boolean] with
-    override def is32Bit(v: F64): Boolean = false
-
-  given refSizeOps: SizeOps[RefValue, Boolean] with
-    override def is32Bit(v: RefValue): Boolean = true
+  given SizeOps[RefValue, Boolean] = _ => true
 
   given ConcreteObjectOps
   (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure, throwClass: ThrowClass): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Mth, StaticMth, I32, InvokeContext, FieldAccessContext, NoJoin] with
@@ -335,7 +322,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override val fixpoint: ConcreteFixpoint[FixIn, FixOut] = ConcreteFixpoint[FixIn, FixOut]
 
-    override def exceptionHandler(mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit  =
+    override def exceptionHandler(mth: Method)(using Fixed): JvmExcept[ConcreteInterpreter.Value] => Unit =
       case JvmExcept.Jump(targetPC) =>
         enterMethod(targetPC, mth)
       case JvmExcept.Ret(_) =>
