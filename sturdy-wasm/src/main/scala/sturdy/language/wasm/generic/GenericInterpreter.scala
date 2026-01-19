@@ -363,7 +363,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case i: VectorStoreInst =>
       val vec = stack.popOrAbort()
       val addr = addressOffset.addOffsetToAddr(i.offset, valToAddr(stack.popOrAbort()))
-      simd.evalStoreVector(i, memoryIndex, addr, vec).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address ${addr}"))
+      simd.evalStoreVector(i, memoryIndex, addr, vec).getOrElse(fail(MemoryAccessOutOfBounds, s"Cannot write vector at address $addr"))
     case i: VectorInst => stack.push(simd.evalSIMD(i))
     case _ => throw new IllegalArgumentException(s"Expected vector instruction, but got $inst")
   }
@@ -791,7 +791,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               case ExternalValue.Global(addr) =>
                 val fromTpe = from.globalTypes(addr)
                 if (fromTpe != globType)
-                  throw new Error(s"Type mismatch: expected global of type $globType but found ${fromTpe}.")
+                  throw new Error(s"Type mismatch: expected global of type $globType but found $fromTpe.")
                 val glob = from.globalAddrs(addr)
                 // TODO: check mutability (=> add mut to GlobalInstance)
                 globs += glob
