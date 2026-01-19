@@ -163,7 +163,8 @@ object ConcreteInterpreter extends Interpreter:
           if resolvedMethod.isStatic then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
           val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
-          if !(selectedMethod.isPublic || selectedMethod.isPrivate) then
+          // java 6 requires the method to be public; later versions allow private as well
+          if !selectedMethod.isPublic /* && !selectedMethod.isPrivate */ then
             throwClass(context._1)(ClassTypeValues.IllegalAccessError)
           if selectedMethod.isAbstract || selectedMethod.isStatic then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)

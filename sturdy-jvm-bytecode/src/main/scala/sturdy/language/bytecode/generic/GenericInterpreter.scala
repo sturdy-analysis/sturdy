@@ -22,7 +22,6 @@ import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.config.Overflow
-import sturdy.values.convert.NilCC
 import sturdy.values.objects.ObjectOps
 import sturdy.values.{Finite, Join, MaybeChanged, Widen}
 
@@ -439,7 +438,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         runAccessControl(field, mth)
         if field.isNotStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
-        if field.isFinal && !(field.classFile == mth.classFile && mth.isStaticInitializer) then
+        // the omitted requirement was added in java 7
+        if field.isFinal && !(field.classFile == mth.classFile /* && mth.isStaticInitializer */) then
           throwClass(ClassTypeValues.IllegalAccessError)
         val addr = getStaticFieldAddr(mth.classFile.thisType, mth, ident)
         val v = stack.popOrAbort()
@@ -468,7 +468,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         runAccessControl(field, mth)
         if field.isStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
-        if field.isFinal && !(field.classFile == mth.classFile && mth.isConstructor) then
+        // the omitted requirement was added in java 7
+        if field.isFinal && !(field.classFile == mth.classFile /* && mth.isConstructor */) then
           throwClass(ClassTypeValues.IllegalAccessError)
         objectOps.setField(site, mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 

@@ -79,6 +79,12 @@ def canOverride(mc: Method, ma: Method): Boolean =
 
 // method selection algorithm for invokeinterface and invokevirtual
 def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
+  // java 6 selection algorithm
+  val dynCF = project.classFile(dynamicType).get
+  dynCF.methods.find(m => resolvedMethod.isAccessibleBy(dynamicType, project.nests) && m.isNotStatic && m.name == resolvedMethod.name && m.descriptor == resolvedMethod.descriptor).getOrElse:
+    dynCF.superclassType.map(selectMethod(_, resolvedMethod)).getOrElse:
+      throwClass(ClassTypeValues.AbstractMethodError)
+  /* java 24 selection algorithm
   if resolvedMethod.isPrivate then return resolvedMethod
 
   val dynCF = project.classFile(dynamicType).get
@@ -101,6 +107,7 @@ def selectMethod[Value, ExcV, J[_] <: MayJoin[_]](dynamicType: ClassType, resolv
     throwClass(ClassTypeValues.AbstractMethodError)
   else
     throwClass(ClassTypeValues.IncompatibleClassChangeError)
+  */
 
 // method selection algorithm for invokespecial
 def selectSpecial[Value, ExcV, J[_] <: MayJoin[_]](c: ClassType, resolvedMethod: Method)(using hierarchy: ClassHierarchy, project: Project[URL], except: Except[JvmExcept[Value], ExcV, J], throwClass: ClassType => Nothing): Method =
