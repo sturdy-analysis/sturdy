@@ -7,7 +7,7 @@ import java.io.File
 import java.nio.file.Path
 
 class testDWARFContext extends AnyFunSuite {
-  val wasmFiles: List[Path] = BenchmarkGameFiles()
+  val wasmFiles: List[Path] = getBenchmarkGameFiles
   
   wasmFiles.foreach { file =>
     test(s"DWARF custom sections are present in ${file.getName}") {

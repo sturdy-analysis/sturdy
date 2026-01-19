@@ -21,16 +21,7 @@ def main(): Unit = {
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
   val astbuilder = new DwarfTreeBuilder()
   val ast = astbuilder.makeAST(dwarfUnits.head)
-  println("==============================")
-  println("GLOBALS: ")
-  ast.globals.foreach { globalVar =>
-    println(DwarfLogging.formatCConcept(globalVar))
-  }
-  println("==============================")
-  println("FUNCTIONS: ")
-  ast.functions.foreach { subprogram =>
-    println(DwarfLogging.formatCConcept(subprogram))
-  }
+  println(DwarfLogging.formatAST(ast))
 
   return
   val unitGlobals = dwarfUnits.map {

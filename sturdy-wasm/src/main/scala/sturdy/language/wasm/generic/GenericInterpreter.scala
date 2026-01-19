@@ -831,7 +831,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         Some(astBuilder.makeAST(dwarfContext.CompileUnits().get(0)))
       case None => None
     }
-    val modInst = ModuleInstance(moduleId, treeOption) //add dwarfcontext to moduleInstance
+    val modInst = ModuleInstance(moduleId, dwarfSyntaxTree = treeOption) //add dwarfcontext to moduleInstance
 
     // First allocate exports
     allocExports(module, modInst)
