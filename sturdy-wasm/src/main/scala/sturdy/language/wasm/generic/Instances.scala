@@ -8,6 +8,8 @@ import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Structural, concreteAbstractly, concretePO}
+import swam.binary.custom.dwarf.DwarfSyntaxTree
+import swam.binary.custom.dwarf.llvm.DWARFContext
 
 case class TableAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
@@ -41,7 +43,10 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
     case _ => false
   override val hashCode: Int = b.hashCode
 
-class ModuleInstance(val id: Option[Any] = None):
+class ModuleInstance(
+                      val id: Option[Any] = None,
+                      val dwarfSyntaxTree: Option[DwarfSyntaxTree] = None //needed to access Dwarf Information
+                    ):
   override def equals(obj: Any): Boolean = obj match
     case that: ModuleInstance => (this.id, that.id) match
       case (Some(id1), Some(id2)) => id1 == id2

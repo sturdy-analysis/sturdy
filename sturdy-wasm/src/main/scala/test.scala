@@ -19,7 +19,8 @@ def main(): Unit = {
   val dwarfContext = new DWARFContext(ABSOLUTEFILEPATH)
   //dwarfContext.devTest()
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
-  val ast = DwarfTreeBuilder.makeAST(dwarfUnits.head)
+  val astbuilder = new DwarfTreeBuilder()
+  val ast = astbuilder.makeAST(dwarfUnits.head)
   println("==============================")
   println("GLOBALS: ")
   ast.globals.foreach { globalVar =>

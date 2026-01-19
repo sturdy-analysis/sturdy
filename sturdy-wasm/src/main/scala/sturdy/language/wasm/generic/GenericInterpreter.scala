@@ -24,6 +24,7 @@ import scala.collection.immutable.VectorBuilder
 import WasmFailure.*
 import scodec.bits.ByteVector
 import sturdy.util.{Lazy, lazily}
+import swam.binary.custom.dwarf.DwarfTreeBuilder
 
 case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
   override def toString: String = funcIx.map(FuncId(module, _).toString).getOrElse("Unknown Function")
@@ -823,8 +824,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     initializeThis()
 
     val (funcImports, globImports, globTypes, tabImports, memImpors) = resolveImports(module, imports, hostModules)
-
-    val modInst = ModuleInstance(moduleId)
+    val treeOption = module.dwarfContext match {
+      case Some(dwarfContext) => 
+        val astBuilder = new DwarfTreeBuilder()
+        assert(dwarfContext.CompileUnits().size() == 1, "Only single compile units are supported")
+        Some(astBuilder.makeAST(dwarfContext.CompileUnits().get(0)))
+      case None => None
+    }
+    val modInst = ModuleInstance(moduleId, treeOption) //add dwarfcontext to moduleInstance
 
     // First allocate exports
     allocExports(module, modInst)

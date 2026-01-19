@@ -16,6 +16,7 @@ import sturdy.values.integer.{IntegerOpsWithSignInterpretation, RelationalBaseIn
 import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
+import swam.binary.custom.dwarf.CType
 
 import scala.annotation.tailrec
 
@@ -233,12 +234,12 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       }
     }
 
-  final class I32IntegerOps(rootFrameData: FrameData, globals: => Vector[(String,Interval)], stackRange: => Interval)
+  final class I32IntegerOps(rootFrameData: FrameData, globals: => Vector[(String,Interval,CType)], stackRange: => Interval)
                            (using intOps: IntegerOpsWithSignInterpretation[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def integerLit(i: Int): I32 = {
-        globals.find((name, iv) => Interval(i,i).isLeq(iv)) match
-          case Some((name,iv)) =>
+        globals.find((name, iv, cType) => Interval(i,i).isLeq(iv)) match
+          case Some((name,iv,cType)) =>
             val offset = apronState.getInterval(ApronExpr.intSub(ApronExpr.lit(i, I32Type), ApronExpr.constant(iv.inf(), I32Type), I32Type))
             GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
           case None => super.integerLit(i)
