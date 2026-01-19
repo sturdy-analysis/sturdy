@@ -76,23 +76,40 @@ trait RelationalMemory extends RelationalValues:
     ) yield apronState.getInterval(value.asInt32.asNumExpr)
 
   /**
-   * 
+   * tries to determine the global addresses of global variables.
+   * If a dwarfSyntaxTree is available it uses the extra information to determine the actual locations of variables.
    */
   private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval,CType)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
     moduleInstance.dwarfSyntaxTree match {
       case Some(dwarfSyntaxTree) =>
-        //leverage debug information:
-        var globalStartAddrs = for {
-          case GlobalVariable(name, cType, location) <- dwarfSyntaxTree.globals
-          currGlobalStart: Int = LocationExpressionParser.parseLocationExpression(location, dwarfSyntaxTree.addressSize) match {
-            case DW_OP_addr(addr) => addr.toInt
-            case _ => sys.error("globals are expected to have a known location")
-          }
-        } yield (name)
-        
-        Vector()
+        var globals: Vector[(String, Interval, CType)] = (
+          for {
+            case GlobalVariable(name, cType, location) <- dwarfSyntaxTree.globals // take dwarfdebug information as "ground truth" and only consider globals that exist in the dwarf debug information
+            currGlobalStartAddr: Int = LocationExpressionParser.parseLocationExpression(location, dwarfSyntaxTree.addressSize) match {
+              case DW_OP_addr(addr) => addr.toInt
+              case _ => sys.error("globals are expected to have a known location")
+            }
+            currGlobalSize: Int = dwarfSyntaxTree.getTypeSize(cType)
+            interval = new apron.Interval(currGlobalStartAddr, currGlobalStartAddr + currGlobalSize - 1)
+          } yield (name, interval, cType)
+          ).toVector
+        globals = globals.prepended((".rodata", dataStart, unknownType()))
+        globals = globals.prepended(("__data_end", dataEnd, unknownType()))
+
+        globals = globals.sortBy((_name, interval, cType) => interval.inf())
+
+        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && iv.isBottom))
+          globals = globals.tail
+
+        if (globals.headOption.exists(_._1 == "__data_end")) {
+          println("<empty>")
+          Vector()
+        } else {
+          println(globals)
+          globals
+        }
       case None =>
         var globalStarts = for {
           case (name, ExternalValue.Global(n)) <- moduleInstance.exports 
@@ -105,6 +122,7 @@ trait RelationalMemory extends RelationalValues:
 
         globalStarts = globalStarts.sortBy((_name, iv) => iv.inf())
 
+        //set end address of a global to the start address of the next global (potentially loses precision)
         var globalRanges = globalStarts.zip(globalStarts.tail).map {
           case ((name, iv),(_, ivNext)) =>
             val end = apronState.getInterval(ApronExpr.intSub(ApronExpr.constant(ivNext, I32Type), ApronExpr.lit(1, I32Type), I32Type))
