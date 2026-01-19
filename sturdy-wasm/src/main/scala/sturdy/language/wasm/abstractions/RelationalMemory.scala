@@ -53,7 +53,7 @@ trait RelationalMemory extends RelationalValues:
       tableBase <- intervalOfExport("__table_base")
       globalBase <- intervalOfExport("__global_base")
       dataEnd <- intervalOfExport("__data_end")
-      globalRanges = parseGlobalRanges(globalBase, dataEnd)
+      globalRanges = parseGlobalRanges(globalBase, dataEnd, moduleInstance)
       stackLow <- intervalOfExport("__stack_low")
       stackHigh <- intervalOfExport("__stack_high")
       heapBase <- intervalOfExport("__heap_base")
@@ -546,7 +546,7 @@ trait RelationalMemory extends RelationalValues:
 
       val effectiveAddrIv = apronState.getInterval(effectiveAddr)
       val offsetMatchesGlobal = for {
-        (globalName: String, globalRange: Interval/*, cType: CType*/) <- staticMemoryLayout.globalRanges
+        (globalName: String, globalRange: Interval, cType: CType) <- staticMemoryLayout.globalRanges
         if offset.isLeq(globalRange) || effectiveAddrIv.isLeq(globalRange)
       } yield ByteMemoryCtx.Global(globalName)
 
@@ -557,7 +557,7 @@ trait RelationalMemory extends RelationalValues:
 
         val constantMatchesGlobal = for {
           const <- baseAddr.constants
-          (globalName: String, globalRange: Interval/*, cType: CType*/) <- staticMemoryLayout.globalRanges
+          (globalName: String, globalRange: Interval, cType: CType) <- staticMemoryLayout.globalRanges
           if const.cmp(globalRange) == 0 || const.cmp(globalRange) == 1 // if const is equal or included in globalRange
         } yield ByteMemoryCtx.Global(globalName)
 
