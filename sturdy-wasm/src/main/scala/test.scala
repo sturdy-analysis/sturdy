@@ -8,18 +8,19 @@ import scala.jdk.OptionConverters.RichOptional
 def tryPrintDieName(die: DWARFDie): Unit = {
   die.getNameAttr.toScala match {
     case Some(value) => println(value)
-    case None => println("<unknown name>")
+    case None => println(s"<unknown die name at 0x${die.getOffset.toHexString}>")
   }
 }
 
 @main
 def main(): Unit = {
-  val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/fankuchredux.wasm"
+  val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/test-arrays.wasm"
   
   val dwarfContext = new DWARFContext(ABSOLUTEFILEPATH)
   //dwarfContext.devTest()
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
   val astbuilder = new DwarfTreeBuilder()
+  dwarfUnits.head.getUnitDIE.devTest()
   val ast = astbuilder.makeAST(dwarfUnits.head)
   println(DwarfLogging.formatAST(ast))
 
