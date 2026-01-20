@@ -9,7 +9,6 @@ import swam.*
 import swam.syntax.*
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Structural, concreteAbstractly, concretePO}
 import swam.binary.custom.dwarf.DwarfSyntaxTree
-import swam.binary.custom.dwarf.llvm.DWARFContext
 
 case class TableAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString

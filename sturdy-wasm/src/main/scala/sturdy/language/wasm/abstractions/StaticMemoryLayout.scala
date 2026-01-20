@@ -14,15 +14,21 @@ import swam.binary.custom.dwarf.{CType, Subprogram}
  * @param heapRange
  */
 case class StaticMemoryLayout(
+                             //...
                                tableRange: Interval,
+                             //...
                                dataRange: Interval, //replace with vector strings
+                             //where global variables are
                                globalRanges: Vector[(String, Interval, CType)],
+                             //where the stack is (function frames)
                                stackRange: Interval, //Vector[(Interval, Subprogram)],
+                             //address of the stackpointer.
                                stackPointer: generic.GlobalAddr, //maybe find the stackpointer address somewhere
-                               heapRange: Interval //TODO: use sturdy NumericInterval
-                               //do globals first
-                               //also do strings (address should be lower than globalbase and higher than DSO_handle
-                               //TODO add functions to staticmemorylayout
+                             //where heap allocated objects are
+                               heapRange: Interval, 
+                             //also do strings (address should be lower than globalbase and higher than DSO_handle
+                             // TODO add functions to StaticMemoryLayout 
+                              //functions: Vector[Subprogram]
                              ):
   def getGlobalRange(name: String): Option[Interval] = 
     globalRanges.find((global, interval, cType) => name == global).map(_._2)

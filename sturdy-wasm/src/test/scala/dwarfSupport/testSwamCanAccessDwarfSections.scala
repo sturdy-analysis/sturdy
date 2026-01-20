@@ -6,7 +6,7 @@ import swam.syntax.Module
 import java.nio.file.Path
 
 class testSwamCanAccessDwarfSections extends AnyFunSuite {
-  val wasmFiles: List[Path] = getBenchmarkGameFiles
+  val wasmFiles: List[Path] = getBenchmarksGameFiles
   
   wasmFiles.foreach { file =>
     test(s"swam can read DWARF Sections for ${file.getName}.") {

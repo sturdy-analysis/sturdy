@@ -10,7 +10,7 @@ import java.nio.file.Path
 /**
  * @return a List of paths containing all .wasm-files in the benchmarksgame/src folder
  */
-def getBenchmarkGameFiles: List[Path] = {
+def getBenchmarksGameFiles: List[Path] = {
   val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI
   val extension = ".wasm"
   val srcFolder = File(uri)
@@ -24,16 +24,29 @@ def getBenchmarkGameFiles: List[Path] = {
   wasmFiles
 }
 
-def getArrayTestFile: Path = {
-  getBenchmarkGameFiles.find(path => path.toString.contains("test-arrays")).getOrElse(sys.error("could not find test-arrays"))
-}
+/**
+ * enumeration representing all benchmarksgame test files.
+ * @param fileName name of the file (without file ending like .wasm or .wast) this allows the encoding to be specified later
+ */
+enum BenchmarksgameFile(val fileName: String):
+  case Binarytrees         extends BenchmarksgameFile("binarytrees")
+  case Fankuchredux        extends BenchmarksgameFile("fankuchredux")
+  case Mandelbrot          extends BenchmarksgameFile("mandelbrot")
+  case Nbody               extends BenchmarksgameFile("nbody")
+  case Pidigits            extends BenchmarksgameFile("pidigits")
+  case ReverseComplement   extends BenchmarksgameFile("reverse-complement")
+  case SpectralNorm        extends BenchmarksgameFile("spectral-norm")
+  case TestArrayOfStructs  extends BenchmarksgameFile("test-array-of-structs")
+  case TestArrays          extends BenchmarksgameFile("test-arrays")
+  case TestCallByReference extends BenchmarksgameFile("test-call-by-reference")
 
-def getCallByReferenceTestFile: Path = {
-  getBenchmarkGameFiles.find(path => path.toString.contains("test-call-by-reference")).getOrElse(sys.error("could not find test-call-by-reference"))
-}
-
-def getArrayOfStructsTestFile: Path = {
-  getBenchmarkGameFiles.find(path => path.toString.contains("test-array-of-structs")).getOrElse(sys.error("could not find test-array-of-structs"))
+/**
+ * utility function returning the path to the test file specified through the parameter. this only succeeds if the files actually exist and are returned by getBenchmarkGameFiles
+ * @param benchmarksgameFile enum value describing the path to be created
+ * @return path to the file.
+ */
+def getTestFile(benchmarksgameFile: BenchmarksgameFile): Path = {
+  getBenchmarksGameFiles.find(path => path.toString.contains(benchmarksgameFile.fileName)).getOrElse(sys.error(s"could not find ${benchmarksgameFile.fileName}"))
 }
 
 def tryToMakeASTFromBinary(path: Path): Option[DwarfSyntaxTree] = {

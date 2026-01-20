@@ -1,5 +1,6 @@
 package dwarfSupport
 
+import dwarfSupport.BenchmarksgameFile.{TestArrayOfStructs, TestArrays, TestCallByReference}
 import org.scalatest.funsuite.AnyFunSuite
 import sturdy.language.wasm.Parsing
 import swam.binary.custom.dwarf.{DwarfLogging, DwarfTreeBuilder}
@@ -9,7 +10,7 @@ import java.nio.file.Path
 
 class CanBuildAST extends AnyFunSuite {
   val DEBUG = true
-  val wasmFiles: List[Path] = getBenchmarkGameFiles
+  val wasmFiles: List[Path] = getBenchmarksGameFiles
 
   //for (file <- wasmFiles) {
   //  test(s"can build ast for ${file.getFileName}") {
@@ -25,21 +26,21 @@ class CanBuildAST extends AnyFunSuite {
   //  }
   //}
   test(s"can build ast for test-arrays fromBinary") {
-    tryToMakeASTFromBinary(getArrayTestFile) match {
+    tryToMakeASTFromBinary(getTestFile(TestArrays)) match {
       case Some(ast) =>
         if (DEBUG) println(DwarfLogging.formatAST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }
   test(s"can build ast for test-array-of-structs fromBinary") {
-    tryToMakeASTFromBinary(getArrayOfStructsTestFile) match {
+    tryToMakeASTFromBinary(getTestFile(TestArrayOfStructs)) match {
       case Some(ast) =>
         if (DEBUG) println(DwarfLogging.formatAST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }
   test(s"can build ast for test-call-by-reference fromBinary") {
-    tryToMakeASTFromBinary(getCallByReferenceTestFile) match {
+    tryToMakeASTFromBinary(getTestFile(TestCallByReference)) match {
       case Some(ast) =>
         if (DEBUG) println(DwarfLogging.formatAST(ast))
       case None => fail(s"could not make AST fromBinary")
