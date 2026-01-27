@@ -24,6 +24,20 @@ def getBenchmarksGameFiles: List[Path] = {
   wasmFiles
 }
 
+def getDwarfTestFiles: List[Path] = {
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/dwarf-test/wasm").toURI
+  val extension = ".wasm"
+  val srcFolder = File(uri)
+  if (!srcFolder.exists || !srcFolder.isDirectory) {
+    sys.error("dwarf-test Files not found.")
+  }
+  val wasmFiles: List[Path] = srcFolder.listFiles()
+    .filter(f => f.isFile && f.getName.endsWith(extension))
+    .toList
+    .map(file => file.toPath)
+  wasmFiles
+}
+
 /**
  * enumeration representing all benchmarksgame test files.
  * @param fileName name of the file (without file ending like .wasm or .wast) this allows the encoding to be specified later

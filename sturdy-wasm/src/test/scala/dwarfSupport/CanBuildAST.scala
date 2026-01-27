@@ -9,7 +9,7 @@ import swam.syntax.Module
 import java.nio.file.Path
 
 class CanBuildAST extends AnyFunSuite {
-  val DEBUG = false
+  val DEBUG = true
   val wasmFiles: List[Path] = getBenchmarksGameFiles
 
   for (file <- wasmFiles) {
@@ -49,10 +49,11 @@ class CanBuildAST extends AnyFunSuite {
   test(s"can build ast for pidigits fromBinary") {
     tryToMakeASTFromBinary(getTestFile(Pidigits)) match {
       case Some(ast) =>
-        if (DEBUG) println(DwarfLogging.formatAST(ast))
-        for (global <- ast.globals) {
-          println(s"${global.name} has size: ${ast.getTypeSize(global.varType)}")
-        }
+        if (DEBUG)
+          println(DwarfLogging.formatAST(ast))
+          for (global <- ast.globals) {
+            println(s"${global.name} has size: ${ast.getTypeSize(global.varType)}")
+          }
       case None => fail(s"could not make AST fromBinary")
     }
   }

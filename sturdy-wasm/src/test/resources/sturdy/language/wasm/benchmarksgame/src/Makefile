@@ -15,3 +15,4 @@ clean:
 
 %.wast: %.wasm
 	wasm2wat $< --generate-names --enable-all -o $@
+	#TODO find option for better grouping

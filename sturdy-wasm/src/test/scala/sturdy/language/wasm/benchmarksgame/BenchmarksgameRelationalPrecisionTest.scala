@@ -29,7 +29,7 @@ val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"
 class BenchmarksgameRelationalPrecisionTests extends Suites(
   BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
   BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false),
+  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false), //<-run this
   BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
   BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
