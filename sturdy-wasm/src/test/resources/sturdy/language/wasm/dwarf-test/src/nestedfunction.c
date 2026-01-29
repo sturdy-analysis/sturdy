@@ -12,7 +12,3 @@ int outerFunction() {
     outerVariable = innerFunction(3);
     return outerVariable;
 }
-
-int _start() {
-    return outerFunction();
-}

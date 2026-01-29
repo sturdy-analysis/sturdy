@@ -8,12 +8,12 @@ for file in src/*.c; do
     echo "Compiling $file -> $name.wasm"
 
     clang --target=wasm32 -nostdlib -O3 -g \
-          -Wl,--allow-undefined,--export-all,--no-gc-sections \
+          -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
           -o "wasm/$name.O3.wasm" \
           "$file"
 
     clang --target=wasm32 -nostdlib -O0 -g \
-          -Wl,--allow-undefined,--export-all,--no-gc-sections \
+          -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
           -o "wasm/$name.O0.wasm" \
           "$file"
 done

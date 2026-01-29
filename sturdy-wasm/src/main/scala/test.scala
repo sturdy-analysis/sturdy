@@ -17,7 +17,8 @@ def main(): Unit = {
   val ABSOLUTEFILEPATH = "/home/flo/programming/sturdy.scala/sturdy-wasm/src/test/resources/sturdy/language/wasm/benchmarksgame/src/test-arrays.wasm"
   
   val dwarfContext = new DWARFContext(ABSOLUTEFILEPATH)
-  //dwarfContext.devTest()
+  dwarfContext.devTest()
+  return
   val dwarfUnits = dwarfContext.CompileUnits().asScala.toList
   val astbuilder = new DwarfTreeBuilder()
   dwarfUnits.head.getUnitDIE.devTest()
