@@ -19,19 +19,19 @@ object TestCases:
   // used by selective test, comments allowed as well
   val includeFileName = "included-files.txt"
 
-  val ignoreRegexes: Seq[Regex] = readRegexesFromFile(ignoreFileName)
-  val includeRegexes: Seq[Regex] = readRegexesFromFile(includeFileName)
+  lazy val ignoreRegexes: Seq[Regex] = readRegexesFromFile(ignoreFileName)
+  lazy val includeRegexes: Seq[Regex] = readRegexesFromFile(includeFileName)
 
   // all tests that are not ignored
-  val fullTests: ArraySeq[ArraySeq[Path]] = allTestCases.filterNot: paths =>
+  lazy val fullTests: ArraySeq[ArraySeq[Path]] = allTestCases.filterNot: paths =>
     ignoreRegexes.exists(_.matches(paths.head.toString))
 
   // all explicitly included tests that are not ignored
-  val includedTests: ArraySeq[ArraySeq[Path]] = fullTests.filter: paths =>
+  lazy val includedTests: ArraySeq[ArraySeq[Path]] = fullTests.filter: paths =>
     includeRegexes.exists(_.matches(paths.head.toString))
 
   // all test cases
-  def allTestCases: ArraySeq[ArraySeq[Path]] =
+  lazy val allTestCases: ArraySeq[ArraySeq[Path]] =
     // flatten nested files
     val files = Files.list(testRootPath).flatMap:
       Files.list(_).flatMap:
@@ -61,12 +61,9 @@ object TestCases:
     .sortBy(_.head)
 
   // path where the test hierarchy is located
-  def testRootPath: Path =
-    var path = try
-      Paths.get(resourcePath)
-    catch case e: NoSuchFileException =>
-      Assertions.cancel(s"exception while reading resource path $resourcePath:\n${e.getMessage}")
-
+  // throws a NoSuchFileException if resource path doesn't exist
+  lazy val testRootPath: Path =
+    var path = Paths.get(resourcePath)
     // walk directory tree until we hit the test cases
     while Files.list(path).filter(Files.isDirectory(_)).count() == 1 do
       // safe as the loop head checks that at least one element exists
