@@ -19,7 +19,11 @@ class CanBuildAST extends AnyFunSuite {
         case Some(ctx) =>
           val unit = ctx.CompileUnits().get(0)
           val astBuilder = new DwarfTreeBuilder()
-          astBuilder.makeAST(unit)
+          val ast = astBuilder.makeAST(unit)
+          if (DEBUG) {
+            println(DwarfLogging.formatAST(ast))
+          }
+
         case None =>
           fail(s"could not read dwarf sections from ${file.getFileName}")
       }
