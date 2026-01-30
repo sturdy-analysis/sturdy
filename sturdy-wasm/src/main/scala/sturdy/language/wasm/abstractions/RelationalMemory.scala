@@ -87,8 +87,8 @@ trait RelationalMemory extends RelationalValues:
         var globals: Vector[(String, Interval, CType)] = (
           for {
             case GlobalVariable(name, cType, location) <- dwarfSyntaxTree.globals // take dwarfdebug information as "ground truth" and only consider globals that exist in the dwarf debug information
-            currGlobalStartAddr: Int = dwarfSyntaxTree.parseLocationExpr(location) match {
-              case DW_OP_addr(addr) => addr
+            currGlobalStartAddr: Int = dwarfSyntaxTree.parseLocationExpr(location).ops match {
+              case DW_OP_addr(addr) :: Nil => addr.toInt //safe because of wasm32 4byte addresses
               case _ => sys.error("globals are expected to have a known location")
             }
             currGlobalSize: Int = dwarfSyntaxTree.getTypeSize(cType)

@@ -8,7 +8,7 @@ import swam.binary.custom.dwarf.LocationExpressionParser.readSLEB128
 
 class CanReadSLEB128 extends AnyFunSuite{
   /** to see if conversion of int -> sleb128 -> int results in the same number */
-  private def toSLEB128(value: Int): List[Byte] = {
+  private def toSLEB128(value: Int): List[Int] = {
     var v = value
     var bytes = List.empty[Byte]
     var more = true
@@ -26,7 +26,7 @@ class CanReadSLEB128 extends AnyFunSuite{
       bytes = bytes :+ byte
     }
 
-    bytes
+    bytes.map(byte => byte & 0xFF)
   }
 
   test("SLEB128: int -> sleb128 -> int from -100k to 100k") {
@@ -68,8 +68,8 @@ class CanReadSLEB128 extends AnyFunSuite{
   }
 
   test("SLEB128: with remaining bytes") {
-    val (v, r) = readSLEB128(List(0x01.toByte, 0x9f.toByte))
+    val (v, r) = readSLEB128(List(0x01, 0x9f))
     assert(v == 1)
-    assert(r == List(0x9f.toByte))  // remaining bytes not part of SLEB128
+    assert(r == List(0x9f))  // remaining bytes not part of SLEB128
   }
 }

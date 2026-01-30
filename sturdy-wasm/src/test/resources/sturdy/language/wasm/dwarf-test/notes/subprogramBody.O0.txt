@@ -1,0 +1,52 @@
+according to .wast:
+
+innerFunction has type $t1 (function with one i32 param (named $p0), returning an i32
+it has 7 local variables (named $l1 through $l7)
+
+$l1 is set to the stack pointer
+$l2 is set to 16
+$l3 is set to $l1 - $l2 so stack pointer - 16 (-> assumption: 16 is the stack frame size)
+ l3 is the frame base of this function
+$p0 is stored at $l3 + 12 (offset=12)
+$l4 is set to what is stored at $l3 + 12 (essentially sets $l4 to $p0)
+$l5 is set to 1
+$l6 is set to $l4 shifted to the left by $l5 (this is a multiplication by two since)
+$l6 is stored at $l3 + 8 (offset=8)
+$l7 is set to what is stored at $l3 + 8 (essentially sets $l7 to 2 * $p0)
+$l7 is returned and the function terminates
+
+Subprogram(
+  name=innerFunction,
+  returnType=baseType(int,4,signed),
+  parameters=
+    FormalParameter(
+      name=innerParameter,
+      type=
+        baseType(name=int, bytesize=4, encoding=signed),
+      location=[(expression=91 18, pcRange=unknown)]),
+  body=
+    Variable(
+      name=innerVariable,
+      type=
+        baseType(name=int, bytesize=4, encoding=signed),
+      location=[(expression=91 14, pcRange=unknown)])
+    LexicalBlock(
+      range=[0x62, 0x80)
+      body=
+        Variable(
+          name=result,
+          type=
+            baseType(name=int, bytesize=4, encoding=signed),
+          location=[(expression=91 10, pcRange=unknown)]))
+    LexicalBlock(
+      range=[0x81, 0xab)
+      body=
+        Variable(
+          name=resultElse,
+          type=
+            baseType(name=int, bytesize=4, encoding=signed),
+          location=[(expression=91 0c, pcRange=unknown)])))
+
+according to dwarf info:
+innerFunction is a subprogram which has return type: baseType(int,4,signed)
+it has one parameter named innerParameter of type: baseType(name=int, bytesize=4, encoding=signed)
