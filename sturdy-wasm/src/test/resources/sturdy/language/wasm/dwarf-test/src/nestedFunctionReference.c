@@ -7,8 +7,8 @@ int innerFunction(const int *innerParameter) { // 1 parameter
     return (*innerParameter) + innerVariable;
 }
 
-int outerFunction() {
+int outerFunction(int x) {
     int outerVariable = 3;
-    outerVariable = innerFunction(&outerVariable);
+    outerVariable = outerVariable + innerFunction(&x);
     return outerVariable;
 }
