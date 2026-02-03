@@ -8,6 +8,7 @@ import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
 import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Structural, concreteAbstractly, concretePO}
+import swam.BlockType.FunctionType
 
 case class TableAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
@@ -16,6 +17,8 @@ case class MemoryAddr(addr: Int) extends AnyVal:
 case class GlobalAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
 case class ElemAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
+case class TagAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
 
 given Finite[TableAddr] with {}
@@ -68,9 +71,10 @@ class ModuleInstance(val id: Option[Any] = None):
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
-  val tagTypes: Vector[TagType] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
+  var tagAddrs: Vector[TagAddr] = Vector.empty
+  var tagTypes: Vector[TagType] = Vector.empty
 
   def exportedName(searched: ExternalValue): Option[String] =
     exports.find ((name, externalVal) =>
@@ -121,6 +125,8 @@ given Structural[Func] with {}
 given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
+case class TagInstance(tpe: FunctionType)
+
 enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
@@ -153,6 +159,7 @@ enum FunctionInstance:
   private def toString(tpe: FuncType): String =
     s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"
 
+// addr is a a pointer into the resp list in the own module. not global store (i think)
 enum ExternalValue:
   case Function(addr: Int)
   case Table(addr: Int)

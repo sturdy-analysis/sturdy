@@ -23,6 +23,7 @@ import swam.syntax.*
 import scala.collection.immutable.VectorBuilder
 import WasmFailure.*
 import scodec.bits.ByteVector
+import sturdy.language.wasm.generic
 import sturdy.util.{Lazy, lazily}
 
 case class FrameData(funcIx: Option[Int], returnArity: Int, module: ModuleInstance):
@@ -59,6 +60,8 @@ case class BreakIfState[V](condition: V, state: Any)
 
 type Imports = Map[String, ModuleInstance]
 
+
+// Sowas auch für Tags
 case class FuncId(mod: ModuleInstance, funcIx: Int):
   override def toString: String =
     if (mod == null)
@@ -234,6 +237,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private var memCount = 0
   private var tabCount = 0
   private var globCount = 0
+  private var tagCount = 0
 
   private def fail(k: FailureKind, what: String) = failure.fail(k, s"$what in $module")
 
@@ -749,14 +753,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case ReferenceType.FuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
 
-  case class ResolvedImports(funcs: Vector[FunctionInstance], globs: Vector[GlobalAddr], globTpes: Vector[GlobalType], tabs: Vector[TableAddr], mems: Vector[MemoryAddr], tags: Vector[TagType])
+  case class ResolvedImports(funcs: Vector[FunctionInstance], globs: Vector[GlobalAddr], globTpes: Vector[GlobalType], tabs: Vector[TableAddr], mems: Vector[MemoryAddr], tagTypes: Vector[TagType], tagAddr: Vector[TagAddr])
   def resolveImports(module: Module, imports: Imports, hostModules: HostModules): ResolvedImports =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
-    val globTpes: VectorBuilder[GlobalType] = VectorBuilder()
+    val globTypes: VectorBuilder[GlobalType] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
-    val tags: VectorBuilder[TagType] = VectorBuilder()
+    val tagTypes: VectorBuilder[TagType] = VectorBuilder()
+    val tagAddr: VectorBuilder[TagAddr] = VectorBuilder()
 
     module.imports.foreach { imp =>
       // handle host functions
@@ -788,29 +793,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
                 }
               case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
-//          case Import.Tag(_, _, tagType) =>
-////          // TODO: what to do, how to do it?
-//            exp match
-//              case ExternalValue.Tag(addr) =>
-//                val fromTpe = from.tagTypes(addr)
-//                if (fromTpe != tagType) {
-//                  throw new Error(s"Type mismatch: expected tag of type $tagType but found ${fromTpe}.")
-//                }
-//                // insert into into tags
-//                tags += from.tagTypes(addr)
-//              case _ => throw new Error(s"Import mismatch: expected a tag but found $exp")
-               case Import.Tag(_, _, tagType) => exp match
-                case ExternalValue.Tag(addr) =>
-            // Get the tag type directly from the exporting module's tag types array
-                  val fromTpe = from.tagTypes.lift(addr).getOrElse(
-                    throw new Error(s"Tag at index $addr not found in module ${imp.moduleName}.")
-                  )
-                  if (fromTpe != tagType) {
-                  throw new Error(s"Type mismatch: expected tag of type $tagType but found ${fromTpe}.")
-                  }
-            // Store the tag type (similar to how globals store both addr and type)
-                    tags += tagType
-          case _ => throw new Error(s"Import mismatch: expected a tag but found $exp")
           case Import.Global(_, _, globType) =>
             exp match
               case ExternalValue.Global(addr) =>
@@ -820,8 +802,29 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 val glob = from.globalAddrs(addr)
                 // TODO: check mutability (=> add mut to GlobalInstance)
                 globs += glob
-                globTpes += globType
+                globTypes += globType
               case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
+          case Import.Tag(_, _, tagType) => // tagType: TagType(expectedTypeIdx)
+            exp match
+              case ExternalValue.Tag(addr) =>
+                // 1. Get the actual function signature from the providing module
+                val providingTagType = from.tagTypes(addr) // This stores the providing TagType
+                val providedSig = from.functionTypes(providingTagType.t)
+
+                // 2. Get the expected signature from the importing module (this)
+                // Note: modInst.functionTypes must be populated before imports are resolved
+                val expectedSig = module.types(tagType.t)
+
+                // 3. Validation
+                if (providedSig != expectedSig)
+                  throw new Error(s"Type mismatch: expected tag with signature $expectedSig but found $providedSig.")
+
+                // 4. Linkage
+                val address = from.tagAddrs(addr)
+
+                tagTypes += tagType
+                tagAddr += address
+              case _ => throw new Error(s"Import mismatch: expected a tag but found $exp.")
           case Import.Table(_, _, tpe) =>
             exp match
               case ExternalValue.Table(addr) =>
@@ -839,7 +842,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    ResolvedImports(funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result(), tags.result())
+    ResolvedImports(funcs.result(), globs.result(), globTypes.result(), tabs.result(), mems.result(), tagTypes.result(), tagAddr.result())
 
   // we assume a valid module here
   def instantiateModule(module: Module,
@@ -859,6 +862,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     allocFunctions(module, modInst, resolvedImports.funcs)
     allocTables(module, modInst, resolvedImports.tabs)
     allocMemory(module, modInst, resolvedImports.mems)
+    allocTags(module, modInst, resolvedImports.tagAddr, resolvedImports.tagTypes)
 
     // Push initial frame to stack
     var loc = InstLoc.InInit(modInst, 0)
@@ -891,6 +895,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case ExternalKind.Table => (fieldName, ExternalValue.Table(index))
           case ExternalKind.Tag => (fieldName, ExternalValue.Tag(index))
         }
+    }
+  }
+
+  private inline def allocTags(module: Module, modInst: ModuleInstance, tagImports: Vector[TagAddr], tagImportTypes: Vector[TagType]): Unit = {
+    modInst.tagTypes = tagImportTypes ++ module.tags
+    modInst.tagAddrs = tagImports ++ module.tags.map { _ =>
+      val tagAddr = TagAddr(tagCount)
+      tagCount += 1
+      tagAddr
     }
   }
 

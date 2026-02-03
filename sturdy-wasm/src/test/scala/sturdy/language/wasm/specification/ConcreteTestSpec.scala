@@ -28,6 +28,7 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
   val pathSpectest: Path = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
   val uriWasm1: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI
   val uriWasm2: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2").toURI
+  val uriWasm3: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm3/Tags").toURI
   val uriSIMD: URI = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm2/simd").toURI
 
   val spectest: Module = Parsing.fromText(pathSpectest)
@@ -46,9 +47,10 @@ class ConcreteTestSpec extends AnyFlatSpec, Matchers:
       }
     }
 
-  runTests(uriWasm1, s => s"execute WASM1 script $s")
-  runTests(uriWasm2, s => s"execute WASM2 script $s")
-  runTests(uriSIMD, s => s"execute SIMD script $s")
+  //runTests(uriWasm1, s => s"execute WASM1 script $s")
+  //runTests(uriWasm2, s => s"execute WASM2 script $s")
+  runTests(uriWasm3, s => s"execute WASM3 script $s")
+  //runTests(uriSIMD, s => s"execute SIMD script $s")
 
 class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)

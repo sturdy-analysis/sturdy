@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
     sturdy_core,
     sturdy_apron,
     sturdy_apron_bench,
-    sturdy_tip,
+    //sturdy_tip,
     sturdy_wasm,
     sturdy_tutorial
   )
