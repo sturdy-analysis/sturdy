@@ -7,8 +7,12 @@ int innerFunction(int innerParameter) { // 1 parameter
     return innerParameter + innerVariable;
 }
 
-int outerFunction() {
+int outerFunction(int x) {
     int outerVariable;
-    outerVariable = innerFunction(3);
+    outerVariable = innerFunction(x);
     return outerVariable;
+}
+
+int _start() {
+    return outerFunction(3);
 }

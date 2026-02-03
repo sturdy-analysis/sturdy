@@ -82,6 +82,12 @@ trait RelationalMemory extends RelationalValues:
   private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval,CType)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
+    if (moduleInstance.dwarfSyntaxTree.isDefined) {
+      println("DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
+    } else {
+      println("DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
+    }
+    
     moduleInstance.dwarfSyntaxTree match {
       case Some(dwarfSyntaxTree) =>
         var globals: Vector[(String, Interval, CType)] = (

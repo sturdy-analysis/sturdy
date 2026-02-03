@@ -323,6 +323,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     // Hook to initialize static memory layout after global variables have been instantiated.
     override protected def instantiateGlobals(module: Module, modInst: ModuleInstance, globImports: Vector[GlobalAddr], globImportsTypes: Vector[GlobalType], initLoc: InstLoc)(using Fixed): InstLoc =
       val loc = super.instantiateGlobals(module, modInst: ModuleInstance, globImports, globImportsTypes, initLoc)
+      //HERE StaticMemoryLayout can receive DwarfInformation through modInst
       optionStaticMemoryLayout = parseStaticMemoryLayout(using moduleInstance = modInst, globals = globals)
       loc
 

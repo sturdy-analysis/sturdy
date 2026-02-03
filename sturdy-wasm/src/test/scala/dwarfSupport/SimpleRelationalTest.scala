@@ -1,4 +1,4 @@
-package sturdy.language.wasm.benchmarksgame
+package dwarfSupport
 
 import apron.*
 import com.github.tototoshi.csv.{CSVReader, CSVWriter, DefaultCSVFormat}
@@ -26,13 +26,13 @@ import scala.jdk.StreamConverters.*
 
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
-class BenchmarksgameRelationalPrecisionTests extends Suites(
+class SimpleExampleRelationalTest extends Suites(
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
   //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false), //<-run this
+  MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = false), //<-run this
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
   //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
+  MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = true),
   //BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
@@ -42,52 +42,62 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
   override def afterAll(): Unit =
     writer.close
 
-class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
+class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
 
   val manager = newManager
   val funcName = "_start"
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/dwarf-test/out/").toURI;
 
   val fixpointConfig: FixpointConfig = FixpointConfig(
     stack = StackConfig.StackedStates(storeIntermediateOutput = false, readPriorOutput = false),
     iter = sturdy.fix.iter.Config.Innermost
   )
 
-  // These programs contain structs, which our analysis does not yet support.
-  val excluded: Set[Path] = Set("k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
-    Paths.get(uri).resolve(prog)
+  // These programs are not analyzed
+  val excludedDirs: Set[String] = Set(
+    "constchardifferences",
+    "subprogramBody",
+    "nestedfunction"
   )
 
-  val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
+  val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
-      it(s"${p.getFileName}") {
-        if(manager.isInstanceOf[Polka] && ssa && (p.endsWith("reverse-complement.wasm")))
-          cancel("timeout")
-
-        val module = Parsing.fromBinary(p)
-
-        val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa))
-        val memoryLogger = analysis.memoryLogger
-        val abstractDomainSizeLogger = analysis.abstractDomainSizeLogger
-        analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
-
-        val moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
-
-        Profiler.addTime("analysis-time") {
-          analysis.failure.fallible(
-            analysis.invokeExported(moduleInst, funcName, List.empty)
-          )
-        }
-        val analysisTime = Profiler.get("analysis-time").get
-
-        Profiler.printLastMeasured()
-        Profiler.reset()
-
-        val expected = parseMemOpsCSV(p, moduleInst)
-
-        writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
+    Files.list(Paths.get(uri)).toScala(List)
+      .filter(Files.isDirectory(_))
+      .filterNot(dir => excludedDirs.contains(dir.getFileName.toString))
+      .flatMap { dir => Files.list(dir).toScala(List) }
+      .filter(p => p.toString.endsWith(".wasm"))
+      .sorted
+      .foreach { p =>
+        println(s"analyzing path: $p")
+        it(s"${p.getFileName}") {
+          if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm")) 
+            cancel("timeout")
+            
+          val module = Parsing.fromBinary(p)
+          
+          val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa))
+          val memoryLogger = analysis.memoryLogger
+          val abstractDomainSizeLogger = analysis.abstractDomainSizeLogger
+          analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+          
+          val moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
+          
+          Profiler.addTime("analysis-time") {
+            analysis.failure.fallible(
+              analysis.invokeExported(moduleInst, funcName, List.empty)
+            )
+          }
+          val analysisTime = Profiler.get("analysis-time").get
+          
+          Profiler.printLastMeasured()
+          Profiler.reset()
+          
+          //csv files do not exist (yet)
+          //val expected = parseMemOpsCSV(p, moduleInst)
+          
+          //writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
       }
     }
   }
@@ -98,7 +108,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
                expected: SortedMap[InstLoc, Set[ByteMemoryCtx]],
                abstractDomainSizeLogger: analysis.AbstractDomainSizeLogger,
                time: Long
-  ): Unit =
+              ): Unit =
     val program = programPath.getFileName
     val precision: memoryLogger.Precision = memoryLogger.computePrecision(expected)
     val preciseLoads = filterLoads(precision.precise)
