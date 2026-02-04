@@ -28,10 +28,13 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
+    /** represents a global variable with name and start position of global variables (global base), offset determines where in the global range the variable lives*/
     case GlobalAddr(nameAndStart: Powerset[(String,Int)], offset: ApronExpr[VirtAddr,Type])
+    /** represents the address of a variable that lives inside a function stackframe. the function, its frame size and stackptr are specified */
     case StackAddr(function: Powerset[FuncId], frameSize: ApronExpr[VirtAddr,Type], stackPointer: ApronExpr[VirtAddr,Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
+    /** represents data/variables allocated on the heap part of linear memory */
     case HeapAddr(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
-
+    //TODO: why initialOffset and otherOffset?
     def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       this match
         case NumExpr(expr) => expr
