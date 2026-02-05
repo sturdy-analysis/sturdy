@@ -291,6 +291,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
               stackPointerExpr = ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type),
               frameSize = v2.asNumExpr
             )
+            //special case for frame base
           case NumExpr(stackPointer@ApronExpr.Constant(const: Scalar, _, _)) if const.isEqual(stackRange.sup()) =>
             newStackFrame(
               stackPointerExpr = ApronExpr.intSub(stackPointer, v2.asNumExpr, I32Type),
