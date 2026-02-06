@@ -65,7 +65,12 @@ trait RelationalMemory extends RelationalValues:
       globalRanges = globalRanges,
       stackRange = Interval(stackLow.inf(), stackHigh.sup()),
       stackPointer = generic.GlobalAddr(0),
-      heapRange = Interval(heapBase.inf(), heapEnd.sup())
+      heapRange = Interval(heapBase.inf(), heapEnd.sup()),
+      functions = moduleInstance
+        .dwarfSyntaxTree
+        .getOrElse(sys.error(s"dwarfSyntaxTree not available for StaticMemoryLayout"))
+        .functions
+        .toVector
     )
   }
 
@@ -82,6 +87,7 @@ trait RelationalMemory extends RelationalValues:
   private def parseGlobalRanges(dataStart: Interval, dataEnd: Interval)(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Vector[(String,Interval,CType)] = {
     val specialGlobals = Set("__memory_base", "__table_base", "__dso_handle", "__data_end", "__stack_low",
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
+    
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
       println("DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
     } else {
@@ -94,7 +100,9 @@ trait RelationalMemory extends RelationalValues:
           for {
             case GlobalVariable(name, cType, location) <- dwarfSyntaxTree.globals // take dwarfdebug information as "ground truth" and only consider globals that exist in the dwarf debug information
             currGlobalStartAddr: Int = dwarfSyntaxTree.parseLocationExpr(location).ops match {
-              case DW_OP_addr(addr) :: Nil => addr.toInt //safe because of wasm32 4byte addresses
+              case DW_OP_addr(addr) :: Nil => 
+                if (dwarfSyntaxTree.addressSize == 4) addr.toInt //safe because of wasm32 4byte addresses
+                else sys.error(s"expected addressSize of 4 but got ${dwarfSyntaxTree.addressSize} instead")
               case _ => sys.error("globals are expected to have a known location")
             }
             currGlobalSize: Int = dwarfSyntaxTree.getTypeSize(cType)

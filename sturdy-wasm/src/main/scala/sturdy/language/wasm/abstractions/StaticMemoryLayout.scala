@@ -2,7 +2,7 @@ package sturdy.language.wasm.abstractions
 
 import apron.Interval
 import sturdy.language.wasm.generic
-import swam.binary.custom.dwarf.{CType, Subprogram}
+import swam.binary.custom.dwarf.{CType, FunctionConcept, Subprogram}
 
 /**
  *
@@ -27,10 +27,11 @@ case class StaticMemoryLayout(
                              //where heap allocated objects are
                                heapRange: Interval, 
                              //also do strings (address should be lower than globalbase and higher than DSO_handle
-                             // TODO add functions to StaticMemoryLayout 
-                              //functions: Vector[Subprogram]
+                             //TODO add functions to StaticMemoryLayout 
+                             functions: Vector[FunctionConcept]
                              ):
   def getGlobalRange(name: String): Option[Interval] = 
     globalRanges.find((global, interval, cType) => name == global).map(_._2)
+    
   def getGlobalCType(name: String): Option[CType] = 
     globalRanges.find((global, interval, cType) => name == global).map(_._3)

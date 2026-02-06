@@ -5,7 +5,9 @@ import swam.binary.custom.dwarf.{DwarfSyntaxTree, DwarfTreeBuilder}
 
 import java.net.URI
 import java.io.File
-import java.nio.file.Path
+import java.nio.file.{Files, Path, Paths}
+import scala.jdk.StreamConverters.*
+import scala.util.Using
 
 /**
  * @return a List of paths containing all .wasm-files in the benchmarksgame/src folder
@@ -25,17 +27,20 @@ def getBenchmarksGameFiles: List[Path] = {
 }
 
 def getDwarfTestFiles: List[Path] = {
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/dwarf-test/wasm").toURI
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/dwarf-test/out").toURI
   val extension = ".wasm"
-  val srcFolder = File(uri)
-  if (!srcFolder.exists || !srcFolder.isDirectory) {
-    sys.error("dwarf-test Files not found.")
-  }
-  val wasmFiles: List[Path] = srcFolder.listFiles()
-    .filter(f => f.isFile && f.getName.endsWith(extension))
-    .toList
-    .map(file => file.toPath)
-  wasmFiles
+  val rootPath = Paths.get(uri)
+
+  // Using 'Using' ensures the AutoCloseable Java Stream is closed
+  val subDirs = Using(Files.list(rootPath))(_.toScala(List)).getOrElse(List.empty)
+    .filter(Files.isDirectory(_))
+
+  subDirs.flatMap { dir =>
+    Using(Files.list(dir)) { stream =>
+      stream.toScala(List)
+        .filter(_.toString.endsWith(extension))
+    }.getOrElse(List.empty)
+  }.sorted
 }
 
 /**

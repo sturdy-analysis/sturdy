@@ -10,7 +10,7 @@ import java.nio.file.Path
 class dwarfTest extends AnyFunSuite{
   val DEBUG = true
   val wasmFiles: List[Path] = getDwarfTestFiles
-
+  println(s"num files: ${wasmFiles.length}")
   for (file <- wasmFiles) {
     test(s"can build ast for ${file.getFileName}") {
       val mod: Module = Parsing.fromBinary(file)

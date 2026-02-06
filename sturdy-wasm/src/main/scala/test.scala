@@ -92,7 +92,7 @@ def getTypeSize(die: DWARFDie): Int = {
         //multidimensional array types are allowed to have multiple child Dies (one for each dimension)
         case subrangeDies@head::tail => subrangeDies.foldRight(1)((subrangeDie, acc) => getTypeSize(subrangeDie) * acc)
 
-    case DwarfTag.subrange_type => die.getCountAttr.toScala match
+    case DwarfTag.subrange_type => die.getCountAttrAsConstant.toScala match
       case Some(value) => value.toInt
       case None => sys.error("subrange_type did not have count attribute")
 

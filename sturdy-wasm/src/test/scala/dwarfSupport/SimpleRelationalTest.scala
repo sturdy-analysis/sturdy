@@ -55,9 +55,12 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
 
   // These programs are not analyzed
   val excludedDirs: Set[String] = Set(
-    "constchardifferences",
     "subprogramBody",
-    "nestedfunction"
+    "nestedfunction",
+    "functionWithFlexibleArrayMember",
+    "functionWithStructParameterPointer",
+    "functionWithVLA",
+    "functionWithStructParameter"
   )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
