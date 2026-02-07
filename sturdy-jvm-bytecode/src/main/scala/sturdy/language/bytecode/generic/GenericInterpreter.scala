@@ -778,8 +778,8 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
   // evaluates each instruction of the given method's body, starting with pc
   @tailrec
   private def runBody(pc: Int, mth: Method)(using Fixed): Unit =
-    // TODO: maybe handle nonexistent body differently
-    val body = mth.body.get
+    val body = mth.body.getOrElse:
+      throw IllegalStateException(s"method $mth has no body")
     // get is safe to call as unapply always returns Some here
     val currInst = body.iterator.find(_.pc == pc).map(_.instruction).getOrElse:
       throw IllegalStateException(s"can't find instruction with pc $pc")
