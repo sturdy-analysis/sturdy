@@ -189,7 +189,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
     val (concreteInterpreter, mType) = runSetup(project, testCase, caseName)(method)
     val v = try
-      concreteInterpreter.invokeExternal(method, true)
+      concreteInterpreter.invokeExternal(method)
     catch
       // all other exceptions fail the test
       case CFailureException(concreteInterpreter.AbortEval.Exit(v), _) => v
@@ -201,7 +201,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
   def runNegative(project: Project[URL], testCase: Path, caseName: String)(method: Method, expectedException: ReferenceType): Assertion =
     val (concreteInterpreter, _) = runSetup(project, testCase, caseName)(method)
     try
-      concreteInterpreter.invokeExternal(method, true)
+      concreteInterpreter.invokeExternal(method)
       if expectedException == ClassTypeValues.VerifyError then
         cancel(s"[$caseName] should have thrown a VerifyError, but this is not our responsibility")
       fail(s"[$caseName] no exception thrown")

@@ -270,4 +270,4 @@ class test extends AnyFunSuite:
     val fibonacciTest = cfs.findMethod("fibonacciTest").head
     // absInterp.stack.push()
     absInterp.evalExternal(BIPUSH(3))
-    println(absInterp.invokeExternal(fibonacciTest, true))
+    println(absInterp.invokeExternal(fibonacciTest))

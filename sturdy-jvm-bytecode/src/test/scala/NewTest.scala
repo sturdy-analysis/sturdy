@@ -39,10 +39,10 @@ class NewTest extends AnyFunSuite:
           val args = InitParams(mth, interp)
           interp.stack.pushN(args.toList)
           println("Executing Method: " ++ mth.name)
-          println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
+          println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
         else
           println("Executing Method: " ++ mth.name)
-          println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
+          println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
         //println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
         println("- - - - - - - - - - - - - - -")
       } catch {

@@ -24,8 +24,8 @@ class FullProgramTest extends AnyFunSuite:
       val absInterp = new ConstantAnalysis.Instance(pWithLibrary, Map())
       println("- - - - - - - - - - - - - - - - -")
       println("Executing Method: " ++ mth.name ++ " from " ++ mth.classFile.thisType.simpleName)
-      println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
-      println("Abstract Interpretation: " ++ absInterp.invokeExternal(mth, true).toString)
+      println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
+      println("Abstract Interpretation: " ++ absInterp.invokeExternal(mth).toString)
       //println(interp.arrayValStore.entries.toSeq.sortBy(_._1))
       //println(interp.objFieldStore.entries)
     }

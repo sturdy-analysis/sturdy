@@ -738,7 +738,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           stack.popOrAbort()
 
   // external entrypoint to invoke a function, expecting its arguments on the stack
-  def invokeExternal(mth: Method, isStatic: Boolean): V = external:
+  def invokeExternal(mth: Method): V = external:
     val args = stack.popNOrAbort(stack.size)
     implicit val site: Site = Site.External
     invoke(mth, args)

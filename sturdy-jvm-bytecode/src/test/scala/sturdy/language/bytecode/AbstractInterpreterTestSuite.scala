@@ -187,7 +187,7 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
   def runPositive(project: Project[URL], testCase: Path, caseName: String)(method: Method): Assertion =
     val (abstractInterpreter, mType) = runSetup(project, testCase, caseName)(method)
     val v = try
-      abstractInterpreter.invokeExternal(method, true)
+      abstractInterpreter.invokeExternal(method)
     catch
       // all other exceptions fail the test
       case CFailureException(abstractInterpreter.AbortEval.Exit(v), _) => v
@@ -201,7 +201,7 @@ abstract class AbstractInterpreterTestSuite extends AnyFunSuite with Matchers wi
   def runNegative(project: Project[URL], testCase: Path, caseName: String)(method: Method, expectedException: ReferenceType): Assertion =
     val (abstractInterpreter, _) = runSetup(project, testCase, caseName)(method)
     try
-      abstractInterpreter.invokeExternal(method, true)
+      abstractInterpreter.invokeExternal(method)
       fail(s"[$caseName] no exception thrown")
     catch
       // all other exceptions fail the test

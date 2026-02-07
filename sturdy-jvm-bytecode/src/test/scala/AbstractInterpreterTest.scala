@@ -41,8 +41,8 @@ class AbstractInterpreterTest extends AnyFunSuite:
       val interp = new ConcreteInterpreter.Instance(pWithLibrary, Map())
       val constInterp = new ConstantAnalysis.Instance(pWithLibrary, Map())
       println("Executing Method: " ++ mth.name)
-      println("Concrete Interpretation: " ++ interp.invokeExternal(mth, true).toString)
-      println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
+      println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
+      println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth).toString)
       println("- - - - - - - - - - - - - - -")
     }
 //
