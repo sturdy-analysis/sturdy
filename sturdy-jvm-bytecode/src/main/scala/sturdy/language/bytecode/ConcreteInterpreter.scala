@@ -29,11 +29,6 @@ import sturdy.values.ordering.EqOps
 import java.net.URL
 import scala.annotation.tailrec
 
-enum ConcreteRefValues[ObjectAddr, Class, FieldName, ObjFieldAddr, ArrayAddr, ArrayElemAddr, AType, ASizeType]:
-  case Object(oid: ObjectAddr, cls: Class, fields: Map[FieldName, ObjFieldAddr])
-  case nonNullArray(aid: ArrayAddr, vals: Seq[ArrayElemAddr], arrayType: AType, arraySize: ASizeType)
-  case NullValue()
-
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
   override type I8 = Byte
@@ -54,7 +49,10 @@ object ConcreteInterpreter extends Interpreter:
   override type FieldName = FieldIdent
   override type AType = ArrayType
 
-  override type RefValue = ConcreteRefValues[Addr, ClassFile, FieldName, Addr, Addr, Addr, AType, Int]
+  enum RefValue:
+    case Object(oid: Addr, cls: ClassFile, fields: Map[FieldName, Addr])
+    case Array(aid: Addr, vals: Seq[Addr], arrayType: AType, arraySize: Int)
+    case Null
 
   override type ExcV = JvmExcept[Value]
 
@@ -81,16 +79,16 @@ object ConcreteInterpreter extends Interpreter:
   given ConcreteTypeOps(using project: Project[URL]): TypeOps[RefValue, TypeRep] with
     // null is currently not supported since java lacks a bottom type we could use here
     override def typeOf(v: RefValue): ReferenceType = v match
-      case ConcreteRefValues.Object(_, cls, _) => cls.thisType
-      case ConcreteRefValues.nonNullArray(_, _, arrayType, _) => arrayType
-      case ConcreteRefValues.NullValue() => throw IllegalArgumentException("can't get type of null")
+      case RefValue.Object(_, cls, _) => cls.thisType
+      case RefValue.Array(_, _, arrayType, _) => arrayType
+      case RefValue.Null => throw IllegalArgumentException("can't get type of null")
 
     override def ifInstanceOf[A](v: RefValue, target: ReferenceType)(ifTrue: => A)(ifFalse: => A): A = v match
-      case ConcreteRefValues.Object(_, cf, _) =>
+      case RefValue.Object(_, cf, _) =>
         if checkInstanceOf(cf.thisType, target)(using project.classHierarchy) then ifTrue else ifFalse
-      case ConcreteRefValues.nonNullArray(_, _, ty, _) =>
+      case RefValue.Array(_, _, ty, _) =>
         if checkInstanceOf(ty, target)(using project.classHierarchy) then ifTrue else ifFalse
-      case ConcreteRefValues.NullValue() =>
+      case RefValue.Null =>
         ifTrue
 
     @tailrec
@@ -129,33 +127,33 @@ object ConcreteInterpreter extends Interpreter:
         store.write(addr, v)
         (name, addr)
       }.toMap
-      ConcreteRefValues.Object(oid, c, fieldAddrs)
+      RefValue.Object(oid, c, fieldAddrs)
 
     override def getField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName): Value = obj match
-      case ConcreteRefValues.Object(_, _, fields) =>
+      case RefValue.Object(_, _, fields) =>
         val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
         val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$identifier not bound"))
-      case ConcreteRefValues.NullValue() =>
+      case RefValue.Null =>
         throwClass(context._1)(ClassType.NullPointerException)
-      case ConcreteRefValues.nonNullArray(_, _, _, _) =>
+      case RefValue.Array(_, _, _, _) =>
         throwClass(context._1)(ClassTypeValues.LinkageError)
 
     override def setField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
-      case ConcreteRefValues.Object(_, _, fields) =>
+      case RefValue.Object(_, _, fields) =>
         val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
         if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
           store.write(fields(resolvedField.getIdent), v)
           JOptionC.some(())
-      case ConcreteRefValues.NullValue() => throwClass(context._1)(ClassType.NullPointerException)
-      case _ =>
-        throw UnsupportedOperationException(s"attempted object operations on $obj")
+      case RefValue.Null => throwClass(context._1)(ClassType.NullPointerException)
+      case RefValue.Array(_, _, _, _) =>
+        throw IllegalStateException(s"attempted to set field of array $obj") // vm spec doesn't cover this case
 
     override def invokeMethod(context: InvokeContext)(staticMethod: StaticMth, obj: RefValue, args: Seq[Value])(invoke: (RefValue, Mth, Seq[Value]) => Value): Value = obj match
-      case ConcreteRefValues.NullValue() => throwClass(context._1)(ClassType.NullPointerException)
-      case ConcreteRefValues.Object(_, cf, _) => context match
+      case RefValue.Null => throwClass(context._1)(ClassType.NullPointerException)
+      case RefValue.Object(_, cf, _) => context match
         case (site, InvokeType.Interface, callingClass) =>
           if !hierarchy.isSubtypeOf(cf.thisType, staticMethod.declaringClass) then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
@@ -194,12 +192,12 @@ object ConcreteInterpreter extends Interpreter:
           invoke(obj, selectedMethod, args)
 
       case _ =>
-        throw UnsupportedOperationException(s"attempted object operations on $obj")
+        throw IllegalStateException(s"attempted to invoke on array $obj") // vm spec doesn't cover this case
 
-    override def makeNull(): RefValue = ConcreteRefValues.NullValue()
+    override def makeNull(): RefValue = RefValue.Null
 
     override def isNull(obj: RefValue): I32 = obj match
-      case ConcreteRefValues.NullValue() => 1
+      case RefValue.Null => 1
       case _ => 0
 
   given ConcreteArrayOps
@@ -209,15 +207,15 @@ object ConcreteInterpreter extends Interpreter:
         val addr = alloc(Site.ArrayElementInitialization(ctx, index))
         store.write(addr, defaultValue)
         addr
-      ConcreteRefValues.nonNullArray(aid, values, arrayType, arraySize)
+      RefValue.Array(aid, values, arrayType, arraySize)
 
     override def get(ctx: ArrayOpContext)(array: RefValue, idx: Int): JOption[NoJoin, Value] = array match
-      case ConcreteRefValues.nonNullArray(_, vals, _, _) =>
+      case RefValue.Array(_, vals, _, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
         else
           store.read(vals(idx))
-      case ConcreteRefValues.NullValue() =>
+      case RefValue.Null =>
         throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
@@ -225,7 +223,7 @@ object ConcreteInterpreter extends Interpreter:
     // returns some if setting the value was successful, none otherwise
     // it can only fail by being out of bounds
     override def set(ctx: ArrayOpContext)(array: RefValue, idx: Int, v: Value): JOptionC[Unit] = array match
-      case ConcreteRefValues.nonNullArray(_, vals, arrayType, _) =>
+      case RefValue.Array(_, vals, arrayType, _) =>
         if idx >= vals.size || idx < 0 then
           JOptionC.none
         else
@@ -238,25 +236,25 @@ object ConcreteInterpreter extends Interpreter:
 
           store.write(vals(idx), v)
           JOptionC.some(())
-      case ConcreteRefValues.NullValue() =>
+      case RefValue.Null =>
         throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
     override def length(ctx: ArrayOpContext)(array: RefValue): Value = array match
-      case ConcreteRefValues.nonNullArray(_, _, _, size: I32) =>
+      case RefValue.Array(_, _, _, size) =>
         Value.Int32(size)
-      case ConcreteRefValues.NullValue() => throwClass(ctx)(ClassType.NullPointerException)
+      case RefValue.Null => throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
   given RefEqOps[AID, OID, ASize]: EqOps[RefValue, Boolean] with
     override def equ(v1: RefValue, v2: RefValue): Boolean = (v1, v2) match
-      case (ConcreteRefValues.Object(oid1, _, _), ConcreteRefValues.Object(oid2, _, _)) =>
+      case (RefValue.Object(oid1, _, _), RefValue.Object(oid2, _, _)) =>
         oid1 == oid2
-      case (ConcreteRefValues.nonNullArray(aid1, _, _, _), ConcreteRefValues.nonNullArray(aid2, _, _, _)) =>
+      case (RefValue.Array(aid1, _, _, _), RefValue.Array(aid2, _, _, _)) =>
         aid1 == aid2
-      case (ConcreteRefValues.NullValue(), ConcreteRefValues.NullValue()) =>
+      case (RefValue.Null, RefValue.Null) =>
         true
       // each remaining case (comparing anything to null or objects to arrays) must be false
       case _ =>

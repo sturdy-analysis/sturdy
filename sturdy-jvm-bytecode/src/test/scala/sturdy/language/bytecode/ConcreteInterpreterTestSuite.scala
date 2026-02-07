@@ -13,7 +13,6 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.except.ConcreteSturdyException
 import sturdy.effect.failure.CFailureException
-import sturdy.language.bytecode.ConcreteRefValues.nonNullArray
 import sturdy.language.bytecode.abstractions.Site
 import sturdy.language.bytecode.generic.JvmExcept
 import sturdy.language.bytecode.util.ClassTypeValues
@@ -181,7 +180,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
     val concreteInterpreter = ConcreteInterpreter.Instance(project, Map())
     // args for invocation of main
     implicit val site: Site = Site.External
-    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(nonNullArray((site, 1), Seq(), ArrayType(ReferenceType("java/lang/String")), 0)))
+    concreteInterpreter.stack.push(ConcreteInterpreter.Value.ReferenceValue(ConcreteInterpreter.RefValue.Array((site, 1), Seq(), ArrayType(ReferenceType("java/lang/String")), 0)))
     if mType == TestedMethodType.Run then
       // push System.out
       concreteInterpreter.stack.push(concreteInterpreter.createObject(ClassTypeValues.PrintStream))
@@ -213,7 +212,7 @@ abstract class ConcreteInterpreterTestSuite extends AnyFunSuite with Matchers wi
       case ConcreteSturdyException(e) => e match
         case JvmExcept.ThrowObject(exception: ConcreteInterpreter.Value) =>
           exception.asRef(using concreteInterpreter.failure) match
-            case ConcreteRefValues.Object(_, cls, _) => assert(cls.thisType == expectedException)
+            case ConcreteInterpreter.RefValue.Object(_, cls, _) => assert(cls.thisType == expectedException)
             case refValue => fail(s"unexpected object thrown: $refValue")
         case x =>
           fail(s"unexpected throw: $x")
