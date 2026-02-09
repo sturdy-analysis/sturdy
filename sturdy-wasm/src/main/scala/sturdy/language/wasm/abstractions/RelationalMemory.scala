@@ -1,7 +1,7 @@
 package sturdy.language.wasm.abstractions
 
 import apron.*
-import sturdy.apron.{ApronExpr, *, given}
+import sturdy.apron.{*, given}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -19,8 +19,10 @@ import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
-import swam.binary.custom.dwarf.{CType, DW_OP_addr, GlobalVariable, LocationExpressionParser, unknownType}
+import swam.binary.custom.dwarf.{DW_OP_fbreg, CConcept, CType, DW_OP_addr, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, Variable, unknownType}
 import swam.binary.custom.dwarf.llvm.DWARFContext
+
+import scala.collection.immutable.{AbstractSeq, LinearSeq}
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -50,6 +52,7 @@ trait RelationalMemory extends RelationalValues:
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
+    val functions = parseFunctionFrames
     for{
       tableBase <- intervalOfExport("__table_base")
       globalBase <- intervalOfExport("__global_base")
@@ -66,11 +69,7 @@ trait RelationalMemory extends RelationalValues:
       stackRange = Interval(stackLow.inf(), stackHigh.sup()),
       stackPointer = generic.GlobalAddr(0),
       heapRange = Interval(heapBase.inf(), heapEnd.sup()),
-      functions = moduleInstance
-        .dwarfSyntaxTree
-        .getOrElse(sys.error(s"dwarfSyntaxTree not available for StaticMemoryLayout"))
-        .functions
-        .toVector
+      functionFrames = functions
     )
   }
 
@@ -99,11 +98,11 @@ trait RelationalMemory extends RelationalValues:
         var globals: Vector[(String, Interval, CType)] = (
           for {
             case GlobalVariable(name, cType, location) <- dwarfSyntaxTree.globals // take dwarfdebug information as "ground truth" and only consider globals that exist in the dwarf debug information
-            currGlobalStartAddr: Int = dwarfSyntaxTree.parseLocationExpr(location).ops match {
+            currGlobalStartAddr: Int = location.ops match {
               case DW_OP_addr(addr) :: Nil => 
                 if (dwarfSyntaxTree.addressSize == 4) addr.toInt //safe because of wasm32 4byte addresses
                 else sys.error(s"expected addressSize of 4 but got ${dwarfSyntaxTree.addressSize} instead")
-              case _ => sys.error("globals are expected to have a known location")
+              case other => sys.error(s"globals are expected to have a known location encoded as a DW_OP_addr. (got $other instead)")
             }
             currGlobalSize: Int = dwarfSyntaxTree.getTypeSize(cType)
             interval = new apron.Interval(currGlobalStartAddr, currGlobalStartAddr + currGlobalSize - 1)
@@ -154,6 +153,63 @@ trait RelationalMemory extends RelationalValues:
           globalRanges
         }
       //moduleInstance
+    }
+  }
+
+  private def parseFunctionFrames(using moduleInstance: ModuleInstance): Map[FuncId, Frame] = {
+    moduleInstance.dwarfSyntaxTree match {
+      case Some(dwarfSyntaxTree) =>
+        dwarfSyntaxTree.functions.toList.collect {
+          case Subprogram(name, frameBase, returnType, parameters, body) =>
+            //map parameters to stack frame entries where possible
+            val paramEntries = parameters
+              .map { case FormalParameter(name, paramType, location) =>
+                if (location.isEmpty) {
+                  None //parameter does not exist in the stackframe itself. only exists as a name and potentially constant value
+                } else if (location.length >= 2) {
+                  sys.error(s"parameter has multiple locations which are currently not handled") 
+                } else {
+                  DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
+                    case Some(DW_OP_fbreg(offset)) =>                   
+                      val size = dwarfSyntaxTree.getTypeSize(paramType)
+                      Some((name, Interval(offset, offset + size), paramType))
+                    case None => //
+                      None
+                  }
+                }
+              }
+              .filter(_.isDefined)
+              .map(_.get)
+            //map function body to stack frame entries where possible
+            def makeStackFrameFromBody(body: List[CConcept]): List[(String, Interval, CType)] = {
+              body match {
+                case Nil => Nil
+                case Variable(name, varType, location) :: rest => 
+                  if (location.isEmpty) {
+                    makeStackFrameFromBody(rest)
+                  } else if (location.length >= 2) {
+                    sys.error(s"variable in function body has multiple locations which are currently not handled")
+                  } else {
+                    DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
+                      case Some(DW_OP_fbreg(offset)) =>
+                        val size = dwarfSyntaxTree.getTypeSize(varType)
+                        (name, Interval(offset, offset + size), varType) :: makeStackFrameFromBody(rest)
+                      case None => makeStackFrameFromBody(rest)
+                    }
+                  }
+                case LexicalBlock(body) :: rest =>
+                  makeStackFrameFromBody(body.toList)
+                    .concat(makeStackFrameFromBody(rest))
+                case other :: rest =>
+                  println(s"ignoring $other during parsing of function body")
+                  makeStackFrameFromBody(rest)
+              }
+            }
+            val bodyEntries = makeStackFrameFromBody(body.toList)
+            FuncId(name) -> Frame(frameBase, Vector.empty[(String, Interval, CType)])
+        } //end of collect
+          .toMap
+      case None => sys.error(s"cannot parse function frames when no dwarf information is supplied")
     }
   }
 
@@ -324,7 +380,7 @@ trait RelationalMemory extends RelationalValues:
           val virtSites = refOps.deref(reference)
           val physSites = for {
             case PhysicalAddress(AddrCtx.ByteMemory(ctx@ByteMemoryCtx.Heap(_, _)), recency) <- virtSites.physicalAddresses
-          } yield(PhysicalAddress(ctx, recency))
+          } yield PhysicalAddress(ctx, recency)
 
           val matchingRegions = for {
             case (physAddr@PhysicalAddress(ctx: (ByteMemoryCtx.Fill | ByteMemoryCtx.Heap | ByteMemoryCtx.Dynamic), recency), region) <- mem.store
@@ -383,7 +439,7 @@ trait RelationalMemory extends RelationalValues:
 
     private def readRangeOverlapsGlobalRegion[Timestamp](
                                                           readStartsEnds: Map[String, (ApronExpr[VirtAddr, Type],ApronExpr[VirtAddr, Type])],
-                                                          ctx: (ByteMemoryCtx.Fill | ByteMemoryCtx.Global | ByteMemoryCtx.Dynamic),
+                                                          ctx: ByteMemoryCtx.Fill | ByteMemoryCtx.Global | ByteMemoryCtx.Dynamic,
                                                           region: MemoryRegion[Addr, Size, Timestamp, Value]
     ): Topped[Boolean] =
       ctx match {
@@ -411,7 +467,7 @@ trait RelationalMemory extends RelationalValues:
                                                          initialOffset: Powerset[Int],
                                                          readStart: ApronExpr[VirtAddr, Type],
                                                          readEnd: ApronExpr[VirtAddr, Type],
-                                                         ctx: (ByteMemoryCtx.Fill | ByteMemoryCtx.Stack | ByteMemoryCtx.Dynamic),
+                                                         ctx: ByteMemoryCtx.Fill | ByteMemoryCtx.Stack | ByteMemoryCtx.Dynamic,
                                                          region: MemoryRegion[Addr, Size, Timestamp, Value]
     ): Topped[Boolean] =
       ctx match {
@@ -570,7 +626,7 @@ trait RelationalMemory extends RelationalValues:
         case GlobalAddr(glob, offset) =>
           for {
             (name,_) <- glob.set
-          } yield(ByteMemoryCtx.Global(name))
+          } yield ByteMemoryCtx.Global(name)
 
         case StackAddr(functions, frameSize, stackPointer, initialOffset, _) =>
           for {
@@ -585,7 +641,7 @@ trait RelationalMemory extends RelationalValues:
               for {
                 offset <- if(initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
               } yield heapCtx.copy(offset = offset)
-            case ctx => throw IllegalArgumentException(s"Expected HeapCtx, but got ${ctx}")
+            case ctx => throw IllegalArgumentException(s"Expected HeapCtx, but got $ctx")
           }.toSet
     }
 

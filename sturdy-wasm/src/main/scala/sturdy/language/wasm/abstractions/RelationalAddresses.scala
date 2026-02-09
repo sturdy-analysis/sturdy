@@ -27,11 +27,17 @@ trait RelationalAddresses extends RelationalTypes:
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
   enum ByteMemoryCtx:
+    /** initialized Memory (filled with bytes containing zeros) */
     case Fill(site: FixIn)
+    /** memory belonging to a global variable */
     case Global(name: String)
+    /** memory belonging to the stack */
     case Stack(function: FuncId, offset: Int)
+    /** memory belonging to the heap */
     case Heap(allocSite: InstLoc, offset: Int)
+    /** memory containing static data */
     case Static(offset: Int)
+    /** memory where pretty much nothing is known about */
     case Dynamic(storeInstruction: FixIn)
 
     override def toString: String =
