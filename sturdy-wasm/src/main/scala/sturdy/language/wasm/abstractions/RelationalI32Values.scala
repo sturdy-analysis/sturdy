@@ -34,7 +34,6 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
     case StackAddr(function: Powerset[FuncId], frameSize: ApronExpr[VirtAddr,Type], stackPointer: ApronExpr[VirtAddr,Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
     /** represents data/variables allocated on the heap part of linear memory */
     case HeapAddr(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
-    //TODO: why initialOffset and otherOffset?
     def asNumExpr(using apronState: ApronState[VirtAddr, Type], resolveState: ResolveState): ApronExpr[VirtAddr, Type] =
       this match
         case NumExpr(expr) => expr
@@ -237,7 +236,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
       }
     }
 
-  final class I32IntegerOps(rootFrameData: FrameData, globals: => Vector[(String,Interval,CType)], stackRange: => Interval)
+  final class I32IntegerOps(rootFrameData: FrameData, globals: => Vector[(String,Interval,CType)], stackRange: => Interval, functionFrames: Map[FuncId, Frame])
                            (using intOps: IntegerOpsWithSignInterpretation[Int, ApronExpr[VirtAddr, Type]], apronState: ApronState[VirtAddr, Type], failure: Failure, effectStack: EffectStack, domLogger: DomLogger[FixIn])
     extends LiftedIntegerOpsWithSignInterpretation[Int, I32, ApronExpr[VirtAddr,Type]](extract = _.asNumExpr, inject = NumExpr(_)):
       override def integerLit(i: Int): I32 = {
@@ -247,7 +246,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
             GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
           case None => super.integerLit(i)
       }
-
+      
       override def add(v1: I32, v2: I32): I32 =
         (v1, v2) match
 

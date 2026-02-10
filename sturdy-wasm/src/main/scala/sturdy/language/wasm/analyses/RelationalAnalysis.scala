@@ -285,7 +285,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     given I32IntegerOps = new I32IntegerOps(
       rootFrameData = rootFrameData,
       globals = optionStaticMemoryLayout.map(_.globalRanges).getOrElse(Vector()),
-      stackRange = optionStaticMemoryLayout.map(_.stackRange).getOrElse(ApronExpr.bottomInterval))
+      stackRange = optionStaticMemoryLayout.map(_.stackRange).getOrElse(ApronExpr.bottomInterval),
+      functionFrames = optionStaticMemoryLayout.map(_.functionFrames).getOrElse(Map())
+    )
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] =
       if (config.relational)

@@ -1,50 +1,6 @@
-according to .wast:
+general notes:
 
-innerFunction has type $t1 (function with one i32 param (named $p0), returning an i32
-it has 7 local variables (named $l1 through $l7)
+structs that are passed by value are not copied into the stack frame of the called function.
+instead: a copy is created in the callers' stack frame and then the struct is passed in a wasm local containing a pointer to the copy
 
-$l1 is set to the stack pointer
-$l2 is set to 16
-$l3 is set to $l1 - $l2 so stack pointer - 16 (-> assumption: 16 is the frame size) BUT this is not always so easy to find out as variably sized stack frames are possible
- l3 is the frame base of this function
-$p0 is stored at $l3 + 12 (offset=12)
-$l4 is set to what is stored at $l3 + 12 (essentially sets $l4 to $p0)
-$l5 is set to 1
-$l6 is set to $l4 shifted to the left by $l5 (this is a multiplication by two since)
-$l6 is stored at $l3 + 8 (offset=8)
-$l7 is set to what is stored at $l3 + 8 (essentially sets $l7 to 2 * $p0)
-$l7 is returned and the function terminates
-
-->  conclusion: the data for "managing" the function (frame size, stackpointer, etc. is stored in wasm locals)
-    the data
-
-Subprogram(
-  name=innerFunction,
-  returnType=baseType(name=int, bytesize=4, encoding=signed),
-  parameters=
-    FormalParameter(
-      name=innerParameter,
-      type=
-        baseType(name=int, bytesize=4, encoding=signed),
-      location=[DwarfOperationSequence(List(DW_OP_fbreg(12)),None)]),
-  body=
-    Variable(
-      name=innerVariable,
-      type=
-        baseType(name=int, bytesize=4, encoding=signed),
-      location=[DwarfOperationSequence(List(DW_OP_fbreg(8)),None)]))
-Subprogram(
-  name=outerFunction,
-  returnType=baseType(name=int, bytesize=4, encoding=signed),
-  parameters=
-,
-  body=
-    Variable(
-      name=outerVariable,
-      type=
-        baseType(name=int, bytesize=4, encoding=signed),
-      location=[DwarfOperationSequence(List(DW_OP_fbreg(12)),None)]))
-
-according to dwarf info:
-innerFunction is a subprogram which has return type: baseType(int,4,signed)
-it has one parameter named innerParameter of type: baseType(name=int, bytesize=4, encoding=signed)
+the call by value semantics are not violated, but handling a pass by reference and pass by value struct are very similar

@@ -4,7 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 
 /* Function to be tested */
-import swam.binary.custom.dwarf.LocationExpressionParser.readSLEB128
+import swam.binary.custom.dwarf.DwarfOperationExprParser.readSLEB128
 
 class CanReadSLEB128 extends AnyFunSuite{
   /** to see if conversion of int -> sleb128 -> int results in the same number */

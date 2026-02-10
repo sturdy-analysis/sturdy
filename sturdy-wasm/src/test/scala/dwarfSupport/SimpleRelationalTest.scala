@@ -27,13 +27,13 @@ import scala.jdk.StreamConverters.*
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
 class SimpleExampleRelationalTest extends Suites(
-  //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
-  //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
+  //MinimalExampleRelationalTest(newManager = Polka(true), relational = true, ssa = false),
+  //MinimalExampleRelationalTest(newManager = Octagon(), relational = true, ssa = false),
   MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = false), //<-run this
-  //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
-  //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
-  MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = true),
-  //BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
+  //MinimalExampleRelationalTest(newManager = Polka(true), relational = true, ssa = true),
+  //MinimalExampleRelationalTest(newManager = Octagon(), relational = true, ssa = true),
+  //MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = true),
+  //MinimalExampleRelationalTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -60,17 +60,21 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
     "functionWithFlexibleArrayMember",
     "functionWithStructParameterPointer",
     "functionWithVLA",
-    "functionWithStructParameter"
+    "functionWithStructParameter",
   )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
 
   describe(analysisName) {
+    val optimizationLevels = Set(
+      "O0",
+      //"O3",
+    )
     Files.list(Paths.get(uri)).toScala(List)
       .filter(Files.isDirectory(_))
       .filterNot(dir => excludedDirs.contains(dir.getFileName.toString))
       .flatMap { dir => Files.list(dir).toScala(List) }
-      .filter(p => p.toString.endsWith(".wasm"))
+      .filter(p => optimizationLevels.exists(opt => p.toString.endsWith(s"$opt.wasm")))
       .sorted
       .foreach { p =>
         println(s"analyzing path: $p")

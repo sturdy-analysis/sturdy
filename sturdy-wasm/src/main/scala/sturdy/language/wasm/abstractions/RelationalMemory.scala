@@ -173,7 +173,7 @@ trait RelationalMemory extends RelationalValues:
                     case Some(DW_OP_fbreg(offset)) =>                   
                       val size = dwarfSyntaxTree.getTypeSize(paramType)
                       Some((name, Interval(offset, offset + size), paramType))
-                    case None => //
+                    case None => //parameter exists, has a location, but the location does not describe an address in the functions stack frame (usually a wasm local instead)
                       None
                   }
                 }
