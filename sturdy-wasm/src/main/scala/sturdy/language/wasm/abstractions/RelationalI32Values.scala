@@ -246,7 +246,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
             GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
           case None => super.integerLit(i)
       }
-      
+
       override def add(v1: I32, v2: I32): I32 =
         (v1, v2) match
 

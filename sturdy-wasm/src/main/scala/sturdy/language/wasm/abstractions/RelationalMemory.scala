@@ -188,7 +188,8 @@ trait RelationalMemory extends RelationalValues:
                   if (location.isEmpty) {
                     makeStackFrameFromBody(rest)
                   } else if (location.length >= 2) {
-                    sys.error(s"variable in function body has multiple locations which are currently not handled")
+                    //this usually also means the variable is not stored in the stack frame but instead in a wasm local and or inlined into the code
+                    sys.error(s"variable <$name> in function body has multiple locations: $location")
                   } else {
                     DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
                       case Some(DW_OP_fbreg(offset)) =>
@@ -206,7 +207,11 @@ trait RelationalMemory extends RelationalValues:
               }
             }
             val bodyEntries = makeStackFrameFromBody(body.toList)
-            FuncId(name) -> Frame(frameBase, Vector.empty[(String, Interval, CType)])
+            val frameEntries = (paramEntries ++ bodyEntries)
+              .sortBy((name, interval, ctype) => interval.inf())
+              .toVector
+            println(s"Frame Entries of function $name: $frameEntries")
+            FuncId(name) -> Frame(frameBase, frameEntries)
         } //end of collect
           .toMap
       case None => sys.error(s"cannot parse function frames when no dwarf information is supplied")
