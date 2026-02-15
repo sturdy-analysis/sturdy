@@ -241,9 +241,9 @@ object ConcreteInterpreter extends Interpreter:
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")
 
-    override def length(ctx: ArrayOpContext)(array: RefValue): Value = array match
+    override def length(ctx: ArrayOpContext)(array: RefValue): Int = array match
       case RefValue.Array(_, _, _, size) =>
-        Value.Int32(size)
+        size
       case RefValue.Null => throwClass(ctx)(ClassType.NullPointerException)
       case _ =>
         throw UnsupportedOperationException(s"attempted array operations on $array")

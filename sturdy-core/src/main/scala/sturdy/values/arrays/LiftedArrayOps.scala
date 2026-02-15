@@ -8,4 +8,4 @@ class LiftedArrayOps[AID, Idx, V, AV, AType, Context, J[_] <: MayJoin[_], UAV, U
   override def makeArray(ctx: Context)(aid: AID, defaultValue: => V, arrayType: AType, arraySize: Idx): AV = injectA(ops.makeArray(ctx)(aid, defaultValue, arrayType, extractIdx(arraySize)))
   override def get(ctx: Context)(array: AV, idx: Idx): JOption[J, V] = ops.get(ctx)(extractA(array), extractIdx(idx))
   override def set(ctx: Context)(array: AV, idx: Idx, v: V): JOption[J, Unit] = ops.set(ctx)(extractA(array), extractIdx(idx), v)
-  override def length(ctx: Context)(array: AV): V = ops.length(ctx)(extractA(array))
+  override def length(ctx: Context)(array: AV): Idx = injectIdx(ops.length(ctx)(extractA(array)))

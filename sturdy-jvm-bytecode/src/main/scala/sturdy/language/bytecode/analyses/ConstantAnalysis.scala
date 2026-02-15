@@ -157,9 +157,9 @@ object ConstantAnalysis extends Interpreter, Numbers, Exceptions:
         case (Topped.Actual(_), Topped.Actual(_)) => ???
         case _ => JOptionA.none
 
-    override def length(ctx: ArrayOpContext)(ref: RefValue): Value = ref match
-      case Topped.Top => Value.Int32(topI32)
-      case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => Value.Int32(array.arraySize)
+    override def length(ctx: ArrayOpContext)(ref: RefValue): I32 = ref match
+      case Topped.Top => topI32
+      case Topped.Actual(AbstractReferenceValue.maybeNullArray(array, _)) => array.arraySize
       case Topped.Actual(_) => ???
 
   class Instance(proj: Project[URL], initStore: Map[abstractions.Addr, Value]) extends GenericInstance:

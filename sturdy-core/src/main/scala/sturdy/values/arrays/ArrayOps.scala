@@ -11,7 +11,7 @@ trait ArrayOps[ArrayIdentifier, Index, Value, ArrayValue, ArrayType, ArrayOpCont
 
   def set(ctx: ArrayOpContext)(array: ArrayValue, idx: Index, v: Value): JOption[J, Unit]
 
-  def length(ctx: ArrayOpContext)(array: ArrayValue): Value
+  def length(ctx: ArrayOpContext)(array: ArrayValue): Index
 
 case class Array[ArrayIdentifier, ArrayElemAddr, ArrayType, ArraySize](aid: ArrayIdentifier, vals: Seq[ArrayElemAddr], arrayType: ArrayType, arraySize: ArraySize)
 
