@@ -695,10 +695,10 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   private def createMultiArray(arrayType: ArrayType, dims: List[V])(using site: Site): V =
     val (size, elementSupplier) = dims match
-      case size :: Nil => (size, () => defaultValue(arrayType.componentType))
-      case size :: xs => (size, () => createMultiArray(arrayType.componentType.asArrayType, xs))
+      case size :: Nil => (size, defaultValue(arrayType.componentType))
+      case size :: xs => (size, createMultiArray(arrayType.componentType.asArrayType, xs))
       case Nil => throw IllegalStateException("dims.size must be >= 1 at all times")
-    arrayOps.makeArray(site)(arrayAlloc(site), elementSupplier(), arrayType, size)
+    arrayOps.makeArray(site)(arrayAlloc(site), elementSupplier, arrayType, size)
 
   def invokeWrapper(using Site)(obj: V, mth: Method, args: Seq[V])(using Fixed): V =
     invoke(mth, obj +: args)
