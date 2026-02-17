@@ -15,9 +15,9 @@ import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, StaticMethodDeclaration, getIdent}
+import sturdy.language.bytecode.algorithms.java6.{accessControl, resolveClass, resolveField}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.language.bytecode.util.ClassTypeValues
-import sturdy.language.bytecode.{accessControl, resolveClass, resolveField}
 import sturdy.values.MaybeChanged.Unchanged
 import sturdy.values.arrays.ArrayOps
 import sturdy.values.booleans.BooleanBranching
@@ -454,7 +454,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           if typeOps.typeOf(obj).isArrayType then
             throwClass(ClassTypeValues.LinkageError)
         }
-        val field = resolveField(mth.classFile.thisType, ident)(using project, except, throwClass)
+        val field = resolveField(ident, mth.classFile.thisType)(using throwClass)
         if field.isStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
         val v = objectOps.getField(site, mth.classFile)(obj, ident)
@@ -464,7 +464,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val ident = FieldIdent(declaringClass, name, fieldType)
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
-        val field = resolveField(mth.classFile.thisType, ident)(using project, except, throwClass)
+        val field = resolveField(ident, mth.classFile.thisType)(using throwClass)
         runAccessControl(field, mth)
         if field.isStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
@@ -500,7 +500,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // NEW opcode 187
       case NEW(classType) =>
-        checkAccessControlForRefType(classType, mth)
+        runAccessControl(classType, mth)
         if project.classHierarchy.isInterface(classType).isYesOrUnknown || getClassFile(classType).isAbstract then
           throwClass(ClassTypeValues.InstantiationError)
         ensureInitialization(mth)(classType)
@@ -511,7 +511,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         handleNewArray(componentType)
 
       case ANEWARRAY(componentType) =>
-        checkAccessControlForRefType(componentType, mth)
+        runAccessControl(componentType, mth)
         handleNewArray(componentType)
 
       case ARRAYLENGTH =>
@@ -534,7 +534,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {} {
           // not null
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass)
+          resolveClass(referenceType, mth.classFile.thisType)(using throwClass)
           typeOps.ifInstanceOf(objectref, referenceType) {} {
             throwClass(ClassType.ClassCastException)
           }
@@ -547,7 +547,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           stack.push(i32ops.integerLit(0))
         } {
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass)
+          resolveClass(referenceType, mth.classFile.thisType)(using throwClass)
           // not null
           typeOps.ifInstanceOf(objectref, referenceType) {
             stack.push(i32ops.integerLit(1))
@@ -575,7 +575,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
       // multianewarray opcode 197
       case MULTIANEWARRAY(arrayType, dimensions) =>
-        checkAccessControlForRefType(arrayType, mth)
+        runAccessControl(arrayType, mth)
         val dims = stack.popNOrAbort(dimensions)
         dims.foreach: dim =>
           branchOpsUnit.boolBranch(compareOps.lt(dim, i32ops.integerLit(0))) {
@@ -683,12 +683,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     }
     stack.push(arrayref)
 
-  private def runAccessControl(e: Field | Method | ClassFile, mth: Method)(using site: Site): Unit =
-    if !accessControl(e, mth.classFile.thisType)(using project.classHierarchy) then
+  private def runAccessControl(e: Field | Method | ReferenceType, mth: Method)(using Site): Unit =
+    if !accessControl(e, mth.classFile.thisType)(using throwClass) then
       throwClass(ClassTypeValues.IllegalAccessError)
-
-  private def checkAccessControlForRefType(refType: ReferenceType, mth: Method)(using Site): Unit =
-    runAccessControl(getClassFile(resolveClass(refType, mth.classFile.thisType)(using project.classHierarchy, project, except, throwClass)), mth)
 
   def createArray(size: V, componentType: FieldType)(using site: Site): V =
     arrayOps.makeArray(site)(arrayAlloc(site), defaultValue(componentType), ArrayType(componentType), size)
@@ -857,7 +854,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
 
   private def getStaticFieldAddr(caller: ClassType, mth: Method, ident: FieldIdent)(using Fixed, Site): Addr =
     ensureInitialization(mth)(ident.declaringClass)
-    val resolvedField = resolveField(caller, ident)(using project, except, throwClass)
+    val resolvedField = resolveField(ident, caller)(using throwClass)
     staticFieldTable.get((), resolvedField.getIdent).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
   enum AbortEval extends FailureKind:

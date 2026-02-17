@@ -1,4 +1,4 @@
-package sturdy.language.bytecode
+package sturdy.language.bytecode.algorithms.java24
 
 import org.opalj.bi.{ACC_PRIVATE, ACC_PROTECTED, ACC_PUBLIC}
 import org.opalj.br.analyses.Project

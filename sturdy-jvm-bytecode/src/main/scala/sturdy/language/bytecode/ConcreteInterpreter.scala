@@ -14,6 +14,7 @@ import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.fix.ConcreteFixpoint
 import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, StaticMethodDeclaration, getIdent}
+import sturdy.language.bytecode.algorithms.java6.{resolveField, resolveInterfaceMethod, resolveMethod, selectInterfaceMethod, selectSpecialMethod, selectVirtualMethod}
 import sturdy.language.bytecode.generic.*
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.values.arrays.*
@@ -119,8 +120,6 @@ object ConcreteInterpreter extends Interpreter:
 
   given ConcreteObjectOps
   (using alloc: Allocator[Addr, Site], store: Store[Addr, Value, NoJoin], project: Project[URL], failure: Failure, throwClass: ThrowClass): ObjectOps[FieldName, Addr, Value, ClassFile, RefValue, Site, Mth, StaticMth, I32, InvokeContext, FieldAccessContext, NoJoin] with
-    given hierarchy: ClassHierarchy = project.classHierarchy
-
     override def makeObject(oid: Addr, c: ClassFile, fields: Seq[(Value, Site, FieldName)]): RefValue =
       val fieldAddrs = fields.map { (v, site, name) =>
         val addr = alloc(site)
@@ -131,7 +130,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def getField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName): Value = obj match
       case RefValue.Object(_, _, fields) =>
-        val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
+        val resolvedField = resolveField(identifier, context._2.thisType)(using throwClass(context._1))
         val addr = fields.getOrElse(resolvedField.getIdent, failure.fail(BytecodeFailure.FieldNotFound, s"field $identifier not found"))
         store.read(addr).getOrElse(failure.fail(BytecodeFailure.UnboundField, s"$identifier not bound"))
       case RefValue.Null =>
@@ -141,7 +140,7 @@ object ConcreteInterpreter extends Interpreter:
 
     override def setField(context: FieldAccessContext)(obj: RefValue, identifier: FieldName, v: Value): JOptionC[Unit] = obj match
       case RefValue.Object(_, _, fields) =>
-        val resolvedField = resolveField(context._2.thisType, identifier)(using project, except, throwClass(context._1))
+        val resolvedField = resolveField(identifier, context._2.thisType)(using throwClass(context._1))
         if !fields.contains(resolvedField.getIdent) then
           JOptionC.none
         else
@@ -155,38 +154,36 @@ object ConcreteInterpreter extends Interpreter:
       case RefValue.Null => throwClass(context._1)(ClassType.NullPointerException)
       case RefValue.Object(_, cf, _) => context match
         case (site, InvokeType.Interface, callingClass) =>
-          if !hierarchy.isSubtypeOf(cf.thisType, staticMethod.declaringClass) then
+          if !project.classHierarchy.isSubtypeOf(cf.thisType, staticMethod.declaringClass) then
             throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
-          val resolvedMethod = resolveInterfaceMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
-          if resolvedMethod.isStatic then
-            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
-          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
+          val resolvedMethod = resolveInterfaceMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
+          val selectedMethod = selectInterfaceMethod(resolvedMethod, cf)(using throwClass(context._1))
           // java 6 requires the method to be public; later versions allow private as well
           if !selectedMethod.isPublic /* && !selectedMethod.isPrivate */ then
             throwClass(context._1)(ClassTypeValues.IllegalAccessError)
-          if selectedMethod.isAbstract || selectedMethod.isStatic then
+          if selectedMethod.isAbstract then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
         case (site, InvokeType.Virtual, callingClass) =>
-          val resolvedMethod = resolveMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
-          if resolvedMethod.isStatic then
-            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
-          val selectedMethod = selectMethod(cf.thisType, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
+          val resolvedMethod = resolveMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
+          // if resolvedMethod.isStatic then
+          //   throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          val selectedMethod = selectVirtualMethod(resolvedMethod, cf)(using throwClass(context._1))
           if selectedMethod.isAbstract then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
         case (site, InvokeType.Special(isInterfaceCall), callingClass) =>
           val resolvedMethod = if isInterfaceCall then
-            resolveInterfaceMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
+            resolveInterfaceMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
           else
-            resolveMethod(callingClass.thisType, staticMethod.declaringClass, staticMethod.name, staticMethod.descriptor)(using hierarchy, project, except, throwClass(context._1))
-          val c = if !resolvedMethod.isConstructor && !isInterfaceCall && callingClass.thisType.isSubtypeOf(staticMethod.declaringClass) && callingClass.superclassType.isDefined && ACC_SUPER.isSet(callingClass.accessFlags) then
-            callingClass.superclassType.get
-          else
-            staticMethod.declaringClass
-          val selectedMethod = selectSpecial(c, resolvedMethod)(using hierarchy, project, except, throwClass(context._1))
+            resolveMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
+          if resolvedMethod.isConstructor && resolvedMethod.classFile.thisType != staticMethod.declaringClass then
+            throwClass(context._1)(ClassTypeValues.NoSuchMethodError)
+          if resolvedMethod.isStatic then
+            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          val selectedMethod = selectSpecialMethod(resolvedMethod, cf, context._3)(using throwClass(context._1))
           if selectedMethod.isAbstract then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
