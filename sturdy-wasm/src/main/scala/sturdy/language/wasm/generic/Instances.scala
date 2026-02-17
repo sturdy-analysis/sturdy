@@ -44,7 +44,18 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
 
 class ModuleInstance(
                       val id: Option[Any] = None,
-                      val dwarfSyntaxTree: Option[DwarfSyntaxTree] = None //needed to access Dwarf Information
+                      /**
+                       * contains all information extracted from the dwarf sections
+                       */
+                      val dwarfSyntaxTree: Option[DwarfSyntaxTree] = None
+                      /**
+                       * data contains the startaddress and the bits describing the data. Sometimes, when a variable
+                       * is initialized the compiler will store the initial value of the variable in a data section.
+                       * the content of the data section is then accessed using e.g. an i64.load-"offset"-operation.
+                       * Using the offset we are able to determine which bytes are read and even distinguish between
+                       * loads from a data section and loads outside a data section.
+                       */
+                      //val dataContent: Vector[Data] = Vector.empty
                     ):
   override def equals(obj: Any): Boolean = obj match
     case that: ModuleInstance => (this.id, that.id) match

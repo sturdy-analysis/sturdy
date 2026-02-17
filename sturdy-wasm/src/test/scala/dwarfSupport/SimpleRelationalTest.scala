@@ -56,11 +56,12 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
   // These programs are not analyzed
   val excludedDirs: Set[String] = Set(
     "subprogramBody",
-    //"nestedfunction",
-    //"functionWithFlexibleArrayMember",
-    //"functionWithStructParameterPointer",
-    //"functionWithVLA",
-    //"functionWithStructParameter",
+    "nestedfunction",
+    "functionWithFlexibleArrayMember",
+    "functionWithStructParameterPointer",
+    "functionWithVLA",
+    "functionWithStructParameter",
+    "nestedFunctionReference",
   )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
@@ -81,8 +82,10 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
         it(s"${p.getFileName}") {
           if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm")) 
             cancel("timeout")
-            
-          val module = Parsing.fromBinary(p)
+
+          val module: swam.syntax.Module = Parsing.fromBinary(p)
+
+          //println(s"data loaded: ${module.data}")
           
           val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa))
           val memoryLogger = analysis.memoryLogger
