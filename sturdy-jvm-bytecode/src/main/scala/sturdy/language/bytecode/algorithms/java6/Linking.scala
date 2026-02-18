@@ -43,7 +43,9 @@ def resolveMethod(staticMethod: StaticMethodDeclaration, d: ClassType)(using thr
   (superClassFileIterator(cf).flatMap(_.methods).find: m =>
     m.name == staticMethod.name && m.descriptor == staticMethod.descriptor
   .orElse:
-    project.classHierarchy.superinterfaceTypes(staticMethod.declaringClass).get.flatMap(getCF(_).methods).find: m =>
+    val x = // project.classHierarchy.superinterfaceTypes(staticMethod.declaringClass).get
+      project.classHierarchy.allSuperclassesIterator(staticMethod.declaringClass).filter(_.isInterfaceDeclaration).flatMap(_.methods)
+    x.find: m =>
       m.name == staticMethod.name && m.descriptor == staticMethod.descriptor) match
     case None =>
       throwClass(ClassTypeValues.NoSuchMethodError)
@@ -60,13 +62,15 @@ def resolveInterfaceMethod(staticMethod: StaticMethodDeclaration, d: ClassType)(
   val cf = getCF(staticMethod.declaringClass)
   if !cf.isInterfaceDeclaration then
     throwClass(ClassTypeValues.IncompatibleClassChangeError)
-  val x = project.classHierarchy.superinterfaceTypes(staticMethod.declaringClass).get
-  (x.add(ClassType.Object).flatMap(getCF(_).methods).find: m =>
-    m.name == staticMethod.name && m.descriptor == staticMethod.descriptor) match
-    case None =>
-      throwClass(ClassTypeValues.NoSuchMethodError)
-    case Some(method) =>
-      method
+  cf.methods.find: m =>
+    m.name == staticMethod.name && m.descriptor == staticMethod.descriptor
+  .getOrElse:
+    (project.classHierarchy.superinterfaceTypes(staticMethod.declaringClass).get.add(ClassType.Object).flatMap(getCF(_).methods).find: m =>
+      m.name == staticMethod.name && m.descriptor == staticMethod.descriptor) match
+      case None =>
+        throwClass(ClassTypeValues.NoSuchMethodError)
+      case Some(method) =>
+        method
 
 // §5.4.4
 @tailrec
@@ -90,7 +94,7 @@ def accessControl(e: ReferenceType | Field | Method, d: ClassType)(using ClassTy
       case Some(ACC_PROTECTED) =>
         c.packageName == d.packageName || d.isSubtypeOf(c)(using project.classHierarchy)
       case Some(ACC_PRIVATE) =>
-        c == d
+        c == d || getCF(d).nestedClasses.contains(c)
       case None => // package-private
         c.packageName == d.packageName
 
@@ -105,17 +109,19 @@ def selectInterfaceMethod(resolvedMethod: Method, dynamicClass: ClassFile)(using
 
 
 def selectSpecialMethod(resolvedMethod: Method, dynamicClass: ClassFile, currentClass: ClassFile)(using throwClass: ClassType => Nothing)(using project: Project[URL]): Method =
-  if !(ACC_SUPER.isSet(currentClass.accessFlags) && currentClass.thisType.isSubtypeOf(resolvedMethod.classFile.thisType)(using project.classHierarchy) && !resolvedMethod.isInitializer) then
-    return resolvedMethod
-  // same algorithm
-  selectInterfaceMethod(resolvedMethod, dynamicClass)
+  if ACC_SUPER.isSet(currentClass.accessFlags) && currentClass.thisType.isSubtypeOf(resolvedMethod.classFile.thisType)(using project.classHierarchy) && !resolvedMethod.isInitializer then
+    superClassFileIterator(getCF(currentClass.superclassType.get)).flatMap(_.methods).find: m =>
+      m.isNotStatic && m.name == resolvedMethod.name && m.descriptor == resolvedMethod.descriptor
+    .getOrElse:
+      throwClass(ClassTypeValues.AbstractMethodError)
+  else
+    resolvedMethod
 
 def selectVirtualMethod(resolvedMethod: Method, dynamicClass: ClassFile)(using throwClass: ClassType => Nothing)(using Project[URL]): Method =
-  dynamicClass.methods.find: m =>
-    m.isNotStatic && m.name == resolvedMethod.name && m.descriptor == resolvedMethod.descriptor && accessControl(m, dynamicClass.thisType)
-  .orElse:
-    dynamicClass.superclassType.map(c => selectVirtualMethod(resolvedMethod, getCFUnchecked(c)))
-  .getOrElse:
+  superClassFileIterator(dynamicClass).flatMap: c =>
+    c.methods.find: m =>
+      m.isNotStatic && m.name == resolvedMethod.name && m.descriptor == resolvedMethod.descriptor && accessControl(resolvedMethod, c.thisType)
+  .nextOption().getOrElse:
     throwClass(ClassTypeValues.AbstractMethodError)
 
 // throws scala exception on failure
@@ -127,7 +133,7 @@ def getCF(c: ReferenceType)(using project: Project[URL], throwClass: ClassType =
   project.classFile(c.mostPreciseClassType).getOrElse:
     throwClass(ClassTypeValues.NoClassDefFoundError)
 
-// reflexive
+// the iterator is reflexive
 def superClassFileIterator(cf: ClassFile)(using Project[URL], ClassType => Nothing): Iterator[ClassFile] = new Iterator[ClassFile]:
   var state: Option[ClassFile] = Some(cf)
 

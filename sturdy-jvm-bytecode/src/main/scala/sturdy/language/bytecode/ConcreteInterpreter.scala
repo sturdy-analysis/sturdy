@@ -167,18 +167,16 @@ object ConcreteInterpreter extends Interpreter:
 
         case (site, InvokeType.Virtual, callingClass) =>
           val resolvedMethod = resolveMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
-          // if resolvedMethod.isStatic then
-          //   throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
+          if resolvedMethod.isStatic then
+            throwClass(context._1)(ClassTypeValues.IncompatibleClassChangeError)
           val selectedMethod = selectVirtualMethod(resolvedMethod, cf)(using throwClass(context._1))
           if selectedMethod.isAbstract then
             throwClass(context._1)(ClassTypeValues.AbstractMethodError)
           invoke(obj, selectedMethod, args)
 
-        case (site, InvokeType.Special(isInterfaceCall), callingClass) =>
-          val resolvedMethod = if isInterfaceCall then
-            resolveInterfaceMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
-          else
-            resolveMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
+        // java 6 does not care whether the method is an interface call
+        case (site, InvokeType.Special(_), callingClass) =>
+          val resolvedMethod = resolveMethod(staticMethod, callingClass.thisType)(using throwClass(context._1))
           if resolvedMethod.isConstructor && resolvedMethod.classFile.thisType != staticMethod.declaringClass then
             throwClass(context._1)(ClassTypeValues.NoSuchMethodError)
           if resolvedMethod.isStatic then
