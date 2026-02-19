@@ -120,7 +120,7 @@ object RelationalAnalysis extends Interpreter,
     initStore: InitStore,
     stackConfig: StackConfig,
     callSites: Int,
-    iterConfig: fix.iter.Config = fix.iter.Config.Innermost
+    iterConfig: fix.iter.Config = fix.iter.Config.Outermost
   ) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
     given tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
@@ -278,10 +278,12 @@ object RelationalAnalysis extends Interpreter,
     final override val fixpoint =
       fix.log(controlEventLogger(this),
         callSiteSensitive(callSites,
-          fix.log(cfgLogger.logger,
-            fix.dispatch(isFunOrWhile, Seq(
-              iterConfig.get(observedStackConfig), iterConfig.get(observedStackConfig)
-            ))
+          fix.log(domLogger,
+            fix.log(cfgLogger.logger,
+              fix.dispatch(isFunOrWhile, Seq(
+                iterConfig.get(observedStackConfig), iterConfig.get(observedStackConfig)
+              ))
+            )
           )
         )
       ).fixpoint

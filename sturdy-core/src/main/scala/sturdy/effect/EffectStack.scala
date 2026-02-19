@@ -58,10 +58,11 @@ class EffectStack(_effects: => Effect,
   override def getInState(dom: Any): In = inEffects(dom).getState
   override def getOutState(dom: Any): Out = outEffects(dom).getState
   override def setAllState(st: All): Unit = 
-    effects.setState(st.asInstanceOf)
+    effects.setStateNonMonotonically(st.asInstanceOf)
     repeating()
-  override def setInState(dom: Any, in: In): Unit = inEffects(dom).setState(in.asInstanceOf)
+  override def setInState(dom: Any, in: In): Unit = inEffects(dom).setStateNonMonotonically(in.asInstanceOf)
   override def setOutState(dom: Any, out: Out): Unit = outEffects(dom).setState(out.asInstanceOf)
+  override def setOutStateNonMonotonically(dom: Any, out: Out): Unit = outEffects(dom).setStateNonMonotonically(out.asInstanceOf)
 
   final override type State = All
   override def getState: State = getAllState

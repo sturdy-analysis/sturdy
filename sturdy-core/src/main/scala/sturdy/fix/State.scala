@@ -15,6 +15,7 @@ trait State:
 
   def getOutState(dom: Any): Out
   def setOutState(dom: Any, out: Out): Unit
+  def setOutStateNonMonotonically(dom: Any, out: Out): Unit
 
   def joinIn[Body](using Join[Body])(dom: Any): Join[(Body,In)]
   def widenIn[Body](using Widen[Body])(dom: Any): Widen[(Body,In)]

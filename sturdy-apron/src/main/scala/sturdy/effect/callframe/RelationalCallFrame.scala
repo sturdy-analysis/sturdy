@@ -3,7 +3,7 @@ package sturdy.effect.callframe
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, StatelessRelationalExpr, given}
-import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
+import sturdy.data.{JOption, JOptionA, JOptionC, MapEquals, NoJoin, WithJoin, given}
 import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
@@ -123,13 +123,20 @@ final class RelationalCallFrame
       .getOrElse(throw new IllegalStateException(s"No name bound to index $idx not bound in call frame $this"))
       ._1
 
-  override type State = addressCallFrame.State
+  override type State = RelationalCallFrameState
+
+  case class RelationalCallFrameState(addressCallFrameState: addressCallFrame.State):
+    override def equals(obj: Any): Boolean =
+      obj match {
+        case other: RelationalCallFrameState => MapEquals(this.addressCallFrameState, other.addressCallFrameState)
+        case _ => false
+      }
 
   override def getState: State =
-    addressCallFrame.getState
+    RelationalCallFrameState(addressCallFrame.getState)
 
   override def setState(state: State): Unit =
-    addressCallFrame.setState(state)
+    addressCallFrame.setState(state.addressCallFrameState)
 
   override def setBottom: Unit =
     addressCallFrame.setBottom
@@ -144,15 +151,15 @@ final class RelationalCallFrame
 
   override def stackWiden: StackWidening[State] =
     (stack: List[State], call: State) =>
-//      Unchanged(call)
-      if(stack.contains(call))
-        Unchanged(call)
-      else
-        Changed(call)
+      Unchanged(call)
+//      if(stack.contains(call))
+//        Unchanged(call)
+//      else
+//        Changed(call)
 
   def combineCallFrame[W <: Widening]: Combine[State, W] = (s1: State, s2: State) =>
     var changed = false
-    val joined = s1.unionWith(s2, (idx, virts1, virts2) =>
+    val joined = s1.addressCallFrameState.unionWith(s2.addressCallFrameState, (idx, virts1, virts2) =>
       val variable = addressCallFrame.getFrameNames.find(_._2 == idx).get._1
       val phys1 = apronState.relationalStore.withLeftState(st => (virts1.physicalAddressesPure(st.addressTranslationState),st))
       val phys2 = apronState.relationalStore.withRightState(st => (virts2.physicalAddressesPure(st.addressTranslationState),st))
@@ -179,7 +186,7 @@ final class RelationalCallFrame
       }
     )
     
-    MaybeChanged(joined, changed)
+    MaybeChanged(RelationalCallFrameState(joined), changed)
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     addressCallFrame.getState.iterator.flatMap(valueIterator)

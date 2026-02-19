@@ -152,7 +152,15 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.widenClosingOver(using effect.widenClosingOver))((unit,state1),(unit,state2)).map(_._2)
   override def joinClosingOver[Codom](using Join[Codom]): Join[(Codom, State)] = combine[Codom,Widening.No](recencyStore.joinClosingOver(using effect.joinClosingOver))
   override def widenClosingOver[Codom](using Widen[Codom]): Widen[(Codom, State)] = combine[Codom,Widening.Yes](recencyStore.widenClosingOver(using effect.widenClosingOver))
-  override def stackWiden: StackWidening[State] = (stack: List[State], call: State) => widen(stack.head, call)
+  override def stackWiden: StackWidening[State] = (stack: List[State], call: State) =>
+    recencyStore.widenClosingOver[List[effect.State]](using { case (es, List(call)) =>
+      effect.stackWiden(es,call).map(List(_))
+    })(
+      (stack.map(_.effectState), stack.head.recencyStoreState.asInstanceOf[recencyStore.State]),
+      (List(call.effectState), call.recencyStoreState.asInstanceOf[recencyStore.State])
+    ).map { case (List(joinedEffectState), joinedRecencyStoreState) =>
+      RecencyClosureState(recencyStore, joinedRecencyStoreState, joinedEffectState)
+    }
 
   def combine[Codom, W <: Widening](combineAll: Combine[((Codom, effect.State), recencyStore.State), W]): Combine[(Codom,State), W] =
     (v1: (Codom,State), v2: (Codom,State)) =>

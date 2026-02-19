@@ -72,13 +72,22 @@ case class RecencyRegion(recent: BitSet, old: BitSet, failed: BitSet):
       (if(old.isEmpty) "" else s", old: ${sturdy.util.BitSet.toString(old)}") +
       (if(failed.isEmpty) "" else s", failed: ${sturdy.util.BitSet.toString(failed)}") + "]"
 
-given CombineRecencyRegion[W <: Widening]: Combine[RecencyRegion, W] =
+given JoinRecencyRegion: Join[RecencyRegion] =
   (region1: RecencyRegion, region2: RecencyRegion) =>
     val joinedFailed = region1.failed ++ region2.failed
     val joinedRecent = (region1.recent ++ region2.recent) -- joinedFailed
     val joinedOld = (region1.old ++ region2.old) -- joinedFailed
     val joinedRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
     MaybeChanged(joinedRegion, joinedRegion.recency != region1.recency)
+
+given WidenRecencyRegion: Widen[RecencyRegion] =
+  (oldRegion: RecencyRegion, newRegion: RecencyRegion) =>
+    val joinedFailed = oldRegion.failed ++ newRegion.failed
+    val joinedRecent = (oldRegion.recent ++ newRegion.recent) -- joinedFailed
+    val joinedOld = (oldRegion.old ++ newRegion.old) -- joinedFailed
+    val joinedRegion = RecencyRegion(joinedRecent, joinedOld, joinedFailed)
+    MaybeChanged(joinedRegion, joinedRegion.recency != oldRegion.recency)
+
 
 trait AddressTranslation[Context: Finite] extends Effect:
   var fresh: mutable.Map[Context,Int] = mutable.Map()
@@ -336,9 +345,13 @@ case class AddressTranslationState[Context](mapping: Map[Context, RecencyRegion]
   override def toString: String =
     s"AddressTranslationState(${hashCode()}, ${mapping.mkString(", ")})"
 
-given AddressTranslationStateCombine[Ctx: Finite, W <: Widening]: Combine[AddressTranslationState[Ctx], W] =
+given JoinAddressTranslationStateC[Ctx: Finite]: Join[AddressTranslationState[Ctx]] =
   (s1: AddressTranslationState[Ctx], s2: AddressTranslationState[Ctx]) =>
-    Combine[Map[Ctx, RecencyRegion], W](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
+    Join[Map[Ctx, RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
+
+given WidenAddressTranslationState[Ctx: Finite]: Widen[AddressTranslationState[Ctx]] =
+  (s1: AddressTranslationState[Ctx], s2: AddressTranslationState[Ctx]) =>
+    Widen[Map[Ctx, RecencyRegion]](s1.mapping, s2.mapping).map(AddressTranslationState.apply)
 
 
 trait HasAddressTranslationState[Context, State]:
@@ -355,10 +368,6 @@ given HasAddressTranslationStateId[Context]: HasAddressTranslationState[Context,
     f(state)
 
 case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTranslation[Context]) extends AbstractAddr[VirtualAddress[Context]]:
-
-  if (toString == "r@map_15")
-    println("break")
-
   def physical: PowPhysicalAddress[Context] =
     addressTrans(ctx, n)
   def recency: PowRecency =
@@ -385,8 +394,9 @@ case class VirtualAddress[Context](ctx: Context, n: Int, addressTrans: AddressTr
 given VirtualAddressOrdering[Context : Ordering]: Ordering[VirtualAddress[Context]] =
   Ordering.by(virt => virt.identifier)
 
-given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] =
-  (virt1: VirtualAddress[Context], virt2: VirtualAddress[Context]) =>
+given VirtualAddressJoin[Context]: Join[VirtualAddress[Context]] = joinVirtualAdresses(_,_)
+
+def joinVirtualAdresses[Context](virt1: VirtualAddress[Context], virt2: VirtualAddress[Context]): MaybeChanged[VirtualAddress[Context]] =
     if(virt1.ctx == virt2.ctx) {
       val addrTrans = virt1.addressTrans
       import addrTrans.given
@@ -516,7 +526,7 @@ def combinePowVirtualAddress[W <: Widening, Context](v1: PowVirtualAddress[Conte
     val joined = v1.union(v2)
     val phys1 = v1.physicalAddressesPure(joined.addressTranslation.leftAddressTranslationState)
     val phys2 = v2.physicalAddressesPure(joined.addressTranslation.rightAddressTranslationState)
-    MaybeChanged(joined, ! phys1.subsetOf(phys2))
+    MaybeChanged(joined, ! phys2.subsetOf(phys1))
 
 
 given PowVirtAddrOrdering[Context]: PartialOrder[PowVirtualAddress[Context]] with
