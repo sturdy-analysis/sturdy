@@ -350,11 +350,12 @@
     (call $assert (i32.eq (local.get $z) (i32.add (local.get $x) (local.get $y))))
   )
 
-  (func $gauss-sum (param $x i32) (result i32)
-    (if (result i32) (i32.le_s (local.get $x) (i32.const 0))
-      (then (i32.const 0))
-      (else (i32.add (local.get $x) (call $gauss-sum (i32.sub (local.get $x) (i32.const -1)))))
+  (func $gauss-sum (export "gauss-sum") (param $x i32) (result i32) (local $y i32)
+    (if (i32.le_s (local.get $x) (i32.const 0))
+      (then (local.set $y (i32.const 0)))
+      (else (local.set $y (i32.add (local.get $x) (call $gauss-sum (i32.sub (local.get $x) (i32.const 1))))))
     )
+    (return (local.get $y))
   )
 
   (func (export "gauss_sum_positive") (local $x i32) (local $y i32)

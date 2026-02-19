@@ -516,7 +516,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      val state = effectStack.getInState(FixIn.Exception)
+      val state = effectStack.getOutState(FixIn.Exception)
       throws(WasmException(JumpTarget.Return, operands, state))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
@@ -536,7 +536,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    val state = effectStack.getInState(FixIn.Exception)
+    val state = effectStack.getOutState(FixIn.Exception())
     throws(WasmException(JumpTarget.Jump(labelIndex), operands, state))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
@@ -564,7 +564,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case WasmException(JumpTarget.Jump(labelIndex), operands, state) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
-              effectStack.setInState(FixIn.Exception, state)
+              effectStack.setOutState(FixIn.Exception, state)
               assertFrameSize(arities.jumpOperands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
@@ -616,7 +616,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       ex match {
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
-          effectStack.setInState(FixIn.Exception, state)
+          effectStack.setOutState(FixIn.Exception(), state)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
