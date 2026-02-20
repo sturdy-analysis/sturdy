@@ -15,7 +15,7 @@ import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.{EffectList, EffectStack}
 import sturdy.fix
 import sturdy.language.bytecode.abstractions.{ArrayOpContext, FieldAccessContext, FieldIdent, InvokeContext, InvokeType, Site, StaticMethodDeclaration, getIdent}
-import sturdy.language.bytecode.algorithms.java6.{accessControl, resolveClass, resolveField}
+import sturdy.language.bytecode.algorithms.java6.{accessControl, resolveClass, resolveField, resolveInterfaceMethod, resolveMethod}
 import sturdy.language.bytecode.generic.FixIn.Eval
 import sturdy.language.bytecode.util.ClassTypeValues
 import sturdy.values.MaybeChanged.Unchanged
@@ -454,7 +454,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           if typeOps.typeOf(obj).isArrayType then
             throwClass(ClassTypeValues.LinkageError)
         }
-        val field = resolveField(ident, mth.classFile.thisType)(using throwClass)
+        val field = resolveField(ident, mth.classFile.thisType)
         if field.isStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
         val v = objectOps.getField(site, mth.classFile)(obj, ident)
@@ -464,7 +464,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         val ident = FieldIdent(declaringClass, name, fieldType)
         val value = stack.popOrAbort()
         val obj = stack.popOrAbort()
-        val field = resolveField(ident, mth.classFile.thisType)(using throwClass)
+        val field = resolveField(ident, mth.classFile.thisType)
         runAccessControl(field, mth)
         if field.isStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
@@ -474,16 +474,18 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         objectOps.setField(site, mth.classFile)(obj, ident, value).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
       // Invoke Functions opcode 182 - 186
-      case INVOKESTATIC(declaringClass, _, name, methodDescriptor) =>
-        ensureInitialization(mth)(declaringClass)
-        val cf = getClassFile(declaringClass)
-        val candidate = findMethod(cf, name, methodDescriptor).get
-        if candidate.isAbstract || candidate.isNotStatic then
+      case INVOKESTATIC(declaringClass, isInterface, name, descriptor) =>
+        // correct java 6 semantics would require no special handling for interface calls and to always use resolveMethod.
+        // however, this breaks our tests and aligning the semantics with later java versions is the easiest solution here
+        val resolvedMethod = if isInterface then
+          resolveInterfaceMethod(StaticMethodDeclaration(declaringClass, name, descriptor), mth.classFile.thisType)
+        else resolveMethod(StaticMethodDeclaration(declaringClass, name, descriptor), mth.classFile.thisType)
+        ensureInitialization(mth)(resolvedMethod.classFile.thisType)
+        if resolvedMethod.isAbstract || resolvedMethod.isNotStatic then
           throwClass(ClassTypeValues.IncompatibleClassChangeError)
-        val numArgs = methodDescriptor.parametersCount
-        val args = stack.popNOrAbort(numArgs)
-        val ret = invoke(candidate, args)
-        if !methodDescriptor.returnType.isVoidType then
+        val args = stack.popNOrAbort(descriptor.parametersCount)
+        val ret = invoke(resolvedMethod, args)
+        if !descriptor.returnType.isVoidType then
           stack.push(ret)
 
       case INVOKEVIRTUAL(declaringClass, name, methodDescriptor) =>
@@ -534,7 +536,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         branchOpsUnit.boolBranch(objectOps.isNull(objectref)) {} {
           // not null
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using throwClass)
+          resolveClass(referenceType, mth.classFile.thisType)
           typeOps.ifInstanceOf(objectref, referenceType) {} {
             throwClass(ClassType.ClassCastException)
           }
@@ -547,7 +549,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
           stack.push(i32ops.integerLit(0))
         } {
           // this performs access control, the type should be resolved by opal
-          resolveClass(referenceType, mth.classFile.thisType)(using throwClass)
+          resolveClass(referenceType, mth.classFile.thisType)
           // not null
           typeOps.ifInstanceOf(objectref, referenceType) {
             stack.push(i32ops.integerLit(1))
@@ -650,7 +652,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
         // static initializers are void
         val _ = invoke(mth, Seq())
       } {
-        case JvmExcept.ThrowObject(_) =>
+        case JvmExcept.ThrowObject(obj) =>
           classInitializationState.set((), classType, InitializationResult.Failure)
           // TODO: throw correct error according to step 11
           throwClass(ClassType.ExceptionInInitializerError)
@@ -684,7 +686,7 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     stack.push(arrayref)
 
   private def runAccessControl(e: Field | Method | ReferenceType, mth: Method)(using Site): Unit =
-    if !accessControl(e, mth.classFile.thisType)(using throwClass) then
+    if !accessControl(e, mth.classFile.thisType) then
       throwClass(ClassTypeValues.IllegalAccessError)
 
   def createArray(size: V, componentType: FieldType)(using site: Site): V =
@@ -846,15 +848,9 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     val v2 = stack.popOrAbort()
     handleIfInst(cmpOp(_, v2), target)
 
-  // tries to find a method in the given class file or the first one while moving upwards in the inheritance hierarchy
-  private def findMethod(cf: ClassFile, name: String, descriptor: MethodDescriptor)(using Site): Option[Method] =
-    cf.findMethod(name, descriptor).orElse:
-      cf.superclassType.flatMap: superCf =>
-        findMethod(getClassFile(superCf), name, descriptor)
-
   private def getStaticFieldAddr(caller: ClassType, mth: Method, ident: FieldIdent)(using Fixed, Site): Addr =
     ensureInitialization(mth)(ident.declaringClass)
-    val resolvedField = resolveField(ident, caller)(using throwClass)
+    val resolvedField = resolveField(ident, caller)
     staticFieldTable.get((), resolvedField.getIdent).option(fail(BytecodeFailure.FieldNotFound, ident.toString))(identity)
 
   enum AbortEval extends FailureKind:
@@ -863,10 +859,10 @@ trait GenericInterpreter[V, Addr, ObjType, ObjRep, TypeRep, ExcV, J[_] <: MayJoi
     // native method encountered
     case Native(m: Method)
 
-  given throwClass: ThrowClass = site => classType =>
-    val exc = createObject(classType)(using site)
+  private implicit def throwClass(c: ClassType)(using site: Site): Nothing =
+    val exc = createObject(c)
     except.throws(JvmExcept.ThrowObject(exc))
 
-  // make the given accessible by having site as an implicit parameter
-  private def throwClass(c: ClassType)(using site: Site): Nothing =
-    throwClass(site)(c)
+  // used by concrete/abstract interpreters
+  given throwClass: ThrowClass = site => classType =>
+    throwClass(classType)(using site)

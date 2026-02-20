@@ -40,13 +40,11 @@ def resolveMethod(staticMethod: StaticMethodDeclaration, d: ClassType)(using thr
   val cf = getCF(staticMethod.declaringClass)
   if cf.isInterfaceDeclaration then
     throwClass(ClassTypeValues.IncompatibleClassChangeError)
-  (superClassFileIterator(cf).flatMap(_.methods).find: m =>
-    m.name == staticMethod.name && m.descriptor == staticMethod.descriptor
-  .orElse:
-    val x = // project.classHierarchy.superinterfaceTypes(staticMethod.declaringClass).get
-      project.classHierarchy.allSuperclassesIterator(staticMethod.declaringClass).filter(_.isInterfaceDeclaration).flatMap(_.methods)
-    x.find: m =>
-      m.name == staticMethod.name && m.descriptor == staticMethod.descriptor) match
+  superClassFileIterator(cf).flatMap(_.findMethod(staticMethod.name, staticMethod.descriptor))
+  .nextOption().orElse:
+    project.classHierarchy.allSuperclassesIterator(staticMethod.declaringClass).filter(_.isInterfaceDeclaration).flatMap(_.findMethod(staticMethod.name, staticMethod.descriptor))
+      .nextOption()
+  match
     case None =>
       throwClass(ClassTypeValues.NoSuchMethodError)
     case Some(method) =>
@@ -106,7 +104,6 @@ def selectInterfaceMethod(resolvedMethod: Method, dynamicClass: ClassFile)(using
     dynamicClass.superclassType.map(c => selectInterfaceMethod(resolvedMethod, getCFUnchecked(c)))
   .getOrElse:
     throwClass(ClassTypeValues.AbstractMethodError)
-
 
 def selectSpecialMethod(resolvedMethod: Method, dynamicClass: ClassFile, currentClass: ClassFile)(using throwClass: ClassType => Nothing)(using project: Project[URL]): Method =
   if ACC_SUPER.isSet(currentClass.accessFlags) && currentClass.thisType.isSubtypeOf(resolvedMethod.classFile.thisType)(using project.classHierarchy) && !resolvedMethod.isInitializer then
