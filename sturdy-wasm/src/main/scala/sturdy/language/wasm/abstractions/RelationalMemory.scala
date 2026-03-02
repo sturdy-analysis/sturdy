@@ -19,7 +19,7 @@ import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
-import swam.binary.custom.dwarf.{DW_OP_fbreg, CConcept, CType, DW_OP_addr, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, Variable, unknownType}
+import swam.binary.custom.dwarf.{CConcept, CType, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, Variable, UnknownType}
 import swam.binary.custom.dwarf.llvm.DWARFContext
 
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
@@ -52,6 +52,7 @@ trait RelationalMemory extends RelationalValues:
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
+    println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     val functions = parseFunctionFrames
     for{
       tableBase <- intervalOfExport("__table_base")
@@ -89,6 +90,7 @@ trait RelationalMemory extends RelationalValues:
     
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
       println("DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
+      println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     } else {
       println("DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
     }
@@ -108,8 +110,8 @@ trait RelationalMemory extends RelationalValues:
             interval = new apron.Interval(currGlobalStartAddr, currGlobalStartAddr + currGlobalSize - 1)
           } yield (name, interval, cType)
           ).toVector
-        //globals = globals.prepended((".rodata", dataStart, unknownType()))
-        //globals = globals.prepended(("__data_end", dataEnd, unknownType()))
+        //globals = globals.prepended((".rodata", dataStart, unknownType))
+        //globals = globals.prepended(("__data_end", dataEnd, unknownType))
 
         globals = globals.sortBy((_name, interval, cType) => interval.inf())
 
@@ -139,7 +141,7 @@ trait RelationalMemory extends RelationalValues:
         var globalRanges = globalStarts.zip(globalStarts.tail).map {
           case ((name, iv),(_, ivNext)) =>
             val end = apronState.getInterval(ApronExpr.intSub(ApronExpr.constant(ivNext, I32Type), ApronExpr.lit(1, I32Type), I32Type))
-            (name, Interval(iv.inf(), end.inf()), unknownType())
+            (name, Interval(iv.inf(), end.inf()), UnknownType)
         }
 
         if(globalRanges.headOption.exists((name, iv, cType) => name == ".rodata" && iv.isBottom))
@@ -172,7 +174,7 @@ trait RelationalMemory extends RelationalValues:
                   DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
                     case Some(DW_OP_fbreg(offset)) =>                   
                       val size = dwarfSyntaxTree.getTypeSize(paramType)
-                      Some((name, Interval(offset, offset + size), paramType))
+                      Some((name, Interval(offset, offset + size - 1), paramType))
                     case None => //parameter exists, has a location, but the location does not describe an address in the functions stack frame (usually a wasm local instead)
                       None
                   }
@@ -184,17 +186,18 @@ trait RelationalMemory extends RelationalValues:
             def makeStackFrameFromBody(body: List[CConcept]): List[(String, Interval, CType)] = {
               body match {
                 case Nil => Nil
-                case Variable(name, varType, location) :: rest => 
+                case variable@(Variable(name, varType, location)) :: rest =>
                   if (location.isEmpty) {
                     makeStackFrameFromBody(rest)
                   } else if (location.length >= 2) {
                     //this usually also means the variable is not stored in the stack frame but instead in a wasm local and or inlined into the code
-                    sys.error(s"variable <$name> in function body has multiple locations: $location")
+                    sys.error(s"variable <$name> in function body has multiple locations: $location, this is not a fatal error but instead an extra case that still needs to be implemented")
                   } else {
                     DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
                       case Some(DW_OP_fbreg(offset)) =>
-                        val size = dwarfSyntaxTree.getTypeSize(varType)
-                        (name, Interval(offset, offset + size), varType) :: makeStackFrameFromBody(rest)
+                        println(variable)
+                        val size = CType.getTypeSize(varType)
+                        (name, Interval(offset, offset + size - 1), varType) :: makeStackFrameFromBody(rest)
                       case None => makeStackFrameFromBody(rest)
                     }
                   }
@@ -524,7 +527,7 @@ trait RelationalMemory extends RelationalValues:
         ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
         ApronBool.Constraint(ApronCons.lt(regionStart, readEnd))
       ))
-
+    //TODO: change here to normalize
     override def computeStartAddrAndSize(ctx: ByteMemoryCtx, startAddr: Addr, byteSize: Int): (Addr, Size) =
       val default = (startAddr, ApronExpr.lit(byteSize, I32Type): Size)
       optionStaticMemoryLayout match
@@ -545,10 +548,25 @@ trait RelationalMemory extends RelationalValues:
                 )
                 .getOrElse(default)
             case (_, stackAddr: StackAddr) =>
-              (
-                stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
-                apronState.toNonRelational(ApronExpr.intAdd(stackAddr.otherOffset, ApronExpr.lit(byteSize, I32Type), I32Type))
-              )
+              val _FLAG_normalizeComputeStartAddrAndSize = false
+
+
+              if !_FLAG_normalizeComputeStartAddrAndSize then { // Original Code
+                (
+                  stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
+                  apronState.toNonRelational(
+                    ApronExpr.intAdd(
+                      stackAddr.otherOffset,
+                      ApronExpr.lit(
+                        byteSize,
+                        I32Type),
+                      I32Type)
+                  )
+                )
+              } else { // Code with normalization
+                ???
+              }
+
             case (_, heapAddr: HeapAddr) =>
               (
                 heapAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
@@ -634,10 +652,42 @@ trait RelationalMemory extends RelationalValues:
           } yield ByteMemoryCtx.Global(name)
 
         case StackAddr(functions, frameSize, stackPointer, initialOffset, _) =>
-          for {
-            fun <- functions.set
-            offset <- if(initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
-          } yield ByteMemoryCtx.Stack(fun, offset)
+          //TODO: add global flag to enable/disable normalization for Alloc0
+          val _FLAG_normalizeAlloc0 = true
+
+
+          if !_FLAG_normalizeAlloc0 then { //Original Code
+            for {
+              fun <- functions.set
+              offset <- if(initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
+            } yield ByteMemoryCtx.Stack(fun, offset)
+          } else { // Code with normalization
+            for {
+              fun <- functions.set
+              offset <- if (initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
+              stackAddr <- {
+                optionStaticMemoryLayout match {
+                  case Some(sml) => sml.functionFrames.get(fun) match {
+                    case Some(functionframe) =>
+                      val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(iv, offset))
+                      candidates.toList match {
+                        case (_, iv, _) :: Nil =>
+                          val (lower, upper) = stackFrameIntervalToIntBounds(iv)
+                          Iterator(
+                            ByteMemoryCtx.Stack(
+                              function = fun, offset = lower
+                            )
+                          )
+                        case Nil => Iterator.empty
+                        case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
+                      }
+                    case None => sys.error(s"no stack frame for function $fun found.")
+                  }
+                  case None => sys.error(s"staticmemorylayout not present but normalize alloc0 is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
+                }
+              }
+            } yield stackAddr
+          }
 
         case HeapAddr(reference, _, initialOffset, _) =>
           val sites = refOps.deref(reference)
@@ -669,7 +719,32 @@ trait RelationalMemory extends RelationalValues:
           if const.cmp(globalRange) == 0 || const.cmp(globalRange) == 1 // if const is equal or included in globalRange
         } yield ByteMemoryCtx.Global(globalName)
 
-        if(constantMatchesGlobal.size == 1) {
+        if(constantMatchesGlobal.size == 1) {  /**
+   * TODO write this comment
+   */
+  def normalizeOffset(funcId: FuncId, givenOffset: Int): Int = {
+    optionStaticMemoryLayout match {
+      case Some(staticMemoryLayout: StaticMemoryLayout) =>
+        staticMemoryLayout.functionFrames.get(funcId) match {
+          case Some(stackframe) =>
+            // candidates is a list containing all valid intervals where the givenOffset fits into
+            // candidates is expected to have length 1 since multiple variables should not be stored in the same
+            // frame location
+            val candidates = stackframe.frame.filter((_, iv, _) => intervalContains(iv, givenOffset))
+            candidates.toList match {
+              case (_, iv, _) :: Nil =>
+                val (lower, upper) = stackFrameIntervalToIntBounds(iv)
+                lower // lower interval bound is the starting address of the variable.
+              case head :: tail => sys.error(s"multiple candidates found: variables in the stackframe are overlapping: ${candidates.map((_, iv, _) => iv)}")
+              case Nil => sys.error(s"no candidate found. unable to normalize $givenOffset for function $funcId")
+            }
+          case None => sys.error(s"staticMemoryLayout did not contain stackframeinformation for function: $funcId")
+        }
+      case None =>
+        println("no static memory layout present. unable to normalize offset")
+        givenOffset
+    }
+  }
           constantMatchesGlobal.headOption
 
         } else {
@@ -718,3 +793,36 @@ trait RelationalMemory extends RelationalValues:
       case Some(x) => Topped.Actual(x)
       case None => Topped.Top
     }
+
+  /**
+   * returns true iff [[iv]] contains [[num]]. If [[iv.isBottom]] holds, then the function returns false
+   */
+  private inline def intervalContains(iv: Interval, num: Int): Boolean = {
+    !iv.isBottom && iv.inf.cmp(num) <= 0 && iv.sup.cmp(num) >= 0
+  }
+
+  /**
+   * extracts integer bounds from a given interval. stackFrameIntervals are assumed to only contain whole Integer bounds
+   * they are also expected to contain valid concrete values. so isBottom should never return true on such an interval.
+   *
+   */
+  def stackFrameIntervalToIntBounds(iv: Interval): (Int, Int) = {
+    (iv.inf, iv.sup) match
+      case (inf: MpqScalar, sup: MpqScalar) =>
+        if inf.isInfty != 0 || sup.isInfty != 0 then sys.error(s"unexpected infinite bound in stack frame interval: $iv")
+        // MpqScalar is of structure: MpqScalar.num / MpqScalar.den
+        // where two fields form a fraction with num being the numerator and den the denominator.
+        // If the denominator is 1 we assume, that the MpqScalar is a whole Integer
+        val denominatorInf = inf.`val`.getDen
+        val denominatorSup = sup.`val`.getDen
+        if denominatorInf.cmp(1) != 0 || denominatorSup.cmp(1) != 0 then
+          sys.error(s"$iv was not an interval with integer bounds.")
+        try
+          val lower = inf.`val`.getNum.bigIntegerValue().intValueExact()
+          val upper = sup.`val`.getNum.bigIntegerValue().intValueExact()
+          (lower, upper)
+        catch
+          case e: ArithmeticException =>
+            sys.error(s"stack frame interval bounds do not fit in Int: $iv (inf=${inf.`val`}, sup=${sup.`val`})")
+      case (_, _) => sys.error(s"$iv was not an interval with integer bounds.")
+  }

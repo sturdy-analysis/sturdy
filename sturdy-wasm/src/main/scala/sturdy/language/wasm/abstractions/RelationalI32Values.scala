@@ -12,11 +12,11 @@ import sturdy.util.Lazy
 import sturdy.values.config.{BitSign, BytesSize, Overflow}
 import sturdy.values.convert.{&&, Convert, ConvertConfig, LiftedConvert, NilCC, SomeCC}
 import sturdy.values.floating.{ConvertDoubleInt, ConvertFloatInt}
-import sturdy.values.integer.{IntegerOpsWithSignInterpretation, RelationalBaseIntegerOps, *, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
-import swam.binary.custom.dwarf.CType
+import swam.binary.custom.dwarf.{CType, UnknownType}
 
 import scala.annotation.tailrec
 
@@ -75,6 +75,11 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
             heapAddress.copy(otherOffset = apronState.simplify(ApronExpr.intAdd(heapAddress.otherOffset, offset, I32Type)))
           }
 
+    /**
+     * calculates the offset of a givenReli32 value
+     * for stack values the offset needs to be put together by the [[StackAddr.frameBaseOffset]], [[StackAddr.indexOffset]] and the size of [[StackAddr._type]]
+     * @return
+     */
     def getOffset: ApronExpr[VirtAddr,Type] =
       this match
         case numExpr: NumExpr => numExpr.expr

@@ -26,6 +26,9 @@ trait RelationalAddresses extends RelationalTypes:
         case ByteMemory(ctx) => ctx.toString
         case Temp(programPosition, tpe) => s"T$programPosition:$tpe"
 
+  /**
+   * 
+   */
   enum ByteMemoryCtx:
     /** initialized Memory (filled with bytes containing zeros) */
     case Fill(site: FixIn)
