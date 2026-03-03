@@ -662,7 +662,7 @@ trait RelationalMemory extends RelationalValues:
               offset <- if(initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
             } yield ByteMemoryCtx.Stack(fun, offset)
           } else { // Code with normalization
-            for {
+            for { // iterate over {funcId1, funcId2, ...} x {offset1, offset2, ...} -> all possible pairs
               fun <- functions.set
               offset <- if (initialOffset.isEmpty) Iterator(0) else initialOffset.set.iterator
               stackAddr <- {
@@ -688,7 +688,7 @@ trait RelationalMemory extends RelationalValues:
               }
             } yield stackAddr
           }
-
+          
         case HeapAddr(reference, _, initialOffset, _) =>
           val sites = refOps.deref(reference)
           sites.addrs.keysIterator.flatMap {
@@ -719,32 +719,7 @@ trait RelationalMemory extends RelationalValues:
           if const.cmp(globalRange) == 0 || const.cmp(globalRange) == 1 // if const is equal or included in globalRange
         } yield ByteMemoryCtx.Global(globalName)
 
-        if(constantMatchesGlobal.size == 1) {  /**
-   * TODO write this comment
-   */
-  def normalizeOffset(funcId: FuncId, givenOffset: Int): Int = {
-    optionStaticMemoryLayout match {
-      case Some(staticMemoryLayout: StaticMemoryLayout) =>
-        staticMemoryLayout.functionFrames.get(funcId) match {
-          case Some(stackframe) =>
-            // candidates is a list containing all valid intervals where the givenOffset fits into
-            // candidates is expected to have length 1 since multiple variables should not be stored in the same
-            // frame location
-            val candidates = stackframe.frame.filter((_, iv, _) => intervalContains(iv, givenOffset))
-            candidates.toList match {
-              case (_, iv, _) :: Nil =>
-                val (lower, upper) = stackFrameIntervalToIntBounds(iv)
-                lower // lower interval bound is the starting address of the variable.
-              case head :: tail => sys.error(s"multiple candidates found: variables in the stackframe are overlapping: ${candidates.map((_, iv, _) => iv)}")
-              case Nil => sys.error(s"no candidate found. unable to normalize $givenOffset for function $funcId")
-            }
-          case None => sys.error(s"staticMemoryLayout did not contain stackframeinformation for function: $funcId")
-        }
-      case None =>
-        println("no static memory layout present. unable to normalize offset")
-        givenOffset
-    }
-  }
+        if(constantMatchesGlobal.size == 1) {
           constantMatchesGlobal.headOption
 
         } else {
