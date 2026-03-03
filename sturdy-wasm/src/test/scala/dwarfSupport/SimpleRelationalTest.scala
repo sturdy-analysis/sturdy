@@ -63,14 +63,16 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
     "functionWithStructParameter",
     "nestedFunctionReference",
   )
+  
+  // Only run the following optimization levels
+  val optimizationLevels = Set(
+    "O0",
+    //"O3",
+  )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
 
   describe(analysisName) {
-    val optimizationLevels = Set(
-      "O0",
-      //"O3",
-    )
     Files.list(Paths.get(uri)).toScala(List)
       .filter(Files.isDirectory(_))
       .filterNot(dir => excludedDirs.contains(dir.getFileName.toString))

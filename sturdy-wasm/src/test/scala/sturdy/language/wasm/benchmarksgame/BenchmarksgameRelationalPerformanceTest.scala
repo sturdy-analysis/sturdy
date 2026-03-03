@@ -27,10 +27,10 @@ import scala.jdk.StreamConverters.*
 val performanceWriter: CSVWriter = CSVWriter.open(File("benchmarks-game-performance-test.csv"))
 
 class BenchmarksgameRelationalPerformanceTests extends Suites(
-  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true, ssa = false),
-  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true, ssa = false),
+//  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true, ssa = false),
+//  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true, ssa = false),
   BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = true, ssa = false),
-  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = false)
+//  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = false)
 //  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true, ssa = true),
 //  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true, ssa = true),
 //  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = true, ssa = true),

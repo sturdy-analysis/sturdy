@@ -57,8 +57,6 @@ def getNameAndTypeSize(die: DWARFDie): (String, (Int, Int)) = {
     //TODO: current understanding: some values do not get a name since they are never assigned to a variable with a name
     // examples encountered: printf() calls containing directly written const char* strings
   }
-  //println("Die has offset: " + die.getOffset.toHexString)
-  //println("Die has Name: " + name)
   die.devTest()
   val typeDie = die.getTypeAttr.toScala match {
     case Some(value) => value

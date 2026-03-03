@@ -35,24 +35,10 @@ trait RelationalMemory extends RelationalValues:
   final type Size = ApronExpr[VirtAddr, Type]
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
 
-  //TODO: refactor StaticMemoryLayout into its own file and change the Interval Class used
-  //case class StaticMemoryLayout(
-  //  tableRange: Interval,
-  //  dataRange: Interval, //replace with vector strings
-  //  globalRanges: Vector[(String, Interval)],
-  //  stackRange: Interval, //replace with vector of functions
-  //  stackPointer: generic.GlobalAddr,
-  //  heapRange: Interval //TODO: use sturdy NumericInterval
-  //                             //do globals first
-  //                             //also do strings (address should be lower than globalbase and higher than DSO_handle
-  //                             //TODO add functions to staticmemorylayout
-  //):
-  //  def getGlobalRange(name: String): Option[Interval] = globalRanges.find((global, _) => name == global).map(_._2)
-
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
-    println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
+    //println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     val functions = parseFunctionFrames
     for{
       tableBase <- intervalOfExport("__table_base")
@@ -90,7 +76,7 @@ trait RelationalMemory extends RelationalValues:
     
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
       println("DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
-      println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
+      //println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     } else {
       println("DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
     }
@@ -119,10 +105,10 @@ trait RelationalMemory extends RelationalValues:
         //  globals = globals.tail
 
         if (globals.headOption.exists(_._1 == "__data_end")) {
-          println("<empty>")
+          println(s"parseglobalranges: <empty>")
           Vector()
         } else {
-          println(globals)
+          println(s"parseglobalranges: $globals")
           globals
         }
       case None =>
@@ -190,8 +176,9 @@ trait RelationalMemory extends RelationalValues:
                   if (location.isEmpty) {
                     makeStackFrameFromBody(rest)
                   } else if (location.length >= 2) {
+                    makeStackFrameFromBody(rest)
                     //this usually also means the variable is not stored in the stack frame but instead in a wasm local and or inlined into the code
-                    sys.error(s"variable <$name> in function body has multiple locations: $location, this is not a fatal error but instead an extra case that still needs to be implemented")
+                    //sys.error(s"variable <$name> in function body has multiple locations: $location, this is not a fatal error but instead an extra case that still needs to be implemented")
                   } else {
                     DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
                       case Some(DW_OP_fbreg(offset)) =>
@@ -291,7 +278,6 @@ trait RelationalMemory extends RelationalValues:
     }
   }
 
-//TODO
   given RelationalLanguageSpecificMemOps(using apronState: ApronState[VirtAddr, Type], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]], sizeOps: SizeOps[Size], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value], heapAlloc: HeapAlloc): LanguageSpecificMemOps[ByteMemoryCtx, Addr, Size, Value] with
     override def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, alignment: Int, mem: Mem[ByteMemoryCtx, Addr, Timestamp, Value, Size]): Iterable[(PhysicalAddress[ByteMemoryCtx], MemoryRegion[Addr, Size, Timestamp, Value], AlignedRead)] =
       addr match
@@ -678,7 +664,7 @@ trait RelationalMemory extends RelationalValues:
                               function = fun, offset = lower
                             )
                           )
-                        case Nil => Iterator.empty
+                        case Nil => Iterator.empty //TODO alternative here: return non normalized offset
                         case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
                       }
                     case None => sys.error(s"no stack frame for function $fun found.")
@@ -688,7 +674,7 @@ trait RelationalMemory extends RelationalValues:
               }
             } yield stackAddr
           }
-          
+
         case HeapAddr(reference, _, initialOffset, _) =>
           val sites = refOps.deref(reference)
           sites.addrs.keysIterator.flatMap {
