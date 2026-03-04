@@ -19,7 +19,7 @@ import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
-import swam.binary.custom.dwarf.{CConcept, CType, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, Variable, UnknownType}
+import swam.binary.custom.dwarf.{CConcept, CType, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, UnknownType, Variable}
 import swam.binary.custom.dwarf.llvm.DWARFContext
 
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
@@ -513,7 +513,11 @@ trait RelationalMemory extends RelationalValues:
         ApronBool.Constraint(ApronCons.lt(readStart, regionEnd)),
         ApronBool.Constraint(ApronCons.lt(regionStart, readEnd))
       ))
+
+
     //TODO: change here to normalize
+
+    // this function is only called from write0?
     override def computeStartAddrAndSize(ctx: ByteMemoryCtx, startAddr: Addr, byteSize: Int): (Addr, Size) =
       val default = (startAddr, ApronExpr.lit(byteSize, I32Type): Size)
       optionStaticMemoryLayout match
@@ -534,10 +538,9 @@ trait RelationalMemory extends RelationalValues:
                 )
                 .getOrElse(default)
             case (_, stackAddr: StackAddr) =>
-              val _FLAG_normalizeComputeStartAddrAndSize = false
-
-
-              if !_FLAG_normalizeComputeStartAddrAndSize then { // Original Code
+              //TODO add global flag for better testing
+              val _FLAG_normalizeComputeStartAddrAndSize = true
+              val stackAddrdefault =
                 (
                   stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
                   apronState.toNonRelational(
@@ -549,8 +552,39 @@ trait RelationalMemory extends RelationalValues:
                       I32Type)
                   )
                 )
+
+              if !_FLAG_normalizeComputeStartAddrAndSize then { // Original Code
+                stackAddrdefault
               } else { // Code with normalization
-                ???
+                assert(stackAddr.function.size == stackAddr.initialOffset.size)
+                if (stackAddr.function.size != 1)
+                  stackAddrdefault
+                else
+                  val fun = stackAddr.function.set.head
+                  val offset = stackAddr.initialOffset.set.head
+                  optionStaticMemoryLayout match {
+                    case Some(sml) => sml.functionFrames.get(fun) match {
+                      case Some(functionframe) =>
+                        val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(iv, offset))
+                        candidates.toList match {
+                          case (_, iv, cType) :: Nil =>
+                            val (lower, upper) = stackFrameIntervalToIntBounds(iv)
+                            val typesize = CType.getTypeSize(cType)
+                            (
+                              stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
+                              apronState.toNonRelational(
+                                ApronExpr.lit(typesize, I32Type)
+                              )
+                            )
+                          case Nil =>
+                            print("WARNING: (computeStartAddrAndSize) no matching stackframe entry found. falling back to stackAddrdefault")
+                            stackAddrdefault
+                          case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
+                        }
+                      case None => sys.error(s"no stack frame for function $fun found.")
+                    }
+                    case None => sys.error("staticmemorylayout not present but normalize computeStartAddrAndSize is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
+                  }
               }
 
             case (_, heapAddr: HeapAddr) =>
