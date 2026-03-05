@@ -2,8 +2,7 @@ package sturdy.effect.except
 
 import sturdy.data.JEither
 import sturdy.data.MayJoin
-import sturdy.effect.Effect
-import sturdy.effect.SturdyException
+import sturdy.effect.{Effect, EffectStack, SturdyException}
 import sturdy.values.exceptions.Exceptional
 
 /** Effect [[Except]] causes and handles exceptions */
