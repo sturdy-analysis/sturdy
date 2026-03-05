@@ -753,15 +753,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case ReferenceType.FuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
 
-  case class ResolvedImports(funcs: Vector[FunctionInstance], globs: Vector[GlobalAddr], globTpes: Vector[GlobalType], tabs: Vector[TableAddr], mems: Vector[MemoryAddr], tagTypes: Vector[TagType], tagAddr: Vector[TagAddr])
+  case class ResolvedImports(funcs: Vector[FunctionInstance], globs: Vector[GlobalAddr], globTpes: Vector[GlobalType], tabs: Vector[TableAddr], mems: Vector[MemoryAddr], tagInstances: Vector[TagInstance])
   def resolveImports(module: Module, imports: Imports, hostModules: HostModules): ResolvedImports =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
     val globTypes: VectorBuilder[GlobalType] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
-    val tagTypes: VectorBuilder[TagType] = VectorBuilder()
-    val tagAddr: VectorBuilder[TagAddr] = VectorBuilder()
+    val tagInstances: VectorBuilder[TagInstance] = VectorBuilder()
 
     module.imports.foreach { imp =>
       // handle host functions
@@ -783,7 +782,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           .getOrElse(throw new Error(s"No export with name ${imp.fieldName} in module."))
         imp match
           case Import.Function(_, _, tpe) =>
-            exp match
+            exp match {
               case ExternalValue.Function(addr) =>
                 val expectedType = module.types(tpe)
                 val func = from.functions(addr)
@@ -793,8 +792,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
                 }
               case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+              }
           case Import.Global(_, _, globType) =>
-            exp match
+            exp match {
               case ExternalValue.Global(addr) =>
                 val fromTpe = from.globalTypes(addr)
                 if (fromTpe != globType)
@@ -804,27 +804,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 globs += glob
                 globTypes += globType
               case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
-          case Import.Tag(_, _, tagType) => // tagType: TagType(expectedTypeIdx)
-            exp match
+            }
+          case Import.Tag(_, _, tagType) =>
+            exp match {
               case ExternalValue.Tag(addr) =>
-                // 1. Get the actual function signature from the providing module
-                val providingTagType = from.tagTypes(addr) // This stores the providing TagType
-                val providedSig = from.functionTypes(providingTagType.t)
+                val expectedType = module.types(tagType)
+                val tagInstance = from.tagInstances(addr)
+                if (expectedType != tagInstance.tpe) {
+                  throw new Error(s"Type mismatch: expected tag of type $tagType but found ${tagInstance.tpe}.")
+                }
+                tagInstances += tagInstance
 
-                // 2. Get the expected signature from the importing module (this)
-                // Note: modInst.functionTypes must be populated before imports are resolved
-                val expectedSig = module.types(tagType.t)
-
-                // 3. Validation
-                if (providedSig != expectedSig)
-                  throw new Error(s"Type mismatch: expected tag with signature $expectedSig but found $providedSig.")
-
-                // 4. Linkage
-                val address = from.tagAddrs(addr)
-
-                tagTypes += tagType
-                tagAddr += address
               case _ => throw new Error(s"Import mismatch: expected a tag but found $exp.")
+            }
           case Import.Table(_, _, tpe) =>
             exp match
               case ExternalValue.Table(addr) =>
@@ -842,7 +834,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    ResolvedImports(funcs.result(), globs.result(), globTypes.result(), tabs.result(), mems.result(), tagTypes.result(), tagAddr.result())
+    ResolvedImports(funcs.result(), globs.result(), globTypes.result(), tabs.result(), mems.result(), tagInstances.result())
 
   // we assume a valid module here
   def instantiateModule(module: Module,
@@ -862,7 +854,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     allocFunctions(module, modInst, resolvedImports.funcs)
     allocTables(module, modInst, resolvedImports.tabs)
     allocMemory(module, modInst, resolvedImports.mems)
-    allocTags(module, modInst, resolvedImports.tagAddr, resolvedImports.tagTypes)
+    allocTags(module, modInst, resolvedImports.tagInstances)
 
     // Push initial frame to stack
     var loc = InstLoc.InInit(modInst, 0)
@@ -898,14 +890,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
   }
 
-  private inline def allocTags(module: Module, modInst: ModuleInstance, tagImports: Vector[TagAddr], tagImportTypes: Vector[TagType]): Unit = {
-    modInst.tagTypes = tagImportTypes ++ module.tags
-    modInst.tagAddrs = tagImports ++ module.tags.map { _ =>
-      val tagAddr = TagAddr(tagCount)
-      tagCount += 1
-      tagAddr
-    }
+  private inline def allocTags(module: Module, modInst: ModuleInstance, tagImports: Vector[TagInstance]): Unit = {
+    modInst.tagInstances = tagImports ++ module.tags.map(tagType => TagInstance(modInst.functionTypes(tagType)))
   }
+
 
   private inline def allocFunctions(module: Module, modInst: ModuleInstance, funcImports: Vector[FunctionInstance]): Unit = {
     // types

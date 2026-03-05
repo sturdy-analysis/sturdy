@@ -44,6 +44,8 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
     case _ => false
   override val hashCode: Int = b.hashCode
 
+case class TagInstance(tpe: FuncType)
+
 class ModuleInstance(val id: Option[Any] = None):
   override def equals(obj: Any): Boolean = obj match
     case that: ModuleInstance => (this.id, that.id) match
@@ -73,8 +75,7 @@ class ModuleInstance(val id: Option[Any] = None):
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
-  var tagAddrs: Vector[TagAddr] = Vector.empty
-  var tagTypes: Vector[TagType] = Vector.empty
+  var tagInstances: Vector[TagInstance] = Vector.empty
 
   def exportedName(searched: ExternalValue): Option[String] =
     exports.find ((name, externalVal) =>
@@ -125,7 +126,6 @@ given Structural[Func] with {}
 given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
-case class TagInstance(tpe: FunctionType)
 
 enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
@@ -159,7 +159,7 @@ enum FunctionInstance:
   private def toString(tpe: FuncType): String =
     s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"
 
-// addr is a a pointer into the resp list in the own module. not global store (i think)
+// addr is an index into the resp. section of an instantiated module.
 enum ExternalValue:
   case Function(addr: Int)
   case Table(addr: Int)
