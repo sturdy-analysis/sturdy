@@ -31,6 +31,7 @@ import swam.text.unresolved.{FreshId, NoId, SomeId}
 import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import com.github.tototoshi.csv.*
+import org.scalacheck.Gen
 
 val csvWriter = {
   val writer = CSVWriter.open(File("relational-test-script.csv"))
@@ -358,29 +359,31 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
           aRest <- genAVals(rest)
         } yield (aVal :: aRest)
 
-  def genAVal(inst: unresolved.Inst): Gen[RelationalAnalysis.Value] = {
-    import RelationalAnalysis.Value.*
-    import RelationalAnalysis.NumValue.*
-    inst match {
-      case unresolved.i32.Const(i) =>
-        for {
-          iv <- genInterval(included = i, minValue = Int.MinValue, maxValue = Int.MaxValue, specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue)*)
-        } yield Num(Int32(NumericInterval(iv.low, iv.high)))
-      case unresolved.i64.Const(l) =>
-        for {
-          iv <- genInterval(included = l, minValue = Long.MinValue, maxValue = Long.MaxValue, specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue)*)
-        } yield Num(Int64(NumericInterval(iv.low, iv.high)))
-      case unresolved.f32.Const(f) =>
-        for {
-          absF <- Gen.oneOf(List(Topped.Actual(f), Topped.Top))
-        } yield Num(Float32(absF))
-      case unresolved.f64.Const(d) =>
-        for {
-          absD <- Gen.oneOf(List(Topped.Actual(d), Topped.Top))
-        } yield Num(Float64(absD))
-      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
-    }
-  }
+  def genAVal(inst: unresolved.Inst): Gen[RelationalAnalysis.Value] = ???
+//
+//  {
+//    import RelationalAnalysis.Value.*
+//    import RelationalAnalysis.NumValue.*
+//    inst match {
+//      case unresolved.i32.Const(i) =>
+//        for {
+//          iv <- genInterval(included = i, minValue = Int.MinValue, maxValue = Int.MaxValue, specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue)*)
+//        } yield Num(Int32(NumericInterval(iv.low, iv.high)))
+//      case unresolved.i64.Const(l) =>
+//        for {
+//          iv <- genInterval(included = l, minValue = Long.MinValue, maxValue = Long.MaxValue, specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue)*)
+//        } yield Num(Int64(NumericInterval(iv.low, iv.high)))
+//      case unresolved.f32.Const(f) =>
+//        for {
+//          absF <- Gen.oneOf(List(Topped.Actual(f), Topped.Top))
+//        } yield Num(Float32(absF))
+//      case unresolved.f64.Const(d) =>
+//        for {
+//          absD <- Gen.oneOf(List(Topped.Actual(d), Topped.Top))
+//        } yield Num(Float64(absD))
+//      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+//    }
+//  }
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =
     value match

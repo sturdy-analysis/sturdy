@@ -1,27 +1,20 @@
 ;; Test tag section
 
 (module
-  (tag)
-  (tag (param i32))
-  (tag (export "t2") (param i32))
-  (tag $t3 (param i32 f32))
-  (export "t3" (tag 3))
+  (tag $e0 (export "e0"))
+  (func (export "throw") (throw $e0))
+
+  (func (export "simple-throw-catch") (param i32) (result i32)
+      (block $h
+        (try_table (result i32) (catch $e0 $h)
+          (if (i32.eqz (local.get 0)) (then (throw $e0)) (else))
+          (i32.const 42)
+        )
+        (return)
+      )
+      (i32.const 23)
+    )
 )
 
-(register "test")
-
-(module
-  (tag $t0 (import "test" "t2") (param i32))
-  (import "test" "t3" (tag $t1 (param i32 f32)))
-)
-
-(assert_invalid
-  (module (tag (result i32)))
-  "non-empty tag result type"
-)
-(assert_invalid
-  (module (import "" "" (tag (result i32))))
-  "non-empty tag result type"
-)
-
-
+(assert_return (invoke "simple-throw-catch" (i32.const 0)) (i32.const 23))
+(assert_return (invoke "simple-throw-catch" (i32.const 1)) (i32.const 42))

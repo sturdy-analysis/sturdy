@@ -51,6 +51,7 @@ object FrameData:
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
   case Return
+  case Exception(tag: TagIdx)
 
 given Finite[JumpTarget] with {}
 
@@ -465,7 +466,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(num.evalNumeric(inst))
     else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
+    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.TryTable)
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
       evalTableInst(inst, loc)
@@ -537,6 +538,36 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val funV = referenceOps.deref(fRef)
         invokeIndirect(funV, ftExpected, funcIx, loc)
       }
+    case t@TryTable(tpe, catches, body) =>
+      stack.withNewFrame(0) {
+        tryCatch {
+          val modInst = module
+          for ((inst, ix) <- body.zipWithIndex) {
+            val loc = modInst.blockInstLocs((BlockId(t), ix))
+            eval(inst, loc)
+          }
+        } { ex =>
+          stack.clearCurrentOperandFrame()
+          ex match {
+            case WasmException(JumpTarget.Jump(labelIndex), operands, state) =>
+              assertFrameSize(0)
+              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
+            case WasmException(JumpTarget.Return, _, state) =>
+              assertFrameSize(0)
+              throws(ex)
+            case WasmException(JumpTarget.Exception(tag), _, state) =>
+              // TODO: 1. Check if exception tag is in catches
+              //       2. Execute handler in cachtes
+              //       3. Reset state
+              //       4. If try block doesn't handle exception tag, rethrow exception
+          }
+        }
+      }
+    case swam.syntax.Throw(tag) =>
+      //TODO:
+      val operands = List()
+      val state = effectStack.getInState(FixIn.Exception)
+      throws(WasmException(JumpTarget.Exception(tag), operands, state))
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -579,7 +610,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               assertFrameSize(0)
               throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
             }
-          case WasmException(JumpTarget.Return, _, state) =>
+          case WasmException(JumpTarget.Return, _, _) =>
+            assertFrameSize(0)
+            throws(ex)
+          case WasmException(JumpTarget.Exception(_), _, _) =>
             assertFrameSize(0)
             throws(ex)
         }
@@ -753,8 +787,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case ReferenceType.FuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
 
-  def resolveImports(module: Module, imports: Imports, hostModules: HostModules):
-    (Vector[FunctionInstance], Vector[GlobalAddr], Vector[GlobalType], Vector[TableAddr], Vector[MemoryAddr]) =
+  case class ResolvedImports(funcs: Vector[FunctionInstance],
+                             globs: Vector[GlobalAddr],
+                             globTpes: Vector[GlobalType],
+                             tabs: Vector[TableAddr],
+                             mems: Vector[MemoryAddr],
+                             tagInstances: Vector[TagInstance])
+  def resolveImports(module: Module, imports: Imports, hostModules: HostModules): ResolvedImports =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
     val globTpes: VectorBuilder[GlobalType] = VectorBuilder()
@@ -832,7 +871,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
 
-    ResolvedImports(funcs.result(), globs.result(), globTypes.result(), tabs.result(), mems.result(), tagInstances.result())
+    ResolvedImports(funcs.result(), globs.result(), globTpes.result(), tabs.result(), mems.result(), tagInstances.result())
 
   // we assume a valid module here
   def instantiateModule(module: Module,

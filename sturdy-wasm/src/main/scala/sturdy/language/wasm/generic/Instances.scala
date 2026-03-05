@@ -33,7 +33,7 @@ given Structural[ElemAddr] with {}
 given Structural[FunctionInstance] with {}
 given Ordering[MemoryAddr] = Ordering.by[MemoryAddr,Int](_.addr)
 
-class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
+class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | TryTable | Global | Data | Elem):
   override def equals(obj: Any): Boolean = obj match
     case that: BlockId => this.b match
       case _: FuncId => this.b == that.b
@@ -109,6 +109,10 @@ class ModuleInstance(val id: Option[Any] = None):
           val bodyLoc = current + 1
           current = registerBlockSizes(id, bodyLoc, body)
         case inst@Loop(_, body) =>
+          val id = BlockId(inst)
+          val bodyLoc = current + 1
+          current = registerBlockSizes(id, bodyLoc, body)
+        case inst@TryTable(tpe, catches, body) =>
           val id = BlockId(inst)
           val bodyLoc = current + 1
           current = registerBlockSizes(id, bodyLoc, body)
