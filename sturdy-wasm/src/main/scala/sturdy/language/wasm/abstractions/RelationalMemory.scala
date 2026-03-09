@@ -579,11 +579,16 @@ trait RelationalMemory extends RelationalValues:
                           case Nil =>
                             print("WARNING: (computeStartAddrAndSize) no matching stackframe entry found. falling back to stackAddrdefault")
                             stackAddrdefault
-                          case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
+                          case head :: tail =>
+                            //TODO handle case of multiple variables in the same location
+                            sys.error(s"overlapping stackframe variables for $fun, offset $offset")
                         }
                       case None => sys.error(s"no stack frame for function $fun found.")
                     }
-                    case None => sys.error("staticmemorylayout not present but normalize computeStartAddrAndSize is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
+                    case None =>
+                      stackAddrdefault
+
+                    //print("staticmemorylayout not present but normalize computeStartAddrAndSize is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
                   }
               }
 

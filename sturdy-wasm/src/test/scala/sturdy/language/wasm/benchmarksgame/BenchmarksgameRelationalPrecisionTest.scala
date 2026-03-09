@@ -92,6 +92,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
     }
   }
 
+  //TODO breakpoint bei memoryLogger und/oder memorylogger.toString ausgeben -> csv datei von hand erstellen
   def writeCSV(programPath: Path,
                analysis: RelationalAnalysis.Instance,
                memoryLogger: analysis.MemoryLogger,
