@@ -1,23 +1,27 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{JOptionA, WithJoin}
+import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{BreakIfState, JumpTarget, WasmException}
-import sturdy.values.booleans.BreakIf
-import sturdy.values.{Combine, Join, MaybeChanged, Widen, Widening}
+import sturdy.language.wasm.generic.{FixIn, JumpTarget, WasmException}
+import sturdy.util.Lazy
+import sturdy.values.{Join, Widen}
 import sturdy.values.exceptions.{Exceptional, ExceptionalByTarget}
 
 trait ExceptionByTarget extends Interpreter:
-  final type ExcV = Map[JumpTarget, (List[Value],JOptionA[BreakIfState[Value]])]
+  final type ExcV = Map[JumpTarget, ExceptionState]
+  case class ExceptionState(operands: List[Value], effectState: Any)
 
-  given ExceptByTarget: Exceptional[WasmException[Value], ExcV, WithJoin] =
-    new ExceptionalByTarget(e => (e.target, (e.operands,e.breakIfState)), { case (trg, (ops, breakIfState)) => WasmException(trg, ops, breakIfState) })
+  given JoinExceptionState(using lazyEffectStack: Lazy[EffectStack], joinValue: Join[Value]): Join[ExceptionState] =
+    (state1, state2) =>
+      lazyEffectStack.value.joinIn[List[Value]](FixIn.Exception)((state1.operands, state1.effectState), (state2.operands, state2.effectState)).map(ExceptionState.apply)
 
-  given JoinBreakIfState(using combineValue: Join[Value], breakIfOps: BreakIf[Bool]): Join[BreakIfState[Value]] with
-    override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      breakIfOps.joinClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v2.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))
+  given WidenExceptionState(using lazyEffectStack: Lazy[EffectStack], widenValue: Widen[Value]): Widen[ExceptionState] =
+    (state1, state2) =>
+      lazyEffectStack.value.widenIn[List[Value]](FixIn.Exception)((state1.operands, state1.effectState), (state2.operands, state2.effectState)).map(ExceptionState.apply)
+      
+  given Exceptional[WasmException[Value], ExcV, WithJoin] = ExceptionalByTarget[WasmException[Value], JumpTarget, ExceptionState](
+    e => (e.target, ExceptionState(e.operands, e.state)),
+    (target,state) => WasmException(target, state.operands, state.effectState)
+  )
 
-  given WidenBreakIfState(using combineValue: Widen[Value], breakIfOps: BreakIf[Bool]): Widen[BreakIfState[Value]] with
-    override def apply(v1: BreakIfState[Value], v2: BreakIfState[Value]): MaybeChanged[BreakIfState[Value]] =
-      breakIfOps.widenClosingOver((v1.condition,v1.state.asInstanceOf[breakIfOps.State]), (v2.condition,v2.state.asInstanceOf[breakIfOps.State])).map((condition,state) => BreakIfState(condition, state))

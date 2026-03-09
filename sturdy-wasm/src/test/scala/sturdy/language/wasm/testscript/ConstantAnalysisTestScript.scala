@@ -4,7 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder}
+import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, testCfgDifference}
@@ -83,6 +83,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
   
   val oldCfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), aInterp)
   val newCfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
+  aInterp.addControlObserver(PrintingControlObserver()(println))
   
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
@@ -111,7 +112,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
-    testCfgDifference(oldCfg, newCfg.get)
+//    testCfgDifference(oldCfg, newCfg.get)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent

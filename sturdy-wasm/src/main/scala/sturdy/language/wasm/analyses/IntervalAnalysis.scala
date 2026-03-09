@@ -52,13 +52,30 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
-    // TODO: implement this for the IntervalAnalysis
-    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = ???
-    override def refToVal(r: RefV): IntervalAnalysis.Value = ???
-    override def liftBytes(b: Seq[Byte]): Seq[NumericInterval[Byte]] = ???
-    override def isNullRef(r: Value): IntervalAnalysis.Value = ???
+    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): RefV =
+      v match
+        case Value.Ref(f) => f
+        case Value.TopValue =>
+          Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
+        case _ => f.fail(TypeError, s"Expected reference, but got $v")
+    override def refToVal(r: RefV): IntervalAnalysis.Value = Value.Ref(r)
+    override def liftBytes(bytes: Seq[Byte]): Seq[NumericInterval[Byte]] = bytes.map(byte => NumericInterval(byte, byte))
+    override def isNullRef(r: Value): IntervalAnalysis.Value =  {
+      r match {
+        case Value.Ref(f) =>
+          if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
+            if (f.set.filter(_ == ExternReference.Null) ++ f.set.filter(_ == FunctionInstance.Null) == f.set)
+              makeI32(NumericInterval(1,1))
+            else
+              makeI32(NumericInterval(0,1))
+          else
+            makeI32(NumericInterval(0,0))
+        case Value.TopValue => makeI32(NumericInterval(0,1))
+        case _ => Value.Num(NumValue.Int32(NumericInterval(0,0)))
+      }
+    }
 
-    override def funcInstToRefV(f: FunctionInstance): RefV = ???
+    override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32

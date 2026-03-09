@@ -677,17 +677,19 @@ final class RelationalStore
   def setState(olderState: State, widening: Boolean): Unit = Profiler.addTime("RelationalStore.setState") {
     // Prioritize recent variables from olderState, but do not forget about old variables in _internalState.
     // To do this, we remove all recent variables in olderState from _internalState and then widen _internalState with olderState.
-
     _internalState = _internalState.modifyNonRelationalState(nonRelationalStoreState =>
       nonRelationalStoreState.filter {
         case (phys@PhysicalAddress(_,Recency.Recent), _) => ! olderState.nonRelationalStoreState.contains(phys)
         case _ => true
       }
     )
-    _internalState.abs1.changeEnvironment(manager, _internalState.abs1.getEnvironment.remove(_internalState.abs1.getEnvironment.getVars.filter{
-      case v@ApronVar(PhysicalAddress(_,Recency.Recent)) => olderState.abs1.getEnvironment.hasVar(v)
-      case _ => false
-    }), false)
+
+    _internalState = _internalState.copy(abs1 = olderState.abs1)
+
+//    _internalState.abs1.changeEnvironment(manager, _internalState.abs1.getEnvironment.remove(_internalState.abs1.getEnvironment.getVars.filter{
+//      case v@ApronVar(PhysicalAddress(_,Recency.Recent)) => olderState.abs1.getEnvironment.hasVar(v)
+//      case _ => false
+//    }), false)
 
     // Then widen the `_internalState` into the `olderState`.
     _internalState =

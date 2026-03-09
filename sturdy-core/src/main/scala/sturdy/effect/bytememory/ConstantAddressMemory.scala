@@ -214,7 +214,7 @@ object ConstantAddressMemory:
             Changed(TopMem(newDefinite, newUpperBound))
         case (oldMem: ImmutableByteMem[B], nowMem: ImmutableByteMem[B]) =>
           if (oldMem.size == nowMem.size) {
-            val words = JoinIntMap[Word[B], W](using ConstantAddressMemory.CombineWord)(oldMem.words, nowMem.words)
+            val words = CombineIntMap[Word[B], W](using ConstantAddressMemory.CombineWord)(oldMem.words, nowMem.words)
             MaybeChanged(ImmutableByteMem(oldMem.size, oldMem.emptyB, words.get, oldMem.sizeLimit, newDefinite, newUpperBound), words.hasChanged || boundDefChanged)
           } else {
             Changed(TopMem(newDefinite, newUpperBound))

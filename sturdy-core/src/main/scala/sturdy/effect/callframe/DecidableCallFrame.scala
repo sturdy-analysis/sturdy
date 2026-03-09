@@ -7,7 +7,7 @@ import sturdy.effect.TrySturdy
 import sturdy.values.{Join, Widen}
 import sturdy.{IsSound, Soundness, seqIsSound}
 
-
+import scala.collection.immutable.{ArraySeq, IntMap}
 import scala.reflect.ClassTag
 
 trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Site, NoJoin]
@@ -15,30 +15,31 @@ trait DecidableCallFrame[Data, Var, V, Site] extends CallFrame[Data, Var, V, Sit
 abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends MutableCallFrame[Data, Var, V, Site, NoJoin], DecidableCallFrame[Data, Var, V, Site]:
   protected var _data: Data = initData
   protected var _callSite: Option[Site] = None
-  protected var vars: Array[V] = _
+  protected var vars: IntMap[V] = _
   protected var names: Map[Var, Int] = _
 
   def setVars(newVars: Iterable[(Var, Option[V])]): Unit = {
-    val builder = Map.newBuilder[Var, Int]
-    vars = Array.ofDim(newVars.size)
+    val namesBuilder = Map.newBuilder[Var, Int]
+    val varsBuilder = IntMap.newBuilder[V]
     var i = 0
     for ((name, v) <- newVars) {
-      builder += name -> i
-      v.foreach(vars.update(i, _))
+      namesBuilder += name -> i
+      v.foreach(varsBuilder += i -> _)
       i += 1
     }
-    names = builder.result()
+    names = namesBuilder.result()
+    vars = varsBuilder.result()
   }
   setVars(initVars)
 
-  def getVars: Array[V] = vars.clone()
+  def getVars: Array[V] = vars.values.toArray[V]
 
   def data: Data = _data
   def callSite: Option[Site] = _callSite
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
-    if (ix >= 0 && ix < vars.length) {
+    if (ix >= 0 && ix < vars.size) {
       val v = vars(ix)
       if (v == null)
         JOptionC.none
@@ -53,8 +54,8 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
     case None => JOptionC.none
 
   def setLocal(ix: Int, v: V): JOptionC[Unit] =
-    if (ix >= 0 && ix < vars.length) {
-      vars = vars.updated(ix, v)
+    if (ix >= 0 && ix < vars.size) {
+      vars += ix -> v
       JOptionC.Some(())
     } else {
       JOptionC.none
@@ -84,19 +85,17 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
       return dataIsSound
     if (getFrameNames != c.getFrameNames)
       return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$getFrameNames")
-    val aVals = vars.toList
-    val cVals = c.vars.toList
-    seqIsSound.isSound(cVals, aVals)
+    val aVals = vars.values.toSeq
+    val cVals = c.vars.values.toSeq
+    seqIsSound(using vSoundness).isSound(cVals, aVals)
 
 
 class ConcreteCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars), Concrete
 
 class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: Iterable[(Var, Option[V])])(using Join[V], Widen[V], ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V, Site](initData, initVars):
-  override type State = List[V]
-  override def getState: State = if(vars == null) List() else vars.toList
-  override def setState(s: State): Unit =
-    if(vars == null) vars = s.toArray
-    else  s.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+  override type State = IntMap[V]
+  override def getState: State = if(vars == null) IntMap() else vars
+  override def setState(s: State): Unit = vars = s
   override def setBottom: Unit = vars = null
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
@@ -104,7 +103,7 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
   override def makeComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(CallFrameJoiner[A])
   private class CallFrameJoiner[A] extends ComputationJoiner[A] {
     private val before = vars
-    private var afterFirst: Array[V] = _
+    private var afterFirst: IntMap[V] = _
 
     override def inbetween(fFailed: Boolean): Unit =
       afterFirst = vars
@@ -119,9 +118,9 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (vars.length != afterFirst.length)
+      if (vars.size != afterFirst.size)
         throw IllegalStateException()
-      vars = afterFirst.zip(vars).map(Join[V](_,_).get)
+      vars = Join(vars,afterFirst).get
   }
 
   override def toString: String =

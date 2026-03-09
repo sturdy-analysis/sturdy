@@ -140,6 +140,7 @@ object Parser:
 
   lazy val expression: P[Exp] =
     (operation ~ (
+      (op(">=") *> P.defer(expression)).map(e2 => Exp.Ge(_, e2)) |
       (op('>') *> P.defer(expression)).map(e2 => Exp.Gt(_, e2)) |
       (op("==") *> P.defer(expression)).map(e2 => Exp.Eq(_, e2))
     ).?).map(maybeBinOp)
