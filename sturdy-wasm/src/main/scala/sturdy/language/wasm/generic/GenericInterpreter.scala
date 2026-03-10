@@ -557,7 +557,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               eval(inst, loc)
             }
             assertFrameSize(ars.results)
-          } finally labelStack.popLabel() // always remove the label, even if an exception escapes
+          } //finally labelStack.popLabel() // always remove the label, even if an exception escapes
         } { ex =>
           stack.clearCurrentOperandFrame()
           ex match {
