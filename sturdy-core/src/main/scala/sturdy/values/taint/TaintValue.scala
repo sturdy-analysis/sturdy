@@ -89,6 +89,10 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
 
 given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[V]] with
   def floatingLit(f: B): TaintProduct[V] =  untainted(ops.floatingLit(f))
+  def NaN: TaintProduct[V] = untainted(ops.NaN)
+  def posInfinity: TaintProduct[V] = untainted(ops.posInfinity)
+  def negInfinity: TaintProduct[V] = untainted(ops.negInfinity)
+
   def randomFloat(): TaintProduct[V] = untainted(ops.randomFloat())
 
   def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)
@@ -106,6 +110,7 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)
   def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
   def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
+  override def remainder(dividend: TaintProduct[V], divisor: TaintProduct[V]): TaintProduct[V] = dividend.binary(ops.remainder, divisor)
 
 given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)

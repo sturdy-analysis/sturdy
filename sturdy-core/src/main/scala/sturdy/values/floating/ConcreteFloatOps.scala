@@ -16,8 +16,12 @@ import java.nio.ByteOrder
 
 given Structural[Float] with {}
 
-given ConcreteFloatOps: FloatOps[Float, Float] with
+given ConcreteFloatOps(): FloatOps[Float, Float] with
   def floatingLit(f: Float): Float = f
+  def NaN: Float = Float.NaN
+  def posInfinity: Float = Float.PositiveInfinity
+  def negInfinity: Float = Float.NegativeInfinity
+  
   def randomFloat(): Float = Random.nextFloat()
   def add(v1: Float, v2: Float): Float = v1 + v2
   def sub(v1: Float, v2: Float): Float = v1 - v2
@@ -40,6 +44,7 @@ given ConcreteFloatOps: FloatOps[Float, Float] with
     else
        Math.copySign((Math.round(v / 2) * 2).toFloat, v)
   def copysign(v: Float, sign: Float): Float = Math.copySign(v, sign)
+  def remainder(dividend: Float, divisor: Float): Float = Math.IEEEremainder(dividend, divisor).toFloat
 
 
 given EqOps[Float, Boolean] with

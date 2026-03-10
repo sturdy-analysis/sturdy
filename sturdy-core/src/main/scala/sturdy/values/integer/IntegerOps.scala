@@ -62,6 +62,14 @@ trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:
   def subStrict(v1: V, v2: V): JOption[J, V]
   def mulStrict(v1: V, v2: V): JOption[J, V]
 
+type ConvertByteInt[VFrom, VTo] = Convert[Byte, Int, VFrom, VTo, config.Bits]
+type ConvertShortInt[VFrom, VTo] = Convert[Short, Int, VFrom, VTo, config.Bits]
+// no config because char is always unsigned (at least on the jvm)
+type ConvertCharInt[VFrom, VTo] = Convert[Char, Int, VFrom, VTo, NilCC.type]
+type ConvertIntByte[VFrom, VTo] = Convert[Int, Byte, VFrom, VTo, config.Overflow]
+type ConvertIntShort[VFrom, VTo] = Convert[Int, Short, VFrom, VTo, config.Overflow]
+type ConvertIntChar[VFrom, VTo] = Convert[Int, Char, VFrom, VTo, config.Overflow]
+
 type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.Bits]
 type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.Bits]
 type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.Bits]

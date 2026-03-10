@@ -1,7 +1,7 @@
 //package sturdy.language.scheme
 //
 //import sturdy.data.unit
-//import sturdy.effect.allocation.Allocation
+//import sturdy.effect.allocation.Allocattor
 //import sturdy.effect.branching.BoolBranching
 //import sturdy.effect.environment.CEnvironment
 //import sturdy.effect.failure.{Failure, FailureKind}

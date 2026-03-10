@@ -81,6 +81,9 @@ given RelationalDoubleIsInterval(using apronState: ApronState[VirtAddr,Type]): I
 
 final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) extends FloatOps[B,V]:
   override def floatingLit(f: B): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floatingLit(f) }
+  override def NaN: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.NaN }
+  override def posInfinity: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.posInfinity }
+  override def negInfinity: V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.negInfinity }
   override def randomFloat(): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.randomFloat() }
   override def add(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.add(v1,v2) }
   override def sub(v1: V, v2: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.sub(v1,v2) }
@@ -96,3 +99,4 @@ final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) ext
   override def truncate(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.truncate(v) }
   override def nearest(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.nearest(v) }
   override def copysign(v: V, sign: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.copysign(v, sign) }
+  override def remainder(dividend: V, divisor: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.remainder(dividend, divisor) }

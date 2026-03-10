@@ -1,14 +1,12 @@
 package sturdy.values.integer
 
-import sturdy.data.JOption
 import sturdy.data.JOptionC
-import sturdy.data.MayJoin
 import sturdy.data.MayJoin.NoJoin
 import sturdy.effect.failure.Failure
-import sturdy.values.{Structural, Topped, config}
+import sturdy.values.{Structural, config}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
-import sturdy.values.config.{UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -96,6 +94,47 @@ given EqOps[Int, Boolean] with
 given OrderingOps[Int, Boolean] with
   def lt(v1: Int, v2: Int): Boolean = v1 < v2
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
+
+given ConcreteConvertByteInt(using failure: Failure): ConvertByteInt[Byte, Int] with
+  override def apply(from: Byte, conf: Bits): Int = conf match
+    case Bits.Signed => from.toInt
+    case Bits.Unsigned => from.toInt & 0X000000FF
+    case _ =>
+      unsupportedConfiguration(conf, this)
+
+given ConcreteConvertShortInt(using failure: Failure): ConvertShortInt[Short, Int] with
+  override def apply(from: Short, conf: Bits): Int = conf match
+    case Bits.Signed => from.toInt
+    case Bits.Unsigned => from.toInt & 0X0000FFFF
+    case _ =>
+      unsupportedConfiguration(conf, this)
+
+given ConcreteConvertCharInt(): ConvertCharInt[Char, Int] with
+  override def apply(from: Char, conf: NilCC.type): Int = from.toInt
+
+given ConcreteConvertIntByte(using failure: Failure): ConvertIntByte[Int, Byte] with
+  override def apply(from: Int, conf: Overflow): Byte = conf match
+    case Overflow.Allow => from.toByte
+    case Overflow.Fail => failure.fail(ConversionFailure, s"int $from out of byte range")
+    case Overflow.JumpToBounds if from > Byte.MaxValue => Byte.MaxValue
+    case Overflow.JumpToBounds if from < Byte.MinValue => Byte.MinValue
+    case Overflow.JumpToBounds => from.toByte
+
+given ConcreteConvertIntShort(using failure: Failure): ConvertIntShort[Int, Short] with
+  override def apply(from: Int, conf: Overflow): Short = conf match
+    case Overflow.Allow => from.toShort
+    case Overflow.Fail => failure.fail(ConversionFailure, s"int $from out of short range")
+    case Overflow.JumpToBounds if from > Short.MaxValue => Short.MaxValue
+    case Overflow.JumpToBounds if from < Short.MinValue => Short.MinValue
+    case Overflow.JumpToBounds => from.toShort
+
+given ConcreteConvertIntChar(using failure: Failure): ConvertIntChar[Int, Char] with
+  override def apply(from: Int, conf: config.Overflow): Char = conf match
+    case Overflow.Allow => from.toChar
+    case Overflow.Fail => failure.fail(ConversionFailure, s"int $from out of char range")
+    case Overflow.JumpToBounds if from > Char.MaxValue => Char.MaxValue
+    case Overflow.JumpToBounds if from < Char.MinValue => Char.MinValue
+    case Overflow.JumpToBounds => from.toChar
 
 given ConcreteConvertIntLong(using failure: Failure): ConvertIntLong[Int, Long] with
   /*

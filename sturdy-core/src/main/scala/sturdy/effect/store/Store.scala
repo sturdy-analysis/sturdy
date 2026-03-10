@@ -25,5 +25,5 @@ trait Store[Addr, V, J[_] <: MayJoin[_]] extends Effect:
 
   def free(x: Addr): Unit
 
-  final def readOrElse(x: Addr, default: => V)(using J[V]): V =
+  final inline def readOrElse(x: Addr, default: => V)(using J[V]): V =
     read(x).getOrElse(default)

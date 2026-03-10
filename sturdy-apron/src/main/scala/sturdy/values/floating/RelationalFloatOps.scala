@@ -46,6 +46,36 @@ given RelationalFloatOps
   override def floatingLit(f: L): ApronExpr[Addr, Type] =
     FloatingLit(f, typeFloatOps.floatingLit(f))
 
+  // TODO: is this correct?
+  override def NaN: ApronExpr[Addr, Type] = floatConstant(
+    Interval(
+      Numeric[L].toDouble(Numeric[L].fromInt(0)),
+      Numeric[L].toDouble(Numeric[L].fromInt(1))
+    ),
+    FloatSpecials.Bottom,
+    typeFloatOps.NaN
+  )
+
+  // TODO: is this correct?
+  override def posInfinity: ApronExpr[Addr, Type] = floatConstant(
+    Interval(
+      Numeric[L].toDouble(Numeric[L].fromInt(0)),
+      Numeric[L].toDouble(Numeric[L].fromInt(1))
+    ),
+    FloatSpecials.Bottom,
+    typeFloatOps.posInfinity
+  )
+
+  // TODO: is this correct?
+  override def negInfinity: ApronExpr[Addr, Type] = floatConstant(
+    Interval(
+      Numeric[L].toDouble(Numeric[L].fromInt(0)),
+      Numeric[L].toDouble(Numeric[L].fromInt(1))
+    ),
+    FloatSpecials.Bottom,
+    typeFloatOps.negInfinity
+  )
+
   override def randomFloat(): ApronExpr[Addr, Type] =
     floatConstant(
       Interval(
@@ -390,6 +420,8 @@ given RelationalFloatOps
         )
       )
     }
+
+  override def remainder(dividend: ApronExpr[Addr, Type], divisor: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = ??? // TODO
 
   def checkForNewFloatSpecials(v: ApronExpr[Addr,Type]): ApronExpr[Addr, Type] =
     val iv = apronState.getInterval(v)

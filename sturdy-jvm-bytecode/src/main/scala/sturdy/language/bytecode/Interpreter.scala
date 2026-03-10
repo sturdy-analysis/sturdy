@@ -1,0 +1,239 @@
+package sturdy.language.bytecode
+
+import sturdy.effect.failure.Failure
+import sturdy.language.bytecode.generic.{BytecodeOps, GenericInterpreter, JvmExcept}
+import sturdy.values.booleans.{BooleanBranching, LiftedBooleanBranching}
+import sturdy.values.floating.*
+import sturdy.values.integer.*
+import sturdy.values.convert.*
+import sturdy.values.ordering.*
+import generic.BytecodeFailure.*
+import sturdy.data.MayJoin
+import sturdy.effect.except.Except
+import sturdy.values.config.Bits
+import sturdy.values.{Combine, MaybeChanged, Top, Widening}
+import sturdy.values.objects.{SizeOps, TypeOps}
+import sturdy.values.unit.UnitOps
+
+trait Interpreter:
+  type J[A] <: MayJoin[A]
+
+  type I8
+  type I16
+  type U16
+  type I32
+  type I64
+  type F32
+  type F64
+  type Bool
+  type Addr
+
+  type Mth
+  type StaticMth
+
+  type TypeRep
+  type FieldName
+  type ObjType
+  type AType
+  type RefValue
+
+  type ExcV
+
+  implicit val except: Except[JvmExcept[Value], ExcV, J]
+
+  enum Value:
+    case TopValue
+    case Int32(i: I32)
+    case Int64(l: I64)
+    case Float32(f: F32)
+    case Float64(d: F64)
+    case ReferenceValue(r: RefValue)
+    // unit value to represent void returns
+    // TODO: can this be dropped by remodeling invocations?
+    case Void
+
+    def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
+
+    def asInt32(using f: Failure): I32 = this match
+      case Int32(i) => i
+      case TopValue => topI32
+      case _ => f.fail(TypeError, s"Expected i32 but got $this")
+
+    def asInt64(using f: Failure): I64 = this match
+      case Int64(l) => l
+      case TopValue => topI64
+      case _ => f.fail(TypeError, s"Expected i64 but got $this")
+
+    def asFloat32(using f: Failure): F32 = this match
+      case Float32(f) => f
+      case TopValue => topF32
+      case _ => f.fail(TypeError, s"Expected f32 but got $this")
+
+    def asFloat64(using f: Failure): F64 = this match
+      case Float64(d) => d
+      case TopValue => topF64
+      case _ => f.fail(TypeError, s"Expected f64 but got $this")
+
+    def asRef(using f: Failure): RefValue = this match
+      case ReferenceValue(r) => r
+      case TopValue => topRef
+      case _ => f.fail(TypeError, s"Expected ref but got $this")
+
+  def topI32: I32
+
+  def topI64: I64
+
+  def topF32: F32
+
+  def topF64: F64
+
+  def topRef: RefValue
+
+  given Top[Value] with
+    override def top: Value = Value.TopValue
+
+  def asBoolean(v: Value)(using Failure): Bool
+
+  def boolean(b: Bool): Value
+
+  given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W], Combine[RefValue, W]): Combine[Value, W] with
+    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case (Value.Int32(i1), Value.Int32(i2)) => Combine[I32, W](i1, i2).map(Value.Int32.apply)
+      case (Value.Int64(i1), Value.Int64(i2)) => Combine[I64, W](i1, i2).map(Value.Int64.apply)
+      case (Value.Float32(i1), Value.Float32(i2)) => Combine[F32, W](i1, i2).map(Value.Float32.apply)
+      case (Value.Float64(i1), Value.Float64(i2)) => Combine[F64, W](i1, i2).map(Value.Float64.apply)
+      case (Value.ReferenceValue(r1), Value.ReferenceValue(r2)) => Combine[RefValue, W](r1, r2).map(Value.ReferenceValue.apply)
+      case _ => MaybeChanged(Value.TopValue, v1)
+
+  given ValueBytecodeOps
+  (using failure: Failure
+   , i32Ops: IntegerOps[Int, I32]
+   , i64Ops: IntegerOps[Long, I64]
+   , f32Ops: FloatOps[Float, F32]
+   , f64Ops: FloatOps[Double, F64]
+   , convertI8I32: ConvertByteInt[I8, I32]
+   , convertI16I32: ConvertShortInt[I16, I32]
+   , convertU16I32: ConvertCharInt[U16, I32]
+   , convertI32I8: ConvertIntByte[I32, I8]
+   , convertI32I16: ConvertIntShort[I32, I16]
+   , convertI32U16: ConvertIntChar[I32, U16]
+   , convertI32I64: ConvertIntLong[I32, I64]
+   , convertI32F32: ConvertIntFloat[I32, F32]
+   , convertI32F64: ConvertIntDouble[I32, F64]
+   , convertI64I32: ConvertLongInt[I64, I32]
+   , convertI64F32: ConvertLongFloat[I64, F32]
+   , convertI64F64: ConvertLongDouble[I64, F64]
+   , convertF32I32: ConvertFloatInt[F32, I32]
+   , convertF32I64: ConvertFloatLong[F32, I64]
+   , convertF32F64: ConvertFloatDouble[F32, F64]
+   , convertF64I32: ConvertDoubleInt[F64, I32]
+   , convertF64I64: ConvertDoubleLong[F64, I64]
+   , convertF64F32: ConvertDoubleFloat[F64, F32]
+   , boolBranchOpsV: BooleanBranching[Bool, Value]
+   , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+   , i32CompareOps: OrderingOps[I32, Bool]
+   , i64CompareOps: OrderingOps[I64, Bool]
+   , f32CompareOps: OrderingOps[F32, Bool]
+   , f64CompareOps: OrderingOps[F64, Bool]
+   , i32EqOps: EqOps[I32, Bool]
+   , i64EqOps: EqOps[I64, Bool]
+   , f32EqOps: EqOps[F32, Bool]
+   , f64EqOps: EqOps[F64, Bool]
+   , refEqOps: EqOps[RefValue, Bool]
+   , refTypeOps: TypeOps[RefValue, TypeRep]
+   , i32SizeOps: SizeOps[I32, Bool]
+   , i64SizeOps: SizeOps[I64, Bool]
+   , f32SizeOps: SizeOps[F32, Bool]
+   , f64SizeOps: SizeOps[F64, Bool]
+   , refSizeOps: SizeOps[RefValue, Bool]
+  ): BytecodeOps[Value, TypeRep] with
+    val branchOpsV: BooleanBranching[Value, Value] = LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
+    val branchOpsUnit: BooleanBranching[Value, Unit] = LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
+
+    override final val voidOps: UnitOps[Value] = () => Value.Void
+
+    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps[Int, Value, I32](_.asInt32, Value.Int32.apply)
+    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps[Long, Value, I64](_.asInt64, Value.Int64.apply)
+    final val f32ops: FloatOps[Float, Value] = LiftedFloatOps(_.asFloat32, Value.Float32.apply)
+    final val f64ops: FloatOps[Double, Value] = LiftedFloatOps(_.asFloat64, Value.Float64.apply)
+
+    // the jvm treats all the smaller types of byte, short, and char as ints, so we always just convert them back
+    private def i32_from_i8: I8 => Value = (convertI8I32.apply(_, Bits.Signed)).andThen(Value.Int32.apply)
+
+    private def i32_from_i16: I16 => Value = (convertI16I32.apply(_, Bits.Signed)).andThen(Value.Int32.apply)
+
+    private def i32_from_u16: U16 => Value = (convertU16I32.apply(_, NilCC)).andThen(Value.Int32.apply)
+
+    final val convert_i32_i8: ConvertIntByte[Value, Value] = LiftedConvert(_.asInt32, i32_from_i8)
+    final val convert_i32_i16: ConvertIntShort[Value, Value] = LiftedConvert(_.asInt32, i32_from_i16)
+    final val convert_i32_u16: ConvertIntChar[Value, Value] = LiftedConvert(_.asInt32, i32_from_u16)
+    final val convert_i32_i64: ConvertIntLong[Value, Value] = LiftedConvert(_.asInt32, Value.Int64.apply)
+    final val convert_i32_f32: ConvertIntFloat[Value, Value] = LiftedConvert(_.asInt32, Value.Float32.apply)
+    final val convert_i32_f64: ConvertIntDouble[Value, Value] = LiftedConvert(_.asInt32, Value.Float64.apply)
+    final val convert_i64_i32: ConvertLongInt[Value, Value] = LiftedConvert(_.asInt64, Value.Int32.apply)
+    final val convert_i64_f32: ConvertLongFloat[Value, Value] = LiftedConvert(_.asInt64, Value.Float32.apply)
+    final val convert_i64_f64: ConvertLongDouble[Value, Value] = LiftedConvert(_.asInt64, Value.Float64.apply)
+    final val convert_f32_i32: ConvertFloatInt[Value, Value] = LiftedConvert(_.asFloat32, Value.Int32.apply)
+    final val convert_f32_i64: ConvertFloatLong[Value, Value] = LiftedConvert(_.asFloat32, Value.Int64.apply)
+    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = LiftedConvert(_.asFloat32, Value.Float64.apply)
+    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = LiftedConvert(_.asFloat64, Value.Int32.apply)
+    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = LiftedConvert(_.asFloat64, Value.Int64.apply)
+    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = LiftedConvert(_.asFloat64, Value.Float32.apply)
+
+    // helper function to avoid duplication
+    // TODO: can the comparison parameters be combined somehow?
+    private inline def cmp(cmpI32: => (I32, I32) => Bool, cmpI64: => (I64, I64) => Bool, cmpF32: => (F32, F32) => Bool, cmpF64: => (F64, F64) => Bool, cmpRef: => (RefValue, RefValue) => Bool)(v1: Value, v2: Value): Value = (v1, v2) match
+      case (Value.Int32(i1), _) => boolean(cmpI32(i1, v2.asInt32))
+      case (Value.Int64(l1), _) => boolean(cmpI64(l1, v2.asInt64))
+      case (Value.Float32(f1), _) => boolean(cmpF32(f1, v2.asFloat32))
+      case (Value.Float64(d1), _) => boolean(cmpF64(d1, v2.asFloat64))
+      case (Value.ReferenceValue(r1), _) => boolean(cmpRef(r1, v2.asRef))
+      case (_, Value.Int32(i2)) => boolean(cmpI32(v1.asInt32, i2))
+      case (_, Value.Int64(l2)) => boolean(cmpI64(v1.asInt64, l2))
+      case (_, Value.Float32(f2)) => boolean(cmpF32(v1.asFloat32, f2))
+      case (_, Value.Float64(d2)) => boolean(cmpF64(v1.asFloat64, d2))
+      case (_, Value.ReferenceValue(r2)) => boolean(cmpRef(v1.asRef, r2))
+      case (Value.TopValue, Value.TopValue) => Value.TopValue // TODO: is this correct?
+      case _ => throw IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
+    final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
+      override def lt(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.lt, OrderingOps.lt, OrderingOps.lt, OrderingOps.lt, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def le(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.le, OrderingOps.le, OrderingOps.le, OrderingOps.le, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def ge(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.ge, OrderingOps.ge, OrderingOps.ge, OrderingOps.ge, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+      override def gt(v1: Value, v2: Value): Value =
+        cmp(OrderingOps.gt, OrderingOps.gt, OrderingOps.gt, OrderingOps.gt, throw IllegalStateException("attempting to access refValue comparison in a numeric comparison"))(v1, v2)
+
+    final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
+      override def equ(v1: Value, v2: Value): Value =
+        cmp(EqOps.equ, EqOps.equ, EqOps.equ, EqOps.equ, EqOps.equ)(v1, v2)
+
+      override def neq(v1: Value, v2: Value): Value =
+        cmp(EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq, EqOps.neq)(v1, v2)
+
+    final val typeOps: TypeOps[Value, TypeRep] = new TypeOps[Value, TypeRep]:
+      override def typeOf(v: Value): TypeRep = v match
+        case Value.ReferenceValue(r) => refTypeOps.typeOf(r)
+        case x => throw IllegalArgumentException(s"expected reference value but got $x")
+
+      override def ifInstanceOf[A](v: Value, ty: TypeRep)(ifTrue: => A)(ifFalse: => A): A = v match
+        case Value.ReferenceValue(r) => refTypeOps.ifInstanceOf(r, ty)(ifTrue)(ifFalse)
+        case x => throw IllegalArgumentException(s"expected reference value but got $x")
+
+    final val sizeOps: SizeOps[Value, Value] =
+      case Value.Int32(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Int64(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Float32(v) => boolean(SizeOps.is32Bit(v))
+      case Value.Float64(v) => boolean(SizeOps.is32Bit(v))
+      case Value.ReferenceValue(v) => boolean(SizeOps.is32Bit(v))
+      case Value.TopValue => ??? // TODO: not implemented
+      case Value.Void => ??? // TODO: not implemented
+
+  type Instance <: GenericInstance
+
+  abstract class GenericInstance extends GenericInterpreter[Value, Addr, ObjType, RefValue, TypeRep, ExcV, J]

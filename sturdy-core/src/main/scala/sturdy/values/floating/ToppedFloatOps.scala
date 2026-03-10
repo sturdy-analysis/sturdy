@@ -10,6 +10,10 @@ import java.nio.ByteOrder
 
 given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] with
   def floatingLit(f: B): Topped[T] = Topped.Actual(ops.floatingLit(f))
+  def NaN: Topped[T] = Topped.Actual(ops.NaN)
+  def posInfinity: Topped[T] = Topped.Actual(ops.posInfinity)
+  def negInfinity: Topped[T] = Topped.Actual(ops.negInfinity)
+
   def randomFloat(): Topped[T] = Topped.Top
 
   def add(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.add, v2)
@@ -27,3 +31,4 @@ given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] w
   def truncate(v: Topped[T]): Topped[T] = v.unary(ops.truncate)
   def nearest(v: Topped[T]): Topped[T] = v.unary(ops.nearest)
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
+  override def remainder(dividend: Topped[T], divisor: Topped[T]): Topped[T] = dividend.binary(ops.remainder, divisor)

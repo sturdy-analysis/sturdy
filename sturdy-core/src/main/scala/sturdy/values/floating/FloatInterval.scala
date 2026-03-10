@@ -62,6 +62,11 @@ given WidenFloatInterval: Widen[FloatInterval] with
 given FloatIntervalFloatOps: FloatOps[Float, FloatInterval] = new IntervalFloatOps {}
 trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
+
+  override def NaN: FloatInterval = FloatInterval.Top
+  override def posInfinity: FloatInterval = FloatInterval(Float.PositiveInfinity, Float.PositiveInfinity)
+  override def negInfinity: FloatInterval = FloatInterval(Float.NegativeInfinity, Float.NegativeInfinity)
+
   def randomFloat(): FloatInterval = FloatInterval(0, 1)
   def add(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 + v2
   def sub(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 - v2
@@ -79,6 +84,7 @@ trait IntervalFloatOps extends FloatOps[Float, FloatInterval]:
   def truncate(v: FloatInterval): FloatInterval = ???
   def nearest(v: FloatInterval): FloatInterval = ???
   def copysign(v: FloatInterval, sign: FloatInterval): FloatInterval = ???
+  override def remainder(dividend: FloatInterval, divisor: FloatInterval): FloatInterval = ??? // TODO
 
 given FloatIntervalOrderingOps: OrderingOps[FloatInterval, Topped[Boolean]] with
   def lt(iv1: FloatInterval, iv2: FloatInterval): Topped[Boolean] =
