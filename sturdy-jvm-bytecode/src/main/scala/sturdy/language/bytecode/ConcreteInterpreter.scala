@@ -1,6 +1,5 @@
 package sturdy.language.bytecode
 
-import org.opalj.bi.ACC_SUPER
 import org.opalj.br.*
 import org.opalj.br.analyses.Project
 import sturdy.data.{*, given}
