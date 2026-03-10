@@ -540,31 +540,81 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         invokeIndirect(funV, ftExpected, funcIx, loc)
       }
     case t@TryTable(tpe, catches, body) =>
-      stack.withNewFrame(0) {
+      val ars = labelArities(tpe, isLoop = false)
+      // try_table is structured like a regular block (see `label()`), but reimplemented
+      // inline because it needs to intercept Exception unwinds to run catch clauses.
+      // `label()` unconditionally rethrows Exception; there is no hook to extend it.
+      // All other handling (Jump, Return, frame, labelStack) is identical to `label()`.
+      stack.withNewFrame(ars.params) {
         tryCatch {
-          val modInst = module
-          for ((inst, ix) <- body.zipWithIndex) {
-            val loc = modInst.blockInstLocs((BlockId(t), ix))
-            eval(inst, loc)
-          }
+          // All control instructions (block, loop, if, try_table) push a label so that
+          // `br n` inside the body can look up the arity of the label it targets.
+          // `label()` does this too — try_table must do it explicitly since it is inlined.
+          try {
+            val modInst = module
+            for ((inst, ix) <- body.zipWithIndex) {
+              val loc = modInst.blockInstLocs((BlockId(t), ix))
+              eval(inst, loc)
+            }
+            assertFrameSize(ars.results)
+          } finally labelStack.popLabel() // always remove the label, even if an exception escapes
         } { ex =>
           stack.clearCurrentOperandFrame()
           ex match {
+            // a `br` targeting this block (labelIndex == 0) or an outer block
             case WasmException(JumpTarget.Jump(labelIndex), operands, state) =>
-              assertFrameSize(0)
-              throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
-            case WasmException(JumpTarget.Return, _, state) =>
+              if (labelIndex == 0) {
+                // this block is the target: restore operands and continue after the block
+                stack.pushN(operands)
+                effectStack.setInState(FixIn.Exception, state)
+                assertFrameSize(ars.jumpOperands)
+              } else {
+                // targeting an outer block: decrement index and propagate
+                assertFrameSize(0)
+                throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
+              }
+            // return unwinds through all blocks; propagate unchanged
+            case WasmException(JumpTarget.Return, _, _) =>
               assertFrameSize(0)
               throws(ex)
-            case WasmException(JumpTarget.Exception(tag), _, state) =>
-              // TODO: 1. Check if exception tag is in catches
-              //       2. Execute handler in cachtes
-              //       3. Reset state
-              //       4. If try block doesn't handle exception tag, rethrow exception
+            case WasmException(JumpTarget.Exception(tag), operands, state) =>
+              // find the first catch clause that matches the thrown tag, in order
+              catches.find {
+                case CatchClause.Catch(x, _)    => x == tag
+                case CatchClause.CatchRef(x, _) => x == tag
+                case CatchClause.CatchAll(_)    => true  // matches any tag
+                case CatchClause.CatchAllRef(_) => true
+              } match {
+                case Some(CatchClause.Catch(_, lbl)) =>
+                  // push the exception's fields so the handler label receives them
+                  stack.pushN(operands)
+                  effectStack.setInState(FixIn.Exception, state)
+                  // branch to lbl in the outer context (try_table's own label was
+                  // already popped by finally, so lbl 0 == first outer label)
+                  branch(lbl)
+                case Some(CatchClause.CatchAll(lbl)) =>
+                  // catch_all has no fields to push
+                  effectStack.setInState(FixIn.Exception, state)
+                  branch(lbl)
+                case Some(CatchClause.CatchRef(_, lbl)) =>
+                  stack.pushN(operands)
+                  // TODO: push exnref (ExceptionInstance as a V) for catch_ref
+                  effectStack.setInState(FixIn.Exception, state)
+                  branch(lbl)
+                case Some(CatchClause.CatchAllRef(lbl)) =>
+                  // TODO: push exnref (ExceptionInstance as a V) for catch_all_ref
+                  effectStack.setInState(FixIn.Exception, state)
+                  branch(lbl)
+                case None =>
+                  // no matching clause: rethrow to the next enclosing try_table
+                  assertFrameSize(0)
+                  throws(ex)
+              }
           }
         }
       }
     case swam.syntax.Throw(tag) =>
+      // pop the tag's parameter values from the stack and package them as an in-flight exception
       val tagInst = module.tagInstances(tag)
       val operands = stack.popNOrAbort(tagInst.tpe.params.size)
       val state = effectStack.getInState(FixIn.Exception)
