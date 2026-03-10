@@ -57,6 +57,7 @@ given Finite[JumpTarget] with {}
 
 case class WasmException[V](target: JumpTarget, operands: List[V], state: Any)
 case class BreakIfState[V](condition: V, state: Any)
+case class ExceptionInstance[V](tagInst: TagInstance, fields: Vector[V])
 
 type Imports = Map[String, ModuleInstance]
 
@@ -564,8 +565,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         }
       }
     case swam.syntax.Throw(tag) =>
-      //TODO:
-      val operands = List()
+      val tagInst = module.tagInstances(tag)
+      val operands = stack.popNOrAbort(tagInst.tpe.params.size)
       val state = effectStack.getInState(FixIn.Exception)
       throws(WasmException(JumpTarget.Exception(tag), operands, state))
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
