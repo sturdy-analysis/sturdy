@@ -467,7 +467,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(num.evalNumeric(inst))
     else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.TryTable)
+    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.TryTable))
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
       evalTableInst(inst, loc)
