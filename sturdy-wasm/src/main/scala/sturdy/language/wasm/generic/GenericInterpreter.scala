@@ -51,7 +51,7 @@ object FrameData:
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
   case Return
-  case Exception(tag: TagIdx)
+  case Exception(tagInst: TagInstance)
 
 given Finite[JumpTarget] with {}
 
@@ -577,11 +577,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
             case WasmException(JumpTarget.Return, _, _) =>
               assertFrameSize(0)
               throws(ex)
-            case WasmException(JumpTarget.Exception(tag), operands, state) =>
+            case WasmException(JumpTarget.Exception(tagInst), operands, state) =>
               // find the first catch clause that matches the thrown tag, in order
               catches.find {
-                case CatchClause.Catch(x, _)    => x == tag
-                case CatchClause.CatchRef(x, _) => x == tag
+                case CatchClause.Catch(x, _)    => module.tagInstances(x) eq tagInst
+                case CatchClause.CatchRef(x, _) => module.tagInstances(x) eq tagInst
                 case CatchClause.CatchAll(_)    => true  // matches any tag
                 case CatchClause.CatchAllRef(_) => true
               } match {
@@ -618,7 +618,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val tagInst = module.tagInstances(tag)
       val operands = stack.popNOrAbort(tagInst.tpe.params.size)
       val state = effectStack.getInState(FixIn.Exception)
-      throws(WasmException(JumpTarget.Exception(tag), operands, state))
+      throws(WasmException(JumpTarget.Exception(tagInst), operands, state))
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
