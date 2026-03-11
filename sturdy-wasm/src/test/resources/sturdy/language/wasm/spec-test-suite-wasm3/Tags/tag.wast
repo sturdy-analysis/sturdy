@@ -46,16 +46,15 @@
   (func $div (param i32 i32) (result i32)
     (local.get 0) (local.get 1) (i32.div_u)
   )
-  
   (func (export "trap-in-callee") (param i32 i32) (result i32)
-	(block $h
-	       (try_table (result i32) (catch_all $h)
-			  (call $div (local.get 0) (local.get 1))
-			  )
-	       (return)
-	       )
-	(i32.const 11)
-	)
+    (block $h
+      (try_table (result i32) (catch_all $h)
+        (call $div (local.get 0) (local.get 1))
+      )
+      (return)
+    )
+    (i32.const 11)
+  )
 
   (func (export "catch-complex-1") (param i32) (result i32)
     (block $h1
@@ -148,70 +147,26 @@
     (return)
   )
 
-  ;; (func (export "throw-catch_ref-param-i32") (param i32) (result i32)
-  ;;   (block $h (result i32 exnref)
-  ;;     (try_table (result i32) (catch_ref $e-i32 $h)
-  ;;       (throw $e-i32 (local.get 0))
-  ;;       (i32.const 2)
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;;   (drop) (return)
-  ;; )
+  (func $throw-param-i32 (param i32) (throw $e-i32 (local.get 0)))
+  (func (export "catch-param-i32") (param i32) (result i32)
+    (block $h (result i32)
+      (try_table (result i32) (catch $e-i32 $h)
+        (i32.const 0)
+        (call $throw-param-i32 (local.get 0))
+      )
+      (return)
+    )
+  )
 
-  ;; (func (export "throw-catch_ref-param-f32") (param f32) (result f32)
-  ;;   (block $h (result f32 exnref)
-  ;;     (try_table (result f32) (catch_ref $e-f32 $h)
-  ;;       (throw $e-f32 (local.get 0))
-  ;;       (f32.const 0)
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;;   (drop) (return)
-  ;; )
-
-  ;; (func (export "throw-catch_ref-param-i64") (param i64) (result i64)
-  ;;   (block $h (result i64 exnref)
-  ;;     (try_table (result i64) (catch_ref $e-i64 $h)
-  ;;       (throw $e-i64 (local.get 0))
-  ;;       (i64.const 2)
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;;   (drop) (return)
-  ;; )
-
-  ;; (func (export "throw-catch_ref-param-f64") (param f64) (result f64)
-  ;;   (block $h (result f64 exnref)
-  ;;     (try_table (result f64) (catch_ref $e-f64 $h)
-  ;;       (throw $e-f64 (local.get 0))
-  ;;       (f64.const 0)
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;;   (drop) (return)
-  ;; )
-
-  ;; (func $throw-param-i32 (param i32) (throw $e-i32 (local.get 0)))
-  ;; (func (export "catch-param-i32") (param i32) (result i32)
-  ;;   (block $h (result i32)
-  ;;     (try_table (result i32) (catch $e-i32 $h)
-  ;;       (i32.const 0)
-  ;;       (call $throw-param-i32 (local.get 0))
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;; )
-
-  ;; (func (export "catch-imported") (result i32)
-  ;;   (block $h
-  ;;     (try_table (result i32) (catch $imported-e0 $h)
-  ;;       (call $imported-throw (i32.const 1))
-  ;;     )
-  ;;     (return)
-  ;;   )
-  ;;   (i32.const 2)
-  ;; )
+  (func (export "catch-imported") (result i32)
+    (block $h
+      (try_table (result i32) (catch $imported-e0 $h)
+        (call $imported-throw (i32.const 1))
+      )
+      (return)
+    )
+    (i32.const 2)
+  )
 
   ;; (func (export "catch-imported-alias") (result i32)
   ;;   (block $h
@@ -266,12 +221,11 @@
 
 (assert_return (invoke "catch-complex-1" (i32.const 0)) (i32.const 3))
 (assert_return (invoke "catch-complex-1" (i32.const 1)) (i32.const 4))
-;;(assert_exception (invoke "catch-complex-1" (i32.const 2)))
+(assert_exception (invoke "catch-complex-1" (i32.const 2)))
 
 (assert_return (invoke "catch-complex-2" (i32.const 0)) (i32.const 3))
 (assert_return (invoke "catch-complex-2" (i32.const 1)) (i32.const 4))
-;;(assert_exception (invoke "complex-2" (i32.const 2)))
-
+(assert_exception (invoke "catch-complex-2" (i32.const 2)))
 
 (assert_return (invoke "throw-catch-param-i32" (i32.const 0)) (i32.const 0))
 (assert_return (invoke "throw-catch-param-i32" (i32.const 1)) (i32.const 1))
@@ -287,24 +241,9 @@
 (assert_return (invoke "throw-catch-param-f64" (f64.const 5.0)) (f64.const 5.0))
 (assert_return (invoke "throw-catch-param-f64" (f64.const 10.5)) (f64.const 10.5))
 
-;; (assert_return (invoke "throw-catch_ref-param-i32" (i32.const 0)) (i32.const 0))
-;; (assert_return (invoke "throw-catch_ref-param-i32" (i32.const 1)) (i32.const 1))
-;; (assert_return (invoke "throw-catch_ref-param-i32" (i32.const 10)) (i32.const 10))
+(assert_return (invoke "catch-param-i32" (i32.const 5)) (i32.const 5))
 
-;; (assert_return (invoke "throw-catch_ref-param-f32" (f32.const 5.0)) (f32.const 5.0))
-;; (assert_return (invoke "throw-catch_ref-param-f32" (f32.const 10.5)) (f32.const 10.5))
-
-;; (assert_return (invoke "throw-catch_ref-param-i64" (i64.const 5)) (i64.const 5))
-;; (assert_return (invoke "throw-catch_ref-param-i64" (i64.const 0)) (i64.const 0))
-;; (assert_return (invoke "throw-catch_ref-param-i64" (i64.const -1)) (i64.const -1))
-
-;; (assert_return (invoke "throw-catch_ref-param-f64" (f64.const 5.0)) (f64.const 5.0))
-;; (assert_return (invoke "throw-catch_ref-param-f64" (f64.const 10.5)) (f64.const 10.5))
-
-;;(assert_return (invoke "catch-param-i32" (i32.const 5)) (i32.const 5))
-
-
-;; (assert_return (invoke "catch-imported") (i32.const 2))
+(assert_return (invoke "catch-imported") (i32.const 2))
 ;; (assert_return (invoke "catch-imported-alias") (i32.const 2))
 
 ;; (assert_return (invoke "catchless-try" (i32.const 0)) (i32.const 0))
@@ -315,157 +254,3 @@
 
 ;; (assert_return (invoke "try-with-param"))
 
-;; (module
-;;   (func $imported-throw (import "test" "throw"))
-;;   (tag $e0)
-
-;;   (func (export "imported-mismatch") (result i32)
-;;     (block $h
-;;       (try_table (result i32) (catch_all $h)
-;;         (block $h0
-;;           (try_table (result i32) (catch $e0 $h0)
-;;             (i32.const 1)
-;;             (call $imported-throw)
-;;           )
-;;           (return)
-;;         )
-;;         (i32.const 2)
-;;       )
-;;       (return)
-;;     )
-;;     (i32.const 3)
-;;   )
-;; )
-
-;; (assert_return (invoke "imported-mismatch") (i32.const 3))
-
-;; (assert_malformed
-;;   (module quote "(module (func (catch_all)))")
-;;   "unexpected token"
-;; )
-
-;; (assert_malformed
-;;   (module quote "(module (tag $e) (func (catch $e)))")
-;;   "unexpected token"
-;; )
-
-;; (module
-;;   (tag $e)
-;;   (func (try_table (catch $e 0) (catch $e 0)))
-;;   (func (try_table (catch_all 0) (catch $e 0)))
-;;   (func (try_table (catch_all 0) (catch_all 0)))
-;;   (func (result exnref) (try_table (catch_ref $e 0) (catch_ref $e 0)) (unreachable))
-;;   (func (result exnref) (try_table (catch_all_ref 0) (catch_ref $e 0)) (unreachable))
-;;   (func (result exnref) (try_table (catch_all_ref 0) (catch_all_ref 0)) (unreachable))
-;; )
-
-;; (assert_invalid
-;;   (module (func (result i32) (try_table (result i32))))
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module (func (result i32) (try_table (result i32) (i64.const 42))))
-;;   "type mismatch"
-;; )
-
-;; (assert_invalid
-;;   (module (tag) (func (try_table (catch_ref 0 0))))
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module (tag) (func (result exnref) (try_table (catch 0 0)) (unreachable)))
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module (func (try_table (catch_all_ref 0))))
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module (func (result exnref) (try_table (catch_all 0)) (unreachable)))
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module
-;;     (tag (param i64))
-;;     (func (result i32 exnref) (try_table (result i32) (catch_ref 0 0) (i32.const 42)))
-;;   )
-;;   "type mismatch"
-;; )
-
-
-;; (module
-;;   (type $t (func))
-;;   (func $dummy)
-;;   (elem declare func $dummy)
-
-;;   (tag $e (param (ref $t)))
-;;   (func $throw (throw $e (ref.func $dummy)))
-
-;;   (func (export "catch") (result (ref null $t))
-;;     (block $l (result (ref null $t))
-;;       (try_table (catch $e $l) (call $throw))
-;;       (unreachable)
-;;     )
-;;   )
-;;   (func (export "catch_ref1") (result (ref null $t))
-;;     (block $l (result (ref null $t) (ref exn))
-;;       (try_table (catch_ref $e $l) (call $throw))
-;;       (unreachable)
-;;     )
-;;     (drop)
-;;   )
-;;   (func (export "catch_ref2") (result (ref null $t))
-;;     (block $l (result (ref null $t) (ref null exn))
-;;       (try_table (catch_ref $e $l) (call $throw))
-;;       (unreachable)
-;;     )
-;;     (drop)
-;;   )
-;;   (func (export "catch_all_ref1")
-;;     (block $l (result (ref exn))
-;;       (try_table (catch_all_ref $l) (call $throw))
-;;       (unreachable)
-;;     )
-;;     (drop)
-;;   )
-;;   (func (export "catch_all_ref2")
-;;     (block $l (result (ref null exn))
-;;       (try_table (catch_all_ref $l) (call $throw))
-;;       (unreachable)
-;;     )
-;;     (drop)
-;;   )
-;; )
-
-;; (assert_return (invoke "catch") (ref.func))
-;; (assert_return (invoke "catch_ref1") (ref.func))
-;; (assert_return (invoke "catch_ref2") (ref.func))
-;; (assert_return (invoke "catch_all_ref1"))
-;; (assert_return (invoke "catch_all_ref2"))
-
-;; (assert_invalid
-;;   (module
-;;     (type $t (func))
-;;     (tag $e (param (ref null $t)))
-;;     (func (export "catch") (result (ref $t))
-;;       (block $l (result (ref $t))
-;;         (try_table (catch $e $l))
-;;         (unreachable)
-;;       )
-;;     )
-;;   )
-;;   "type mismatch"
-;; )
-;; (assert_invalid
-;;   (module
-;;     (type $t (func))
-;;     (tag $e (param (ref null $t)))
-;;     (func (export "catch_ref") (result (ref $t))
-;;       (block $l (result (ref $t) (ref exn))
-;;         (try_table (catch $e $l))
-;;         (unreachable)
-;;       )
-;;     )
-;;   )
-;;   "type mismatch"
-;; )
