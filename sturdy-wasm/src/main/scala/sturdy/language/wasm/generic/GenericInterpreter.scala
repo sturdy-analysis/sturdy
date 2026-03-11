@@ -710,6 +710,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           effectStack.setInState(FixIn.Exception, state)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
+        // An uncaught exception escapes the function to the host (assert_exception).
+        case WasmException(JumpTarget.Exception(_), _, _) =>
+          throws(ex)
       }
     }
     stack.peekNOrAbort(returnN)

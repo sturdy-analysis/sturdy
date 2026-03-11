@@ -125,6 +125,12 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       }
     case _: AssertMalformed => // skip
     case _: AssertExhaustion => // skip
+    case AssertException(action) =>
+      // assert_exception: the action must propagate an uncaught Wasm exception to the host.
+      // An uncaught exception escapes fallible() as a ConcreteSturdyException (SturdyException).
+      assertThrows[sturdy.effect.SturdyException] {
+        runAction(action)
+      }
     case action: Action => runAction(action)
     case _: Meta => // skip
 
