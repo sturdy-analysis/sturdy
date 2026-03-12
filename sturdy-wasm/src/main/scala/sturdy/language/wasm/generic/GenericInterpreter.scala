@@ -547,9 +547,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       // All other handling (Jump, Return, frame, labelStack) is identical to `label()`.
       stack.withNewFrame(ars.params) {
         tryCatch {
-          // All control instructions (block, loop, if, try_table) push a label so that
-          // `br n` inside the body can look up the arity of the label it targets.
-          // `label()` does this too — try_table must do it explicitly since it is inlined.
+          labelStack.pushLabel(ars.jumpOperands)
           try {
             val modInst = module
             for ((inst, ix) <- body.zipWithIndex) {
@@ -557,7 +555,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               eval(inst, loc)
             }
             assertFrameSize(ars.results)
-          } //finally labelStack.popLabel() // always remove the label, even if an exception escapes
+          } finally labelStack.popLabel()
         } { ex =>
           stack.clearCurrentOperandFrame()
           ex match {
