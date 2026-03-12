@@ -57,7 +57,7 @@ given Finite[JumpTarget] with {}
 
 case class WasmException[V](target: JumpTarget, operands: List[V], state: Any)
 case class BreakIfState[V](condition: V, state: Any)
-case class ExceptionInstance[V](tagInst: TagInstance, fields: Vector[V])
+case class ExceptionInstance[V](tagInst: TagInstance, fields: List[V])
 
 type Imports = Map[String, ModuleInstance]
 
@@ -598,11 +598,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   branch(lbl)
                 case Some(CatchClause.CatchRef(_, lbl)) =>
                   stack.pushN(operands)
-                  // TODO: push exnref (ExceptionInstance as a V) for catch_ref
+                  stack.push(wrapExnRef(ExceptionInstance(tagInst, operands)))
                   effectStack.setInState(FixIn.Exception, state)
                   branch(lbl)
                 case Some(CatchClause.CatchAllRef(lbl)) =>
-                  // TODO: push exnref (ExceptionInstance as a V) for catch_all_ref
+                  stack.push(wrapExnRef(ExceptionInstance(tagInst, operands)))
                   effectStack.setInState(FixIn.Exception, state)
                   branch(lbl)
                 case None =>

@@ -139,6 +139,12 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
         case _ => Value.Num(NumValue.Int32(0))
       }
 
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.Ref(e)
+
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = v match
+      case Value.Ref(e: ExceptionInstance[Value]) => e
+      case _ => f.fail(TypeError, s"Expected exnref but got $v")
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
       if (i >= 0 && i < vec.size)

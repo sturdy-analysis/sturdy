@@ -60,6 +60,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def refToVal(r: RefV): Value = ???
     override def liftBytes(b: Seq[Byte]): Bytes = ???
     override def isNullRef(r: Value): ConstantTaintAnalysis.Value = ???
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = ???
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = ???
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match

@@ -58,6 +58,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = ???
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = ???
+
     override def isNullRef(r: Value): ConstantAnalysis.Value = {
       r match {
         case Value.Ref(f) =>

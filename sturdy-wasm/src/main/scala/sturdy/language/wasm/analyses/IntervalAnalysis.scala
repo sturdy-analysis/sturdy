@@ -77,6 +77,9 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = ???
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = ???
+
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
       val elems = for (i <- l.max(0) to h.min(vec.size - 1))

@@ -4,7 +4,7 @@ import apron.*
 import sturdy.apron.{*, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.RelationalAnalysis.*
-import sturdy.language.wasm.generic.{FunctionInstance, given}
+import sturdy.language.wasm.generic.{ExceptionInstance, FunctionInstance, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.{*, given}
@@ -29,11 +29,14 @@ object RelationalAnalysisSoundness {
     }
 
   given referencesSound: Soundness[ConcreteInterpreter.Reference, RelationalAnalysis.Reference] with
-    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference, a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]): IsSound = Profiler.disableMeasurement {
-      if (a.set.contains(toRelationalAnalysisExternRef(c)))
-        IsSound.Sound
-      else
-        IsSound.NotSound(s"Abstract reference $a does not contain instance $c")
+    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference | ExceptionInstance[ConcreteInterpreter.Value], a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]): IsSound = Profiler.disableMeasurement {
+      c match
+        case _: ExceptionInstance[?] => IsSound.Sound // exnref has no abstract counterpart yet
+        case other: (FunctionInstance | ConcreteInterpreter.ExternReference) =>
+          if (a.set.contains(toRelationalAnalysisExternRef(other)))
+            IsSound.Sound
+          else
+            IsSound.NotSound(s"Abstract reference $a does not contain instance $c")
     }
 
     private def toRelationalAnalysisExternRef(c: FunctionInstance | ConcreteInterpreter.ExternReference): FunctionInstance | RelationalAnalysis.ExternReference =

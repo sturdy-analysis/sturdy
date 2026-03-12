@@ -133,6 +133,9 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
     override def refToVal(r: RefV): Value = Ref(r)
+
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = ???
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = ???
     override def liftBytes(b: Seq[Byte]): Bytes =
       BTS.StoredBytes(
         value = b.map(x =>
