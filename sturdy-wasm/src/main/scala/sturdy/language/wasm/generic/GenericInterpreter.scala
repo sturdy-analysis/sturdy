@@ -619,6 +619,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val operands = stack.popNOrAbort(tagInst.tpe.params.size)
       val state = effectStack.getInState(FixIn.Exception)
       throws(WasmException(JumpTarget.Exception(tagInst), operands, state))
+    case swam.syntax.ThrowRef =>
+      val exnInst = unwrapExnRef(stack.popOrAbort())
+      val state = effectStack.getInState(FixIn.Exception)
+      throws(WasmException(JumpTarget.Exception(exnInst.tagInst), exnInst.fields, state))
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
