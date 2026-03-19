@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.OperandStack
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.language.wasm.generic.{ExceptionInstance, FixIn, FixOut, FunctionInstance, InstLoc}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.{Finite, Join, Powerset, Topped, given}
 import sturdy.values.booleans.given
@@ -55,7 +55,8 @@ trait ConstantValues extends Interpreter with PowersetReference:
       case Value.Num(NumValue.Int64(v)) => v.isActual
       case Value.Num(NumValue.Float32(v)) => v.isActual
       case Value.Num(NumValue.Float64(v)) => v.isActual
-      case Value.Ref(v) => v.size == 1
+      case Value.Ref(_: ExceptionInstance[?]) => true
+      case Value.Ref(v) => v.asInstanceOf[Powerset[?]].size == 1
       case Value.Vec(v) => v.isActual
     })
 

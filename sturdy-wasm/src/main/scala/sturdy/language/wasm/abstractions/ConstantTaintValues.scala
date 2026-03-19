@@ -7,14 +7,14 @@ import sturdy.effect.operandstack.OperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.values.{Finite, Powerset, Structural, Topped, given}
+import sturdy.values.{*, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
 import sturdy.values.integer.given
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.language.wasm.generic.{ExceptionInstance, FixIn, FixOut, FunctionInstance, InstLoc}
 import sturdy.values.references.ReferenceOps
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
@@ -30,7 +30,7 @@ trait ConstantTaintValues extends Interpreter:
   final type F64 = TaintProduct[Topped[Double]]
   final type V128 = TaintProduct[Topped[Array[Byte]]]
   final type Bool = TaintProduct[Topped[Boolean]]
-  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]]
+  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]] | ExceptionInstance[Value]
   final type RefV = Reference
   final type FunV = Powerset[FunctionInstance]
 
@@ -46,7 +46,8 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Num(NumValue.Int64(tp)) => tp.taint
     case Value.Num(NumValue.Float32(tp)) => tp.taint
     case Value.Num(NumValue.Float64(tp)) => tp.taint
-    case Value.Ref(tp) => tp.taint
+    case Value.Ref(_: ExceptionInstance[?]) => Taint.Untainted
+    case Value.Ref(tp) => tp.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]].taint
     case Value.Vec(tp) => tp.taint
 
   final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.map {
@@ -146,6 +147,18 @@ trait ConstantTaintValues extends Interpreter:
 
     def maybeTainted(v: Value): Boolean =
       Taint.Tainted <= getTaint(v)
+
+  given CombineReference[W <: Widening](using Combine[TaintProduct[Powerset[FunctionInstance | ExternReference]], W]): Combine[Reference, W] with
+    override def apply(r1: Reference, r2: Reference): MaybeChanged[Reference] = (r1, r2) match
+      case (tp1: TaintProduct[?], tp2: TaintProduct[?]) =>
+        summon[Combine[TaintProduct[Powerset[FunctionInstance | ExternReference]], W]](
+          tp1.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]],
+          tp2.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]]
+        ).asInstanceOf[MaybeChanged[Reference]]
+      case (e1: ExceptionInstance[?], e2: ExceptionInstance[?]) if e1 == e2 =>
+        Unchanged(e1.asInstanceOf[ExceptionInstance[Value]])
+      case _ =>
+        throw CannotJoinException(s"Cannot join $r1 and $r2")
 
   given TaintReference: ReferenceOps[FunV, RefV] with {
     override def mkNullRef: RefV = ???

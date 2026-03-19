@@ -62,9 +62,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def liftBytes(bytes: Seq[Byte]): Seq[NumericInterval[Byte]] = bytes.map(byte => NumericInterval(byte, byte))
     override def isNullRef(r: Value): IntervalAnalysis.Value =  {
       r match {
+        case Value.Ref(_: ExceptionInstance[?]) =>
+          makeI32(NumericInterval(0, 0))
         case Value.Ref(f) =>
-          if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
-            if (f.set.filter(_ == ExternReference.Null) ++ f.set.filter(_ == FunctionInstance.Null) == f.set)
+          val ps = f.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
+          if (ps.set.contains(ExternReference.Null) || ps.set.contains(FunctionInstance.Null))
+            if (ps.set.filter(_ == ExternReference.Null) ++ ps.set.filter(_ == FunctionInstance.Null) == ps.set)
               makeI32(NumericInterval(1,1))
             else
               makeI32(NumericInterval(0,1))
@@ -77,8 +80,10 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
-    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.TopValue
-    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = f.fail(TypeError, "unwrapExnRef not supported in IntervalAnalysis")
+    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.Ref(e)
+    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = v match
+      case Value.Ref(e: ExceptionInstance[Value]) => e
+      case _ => f.fail(TypeError, s"Expected exnref but got $v")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32

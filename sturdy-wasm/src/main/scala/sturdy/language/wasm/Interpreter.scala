@@ -151,6 +151,10 @@ trait Interpreter:
           case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)
           case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
           case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
+          case (Ref(e1: ExceptionInstance[Value]), Ref(e2: ExceptionInstance[Value]))
+              if e1.tagInst eq e2.tagInst =>
+            val joined = e1.fields.zip(e2.fields).map((a, b) => apply(a, b).get)
+            MaybeChanged(makeRef(ExceptionInstance(e1.tagInst, joined)), joined != e1.fields)
           case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
           case _ => MaybeChanged(TopValue, v1)
       } catch {

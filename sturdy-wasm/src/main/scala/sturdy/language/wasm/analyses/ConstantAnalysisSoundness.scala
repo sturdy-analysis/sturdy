@@ -2,9 +2,9 @@ package sturdy.language.wasm.analyses
 
 import sturdy.{*, given}
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.generic.{FunctionInstance, given}
+import sturdy.language.wasm.generic.{ExceptionInstance, FunctionInstance, given}
 import ConstantAnalysis.*
-import sturdy.values.given
+import sturdy.values.{*, given}
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
@@ -33,9 +33,13 @@ object ConstantAnalysisSoundness {
       case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => PartialOrder[I64].lteq(l1, l2)
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[F32].lteq(f1, f2)
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[F64].lteq(d1, d2)
+      case (Value.Ref(e1: ExceptionInstance[?]), Value.Ref(e2: ExceptionInstance[?])) =>
+        e1 == e2
       case (Value.Ref(r1), Value.Ref(r2)) =>
-        r1.set.forall { f1 =>
-          r2.set.exists { f2 =>
+        val p1 = r1.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
+        val p2 = r2.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
+        p1.set.forall { f1 =>
+          p2.set.exists { f2 =>
             (f1, f2) match {
               case (inst1: FunctionInstance, inst2: FunctionInstance) => PartialOrder[Topped[FunctionInstance]].lteq(Topped.Actual(inst1), Topped.Actual(inst2))
               case (ext1: ExternReference, ext2: ExternReference) => ext1 == ext2
