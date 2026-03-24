@@ -51,13 +51,13 @@ object FrameData:
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
   case Return
+  case TailCall(func: FunctionInstance)
   case Exception(tagInst: TagInstance)
 
 given Finite[JumpTarget] with {}
 
 case class WasmException[V](target: JumpTarget, operands: List[V], state: Any)
 case class BreakIfState[V](condition: V, state: Any)
-case class ExceptionInstance[V](tagInst: TagInstance, fields: List[V])
 
 type Imports = Map[String, ModuleInstance]
 
@@ -467,7 +467,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(num.evalNumeric(inst))
     else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.TryTable))
+    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.ReturnCall || opcode == OpCode.TryTable))
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
       evalTableInst(inst, loc)
@@ -529,6 +529,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func, loc)
+    case ReturnCall(funcIx) =>
+      val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      val args = stack.popNOrAbort(func.funcType.params.size)
+      // State will be restored to stateBeforeCall by the invoke loop
+      throws(WasmException(JumpTarget.TailCall(func), args, null))
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
@@ -571,8 +576,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 assertFrameSize(0)
                 throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
               }
-            // return unwinds through all blocks; propagate unchanged
+            // return and tail-call unwind through all blocks; propagate unchanged
             case WasmException(JumpTarget.Return, _, _) =>
+              assertFrameSize(0)
+              throws(ex)
+            case WasmException(JumpTarget.TailCall(_), _, _) =>
               assertFrameSize(0)
               throws(ex)
             case WasmException(JumpTarget.Exception(tagInst), operands, state) =>
@@ -666,6 +674,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case WasmException(JumpTarget.Return, _, _) =>
             assertFrameSize(0)
             throws(ex)
+          case WasmException(JumpTarget.TailCall(_), _, _) =>
+            assertFrameSize(0)
+            throws(ex)
           case WasmException(JumpTarget.Exception(_), _, _) =>
             assertFrameSize(0)
             throws(ex)
@@ -674,29 +685,71 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     }
 
   def invoke(fun: FunctionInstance, loc: InstLoc)(using Fixed): Unit =
-    val funcType = fun.funcType
-    val frameData = FrameData(Some(fun.funcIdx), funcType.t.size, fun.module)
-    val args = stack.popNOrAbort(funcType.params.size)
-
     fun match
-      case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-        val vars = args.view.map(Some.apply) ++ func.locals.map {
-          case VecType.V128 => Some(simd.defaultValue())
-          case ty@(i: ValType) => Some(num.defaultValue(ty))
-        }
-        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
-          enterFunction(FuncId(mod, ix), func, funcType)
-        }))
       case FunctionInstance.Host(mod, ix, hostFunc) =>
-        // Don't create a new call-frame, because this reduces precision. Instead, inline host function summary at call-site
+        // Host functions don't support tail calls
+        val args = stack.popNOrAbort(hostFunc.funcType.params.size)
         val res = invokeHostFunction(hostFunc, args)
         stack.pushN(res)
-    //        val vars = args.view.map(Some.apply)
-//        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
-//          enterHostFunction(FuncId(mod, ix), hostFunc)
-//        }))
+
       case FunctionInstance.Null =>
         fail(WasmFailure.InvocationError, "Cannot invoke \"null\" function")
+
+      case FunctionInstance.Wasm(mod, ix, func, funcType) =>
+        // For Wasm functions, use tail call loop with frame reuse
+        invokeTailCallLoop(fun, loc)
+
+  private def invokeTailCallLoop(initialFun: FunctionInstance, initialLoc: InstLoc)(using Fixed): Unit =
+    var currentFun = initialFun
+    var currentLoc = initialLoc
+
+    // Set up the outer frame context once - this is reused for all tail calls
+    val initialArgs = stack.popNOrAbort(currentFun.funcType.params.size)
+
+    labelStack.withNew(stack.withNewFrame(0) {
+      stack.pushN(initialArgs)
+
+      var continue = true
+      while (continue) {
+        val funcType = currentFun.funcType
+        val args = stack.popNOrAbort(funcType.params.size)
+
+        currentFun match
+          case FunctionInstance.Wasm(mod, ix, func, funcType) =>
+            val frameData = FrameData(Some(currentFun.funcIdx), funcType.t.size, currentFun.module)
+            val vars = args.view.map(Some.apply) ++ func.locals.map {
+              case VecType.V128 => Some(simd.defaultValue())
+              case ty@(i: ValType) => Some(num.defaultValue(ty))
+            }
+
+            tryCatch {
+              callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), currentLoc) {
+                enterFunction(FuncId(mod, ix), func, funcType)
+              }
+              continue = false  // Normal return - exit loop
+            } { ex =>
+              ex match {
+                case WasmException(JumpTarget.TailCall(nextFunc), tailArgs, _) =>
+                  // Tail call: push arguments and loop, reusing the same stack frame
+                  stack.pushN(tailArgs)
+                  currentFun = nextFunc
+                  // continue = true (already true)
+                case _ =>
+                  // Other exceptions: propagate
+                  continue = false
+                  throws(ex)
+              }
+            }
+
+          case FunctionInstance.Host(mod, ix, hostFunc) =>
+            val res = invokeHostFunction(hostFunc, args)
+            stack.pushN(res)
+            continue = false
+
+          case FunctionInstance.Null =>
+            fail(WasmFailure.InvocationError, "Cannot invoke \"null\" function")
+      }
+    })
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
 
@@ -710,6 +763,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
           effectStack.setInState(FixIn.Exception, state)
+        case WasmException(JumpTarget.TailCall(_), _, _) =>
+          // TailCall should be caught by invoke loop, not here
+          throws(ex)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
         // An uncaught exception escapes the function to the host (assert_exception).
