@@ -51,7 +51,7 @@ object FrameData:
 enum JumpTarget:
   case Jump(labelIndex: LabelIdx)
   case Return
-  case TailCall(func: FunctionInstance)
+  case TailCall(func: FunctionInstance, loc: InstLoc)
   case Exception(tagInst: TagInstance)
 
 given Finite[JumpTarget] with {}
@@ -532,8 +532,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case ReturnCall(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       val args = stack.popNOrAbort(func.funcType.params.size)
-      // State will be restored to stateBeforeCall by the invoke loop
-      throws(WasmException(JumpTarget.TailCall(func), args, null))
+      throws(WasmException(JumpTarget.TailCall(func, loc), args, null))
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
@@ -580,7 +579,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
             case WasmException(JumpTarget.Return, _, _) =>
               assertFrameSize(0)
               throws(ex)
-            case WasmException(JumpTarget.TailCall(_), _, _) =>
+            case WasmException(JumpTarget.TailCall(_, _), _, _) =>
               assertFrameSize(0)
               throws(ex)
             case WasmException(JumpTarget.Exception(tagInst), operands, state) =>
@@ -604,11 +603,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                   branch(lbl)
                 case Some(CatchClause.CatchRef(_, lbl)) =>
                   stack.pushN(operands)
-                  stack.push(wrapExnRef(ExceptionInstance(tagInst, operands)))
+                  stack.push(wrapExnRef(tagInst, operands))
                   effectStack.setInState(FixIn.Exception, state)
                   branch(lbl)
                 case Some(CatchClause.CatchAllRef(lbl)) =>
-                  stack.push(wrapExnRef(ExceptionInstance(tagInst, operands)))
+                  stack.push(wrapExnRef(tagInst, operands))
                   effectStack.setInState(FixIn.Exception, state)
                   branch(lbl)
                 case None =>
@@ -626,9 +625,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val state = effectStack.getInState(FixIn.Exception)
       throws(WasmException(JumpTarget.Exception(tagInst), operands, state))
     case swam.syntax.ThrowRef =>
-      val exnInst = unwrapExnRef(stack.popOrAbort())
+      val (tag, fields) = unwrapExnRef(stack.popOrAbort())
       val state = effectStack.getInState(FixIn.Exception)
-      throws(WasmException(JumpTarget.Exception(exnInst.tagInst), exnInst.fields, state))
+      throws(WasmException(JumpTarget.Exception(tag), fields, state))
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -674,7 +673,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case WasmException(JumpTarget.Return, _, _) =>
             assertFrameSize(0)
             throws(ex)
-          case WasmException(JumpTarget.TailCall(_), _, _) =>
+          case WasmException(JumpTarget.TailCall(_, _), _, _) =>
             assertFrameSize(0)
             throws(ex)
           case WasmException(JumpTarget.Exception(_), _, _) =>
@@ -699,21 +698,26 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         // For Wasm functions, use tail call loop with frame reuse
         invokeTailCallLoop(fun, loc)
 
+  private def resetLocals(func: Func, args: List[V]): Unit =
+    for (v, i) <- args.zipWithIndex do
+      callFrame.setLocal(i, v)
+    var i = args.size
+    for localType <- func.locals do
+      val default = localType match
+        case VecType.V128 => simd.defaultValue()
+        case ty: ValType => num.defaultValue(ty)
+      callFrame.setLocal(i, default)
+      i += 1
+
   private def invokeTailCallLoop(initialFun: FunctionInstance, initialLoc: InstLoc)(using Fixed): Unit =
     var currentFun = initialFun
     var currentLoc = initialLoc
-
-    // Set up the outer frame context once - this is reused for all tail calls
-    val initialArgs = stack.popNOrAbort(currentFun.funcType.params.size)
+    var currentArgs = stack.popNOrAbort(currentFun.funcType.params.size)
 
     labelStack.withNew(stack.withNewFrame(0) {
-      stack.pushN(initialArgs)
-
       var continue = true
       while (continue) {
-        val funcType = currentFun.funcType
-        val args = stack.popNOrAbort(funcType.params.size)
-
+        val args = currentArgs
         currentFun match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(Some(currentFun.funcIdx), funcType.t.size, currentFun.module)
@@ -724,18 +728,32 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
             tryCatch {
               callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), currentLoc) {
-                enterFunction(FuncId(mod, ix), func, funcType)
+                // Inner loop for self-tail-calls: reuses the call frame by resetting
+                // locals in place, avoiding the withNew snapshot/rebuild overhead.
+                var selfContinue = true
+                while selfContinue do
+                  tryCatch {
+                    enterFunction(FuncId(mod, ix), func, funcType)
+                    selfContinue = false
+                  } { ex =>
+                    ex match
+                      case WasmException(JumpTarget.TailCall(FunctionInstance.Wasm(nextMod, nextIx, _, _), nextLoc), tailArgs, _)
+                          if (nextMod eq mod) && nextIx == ix =>
+                        resetLocals(func, tailArgs)
+                        currentLoc = nextLoc
+                      case _ =>
+                        selfContinue = false
+                        throws(ex)
+                  }
               }
-              continue = false  // Normal return - exit loop
+              continue = false
             } { ex =>
               ex match {
-                case WasmException(JumpTarget.TailCall(nextFunc), tailArgs, _) =>
-                  // Tail call: push arguments and loop, reusing the same stack frame
-                  stack.pushN(tailArgs)
+                case WasmException(JumpTarget.TailCall(nextFunc, nextLoc), tailArgs, _) =>
                   currentFun = nextFunc
-                  // continue = true (already true)
+                  currentLoc = nextLoc
+                  currentArgs = tailArgs
                 case _ =>
-                  // Other exceptions: propagate
                   continue = false
                   throws(ex)
               }
@@ -763,7 +781,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
           effectStack.setInState(FixIn.Exception, state)
-        case WasmException(JumpTarget.TailCall(_), _, _) =>
+        case WasmException(JumpTarget.TailCall(_, _), _, _) =>
           // TailCall should be caught by invoke loop, not here
           throws(ex)
         case WasmException(JumpTarget.Jump(_), _, _) =>
@@ -898,6 +916,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private def mkNullRef(referenceType: ReferenceType): RefV = referenceType match
     case ReferenceType.FuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
+    case ReferenceType.ExnRef => throw IllegalArgumentException("exnref has no null value")
 
   case class ResolvedImports(funcs: Vector[FunctionInstance],
                              globs: Vector[GlobalAddr],
@@ -1185,5 +1204,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               enterFunction(FuncId(mod, ix), func, funcType)
             }))
           case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?
+          case FunctionInstance.Null => throw IllegalStateException("Start function is null")
     }
   }
