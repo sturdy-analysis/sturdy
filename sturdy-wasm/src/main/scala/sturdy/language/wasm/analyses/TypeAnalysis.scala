@@ -84,11 +84,6 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
       :
     private given Instance = this
 
-    override protected def handleTailCallInFunction(ex: WasmException[Value])(using Fixed): Unit = ex match
-      case WasmException(JumpTarget.TailCall(nextFunc, nextLoc), tailArgs, _) =>
-        stack.pushN(tailArgs)
-        invoke(nextFunc, nextLoc)
-
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[Value]] = new fix.ContextualFixpoint {
       override type Ctx = observedConfig.ctx.Ctx

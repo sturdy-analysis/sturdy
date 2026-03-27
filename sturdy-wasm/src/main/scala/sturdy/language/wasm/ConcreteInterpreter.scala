@@ -189,6 +189,11 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
     override val failure: ConcreteFailure = new ConcreteFailure
     private given Failure = failure
 
+    // Re-throw TailCall so invokeTailCallLoop's while loop handles deep mutual tail recursion
+    // without growing the Scala stack.
+    override protected def handleTailCallInFunction(ex: WasmException[Value])(using Fixed): Unit =
+      except.throws(ex)
+
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, NoJoin] = implicitly
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] = hostFunc.name match {

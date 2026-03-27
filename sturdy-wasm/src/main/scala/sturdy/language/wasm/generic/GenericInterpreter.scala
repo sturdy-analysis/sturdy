@@ -809,11 +809,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     stack.peekNOrAbort(returnN)
 
   /** Handles a TailCall exception inside enterFunction_open.
-   *  Default: re-throws so invokeTailCallLoop's while loop handles it (needed for concrete deep recursion).
-   *  Abstract analyses override to invoke the target function directly, so that joinComputations
-   *  correctly joins success paths with tail-call paths through the fixed-point machinery. */
-  protected def handleTailCallInFunction(ex: WasmException[V])(using Fixed): Unit =
-    throws(ex)
+   *  Default: invokes the target function directly, so that joinComputations correctly joins
+   *  success paths with tail-call paths through the fixed-point machinery.
+   *  The concrete interpreter overrides to re-throw, so invokeTailCallLoop's while loop
+   *  handles deep mutual tail recursion without growing the Scala stack. */
+  protected def handleTailCallInFunction(ex: WasmException[V])(using Fixed): Unit = ex match
+    case WasmException(JumpTarget.TailCall(nextFunc, nextLoc), tailArgs, _) =>
+      stack.pushN(tailArgs)
+      invoke(nextFunc, nextLoc)
 
   def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V, loc: InstLoc)(using Fixed): Unit =
     functionOps.invokeFun(funV, ftExpected) {
