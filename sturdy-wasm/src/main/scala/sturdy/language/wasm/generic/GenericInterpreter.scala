@@ -467,7 +467,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(num.evalNumeric(inst))
     else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.ReturnCall || opcode == OpCode.TryTable))
+    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.ReturnCall || opcode == OpCode.ReturnCallRef || opcode == OpCode.TryTable))
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
       evalTableInst(inst, loc)
@@ -533,6 +533,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       val args = stack.popNOrAbort(func.funcType.params.size)
       throws(WasmException(JumpTarget.TailCall(func, loc), args, null))
+    case ReturnCallRef(typeIdx) =>
+      val ftExpected = module.functionTypes(typeIdx)
+      val funcRefV = stack.popOrAbort()
+      branchOpsUnit.boolBranch(isNullRef(funcRefV)) {
+        fail(UnboundFunctionIndex, "Cannot tail-call null function reference")
+      } {
+        val fRef = valToRef(funcRefV, module.functions)
+        val funV = referenceOps.deref(fRef)
+        functionOps.invokeFun(funV, ftExpected) {
+          case (func, _) =>
+            val ftActual = func.funcType
+            if (ftExpected != ftActual)
+              fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but call_ref has type $ftActual")
+            val args = stack.popNOrAbort(func.funcType.params.size)
+            throws(WasmException(JumpTarget.TailCall(func, loc), args, null))
+        }
+      }
     case CallIndirect(tableIdx, typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcIx = stack.popOrAbort()
@@ -713,7 +730,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     var currentFun = initialFun
     var currentLoc = initialLoc
     var currentArgs = stack.popNOrAbort(currentFun.funcType.params.size)
-
     labelStack.withNew(stack.withNewFrame(0) {
       var continue = true
       while (continue) {
@@ -914,7 +930,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     valToAddr(v)
 
   private def mkNullRef(referenceType: ReferenceType): RefV = referenceType match
-    case ReferenceType.FuncRef => referenceOps.mkNullRef
+    case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
     case ReferenceType.ExnRef => throw IllegalArgumentException("exnref has no null value")
 

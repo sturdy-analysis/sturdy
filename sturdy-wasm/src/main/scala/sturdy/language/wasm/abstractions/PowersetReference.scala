@@ -1,12 +1,12 @@
 package sturdy.language.wasm.abstractions
 
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{ExceptionInstance, FunctionInstance}
+import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.values.references.ReferenceOps
 import sturdy.values.{*, given}
 
 trait PowersetReference extends Interpreter:
-  override final type Reference = Powerset[FunctionInstance | ExternReference] | ExceptionInstance[Value]
+  override final type Reference = Powerset[FunctionInstance | ExternReference]
   override final type RefV = Reference
   override final type FunV = Powerset[FunctionInstance]
 
@@ -17,8 +17,6 @@ trait PowersetReference extends Interpreter:
       case (p1: Powerset[?], p2: Powerset[?]) =>
         val joined = p1.set ++ p2.set
         MaybeChanged(Powerset(joined).asInstanceOf[Powerset[FunctionInstance | ExternReference]], joined.size > p1.set.size)
-      case (e1: ExceptionInstance[?], e2: ExceptionInstance[?]) if e1 == e2 =>
-        Unchanged(e1.asInstanceOf[ExceptionInstance[Value]])
       case _ =>
         throw CannotJoinException(s"Cannot join $r1 and $r2")
 
@@ -36,6 +34,4 @@ trait PowersetReference extends Interpreter:
           throw IllegalStateException("Cannot dereference externref")
         }
         Powerset(funcs)
-      case _: ExceptionInstance[?] =>
-        throw IllegalStateException("Cannot dereference exnref")
   }

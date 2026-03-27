@@ -60,9 +60,9 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, Exception
     override def refToVal(r: RefV): Value = ???
     override def liftBytes(b: Seq[Byte]): Bytes = ???
     override def isNullRef(r: Value): ConstantTaintAnalysis.Value = ???
-    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.Ref(e)
-    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = v match
-      case Value.Ref(e: ExceptionInstance[Value]) => e
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
+    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
+      case Value.ExnRef(tag, fields) => (tag, fields)
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =

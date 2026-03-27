@@ -73,7 +73,7 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
 
   def funcInstToRefV(f: FunctionInstance): RefV
 
-  def wrapExnRef(e: ExceptionInstance[V]): V
-  def unwrapExnRef(v: V): ExceptionInstance[V]
+  def wrapExnRef(tag: TagInstance, fields: List[V]): V
+  def unwrapExnRef(v: V): (TagInstance, List[V])
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]

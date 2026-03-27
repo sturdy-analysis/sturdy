@@ -14,7 +14,7 @@ import sturdy.values.floating.given
 import sturdy.values.integer.given
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{ExceptionInstance, FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
 import sturdy.values.references.ReferenceOps
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
@@ -30,7 +30,7 @@ trait ConstantTaintValues extends Interpreter:
   final type F64 = TaintProduct[Topped[Double]]
   final type V128 = TaintProduct[Topped[Array[Byte]]]
   final type Bool = TaintProduct[Topped[Boolean]]
-  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]] | ExceptionInstance[Value]
+  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]]
   final type RefV = Reference
   final type FunV = Powerset[FunctionInstance]
 
@@ -46,7 +46,7 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Num(NumValue.Int64(tp)) => tp.taint
     case Value.Num(NumValue.Float32(tp)) => tp.taint
     case Value.Num(NumValue.Float64(tp)) => tp.taint
-    case Value.Ref(_: ExceptionInstance[?]) => Taint.Untainted
+    case Value.ExnRef(_, _) => Taint.Untainted
     case Value.Ref(tp) => tp.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]].taint
     case Value.Vec(tp) => tp.taint
 
@@ -155,8 +155,6 @@ trait ConstantTaintValues extends Interpreter:
           tp1.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]],
           tp2.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]]
         ).asInstanceOf[MaybeChanged[Reference]]
-      case (e1: ExceptionInstance[?], e2: ExceptionInstance[?]) if e1 == e2 =>
-        Unchanged(e1.asInstanceOf[ExceptionInstance[Value]])
       case _ =>
         throw CannotJoinException(s"Cannot join $r1 and $r2")
 

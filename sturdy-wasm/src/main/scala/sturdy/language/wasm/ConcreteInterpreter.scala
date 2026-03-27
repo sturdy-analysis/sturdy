@@ -71,6 +71,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
       case (Value.Ref(r1), Value.Ref(r2)) => r1 == r2
+      case (Value.ExnRef(t1, fs1), Value.ExnRef(t2, fs2)) => (t1 eq t2) && eqVals(fs1, fs2)
       case (Value.Vec(b1), Value.Vec(b2)) =>
         val bb1 = ByteBuffer.wrap(b1)
         val bb2 = ByteBuffer.wrap(b2)
@@ -103,8 +104,9 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case unresolved.v128.Const(v, _) => Value.Vec(v)
       case unresolved.RefNull(t) =>
         t match
-          case ReferenceType.FuncRef => makeRef(FunctionInstance.Null)
+          case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef => makeRef(FunctionInstance.Null)
           case ReferenceType.ExternRef => makeRef(ExternReference.Null)
+          case ReferenceType.ExnRef => throw IllegalArgumentException("exnref has no null value")
       case unresolved.RefFunc(x) => x match {
         case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
         case _ => Value.Ref(ExternReference.Null)
@@ -139,10 +141,10 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
         case _ => Value.Num(NumValue.Int32(0))
       }
 
-    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.Ref(e)
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
 
-    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = v match
-      case Value.Ref(e: ExceptionInstance[Value]) => e
+    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
+      case Value.ExnRef(tag, fields) => (tag, fields)
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =

@@ -62,7 +62,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def liftBytes(bytes: Seq[Byte]): Seq[NumericInterval[Byte]] = bytes.map(byte => NumericInterval(byte, byte))
     override def isNullRef(r: Value): IntervalAnalysis.Value =  {
       r match {
-        case Value.Ref(_: ExceptionInstance[?]) =>
+        case Value.ExnRef(_, _) =>
           makeI32(NumericInterval(0, 0))
         case Value.Ref(f) =>
           val ps = f.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
@@ -80,9 +80,9 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
-    override def wrapExnRef(e: ExceptionInstance[Value]): Value = Value.Ref(e)
-    override def unwrapExnRef(v: Value): ExceptionInstance[Value] = v match
-      case Value.Ref(e: ExceptionInstance[Value]) => e
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
+    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
+      case Value.ExnRef(tag, fields) => (tag, fields)
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
@@ -123,6 +123,9 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(NumericInterval.constant(l)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
       case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
+      case ConcreteInterpreter.Value.Ref(r: FunctionInstance) => Value.Ref(Powerset(r))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.Null) => Value.Ref(Powerset(ExternReference.Null))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.ExternReference) => Value.Ref(Powerset(ExternReference.ExternReference))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]

@@ -245,4 +245,4 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
     case NumType.I64 => evalNumeric(i64.Const(0))
     case NumType.F32 => evalNumeric(f32.Const(0))
     case NumType.F64 => evalNumeric(f64.Const(0))
-    case ReferenceType.FuncRef => evalNumeric(i32.Const(0))
+    case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef => evalNumeric(i32.Const(0))

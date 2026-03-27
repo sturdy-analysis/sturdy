@@ -4,7 +4,7 @@ import apron.*
 import sturdy.apron.{*, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.RelationalAnalysis.*
-import sturdy.language.wasm.generic.{ExceptionInstance, FunctionInstance, given}
+import sturdy.language.wasm.generic.{FunctionInstance, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.{*, given}
@@ -23,28 +23,20 @@ object RelationalAnalysisSoundness {
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(cf32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(vf32))) => Soundness.isSound(cf32, vf32)
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(cf64)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(vf64))) => Soundness.isSound(cf64, vf64)
         case (ConcreteInterpreter.Value.Ref(cr), RelationalAnalysis.Value.Ref(ar)) => Soundness.isSound(cr, ar)
+        case (ConcreteInterpreter.Value.ExnRef(ct, cfs), RelationalAnalysis.Value.ExnRef(at, afs)) =>
+          if ct == at then listSound.isSound(cfs, afs)
+          else IsSound.NotSound(s"Abstract exnref tag $at does not match concrete tag $ct")
         case (ConcreteInterpreter.Value.Vec(cv), RelationalAnalysis.Value.Vec(av)) => Soundness.isSound(cv, av)
         case (_, RelationalAnalysis.Value.TopValue) => IsSound.Sound
         case (_, _) => IsSound.NotSound(s"abstract value $a with interval does not overapproximate concrete value $c")
     }
 
   given referencesSound: Soundness[ConcreteInterpreter.Reference, RelationalAnalysis.Reference] with
-    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference | ExceptionInstance[ConcreteInterpreter.Value], a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference] | ExceptionInstance[RelationalAnalysis.Value]): IsSound = Profiler.disableMeasurement {
-      (c, a) match
-        case (ce: ExceptionInstance[ConcreteInterpreter.Value], ae: ExceptionInstance[RelationalAnalysis.Value]) =>
-          if (ce.tagInst == ae.tagInst)
-            IsSound.Sound // tag matches; fieldundness deferred (requires apronState in context)
-          else
-            IsSound.NotSound(s"Abstract exnref $ae does not overapproximate concrete $ce: tag mismatch")
-        case (_: ExceptionInstance[?], ap: Powerset[?]) =>
-          IsSound.NotSound(s"Abstract powerset $ap does not overapproximate exception $c")
-        case (other: (FunctionInstance | ConcreteInterpreter.ExternReference), ap: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]) =>
-          if (ap.set.contains(toRelationalAnalysisExternRef(other)))
-            IsSound.Sound
-          else
-            IsSound.NotSound(s"Abstract reference $a does not contain instance $c")
-        case _ =>
-          IsSound.NotSound(s"Mismatched reference types: concrete $c, abstract $a")
+    override def isSound(c: FunctionInstance | ConcreteInterpreter.ExternReference, a: Powerset[FunctionInstance | RelationalAnalysis.ExternReference]): IsSound = Profiler.disableMeasurement {
+      if (a.set.contains(toRelationalAnalysisExternRef(c)))
+        IsSound.Sound
+      else
+        IsSound.NotSound(s"Abstract reference $a does not contain instance $c")
     }
 
     private def toRelationalAnalysisExternRef(c: FunctionInstance | ConcreteInterpreter.ExternReference): FunctionInstance | RelationalAnalysis.ExternReference =

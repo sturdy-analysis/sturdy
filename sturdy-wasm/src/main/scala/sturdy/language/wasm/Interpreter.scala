@@ -51,6 +51,7 @@ trait Interpreter:
     case Num(n: NumValue)
     case Ref(r: Reference)
     case Vec(v: V128)
+    case ExnRef(tag: TagInstance, fields: List[Value])
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -90,7 +91,7 @@ trait Interpreter:
     case NumType.F32 => Value.Num(Float32(topF32))
     case NumType.F64 => Value.Num(Float64(topF64))
     case VecType.V128 => Value.Vec(topV128)
-    case ReferenceType.FuncRef | ReferenceType.ExternRef => Value.TopValue
+    case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef | ReferenceType.ExternRef => Value.TopValue
   
   def asBoolean(v: Value)(using Failure): Bool
   def booleanToVal(b: Bool): Value
@@ -151,11 +152,12 @@ trait Interpreter:
           case (Num(NumValue.Float32(f1)), Num(NumValue.Float32(f2))) => Combine[F32, W](f1, f2).map(makeF32)
           case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
           case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
-//          case (Ref(e1: ExceptionInstance[Value]), Ref(e2: ExceptionInstance[Value]))
-//              if e1.tagInst eq e2.tagInst =>
-//            val joined = e1.fields.zip(e2.fields).map((a, b) => apply(a, b).get)
-//            MaybeChanged(makeRef(ExceptionInstance(e1.tagInst, joined)), joined != e1.fields)
           case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
+          case (ExnRef(t1, fs1), ExnRef(t2, fs2)) if t1 eq t2 =>
+            val joinedFields = fs1.zip(fs2).map((a, b) => apply(a, b).get)
+            MaybeChanged(ExnRef(t1, joinedFields), joinedFields != fs1)
+          case (ExnRef(_, _), _) | (_, ExnRef(_, _)) =>
+            throw CannotJoinException(s"Cannot join $v1 and $v2")
           case _ => MaybeChanged(TopValue, v1)
       } catch {
         case _: CannotJoinException => MaybeChanged(TopValue, v1)
