@@ -132,7 +132,12 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 //      , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
       :
     private given Instance = this
-    
+
+    override protected def handleTailCallInFunction(ex: WasmException[Value])(using Fixed): Unit = ex match
+      case WasmException(JumpTarget.TailCall(nextFunc, nextLoc), tailArgs, _) =>
+        stack.pushN(tailArgs)
+        invoke(nextFunc, nextLoc)
+
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly

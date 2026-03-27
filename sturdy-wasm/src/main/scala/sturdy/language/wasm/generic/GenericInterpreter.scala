@@ -797,9 +797,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
           effectStack.setInState(FixIn.Exception, state)
-        case WasmException(JumpTarget.TailCall(_, _), _, _) =>
-          // TailCall should be caught by invoke loop, not here
-          throws(ex)
+        case tc@WasmException(JumpTarget.TailCall(_, _), _, _) =>
+          handleTailCallInFunction(tc)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
         // An uncaught exception escapes the function to the host (assert_exception).
@@ -808,6 +807,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       }
     }
     stack.peekNOrAbort(returnN)
+
+  /** Handles a TailCall exception inside enterFunction_open.
+   *  Default: re-throws so invokeTailCallLoop's while loop handles it (needed for concrete deep recursion).
+   *  Abstract analyses override to invoke the target function directly, so that joinComputations
+   *  correctly joins success paths with tail-call paths through the fixed-point machinery. */
+  protected def handleTailCallInFunction(ex: WasmException[V])(using Fixed): Unit =
+    throws(ex)
 
   def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V, loc: InstLoc)(using Fixed): Unit =
     functionOps.invokeFun(funV, ftExpected) {

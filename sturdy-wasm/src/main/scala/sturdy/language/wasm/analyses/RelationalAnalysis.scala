@@ -155,6 +155,11 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     private given Instance = this
     given Manager = apronManager
 
+    override protected def handleTailCallInFunction(ex: WasmException[Value])(using Fixed): Unit = ex match
+      case WasmException(JumpTarget.TailCall(nextFunc, nextLoc), tailArgs, _) =>
+        stack.pushN(tailArgs)
+        invoke(nextFunc, nextLoc)
+
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
