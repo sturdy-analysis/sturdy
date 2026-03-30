@@ -74,6 +74,6 @@ final class Outermost[Dom, Codom, Ctx]
             }
             result
           case stack.PopResult.Unstable(newresult, newout) =>
-            newout.foreach(state.setOutStateNonMonotonically(dom, _))
+            newout.foreach(state.setOutState(dom, _))
             someComponentIsLooping = true
             newresult

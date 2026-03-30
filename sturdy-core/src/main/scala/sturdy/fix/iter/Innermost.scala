@@ -73,5 +73,5 @@ final class Innermost[Dom, Codom, Ctx]
               marker.markPermanentlyStable()
             (result, false)
           case stack.PopResult.Unstable(newresult, newout) =>
-            newout.foreach(state.setOutStateNonMonotonically(dom, _))
+            newout.foreach(state.setOutState(dom, _))
             (newresult, true)
