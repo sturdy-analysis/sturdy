@@ -256,9 +256,9 @@ class IntervalAnalysisTestSpecInterpreter(spectest: Option[Module] = None, aInte
           try {
             checkResult(evalAInvoke(modName, fun, avals))
           } catch {
-            // With wider abstract inputs some paths may throw uncaught Wasm
-            // exceptions; treat this as an acceptable over-approximation.
-            case _: sturdy.effect.SturdyException => succeed
+            // Abstract analysis with wider intervals may explore uncaught Wasm exception paths
+            // that the concrete test input does not trigger. This is a sound overapproximation.
+            case _: sturdy.effect.SturdyException => assert(true)
           }
         }
       } else {
