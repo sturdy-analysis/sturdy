@@ -565,10 +565,10 @@ trait RelationalMemory extends RelationalValues:
                   optionStaticMemoryLayout match {
                     case Some(sml) => sml.functionFrames.get(fun) match {
                       case Some(functionframe) =>
-                        val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(iv, offset))
+                        val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(intervalBounds(iv), offset))
                         candidates.toList match {
                           case (_, iv, cType) :: Nil =>
-                            val (lower, upper) = stackFrameIntervalToIntBounds(iv)
+                            val (lower, upper) = intervalBounds(iv)
                             val typesize = CType.getTypeSize(cType)
                             (
                               stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
@@ -694,10 +694,10 @@ trait RelationalMemory extends RelationalValues:
                 optionStaticMemoryLayout match {
                   case Some(sml) => sml.functionFrames.get(fun) match {
                     case Some(functionframe) =>
-                      val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(iv, offset))
+                      val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(intervalBounds(iv), offset))
                       candidates.toList match {
                         case (_, iv, _) :: Nil =>
-                          val (lower, upper) = stackFrameIntervalToIntBounds(iv)
+                          val (lower, upper) = intervalBounds(iv)
                           Iterator(
                             ByteMemoryCtx.Stack(
                               function = fun, offset = lower
@@ -795,13 +795,6 @@ trait RelationalMemory extends RelationalValues:
     }
 
   /**
-   * returns true iff [[iv]] contains [[num]]. If [[iv.isBottom]] holds, then the function returns false
-   */
-  private inline def intervalContains(iv: Interval, num: Int): Boolean = {
-    !iv.isBottom && iv.inf.cmp(num) <= 0 && iv.sup.cmp(num) >= 0
-  }
-
-  /**
    * extracts integer bounds from a given interval. stackFrameIntervals are assumed to only contain whole Integer bounds
    * they are also expected to contain valid concrete values. so isBottom should never return true on such an interval.
    *
@@ -826,3 +819,20 @@ trait RelationalMemory extends RelationalValues:
             sys.error(s"stack frame interval bounds do not fit in Int: $iv (inf=${inf.`val`}, sup=${sup.`val`})")
       case (_, _) => sys.error(s"$iv was not an interval with integer bounds.")
   }
+
+  /**
+   * extracts the infimum and supremum of an interval as two integer values
+   * @param iv interval where bounds should be extracted
+   * @return tuple of integers
+   */
+  private def intervalBounds(iv: Interval): (Int, Int) =
+    (
+      ApronExpr.toInt(iv.inf()).getOrElse(Int.MinValue),
+      ApronExpr.toInt(iv.sup()).getOrElse(Int.MaxValue)
+    )
+
+  /**
+   * returns true iff [[interval._1]] is less or equal to [[value]] and [[interval._2]] is bigger or equal to [[value]]
+   */
+  private def intervalContains(interval: (Int, Int), value: Int): Boolean =
+    value >= interval._1 && value <= interval._2

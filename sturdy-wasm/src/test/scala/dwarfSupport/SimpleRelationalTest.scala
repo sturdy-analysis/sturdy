@@ -55,19 +55,19 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
 
   // These programs are not analyzed
   val excludedDirs: Set[String] = Set(
-    "subprogramBody",
-    "nestedfunction",
-    "functionWithFlexibleArrayMember",
-    "functionWithStructParameterPointer",
-    "functionWithVLA",
-    "functionWithStructParameter",
-    "nestedFunctionReference",
+    //"subprogramBody",
+    //"nestedfunction",
+    //"functionWithFlexibleArrayMember",
+    //"functionWithStructParameterPointer",
+    //"functionWithVLA",
+    //"functionWithStructParameter",
+    //"nestedFunctionReference",
   )
   
   // Only run the following optimization levels
   val optimizationLevels = Set(
     "O0",
-    //"O3",
+    "O3",
   )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
@@ -80,7 +80,7 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
       .filter(p => optimizationLevels.exists(opt => p.toString.endsWith(s"$opt.wasm")))
       .sorted
       .foreach { p =>
-        println(s"analyzing path: $p")
+        println(s"analyzing path: $p with -$optimizationLevels")
         it(s"${p.getFileName}") {
           if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm")) 
             cancel("timeout")

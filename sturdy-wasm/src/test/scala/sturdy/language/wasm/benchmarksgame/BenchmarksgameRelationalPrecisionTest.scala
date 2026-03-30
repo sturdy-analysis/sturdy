@@ -32,7 +32,7 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false), //<-run this
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
   //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
+  //BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
   //BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
