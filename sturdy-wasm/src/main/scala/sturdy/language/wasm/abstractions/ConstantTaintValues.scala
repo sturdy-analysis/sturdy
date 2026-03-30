@@ -46,7 +46,7 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Num(NumValue.Int64(tp)) => tp.taint
     case Value.Num(NumValue.Float32(tp)) => tp.taint
     case Value.Num(NumValue.Float64(tp)) => tp.taint
-    case Value.ExnRef(_, _) => Taint.Untainted
+    case Value.ExnRef(_) => Taint.Untainted
     case Value.Ref(tp) => tp.asInstanceOf[TaintProduct[Powerset[FunctionInstance | ExternReference]]].taint
     case Value.Vec(tp) => tp.taint
 

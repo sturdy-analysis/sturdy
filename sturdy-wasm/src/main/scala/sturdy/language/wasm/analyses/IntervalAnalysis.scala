@@ -62,7 +62,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     override def liftBytes(bytes: Seq[Byte]): Seq[NumericInterval[Byte]] = bytes.map(byte => NumericInterval(byte, byte))
     override def isNullRef(r: Value): IntervalAnalysis.Value =  {
       r match {
-        case Value.ExnRef(_, _) =>
+        case Value.ExnRef(_) =>
           makeI32(NumericInterval(0, 0))
         case Value.Ref(f) =>
           val ps = f.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
@@ -80,10 +80,13 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
 
     override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
-    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
-    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
-      case Value.ExnRef(tag, fields) => (tag, fields)
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(List((tag, fields)))
+    override def unwrapExnRef(v: Value): List[(TagInstance, List[Value])] = v match
+      case Value.ExnRef(entries) => entries
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
+
+    override def isTopValue(v: Value): Boolean = v == Value.TopValue
+    override def topFieldsForTag(tag: TagInstance): List[Value] = tag.tpe.params.map(typedTop).toList
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32

@@ -33,8 +33,12 @@ object ConstantAnalysisSoundness {
       case (Value.Num(NumValue.Int64(l1)), Value.Num(NumValue.Int64(l2))) => PartialOrder[I64].lteq(l1, l2)
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => PartialOrder[F32].lteq(f1, f2)
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => PartialOrder[F64].lteq(d1, d2)
-      case (Value.ExnRef(t1, fs1), Value.ExnRef(t2, fs2)) =>
-        t1 == t2 && fs1 == fs2
+      case (Value.ExnRef(es1), Value.ExnRef(es2)) =>
+        es1.forall { case (t1, fs1) =>
+          es2.exists { case (t2, fs2) =>
+            (t1 eq t2) && fs1.size == fs2.size && fs1.zip(fs2).forall((f1, f2) => lteq(f1, f2))
+          }
+        }
       case (Value.Ref(r1), Value.Ref(r2)) =>
         val p1 = r1.asInstanceOf[Powerset[FunctionInstance | ExternReference]]
         val p2 = r2.asInstanceOf[Powerset[FunctionInstance | ExternReference]]

@@ -54,7 +54,7 @@ trait IntervalValues extends Interpreter with PowersetReference:
       case Value.Num(NumValue.Int64(v)) => v.isConstant
       case Value.Num(NumValue.Float32(v)) => v.isActual
       case Value.Num(NumValue.Float64(v)) => v.isActual
-      case Value.ExnRef(_, _) => true
+      case Value.ExnRef(_) => true
       case Value.Ref(v) => v.asInstanceOf[Powerset[?]].size == 1
       case Value.Vec(v) => v.isActual
     })

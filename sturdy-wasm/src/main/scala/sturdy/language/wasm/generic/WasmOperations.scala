@@ -74,6 +74,12 @@ trait SpecialWasmOperations[V, Addr, Bytes, Size, Index, FunV, RefV, J[_] <: May
   def funcInstToRefV(f: FunctionInstance): RefV
 
   def wrapExnRef(tag: TagInstance, fields: List[V]): V
-  def unwrapExnRef(v: V): (TagInstance, List[V])
+  def unwrapExnRef(v: V): List[(TagInstance, List[V])]
+
+  /** True when v is the top element of the value lattice (sound over-approximation of any value). */
+  def isTopValue(v: V): Boolean
+
+  /** For each parameter type of tag, produce the top value of that type. */
+  def topFieldsForTag(tag: TagInstance): List[V]
 
   def indexLookup[A](ix: V, vec: Vector[A]): JOption[J, A]

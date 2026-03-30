@@ -23,9 +23,14 @@ object RelationalAnalysisSoundness {
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(cf32)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(vf32))) => Soundness.isSound(cf32, vf32)
         case (ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(cf64)), RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(vf64))) => Soundness.isSound(cf64, vf64)
         case (ConcreteInterpreter.Value.Ref(cr), RelationalAnalysis.Value.Ref(ar)) => Soundness.isSound(cr, ar)
-        case (ConcreteInterpreter.Value.ExnRef(ct, cfs), RelationalAnalysis.Value.ExnRef(at, afs)) =>
-          if ct == at then listSound.isSound(cfs, afs)
-          else IsSound.NotSound(s"Abstract exnref tag $at does not match concrete tag $ct")
+        case (ConcreteInterpreter.Value.ExnRef(ces), RelationalAnalysis.Value.ExnRef(aes)) =>
+          ces.forall { case (ct, cfs) =>
+            aes.exists { case (at, afs) =>
+              (ct eq at) && listSound.isSound(cfs, afs) == IsSound.Sound
+            }
+          } match
+            case true => IsSound.Sound
+            case false => IsSound.NotSound(s"Abstract exnref $aes does not overapproximate concrete exnref $ces")
         case (ConcreteInterpreter.Value.Vec(cv), RelationalAnalysis.Value.Vec(av)) => Soundness.isSound(cv, av)
         case (_, RelationalAnalysis.Value.TopValue) => IsSound.Sound
         case (_, _) => IsSound.NotSound(s"abstract value $a with interval does not overapproximate concrete value $c")

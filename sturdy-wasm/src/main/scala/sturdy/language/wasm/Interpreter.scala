@@ -51,7 +51,7 @@ trait Interpreter:
     case Num(n: NumValue)
     case Ref(r: Reference)
     case Vec(v: V128)
-    case ExnRef(tag: TagInstance, fields: List[Value])
+    case ExnRef(entries: List[(TagInstance, List[Value])])
 
     def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
@@ -153,11 +153,22 @@ trait Interpreter:
           case (Num(NumValue.Float64(d1)), Num(NumValue.Float64(d2))) => Combine[F64, W](d1, d2).map(makeF64)
           case (Vec(v1), Vec(v2)) => Combine[V128, W](v1, v2).map(makeV128)
           case (Ref(r1), Ref(r2)) => Combine[Reference, W](r1, r2).map(makeRef)
-          case (ExnRef(t1, fs1), ExnRef(t2, fs2)) if t1 eq t2 =>
-            val joinedFields = fs1.zip(fs2).map((a, b) => apply(a, b).get)
-            MaybeChanged(ExnRef(t1, joinedFields), joinedFields != fs1)
-          case (ExnRef(_, _), _) | (_, ExnRef(_, _)) =>
-            throw CannotJoinException(s"Cannot join $v1 and $v2")
+          case (ExnRef(es1), ExnRef(es2)) =>
+            // Powerset join: merge entries by tag identity (eq), field-wise join for shared tags
+            var merged = es1
+            var changed = false
+            for ((t2, fs2) <- es2) {
+              merged.indexWhere(_._1 eq t2) match
+                case -1 =>
+                  merged = merged :+ (t2, fs2)
+                  changed = true
+                case i =>
+                  val (t1, fs1) = merged(i)
+                  val joined = fs1.zip(fs2).map((a, b) => apply(a, b).get)
+                  if (joined != fs1) changed = true
+                  merged = merged.updated(i, (t1, joined))
+            }
+            MaybeChanged(ExnRef(merged), changed)
           case _ => MaybeChanged(TopValue, v1)
       } catch {
         case _: CannotJoinException => MaybeChanged(TopValue, v1)

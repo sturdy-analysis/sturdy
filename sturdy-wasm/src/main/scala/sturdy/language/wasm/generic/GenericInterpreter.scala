@@ -593,38 +593,21 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
                 throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
               }
             // return and tail-call unwind through all blocks; propagate unchanged
-            case WasmException(JumpTarget.Return, _, _) =>
-              assertFrameSize(0)
-              throws(ex)
-            case WasmException(JumpTarget.TailCall(_, _), _, _) =>
+            case WasmException(JumpTarget.Return | JumpTarget.TailCall(_, _), _, _) =>
               assertFrameSize(0)
               throws(ex)
             case WasmException(JumpTarget.Exception(tagInst), operands, state) =>
-              // find the first catch clause that matches the thrown tag, in order
-              catches.find {
-                case CatchClause.Catch(x, _)    => module.tagInstances(x) eq tagInst
-                case CatchClause.CatchRef(x, _) => module.tagInstances(x) eq tagInst
-                case CatchClause.CatchAll(_)    => true  // matches any tag
-                case CatchClause.CatchAllRef(_) => true
+              // Find the first catch clause whose tag matches (or catch_all), then dispatch.
+              // Uses collectFirst for a single-pass find+extract.
+              catches.collectFirst {
+                case CatchClause.Catch(x, lbl)    if module.tagInstances(x) eq tagInst => (lbl, false, false)
+                case CatchClause.CatchRef(x, lbl) if module.tagInstances(x) eq tagInst => (lbl, false, true)
+                case CatchClause.CatchAll(lbl)                                         => (lbl, true,  false)
+                case CatchClause.CatchAllRef(lbl)                                      => (lbl, true,  true)
               } match {
-                case Some(CatchClause.Catch(_, lbl)) =>
-                  // push the exception's fields so the handler label receives them
-                  stack.pushN(operands)
-                  effectStack.setInState(FixIn.Exception, state)
-                  // branch to lbl in the outer context (try_table's own label was
-                  // already popped by finally, so lbl 0 == first outer label)
-                  branch(lbl)
-                case Some(CatchClause.CatchAll(lbl)) =>
-                  // catch_all has no fields to push
-                  effectStack.setInState(FixIn.Exception, state)
-                  branch(lbl)
-                case Some(CatchClause.CatchRef(_, lbl)) =>
-                  stack.pushN(operands)
-                  stack.push(wrapExnRef(tagInst, operands))
-                  effectStack.setInState(FixIn.Exception, state)
-                  branch(lbl)
-                case Some(CatchClause.CatchAllRef(lbl)) =>
-                  stack.push(wrapExnRef(tagInst, operands))
+                case Some((lbl, isCatchAll, isRef)) =>
+                  if (!isCatchAll) stack.pushN(operands)       // catch/catch_ref: push fields
+                  if (isRef) stack.push(wrapExnRef(tagInst, operands))  // *_ref: push exnref
                   effectStack.setInState(FixIn.Exception, state)
                   branch(lbl)
                 case None =>
@@ -642,9 +625,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val state = effectStack.getInState(FixIn.Exception)
       throws(WasmException(JumpTarget.Exception(tagInst), operands, state))
     case swam.syntax.ThrowRef =>
-      val (tag, fields) = unwrapExnRef(stack.popOrAbort())
+      val v = stack.popOrAbort()
       val state = effectStack.getInState(FixIn.Exception)
-      throws(WasmException(JumpTarget.Exception(tag), fields, state))
+      if isTopValue(v) then
+        // Sound over-approximation: TopValue means the exnref could carry any tag.
+        // Throw an exception for every known tag (with top-valued fields) and join the results.
+        effectStack.joinFold[TagInstance, Unit](module.tagInstances, { tagInst =>
+          throws(WasmException(JumpTarget.Exception(tagInst), topFieldsForTag(tagInst), state))
+        })
+      else
+        val entries = unwrapExnRef(v)
+        if entries.sizeIs == 1 then
+          val (tag, fields) = entries.head
+          throws(WasmException(JumpTarget.Exception(tag), fields, state))
+        else
+          effectStack.joinFold[(TagInstance, List[V]), Unit](entries, { case (tag, fields) =>
+            throws(WasmException(JumpTarget.Exception(tag), fields, state))
+          })
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =
@@ -687,13 +684,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
               assertFrameSize(0)
               throws(WasmException(JumpTarget.Jump(labelIndex - 1), operands, state))
             }
-          case WasmException(JumpTarget.Return, _, _) =>
-            assertFrameSize(0)
-            throws(ex)
-          case WasmException(JumpTarget.TailCall(_, _), _, _) =>
-            assertFrameSize(0)
-            throws(ex)
-          case WasmException(JumpTarget.Exception(_), _, _) =>
+          case WasmException(JumpTarget.Return | JumpTarget.TailCall(_, _) | JumpTarget.Exception(_), _, _) =>
             assertFrameSize(0)
             throws(ex)
         }

@@ -57,10 +57,13 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = ???
     override def funcInstToRefV(f: FunctionInstance): RefV = ???
     override def isNullRef(r: Value): TypeAnalysis.Value = ???
-    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
-    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
-      case Value.ExnRef(tag, fields) => (tag, fields)
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(List((tag, fields)))
+    override def unwrapExnRef(v: Value): List[(TagInstance, List[Value])] = v match
+      case Value.ExnRef(entries) => entries
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
+
+    override def isTopValue(v: Value): Boolean = v == Value.TopValue
+    override def topFieldsForTag(tag: TagInstance): List[Value] = tag.tpe.params.map(typedTop).toList
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)

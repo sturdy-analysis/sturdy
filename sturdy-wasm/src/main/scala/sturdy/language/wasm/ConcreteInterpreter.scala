@@ -71,7 +71,8 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
       case (Value.Num(NumValue.Float32(f1)), Value.Num(NumValue.Float32(f2))) => f1.isNaN && f2.isNaN || f1 == f2
       case (Value.Num(NumValue.Float64(d1)), Value.Num(NumValue.Float64(d2))) => d1.isNaN && d2.isNaN || d1 == d2
       case (Value.Ref(r1), Value.Ref(r2)) => r1 == r2
-      case (Value.ExnRef(t1, fs1), Value.ExnRef(t2, fs2)) => (t1 eq t2) && eqVals(fs1, fs2)
+      case (Value.ExnRef(es1), Value.ExnRef(es2)) =>
+        es1.size == es2.size && es1.zip(es2).forall { case ((t1, fs1), (t2, fs2)) => (t1 eq t2) && eqVals(fs1, fs2) }
       case (Value.Vec(b1), Value.Vec(b2)) =>
         val bb1 = ByteBuffer.wrap(b1)
         val bb2 = ByteBuffer.wrap(b2)
@@ -141,11 +142,16 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
         case _ => Value.Num(NumValue.Int32(0))
       }
 
-    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(tag, fields)
+    override def wrapExnRef(tag: TagInstance, fields: List[Value]): Value = Value.ExnRef(List((tag, fields)))
 
-    override def unwrapExnRef(v: Value): (TagInstance, List[Value]) = v match
-      case Value.ExnRef(tag, fields) => (tag, fields)
+    override def unwrapExnRef(v: Value): List[(TagInstance, List[Value])] = v match
+      case Value.ExnRef(entries) => entries
       case _ => f.fail(TypeError, s"Expected exnref but got $v")
+
+    override def isTopValue(v: Value): Boolean = false
+
+    override def topFieldsForTag(tag: TagInstance): List[Value] =
+      throw new IllegalStateException("topFieldsForTag should never be called in concrete interpreter")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
