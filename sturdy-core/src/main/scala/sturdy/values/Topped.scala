@@ -65,6 +65,12 @@ given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] 
 given TopTopped[V]: Top[Topped[V]] with
   override def top: Topped[V] = Topped.Top
 
+given JoinToppedByteArray[W <: Widening]: Combine[Topped[Array[Byte]], W] with
+  def apply(v1: Topped[Array[Byte]], v2: Topped[Array[Byte]]): MaybeChanged[Topped[Array[Byte]]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) => if (java.util.Arrays.equals(x1, x2)) Unchanged(v1) else Changed(Topped.Top)
+
 given JoinToppedFlat[V, W <: Widening](using Structural[V]): Combine[Topped[V], W] with
   def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
     case (Topped.Top, _) => Unchanged(Topped.Top)

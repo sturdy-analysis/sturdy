@@ -282,6 +282,14 @@ given ConcreteSIMDOps[V]
     case _ => f.fail(UnsupportedConfiguration, s"SIMD operation Q15MulrSatS does not support shape: $shape")
 
   override def vectorDotS(shape: LaneShape, v1: Array[Byte], v2: Array[Byte]): Array[Byte] = shape match
+    case LaneShape.I8 =>
+      val codecByte = summon[LaneCodec[Byte]]
+      val lane1 = extractLanes(v1, codecByte)
+      val lane2 = extractLanes(v2, codecByte)
+      val products = lane1.zip(lane2).map { case (a, b) => (a.toShort * b.toShort).toShort }
+      val summed = products.grouped(2).map(_.sum.toShort).toArray
+      val codecShort = summon[LaneCodec[Short]]
+      encodeLanes(summed, codecShort)
     case LaneShape.I16 =>
       val codecShort = summon[LaneCodec[Short]]
       val lane1 = extractLanes(v1, codecShort)

@@ -54,6 +54,27 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
     case lane: VectorExtractLane => evalExtractLane(lane)
     case lane: VectorReplaceLane => evalReplaceLane(lane)
     case v128.Const(bytes) => v128ops.vectorLit(bytes)
+    // Relaxed SIMD
+    case i8x16.RelaxedSwizzle => val (v1, v2) = stack.pop2OrAbort(); v128ops.swizzleLanes(LaneShape.I8, v1, v2)
+    case i8x16.RelaxedLaneselect => evalRelaxedLaneselect()
+    case i16x8.RelaxedLaneselect => evalRelaxedLaneselect()
+    case i32x4.RelaxedLaneselect => evalRelaxedLaneselect()
+    case i64x2.RelaxedLaneselect => evalRelaxedLaneselect()
+    case i32x4.RelaxedTruncF32x4S => v128ops.vectorTruncSat(LaneShape.F32, TruncMode.Sat, Signed, stack.popOrAbort())
+    case i32x4.RelaxedTruncF32x4U => v128ops.vectorTruncSat(LaneShape.F32, TruncMode.Sat, Unsigned, stack.popOrAbort())
+    case i32x4.RelaxedTruncF64x2SZero => v128ops.vectorTruncSat(LaneShape.F64, TruncMode.SatZero, Signed, stack.popOrAbort())
+    case i32x4.RelaxedTruncF64x2UZero => v128ops.vectorTruncSat(LaneShape.F64, TruncMode.SatZero, Unsigned, stack.popOrAbort())
+    case f32x4.RelaxedMadd => evalRelaxedMadd(LaneShape.F32)
+    case f32x4.RelaxedNmadd => evalRelaxedNmadd(LaneShape.F32)
+    case f64x2.RelaxedMadd => evalRelaxedMadd(LaneShape.F64)
+    case f64x2.RelaxedNmadd => evalRelaxedNmadd(LaneShape.F64)
+    case f32x4.RelaxedMin => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorMin(LaneShape.F32, Raw, v1, v2)
+    case f32x4.RelaxedMax => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorMax(LaneShape.F32, Raw, v1, v2)
+    case f64x2.RelaxedMin => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorMin(LaneShape.F64, Raw, v1, v2)
+    case f64x2.RelaxedMax => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorMax(LaneShape.F64, Raw, v1, v2)
+    case i16x8.RelaxedQ15MulrS => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorQ15MulrSatS(LaneShape.I16, v1, v2)
+    case i16x8.RelaxedDotI8x16I7x16S => val (v1, v2) = stack.pop2OrAbort(); v128ops.vectorDotS(LaneShape.I8, v1, v2)
+    case i32x4.RelaxedDotI8x16I7x16AddS => evalRelaxedDotI8x16AddS()
     case _ => throw new IllegalArgumentException(s"Unsupported SIMD instruction: $inst")
   }
 
@@ -340,6 +361,36 @@ class GenericInterpreterSIMD [V, Addr, Bytes, J[_] <: MayJoin[_]]
       case f64x2.ConvertLowI32x4U => v128ops.vectorConvertLow(LaneShape.I32, Unsigned, v)
 
       case f64x2.PromoteLowF32x4 => v128ops.vectorPromoteLow(LaneShape.F32, v)
+
+  private def evalRelaxedLaneselect(): V = {
+    val m = stack.popOrAbort()
+    val b = stack.popOrAbort()
+    val a = stack.popOrAbort()
+    v128ops.vectorBitselect(V128, a, b, m)
+  }
+
+  private def evalRelaxedMadd(shape: LaneShape): V = {
+    val c = stack.popOrAbort()
+    val b = stack.popOrAbort()
+    val a = stack.popOrAbort()
+    v128ops.vectorAdd(shape, Allow, Raw, v128ops.vectorMul(shape, a, b), c)
+  }
+
+  private def evalRelaxedNmadd(shape: LaneShape): V = {
+    val c = stack.popOrAbort()
+    val b = stack.popOrAbort()
+    val a = stack.popOrAbort()
+    v128ops.vectorSub(shape, Allow, Raw, c, v128ops.vectorMul(shape, a, b))
+  }
+
+  private def evalRelaxedDotI8x16AddS(): V = {
+    val c = stack.popOrAbort()
+    val b = stack.popOrAbort()
+    val a = stack.popOrAbort()
+    val dotI16 = v128ops.vectorDotS(LaneShape.I8, a, b)
+    val sumI32 = v128ops.vectorExtAdd(LaneShape.I16, Signed, dotI16)
+    v128ops.vectorAdd(LaneShape.I32, Allow, Raw, sumI32, c)
+  }
 
   def defaultValue(): V = {
     evalSIMD(v128.Const(Array.fill(VecBytes)(0.toByte)))

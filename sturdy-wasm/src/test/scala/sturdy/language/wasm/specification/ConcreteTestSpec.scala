@@ -106,6 +106,12 @@ class ConcreteTestSpecInterpreter(spectest: Option[Module] = None):
       assert(!res.isFailing, s"$action failed $res")
       val expected = constExprToVals(expectedRes)
       assert(eqVals(expected, res.get), c.toString + s" but expected $expected != actual ${res.get}")
+    case AssertReturnEither(action, expectedAlternatives) =>
+      val res = runAction(action)
+      assert(!res.isFailing, s"$action failed $res")
+      val alternatives = expectedAlternatives.map(constExprToVals)
+      assert(alternatives.exists(eqVals(_, res.get)),
+        c.toString + s" but actual ${res.get} did not match any of: ${alternatives.mkString(", ")}")
     case AssertReturnCanonicalNaN(action) =>
       val res = runAction(action)
       checkNaN(res, c.toString)
