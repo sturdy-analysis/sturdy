@@ -467,7 +467,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       stack.push(num.evalNumeric(inst))
     else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.ReturnCall || opcode == OpCode.ReturnCallRef || opcode == OpCode.TryTable))
+    else if (opcode >= OpCode.Unreachable && (opcode <= OpCode.CallIndirect || opcode == OpCode.ReturnCall || opcode == OpCode.ReturnCallIndirect || opcode == OpCode.ReturnCallRef || opcode == OpCode.TryTable))
       evalControlInst(inst, loc)
     else if (opcode >= OpCode.TableGet && opcode <= OpCode.TableSet)
       evalTableInst(inst, loc)
@@ -533,6 +533,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       val args = stack.popNOrAbort(func.funcType.params.size)
       throws(WasmException(JumpTarget.TailCall(func, loc), args, null))
+    case ReturnCallIndirect(tableIdx, typeIdx) =>
+      val ftExpected = module.functionTypes(typeIdx)
+      val funcIx = stack.popOrAbort()
+      val fRef = tables.getOrElse(module.tableAddrs(tableIdx), valToIdx(funcIx), fail(UnboundFunctionIndex, funcIx.toString))
+      branchOpsUnit.boolBranch(isNullRef(refToVal(fRef))) {
+        fail(UnboundFunctionIndex, s"Cannot tail-call function with null reference $fRef.")
+      } {
+        val funV = referenceOps.deref(fRef)
+        functionOps.invokeFun(funV, ftExpected) {
+          case (func, _) =>
+            val ftActual = func.funcType
+            if (ftExpected != ftActual)
+              fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
+            val args = stack.popNOrAbort(func.funcType.params.size)
+            throws(WasmException(JumpTarget.TailCall(func, loc), args, null))
+        }
+      }
     case ReturnCallRef(typeIdx) =>
       val ftExpected = module.functionTypes(typeIdx)
       val funcRefV = stack.popOrAbort()
@@ -932,7 +949,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   private def mkNullRef(referenceType: ReferenceType): RefV = referenceType match
     case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef => referenceOps.mkNullRef
     case ReferenceType.ExternRef => referenceOps.mkExternNullRef
-    case ReferenceType.ExnRef => throw IllegalArgumentException("exnref has no null value")
+    case ReferenceType.ExnRef | ReferenceType.NonNullExnRef => throw IllegalArgumentException("exnref has no null value")
 
   case class ResolvedImports(funcs: Vector[FunctionInstance],
                              globs: Vector[GlobalAddr],

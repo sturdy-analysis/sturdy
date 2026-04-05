@@ -54,10 +54,22 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
       case Some(None) => rest
       case Some(Some(replace)) => replace :: rest
 
+  private def updateThroughSections(ev: ControlEvent[Atom,Section,Exc,Fx])(f: PartialFunction[Entry, Option[Entry]]): Unit =
+    stack = updateThroughSections_(stack, ev)(f)
+
+  private def updateThroughSections_(entries: List[Entry], ev: ControlEvent[Atom,Section,Exc,Fx])(f: PartialFunction[Entry, Option[Entry]]): List[Entry] = entries match
+    case Nil => error(s"No entry to update, stack is empty: $ev")
+    case e :: rest => f.lift(e) match
+      case None => e match
+        case Entry.Sec => e :: updateThroughSections_(rest, ev)(f)
+        case _ => error(s"Entry mismatch, expected end of $e: $ev")
+      case Some(None) => rest
+      case Some(Some(replace)) => replace :: rest
+
   def isCatching: Boolean = isCatching(stack)
   def isCatching(st: List[Entry]): Boolean = st match
     case Entry.Catching :: _ => true
-    case (Entry.ForkFirst | Entry.ForkSecond) :: st_ => isCatching(st_)
+    case (Entry.ForkFirst | Entry.ForkSecond | Entry.Sec) :: st_ => isCatching(st_)
     case _ => false
 
   private def assertNoCatching(): Unit =
@@ -94,12 +106,12 @@ class ControlEventChecker[Atom,Section,Exc,Fx] extends ControlObserver[Atom,Sect
         pushEntry(Entry.Try)
       case Throw(exc: Exc) =>
         assertNoCatching()
-      case Catching() => updateEntry(ev) { case Entry.Try => Some(Entry.Catching) }
+      case Catching() => updateThroughSections(ev) { case Entry.Try => Some(Entry.Catching) }
       case BeginHandle(exc: Exc) =>
         assertCatching()
         pushEntry(Entry.Handle)
       case EndHandle() => updateEntry(ev) { case Entry.Handle => None }
-      case EndTry() => updateEntry(ev) { case Entry.Try | Entry.Catching => None }
+      case EndTry() => updateThroughSections(ev) { case Entry.Try | Entry.Catching => None }
 
   override def handle(ev: FixpointControlEvent[Atom,Section,Exc,Fx]): Unit =
     import FixpointControlEvent.*
@@ -117,4 +129,3 @@ object ControlEventChecker:
     throw InvalidControlEventSequence(msg)
 
   case class InvalidControlEventSequence(msg: String) extends Exception(msg)
-

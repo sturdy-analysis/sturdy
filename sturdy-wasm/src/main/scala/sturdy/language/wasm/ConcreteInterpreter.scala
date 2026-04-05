@@ -107,7 +107,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
         t match
           case ReferenceType.FuncRef | ReferenceType.NullableConcreteFuncRef | ReferenceType.AbstractNonNullFuncRef | ReferenceType.NonNullFuncRef => makeRef(FunctionInstance.Null)
           case ReferenceType.ExternRef => makeRef(ExternReference.Null)
-          case ReferenceType.ExnRef => throw IllegalArgumentException("exnref has no null value")
+          case ReferenceType.ExnRef | ReferenceType.NonNullExnRef => throw IllegalArgumentException("exnref has no null value")
       case unresolved.RefFunc(x) => x match {
         case Left(r) => throw new IllegalArgumentException(s"Cannot resolve unresolved funcref $r")
         case _ => Value.Ref(ExternReference.Null)
