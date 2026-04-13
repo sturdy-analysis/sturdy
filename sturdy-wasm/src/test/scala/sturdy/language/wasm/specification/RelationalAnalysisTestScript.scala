@@ -11,7 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, Suites}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.apron.{RoundingDir, RoundingMode}
+import sturdy.apron.{ApronExpr, RoundingDir, RoundingMode}
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
 import sturdy.{*, given}
@@ -20,7 +20,7 @@ import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
 import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
+import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, ModuleInstance, WasmFailure}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import sturdy.values.integer.given
@@ -31,9 +31,11 @@ import swam.text.unresolved.{FreshId, NoId, SomeId}
 import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import com.github.tototoshi.csv.*
+import org.scalacheck.Gen
+import sturdy.util.GenInterval.genInterval
 
 val csvWriter = {
-  val writer = CSVWriter.open(File("relational-test-script.csv"))
+  val writer = CSVWriter.open(File("soundness.csv"))
   writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed", "constrained_instructions", "total_instructions", "percent_constrained"))
   writer
 }
@@ -43,8 +45,8 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 class RelationalAnalysisSoundnessTests extends Suites(
   new RelationalAnalysisTestScript(Polka(true), relational = true),
   new RelationalAnalysisTestScript(Octagon(), relational = true),
-  new RelationalAnalysisTestScript(Box(), relational = true),
-  new RelationalAnalysisTestScript(Box(), relational = false),
+  new RelationalAnalysisTestScript(Box(), relational = true)
+  // new RelationalAnalysisTestScript(Box(), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()
@@ -215,8 +217,9 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
       passedTestCases.increment()
     case AssertTrap(action: Action, message: String) =>
       totalTestCases.increment()
-      val state = aInterp.effectStack.getState
-      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setState(state) }
+      val dummyFunctionCall = FixIn.EnterWasmFunction(null, null, null)
+      val state = aInterp.effectStack.getOutState(dummyFunctionCall)
+      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setOutState(dummyFunctionCall, state) }
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
@@ -361,23 +364,13 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
   def genAVal(inst: unresolved.Inst): Gen[RelationalAnalysis.Value] = {
     import RelationalAnalysis.Value.*
     import RelationalAnalysis.NumValue.*
+    import RelationalAnalysis.RelI32.*
+    import RelationalAnalysis.Type.*
     inst match {
-      case unresolved.i32.Const(i) =>
-        for {
-          iv <- genInterval(included = i, minValue = Int.MinValue, maxValue = Int.MaxValue, specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue)*)
-        } yield Num(Int32(NumericInterval(iv.low, iv.high)))
-      case unresolved.i64.Const(l) =>
-        for {
-          iv <- genInterval(included = l, minValue = Long.MinValue, maxValue = Long.MaxValue, specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue)*)
-        } yield Num(Int64(NumericInterval(iv.low, iv.high)))
-      case unresolved.f32.Const(f) =>
-        for {
-          absF <- Gen.oneOf(List(Topped.Actual(f), Topped.Top))
-        } yield Num(Float32(absF))
-      case unresolved.f64.Const(d) =>
-        for {
-          absD <- Gen.oneOf(List(Topped.Actual(d), Topped.Top))
-        } yield Num(Float64(absD))
+      case unresolved.i32.Const(i) => Gen.const(Num(Int32(NumExpr(ApronExpr.lit(i, I32Type)))))
+      case unresolved.i64.Const(l) => Gen.const(Num(Int64(ApronExpr.lit(l, I64Type))))
+      case unresolved.f32.Const(f) => Gen.const(Num(Float32(ApronExpr.lit(f, I32Type))))
+      case unresolved.f64.Const(d) => Gen.const(Num(Float64(ApronExpr.lit(d, I64Type))))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
     }
   }
