@@ -4,19 +4,23 @@ import scala.collection.mutable
 
 object Export:
 
-  def toGraphViz(ir: IR, toStr: IR => String = _.toString): String =
+  def toGraphViz(_ir: IR, toStr: IR => String = _.toString): String =
+    var ir = _ir
     val visited = mutable.Set[IR]()
     val stack = mutable.Stack[IR](ir)
     val builder = new StringBuilder
     builder ++= "strict digraph {\n"
     builder ++= s"\"${toStr(ir)}\" [fillcolor=lightcoral, style=filled, fontcolor=black]\n"
 
+//    ir = ir.normalize
+    ir.resolveFix()
+
     ir.foreach { node =>
-      if (node.isInstanceOf[IR.Feedback])
+      if (node.isInstanceOf[IR.Feedback] || node.isInstanceOf[IR.Fix])
         builder ++= s"\"${toStr(node)}\" [fillcolor=lemonchiffon, style=filled, fontcolor=black]\n"
 
       for ((p, l) <- node.predecessors) {
-        builder ++= s"\"$p\" -> \"$node\" [label = \"$l\"]\n"
+        builder ++= s"\"${toStr(p)}\" -> \"${toStr(node)}\" [label = \"$l\"]\n"
       }
     }
 
