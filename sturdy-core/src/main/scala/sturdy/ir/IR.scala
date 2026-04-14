@@ -5,6 +5,7 @@ import sturdy.values.booleans.ConcreteIntBools
 import sturdy.ir.IR.FixResultSmart
 import sturdy.values.MaybeChanged.{Changed, Unchanged}
 import sturdy.values.booleans.IRBooleanOperator
+import sturdy.values.ordering.IROrderingOperator
 import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder, PathSensitive, Top}
 
 import scala.collection.immutable.SortedMap
@@ -50,11 +51,6 @@ enum IR:
 //    case that: IR => this.uid == that.uid
 //    case _ => false
 
-  def normalize: IR =
-    map {
-      case Fixresult(fix, name) => FixResultSmart(fix, name)
-      case ir => ir
-    }
   def resolveFix(): Unit = {
     var fixvars: Map[String, IR.Fix] = Map()
     def resolve(ir: IR): Unit = ir match
@@ -103,7 +99,12 @@ enum IR:
     case fix@IR.Fix(inits, steps, loopWhileAny) =>
       val initPreds = inits.toSeq.map((k, v) => v -> s"init_$k")
       val stepPreds = steps.toSeq.map((k, v) => v -> s"step_$k")
-      val condPreds = loopWhileAny.zipWithIndex.map((c, i) => c -> s"cond_$i")
+      val condPreds =if (loopWhileAny.size != 1) {
+        println(s"Warning: Fix should be normalized before export.")
+        loopWhileAny.zipWithIndex.map((c, i) => c -> s"cond_$i")
+      } else {
+        loopWhileAny.headOption.map(c => c -> "cond").toSeq
+      }
       initPreds ++ stepPreds ++ condPreds
     case v@IR.Fixvar(name) =>
       val target = v.target.getOrElse(throw new UnsupportedOperationException(s"Cannot get predecessors of unbound fixvar $name"))
@@ -189,10 +190,39 @@ enum IR:
     case IR.Assert(cond, data) => f(IR.Assert(cond.map(f), data.map(f)))
     case IR.Fix(inits, steps, cond) => f(IR.Fix(inits.map((k, v) => k -> v.map(f)), steps.map((k, v) => k -> v.map(f)), cond.map(f)))
     case IR.Fixvar(name) => f(this)
-    case IR.Fixresult(fix, name) => f(this)
+    case IR.Fixresult(fix, name) => f(IR.Fixresult(fix.map(f).asInstanceOf[IR.Fix], name))
     case IR.Feedback(inits, cond, steps) => throw new UnsupportedOperationException()
     case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
   }
+
+  def normalize: IR = map {
+    case IR.Fix(inits, steps, List()) =>
+      IR.Fix(inits, steps, List(IR.Const(false)))
+    case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.size > 1 =>
+
+      IR.Fix(inits, steps, List(IR.mkOr(loopWhileAny))).normalize
+    case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) =>
+      var isRecursive = false
+      loopWhileAny.foreach(_.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () })
+      if (!isRecursive)
+        IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalize
+      else
+        ir
+    case IR.Select(cond, left, right) if left == right => left
+    case ir => ir
+  }
+
+  def dedup: IR =
+    var seen: Map[IR, IR] = Map()
+    this map { ir =>
+      seen.get(ir) match
+        case Some(existing) =>
+          println(s"Deduping $ir")
+          existing
+        case None =>
+          seen += ir -> ir
+          ir
+    }
 
   def foreachTree(f: IR => Unit): Unit = this match {
     case IR.Bot() => f(this)
@@ -305,6 +335,22 @@ object IR:
     else
       Fixresult(fix, name)
 
+  def mkNot(ir: IR): IR = ir match {
+    case IR.Const(b: Boolean) => IR.Const(!b)
+    case IR.Op(IRBooleanOperator.NOT, Seq(inner)) => inner
+    case IR.Op(IROrderingOperator.LE, Seq(e1, e2)) => IR.Op(IROrderingOperator.LT, e2, e1)
+    case IR.Op(IROrderingOperator.LT, Seq(e1, e2)) => IR.Op(IROrderingOperator.LE, e2, e1)
+    case _ => IR.Op(IRBooleanOperator.NOT, ir)
+  }
+
+  def reduce(irs : List[IR])(default: IR, f: (IR, IR) => IR): IR =
+    irs.size match
+      case 0 => default
+      case 1 => irs.head
+      case _ => irs.tail.foldLeft(irs.head)(f)
+
+  def mkAnd(irs: List[IR]): IR = reduce(irs)(IR.Const(false), (a, b) => IR.Op(IRBooleanOperator.AND, a, b))
+  def mkOr(irs: List[IR]): IR = reduce(irs)(IR.Const(true), (a, b) => IR.Op(IRBooleanOperator.OR, a, b))
 
 
 given sturdy.values.Join[IR] with

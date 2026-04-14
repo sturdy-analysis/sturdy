@@ -4,8 +4,7 @@ import scala.collection.mutable
 
 object Export:
 
-  def toGraphViz(_ir: IR, toStr: IR => String = _.toString): String =
-    var ir = _ir
+  def toGraphViz(ir: IR, toStr: IR => String = _.toString): String =
     val visited = mutable.Set[IR]()
     val stack = mutable.Stack[IR](ir)
     val builder = new StringBuilder

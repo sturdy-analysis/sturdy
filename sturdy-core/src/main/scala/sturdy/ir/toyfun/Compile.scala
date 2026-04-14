@@ -18,30 +18,6 @@ class Compile(defs: Map[String, Def]) {
   private var path: Set[IR] = Set()
   private var env: SortedMap[String, IR] = SortedMap()
 
-  def notIr(ir: IR): IR = ir match {
-    case IR.Const(b: Boolean) => IR.Const(!b)
-    case IR.Op(IRBooleanOperator.NOT, Seq(inner)) => inner
-    case IR.Op(IROrderingOperator.LE, Seq(e1, e2)) => IR.Op(IROrderingOperator.LT, e2, e1)
-    case IR.Op(IROrderingOperator.LT, Seq(e1, e2)) => IR.Op(IROrderingOperator.LE, e2, e1)
-    case _ => IR.Op(IRBooleanOperator.NOT, ir)
-  }
-
-//  def pathProp(p: List[IR]): IR =
-//    if (p.isEmpty)
-//      IR.Const(true)
-//    else if (p.size == 1)
-//      p.head
-//    else
-//      IR.Op(IRBooleanOperator.AND, p.head, pathProp(p.tail))
-
-  def pathPropNot(p: Set[IR]): Set[IR] =
-    if (p.isEmpty)
-      Set.empty
-    else if (p.size == 1)
-      Set(notIr(p.head))
-    else
-      pathPropNot(p.tail) + notIr(p.head)
-
   // TODO: may need structural equality on IR values instead of reference equality
   case class State(env: SortedMap[String, IR]):
 
@@ -71,7 +47,7 @@ class Compile(defs: Map[String, Def]) {
         val steps = other.env.map((k,_) => (k,IR.Fixvar(k)))
 
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
-        val loopWhile = pathPropNot(path)
+        val loopWhile = path.map(IR.mkNot)
         printIndented(s"Loop while: $loopWhile")
         val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         printIndented(s"NEW FIX: $fix")
@@ -93,10 +69,10 @@ class Compile(defs: Map[String, Def]) {
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
         path = path.map(rewriteFixResult)
         printIndented(s"Path rewritten: ${path.map(_.toString).mkString(" AND ")}")
-        val loopWhile = pathPropNot(path)
+        val loopWhile = path.map(IR.mkNot)
         val previousConds = previousFixes.flatMap(_._2.loopWhileAny).toSet
         val (loopCondBefore, loopCondNew) = loopWhile.partition(previousConds)
-        val loopCondNewNot = pathPropNot(loopCondNew)
+        val loopCondNewNot = loopCondNew.map(IR.mkNot)
         printIndented(s"Loop while from before $loopCondBefore")
         printIndented(s"         new condition $loopCondNew")
         printIndented(s"     new not condition $loopCondNewNot")
@@ -156,7 +132,7 @@ class Compile(defs: Map[String, Def]) {
 
       path = oldPath + condIR
       val thenIR = TrySturdy(compile(thenBranch))
-      path = oldPath + notIr(condIR)
+      path = oldPath + IR.mkNot(condIR)
       val elseIR = TrySturdy(compile(elseBranch))
       path = oldPath
 
@@ -249,4 +225,7 @@ object RunCompile extends App:
 //  println(Export.toGraphViz(diff_X_Y))
 
   private val fac_N = compiler.compileFun("fac", List(IR.External("N"), IR.Const(1)))
-  println(Export.toGraphViz(fac_N, _.nodeString))
+  fac_N.resolveFix()
+  val fac_N_norm = fac_N.normalize
+  val fac_N_norm_dedup = fac_N_norm.dedup
+  println(Export.toGraphViz(fac_N_norm_dedup, _.nodeString))
