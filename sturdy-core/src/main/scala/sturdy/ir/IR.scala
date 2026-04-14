@@ -2,7 +2,7 @@ package sturdy.ir
 
 import org.scalacheck.rng.Seed
 import sturdy.values.booleans.ConcreteIntBools
-import sturdy.ir.IR.FixResultSmart
+import sturdy.ir.IR.{FixResultSmart, mkNot}
 import sturdy.values.MaybeChanged.{Changed, Unchanged}
 import sturdy.values.booleans.IRBooleanOperator
 import sturdy.values.ordering.IROrderingOperator
@@ -195,29 +195,59 @@ enum IR:
     case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
   }
 
-  def normalize: IR = map {
-    case IR.Fix(inits, steps, List()) =>
-      IR.Fix(inits, steps, List(IR.Const(false)))
-    case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.size > 1 =>
-
-      IR.Fix(inits, steps, List(IR.mkOr(loopWhileAny))).normalize
-    case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) =>
-      var isRecursive = false
-      loopWhileAny.foreach(_.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () })
-      if (!isRecursive)
-        IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalize
-      else
-        ir
-    case IR.Select(cond, left, right) if left == right => left
-    case ir => ir
+  protected def norm(path: Set[IR], f: (Set[IR], IR) => IR): IR = this match {
+    case IR.Bot() => f(path, this)
+    case IR.Unknown() => f(path, this)
+    case IR.Undefined() => f(path, this)
+    case IR.External(name) => f(path, this)
+    case IR.Const(c) => f(path, this)
+    case IR.Op(op, args) => f(path, IR.Op(op, args.map(_.norm(path, f))))
+    case IR.Select(cond, left, right) =>
+      val condN = cond.norm(path, f)
+      val oldPath = path
+      val leftN = left.norm(oldPath + condN, f)
+      val rightN = right.norm(oldPath + mkNot(condN), f)
+      f(path, IR.Select(condN, leftN, rightN))
+    case IR.Join(left, right) => f(path, IR.Join(left.norm(path, f), right.norm(path, f)))
+    case IR.Assert(cond, data) => f(path, IR.Assert(cond.norm(path, f), data.norm(path, f)))
+    case IR.Fix(inits, steps, cond) =>
+      val condN = cond.map(_.norm(path, f))
+      f(path, IR.Fix(inits.map((k, v) => k -> v.norm(path, f)), steps.map((k, v) => k -> v.norm(path ++ condN, f)), condN))
+    case IR.Fixvar(name) => f(path, this)
+    case IR.Fixresult(fix, name) => f(path, IR.Fixresult(fix.norm(path, f).asInstanceOf[IR.Fix], name))
+    case IR.Feedback(inits, cond, steps) => throw new UnsupportedOperationException()
+    case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
   }
+
+  def normalize: IR = normalizeLoop(Set.empty)
+
+  protected def normalizeLoop(path: Set[IR]): IR =
+    norm (path, { (path, ir) =>
+      ir match {
+        case IR.Fix(inits, steps, List()) =>
+          IR.Fix(inits, steps, List(IR.Const(false)))
+        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.size > 1 =>
+          IR.Fix(inits, steps, List(IR.mkOr(loopWhileAny))).normalizeLoop(path)
+        case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) =>
+          var isRecursive = false
+          loopWhileAny.foreach(_.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () })
+          if (!isRecursive)
+            IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalizeLoop(path)
+          else
+            ir
+        case IR.Select(cond, left, right) if left == right => left
+        case IR.Select(cond, left, right) if path.contains(cond) => left
+        case IR.Select(cond, left, right) if path.contains(mkNot(cond)) => right
+        case ir => ir
+      }
+    })
 
   def dedup: IR =
     var seen: Map[IR, IR] = Map()
     this map { ir =>
       seen.get(ir) match
         case Some(existing) =>
-          println(s"Deduping $ir")
+//          println(s"Deduping $ir")
           existing
         case None =>
           seen += ir -> ir
