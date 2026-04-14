@@ -29,7 +29,7 @@ import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
 
 import java.io.File
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{FileSystemNotFoundException, FileSystems, Files, Path, Paths}
 import com.github.tototoshi.csv.*
 import org.scalacheck.Gen
 import sturdy.util.GenInterval.genInterval
@@ -54,10 +54,26 @@ class RelationalAnalysisSoundnessTests extends Suites(
 class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true) extends AnyFlatSpec, Matchers:
   behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
 
-  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
+  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+    Parsing.fromString(
+      scala.io.Source.fromInputStream(this.getClass.getResourceAsStream("/sturdy/language/wasm/spectest.wast")).mkString
+    )
+  }
   val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
-
-  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
+  // Handle both file system paths and JAR resources
+  val path = if (uri.getScheme == "jar") {
+    // For JAR resources - get existing FileSystem or create new one
+    val fs = try {
+      FileSystems.getFileSystem(uri)
+    } catch {
+      case _: FileSystemNotFoundException =>
+        FileSystems.newFileSystem(uri, new java.util.HashMap[String, Any]())
+    }
+    fs.getPath("/sturdy/language/wasm/spec-test-suite-wasm1")
+  } else {
+    // For regular file system paths
+    Paths.get(uri)
+  }
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
@@ -82,7 +98,7 @@ class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true)
     interp.run(scriptPath.getFileName, script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p =>
+  Files.list(path).toScala(List).filter(p =>
     p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
