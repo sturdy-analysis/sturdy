@@ -1,5 +1,7 @@
 package sturdy.ir
 
+import org.scalacheck.rng.Seed
+import sturdy.values.booleans.ConcreteIntBools
 import sturdy.ir.IR.FixResultSmart
 import sturdy.values.MaybeChanged.{Changed, Unchanged}
 import sturdy.values.booleans.IRBooleanOperator
@@ -9,6 +11,7 @@ import scala.collection.immutable.SortedMap
 import scala.collection.mutable
 
 trait IROperator
+trait IRBinaryOperator(val infix: String) extends IROperator
 //trait IRCheck[C]:
 //  def assert(c: C): C
 //
@@ -115,6 +118,7 @@ enum IR:
       case IR.Undefined() => s"Undefined"
       case IR.External(name) => s"Ext_$name"
       case IR.Const(c) => s"$c"
+      case IR.Op(bop: IRBinaryOperator, Seq(a1, a2)) => s"(${a1.toString(bound - 1)} ${bop.infix} ${a2.toString(bound - 1)})"
       case IR.Op(op, args) => s"Op($op, [${args.map(_.toString(bound - 1)).mkString(", ")}])"
       case IR.Select(cond, left, right) => s"Select(${cond.toString(bound - 1)}, ${left.toString(bound - 1)}, ${right.toString(bound - 1)})"
       case IR.Join(left, right) => s"Join(${left.toString(bound - 1)}, ${right.toString(bound - 1)})"
@@ -188,6 +192,27 @@ enum IR:
     case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
   }
 
+  def foreachTree(f: IR => Unit): Unit = this match {
+    case IR.Bot() => f(this)
+    case IR.Unknown() => f(this)
+    case IR.Undefined() => f(this)
+    case IR.External(name) => f(this)
+    case IR.Const(c) => f(this)
+    case IR.Op(op, args) => args.foreach(_.foreachTree(f)); f(this)
+    case IR.Select(cond, left, right) => cond.foreachTree(f); left.foreachTree(f); right.foreachTree(f); f(this)
+    case IR.Join(left, right) => left.foreachTree(f); right.foreachTree(f); f(this)
+    case IR.Assert(cond, data) => cond.foreachTree(f); data.foreachTree(f); f(this)
+    case IR.Fix(inits, steps, cond) =>
+      inits.values.foreach(_.foreachTree(f))
+      steps.values.foreach(_.foreachTree(f))
+      cond.foreachTree(f)
+      f(this)
+    case IR.Fixvar(name) => f(this)
+    case IR.Fixresult(fix, name) => fix.foreachTree(f); f(this)
+    case IR.Feedback(inits, cond, steps) => throw new UnsupportedOperationException()
+    case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
+  }
+
   def foreach(f: IR => Unit): Unit =
     val visited = mutable.Set[IR]()
     val stack = mutable.Stack[IR](this)
@@ -204,11 +229,55 @@ enum IR:
 
   def externals: Set[String] =
     var names = Set.empty[String]
-    foreach {
+    foreachTree {
       case IR.External(name) => names += name
       case _ => ()
     }
     names
+
+  def testIsLeq(other: IR): Unit =
+    import org.scalacheck.Gen.Choose
+    import org.scalacheck.{Arbitrary, Gen, Shrink, Prop, Test}
+    val extVariables = this.externals ++ other.externals
+//    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(IRValue.apply))
+    val genVal = Gen.choose(1,1)/*Arbitrary.arbitrary[Int]*/.map(i => IRValue(i.abs))
+
+    val p = Prop.forAll(genVal) { v =>
+      val extValues = extVariables.zip(List(v)).toMap
+      isLeq(other)(extValues)
+    }
+
+    val res = Test.check(Test.Parameters.default, p)
+    res.status match {
+      case Test.Passed => // ok
+      case Test.Proved(args) => // ok
+      case Test.Failed(args, labels) =>
+
+        val vals = args.head.arg.asInstanceOf[IRValue]
+        val extValues = extVariables.zip(Seq(vals)).toMap
+        val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
+        val thisValue = interp.run(this)
+        val otherValue = interp.run(other)
+        throw new AssertionError(s"IsLeq Failed for $this <= $other.\n  arguments $extValues\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
+      case Test.Exhausted =>
+        throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed to generate sufficient test inputs.")
+      case Test.PropException(args, e, labels) =>
+        throw new AssertionError(s"IsLeq Failed for $this <= $other. Exception during test generation: ${e.getMessage}", e)
+    }
+
+
+  def isLeq(other: IR)(extValues: Map[String, IRValue]): Boolean =
+    val extVariables = this.externals ++ other.externals
+    if (!extVariables.subsetOf(extValues.keySet))
+      throw new IllegalArgumentException(s"Missing values for externals: ${extVariables.diff(extValues.keySet)}")
+    val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
+    val thisValue = interp.run(this)
+    val otherValue = interp.run(other)
+    (thisValue, otherValue) match
+      case (None, _) => true
+      case (Some(_), None) => false
+      case (Some(v1), Some(v2)) => v1 == v2
+
 
 object IR:
   def Op(op: IROperator, arg: IR, args: IR*): IR.Op =

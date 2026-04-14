@@ -48,7 +48,7 @@ val natdiff = Def("diff", List("x", "y"),
       Sub(Var("y"), Var("x")),
       Sub(Var("x"), Var("y")))))
 
-val fac = Def("fac", List("n", "acc"), If(Eq(Var("n"), Num(0)), Var("acc"), Call("fac", Sub(Var("n"), Num(1)), Mul(Var("acc"), Var("n")))))
+val fac = Def("fac", List("n", "acc"), If(Lt(Var("n"), Num(0)), Var("acc"), Call("fac", Sub(Var("n"), Num(1)), Mul(Var("acc"), Var("n")))))
 val fac_main = Def("main", List("n"), Call("fac", Var("n"), Num(1)))
 
 object Run extends App:

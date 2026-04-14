@@ -1,12 +1,14 @@
 package sturdy.values.ordering
 
-import sturdy.ir.{IR, IROperator, IRValue}
+import sturdy.ir.{IR, IRBinaryOperator, IROperator, IRValue}
 
-enum IROrderingOperator extends IROperator:
-  case LT
-  case LE
-  case LTUnsigned
-  case LEUnsigned
+
+trait IROrderingOperator extends IROperator
+object IROrderingOperator:
+  object LT extends IROrderingOperator, IRBinaryOperator("<")
+  object LE extends IROrderingOperator, IRBinaryOperator("<=")
+  object LTUnsigned extends IROrderingOperator, IRBinaryOperator("< (unsigned)")
+  object LEUnsigned extends IROrderingOperator, IRBinaryOperator("<= (unsigned)")
 
 given IROrderingOps: OrderingOps[IR, IR] with
   import IROrderingOperator.*

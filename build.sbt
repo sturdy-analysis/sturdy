@@ -27,6 +27,7 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
       "org.eclipse.collections" % "eclipse-collections" % "11.0.0",
+      "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0" % "test"

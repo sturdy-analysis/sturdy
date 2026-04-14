@@ -1,12 +1,13 @@
 package sturdy.values.booleans
 
-import sturdy.ir.{IR, IROperator}
+import sturdy.ir.{IR, IRBinaryOperator, IROperator}
 import sturdy.values.Join
 
-enum IRBooleanOperator extends IROperator:
-  case AND
-  case OR
-  case NOT
+trait IRBooleanOperator extends IROperator
+object IRBooleanOperator:
+  object AND extends IRBooleanOperator, IRBinaryOperator("&&")
+  object OR extends IRBooleanOperator, IRBinaryOperator("||")
+  case object NOT extends IRBooleanOperator
 
 given IRBooleanOps: BooleanOps[IR] with
   override def boolLit(b: Boolean): IR = IR.Const(b)

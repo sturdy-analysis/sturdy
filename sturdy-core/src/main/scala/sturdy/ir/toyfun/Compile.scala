@@ -18,8 +18,45 @@ class Compile(defs: Map[String, Def]) {
   private var path: List[IR] = List()
   private var env: SortedMap[String, IR] = SortedMap()
 
+  def notIr(ir: IR): IR = ir match {
+    case IR.Const(b: Boolean) => IR.Const(!b)
+    case IR.Op(IRBooleanOperator.NOT, Seq(inner)) => inner
+    case _ => IR.Op(IRBooleanOperator.NOT, ir)
+  }
+
+  def pathProp(p: List[IR]): IR =
+    if (p.isEmpty)
+      IR.Const(true)
+    else if (p.size == 1)
+      p.head
+    else
+      IR.Op(IRBooleanOperator.AND, p.head, pathProp(p.tail))
+
+  def pathPropNot(p: List[IR]): IR =
+    if (p.isEmpty)
+      IR.Const(false)
+    else if (p.size == 1)
+      notIr(p.head)
+    else
+      IR.Op(IRBooleanOperator.OR, notIr(p.head), pathPropNot(p.tail))
+
   // TODO: may need structural equality on IR values instead of reference equality
   case class State(env: SortedMap[String, IR]):
+
+    def testIsLeq(other: State): Unit =
+      if (this.env.keySet != other.env.keySet)
+        throw new RuntimeException(s"Cannot compare states with different keys: ${env.keySet} vs ${other.env.keySet}")
+      printIndented(s"TEST LEQ")
+      printIndented(s"  $env")
+      printIndented(s"  ${other.env}")
+      val keys = this.env.keySet.toList
+      keys.foreach { k =>
+        val v1 = this.env(k)
+        val v2 = other.env(k)
+        if (v1 != v2)
+          v1.testIsLeq(v2)
+      }
+
     def inputWiden(other: State): MaybeChanged[State] = {
       if (this.env.keySet != other.env.keySet)
         throw new RuntimeException(s"Cannot widen states with different keys: ${env.keySet} vs ${other.env.keySet}")
@@ -30,25 +67,39 @@ class Compile(defs: Map[String, Def]) {
       if (this.env.values.forall(!_.isInstanceOf[IR.Fixresult])) {
         val inits = other.env
         val steps = other.env.map((k,_) => (k,IR.Fixvar(k)))
-        val fix: IR.Fix = IR.Fix(inits, steps, IR.Const(false))
+
+        printIndented(s"Path condition: ${path.reverse.map(_.toString).mkString(" AND ")}")
+        val loopWhile = pathPropNot(path)
+        printIndented(s"Loop while: $loopWhile")
+        val fix: IR.Fix = IR.Fix(inits, steps, loopWhile)
         printIndented(s"NEW FIX: $fix")
         val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         val changed = other.env != fixEnv
-        MaybeChanged(State(fixEnv), changed)
+
+        val newstate = State(fixEnv)
+        other.testIsLeq(newstate)
+        MaybeChanged(newstate, changed)
       } else {
         val previousFixes = this.env.collect { case (k, v: IR.Fixresult) => k -> v.fix }
         val inits = this.env.map((k, _) => (k, previousFixes(k).inits(k)))
-        val steps = other.env.map((k, v) => (k, v.map {
-          case IR.Fixresult(fix, name) if previousFixes.get(k).contains(fix) => IR.Fixvar(name)
+        def rewriteFixResult(ir: IR): IR = ir.map {
+          case IR.Fixresult(fix, name) if previousFixes.get(name).contains(fix) => IR.Fixvar(name)
           case ir => ir
-        }))
-        val fix: IR.Fix = IR.Fix(inits, steps, IR.Const(false))
+        }
+        val steps = other.env.map((k, v) => (k, rewriteFixResult(v)))
+
+        printIndented(s"Path condition: ${path.reverse.map(_.toString).mkString(" AND ")}")
+        val loopWhile = pathPropNot(path)
+        printIndented(s"Loop while: $loopWhile")
+        val fix: IR.Fix = IR.Fix(inits, steps, rewriteFixResult(loopWhile))
         val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         if (this.env == fixEnv)
           Unchanged(other)
         else {
           printIndented(s"NEW FIX: $fix")
-          Changed(State(fixEnv))
+          val newstate = State(fixEnv)
+          other.testIsLeq(newstate)
+          Changed(newstate)
         }
       }
     }

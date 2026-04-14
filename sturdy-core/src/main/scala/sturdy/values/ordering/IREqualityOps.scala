@@ -1,11 +1,12 @@
 package sturdy.values.ordering
 
-import sturdy.ir.{IR, IROperator, embed}
+import sturdy.ir.{IR, IRBinaryOperator, IROperator, embed}
 import sturdy.values.Topped
 
-enum IREqualityOperator extends IROperator:
-  case EQ
-  case NEQ
+trait IREqualityOperator extends IROperator
+object IREqualityOperator:
+  object EQ extends IREqualityOperator, IRBinaryOperator("==")
+  object NEQ extends IREqualityOperator, IRBinaryOperator("!=")
 
 given IREqualityOps: EqOps[IR, IR] with
   import IREqualityOperator.*

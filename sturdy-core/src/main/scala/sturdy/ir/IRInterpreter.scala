@@ -1,7 +1,7 @@
 package sturdy.ir
 
-import sturdy.effect.{Effect, EffectList, EffectStack}
-import sturdy.effect.failure.{CollectedFailures, ConcreteFailure, Failure}
+import sturdy.effect.{Effect, EffectList, EffectStack, TrySturdy}
+import sturdy.effect.failure.{AFallible, CollectedFailures, ConcreteFailure, Failure}
 import sturdy.values.{Join, MaybeChanged, Structural, Topped, booleans}
 import sturdy.values.booleans.{BooleanBranching, BooleanOps, IRBooleanOperator, IntBools, given}
 import sturdy.values.functions.IRFunctionOperator
@@ -21,11 +21,20 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
 
   var feedbackStore: Map[IR_UID, List[Option[IRValue]]] = Map()
 
+  var fixEnv: Map[String, IRValue] = Map()
+  var fixStore: Map[IR_UID, Map[String, IRValue]] = Map()
+
   val integerOps: IntegerOps[Int, VInt]
   val booleanOps: BooleanOps[VBool]
   val orderingOps: OrderingOps[VInt, VBool]
   val integerEqOps: EqOps[VInt, VBool]
   val booleanBranching: BooleanBranching[VBool, IRValue]
+
+  def run(ir: IR): Option[IRValue] =
+    try TrySturdy(interpret(ir)).get
+    catch {
+      case _: StackOverflowError => None
+    }
 
   def interpret(ir: IR): IRValue = ir match
     case IR.Unknown() => inputValue()
@@ -77,6 +86,26 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
 
     case IR.Join(left, right) => ???
 
+    case IR.Fix(inits, steps, cond) => feedbackStore.get(ir.uid) match
+      case Some(_) => throw new Exception("Should not happen")
+      case None =>
+        val oldEnv = fixEnv
+        val initsValue = inits.map((name,init) => (name, interpret(init)))
+        fixStore += ir.uid -> initsValue
+        fixEnv ++= initsValue
+        try interpretFix(ir.uid, steps, cond)
+        finally fixEnv = oldEnv
+        IRValue(null)
+
+    case IR.Fixvar(name) =>
+      fixEnv.getOrElse(name, throw new Exception(s"Unbound fix variable $name. Environment: $fixEnv"))
+
+    case IR.Fixresult(fix, name) =>
+      val st =  fixStore.get(fix.uid) match
+        case None => interpret(fix); fixStore(fix.uid)
+        case Some(store) => store
+      st.getOrElse(name, throw new Exception(s"Unbound fix result $name in fix ${fix.uid}. Store: $st"))
+
     case IR.Feedback(inits, Some(cond), Some(steps)) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
@@ -114,10 +143,22 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
   private final def interpretFeedback(uid: IR_UID, cond: IR, steps: List[IR]) : Unit = {
     val v = interpret(cond)
     v match
-      case IRValue(false | 0) => println(s"Finished with $uid")
+      case IRValue(false | 0) => // println(s"Finished with $uid")
       case _ => val newStore = steps.map(step => Some(interpret(step)))
                 feedbackStore += (uid -> newStore)
                 interpretFeedback(uid, cond, steps)
+  }
+
+  private final def interpretFix(uid: IR_UID, steps: Map[String, IR], cond: IR): Unit = {
+    val v = interpret(cond)
+    v match
+      case IRValue(false | 0) => // println(s"Finished with $uid")
+      case _ =>
+        val newStore = steps.map((name,step) => (name, interpret(step)))
+        fixEnv ++= newStore
+        fixStore += (uid -> newStore)
+        interpretFix(uid, steps, cond)
+        val a = 0 // to force stack overflows
   }
 
 }

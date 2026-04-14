@@ -1,12 +1,13 @@
 package sturdy.values.integer
 
-import sturdy.ir.{IR, IROperator, IRValue}
+import sturdy.ir.{IR, IRBinaryOperator, IROperator, IRValue}
 
-enum IRIntegerOperator extends IROperator:
-  case ADD
-  case SUB
-  case MUL
-  case DIV
+trait IRIntegerOperator extends IROperator
+object IRIntegerOperator:
+  object ADD extends IRIntegerOperator, IRBinaryOperator("+")
+  object SUB extends IRIntegerOperator, IRBinaryOperator("-")
+  object MUL extends IRIntegerOperator, IRBinaryOperator("*")
+  object DIV extends IRIntegerOperator, IRBinaryOperator("/")
 
 given IRIntegerOps[B]: IntegerOps[B, IR] with
   import IRIntegerOperator.*
