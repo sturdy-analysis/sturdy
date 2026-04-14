@@ -15,7 +15,7 @@ object Export:
 //    ir = ir.normalize
     ir.resolveFix()
 
-    ir.foreach { node =>
+    ir.foreachTree { node =>
       if (node.isInstanceOf[IR.Feedback] || node.isInstanceOf[IR.Fix])
         builder ++= s"\"${toStr(node)}\" [fillcolor=lemonchiffon, style=filled, fontcolor=black]\n"
 

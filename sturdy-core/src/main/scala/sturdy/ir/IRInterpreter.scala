@@ -86,14 +86,14 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
 
     case IR.Join(left, right) => ???
 
-    case IR.Fix(inits, steps, cond) => feedbackStore.get(ir.uid) match
+    case IR.Fix(inits, steps, loopWhileAny) => feedbackStore.get(ir.uid) match
       case Some(_) => throw new Exception("Should not happen")
       case None =>
         val oldEnv = fixEnv
         val initsValue = inits.map((name,init) => (name, interpret(init)))
         fixStore += ir.uid -> initsValue
         fixEnv ++= initsValue
-        try interpretFix(ir.uid, steps, cond)
+        try interpretFix(ir.uid, steps, loopWhileAny)
         finally fixEnv = oldEnv
         IRValue(null)
 
@@ -149,18 +149,22 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
                 interpretFeedback(uid, cond, steps)
   }
 
-  private final def interpretFix(uid: IR_UID, steps: Map[String, IR], cond: IR): Unit = {
-    val v = interpret(cond)
-    v match
-      case IRValue(false | 0) => // println(s"Finished with $uid")
-      case _ =>
-        val newStore = steps.map((name,step) => (name, interpret(step)))
-        fixEnv ++= newStore
-        fixStore += (uid -> newStore)
-        interpretFix(uid, steps, cond)
-        val a = 0 // to force stack overflows
-  }
+  def isFalse(v: IRValue): Boolean = v match
+    case IRValue(false) => true
+    case IRValue(0) => true
+    case _ => false
 
+  private final def interpretFix(uid: IR_UID, steps: Map[String, IR], loopWhileAny: List[IR]): Unit = {
+    val vals = loopWhileAny.map(interpret)
+    if (vals.exists(v => !isFalse(v))) {
+//      println(s"Loop fix $uid cond $vals")
+      val newStore = steps.map((name, step) => (name, interpret(step)))
+      fixEnv ++= newStore
+      fixStore += (uid -> newStore)
+      interpretFix(uid, steps, loopWhileAny)
+      val a = 0 // to force stack overflows
+    }
+  }
 }
 
 class IRInterpreterConcrete[I](externals: Map[String, IRValue], inputValue: () => IRValue)(using IntBools[I, Boolean]) extends IRInterpreter(externals: Map[String, IRValue], inputValue: () => IRValue) {

@@ -5,10 +5,10 @@ import sturdy.ir.{IR, IRBinaryOperator, IROperator, IRValue}
 
 trait IROrderingOperator extends IROperator
 object IROrderingOperator:
-  object LT extends IROrderingOperator, IRBinaryOperator("<")
-  object LE extends IROrderingOperator, IRBinaryOperator("<=")
-  object LTUnsigned extends IROrderingOperator, IRBinaryOperator("< (unsigned)")
-  object LEUnsigned extends IROrderingOperator, IRBinaryOperator("<= (unsigned)")
+  case object LT extends IROrderingOperator, IRBinaryOperator("<")
+  case object LE extends IROrderingOperator, IRBinaryOperator("<=")
+  case object LTUnsigned extends IROrderingOperator, IRBinaryOperator("< (unsigned)")
+  case object LEUnsigned extends IROrderingOperator, IRBinaryOperator("<= (unsigned)")
 
 given IROrderingOps: OrderingOps[IR, IR] with
   import IROrderingOperator.*

@@ -15,30 +15,32 @@ import scala.collection.immutable.{SortedMap, TreeMap}
 
 class Compile(defs: Map[String, Def]) {
 
-  private var path: List[IR] = List()
+  private var path: Set[IR] = Set()
   private var env: SortedMap[String, IR] = SortedMap()
 
   def notIr(ir: IR): IR = ir match {
     case IR.Const(b: Boolean) => IR.Const(!b)
     case IR.Op(IRBooleanOperator.NOT, Seq(inner)) => inner
+    case IR.Op(IROrderingOperator.LE, Seq(e1, e2)) => IR.Op(IROrderingOperator.LT, e2, e1)
+    case IR.Op(IROrderingOperator.LT, Seq(e1, e2)) => IR.Op(IROrderingOperator.LE, e2, e1)
     case _ => IR.Op(IRBooleanOperator.NOT, ir)
   }
 
-  def pathProp(p: List[IR]): IR =
-    if (p.isEmpty)
-      IR.Const(true)
-    else if (p.size == 1)
-      p.head
-    else
-      IR.Op(IRBooleanOperator.AND, p.head, pathProp(p.tail))
+//  def pathProp(p: List[IR]): IR =
+//    if (p.isEmpty)
+//      IR.Const(true)
+//    else if (p.size == 1)
+//      p.head
+//    else
+//      IR.Op(IRBooleanOperator.AND, p.head, pathProp(p.tail))
 
-  def pathPropNot(p: List[IR]): IR =
+  def pathPropNot(p: Set[IR]): Set[IR] =
     if (p.isEmpty)
-      IR.Const(false)
+      Set.empty
     else if (p.size == 1)
-      notIr(p.head)
+      Set(notIr(p.head))
     else
-      IR.Op(IRBooleanOperator.OR, notIr(p.head), pathPropNot(p.tail))
+      pathPropNot(p.tail) + notIr(p.head)
 
   // TODO: may need structural equality on IR values instead of reference equality
   case class State(env: SortedMap[String, IR]):
@@ -68,10 +70,10 @@ class Compile(defs: Map[String, Def]) {
         val inits = other.env
         val steps = other.env.map((k,_) => (k,IR.Fixvar(k)))
 
-        printIndented(s"Path condition: ${path.reverse.map(_.toString).mkString(" AND ")}")
+        printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
         val loopWhile = pathPropNot(path)
         printIndented(s"Loop while: $loopWhile")
-        val fix: IR.Fix = IR.Fix(inits, steps, loopWhile)
+        val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         printIndented(s"NEW FIX: $fix")
         val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         val changed = other.env != fixEnv
@@ -88,10 +90,18 @@ class Compile(defs: Map[String, Def]) {
         }
         val steps = other.env.map((k, v) => (k, rewriteFixResult(v)))
 
-        printIndented(s"Path condition: ${path.reverse.map(_.toString).mkString(" AND ")}")
+        printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
+        path = path.map(rewriteFixResult)
+        printIndented(s"Path rewritten: ${path.map(_.toString).mkString(" AND ")}")
         val loopWhile = pathPropNot(path)
-        printIndented(s"Loop while: $loopWhile")
-        val fix: IR.Fix = IR.Fix(inits, steps, rewriteFixResult(loopWhile))
+        val previousConds = previousFixes.flatMap(_._2.loopWhileAny).toSet
+        val (loopCondBefore, loopCondNew) = loopWhile.partition(previousConds)
+        val loopCondNewNot = pathPropNot(loopCondNew)
+        printIndented(s"Loop while from before $loopCondBefore")
+        printIndented(s"         new condition $loopCondNew")
+        printIndented(s"     new not condition $loopCondNewNot")
+
+        val fix: IR.Fix = IR.Fix(inits, steps, loopCondBefore.toList ++ loopCondNewNot)
         val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         if (this.env == fixEnv)
           Unchanged(other)
@@ -133,6 +143,7 @@ class Compile(defs: Map[String, Def]) {
     case Exp.Num(n) => IR.Const(n)
     case Exp.Eq(e1, e2) => IR.Op(IREqualityOperator.EQ, compile(e1), compile(e2))
     case Exp.Lt(e1, e2) => IR.Op(IROrderingOperator.LT, compile(e1), compile(e2))
+    case Exp.Le(e1, e2) => IR.Op(IROrderingOperator.LE, compile(e1), compile(e2))
     case Exp.Sub(e1, e2) => IR.Op(IRIntegerOperator.SUB, compile(e1), compile(e2))
     case Exp.Mul(e1, e2) => IR.Op(IRIntegerOperator.MUL, compile(e1), compile(e2))
     case Exp.Let(name, value, body) =>
@@ -143,9 +154,9 @@ class Compile(defs: Map[String, Def]) {
       val condIR = compile(cond)
       val oldPath = path
 
-      path = condIR :: oldPath
+      path = oldPath + condIR
       val thenIR = TrySturdy(compile(thenBranch))
-      path = IR.Op(IRBooleanOperator.NOT, condIR) :: oldPath
+      path = oldPath + notIr(condIR)
       val elseIR = TrySturdy(compile(elseBranch))
       path = oldPath
 

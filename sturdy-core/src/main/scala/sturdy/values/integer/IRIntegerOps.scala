@@ -4,10 +4,10 @@ import sturdy.ir.{IR, IRBinaryOperator, IROperator, IRValue}
 
 trait IRIntegerOperator extends IROperator
 object IRIntegerOperator:
-  object ADD extends IRIntegerOperator, IRBinaryOperator("+")
-  object SUB extends IRIntegerOperator, IRBinaryOperator("-")
-  object MUL extends IRIntegerOperator, IRBinaryOperator("*")
-  object DIV extends IRIntegerOperator, IRBinaryOperator("/")
+  case object ADD extends IRIntegerOperator, IRBinaryOperator("+")
+  case object SUB extends IRIntegerOperator, IRBinaryOperator("-")
+  case object MUL extends IRIntegerOperator, IRBinaryOperator("*")
+  case object DIV extends IRIntegerOperator, IRBinaryOperator("/")
 
 given IRIntegerOps[B]: IntegerOps[B, IR] with
   import IRIntegerOperator.*

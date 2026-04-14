@@ -38,7 +38,7 @@ enum IR:
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
   case Assert(cond: IR, data: IR)
-  case Fix(inits: SortedMap[String, IR], steps: SortedMap[String, IR], cond: IR)
+  case Fix(inits: SortedMap[String, IR], steps: SortedMap[String, IR], loopWhileAny: List[IR])
   case Fixvar(name: String) extends IR, Target[Fix]
   case Fixresult(fix: Fix, name: String)
   case Feedback(inits: List[IR], var cond: Option[IR], var steps: Option[List[IR]])
@@ -58,12 +58,12 @@ enum IR:
   def resolveFix(): Unit = {
     var fixvars: Map[String, IR.Fix] = Map()
     def resolve(ir: IR): Unit = ir match
-      case fix@IR.Fix(inits, steps, cond) =>
+      case fix@IR.Fix(inits, steps, loopWhileAny) =>
         inits.foreach((k, v) => resolve(v))
         val old = fixvars
         fixvars = fixvars ++ inits.keys.map(k => k -> fix)
         steps.foreach((k, v) => resolve(v))
-        resolve(cond)
+        loopWhileAny.foreach(resolve)
         fixvars = old
       case v@IR.Fixvar(name) =>
         v.target = fixvars.get(name)
@@ -100,10 +100,10 @@ enum IR:
     case IR.Assert(cond, data) => Seq(cond -> "?", data -> "")
     case IR.Feedback(inits, cond, steps) => inits.zipWithIndex.map((ir, i) => ir ->  s"init_$i") ++ cond.map(_ -> "cond") ++ steps.map(_.zipWithIndex.map((ir, i) => ir ->  s"step_$i")).getOrElse(List.empty)
     case IR.FeedbackAsk(_, feedback) => Seq(feedback -> "feedback")
-    case fix@IR.Fix(inits, steps, cond) =>
+    case fix@IR.Fix(inits, steps, loopWhileAny) =>
       val initPreds = inits.toSeq.map((k, v) => v -> s"init_$k")
-      val condPreds = Seq(cond -> "cond")
       val stepPreds = steps.toSeq.map((k, v) => v -> s"step_$k")
+      val condPreds = loopWhileAny.zipWithIndex.map((c, i) => c -> s"cond_$i")
       initPreds ++ stepPreds ++ condPreds
     case v@IR.Fixvar(name) =>
       val target = v.target.getOrElse(throw new UnsupportedOperationException(s"Cannot get predecessors of unbound fixvar $name"))
@@ -128,7 +128,9 @@ enum IR:
       case IR.FeedbackAsk(index, feedback) => s"Feedback@${feedback.uid}_$index"
       case IR.Bot() => s"Bot"
       case IR.Fix(inits, steps, cond) =>
-        s"Fix@$uid({${inits.map((k, v) => s"$k -> ${v.toString(bound - 1)}").mkString(", ")}}, {${steps.map((k, v) => s"$k -> ${v.toString(bound - 1)}").mkString(", ")}}, ${cond.toString(bound - 1)})"
+        s"Fix@$uid({${inits.map((k, v) => s"$k -> ${v.toString(bound - 1)}").mkString(", ")}}," +
+          s" {${steps.map((k, v) => s"$k -> ${v.toString(bound - 1)}").mkString(", ")}}, " +
+          s"${cond.map(_.toString(bound - 1)).mkString(" || ")})"
       case IR.Fixvar(name) => s"Fix_$name"
       case IR.Fixresult(fix, name) => s"Fixed_$name@${fix.uid}"
 
@@ -168,10 +170,10 @@ enum IR:
     // TODO Add Feedback ? Better guard for cycles ? Does this really work (need tests)
     case (IR.Feedback(_, _, _), IR.Feedback(_, _, _)) if this == that => true
     case (IR.Fixvar(name1), IR.Fixvar(name2)) if name1 == name2 => true
-    case (IR.Fix(inits1, steps1, cond1), IR.Fix(inits2, steps2, cond2)) if inits1.keySet == inits2.keySet && steps1.keySet == steps2.keySet =>
+    case (IR.Fix(inits1, steps1, cond1), IR.Fix(inits2, steps2, cond2)) if inits1.keySet == inits2.keySet && steps1.keySet == steps2.keySet && cond1.size == cond2.size =>
       inits1.forall((k, v) => v.structuralEquality(inits2(k))) &&
       steps1.forall((k, v) => v.structuralEquality(steps2(k))) &&
-      cond1.structuralEquality(cond2)
+      cond1.zip(cond2).forall(p => p._1.structuralEquality(p._2))
     case (IR.Fixresult(fix1, name1), IR.Fixresult(fix2, name2)) if name1 == name2 && fix1.structuralEquality(fix2) => true
     case _ => false
 
@@ -202,10 +204,10 @@ enum IR:
     case IR.Select(cond, left, right) => cond.foreachTree(f); left.foreachTree(f); right.foreachTree(f); f(this)
     case IR.Join(left, right) => left.foreachTree(f); right.foreachTree(f); f(this)
     case IR.Assert(cond, data) => cond.foreachTree(f); data.foreachTree(f); f(this)
-    case IR.Fix(inits, steps, cond) =>
+    case IR.Fix(inits, steps, loopWhileAny) =>
       inits.values.foreach(_.foreachTree(f))
       steps.values.foreach(_.foreachTree(f))
-      cond.foreachTree(f)
+      loopWhileAny.foreach(_.foreachTree(f))
       f(this)
     case IR.Fixvar(name) => f(this)
     case IR.Fixresult(fix, name) => fix.foreachTree(f); f(this)
@@ -240,12 +242,22 @@ enum IR:
     import org.scalacheck.{Arbitrary, Gen, Shrink, Prop, Test}
     val extVariables = this.externals ++ other.externals
 //    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(IRValue.apply))
-    val genVal = Gen.choose(1,1)/*Arbitrary.arbitrary[Int]*/.map(i => IRValue(i.abs))
+    val genVal = Gen.choose(2,2)/*Arbitrary.arbitrary[Int]*/.map(i => IRValue(i.abs))
+
+    val r = isLeq(other)(extVariables.zip(Seq(IRValue(2))).toMap)
+    if (!r) {
+      val interp = new IRInterpreterConcrete[Int](extVariables.zip(Seq(IRValue(2))).toMap, () => throw new IllegalStateException("Should not happen"))
+      val thisValue = interp.run(this)
+      val otherValue = interp.run(other)
+      throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed on initial test with all externals set to 2.\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
+
+    }
 
     val p = Prop.forAll(genVal) { v =>
       val extValues = extVariables.zip(List(v)).toMap
       isLeq(other)(extValues)
     }
+
 
     val res = Test.check(Test.Parameters.default, p)
     res.status match {
@@ -288,7 +300,7 @@ object IR:
     else
       IR.Select(cond, v1, v2)
   def FixResultSmart(fix: Fix, name: String): IR =
-    if (fix.cond == Const(false))
+    if (fix.loopWhileAny.isEmpty)
       fix.inits(name)
     else
       Fixresult(fix, name)

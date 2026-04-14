@@ -19,6 +19,7 @@ enum Exp:
   case Num(n: Int)
   case Eq(e1: Exp, e2: Exp)
   case Lt(e1: Exp, e2: Exp)
+  case Le(e1: Exp, e2: Exp)
   case Sub(e1: Exp, e2: Exp)
   case Mul(e1: Exp, e2: Exp)
   case Let(name: String, value: Exp, body: Exp)
@@ -30,6 +31,7 @@ enum Exp:
     case Num(n) => n.toString
     case Eq(e1, e2) => s"(${e1} == ${e2})"
     case Lt(e1, e2) => s"(${e1} < ${e2})"
+    case Le(e1: Exp, e2: Exp) => s"(${e1} <= ${e2})"
     case Sub(e1, e2) => s"(${e1} - ${e2})"
     case Mul(e1, e2) => s"(${e1} * ${e2})"
     case Let(name, value, body) => s"(let ${name} = ${value} in ${body})"
@@ -48,7 +50,7 @@ val natdiff = Def("diff", List("x", "y"),
       Sub(Var("y"), Var("x")),
       Sub(Var("x"), Var("y")))))
 
-val fac = Def("fac", List("n", "acc"), If(Lt(Var("n"), Num(0)), Var("acc"), Call("fac", Sub(Var("n"), Num(1)), Mul(Var("acc"), Var("n")))))
+val fac = Def("fac", List("n", "acc"), If(Le(Var("n"), Num(0)), Var("acc"), Call("fac", Sub(Var("n"), Num(1)), Mul(Var("acc"), Var("n")))))
 val fac_main = Def("main", List("n"), Call("fac", Var("n"), Num(1)))
 
 object Run extends App:

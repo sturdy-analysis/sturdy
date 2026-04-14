@@ -5,8 +5,8 @@ import sturdy.values.Join
 
 trait IRBooleanOperator extends IROperator
 object IRBooleanOperator:
-  object AND extends IRBooleanOperator, IRBinaryOperator("&&")
-  object OR extends IRBooleanOperator, IRBinaryOperator("||")
+  case object AND extends IRBooleanOperator, IRBinaryOperator("&&")
+  case object OR extends IRBooleanOperator, IRBinaryOperator("||")
   case object NOT extends IRBooleanOperator
 
 given IRBooleanOps: BooleanOps[IR] with
