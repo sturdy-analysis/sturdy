@@ -72,7 +72,7 @@
           config = {
             Env = [ "PATH=/bin:${pkgs.bash}/bin:${pkgs.coreutils}/bin:${pkgs.busybox}/bin" ];
             Cmd = "${pkgs.bash}/bin/bash";
-            WorkingDirectory = "/sturdy/";
+            WorkingDir = "/sturdy/";
           };
         };
       };

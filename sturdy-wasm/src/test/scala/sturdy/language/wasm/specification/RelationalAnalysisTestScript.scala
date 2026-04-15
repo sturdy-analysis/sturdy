@@ -106,13 +106,13 @@ class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true)
       if (isSlow(anl.apronManager, p.getFileName.toString))
         it must s"execute ${p.getFileName} with ${anl}" taggedAs (SlowTest) in {
           runTest(p, anl)
-          Profiler.printLastMeasured()
+//          Profiler.printLastMeasured()
           Profiler.reset()
         }
       else
         it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
-          Profiler.printLastMeasured()
+//          Profiler.printLastMeasured()
           Profiler.reset()
         }
 
@@ -127,7 +127,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
   type AValue = RelationalAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val constrainedInstructionsLogger: aInterp.ConstrainedInstructionsLogger = aInterp.constrainedInstructionsLogger
   val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()

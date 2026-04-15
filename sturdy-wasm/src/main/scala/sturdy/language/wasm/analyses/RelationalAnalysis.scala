@@ -682,10 +682,10 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       val stateBefore = effectStack.getState
       recencyStore.collectGarbage(alive)
       val stateAfter = effectStack.getState
-      println(s"Alive: $alive")
-      println(s"Dead: $dead")
-      println(s"State Before: $stateBefore")
-      println(s"State After: $stateAfter")
+//      println(s"Alive: $alive")
+//      println(s"Dead: $dead")
+//      println(s"State Before: $stateBefore")
+//      println(s"State After: $stateAfter")
 
     def getInterval(v: Value): Value =
       v match
