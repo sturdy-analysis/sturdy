@@ -1,6 +1,6 @@
 package sturdy.ir.toyfun
 
-import sturdy.data.WidenFiniteKeyMap
+import sturdy.data.{CombineEquiList, CombineEquiSeq, CombineFiniteKeyMap, WidenFiniteKeyMap}
 import sturdy.effect.{RecurrentCall, TrySturdy}
 import sturdy.effect.TrySturdy.*
 import sturdy.ir.{Export, IR}
@@ -11,15 +11,13 @@ import sturdy.values.booleans.IRBooleanOperator
 import sturdy.values.integer.IRIntegerOperator
 import sturdy.values.ordering.{IREqualityOperator, IROrderingOperator}
 
-import scala.collection.immutable.{SortedMap, TreeMap}
-
 class Compile(defs: Map[String, Def]) {
 
   private var path: Set[IR] = Set()
-  private var env: SortedMap[String, IR] = SortedMap()
+  private var env: Map[String, IR] = Map()
 
   // TODO: may need structural equality on IR values instead of reference equality
-  case class State(env: SortedMap[String, IR]):
+  case class State(env: Map[String, IR]):
 
     def testIsLeq(other: State): Unit =
       if (this.env.keySet != other.env.keySet)
@@ -51,7 +49,7 @@ class Compile(defs: Map[String, Def]) {
         printIndented(s"Loop while: $loopWhile")
         val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         printIndented(s"NEW FIX: $fix")
-        val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
+        val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         val changed = other.env != fixEnv
 
         val newstate = State(fixEnv)
@@ -78,7 +76,7 @@ class Compile(defs: Map[String, Def]) {
         printIndented(s"     new not condition $loopCondNewNot")
 
         val fix: IR.Fix = IR.Fix(inits, steps, loopCondBefore.toList ++ loopCondNewNot)
-        val fixEnv = SortedMap() ++ keys.map(k => k -> IR.Fixresult(fix, k))
+        val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         if (this.env == fixEnv)
           Unchanged(other)
         else {
@@ -96,13 +94,44 @@ class Compile(defs: Map[String, Def]) {
 
   given Finite[String] with {}
 
-  private val joinIR: Join[IR] = (v1: IR, v2: IR) =>
-    if (v1 == v2 || v1.isInstanceOf[IR.Unknown])
+  private implicit def joinIRSeq: Join[Seq[IR]] = new CombineEquiSeq()
+  private implicit def joinIRList: Join[List[IR]] = new CombineEquiList()
+  private implicit def joinIRMap: Join[Map[String, IR]] = new CombineFiniteKeyMap()
+  private implicit def joinIR: Join[IR] = (v1: IR, v2: IR) =>
+    if (v1 == v2)
       Unchanged(v1)
-    else {
-      printIndented(s"join $v1")
-      printIndented(s"     $v2")
-      Changed(IR.Unknown())
+    else (v1, v2) match {
+      case (IR.Bot(), v2) => MaybeChanged(v2, v1)
+      case (v1, IR.Bot()) => Unchanged(v1)
+      case (IR.Unknown(), v2) => Unchanged(IR.Unknown())
+      case (v1, IR.Unknown()) => MaybeChanged(IR.Unknown(), v1)
+      case (IR.Op(op1, args1), IR.Op(op2, args2)) if op1 == op2 && args1.size == args2.size =>
+        val args = Join(args1, args2)
+        MaybeChanged(IR.Op(op1, args.get), args.hasChanged)
+      case (IR.Select(cond1, left1, right1), IR.Select(cond2, left2, right2)) if cond1 == cond2 =>
+        val left = Join(left1, left2)
+        val right = Join(right1, right2)
+        MaybeChanged(IR.Select(cond1, left.get, right.get), left.hasChanged || right.hasChanged)
+      case (IR.Assert(cond1, data1), IR.Assert(cond2, data2)) =>
+        val cond = Join(cond1, cond2)
+        val data = Join(data1, data2)
+        MaybeChanged(IR.Assert(cond.get, data.get), cond.hasChanged || data.hasChanged)
+      case (IR.Fix(inits1, steps1, conds1), IR.Fix(inits2, steps2, conds2)) if inits1.keySet == inits2.keySet =>
+        val inits = Join(inits1, inits2)
+        val steps = Join(steps1, steps2)
+        val conds = Join(conds1, conds2)
+        MaybeChanged(IR.Fix(inits.get, steps.get, conds.get), inits.hasChanged || steps.hasChanged || conds.hasChanged)
+      case (IR.Fixresult(fix1, name1), IR.Fixresult(fix2, name2)) if name1 == name2 =>
+        val fix = joinIR(fix1, fix2)
+        MaybeChanged(IR.Fixresult(fix.get.asInstanceOf[IR.Fix], name1), fix.hasChanged)
+      case (v1, v2) => Changed(IR.Join(v1, v2))
+
+//      case IR.Join(left, right) => f(IR.Join(left.map(f), right.map(f)))
+//      case IR.Fix(inits, steps, cond) => f(IR.Fix(inits.map((k, v) => k -> v.map(f)), steps.map((k, v) => k -> v.map(f)), cond.map(f)))
+//      case IR.Fixvar(name) => f(this)
+//      case IR.Fixresult(fix, name) => f(IR.Fixresult(fix.map(f).asInstanceOf[IR.Fix], name))
+//      case IR.Feedback(inits, cond, steps) => throw new UnsupportedOperationException()
+//      case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
     }
 
   def compileFun(fun: String, argIRs: List[IR]): IR = {
@@ -152,7 +181,7 @@ class Compile(defs: Map[String, Def]) {
     if (d.params.length != argIRs.length)
       throw new RuntimeException(s"Function ${d.name} expects ${d.params.length} arguments, but got ${argIRs.length}")
     val oldEnv = env
-    env = SortedMap() ++ d.params.zip(argIRs)
+    env = Map() ++ d.params.zip(argIRs)
     val bodyIR = enterFun(fun, d.body)
     env = oldEnv
     bodyIR
@@ -176,9 +205,9 @@ class Compile(defs: Map[String, Def]) {
           val cached = cache.get(fun)
           printIndented(s"CO-RECURRENT $fun with cache $cached")
           val joined = cached.map(ir => joinIR(ir, bodyIR)).getOrElse(Changed(bodyIR))
-          if (joined.hasChanged) {
+          if (joined.hasChanged && cached.isEmpty) {
             printIndented(s"REPEAT $fun:")
-            printIndented(s"  join $cached")
+            printIndented(s"  join ${cached.getOrElse(None)}")
             printIndented(s"  with $bodyIR")
             printIndented(s"     = $joined")
             cache = cache + (fun -> joined.get)

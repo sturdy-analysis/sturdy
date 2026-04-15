@@ -5,6 +5,7 @@ import sturdy.values.booleans.ConcreteIntBools
 import sturdy.ir.IR.{FixResultSmart, mkNot}
 import sturdy.values.MaybeChanged.{Changed, Unchanged}
 import sturdy.values.booleans.IRBooleanOperator
+import sturdy.values.integer.IRIntegerOperator
 import sturdy.values.ordering.IROrderingOperator
 import sturdy.values.{Abstractly, Join, MaybeChanged, PartialOrder, PathSensitive, Top}
 
@@ -39,7 +40,7 @@ enum IR:
   case Select(cond: IR, left: IR, right: IR)
   case Join(left: IR, right: IR)
   case Assert(cond: IR, data: IR)
-  case Fix(inits: SortedMap[String, IR], steps: SortedMap[String, IR], loopWhileAny: List[IR])
+  case Fix(inits: Map[String, IR], steps: Map[String, IR], loopWhileAny: List[IR])
   case Fixvar(name: String) extends IR, Target[Fix]
   case Fixresult(fix: Fix, name: String)
   case Feedback(inits: List[IR], var cond: Option[IR], var steps: Option[List[IR]])
@@ -99,7 +100,7 @@ enum IR:
     case fix@IR.Fix(inits, steps, loopWhileAny) =>
       val initPreds = inits.toSeq.map((k, v) => v -> s"init_$k")
       val stepPreds = steps.toSeq.map((k, v) => v -> s"step_$k")
-      val condPreds =if (loopWhileAny.size != 1) {
+      val condPreds = if (loopWhileAny.size != 1) {
         println(s"Warning: Fix should be normalized before export.")
         loopWhileAny.zipWithIndex.map((c, i) => c -> s"cond_$i")
       } else {
@@ -221,26 +222,62 @@ enum IR:
 
   def normalize: IR = normalizeLoop(Set.empty)
 
+  def isRecursive: Boolean =
+    var isRecursive = false
+    this.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () }
+    isRecursive
+
+
   protected def normalizeLoop(path: Set[IR]): IR =
     norm (path, { (path, ir) =>
       ir match {
-        case IR.Fix(inits, steps, List()) =>
-          IR.Fix(inits, steps, List(IR.Const(false)))
-        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.size > 1 =>
-          IR.Fix(inits, steps, List(IR.mkOr(loopWhileAny))).normalizeLoop(path)
-        case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) =>
-          var isRecursive = false
-          loopWhileAny.foreach(_.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () })
-          if (!isRecursive)
-            IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalizeLoop(path)
-          else
-            ir
+        case IR.Op(IROrderingOperator.LE, Seq(IR.Op(IRIntegerOperator.SUB, Seq(a, IR.Const(1))), b)) =>
+          IR.Op(IROrderingOperator.LT, a, b).normalizeLoop(path)
+
+        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && tryDecide(c, path).contains(true)) =>
+          IR.Bot() // loop will always diverge
+        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && tryDecide(c, path).contains(false)) =>
+          val newconds = loopWhileAny.filter(c => c.isRecursive || !tryDecide(c, path).contains(false))
+          IR.Fix(inits, steps, newconds).normalizeLoop(path)
+
+        case ir@IR.Fixresult(IR.Fix(inits, steps, List()), name) =>
+          inits(name).normalizeLoop(path)
+        case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) if loopWhileAny.forall(!_.isRecursive) =>
+          IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalizeLoop(path)
         case IR.Select(cond, left, right) if left == right => left
-        case IR.Select(cond, left, right) if path.contains(cond) => left
-        case IR.Select(cond, left, right) if path.contains(mkNot(cond)) => right
+        case IR.Select(cond, left, right) =>
+          tryDecide(cond, path) match
+            case Some(true) => left
+            case Some(false) => right
+            case None =>
+              println(s"Select $cond\n  path $path")
+              ir
+//        case IR.Select(cond, left, right) if path.contains(mkNot(cond)) => right
+//        case IR.Select(IR.Op(IROrderingOperator.LT, Seq(a, b)), left, right) if path.contains(IR.Op(IROrderingOperator.LT, Seq(b, a))) => right
+//        case IR.Select(IR.Op(IROrderingOperator.LE, Seq(IR.Fixresult(fix, name), b)), left, right) =>
+//          println(s"Select Fixed $name <= $b\n  fix = $fix\n  path $path")
+//          ir
+//        case IR.Select(cond, left, right) =>
+//          println(s"Select $cond\n  path $path")
+//          ir
         case ir => ir
       }
     })
+
+  def tryDecide(cond: IR, path: Set[IR]): Option[Boolean] = cond match {
+    case Const(0 | false) => Some(false)
+    case Const(_) => Some(true)
+    case IR.Op(IRBooleanOperator.NOT, Seq(inner)) =>
+      tryDecide(inner, path).map(b => !b)
+    case cond if path.contains(cond) => Some(true)
+    case cond if path.contains(mkNot(cond)) => Some(false)
+    case IR.Op(IROrderingOperator.LT, Seq(a, b)) if path.contains(IR.Op(IROrderingOperator.LT, Seq(b, a))) => Some(false)
+    case IR.Op(IROrderingOperator.LE, Seq(IR.Fixresult(fix, name), b)) =>
+      val subir = IR.Op(IROrderingOperator.LE, Seq(IR.Fixvar(name), b))
+      val extra = fix.loopWhileAny.map(mkNot)
+      tryDecide(subir, path ++ fix.loopWhileAny.map(mkNot))
+    case _ => None
+  }
 
   def dedup: IR =
     var seen: Map[IR, IR] = Map()
