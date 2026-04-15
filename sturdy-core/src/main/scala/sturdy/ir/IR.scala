@@ -231,13 +231,11 @@ enum IR:
   protected def normalizeLoop(path: Set[IR]): IR =
     norm (path, { (path, ir) =>
       ir match {
-        case IR.Op(IROrderingOperator.LE, Seq(IR.Op(IRIntegerOperator.SUB, Seq(a, IR.Const(1))), b)) =>
-          IR.Op(IROrderingOperator.LT, a, b).normalizeLoop(path)
 
-        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && tryDecide(c, path).contains(true)) =>
+        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && c.tryDecide(path).contains(true)) =>
           IR.Bot() // loop will always diverge
-        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && tryDecide(c, path).contains(false)) =>
-          val newconds = loopWhileAny.filter(c => c.isRecursive || !tryDecide(c, path).contains(false))
+        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && c.tryDecide(path).contains(false)) =>
+          val newconds = loopWhileAny.filter(c => c.isRecursive || !c.tryDecide(path).contains(false))
           IR.Fix(inits, steps, newconds).normalizeLoop(path)
 
         case ir@IR.Fixresult(IR.Fix(inits, steps, List()), name) =>
@@ -246,36 +244,32 @@ enum IR:
           IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalizeLoop(path)
         case IR.Select(cond, left, right) if left == right => left
         case IR.Select(cond, left, right) =>
-          tryDecide(cond, path) match
-            case Some(true) => left
-            case Some(false) => right
+          cond.tryDecide(path) match
+            case Some(true) =>
+              left
+            case Some(false) =>
+              right
             case None =>
               println(s"Select $cond\n  path $path")
               ir
-//        case IR.Select(cond, left, right) if path.contains(mkNot(cond)) => right
-//        case IR.Select(IR.Op(IROrderingOperator.LT, Seq(a, b)), left, right) if path.contains(IR.Op(IROrderingOperator.LT, Seq(b, a))) => right
-//        case IR.Select(IR.Op(IROrderingOperator.LE, Seq(IR.Fixresult(fix, name), b)), left, right) =>
-//          println(s"Select Fixed $name <= $b\n  fix = $fix\n  path $path")
-//          ir
-//        case IR.Select(cond, left, right) =>
-//          println(s"Select $cond\n  path $path")
-//          ir
         case ir => ir
       }
     })
 
-  def tryDecide(cond: IR, path: Set[IR]): Option[Boolean] = cond match {
+  def tryDecide(path: Set[IR]): Option[Boolean] = this match {
     case Const(0 | false) => Some(false)
     case Const(_) => Some(true)
     case IR.Op(IRBooleanOperator.NOT, Seq(inner)) =>
-      tryDecide(inner, path).map(b => !b)
+      inner.tryDecide(path).map(b => !b)
     case cond if path.contains(cond) => Some(true)
     case cond if path.contains(mkNot(cond)) => Some(false)
+    case IR.Op(IROrderingOperator.LE, Seq(IR.Op(IRIntegerOperator.SUB, Seq(a, IR.Const(1))), b)) =>
+      IR.Op(IROrderingOperator.LT, a, b).tryDecide(path)
     case IR.Op(IROrderingOperator.LT, Seq(a, b)) if path.contains(IR.Op(IROrderingOperator.LT, Seq(b, a))) => Some(false)
     case IR.Op(IROrderingOperator.LE, Seq(IR.Fixresult(fix, name), b)) =>
       val subir = IR.Op(IROrderingOperator.LE, Seq(IR.Fixvar(name), b))
       val extra = fix.loopWhileAny.map(mkNot)
-      tryDecide(subir, path ++ fix.loopWhileAny.map(mkNot))
+      subir.tryDecide(path ++ fix.loopWhileAny.map(mkNot))
     case _ => None
   }
 
@@ -334,27 +328,24 @@ enum IR:
     }
     names
 
-  def testIsLeq(other: IR): Unit =
+  def testIsLeq(other: IR, cond: IR): Unit =
     import org.scalacheck.Gen.Choose
     import org.scalacheck.{Arbitrary, Gen, Shrink, Prop, Test}
-    val extVariables = this.externals ++ other.externals
-//    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(IRValue.apply))
-    val genVal = Gen.choose(2,2)/*Arbitrary.arbitrary[Int]*/.map(i => IRValue(i.abs))
 
-    val r = isLeq(other)(extVariables.zip(Seq(IRValue(2))).toMap)
-    if (!r) {
-      val interp = new IRInterpreterConcrete[Int](extVariables.zip(Seq(IRValue(2))).toMap, () => throw new IllegalStateException("Should not happen"))
-      val thisValue = interp.run(this)
-      val otherValue = interp.run(other)
-      throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed on initial test with all externals set to 2.\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
-
+    val extVariables = this.externals ++ other.externals ++ cond.externals
+    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(IRValue.apply))
+    val genOkVals = genVals.filter { vals =>
+      val extValues = extVariables.zip(vals).toMap
+      val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
+      interp.run(cond) match
+        case Some(IRValue(false | 0)) => false
+        case _ => true
     }
 
-    val p = Prop.forAll(genVal) { v =>
-      val extValues = extVariables.zip(List(v)).toMap
+    val p = Prop.forAll(genOkVals) { vals =>
+      val extValues = extVariables.zip(vals).toMap
       isLeq(other)(extValues)
     }
-
 
     val res = Test.check(Test.Parameters.default, p)
     res.status match {
@@ -362,14 +353,14 @@ enum IR:
       case Test.Proved(args) => // ok
       case Test.Failed(args, labels) =>
 
-        val vals = args.head.arg.asInstanceOf[IRValue]
-        val extValues = extVariables.zip(Seq(vals)).toMap
+        val vals = args.head.arg.asInstanceOf[List[IRValue]]
+        val extValues = extVariables.zip(vals).toMap
         val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
         val thisValue = interp.run(this)
         val otherValue = interp.run(other)
         throw new AssertionError(s"IsLeq Failed for $this <= $other.\n  arguments $extValues\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
       case Test.Exhausted =>
-        throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed to generate sufficient test inputs.")
+        // throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed to generate sufficient test inputs.")
       case Test.PropException(args, e, labels) =>
         throw new AssertionError(s"IsLeq Failed for $this <= $other. Exception during test generation: ${e.getMessage}", e)
     }

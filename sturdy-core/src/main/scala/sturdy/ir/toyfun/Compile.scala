@@ -30,7 +30,7 @@ class Compile(defs: Map[String, Def]) {
         val v1 = this.env(k)
         val v2 = other.env(k)
         if (v1 != v2)
-          v1.testIsLeq(v2)
+          v1.testIsLeq(v2, IR.mkAnd(path.filter(!_.isRecursive).toList))
       }
 
     def inputWiden(other: State): MaybeChanged[State] = {
@@ -45,7 +45,7 @@ class Compile(defs: Map[String, Def]) {
         val steps = other.env.map((k,_) => (k,IR.Fixvar(k)))
 
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
-        val loopWhile = path.map(IR.mkNot)
+        val loopWhile = Set() // path.map(IR.mkNot)
         printIndented(s"Loop while: $loopWhile")
         val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         printIndented(s"NEW FIX: $fix")
@@ -65,17 +65,14 @@ class Compile(defs: Map[String, Def]) {
         val steps = other.env.map((k, v) => (k, rewriteFixResult(v)))
 
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
-        path = path.map(rewriteFixResult)
-        printIndented(s"Path rewritten: ${path.map(_.toString).mkString(" AND ")}")
+        path = path.map(rewriteFixResult).filter(_.isRecursive)
+        printIndented(s"Path rewritten filtered recursive: ${path.map(_.toString).mkString(" AND ")}")
         val loopWhile = path.map(IR.mkNot)
-        val previousConds = previousFixes.flatMap(_._2.loopWhileAny).toSet
-        val (loopCondBefore, loopCondNew) = loopWhile.partition(previousConds)
-        val loopCondNewNot = loopCondNew.map(IR.mkNot)
-        printIndented(s"Loop while from before $loopCondBefore")
-        printIndented(s"         new condition $loopCondNew")
-        printIndented(s"     new not condition $loopCondNewNot")
+        val loopWhileNot = loopWhile.map(IR.mkNot)
+        printIndented(s"Loop while new condition $loopWhile")
+        printIndented(s"       new not condition $loopWhileNot")
 
-        val fix: IR.Fix = IR.Fix(inits, steps, loopCondBefore.toList ++ loopCondNewNot)
+        val fix: IR.Fix = IR.Fix(inits, steps, loopWhileNot.toList)
         val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         if (this.env == fixEnv)
           Unchanged(other)
@@ -151,26 +148,39 @@ class Compile(defs: Map[String, Def]) {
     case Exp.Le(e1, e2) => IR.Op(IROrderingOperator.LE, compile(e1), compile(e2))
     case Exp.Sub(e1, e2) => IR.Op(IRIntegerOperator.SUB, compile(e1), compile(e2))
     case Exp.Mul(e1, e2) => IR.Op(IRIntegerOperator.MUL, compile(e1), compile(e2))
+    case Exp.If(cond, thenBranch, elseBranch) =>
+      val condIR = compile(cond)
+      val normalize = condIR.normalize
+      val maybeBoolean = normalize.tryDecide(path)
+      val oldPath = path
+      maybeBoolean match {
+        case Some(true) =>
+          path = oldPath + condIR
+          try compile(thenBranch)
+          finally path = oldPath
+        case Some(false) =>
+          path = oldPath + IR.mkNot(condIR)
+          try compile(elseBranch)
+          finally path = oldPath
+        case None =>
+          println(s"Cannot decide condition $condIR under path ${path.map(_.toString).mkString(" AND ")}")
+          path = oldPath + condIR
+          val thenIR = TrySturdy(compile(thenBranch))
+          path = oldPath + IR.mkNot(condIR)
+          val elseIR = TrySturdy(compile(elseBranch))
+          path = oldPath
+
+          val joined = (thenIR.isBottom, elseIR.isBottom) match
+            case (false, false) => IR.Select(condIR, thenIR.getOrThrow, elseIR.getOrThrow)
+            case (false, true) => IR.Select(condIR, thenIR.getOrThrow, IR.Bot())
+            case (true, false) => IR.Select(condIR, IR.Bot(), elseIR.getOrThrow)
+            case (true, true) => IR.Bot()
+          joined
+      }
     case Exp.Let(name, value, body) =>
       val valueIR = compile(value)
       env += (name -> valueIR)
       compile(body)
-    case Exp.If(cond, thenBranch, elseBranch) =>
-      val condIR = compile(cond)
-      val oldPath = path
-
-      path = oldPath + condIR
-      val thenIR = TrySturdy(compile(thenBranch))
-      path = oldPath + IR.mkNot(condIR)
-      val elseIR = TrySturdy(compile(elseBranch))
-      path = oldPath
-
-      val joined = (thenIR.isBottom, elseIR.isBottom) match
-        case (false, false) => IR.SelectSmart(condIR, thenIR.getOrThrow, elseIR.getOrThrow)
-        case (false, true) => IR.SelectSmart(condIR, thenIR.getOrThrow, IR.Bot())
-        case (true, false) => IR.SelectSmart(condIR, IR.Bot(), elseIR.getOrThrow)
-        case (true, true) => IR.Bot()
-      joined
     case Exp.Call(fun, args) =>
       val argIRs = args.map(compile)
       compileCall(fun, argIRs)
