@@ -424,7 +424,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "free" =>
         args match
           case List(Num(Int32(ptr))) =>
-            println(s"free($ptr)")
+            // println(s"free($ptr)")
             List()
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as argument to $hostFunc, but got $args")
@@ -454,35 +454,35 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "write" =>
         args match
           case List(data@Num(Int32(fd)), Num(Int32(buffer)), sizeVal@Num(Int32(size))) =>
-            println(s"write($data, $buffer, $size)")
+            // println(s"write($data, $buffer, $size)")
             List(sizeVal)
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "putchar" =>
         args match
           case List(Num(Int32(char))) =>
-            println(s"putchar($char)")
+            // println(s"putchar($char)")
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "puts" =>
         args match
           case List(Num(Int32(strPtr))) =>
-            println(s"fputs($strPtr)")
+            // println(s"fputs($strPtr)")
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32 as arguments to $hostFunc, but got $args")
       case "fputs" =>
         args match
           case List(Num(Int32(strPtr)), Num(Int32(fd))) =>
-            println(s"fputs($strPtr, $fd)")
+            // println(s"fputs($strPtr, $fd)")
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
       case "fgets" =>
         args match
           case List(buffer@Num(Int32(_)), count@Num(Int32(_)), Num(Int32(stream))) =>
-            println(s"fgets($buffer, $count, $stream)")
+            // println(s"fgets($buffer, $count, $stream)")
             memory.fill(
               MemoryAddr(0),
               wasmOps.specialOps.valToAddr(buffer),
@@ -495,14 +495,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       case "fwrite" =>
         args match
           case List(Num(Int32(strPtr)), Num(Int32(size)), Num(Int32(count)),Num(Int32(fd))) =>
-            println(s"fwrite($strPtr, $size, $count, $fd)")
+            // println(s"fwrite($strPtr, $size, $count, $fd)")
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32,i32 as arguments to $hostFunc, but got $args")
       case "printf" =>
         args match
           case List(Num(Int32(strPtr)), c@Num(Int32(varargs))) =>
-            println(s"printf($strPtr, $varargs)")
+            // println(s"printf($strPtr, $varargs)")
             List(Num(Int32(topI32)))
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32 as arguments to $hostFunc, but got $args")
@@ -513,7 +513,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
               apronState.assign(tmp, ApronExpr.interval(Integer.MIN_VALUE, Integer.MAX_VALUE, I32Type))
               ApronExpr.addr(tmp,I32Type)
             )))))
-            println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
+            // println(s"fwrite($fd, $strPtr, $varargs) = ${res.head}")
             res
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")
@@ -529,7 +529,7 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
                 ApronExpr.addr(tmp, I32Type)
               )))))
             }
-            println(s"fileno($fd) = ${res.head}")
+            // println(s"fileno($fd) = ${res.head}")
             res
           case _ =>
             failure.fail(WasmFailure.TypeError, s"Expected i32,i32,i32 as arguments to $hostFunc, but got $args")

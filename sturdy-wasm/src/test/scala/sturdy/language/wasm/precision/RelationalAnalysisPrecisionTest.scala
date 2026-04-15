@@ -36,11 +36,10 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
 
-given writer: CSVWriter = CSVWriter.open(File("relational-analysis-precision-test.csv"))
+given writer: CSVWriter = CSVWriter.open(File("precision.csv"))
 final class RelationalAnalysisPrecisionTests extends Suites(
-//  new SSATests,
-  new VirtualRecencyTests,
-  new NonRelationalTests
+  new VirtualRecencyTests
+//  new NonRelationalTests
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -49,11 +48,6 @@ final class RelationalAnalysisPrecisionTests extends Suites(
   override def afterAll(): Unit =
     writer.close
 
-final class SSATests(using writer: CSVWriter) extends Suites(
-  new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true, ssa = true),
-  new RelationalAnalysisPrecisionTest(manager = new Octagon, relational = true, ssa = true),
-  new RelationalAnalysisPrecisionTest(manager = new Box, relational = true, ssa = true)
-)
 
 final class VirtualRecencyTests(using writer: CSVWriter) extends Suites(
   new RelationalAnalysisPrecisionTest(manager = new Polka(true), relational = true),

@@ -3,14 +3,13 @@ package sturdy.language.wasm.testscript
 import apron.*
 import cats.effect.{Blocker, IO}
 
-import scala.collection.mutable
-import scala.io.Source
-import scala.jdk.StreamConverters.*
 import org.scalatest.Assertions.*
 import org.scalatest.{BeforeAndAfterAll, Suites}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalacheck.Gen
+
 import sturdy.apron.{ApronExpr, RoundingDir, RoundingMode}
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
@@ -24,15 +23,20 @@ import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, ModuleInst
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import sturdy.values.integer.given
+import sturdy.util.GenInterval.genInterval
+
 import swam.syntax.Module
 import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
 
 import java.io.File
 import java.nio.file.{FileSystemNotFoundException, FileSystems, Files, Path, Paths}
+
 import com.github.tototoshi.csv.*
-import org.scalacheck.Gen
-import sturdy.util.GenInterval.genInterval
+
+import scala.collection.mutable
+import scala.io.Source
+import scala.jdk.StreamConverters.*
 
 val csvWriter = {
   val writer = CSVWriter.open(File("soundness.csv"))
