@@ -74,6 +74,7 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
           g
         }
 
+
   def addConditionToWideningThresholds(condition: ApronBool[Addr,Type]): Unit = {
     val constraints = for(cons <- condition.constraints; c <- Iterable(ApronCons.le(cons.e1, cons.e2), ApronCons.lt(cons.e1, cons.e2), ApronCons.gt(cons.e1, cons.e2), ApronCons.ge(cons.e1, cons.e2))) yield(c)
     addConstraintsToWideningThresholds(constraints)

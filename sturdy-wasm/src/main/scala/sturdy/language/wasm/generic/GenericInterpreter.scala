@@ -506,11 +506,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case Br(labelIndex) =>
       branch(labelIndex)
     case BrIf(labelIndex) =>
-      val isZero = num.evalNumeric(i32.Eqz)
-      branchOpsUnit.boolBranch(isZero) {
-        // v == 0: else branch
-        // do nothing
-      } {
+      val x = stack.popOrAbort()
+      val cond = eqOps.neq(x, i32ops.integerLit(0))
+      breakIfOps.breakIf(cond) { _ =>
         branch(labelIndex)
       }
     case BrTable(labels, defaultLabel) =>
