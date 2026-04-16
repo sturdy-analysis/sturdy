@@ -14,9 +14,10 @@ import scala.annotation.tailrec
 import scala.collection.immutable.{BitSet, HashMap}
 import scala.reflect.ClassTag
 
-/**
-Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
- **/
+enum WithWideningThresholds:
+  case Yes
+  case No
+
 final class RelationalStore
   [
     Context: Ordering: Finite,
@@ -26,10 +27,12 @@ final class RelationalStore
   ]
   (initAddrTrans: Map[Context, RecencyRegion],
    initialAbs1: Abstract1,
-   initialNonRelationalStore: Map[PhysicalAddress[Context], Val])
+   initialNonRelationalStore: Map[PhysicalAddress[Context], Val]
+  )
   (using
    manager: Manager,
-   relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]]
+   relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]],
+   withWideningThresholds: WithWideningThresholds
   )
   extends StoreWithPureOps[PowAddr, Val, WithJoin] with AddressTranslation[Context]:
 
@@ -411,17 +414,20 @@ final class RelationalStore
   def addConstraintsToWideningThresholdsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
     constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
 
-  def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State = {
-    val resolvedConstraint = replaceMissingAddrs(constraint, state)
-    val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
-    tconsToLincons(state.abs1, cons) match {
-      // Don't save constant constraints.
-      // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
-      case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
-        state.copy(wideningThresholds = state.wideningThresholds + minimizeEnvironment(lincons) + minimizeEnvironment(toOld(lincons)))
-      case _ => state
-    }
-  }
+  def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State =
+    withWideningThresholds match
+      case WithWideningThresholds.Yes =>
+        val resolvedConstraint = replaceMissingAddrs(constraint, state)
+        val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
+        tconsToLincons(state.abs1, cons) match {
+          // Don't save constant constraints.
+          // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
+          case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
+            state.copy(wideningThresholds = state.wideningThresholds + minimizeEnvironment(lincons) + minimizeEnvironment(toOld(lincons)))
+          case _ => state
+        }
+      case WithWideningThresholds.No =>
+        state
 
   private def tconsToLincons(abs1: Abstract1, tcons: Tcons1): Option[Lincons1] =
     for {

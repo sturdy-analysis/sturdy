@@ -30,8 +30,9 @@ import swam.syntax.Module
 import swam.text.*
 
 import java.math.BigInteger
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{FileSystemNotFoundException, FileSystems, Files, Path, Paths}
 import java.io.File
+import java.net.URI
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.reflect.{ClassTag, TypeTest}
@@ -61,7 +62,21 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
   val analysisName = (if (relational) "relational" else "non-relational") + (if (ssa) "-ssa" else "")
   val domain = manager.getClass.getSimpleName
 
-  val precisionPath = Paths.get(this.getClass.getResource("/sturdy/language/wasm/precision.wast").toURI);
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/precision.wast").toURI;
+  val precisionPath = if (uri.getScheme == "jar") {
+    // For JAR resources - get existing FileSystem or create new one
+    val fs = try {
+      FileSystems.getFileSystem(uri)
+    } catch {
+      case _: FileSystemNotFoundException =>
+        FileSystems.newFileSystem(uri, new java.util.HashMap[String, Any]())
+    }
+    fs.getPath("/sturdy/language/wasm/precision.wast")
+  } else {
+    // For regular file system paths
+    Paths.get(uri)
+  }
+
   val precisionModule = wasm.Parsing.fromText(precisionPath)
 
   import NumValue.*
@@ -153,7 +168,7 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
         soundOverflowHandling = false // Needed for recursive functions
       )
       val analysis = new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, config)
-      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
       val domainSizeLogger = analysis.abstractDomainSizeLogger
 
       val modInst = analysis.instantiateModule(precisionModule, moduleId = Some("precision"))
@@ -181,7 +196,7 @@ class RelationalAnalysisPrecisionTest(manager: apron.Manager, relational: Boolea
         ))
       }
 
-      Profiler.printLastMeasured()
+//      Profiler.printLastMeasured()
       Profiler.reset()
 
     }

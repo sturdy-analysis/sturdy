@@ -32,13 +32,9 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 val performanceWriter: CSVWriter = CSVWriter.open(File("scalability.csv"))
 
 class BenchmarksgameRelationalPerformanceTests extends Suites(
-  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true, ssa = false),
-  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true, ssa = false),
-  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = true, ssa = false),
-//  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = false)
-//  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true, ssa = true),
-//  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true, ssa = true),
-//  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = true, ssa = true),
+  BenchmarksgameRelationalPerformanceTest(newManager = Polka(true), relational = true),
+  BenchmarksgameRelationalPerformanceTest(newManager = Octagon(), relational = true),
+  BenchmarksgameRelationalPerformanceTest(newManager = Box(), relational = true),
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -47,7 +43,7 @@ class BenchmarksgameRelationalPerformanceTests extends Suites(
   override def afterAll(): Unit =
     performanceWriter.close
 
-class BenchmarksgameRelationalPerformanceTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFlatSpec, Matchers:
+class BenchmarksgameRelationalPerformanceTest(newManager: => Manager, relational: Boolean) extends AnyFlatSpec, Matchers:
 
   val manager = newManager
   val funcName = "_start"
@@ -86,9 +82,11 @@ class BenchmarksgameRelationalPerformanceTest(newManager: => Manager, relational
     val module = Parsing.fromBinary(p)
 
     def runAnalysis: (Int, Int, Long) =
-      val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa, soundOverflowHandling = false))
+      // We want to disable widening thresholds for better performance.
+      // A bug causes binarytrees.wasm to diverge without widening thresholds.
+      val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, soundOverflowHandling = false, wideningThresholds = p.toString.contains("binarytrees.wasm")))
       val abstractDomainSizeLogger = analysis.abstractDomainSizeLogger
-      //          analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//      analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
 
       val moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
 

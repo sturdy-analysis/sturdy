@@ -42,7 +42,7 @@ import scala.collection.{IndexedSeqView, mutable}
 import WasmFailure.*
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.stack.RelationalStack
-import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyStore, RelationalStore, WithWideningThresholds}
 import sturdy.fix.{DomLogger, Logger}
 
 import java.math.BigInteger
@@ -146,6 +146,20 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     private given Instance = this
     given Manager = apronManager
+
+    given overflowHandling: OverflowHandling = {
+      if (config.soundOverflowHandling)
+        OverflowHandling.WrapAround
+      else
+        OverflowHandling.Fail
+    }
+
+    given wideningThresholds: WithWideningThresholds = {
+      if(config.wideningThresholds)
+        WithWideningThresholds.Yes
+      else
+        WithWideningThresholds.No
+    }
 
     var dummy: List[Value] = List()
 
@@ -277,13 +291,6 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
           case _: FixIn.Exception.type => effectsException
         }
       )
-
-    given overflowHandling: OverflowHandling = {
-      if(config.soundOverflowHandling)
-        OverflowHandling.WrapAround
-      else
-        OverflowHandling.Fail
-    }
 
     given I32IntegerOps = new I32IntegerOps(
       rootFrameData = rootFrameData,

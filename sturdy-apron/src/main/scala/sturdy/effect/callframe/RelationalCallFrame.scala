@@ -7,7 +7,7 @@ import sturdy.data.{JOption, JOptionA, JOptionC, MapEquals, NoJoin, WithJoin, gi
 import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
-import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, WithWideningThresholds, given}
 import sturdy.fix.DomLogger
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
@@ -219,7 +219,8 @@ object RelationalCallFrame:
      combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
      localVariableAllocator: Allocator[Ctx, (Var, Data)],
      apronManager: Manager,
-     effectStack: EffectStack
+     effectStack: EffectStack,
+     withWideningThresholds: WithWideningThresholds
    ): (RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val state = RecencyRelationalStore[Ctx,Type]
     given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)
