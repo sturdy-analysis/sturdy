@@ -56,9 +56,9 @@
           depsSha256 = "sha256-ZllRXxIE6qomVoRj0t8pBPLH9sslLUmU9Dxc6pv0eew=";
 
           patchPhase = ''
-            substituteInPlace soundness-tests.sh --replace-fail "java" "${jdk}/bin/java"
-            substituteInPlace scalability-tests.sh --replace-fail "java" "${jdk}/bin/java"
-            substituteInPlace precision-tests.sh --replace-fail "java" "${jdk}/bin/java"
+            substituteInPlace soundness-tests.sh --replace-fail "java " "${jdk}/bin/java"
+            substituteInPlace scalability-tests.sh --replace-fail "java " "${jdk}/bin/java"
+            substituteInPlace precision-tests.sh --replace-fail "java " "${jdk}/bin/java"
           '';
 
           buildPhase = ''
