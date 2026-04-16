@@ -62,6 +62,7 @@
           '';
 
           buildPhase = ''
+            rm -rf sturdy-apron/lib
             ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
             sbt sturdy_wasm/Test/assembly
           '';
