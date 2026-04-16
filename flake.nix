@@ -22,6 +22,7 @@
           system = sys;
           overlays = [ overlay ];
         };
+        jdk = pkgs.jdk21_headless;
     in {
       packages = rec {
         pyenv = pkgs.python3.withPackages (ps: with ps; [
@@ -47,11 +48,18 @@
           version = "0.1";
           src = ./.;
           depsWarmupCommand = ''
+            rm -rf sturdy-apron/lib
             ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
             sbt compile
           '';
           nativeBuildInputs = [ numerical-analysis-libraries ];
           depsSha256 = "sha256-ZllRXxIE6qomVoRj0t8pBPLH9sslLUmU9Dxc6pv0eew=";
+
+          patchPhase = ''
+            substituteInPlace soundness-tests.sh --replace-fail "java" "${jdk}/bin/java"
+            substituteInPlace scalability-tests.sh --replace-fail "java" "${jdk}/bin/java"
+            substituteInPlace precision-tests.sh --replace-fail "java" "${jdk}/bin/java"
+          '';
 
           buildPhase = ''
             ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
@@ -67,7 +75,7 @@
           name = "sturdy";
           tag = "latest";
           contents = [
-            sturdy pkgs.jdk21_headless pkgs.bash pkgs.coreutils pkgs.busybox
+            sturdy jdk pkgs.bash pkgs.coreutils pkgs.busybox
           ];
           config = {
             Env = [ "PATH=/bin:${pkgs.bash}/bin:${pkgs.coreutils}/bin:${pkgs.busybox}/bin" ];
