@@ -3,13 +3,14 @@ package sturdy.ir.toyfun
 import sturdy.data.{CombineEquiList, CombineEquiSeq, CombineFiniteKeyMap, WidenFiniteKeyMap}
 import sturdy.effect.{RecurrentCall, TrySturdy}
 import sturdy.effect.TrySturdy.*
-import sturdy.ir.{Export, IR}
+import sturdy.ir.{Export, IR, IRInterpreterConcrete, IRValue}
 import sturdy.values
 import sturdy.values.MaybeChanged.{Changed, Unchanged}
 import sturdy.values.{Finite, Join, MaybeChanged, Widen}
 import sturdy.values.booleans.IRBooleanOperator
 import sturdy.values.integer.IRIntegerOperator
 import sturdy.values.ordering.{IREqualityOperator, IROrderingOperator}
+import sturdy.values.booleans.ConcreteIntBools
 
 class Compile(defs: Map[String, Def]) {
 
@@ -49,7 +50,7 @@ class Compile(defs: Map[String, Def]) {
         printIndented(s"Loop while: $loopWhile")
         val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         printIndented(s"NEW FIX: $fix")
-        val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
+        val fixEnv = keys.map(k => k -> IR.Fixresult(fix, k)).toMap
         val changed = other.env != fixEnv
 
         val newstate = State(fixEnv)
@@ -146,6 +147,7 @@ class Compile(defs: Map[String, Def]) {
     case Exp.Eq(e1, e2) => IR.Op(IREqualityOperator.EQ, compile(e1), compile(e2))
     case Exp.Lt(e1, e2) => IR.Op(IROrderingOperator.LT, compile(e1), compile(e2))
     case Exp.Le(e1, e2) => IR.Op(IROrderingOperator.LE, compile(e1), compile(e2))
+    case Exp.Add(e1, e2) => IR.Op(IRIntegerOperator.ADD, compile(e1), compile(e2))
     case Exp.Sub(e1, e2) => IR.Op(IRIntegerOperator.SUB, compile(e1), compile(e2))
     case Exp.Mul(e1, e2) => IR.Op(IRIntegerOperator.MUL, compile(e1), compile(e2))
     case Exp.If(cond, thenBranch, elseBranch) =>
@@ -232,6 +234,7 @@ class Compile(defs: Map[String, Def]) {
           bodyIR
         }
       case Some(state) =>
+        printIndented(s"WIDEN INPUT for $fun")
         val widened = state.inputWiden(State(env))
         widened match {
           case Unchanged(_) =>
@@ -255,7 +258,8 @@ class Compile(defs: Map[String, Def]) {
 }
 
 object RunCompile extends App:
-  val compiler = new Compile(Map("diff" -> natdiff, "fac" -> fac, "fac_main" -> fac_main))
+  val compiler = new Compile(Map("diff" -> natdiff, "fac" -> fac, "fib" -> fib, "mul" -> mul, "fac_mul" -> fac_mul))
+  val interpreter = new IRInterpreterConcrete[Int](Map("N" -> IRValue(10)), () => throw NotImplementedError())
 
 //  private val diff_5_2 = compiler.compileFun("diff", List(IR.Const(5), IR.Const(2)))
 //  println(Export.toGraphViz(diff_5_2))
@@ -268,3 +272,21 @@ object RunCompile extends App:
   val fac_N_norm = fac_N.normalize
   val fac_N_norm_dedup = fac_N_norm.dedup
   println(Export.toGraphViz(fac_N_norm_dedup, _.nodeString))
+
+  println(interpreter.run(fac_N_norm_dedup))
+
+  private val fib_N = compiler.compileFun("fib", List(IR.External("N"), IR.Const(0), IR.Const(1)))
+  fib_N.resolveFix()
+  val fib_N_norm = fib_N.normalize
+  val fib_N_norm_dedup = fib_N_norm.dedup
+  println(Export.toGraphViz(fib_N_norm_dedup, _.nodeString))
+
+  println(interpreter.run(fib_N_norm_dedup))
+
+  private val fac_mul_N = compiler.compileFun("fac_mul", List(IR.External("N"), IR.Const(0)))
+  fac_mul_N.resolveFix()
+  val fac_mul_norm = fac_mul_N.normalize
+  val fac_mul_norm_dedup = fac_mul_norm.dedup
+  println(Export.toGraphViz(fac_mul_norm_dedup, _.nodeString))
+
+  println(interpreter.run(fac_mul_norm_dedup))
