@@ -30,10 +30,10 @@ abstract class IRInterpreter(val externals: Map[String, IRValue], inputValue: ()
   val integerEqOps: EqOps[VInt, VBool]
   val booleanBranching: BooleanBranching[VBool, IRValue]
 
-  def run(ir: IR): Option[IRValue] =
-    try TrySturdy(interpret(ir)).get
+  def run(ir: IR): Either[Option[IRValue], Unit] =
+    try Left(TrySturdy(interpret(ir)).get)
     catch {
-      case _: StackOverflowError => None
+      case _: StackOverflowError => Right(())
     }
 
   def interpret(ir: IR): IRValue = ir match

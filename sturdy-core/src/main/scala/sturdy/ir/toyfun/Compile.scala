@@ -14,16 +14,24 @@ import sturdy.values.booleans.ConcreteIntBools
 
 class Compile(defs: Map[String, Def]) {
 
-  private var path: Set[IR] = Set()
+  enum Env:
+    case Std(m: Map[String, IR])
+    case Fix(fix: IR.Fix, names: Set[String])
+
+    def getStdEnv: Map[String, IR] = this match
+      case Std(m) => m
+      case Fix(fix, names) => names.map(name => name -> IR.Fixresult(fix, name)).toMap
+
+  private var path: Set[IR] = Set(IR.Const(1))
   private var env: Map[String, IR] = Map()
 
   // TODO: may need structural equality on IR values instead of reference equality
   case class State(env: Map[String, IR]):
 
-    def testIsLeq(other: State): Unit =
+    def testIsRelated(other: State, leq: Boolean): Unit =
       if (this.env.keySet != other.env.keySet)
         throw new RuntimeException(s"Cannot compare states with different keys: ${env.keySet} vs ${other.env.keySet}")
-      printIndented(s"TEST LEQ")
+      printIndented(s"TEST ${if (leq) "LEQ" else "EQ"}:")
       printIndented(s"  $env")
       printIndented(s"  ${other.env}")
       val keys = this.env.keySet.toList
@@ -31,7 +39,7 @@ class Compile(defs: Map[String, Def]) {
         val v1 = this.env(k)
         val v2 = other.env(k)
         if (v1 != v2)
-          v1.testIsLeq(v2, IR.mkAnd(path.filter(!_.isRecursive).toList))
+          v1.testIsRelated(v2, IR.mkAnd(path.filter(!_.isRecursive).toList), leq)
       }
 
     def inputWiden(other: State): MaybeChanged[State] = {
@@ -46,15 +54,15 @@ class Compile(defs: Map[String, Def]) {
         val steps = other.env.map((k,_) => (k,IR.Fixvar(k)))
 
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
-        val loopWhile = Set() // path.map(IR.mkNot)
-        printIndented(s"Loop while: $loopWhile")
-        val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
+        val cond = IR.Op(IROrderingOperator.LT, IR.Const(0), IR.Op(IRIntegerOperator.SUB, IR.External("N"), IR.Const(1)))
+        val fix: IR.Fix = IR.Fix(inits, steps, List(cond))
         printIndented(s"NEW FIX: $fix")
-        val fixEnv = keys.map(k => k -> IR.Fixresult(fix, k)).toMap
+        val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
+
         val changed = other.env != fixEnv
 
         val newstate = State(fixEnv)
-        other.testIsLeq(newstate)
+        other.testIsRelated(newstate, leq = false)
         MaybeChanged(newstate, changed)
       } else {
         val previousFixes = this.env.collect { case (k, v: IR.Fixresult) => k -> v.fix }
@@ -66,21 +74,17 @@ class Compile(defs: Map[String, Def]) {
         val steps = other.env.map((k, v) => (k, rewriteFixResult(v)))
 
         printIndented(s"Path condition: ${path.map(_.toString).mkString(" AND ")}")
-        path = path.map(rewriteFixResult).filter(_.isRecursive)
-        printIndented(s"Path rewritten filtered recursive: ${path.map(_.toString).mkString(" AND ")}")
-        val loopWhile = path.map(IR.mkNot)
-        val loopWhileNot = loopWhile.map(IR.mkNot)
+        val loopWhile = path.map(rewriteFixResult).filter(_.isRecursive)
         printIndented(s"Loop while new condition $loopWhile")
-        printIndented(s"       new not condition $loopWhileNot")
 
-        val fix: IR.Fix = IR.Fix(inits, steps, loopWhileNot.toList)
+        val fix: IR.Fix = IR.Fix(inits, steps, loopWhile.toList)
         val fixEnv = Map() ++ keys.map(k => k -> IR.Fixresult(fix, k))
         if (this.env == fixEnv)
           Unchanged(other)
         else {
           printIndented(s"NEW FIX: $fix")
           val newstate = State(fixEnv)
-          other.testIsLeq(newstate)
+          other.testIsRelated(newstate, leq = false)
           Changed(newstate)
         }
       }
@@ -133,7 +137,7 @@ class Compile(defs: Map[String, Def]) {
     }
 
   def compileFun(fun: String, argIRs: List[IR]): IR = {
-    assert(path.isEmpty)
+    assert(path == Set(IR.Const(1)))
     assert(env.isEmpty)
     assert(callstack.isEmpty)
     assert(recurrent.isEmpty)
@@ -217,7 +221,7 @@ class Compile(defs: Map[String, Def]) {
           val cached = cache.get(fun)
           printIndented(s"CO-RECURRENT $fun with cache $cached")
           val joined = cached.map(ir => joinIR(ir, bodyIR)).getOrElse(Changed(bodyIR))
-          if (joined.hasChanged && cached.isEmpty) {
+          if (joined.hasChanged) {
             printIndented(s"REPEAT $fun:")
             printIndented(s"  join ${cached.getOrElse(None)}")
             printIndented(s"  with $bodyIR")

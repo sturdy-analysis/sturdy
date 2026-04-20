@@ -222,18 +222,30 @@ enum IR:
 
   def normalize: IR = normalizeLoop(Set.empty)
 
-  def isRecursive: Boolean =
-    var isRecursive = false
-    this.foreachTree { case IR.Fixvar(_) => isRecursive = true; case _ => () }
-    isRecursive
+  def isRecursive: Boolean = this match {
+    case IR.Bot() => false
+    case IR.Unknown() => false
+    case IR.Undefined() => false
+    case IR.External(name) => false
+    case IR.Const(c) => false
+    case IR.Op(op, args) => args.exists(_.isRecursive)
+    case IR.Select(cond, left, right) => cond.isRecursive || left.isRecursive || right.isRecursive
+    case IR.Join(left, right) => left.isRecursive || right.isRecursive
+    case IR.Assert(cond, data) => cond.isRecursive || data.isRecursive
+    case IR.Fix(inits, steps, loopWhileAny) => true
+    case IR.Fixvar(name) => true
+    case IR.Fixresult(fix, name) => false
+    case IR.Feedback(inits, cond, steps) => throw new UnsupportedOperationException()
+    case IR.FeedbackAsk(index, feedback) => throw new UnsupportedOperationException()
+  }
 
 
   protected def normalizeLoop(path: Set[IR]): IR =
     norm (path, { (path, ir) =>
       ir match {
 
-        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && c.tryDecide(path).contains(true)) =>
-          IR.Bot() // loop will always diverge
+//        case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && c.tryDecide(path).contains(true)) =>
+//          IR.Bot() // loop will always diverge
         case IR.Fix(inits, steps, loopWhileAny) if loopWhileAny.exists(c => !c.isRecursive && c.tryDecide(path).contains(false)) =>
           val newconds = loopWhileAny.filter(c => c.isRecursive || !c.tryDecide(path).contains(false))
           IR.Fix(inits, steps, newconds).normalizeLoop(path)
@@ -242,6 +254,9 @@ enum IR:
           inits(name).normalizeLoop(path)
         case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) if loopWhileAny.forall(!_.isRecursive) =>
           IR.Select(IR.mkOr(loopWhileAny), IR.Bot(), inits(name)).normalizeLoop(path)
+//        case ir@IR.Fixresult(IR.Fix(inits, steps, loopWhileAny), name) if !steps(name).isRecursive && inits(name) == steps(name) =>
+//          inits(name).normalizeLoop(path)
+
         case IR.Select(cond, left, right) if left == right => left
         case IR.Select(cond, left, right) =>
           cond.tryDecide(path) match
@@ -328,25 +343,26 @@ enum IR:
     }
     names
 
-  def testIsLeq(other: IR, cond: IR): Unit =
+  def testIsRelated(other: IR, cond: IR, leq: Boolean): Unit =
     import org.scalacheck.Gen.Choose
     import org.scalacheck.{Arbitrary, Gen, Shrink, Prop, Test}
 
     val extVariables = this.externals ++ other.externals ++ cond.externals
-    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(IRValue.apply))
+    val genVals = Gen.containerOfN[List, IRValue](extVariables.size, Arbitrary.arbitrary[Int].map(_ => IRValue.apply(10)))
     val genOkVals = genVals.filter { vals =>
       val extValues = extVariables.zip(vals).toMap
       val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
       interp.run(cond) match
-        case Some(IRValue(false | 0)) => false
+        case Right(_) | Left(Some(IRValue(false | 0))) => false
         case _ => true
     }
 
     val p = Prop.forAll(genOkVals) { vals =>
       val extValues = extVariables.zip(vals).toMap
-      isLeq(other)(extValues)
+      isRelated(other, leq)(extValues)
     }
 
+    val sym = if (leq) "<=" else "=="
     val res = Test.check(Test.Parameters.default, p)
     res.status match {
       case Test.Passed => // ok
@@ -358,15 +374,15 @@ enum IR:
         val interp = new IRInterpreterConcrete[Int](extValues, () => throw new IllegalStateException("Should not happen"))
         val thisValue = interp.run(this)
         val otherValue = interp.run(other)
-        throw new AssertionError(s"IsLeq Failed for $this <= $other.\n  arguments $extValues\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
+        throw new AssertionError(s"IsLeq Failed for $this $sym $other.\n  arguments $extValues\n  this evaluates to $thisValue\n  other evaluates to $otherValue")
       case Test.Exhausted =>
         // throw new AssertionError(s"IsLeq Failed for $this <= $other. Failed to generate sufficient test inputs.")
       case Test.PropException(args, e, labels) =>
-        throw new AssertionError(s"IsLeq Failed for $this <= $other. Exception during test generation: ${e.getMessage}", e)
+        throw new AssertionError(s"IsLeq Failed for $this $sym $other. Exception during test generation: ${e.getMessage}", e)
     }
 
 
-  def isLeq(other: IR)(extValues: Map[String, IRValue]): Boolean =
+  def isRelated(other: IR, leq: Boolean)(extValues: Map[String, IRValue]): Boolean =
     val extVariables = this.externals ++ other.externals
     if (!extVariables.subsetOf(extValues.keySet))
       throw new IllegalArgumentException(s"Missing values for externals: ${extVariables.diff(extValues.keySet)}")
@@ -374,9 +390,12 @@ enum IR:
     val thisValue = interp.run(this)
     val otherValue = interp.run(other)
     (thisValue, otherValue) match
-      case (None, _) => true
-      case (Some(_), None) => false
-      case (Some(v1), Some(v2)) => v1 == v2
+      case (Right(_), _) | (_, Right(_)) => true
+      case (Left(None), Left(None)) => true
+      case (Left(None), _) if leq => true
+      case (Left(Some(_)), Left(None)) if leq => false
+      case (Left(Some(v1)), Left(Some(v2))) => v1 == v2
+      case _ => false
 
 
 object IR:
@@ -407,8 +426,8 @@ object IR:
       case 1 => irs.head
       case _ => irs.tail.foldLeft(irs.head)(f)
 
-  def mkAnd(irs: List[IR]): IR = reduce(irs)(IR.Const(false), (a, b) => IR.Op(IRBooleanOperator.AND, a, b))
-  def mkOr(irs: List[IR]): IR = reduce(irs)(IR.Const(true), (a, b) => IR.Op(IRBooleanOperator.OR, a, b))
+  def mkAnd(irs: List[IR]): IR = reduce(irs)(IR.Const(true), (a, b) => IR.Op(IRBooleanOperator.AND, a, b))
+  def mkOr(irs: List[IR]): IR = reduce(irs)(IR.Const(false), (a, b) => IR.Op(IRBooleanOperator.OR, a, b))
 
 
 given sturdy.values.Join[IR] with
