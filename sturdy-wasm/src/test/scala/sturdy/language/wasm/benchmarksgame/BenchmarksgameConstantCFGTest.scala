@@ -54,7 +54,7 @@ class BenchmarksgameConstantCFGTest extends AnyFlatSpec, Matchers:
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     val res = interp.failure.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )

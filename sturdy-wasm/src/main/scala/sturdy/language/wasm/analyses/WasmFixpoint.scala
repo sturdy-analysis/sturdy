@@ -15,30 +15,14 @@ import sturdy.report.Properties
 import sturdy.values.Finite
 import sturdy.values.{Finite, Join, Widen}
 
-//trait WasmFixpoint[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
-//  (val config: WasmConfig)(using Widen[FixOut[V]])
-//  extends GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J], fix.Fixpoint[FixIn, FixOut[V]]:
-//
-//  override type Ctx = config.ctx.Ctx
-//
-//  implicit def widenState: Widen[State]
-//  implicit def widenInState: Widen[InState]
-//  implicit def widenOutState: Widen[OutState]
-//
-//  val (contextPreparation, sensitivity) = config.ctx.make[V]
-//  import config.ctx.finiteCtx
-//  override protected def contextFree = contextPreparation
-//  override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
-//  override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
-
-case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive, localSSA: Boolean = false):
+case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive, localSSA: Boolean = false, relational: Boolean = true, soundOverflowHandling: Boolean = true, wideningThresholds: Boolean = true):
   override def toString: String = s"$fix $ctx"
 
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): WasmConfig =
-    WasmConfig(fix.withObservers(newObservers), ctx, localSSA = localSSA)
+    this.copy(fix = fix.withObservers(newObservers))
 
 object WasmConfig:
-  def default = WasmConfig()
+  def default: WasmConfig = WasmConfig()
 
 case class FixpointConfig(stack: StackConfig = StackedStates(), iter: fix.iter.Config = fix.iter.Config.Innermost, loopUnwinding: Int = 0):
   def withObservers[Fx](newObservers: Iterable[FixpointControlEvent[Nothing,Nothing,Nothing,Fx] => Unit]): FixpointConfig =

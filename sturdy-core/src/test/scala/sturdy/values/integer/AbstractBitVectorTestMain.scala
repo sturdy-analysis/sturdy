@@ -5,7 +5,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.{ConcreteFailure, Failure}
 import sturdy.values.*
 import sturdy.values.booleans.*
-import sturdy.values.config.{Bits, UnsupportedConfiguration}
+import sturdy.values.config.{BitSign, UnsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.integer.AbstractBitVector.*
 // import sturdy.values.relational.*

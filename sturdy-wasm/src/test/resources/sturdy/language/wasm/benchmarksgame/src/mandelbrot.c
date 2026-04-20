@@ -10,14 +10,12 @@
 //#define MAXIMUM_ITERATIONS   50
 #define MAXIMUM_ITERATIONS   5
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "../../stdlib.h"
 
 // intptr_t should be the native integer type on most sane systems.
 typedef intptr_t intnative_t;
 
-int main() {
+int _start() {
    // Ensure image_Width_And_Height are multiples of 8.
    const intnative_t image_Width_And_Height=(512+7)/8*8;
 
@@ -81,9 +79,8 @@ int main() {
    }
 
    // Output the image to stdout.
-   //fprintf(stdout, "P4\n%jd %jd\n", (intmax_t)image_Width_And_Height,
-   //  (intmax_t)image_Width_And_Height);
-   //fwrite(pixels, image_Width_And_Height*image_Width_And_Height/8, 1, stdout);
+   fprintf(stdout, "P4\n%jd %jd\n", (intmax_t)image_Width_And_Height, (intmax_t)image_Width_And_Height);
+   fwrite(pixels, image_Width_And_Height*image_Width_And_Height/8, 1, stdout);
 
    free(pixels);
 

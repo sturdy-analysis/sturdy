@@ -2,7 +2,7 @@ package sturdy.effect.symboltable
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.apron.{ApronExpr, ApronRecencyState, RelationalExpr}
+import sturdy.apron.{ApronExpr, ApronRecencyState, StatelessRelationalExpr}
 import sturdy.data.{*, given}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -10,7 +10,8 @@ import sturdy.values.references.{*, given}
 import sturdy.values.{*, given}
 
 import scala.reflect.ClassTag
-import scala.util.boundary, boundary.break
+import scala.util.boundary
+import boundary.break
 
 final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Widen, Ctx, Type]
   (
@@ -18,7 +19,7 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Entry],
-    relationalValue: RelationalExpr[Entry, VirtualAddress[Ctx], Type]
+    relationalValue: StatelessRelationalExpr[Entry, VirtualAddress[Ctx], Type]
   ) extends DecidableSymbolTable[Key, Symbol, Entry]:
 
   val table: JoinableDecidableSymbolTable[Key, Symbol, PowVirtualAddress[Ctx]] = new JoinableDecidableSymbolTable()
@@ -28,11 +29,12 @@ final class RelationalSymbolTable[Key: Finite, Symbol: Finite, Entry: Join: Wide
       apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Entry]].toJOptionC
     }.asInstanceOf[JOptionC[Entry]]
 
-  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): JOptionC[Unit] =
     val ctx = symbolTableAllocator.alloc((key,symbol))
     val virt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
     apronState.recencyStore.write(virt, newEntry)
     table.set(key, symbol, virt)
+    
 
   override def putNew(key: Key): Unit =
     table.putNew(key)

@@ -3,7 +3,7 @@ package sturdy.values.floating
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config
-import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{BitSign, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.{&&, *}
 import sturdy.values.ordering.OrderingOps
 import sturdy.values.ordering.EqOps
@@ -30,6 +30,7 @@ given ConcreteFloatOps: FloatOps[Float, Float] with
   def absolute(v: Float): Float = Math.abs(v)
   def negated(v: Float): Float = -v
   def sqrt(v: Float): Float = Math.sqrt(v).toFloat
+  def pow(base: Float, exponent: Float): Float = throw new UnsupportedOperationException("pow only defined on doubles")
   def ceil(v: Float): Float = v.ceil
   def floor(v: Float): Float = v.floor
   def truncate(v: Float): Float = if (v < 0) v.ceil else v.floor
@@ -55,18 +56,18 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(f: Float, conf: config.Overflow && config.Bits) = conf match
-    case (_ && config.Bits.Raw) => JFloat.floatToRawIntBits(f)
-    case (config.Overflow.Allow && config.Bits.Signed) => f.toInt
-    case (config.Overflow.Allow && config.Bits.Unsigned) => f.toLong.toInt
-    case (config.Overflow.Fail && config.Bits.Signed) =>
+  def apply(f: Float, conf: config.Overflow && config.BitSign) = conf match
+    case (_ && config.BitSign.Raw) => JFloat.floatToRawIntBits(f)
+    case (config.Overflow.Allow && config.BitSign.Signed) => f.toInt
+    case (config.Overflow.Allow && config.BitSign.Unsigned) => f.toLong.toInt
+    case (config.Overflow.Fail && config.BitSign.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
       else if (f >= -Int.MinValue.toFloat || f < Int.MinValue.toFloat)
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
         f.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Signed) =>
       if (f.isNaN)
         0
       else if (f >= -Int.MinValue.toFloat)
@@ -75,14 +76,14 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
         Int.MinValue
       else
         f.toInt
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.BitSign.Unsigned) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
       else if (f >= -Int.MinValue.toDouble * 2.0d || f <= -1.0f)
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
         f.toLong.toInt
-    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Unsigned) =>
       if (f.isNaN)
         0
       else if (f >= -Int.MinValue.toFloat * 2.0f)
@@ -99,17 +100,17 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(f: Float, conf: config.Overflow && config.Bits) = conf match
-    case (config.Overflow.Allow && config.Bits.Signed) => f.toLong
+  def apply(f: Float, conf: config.Overflow && config.BitSign) = conf match
+    case (config.Overflow.Allow && config.BitSign.Signed) => f.toLong
 //    case (config.Overflow.Allow, config.Bits.Unsigned) => ???
-    case (config.Overflow.Fail && config.Bits.Signed) =>
+    case (config.Overflow.Fail && config.BitSign.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
       else if (f >= -Long.MinValue.toFloat || f < Long.MinValue.toFloat)
         fa.fail(ConversionFailure, s"float $f out of long range")
       else
         f.toLong
-    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Signed) =>
       if (f.isNaN)
         0
       else if (f >= -Long.MinValue.toFloat)
@@ -118,7 +119,7 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         Long.MinValue
       else
         f.toLong
-    case (config.Overflow.Fail && config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.BitSign.Unsigned) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
       else if (f >= -Long.MinValue.toFloat * 2.0d || f <= -1.0d)
@@ -127,7 +128,7 @@ given ConcreteConvertFloatLong(using fa: Failure): ConvertFloatLong[Float, Long]
         (f - 9223372036854775808.0d).toLong | Long.MinValue
       else
         f.toLong
-    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.BitSign.Unsigned) =>
       if (f.isNaN)
         0
       else if (f >= -Long.MinValue.toFloat * 2.0d)

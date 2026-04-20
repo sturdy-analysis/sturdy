@@ -1,13 +1,15 @@
 package sturdy.values.taint
 
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.MaybeChanged
-import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.{BooleanBranching, BreakIf}
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.ordering.{UnsignedOrderingOps, EqOps, OrderingOps}
+import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
+import sturdy.values.simd.{LaneShape, SIMDOps}
 
 enum Taint:
   case Tainted
@@ -101,11 +103,13 @@ given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[
   def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
   def negated(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.negated)
   def sqrt(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.sqrt)
+  def pow(base: TaintProduct[V], exponent: TaintProduct[V]): TaintProduct[V] = base.binary(ops.pow, exponent)
   def ceil(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.ceil)
   def floor(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.floor)
   def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)
   def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
   def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
+
 
 given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)
@@ -143,3 +147,13 @@ given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[
 
 given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBranching[TaintProduct[V], R] with
   def boolBranch(v: TaintProduct[V], thn: => R, els: => R): R = ops.boolBranch(v.value, thn, els)
+
+private final class TaintBreakIf[V](using val ops: BreakIf[V]) extends BreakIf[TaintProduct[V]]:
+  override type State = ops.State
+  inline override def break(br: ops.State => Unit): Unit = ops.break(br)
+  inline override def breakIf(cond: TaintProduct[V])(break: State => Unit): Unit = ops.breakIf(cond.value)(break)
+  inline override def assertCondition(cond: TaintProduct[V], state: State): Unit = ops.assertCondition(cond.value, state)
+  inline override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = ops.joinClosingOver
+  inline override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = ops.widenClosingOver
+
+given TaintBreakIfGiven[V](using ops: BreakIf[V]): BreakIf[TaintProduct[V]] = TaintBreakIf[V]

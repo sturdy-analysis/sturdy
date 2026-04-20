@@ -22,7 +22,7 @@ given abstractAddrEqOps[AA <: AbstractAddr[_]]: EqOps[AA, Topped[Boolean]] with
 case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends AbstractAddr[AA]:
   override def isEmpty: Boolean = addrs.forall(_.isEmpty)
   override def isStrong: Boolean = addrs.size == 1 && addrs.head.isStrong
-  override def reduce[B](f: AA => B)(using Join[B]): B = addrs.map(f).reduce { case (a1, a2) =>
+  override def reduce[B](f: AA => B)(using Join[B]): B = addrs.iterator.map(f).reduce { case (a1, a2) =>
     Join(a1, a2).get
   }
   override def iterator: Iterator[AA] = addrs.iterator
@@ -31,6 +31,7 @@ case class PowersetAddr[A, AA <: AbstractAddr[A]](addrs: Set[AA]) extends Abstra
 object PowersetAddr:
   def apply[A, AA <: AbstractAddr[A]](addr: AA): PowersetAddr[A, AA] = PowersetAddr(Set(addr))
   def apply[A, AA <: AbstractAddr[A]](addr: AA, addrs: AA*): PowersetAddr[A, AA] = PowersetAddr(Set(addr) ++ addrs)
+  def from[A, AA <: AbstractAddr[A]](addrs: Iterable[AA]): PowersetAddr[A,AA] = PowersetAddr(addrs.toSet)
 
 given joinPowersetAddr[A, AA <: AbstractAddr[A]]: Join[PowersetAddr[A, AA]] with
   override def apply(v1: PowersetAddr[A, AA], v2: PowersetAddr[A, AA]): MaybeChanged[PowersetAddr[A, AA]] =

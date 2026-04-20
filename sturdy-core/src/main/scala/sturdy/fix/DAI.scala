@@ -80,7 +80,7 @@ class DAIFixpoint[Dom, Codom]
             val joinedValueAndOut = outCache(conf) match
               case null => (codom, out)
               case (codomCached, outCached) =>
-                val widened = (Join(codomCached, codom).get, state.joinIn(dom)(outCached, out).get)
+                val widened = state.joinIn(dom)((codomCached,outCached), (codom,out)).get
                 //                println(s"${widened._1}    $codom     $codomCached")
                 widened
 

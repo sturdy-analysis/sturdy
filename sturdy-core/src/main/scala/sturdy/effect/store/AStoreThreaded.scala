@@ -11,17 +11,21 @@ import scala.reflect.ClassTag
 
 /** An abstract threaded store. */
 class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V], Widen[V], Finite[A])
-  extends Store[AA, V, WithJoin]:
+  extends StoreWithPureOps[AA, V, WithJoin]:
 
   private var store: Map[A, V] = _init
 
   override def read(xs: AA): JOptionA[V] =
-    if (xs.isEmpty)
-      JOptionA.None()
-    else
-      xs.reduce(x => JOptionA(store.get(x)))
+    readPure(xs, store)._1
 
-  override def write(xs: AA, v: V): Unit =
+  override def readPure(xs: AA, state: State): (JOptionA[V],State) =
+    if (xs.isEmpty)
+      (JOptionA.None(),state)
+    else
+      (xs.reduce(x => JOptionA(state.get(x))),state)
+
+  override def writePure(xs: AA, v: V, state: State): State =
+    var store = state
     if (xs.isEmpty) {
       // nothing
     } else if (xs.isStrong) {
@@ -32,14 +36,22 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
         case Some(old) => store += x -> Join(old, v).get
       }
     }
+    store
 
-  override def free(xs: AA): Unit =
+  override def freePure(xs: AA, state: State): State =
+    var store = state
     if (xs.isStrong)
       xs.reduce(x => store -= x)
+    store
 
   override type State = Map[A, V]
   override def getState: State = store
   override def setState(s: State): Unit = this.store = s
+  override def withInternalState[A](f: State => (A, State)): A =
+    val (res, storeNew) = f(store)
+    store = storeNew
+    res
+
   override def setBottom: Unit = this.store = Map()
   override def join: Join[State] = implicitly
   override def widen: Widen[State] = implicitly
@@ -60,3 +72,6 @@ class AStoreThreaded[A, AA <: AbstractAddr[A], V](_init: Map[A, V])(using Join[V
           if (s.isNotSound) break(s)
     }
     IsSound.Sound
+
+
+  override def toString: String = getState.toString()

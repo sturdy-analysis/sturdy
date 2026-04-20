@@ -35,6 +35,10 @@ class RelationalStoreTest extends AnyFunSuite:
   given Allocator[Context, Type] with Stateless with
     override def alloc(tpe: Type): Context =
       s"tmp_$tpe"
+  given Allocator[Context, (ApronExpr[VAddr,Type], ApronExpr[VAddr,Type])] with Stateless with
+    override def alloc(exprs: (ApronExpr[VAddr, Type], ApronExpr[VAddr, Type])): Context =
+      s"tmp_${exprs._1._type}"
+
   given CombineVal[W <: Widening]: Combine[Val, W] = ???
 
   given apron.Manager = new apron.Polka(true)

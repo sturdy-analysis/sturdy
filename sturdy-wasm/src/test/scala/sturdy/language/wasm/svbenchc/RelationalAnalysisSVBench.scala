@@ -9,7 +9,7 @@ import sturdy.language.wasm
 import sturdy.language.wasm.Parsing.WasmParseError
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.{CallSites, FixpointConfig, RelationalAnalysis, TypeAnalysis, WasmConfig}
-import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, wasi_snapshot_preview1}
+import sturdy.language.wasm.generic.{FrameData, FuncId, HostModules, InstLoc, defaultHostModules}
 import sturdy.language.wasm.{ConcreteInterpreter, Parsing, abstractions, testCfgDifference}
 import sturdy.values.Topped
 import org.scalatest.exceptions.{TestCanceledException, TestFailedDueToTimeoutException, TestFailedException}
@@ -34,9 +34,6 @@ import com.github.tototoshi.csv.*
 import java.nio.file.{Files, Path, Paths}
 import scala.jdk.StreamConverters.*
 import scala.language.postfixOps
-
-object SlowTest extends org.scalatest.Tag("SlowTest")
-object FastTest extends org.scalatest.Tag("FastTest")
 
 class RelationalAnalysisSVBench extends Suites(
 //  new RelationalAnalysisTest(Polka(true)),
@@ -100,11 +97,8 @@ class RelationalAnalysisTest(manager: apron.Manager) extends AnyFunSpec, Matcher
     analysis.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
     val cfgBuilder = analysis.addControlObserver(new ControlEventGraphBuilder)
 
-    val hostModules = HostModules(
-      "wasi_snapshot_preview1" -> wasi_snapshot_preview1,
-      "env" -> svbenchHostFunctions
-    )
-    val modInst = analysis.initializeModule(module, hostModules = hostModules)
+    val hostModules = defaultHostModules
+    val modInst = analysis.instantiateModule(module, hostModules = hostModules)
     given Signaler = ThreadSignaler
     val result = try {
       failAfter(1 minute) {

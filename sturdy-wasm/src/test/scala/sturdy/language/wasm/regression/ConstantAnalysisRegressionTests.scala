@@ -15,7 +15,7 @@ import sturdy.fix.{Fixpoint, StackConfig}
 import sturdy.language.wasm
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.abstractions.{CfgConfig, ControlFlow}
-import sturdy.language.wasm.analyses.ConstantAnalysis.Value
+import sturdy.language.wasm.analyses.ConstantAnalysis.{Value, NumValue}
 import sturdy.language.wasm.analyses.{CallSites, ConstantAnalysis, FixpointConfig, WasmConfig}
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, WasmFailure}
 import sturdy.language.wasm.{ConcreteInterpreter, testCfgDifference}
@@ -37,8 +37,8 @@ class ConstantAnalysisRegressionTests extends AnyFunSuite, Matchers:
   Fixpoint.DEBUG_PRIOR_OUTPUT = false
   Fixpoint.DEBUG_INVARIANTS = false
 
-  runAnalysis("debug.wast", Unfailing(List(Value.Int32(Top))))
-  runAnalysis("br_if_broken.wast", Unfailing(List(Value.Int32(Top))))
+  runAnalysis("debug.wast", Unfailing(List(Value.Num(NumValue.Int32(Top)))))
+  runAnalysis("br_if_broken.wast", Unfailing(List(Value.Num(NumValue.Int32(Top)))))
 
   def runAnalysis(watFile: String, expected: AFallible[List[Value]]): Unit =
     test(watFile) {
@@ -49,8 +49,8 @@ class ConstantAnalysisRegressionTests extends AnyFunSuite, Matchers:
       val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
       interp.addControlObserver(new PrintingControlObserver()(println))
 
-      val modInst = interp.initializeModule(module, moduleId = Some("mod"))
-      val r = interp.failure.fallible(interp.invokeExported(modInst, "main", List(Value.Int32(Top))))
+      val modInst = interp.instantiateModule(module, moduleId = Some("mod"))
+      val r = interp.failure.fallible(interp.invokeExported(modInst, "main", List(Value.Num(NumValue.Int32(Top)))))
 
       val cfg = graphBuilder.get
 

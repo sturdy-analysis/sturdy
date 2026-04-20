@@ -1,8 +1,8 @@
 package sturdy.apron
 
 import apron.*
-import gmp.{Mpq, Mpz}
-import sturdy.apron.ApronExpr.topInterval
+import gmp.{Mpfr, Mpq, Mpz}
+import sturdy.apron.ApronExpr.{mpqScalar, topInterval}
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
@@ -66,7 +66,7 @@ enum ApronExpr[Addr, Type]:
 
   def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronExpr[OtherAddr, Type] =
     this match
-      case Addr(ApronVar(addr), specials, _type) => Addr(ApronVar(f(addr)), specials, _type)
+      case Addr(addr, specials, _type) => Addr(ApronVar(f(addr.addr)), specials, _type)
       case Constant(coeff, specials, _type) => Constant(coeff, specials, _type)
       case Unary(op, expr, roundingType, roundingDir, specials, _type) =>
         Unary(op, expr.mapAddr(f), roundingType, roundingDir, specials, _type)
@@ -81,24 +81,42 @@ enum ApronExpr[Addr, Type]:
         Unary(op, expr.mapAddrSame(f), roundingType, roundingDir, specials, _type)
       case Binary(op, expr1, expr2, roundingType, roundingDir, specials, _type) =>
         Binary(op, expr1.mapAddrSame(f), expr2.mapAddrSame(f), roundingType, roundingDir, specials, _type)
-        
-  def isConstant: Boolean = addrs.isEmpty
 
-  def isTop: Topped[Boolean] =
-    this match
-      case Constant(iv, _, _) => Topped.Actual(iv.inf().isInfty == -1 && iv.sup().isInfty == 1)
-      case _ => Topped.Top
-
-  def isBottom: Topped[Boolean] =
-    this match
-      case Constant(iv, _, _) => Topped.Actual(iv.inf().cmp(iv.sup()) > 0)
-      case _ => Topped.Top
-
-  def addrs: Set[Addr] = this match
-    case Addr(v, _, _) => Set(v.addr)
-    case Constant(_, _, _) => Set()
+  def addrs: Iterable[Addr] = this match
+    case Addr(v, _, _) => Iterable(v.addr)
+    case _: Constant[Addr,Type] => Iterable()
     case Unary(_, e, _, _, _, _) => e.addrs
     case Binary(_, l, r, _, _, _, _) => l.addrs ++ r.addrs
+
+  def constants: Set[Coeff] = this match
+    case Addr(_, _, _) => Set()
+    case Constant(coeff, _, _) => Set(coeff)
+    case Unary(_, e, _, _, _, _) => e.constants
+    case Binary(_, l, r, _, _, _, _) => l.constants ++ r.constants
+
+  def isConstant: Boolean =
+    this match
+      case _: ApronExpr.Addr[?,?] => false
+      case _: Constant[?,?] => true
+      case unary: Unary[?,?] => unary.e.isConstant
+      case binary: Binary[?,?] => binary.l.isConstant && binary.r.isConstant
+
+  def isConstantEqual(n: Int): Boolean =
+    this match
+      case Constant(coeff, _, _) => coeff.isEqual(n)
+      case _ => false
+
+  def isTop: Topped[Boolean] =
+    if(constants.exists(iv => iv.inf().isInfty == -1 && iv.sup().isInfty == 1))
+      Topped.Actual(true)
+    else
+      Topped.Top
+
+  def isBottom: Topped[Boolean] =
+    if(constants.exists(iv => iv.inf().cmp(iv.sup()) > 0))
+      Topped.Actual(true)
+    else
+      Topped.Top
 
   override def toString: String = this match
     case Addr(v, _, _) => v.toString
@@ -133,7 +151,6 @@ enum ApronExpr[Addr, Type]:
       case exc: Exception =>
         throw new IllegalArgumentException(s"Exception while converting ApronExpr $expr with environment $env", exc)
     }
-
 
 object ApronExpr:
   inline def addr[Addr : Ordering : ClassTag, Type](addr: Addr, _type: Type): ApronExpr[Addr, Type] = ApronExpr.Addr(ApronVar(addr), FloatSpecials.Integer, _type)
@@ -173,7 +190,49 @@ object ApronExpr:
       m
   inline def scalar(f: Float): Scalar = new DoubleScalar(f)
   inline def scalar(d: Double): Scalar = new DoubleScalar(d)
+  def scalar(f: BigDecimal): Scalar =
+    val d = new DoubleScalar(f.doubleValue())
+    val m = mpqScalar(f)
+    if(d.isEqual(m))
+      d
+    else
+      m
 
+  private inline def mpqScalar(f: BigDecimal): MpqScalar =
+    if(f.scale <= 0)
+      new MpqScalar(new Mpq(f.bigDecimal.toBigInteger, BigInteger.ONE))
+    else {
+      val denominator = BigInteger.TEN.pow(f.scale)
+      val numerator = f.bigDecimal.unscaledValue()
+      val d = numerator.gcd(denominator)
+      new MpqScalar(numerator.divide(d), denominator.divide(d))
+    }
+
+  def toInt(scalar: Scalar): Option[Int] =
+    val result = Array(0.0d)
+    if(scalar.isInfty == 0 && scalar.toDouble(result, Mpfr.RNDZ) == 0 && result(0).isValidInt) {
+      Some(result(0).toInt)
+    } else {
+      None
+    }
+
+  def toLong(scalar: Scalar): Option[Long] =
+    val result = Mpq()
+    if(scalar.isInfty == 0 && scalar.toMpq(result, Mpfr.RNDZ) == 0 && result.denRef.cmp(1) == 0)
+      try {
+        Some(result.numRef.bigIntegerValue().longValueExact())
+      } catch {
+        case _: ArithmeticException => None
+      }
+    else
+      None
+
+  def toBigInt(scalar: Scalar): Option[BigInt] =
+    val result = Mpq()
+    if(scalar.isInfty == 0 && scalar.toMpq(result, Mpfr.RNDZ) == 0 && result.denRef.cmp(1) == 0)
+      Some(result.numRef.bigIntegerValue())
+    else
+      None
 
   inline def top[Addr,Type](tpe: Type): Constant[Addr,Type] =
     Constant(topInterval, FloatSpecials.Integer, tpe)
@@ -194,13 +253,16 @@ object ApronExpr:
   inline def binary[Addr, Type: ApronType](op: BinOp, e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, resultType: Type): ApronExpr[Addr, Type] =
     ApronExpr.Binary(op, e1, e2, resultType.roundingType, resultType.roundingDir, floatSpecials, resultType)
 
-  inline def intNegate[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, e1._type)
+  inline def intNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
+    intNegate(e1, e1._type)
+
+  inline def intNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, tpe)
 
   inline def intAdd[L,Addr,Type: ApronType](using intOps: IntegerOps[L,Type])(e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type]): ApronExpr[Addr,Type] =
     intAdd(e1, e2, intOps.add(e1._type, e2._type))
 
-  inline def intAdd[L,Addr,Type: ApronType](e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type], tpe: Type): ApronExpr[Addr,Type] =
+  inline def intAdd[Addr,Type: ApronType](e1: ApronExpr[Addr,Type], e2: ApronExpr[Addr,Type], tpe: Type): ApronExpr[Addr,Type] =
     binary(BinOp.Add, e1, e2, tpe)
 
   inline def intSub[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
@@ -227,7 +289,10 @@ object ApronExpr:
     binary(BinOp.Mod, e1, e2, tpe)
 
   inline def intPow[L, Addr, Type: ApronType](using intOps: IntegerOps[L, Type])(e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
-    binary(BinOp.Pow, e1, e2, intOps.mul(e1._type, e2._type))
+    intPow(e1, e2, intOps.mul(e1._type, e2._type))
+
+  inline def intPow[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], e2: ApronExpr[Addr, Type], tpe: Type): ApronExpr[Addr, Type] =
+    binary(BinOp.Pow, e1, e2, tpe)
 
   inline def cast[Addr, Type: ApronType](e: ApronExpr[Addr, Type], roundingType: RoundingType, roundingDir: RoundingDir, tpe: Type): ApronExpr[Addr, Type] =
     Unary(UnOp.Cast, e, roundingType, roundingDir, FloatSpecials.Integer, tpe)
@@ -249,7 +314,10 @@ object ApronExpr:
     binary(BinOp.Div, e1, e2, floatSpecials, floatOps.div(e1._type, e2._type))
 
   inline def floatNegate[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
-    unary(UnOp.Negate, e1, floatSpecials, floatOps.negated(e1._type))
+    floatNegate(e1, floatSpecials, floatOps.negated(e1._type))
+
+  inline def floatNegate[L, Addr, Type: ApronType](e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials, tpe: Type): ApronExpr[Addr, Type] =
+    unary(UnOp.Negate, e1, floatSpecials, tpe)
 
   inline def floatSqrt[L, Addr, Type: ApronType](using floatOps: FloatOps[L, Type])(e1: ApronExpr[Addr, Type], floatSpecials: FloatSpecials): ApronExpr[Addr, Type] =
     unary(UnOp.Sqrt, e1, floatSpecials, floatOps.sqrt(e1._type))
@@ -300,6 +368,11 @@ enum BinOp:
   case Mod
   case Pow
 
+  def neutralElement: Int =
+    this match
+      case Add | Sub => 0
+      case Mul | Div | Mod | Pow => 1
+
   override def toString: String = this match
     case Add => "+"
     case Sub => "-"
@@ -321,15 +394,17 @@ case class ApronCons[Addr, Type](op: CompareOp, e1: ApronExpr[Addr, Type], e2: A
 
   override def toString: String = s"($e1 $op $e2)"
 
-  def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
+  inline def mapAddr[OtherAddr : Ordering : ClassTag](f: Addr => OtherAddr): ApronCons[OtherAddr, Type] =
     ApronCons(op, e1.mapAddr(f), e2.mapAddr(f))
 
-  def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
+  inline def mapExprs(f: ApronExpr[Addr,Type] => ApronExpr[Addr,Type]): ApronCons[Addr,Type] =
     ApronCons(op, f(e1), f(e2))
 
-  def addrs: Set[Addr] = e1.addrs ++ e2.addrs
+  inline def addrs: Iterable[Addr] = e1.addrs ++ e2.addrs
 
-  def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
+  inline def isConstant: Boolean = e1.isConstant && e2.isConstant
+
+  final def toApron(env : apron.Environment)(using apronType: ApronType[Type]): Tcons1 = op match
     case Eq  => Tcons1(env, Tcons1.EQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
     case Neq => Tcons1(env, Tcons1.DISEQ, ApronExpr.binary(BinOp.Sub, e1, e2, e1._type).toApron(env))
     case Lt  => Tcons1(env, Tcons1.SUP, ApronExpr.binary(BinOp.Sub, e2, e1, e1._type).toApron(env))
@@ -395,29 +470,42 @@ enum CompareOp:
 
 enum ApronBool[Addr, Type]:
   case Constraint(cons: ApronCons[Addr, Type])
+  case Constant(boolean: Topped[Boolean])
   case And(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
   case Or(e1: ApronBool[Addr,Type], e2: ApronBool[Addr,Type])
 
-  def addrs: Set[Addr] =
+  def addrs: Iterable[Addr] =
     this match
       case Constraint(cons) => cons.addrs
+      case Constant(_) => Set()
       case And(e1, e2) => e1.addrs ++ e2.addrs
       case Or(e1, e2) => e1.addrs ++ e2.addrs
+
+  def mapAddr[OtherAddr: Ordering: ClassTag](f: Addr => OtherAddr): ApronBool[OtherAddr,Type] =
+    this match {
+      case Constraint(cons) => Constraint(cons.mapAddr(f))
+      case Constant(b) => Constant(b)
+      case And(e1, e2) => And(e1.mapAddr(f), e2.mapAddr(f))
+      case Or(e1, e2) => Or(e1.mapAddr(f), e2.mapAddr(f))
+    }
 
   def negated: ApronBool[Addr,Type] =
     this match
       case Constraint(cons) => Constraint(cons.negated)
+      case Constant(b) => Constant(b.map(!_))
       case And(e1, e2) => Or(e1.negated, e2.negated)
       case Or(e1, e2) => And(e1.negated, e2.negated)
 
-  def constraint: Iterable[ApronCons[Addr, Type]] =
+  def constraints: Iterable[ApronCons[Addr, Type]] =
     this match
       case Constraint(cons) => Iterable(cons)
-      case And(e1, e2) => e1.constraint ++ e2.constraint
-      case Or(e1, e2) => e1.constraint ++ e2.constraint
+      case Constant(b) => Iterable()
+      case And(e1, e2) => e1.constraints ++ e2.constraints
+      case Or(e1, e2) => e1.constraints ++ e2.constraints
 
   override def toString: String =
     this match
       case Constraint(cons) => cons.toString
+      case Constant(b) => b.toString
       case And(e1, e2) => s"$e1 ∧ $e2"
       case Or(e1, e2) => s"$e1 ∨ $e2"

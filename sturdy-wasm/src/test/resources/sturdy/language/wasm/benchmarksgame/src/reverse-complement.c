@@ -6,16 +6,18 @@
 */
 
 #define _GNU_SOURCE
-#include <sched.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <string.h>
+//#include <sched.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <ctype.h>
+//#include <unistd.h>
+//#include <string.h>
+#include "../../stdlib.h"
 
-char *pairs = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
+char pairs[] = "ATCGGCTAUAMKRYWWSSYRKMVBHDDHBVNN\n\n";
 char tbl[128];
 
+__attribute__ ((noinline))
 void process(char *from, char *to) {
    while (*from++ != '\n');
 
@@ -35,7 +37,7 @@ void process(char *from, char *to) {
       c = tbl[(int)*from], *from = tbl[(int)*to], *to = c;
 }
 
-int main() {
+int _start() {
    char *s;
    for (s = pairs; *s; s += 2) {
       tbl[toupper(s[0])] = s[1];

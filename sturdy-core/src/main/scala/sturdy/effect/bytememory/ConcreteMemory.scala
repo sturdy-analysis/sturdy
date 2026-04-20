@@ -13,7 +13,7 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
   
   def getMemories: Map[Key, Mem] = memories.toMap
 
-  override def read(key: Key, addr: Int, length: Int): JOptionC[Seq[Byte]] =
+  override def read(key: Key, addr: Int, length: Int, alignment: Int): JOptionC[Seq[Byte]] =
     val mem = memories(key)
     // since collections are indexed by signed integers, we have to check here for addr >= 0
     // this means our maximum memory size is half of the allowed size in wasm
@@ -23,7 +23,7 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
     else
       JOptionC.none
 
-  override def write(key: Key, addr: Int, bytes: Seq[Byte]): JOptionC[Unit] =
+  override def write(key: Key, addr: Int, bytes: Seq[Byte], alignment: Int): JOptionC[Unit] =
     val mem = memories(key)
     if (addr >= 0 && addr + bytes.size <= mem.size) {
       var i = addr
@@ -51,6 +51,40 @@ class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin], Conc
       JOptionC.none
     }
 
+  override def fill(key: Key, addr: Int, size: Int, value: Seq[Byte]): JOptionC[Unit] =
+    val mem = memories(key)
+    if (addr >= 0 && addr + size <= mem.size && value.size == 1 && size >= 0) {
+      for (i <- 0 until size) {
+        mem.bytes(addr + i) = value.head
+      }
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
+
+  override def copy(key: Key, srcAddr: Int, dstAddr: Int, size: Int): JOptionC[Unit] =
+    val mem = memories(key)
+    if (srcAddr >= 0 && dstAddr >= 0 && srcAddr + size <= mem.size && dstAddr + size <= mem.size && size >= 0) {
+      Array.copy(mem.bytes, srcAddr, mem.bytes, dstAddr, size)
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
+
+  override def init(key: Key, tableAddr: Int, dataAddr: Int, byteAmount: Int, dataBytes: Seq[Byte]): JOption[NoJoin, Unit] =
+    val mem = memories(key)
+    if (tableAddr >= 0 && dataAddr >= 0 && byteAmount >= 0 && tableAddr + byteAmount <= mem.size && dataAddr + byteAmount <= dataBytes.size) {
+      if (!mem.sizeLimit.forall(lim => tableAddr + byteAmount <= lim * pageSize && dataAddr + byteAmount <= lim * pageSize)) {
+        return JOptionC.none
+      }
+      for (i <- 0 until byteAmount) {
+        mem.bytes(tableAddr + i) = dataBytes(dataAddr + i)
+      }
+      memories(key) = mem
+      JOptionC.Some(())
+    } else {
+      JOptionC.none
+    }
 
   override def putNew(key: Key, initSize: Int, sizeLimit: scala.Option[Int]): Unit =
     memories(key) = Mem(Array.ofDim[Byte](initSize*pageSize), sizeLimit)

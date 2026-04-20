@@ -69,7 +69,7 @@ class RelationalConvertTests(manager: Manager) extends Suites(
 
 given OverflowHandling = OverflowHandling.WrapAround
 
-class RelationalConvertIntLongTest(using manager: Manager) extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Bits](
+class RelationalConvertIntLongTest(using manager: Manager) extends ConvertTest[Int, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], BitSign](
   specials = List(),
   makeConvert = withApronState(using manager) (
     (
@@ -98,7 +98,7 @@ class RelationalConvertLongIntTest(using manager: Manager) extends ConvertTest[L
   )
 )
 
-class RelationalConvertFloatLongTest(using manager: Manager) extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertFloatLongTest(using manager: Manager) extends ConvertTest[Float, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && BitSign](
   specials = specialFloatingIntegerNumbers[Float,Long](_.toFloat),
   makeConvert = withApronState(
     (
@@ -111,7 +111,7 @@ class RelationalConvertFloatLongTest(using manager: Manager) extends ConvertTest
   )
 )
 
-class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[Float, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[Float, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && BitSign](
   specials = specialFloatingIntegerNumbers[Float,Int](_.toFloat),
   makeConvert = withApronState(
     (
@@ -125,13 +125,13 @@ class RelationalConvertFloatIntTest(using manager: Manager) extends ConvertTest[
 ):
   test(s"convert(0.0,Overflow.Fail && Bits.Unsigned) = 0") {
     implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = _makeConvert
-    val actual = afailure.fallible(convertOps(fromIvOps.constant(0.0f), Overflow.Fail && Bits.Unsigned))
-    val expected = cfailure.fallible(ConcreteConvertFloatInt(0.0f, Overflow.Fail && Bits.Unsigned))
+    val actual = afailure.fallible(convertOps(fromIvOps.constant(0.0f), Overflow.Fail && BitSign.Unsigned))
+    val expected = cfailure.fallible(ConcreteConvertFloatInt(0.0f, Overflow.Fail && BitSign.Unsigned))
     assertResult(IsSound.Sound, s"$actual does not overapproximate $expected")(soundness.isSound(expected, actual))
   }
 
 
-class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTest[Double, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTest[Double, Long, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && BitSign](
   specials = specialFloatingIntegerNumbers[Double,Long](_.toDouble),
   makeConvert = withApronState(
     (
@@ -144,7 +144,7 @@ class RelationalConvertDoubleLongTest(using manager: Manager) extends ConvertTes
   )
 )
 
-class RelationalConvertDoubleIntTest(using manager: Manager) extends ConvertTest[Double, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && Bits](
+class RelationalConvertDoubleIntTest(using manager: Manager) extends ConvertTest[Double, Int, ApronExpr[VirtAddr,Type], ApronExpr[VirtAddr,Type], Overflow && BitSign](
   specials = specialFloatingIntegerNumbers[Double,Int](_.toDouble),
   makeConvert = withApronState(
     (
@@ -194,7 +194,7 @@ class RelationalConvertFloatDoubleTest(using manager: Manager) extends ConvertTe
 )
 
 
-class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[Int, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[Int, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], BitSign](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -210,13 +210,13 @@ class RelationalConvertIntFloatTest(using manager: Manager) extends ConvertTest[
     implicit val (fromIvOps, toIvOps, convertOps, soundness, afailure) = _makeConvert
     assertResult(IsSound.Sound)(
       soundness.isSound(
-        cfailure.fallible(ConcreteConvertIntFloat(16777217, Bits.Unsigned)),
-        afailure.fallible(convertOps(ApronExpr.lit(16777217, Type.IntType), Bits.Unsigned))
+        cfailure.fallible(ConcreteConvertIntFloat(16777217, BitSign.Unsigned)),
+        afailure.fallible(convertOps(ApronExpr.lit(16777217, Type.IntType), BitSign.Unsigned))
       )
     )
   }
 
-class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest[Int, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], BitSign](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -229,7 +229,7 @@ class RelationalConvertIntDoubleTest(using manager: Manager) extends ConvertTest
   )
 )
 
-class RelationalConvertLongFloatTest(using manager: Manager) extends ConvertTest[Long, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertLongFloatTest(using manager: Manager) extends ConvertTest[Long, Float, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], BitSign](
   specials = List(),
   makeConvert = withApronState(
     (
@@ -242,7 +242,7 @@ class RelationalConvertLongFloatTest(using manager: Manager) extends ConvertTest
   )
 )
 
-class RelationalConvertLongDoubleTest(using manager: Manager) extends ConvertTest[Long, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], Bits](
+class RelationalConvertLongDoubleTest(using manager: Manager) extends ConvertTest[Long, Double, ApronExpr[VirtAddr, Type], ApronExpr[VirtAddr, Type], BitSign](
   specials = List(),
   makeConvert = withApronState(
     (

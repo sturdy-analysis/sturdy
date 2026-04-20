@@ -70,13 +70,17 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
       WasmConfig(fix = FixpointConfig(stack = stackConfig, iter = iterConfig)))
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
 
     val res = Profiler.addTime("analysis") {
       interp.failure.fallible(
         interp.invokeExported(modInst, funcName, List.empty)
       )
     }
-    Profiler.printLastMeasured()
-    graphBuilder.get
+    
+    val newCfg = graphBuilder.get
+    val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".constant.dot")
+    Files.writeString(dotPath2, newCfg.toGraphViz)
 
+    Profiler.printLastMeasured()
+    newCfg

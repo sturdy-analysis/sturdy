@@ -9,18 +9,14 @@
    *reset*
 */
 
-#include <malloc.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "../../stdlib.h"
 
 typedef struct tn {
     struct tn*    left;
     struct tn*    right;
 } treeNode;
 
-
+__attribute__((noinline))
 treeNode* NewTreeNode(treeNode* left, treeNode* right)
 {
     treeNode*    new;
@@ -33,7 +29,7 @@ treeNode* NewTreeNode(treeNode* left, treeNode* right)
     return new;
 } /* NewTreeNode() */
 
-
+__attribute__((noinline))
 long ItemCheck(treeNode* tree)
 {
     if (tree->left == NULL)
@@ -42,7 +38,7 @@ long ItemCheck(treeNode* tree)
         return 1 + ItemCheck(tree->left) + ItemCheck(tree->right);
 } /* ItemCheck() */
 
-
+__attribute__((noinline))
 treeNode* BottomUpTree(unsigned depth)
 {
     if (depth > 0)
@@ -55,7 +51,7 @@ treeNode* BottomUpTree(unsigned depth)
         return NewTreeNode(NULL, NULL);
 } /* BottomUpTree() */
 
-
+__attribute__((noinline))
 void DeleteTree(treeNode* tree)
 {
     if (tree->left != NULL)
@@ -67,14 +63,13 @@ void DeleteTree(treeNode* tree)
     free(tree);
 } /* DeleteTree() */
 
-
-int main()
+__attribute__((noinline))
+int _start()
 {
     unsigned   N, depth, minDepth, maxDepth, stretchDepth;
     treeNode   *stretchTree, *longLivedTree, *tempTree;
 
-    //N = 15;
-    N = 6;
+    N = __VERIFIER_nondet_int();
 
     minDepth = 4;
 
@@ -86,12 +81,7 @@ int main()
     stretchDepth = maxDepth + 1;
 
     stretchTree = BottomUpTree(stretchDepth);
-    /*printf
-    (
-        "stretch tree of depth %u\t check: %li\n",
-        stretchDepth,
-        ItemCheck(stretchTree)
-    );*/
+    assert(ItemCheck(stretchTree) == ((long) pow(2,stretchDepth)));
 
     DeleteTree(stretchTree);
 
@@ -112,21 +102,11 @@ int main()
             DeleteTree(tempTree);
         } /* for(i = 1...) */
 
-        /*printf
-        (
-            "%li\t trees of depth %u\t check: %li\n",
-            iterations,
-            depth,
-            check
-        );*/
+
+        assert((long)pow(2,depth) * iterations == check);
     } /* for(depth = minDepth...) */
 
-    /*printf
-    (
-        "long lived tree of depth %u\t check: %li\n",
-        maxDepth,
-        ItemCheck(longLivedTree)
-    );*/
+    assert(ItemCheck(longLivedTree) == (long)pow(2,maxDepth));
 
     return 0;
 } /* main() */

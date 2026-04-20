@@ -7,10 +7,7 @@
 // and each oligonucleotide count output by this program.
 #define MAXIMUM_OUTPUT_LENGTH 4096
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "../../stdlib.h"
 
 #include "khash.h"
 
@@ -47,7 +44,7 @@ typedef struct {
 // Function to use when sorting elements with qsort() later. Elements with
 // larger values will come first and in cases of identical values then elements
 // with smaller keys will come first.
-static int element_Compare(const element * const left_Element
+int element_Compare(const element * const left_Element
   , const element * const right_Element){
 
 	// Sort based on element values.
@@ -62,7 +59,7 @@ static int element_Compare(const element * const left_Element
 
 // Generate frequencies for all oligonucleotides in polynucleotide that are of
 // desired_Length_For_Oligonucleotides and then save it to output.
-static void generate_Frequencies_For_Desired_Length_Oligonucleotides(
+void generate_Frequencies_For_Desired_Length_Oligonucleotides(
   const char * const polynucleotide, const intnative_t polynucleotide_Length
   , const intnative_t desired_Length_For_Oligonucleotides, char * const output){
 
@@ -133,7 +130,7 @@ static void generate_Frequencies_For_Desired_Length_Oligonucleotides(
 
 // Generate a count for the number of times oligonucleotide appears in
 // polynucleotide and then save it to output.
-static void generate_Count_For_Oligonucleotide(
+void generate_Count_For_Oligonucleotide(
   const char * const polynucleotide, const intnative_t polynucleotide_Length
   , const char * const oligonucleotide, char * const output){
 	const intnative_t oligonucleotide_Length=strlen(oligonucleotide);
@@ -180,7 +177,7 @@ static void generate_Count_For_Oligonucleotide(
 }
 
 
-int main(){
+int _start(){
 	char buffer[4096];
 
 	// Find the start of the third polynucleotide.

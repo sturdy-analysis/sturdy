@@ -14,18 +14,12 @@ trait ExceptionByTarget extends Interpreter:
 
   given JoinExceptionState(using lazyEffectStack: Lazy[EffectStack], joinValue: Join[Value]): Join[ExceptionState] =
     (state1, state2) =>
-      for {
-        operands <- Join(state1.operands, state2.operands)
-        effectState <- lazyEffectStack.value.joinIn(FixIn.Exception)(state1.effectState, state2.effectState)
-      } yield(ExceptionState(operands, effectState))
+      lazyEffectStack.value.joinIn[List[Value]](FixIn.Exception)((state1.operands, state1.effectState), (state2.operands, state2.effectState)).map(ExceptionState.apply)
 
   given WidenExceptionState(using lazyEffectStack: Lazy[EffectStack], widenValue: Widen[Value]): Widen[ExceptionState] =
     (state1, state2) =>
-      for {
-        operands <- Widen(state1.operands, state2.operands)
-        effectState <- lazyEffectStack.value.joinIn(FixIn.Exception)(state1.effectState, state2.effectState)
-      } yield(ExceptionState(operands, effectState))
-
+      lazyEffectStack.value.widenIn[List[Value]](FixIn.Exception)((state1.operands, state1.effectState), (state2.operands, state2.effectState)).map(ExceptionState.apply)
+      
   given Exceptional[WasmException[Value], ExcV, WithJoin] = ExceptionalByTarget[WasmException[Value], JumpTarget, ExceptionState](
     e => (e.target, ExceptionState(e.operands, e.state)),
     (target,state) => WasmException(target, state.operands, state.effectState)

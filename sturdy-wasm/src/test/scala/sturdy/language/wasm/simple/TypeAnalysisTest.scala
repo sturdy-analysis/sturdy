@@ -28,6 +28,7 @@ import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
+import java.net.URI
 import scala.reflect.ClassTag
 import scala.reflect.TypeTest
 
@@ -35,38 +36,38 @@ import scala.reflect.TypeTest
 class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm type analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
-  val simple = Paths.get(uriSimple)
-  val fact = Paths.get(uriFact)
+  val uriSimple: URI = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI
+  val uriFact: URI = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI
+  val simple: Path = Paths.get(uriSimple)
+  val fact: Path = Paths.get(uriFact)
 
-  val uriSimpleTest = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI;
-  val simpleTest = Paths.get(uriSimpleTest)
+  val uriSimpleTest: URI = this.getClass.getResource("/sturdy/language/wasm/simple_test.wast").toURI
+  val simpleTest: Path = Paths.get(uriSimpleTest)
 
-  testFunction(simple, "const", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "first", List(Value.Int32(topI32), Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "second", List(Value.Int32(topI32), Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-mem", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "nesting", List(Value.Float32(topF32), Value.Float32(topF32)), List(Value.Float32(topF32)))
-  testFunction(simple, "test-br3", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-br-and-return", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-br-and-return2", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-br-and-return3", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-br-and-return4", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-unreachable5", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-global", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
-  testFailingFunction(simple, "division", List(Value.Int32(topI32), Value.Int32(topI32)), IntegerDivisionByZero)
-  testFunction(simple, "effects", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
+  testFunction(simple, "const", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "first", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32)), Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "second", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32)), Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-mem", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "nesting", List(Value.Num(TypeAnalysis.NumValue.Float32(topF32)), Value.Num(TypeAnalysis.NumValue.Float32(topF32))), List(Value.Num(TypeAnalysis.NumValue.Float32(topF32))))
+  testFunction(simple, "test-br3", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-br-and-return", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-br-and-return2", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-br-and-return3", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-br-and-return4", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-unreachable5", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-global", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFunction(simple, "test-call-indirect-parametric", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
+  testFailingFunction(simple, "division", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32)), Value.Num(TypeAnalysis.NumValue.Int32(topI32))), IntegerDivisionByZero)
+  testFunction(simple, "effects", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
 
-  testFunction(fact, "fac-rec", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
-  testFunction(fact, "fac-iter", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
-  testFunction(fact, "fac-rec-named", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
-  testFunction(fact, "fac-iter-named", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
-  testFunction(fact, "fac-opt", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
-  testFunction(fact, "fib", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
+  testFunction(fact, "fac-rec", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
+  testFunction(fact, "fac-iter", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
+  testFunction(fact, "fac-rec-named", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
+  testFunction(fact, "fac-iter-named", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
+  testFunction(fact, "fac-opt", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
+  testFunction(fact, "fib", List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))), List(Value.Num(TypeAnalysis.NumValue.Int64(topI64))))
 
-  testFunction(simpleTest, "main", List(Value.Int32(topI32)), List(Value.Int32(topI32)))
+  testFunction(simpleTest, "main", List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))), List(Value.Num(TypeAnalysis.NumValue.Int32(topI32))))
 
 
   def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
@@ -96,7 +97,7 @@ def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[L
   val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
 
-  val modInst = interp.initializeModule(module)
+  val modInst = interp.instantiateModule(module)
   val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

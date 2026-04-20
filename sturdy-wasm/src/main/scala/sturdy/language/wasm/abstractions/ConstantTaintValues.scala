@@ -7,74 +7,80 @@ import sturdy.effect.operandstack.OperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.values.Finite
-import sturdy.values.Topped
+import sturdy.values.{Finite, Powerset, Structural, Topped, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.booleans.given
 import sturdy.values.floating.given
 import sturdy.values.integer.given
-import sturdy.values.given
 import sturdy.fix
 import sturdy.fix.Logger
-import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
-import sturdy.values.Powerset
+import sturdy.language.wasm.generic.{FixIn, FixOut, FunctionInstance, InstLoc}
+import sturdy.values.references.ReferenceOps
 import swam.syntax.Inst
 import swam.{OpCode, syntax}
 
 import scala.collection.MapView
 import java.security.KeyStore.TrustedCertificateEntry
 
+
 trait ConstantTaintValues extends Interpreter:
   final type I32 = TaintProduct[Topped[Int]]
   final type I64 = TaintProduct[Topped[Long]]
   final type F32 = TaintProduct[Topped[Float]]
   final type F64 = TaintProduct[Topped[Double]]
+  final type V128 = TaintProduct[Topped[Array[Byte]]]
   final type Bool = TaintProduct[Topped[Boolean]]
+  final type Reference = TaintProduct[Powerset[FunctionInstance | ExternReference]]
+  final type RefV = Reference
+  final type FunV = Powerset[FunctionInstance]
 
   final def topI32: I32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topI64: I64 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF32: F32 = TaintProduct(Taint.TopTaint, Topped.Top)
   final def topF64: F64 = TaintProduct(Taint.TopTaint, Topped.Top)
+  final def topV128: V128 = TaintProduct(Taint.TopTaint, Topped.Top)
 
   def getTaint(v: Value): Taint = v match
     case Value.TopValue => Taint.TopTaint
-    case Value.Int32(tp) => tp.taint
-    case Value.Int64(tp) => tp.taint
-    case Value.Float32(tp) => tp.taint
-    case Value.Float64(tp) => tp.taint
+    case Value.Num(NumValue.Int32(tp)) => tp.taint
+    case Value.Num(NumValue.Int64(tp)) => tp.taint
+    case Value.Num(NumValue.Float32(tp)) => tp.taint
+    case Value.Num(NumValue.Float64(tp)) => tp.taint
+    case Value.Ref(tp) => tp.taint
+    case Value.Vec(tp) => tp.taint
 
   final def asBoolean(v: Value)(using Failure): Bool = v.asInt32.map {
     case Topped.Top => Topped.Top
     case Topped.Actual(i) => Topped.Actual(i != 0)
   }
-  final def boolean(b: Bool): Value = Value.Int32(b.map {
+  final def booleanToVal(b: Bool): Value = Value.Num(NumValue.Int32(b.map {
     case Topped.Top => Topped.Top
     case Topped.Actual(true) => Topped.Actual(1)
     case Topped.Actual(false) => Topped.Actual(0)
-  })
+  }))
 
   def liftConcreteValue(cv: ConcreteInterpreter.Value, taint: Taint = Taint.Untainted): Value =
     cv match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(injectTaint(taint, Topped.Actual(i)))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(injectTaint(taint, Topped.Actual(l)))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(injectTaint(taint, Topped.Actual(f)))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(injectTaint(taint, Topped.Actual(d)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint, Topped.Actual(i))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint, Topped.Actual(l))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint, Topped.Actual(f))))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint, Topped.Actual(d))))
 
   def liftConstantValue(cv: ConstantAnalysis.Value, taint: Taint = Taint.Untainted): Value =
     cv match
       case ConstantAnalysis.Value.TopValue => Value.TopValue
-      case ConstantAnalysis.Value.Int32(i) => Value.Int32(injectTaint(taint,i))
-      case ConstantAnalysis.Value.Int64(l) => Value.Int64(injectTaint(taint,l))
-      case ConstantAnalysis.Value.Float32(f) => Value.Float32(injectTaint(taint,f))
-      case ConstantAnalysis.Value.Float64(d) => Value.Float64(injectTaint(taint,d))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(i)) => Value.Num(NumValue.Int32(injectTaint(taint,i)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(l)) => Value.Num(NumValue.Int64(injectTaint(taint,l)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(f)) => Value.Num(NumValue.Float32(injectTaint(taint,f)))
+      case ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(d)) => Value.Num(NumValue.Float64(injectTaint(taint,d)))
 
   def untaint(v: Value): ConstantAnalysis.Value = v match
     case Value.TopValue => ConstantAnalysis.Value.TopValue
-    case Value.Int32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int32(v1)
-    case Value.Int64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int64(v1)
-    case Value.Float32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float32(v1)
-    case Value.Float64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float64(v1)
+    case Value.Num(NumValue.Int32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(v1))
+    case Value.Num(NumValue.Int64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int64(v1))
+    case Value.Num(NumValue.Float32(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float32(v1))
+    case Value.Num(NumValue.Float64(TaintProduct(_, v1))) => ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Float64(v1))
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
     val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
@@ -82,16 +88,17 @@ trait ConstantTaintValues extends Interpreter:
     constants
 
   class ConstantInstructionsLogger(stack: OperandStack[Value, NoJoin])(using Failure) extends InstructionResultLogger[Value, Value](stack):
-    override def boolValue(v: Value): Value = boolean(asBoolean(v))
-    override def dummyValue: Value = Value.Int32(TaintProduct(Taint.Untainted, Topped.Actual(0)))
+    override def boolValue(v: Value): Value = booleanToVal(asBoolean(v))
     override def getInfo(v: Value): Value = v
 
     def get: Map[InstLoc, List[Value]] = instructionInfo.filter(_._2.forall {
       case Value.TopValue => false
-      case Value.Int32(TaintProduct(_, Topped.Top)) => false
-      case Value.Int64(TaintProduct(_, Topped.Top)) => false
-      case Value.Float32(TaintProduct(_, Topped.Top)) => false
-      case Value.Float64(TaintProduct(_, Topped.Top)) => false
+      case Value.Num(NumValue.Int32(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Int64(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Float32(TaintProduct(_, v))) => v.isActual
+      case Value.Num(NumValue.Float64(TaintProduct(_, v))) => v.isActual
+      case Value.Ref(TaintProduct(_, v)) => v.size == 1
+      case Value.Vec(TaintProduct(_, v)) => v.isActual
       case _ => true
     })
 
@@ -112,7 +119,7 @@ trait ConstantTaintValues extends Interpreter:
     def memoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo
     def taintedMemoryInstructions: Map[InstLoc, Powerset[Value]] = instructionInfo.filter(_._2.set.nonEmpty)
     
-    override def enterInfo(inst: Inst): Option[Powerset[Value]] =
+    override def enterInfo(inst: Inst, loc: InstLoc): Option[Powerset[Value]] =
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =
           if (addressOnTopOfStack(inst))
@@ -127,7 +134,7 @@ trait ConstantTaintValues extends Interpreter:
       } else
         None
 
-    override def exitInfo(inst: Inst, success: Boolean): Option[Powerset[Value]] = None
+    override def exitInfo(inst: Inst, loc: InstLoc, success: Boolean): Option[Powerset[Value]] = None
 
     def addressOnTopOfStack(inst: syntax.Inst): Boolean = inst match
       case _: syntax.LoadInst => true
@@ -139,3 +146,10 @@ trait ConstantTaintValues extends Interpreter:
 
     def maybeTainted(v: Value): Boolean =
       Taint.Tainted <= getTaint(v)
+
+  given TaintReference: ReferenceOps[FunV, RefV] with {
+    override def mkNullRef: RefV = ???
+    override def mkExternNullRef: RefV = ???
+    override def mkRef(trg: FunV): RefV = ???
+    override def deref(v: RefV): FunV = ???
+  }

@@ -1,17 +1,13 @@
 package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
+import sturdy.IsSound.{NotSound, Sound}
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.{Soundness, AbstractlySound, seqIsSound, IsSound}
+import sturdy.{AbstractlySound, IsSound, Soundness, seqIsSound}
 import swam.*
 import swam.syntax.*
-import sturdy.values.Finite
-import sturdy.values.Join
-import sturdy.values.MaybeChanged
-import sturdy.values.Structural
-import sturdy.values.concretePO
-import sturdy.values.concreteAbstractly
+import sturdy.values.{Finite, Join, MaybeChanged, PartialOrder, Structural, concreteAbstractly, concretePO}
 
 case class TableAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
@@ -19,14 +15,18 @@ case class MemoryAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
 case class GlobalAddr(addr: Int) extends AnyVal:
   override def toString: String = addr.toString
+case class ElemAddr(addr: Int) extends AnyVal:
+  override def toString: String = addr.toString
 
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}
 given Finite[GlobalAddr] with {}
+given Finite[ElemAddr] with {}
 given Finite[FunctionInstance] with {}
 given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
+given Structural[ElemAddr] with {}
 given Structural[FunctionInstance] with {}
 given Ordering[MemoryAddr] = Ordering.by[MemoryAddr,Int](_.addr)
 
@@ -64,12 +64,20 @@ class ModuleInstance(val id: Option[Any] = None):
         registerBlockSizes(BlockId(funcId), loc, func.body)
       case _: FunctionInstance.Host => // nothing
 
+  var globalTypes: Vector[GlobalType] = Vector.empty
+  var globalAddrs: Vector[GlobalAddr] = Vector.empty
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
-  var globalAddrs: Vector[GlobalAddr] = Vector.empty
-  var elems: Vector[ElemInstance] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
+
+  def exportedName(searched: ExternalValue): Option[String] =
+    exports.find ((name, externalVal) =>
+        searched == externalVal
+    ).map(_._1)
+    
+  def findExport(searched: String): Option[ExternalValue] =
+    exports.find((name, _) => name == searched).map(_._2)
 
   def exportedFunctions: Map[String, ExternalValue.Function] =
     exports.collect {
@@ -115,6 +123,7 @@ given Structural[DataInstance] with {}
 enum FunctionInstance:
   case Wasm(mod: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(mod: ModuleInstance, funcIx: Int, hf: HostFunction)
+  case Null
 
   def funcIdx: FuncIdx = this match
     case Wasm(_, funcIx, _, _) => funcIx
@@ -123,15 +132,22 @@ enum FunctionInstance:
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
     case Host(_, _, hf) => hf.funcType
+    case Null => FuncType(Vector.empty, Vector.empty)
 
   def module: ModuleInstance = this match
     case Wasm(mod, _, _, _) => mod
     case Host(mod, _, _) => mod
+    case Null => ModuleInstance()
+
+  def funcName: Option[String] =
+    this match
+      case Wasm(mod, funcIx,_, tpe) =>
+        mod.exportedName(ExternalValue.Function(funcIdx))
+      case Host(_, _, hostFun) => Some(s"${hostFun.name}: ${toString(hostFun.funcType)}")
+      case Null => Some("Null")
 
   override def toString: String =
-    this match
-      case Wasm(_, funcIx,_, tpe) => s"f$funcIx: ${toString(tpe)}"
-      case Host(_, _, hostFun) => s"${hostFun.name}: ${toString(hostFun.funcType)}"
+    funcName.getOrElse(s"f${this.asInstanceOf[Wasm].funcIx.toString}: ${toString(this.asInstanceOf[Wasm].funcType)}")
 
   private def toString(tpe: FuncType): String =
     s"${tpe.params.mkString("×")} -> ${tpe.t.mkString("×")}"
@@ -141,8 +157,6 @@ enum ExternalValue:
   case Table(addr: Int)
   case Memory(addr: Int)
   case Global(addr: Int)
-
-
 
 
 
@@ -156,11 +170,11 @@ given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
     val tabSound = summon[Soundness[Vector[TableAddr], Vector[TableAddr]]].isSound(c.tableAddrs, a.tableAddrs)
     val memSound = summon[Soundness[Vector[MemoryAddr], Vector[MemoryAddr]]].isSound(c.memoryAddrs, a.memoryAddrs)
     val globSound = summon[Soundness[Vector[GlobalAddr], Vector[GlobalAddr]]].isSound(c.globalAddrs, a.globalAddrs)
-    val elemSound = seqIsSound(using elemInstanceIsSound(using functionInstanceIsSoundFlat)).isSound(c.elems, a.elems)
-    val datSound = summon[Soundness[Vector[DataInstance], Vector[DataInstance]]].isSound(c.data, a.data)
+    val dataSound = summon[Soundness[Vector[DataInstance], Vector[DataInstance]]].isSound(c.data, a.data)
     val expSound = summon[Soundness[Vector[(String,ExternalValue)], Vector[(String,ExternalValue)]]].isSound(c.exports, a.exports)
 
-    ftSound && fSound && tabSound && memSound && globSound && elemSound && datSound && expSound
+    ftSound && fSound && tabSound && memSound && globSound && dataSound && expSound
+    //ftSound && fSound && tabSound && memSound && globSound && datSound && expSound
 
 given functionInstanceIsSound: Soundness[FunctionInstance, FunctionInstance] with
   override def isSound(c: FunctionInstance, a: FunctionInstance): IsSound = (c,a) match
@@ -179,14 +193,31 @@ def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] =
     case _ => IsSound.NotSound(s"Concrete function instance $c not approximated by $a.")
 }
 
+given functionInstancePO: PartialOrder[FunctionInstance] with
+  override def lteq(c: FunctionInstance, a: FunctionInstance): Boolean = (c, a) match
+    case (FunctionInstance.Wasm(_, _, cFunc, cFt), FunctionInstance.Wasm(_, _, aFunc, aFt)) =>
+      cFunc == aFunc && cFt == aFt
+    case (FunctionInstance.Host(_, _, chf), FunctionInstance.Host(_, _, ahf)) =>
+      chf == ahf
+    case (FunctionInstance.Null, FunctionInstance.Null) =>
+      true
+    case _ =>
+      false
+
 //case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 //case class GlobalInstance[V](tpe: ValType, val value: V)
 case class DataInstance(data: ByteVector)
-case class ElemInstance(functions: Vector[FunctionInstance])
+case class ElemInstance(functions: Seq[FunctionInstance], referenceType: ReferenceType, elemMode: ElemMode)
+
+given elemModeIsSound: Soundness[ElemMode, ElemMode] with
+  override def isSound(c: ElemMode, a: ElemMode): IsSound = if (c.equals(a)) Sound else NotSound("ElemMode mismatch")
+
+given elemRefTypeIsSound: Soundness[ReferenceType, ReferenceType] with
+  override def isSound(c: ReferenceType, a: ReferenceType): IsSound = if (c.equals(a)) Sound else NotSound(s"ElemInstance reference type mismatch: $c != $a")
 
 given elemInstanceIsSound(using fSoundness: Soundness[FunctionInstance, FunctionInstance]): Soundness[ElemInstance, ElemInstance] with
   override def isSound(c: ElemInstance, a: ElemInstance): IsSound =
-    seqIsSound.isSound(c.functions, a.functions)
+    seqIsSound.isSound(c.functions, a.functions) && summon[Soundness[ElemMode, ElemMode]].isSound(c.elemMode, a.elemMode) && summon[Soundness[ReferenceType, ReferenceType]].isSound(c.referenceType, a.referenceType)
 
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)

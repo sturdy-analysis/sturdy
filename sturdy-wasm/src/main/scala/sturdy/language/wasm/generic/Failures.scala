@@ -11,7 +11,9 @@ enum WasmFailure extends FailureKind:
   case UnboundFunctionIndex
   case IndirectCallTypeMismatch
   case MemoryAccessOutOfBounds
+  case DataSegmentOutOfBounds
   case TableAccessOutOfBounds
+  case ElementSegmentOutOfBounds
   case InvocationError
   case InvalidModule
   case TypeError

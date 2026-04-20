@@ -91,6 +91,7 @@ final class WithNearestRoundingModeFloatingOps[B,V](floatOps: FloatOps[B,V]) ext
   override def absolute(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.absolute(v) }
   override def negated(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.negated(v) }
   override def sqrt(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.sqrt(v) }
+  override def pow(base: V, exponent: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.pow(base, exponent) }
   override def ceil(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.ceil(v) }
   override def floor(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.floor(v) }
   override def truncate(v: V): V = RoundingMode.withRoundingMode(RoundingDir.Nearest) { floatOps.truncate(v) }

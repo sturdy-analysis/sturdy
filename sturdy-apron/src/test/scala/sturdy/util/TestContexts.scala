@@ -3,8 +3,10 @@ package sturdy.util
 import scala.math.Ordered.orderingToOrdered
 import sturdy.values.Finite
 import TestTypes.*
+import sturdy.apron.ApronExpr
 import sturdy.effect.Stateless
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
+import sturdy.values.references.VirtualAddress
 
 
 object TestContexts:
@@ -24,8 +26,8 @@ object TestContexts:
     case _ => -1
   }
 
-  given variableAllocator: Allocator[Ctx, (String, Any, Option[Any])] =
-    AAllocatorFromContext((v,_,_) => Ctx.Var(v))
+  given variableAllocator: Allocator[Ctx, (String, Any)] =
+    AAllocatorFromContext((v,_) => Ctx.Var(v))
 
   given tempVariableAllocator: Allocator[Ctx, Type] = new Allocator[Ctx, Type] with Stateless:
     var n = 0
@@ -33,3 +35,10 @@ object TestContexts:
     override def alloc(ctx: Type): Ctx =
       n += 1
       Ctx.TempVar(ctx, n)
+      
+  given combineExprAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type],ApronExpr[VirtualAddress[Ctx], Type])] = new Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type],ApronExpr[VirtualAddress[Ctx], Type])] with Stateless:
+    var n = 0
+    override def alloc(exprs: (ApronExpr[VirtualAddress[Ctx], Type],ApronExpr[VirtualAddress[Ctx], Type])): Ctx =
+      val tpe = exprs._1._type
+      n += 1
+      Ctx.TempVar(tpe, n)

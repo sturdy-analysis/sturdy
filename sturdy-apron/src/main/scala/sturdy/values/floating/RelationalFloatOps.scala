@@ -42,6 +42,7 @@ given RelationalFloatOps
   ): FloatOps[L, ApronExpr[Addr,Type]] with
 
   given Lazy[ApronState[Addr,Type]] = Lazy(apronState)
+  given defaultResolveState: ResolveState = ResolveState.Internal
 
   override def floatingLit(f: L): ApronExpr[Addr, Type] =
     FloatingLit(f, typeFloatOps.floatingLit(f))
@@ -227,7 +228,7 @@ given RelationalFloatOps
     } else if (iv2.isBottom || iv2.sup().cmp(iv1.inf()) <= 0) {
       v1.setFloatSpecials(resultSpecials)
     } else {
-      apronState.ifThenElse(lt(v1,v2)) {
+      apronState.ifThenElse(le(v1,v2)) {
         v2
       } {
         v1
@@ -256,7 +257,7 @@ given RelationalFloatOps
     else if (iv2.sup().cmp(iv1.inf()) <= 0)
       v2.setFloatSpecials(resultSpecials)
     else
-      apronState.ifThenElse(lt(v1, v2)) {
+      apronState.ifThenElse(le(v1, v2)) {
         v1
       } {
         v2
@@ -324,6 +325,21 @@ given RelationalFloatOps
         nan = specials.nan || iv.inf().sgn() < 0
       )
     )
+
+  override def pow(base: ApronExpr[Addr, Type], exponent: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = {
+    val baseSpecials = base.floatSpecials
+    val exponentSpecials = exponent.floatSpecials
+    checkForNewFloatSpecials(
+      floatPow(base, exponent,
+        FloatSpecials(
+          negInfinity = baseSpecials.posInfinity || baseSpecials.negInfinity || exponentSpecials.posInfinity || exponentSpecials.negInfinity,
+          posInfinity = baseSpecials.posInfinity || baseSpecials.negInfinity || exponentSpecials.posInfinity || exponentSpecials.negInfinity,
+          negZero = true,
+          nan = baseSpecials.nan || exponentSpecials.nan
+        )
+      )
+    )
+  }
 
   override def ceil(v: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] =
     // ceil(-∞  ) = -∞
@@ -445,7 +461,7 @@ given RelationalFloatOps
 
 given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Float, ApronExpr[Addr, Type]] with
   override def isSound(c: Float, expr: ApronExpr[Addr, Type]): IsSound =
-    val iv = this.apronState.getFloatInterval(expr)
+    val iv = this.apronState.getFloatInterval(expr)(using ResolveState.Internal)
     if (sturdy.apron.FloatInterval(c.toDouble).isLeq(iv))
       IsSound.Sound
     else
@@ -453,7 +469,7 @@ given SoundnessFloatApronExpr[Addr, Type](using apronState: ApronState[Addr, Typ
 
 given SoundnessDoubleApronExpr[Addr, Type](using apronState: ApronState[Addr, Type]): Soundness[Double, ApronExpr[Addr, Type]] with
   override def isSound(c: Double, expr: ApronExpr[Addr, Type]): IsSound =
-    val iv = this.apronState.getFloatInterval(expr)
+    val iv = this.apronState.getFloatInterval(expr)(using ResolveState.Internal)
     if(sturdy.apron.FloatInterval(c).isLeq(iv))
       IsSound.Sound
     else

@@ -51,7 +51,36 @@ trait IntegerOps[B, V]:
   def countTrailingZeros(v: V): V
   def nonzeroBitCount(v: V): V
   def invertBits(v: V): V
-  
+
+trait IntegerOpsWithSignInterpretation[B,V] extends IntegerOps[B, V]:
+
+  inline def signedMinValue(numBytes: Int): BigInt =
+    -BigInt(2).pow(numBytes * 8 - 1)
+
+  inline def signedMaxValue(numBytes: Int): BigInt =
+    BigInt(2).pow(numBytes * 8 - 1) - 1
+
+  inline def unsignedMinValue(numBytes: Int): BigInt =
+    0
+
+  inline def unsignedMaxValue(numBytes: Int): BigInt =
+    BigInt(2).pow(numBytes * 8)
+
+  def interpretSignedAsUnsigned(v: V): V
+  def interpretSignedAsUnsigned(v: V, fromNumBytes: Int): V
+
+  def interpretUnsignedAsSigned(v: V): V
+  def interpretUnsignedAsSigned(v: V, fromNumBytes: Int): V
+
+  override inline def divUnsigned(v1: V, v2: V): V =
+    interpretUnsignedAsSigned(div(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
+
+  override inline def remainderUnsigned(v1: V, v2: V): V =
+    interpretUnsignedAsSigned(remainder(interpretSignedAsUnsigned(v1), interpretSignedAsUnsigned(v2)))
+
+  override inline def shiftRightUnsigned(v: V, shift: V): V =
+    interpretUnsignedAsSigned(shiftRight(interpretSignedAsUnsigned(v), shift))
+
 
 trait OverflowIntegers[V]:
   def wasOverflown(v: V): Topped[Boolean]
@@ -62,14 +91,14 @@ trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:
   def subStrict(v1: V, v2: V): JOption[J, V]
   def mulStrict(v1: V, v2: V): JOption[J, V]
 
-type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.Bits]
-type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.Bits]
-type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.Bits]
+type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.BitSign]
+type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.BitSign]
+type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.BitSign]
 type ConvertIntBytes[VFrom, VTo] = Convert[Int, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
-type ConvertBytesInt[VFrom, VTo] = Convert[Seq[Byte], Int, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.Bits]
+type ConvertBytesInt[VFrom, VTo] = Convert[Seq[Byte], Int, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.BitSign]
 
 type ConvertLongInt[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, NilCC.type]
-type ConvertLongFloat[VFrom, VTo] = Convert[Long, Float, VFrom, VTo, config.Bits]
-type ConvertLongDouble[VFrom, VTo] = Convert[Long, Double, VFrom, VTo, config.Bits]
+type ConvertLongFloat[VFrom, VTo] = Convert[Long, Float, VFrom, VTo, config.BitSign]
+type ConvertLongDouble[VFrom, VTo] = Convert[Long, Double, VFrom, VTo, config.BitSign]
 type ConvertLongBytes[VFrom, VTo] = Convert[Long, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
-type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.Bits]
+type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.BitSign]

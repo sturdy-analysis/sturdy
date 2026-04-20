@@ -9,8 +9,8 @@ import scala.annotation.tailrec
 
 @State(Scope.Benchmark)
 @BenchmarkMode(Array(Mode.SampleTime))
-@Warmup(iterations=1, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations=3, time = 10, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations=1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations=3, time = 1, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(value = TimeUnit.MILLISECONDS)
 class ApronBench {
 
@@ -94,7 +94,7 @@ class ApronBench {
 
   @Benchmark
   def apronJoinsCombineAbstract1: Abstract1 =
-    ApronJoins.combineAbstract1(abs1, abs2, widen=false).get
+    ApronJoins.combineAbstract1(manager, abs1, abs2, Set(), widen=false).get
 }
 
 object ApronBench:

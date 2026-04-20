@@ -25,5 +25,7 @@ final class DomLogger[Dom] extends Logger[Dom, Any]:
   override def exit(dom: Dom, codom: TrySturdy[Any]): Unit =
     doms = doms.drop(1)
 
+  def getDoms: List[Dom] = doms
+
   def currentDom: Option[Dom] =
     doms.headOption

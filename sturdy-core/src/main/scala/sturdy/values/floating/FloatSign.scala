@@ -135,6 +135,7 @@ given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
   def absolute(v: FloatSign): FloatSign = ???
   def negated(v: FloatSign): FloatSign = ???
   def sqrt(v: FloatSign): FloatSign = ???
+  def pow(base: FloatSign, exponent: FloatSign): FloatSign = ???
   def ceil(v: FloatSign): FloatSign = ???
   def floor(v: FloatSign): FloatSign = ???
   def truncate(v: FloatSign): FloatSign = ???

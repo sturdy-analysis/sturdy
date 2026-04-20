@@ -1,4 +1,4 @@
-{ lib, stdenv, binutils, fetchFromGitHub, gmp, mpfr, ppl, jdk21_headless }:
+{ lib, keepBuildTree, stdenv, binutils, fetchFromGitHub, clang, gmp, mpfr, ppl, jdk21_headless, zip }:
 
 stdenv.mkDerivation rec {
   name = "apron";
@@ -13,11 +13,12 @@ stdenv.mkDerivation rec {
 
   patchPhase = ''
     substituteInPlace configure \
-      --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\""
+      --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\"" \
+      --replace 'acc=""' 'acc="-Wl,-plugin-opt=save-temps"'
   '';
 
   configurePhase = ''
-    ./configure -prefix $out
+    CC=${clang}/bin/clang CFLAGS=-flto LDFLAGS="-flto -fuse-ld=gold -Wl,-plugin-opt=save-temps" ./configure -prefix $out -no-cxx -ppl-prefix ${ppl}/lib/
   '';
 
   buildInputs = [ gmp mpfr ppl jdk21_headless ];

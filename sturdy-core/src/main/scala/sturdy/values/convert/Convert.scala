@@ -37,3 +37,6 @@ inline def safeConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(u
   else
     res
 
+trait GaloisConnection[A, B]:
+  def asAbstract(a: A): B
+  def concretize(b: B)(using Failure): A
