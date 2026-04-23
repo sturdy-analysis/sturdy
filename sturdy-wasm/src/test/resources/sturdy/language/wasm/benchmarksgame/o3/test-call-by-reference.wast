@@ -1,0 +1,15 @@
+(module $test-call-by-reference.wasm
+  (type $t0 (func (param i32)))
+  (type $t1 (func (result i32)))
+  (import "env" "assert" (func $assert (type $t0)))
+  (func $_start (type $t1) (result i32)
+    i32.const 1
+    call $assert
+    i32.const 0)
+  (memory $memory 2)
+  (global $__stack_pointer (mut i32) (i32.const 66560))
+  (export "memory" (memory $memory))
+  (export "_start" (func $_start))
+  (@custom "name" "\00\1c\1btest-call-by-reference.wasm\01\11\02\00\06assert\01\06_start\07\12\01\00\0f__stack_pointer")
+  (@custom "producers" "\01\0cprocessed-by\01\05clang\0621.1.7")
+  (@custom "target_features" "\08+\0bbulk-memory+\0fbulk-memory-opt+\16call-indirect-overlong+\0amultivalue+\0fmutable-globals+\13nontrapping-fptoint+\0freference-types+\08sign-ext"))
