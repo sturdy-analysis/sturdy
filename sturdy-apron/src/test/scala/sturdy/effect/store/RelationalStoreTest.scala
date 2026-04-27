@@ -31,6 +31,7 @@ class RelationalStoreTest extends AnyFunSuite:
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
+  given WithWideningThresholds = WithWideningThresholds.No  
 
   given Allocator[Context, Type] with Stateless with
     override def alloc(tpe: Type): Context =

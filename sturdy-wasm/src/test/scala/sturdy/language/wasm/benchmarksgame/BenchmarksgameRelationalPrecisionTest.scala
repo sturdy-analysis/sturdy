@@ -26,7 +26,7 @@ import scala.jdk.StreamConverters.*
 
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
-class BenchmarksgameRelationalPrecisionTests extends Suites(
+class BenchmarksgamelationalPrecisionTests extends Suites(
 //  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
 //  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false),
@@ -61,7 +61,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fasta.wasm") && !excluded.contains(p)).sorted.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fankuchredux.wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
         val module = Parsing.fromBinary(p)
 

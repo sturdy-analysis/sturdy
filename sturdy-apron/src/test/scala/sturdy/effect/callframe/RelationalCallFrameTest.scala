@@ -10,7 +10,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
-import sturdy.effect.store.RecencyClosure
+import sturdy.effect.store.{RecencyClosure, WithWideningThresholds}
 import sturdy.values.Finite
 import sturdy.values.references.{AddressTranslation, PhysicalAddress, VirtualAddress}
 import sturdy.values.integer.BaseTypeIntegerOps
@@ -34,6 +34,8 @@ class RelationalCallFrameTest extends AnyFunSuite:
   given defaultResolveState: ResolveState = ResolveState.Internal
 
   given Manager = new apron.Polka(true)
+
+  given WithWideningThresholds = WithWideningThresholds.No
 
   test("getLocal") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](

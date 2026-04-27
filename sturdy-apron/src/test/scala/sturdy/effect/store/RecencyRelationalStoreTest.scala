@@ -33,6 +33,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
 
   var exprConverter: ApronExprConverter[Ctx, Type, Value] = null
   given lazyExprConverter: Lazy[ApronExprConverter[Ctx, Type, Value]] = lazily(exprConverter)
+  given WithWideningThresholds = WithWideningThresholds.No
 
   given StatelessRelationalExpr[Value, VAddr, Type] with
     override def getRelationalExpr(v: Value): Option[ApronExpr[VAddr, Type]] =

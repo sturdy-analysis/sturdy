@@ -78,16 +78,15 @@ given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
   def invertBits(v: Int): Int = ~v
 
-given ConcreteStrictIntegerOps: StrictIntegerOps[Int, Int, NoJoin] with
-  override def addStrict(v1: Int, v2: Int): JOptionC[Int] =
-    try JOptionC.Some(StrictMath.addExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
-  def subStrict(v1: Int, v2: Int): JOptionC[Int] =
-    try JOptionC.Some(StrictMath.subtractExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
-  def mulStrict(v1: Int, v2: Int): JOptionC[Int] =
-    try JOptionC.Some(StrictMath.multiplyExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
+given ConcreteStrictIntegerOps: StrictIntegerOps[Int] with
+  override def add(v1: Int, v2: Int): Int =
+    StrictMath.addExact(v1, v2)
+  override def sub(v1: Int, v2: Int): Int =
+    StrictMath.subtractExact(v1, v2)
+  override def mul(v1: Int, v2: Int): Int =
+    StrictMath.multiplyExact(v1, v2)
+  override def neg(x: Int): Int =
+    StrictMath.negateExact(x)
 
 given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2

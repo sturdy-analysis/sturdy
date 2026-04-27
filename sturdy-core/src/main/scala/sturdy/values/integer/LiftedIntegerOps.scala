@@ -43,7 +43,7 @@ class LiftedIntegerOpsWithSignInterpretation[B, V, I](extract: V => I, inject: I
   override def interpretUnsignedAsSigned(v: V, fromNumBytes: Int): V = inject(ops.interpretUnsignedAsSigned(extract(v), fromNumBytes))
 
 
-final class LiftedStrictIntegerOps[B, V, I, J[_] <: MayJoin[_]](extract: V => I, inject: I => V)(using ops: StrictIntegerOps[B, I, J]) extends StrictIntegerOps[B, V, J]:
-  inline def addStrict(v1: V, v2: V): JOption[J, V] = ops.addStrict(extract(v1), extract(v2)).map(inject)
-  inline def subStrict(v1: V, v2: V): JOption[J, V] = ops.subStrict(extract(v1), extract(v2)).map(inject)
-  inline def mulStrict(v1: V, v2: V): JOption[J, V] = ops.mulStrict(extract(v1), extract(v2)).map(inject)
+//final class LiftedStrictIntegerOps[B, V, I, J[_] <: MayJoin[_]](extract: V => I, inject: I => V)(using ops: StrictIntegerOps[B]) extends StrictIntegerOps[B]:
+//  inline def addStrict(v1: V, v2: V): JOption[J, V] = ops.addStrict(extract(v1), extract(v2)).map(inject)
+//  inline def subStrict(v1: V, v2: V): JOption[J, V] = ops.subStrict(extract(v1), extract(v2)).map(inject)
+//  inline def mulStrict(v1: V, v2: V): JOption[J, V] = ops.mulStrict(extract(v1), extract(v2)).map(inject)

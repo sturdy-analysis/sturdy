@@ -4,6 +4,7 @@ import sturdy.{IsSound, Soundness}
 import sturdy.data.{JOptionA, JOptionC, JOptionPowerset, NoJoin, SomeJOption, joinComputations, joinWithFailure, noJoin, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
+import sturdy.util.{Bounded, given}
 import sturdy.values.*
 import sturdy.values.config.BitSign
 import sturdy.values.config.UnsupportedConfiguration
@@ -98,7 +99,137 @@ case class Decomposition[I](lessZero: Option[NumericInterval[I]], leqZero: Optio
                             hasZero: Boolean,
                             geqZero: Option[NumericInterval[I]], greaterZero: Option[NumericInterval[I]])
 
+given NumericIntervalIntOps(using failure: Failure): NumericIntervalIntegerOps[Int] with {}
+given LongNumericIntervalLongOps(using failure: Failure): NumericIntervalIntegerOps[Long] with {}
 
+class NumericIntervalIntegerOps[I]
+    (using
+      ord: Ordering[I],
+      bounds: Bounded[I],
+      numeric: Numeric[I],
+      integerOps: IntegerOps[I,I],
+      strictIntegerOps: StrictIntegerOps[I]
+    )(using f: Failure, j: EffectStack)
+    extends IntegerOps[I, NumericInterval[I]] {
+
+  val top: NumericInterval[I] = NumericInterval.safe(bounds.minValue, bounds.maxValue)
+
+  override def integerLit(i: I): NumericInterval[I] = NumericInterval.safe(i, i)
+
+  override def randomInteger(): NumericInterval[I] = top
+
+  override def add(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    try {
+      NumericInterval(strictIntegerOps.add(v1.low, v2.low), strictIntegerOps.add(v1.high, v2.high))
+    } catch {
+      case _: ArithmeticException => top
+    }
+
+  override def sub(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    try {
+      NumericInterval(strictIntegerOps.sub(v1.low, v2.low), strictIntegerOps.sub(v1.high, v2.high))
+    } catch {
+      case _: ArithmeticException => top
+    }
+
+  override def mul(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    try {
+      val a = strictIntegerOps.mul(v1.low, v2.low)
+      val b = strictIntegerOps.mul(v1.low, v2.high)
+      val c = strictIntegerOps.mul(v1.high, v2.low)
+      val d = strictIntegerOps.mul(v1.high, v2.high)
+      NumericInterval(List(a,b,c,d).reduce(integerOps.min), List(a,b,c,d).reduce(integerOps.max))
+    } catch {
+      case _: ArithmeticException => top
+    }
+
+  override def max(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    NumericInterval.safe(integerOps.max(v1.low, v2.low), integerOps.max(v1.high, v2.high))
+
+  override def min(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    NumericInterval.safe(integerOps.min(v1.low, v2.low), integerOps.min(v1.high, v2.high))
+
+  override def absolute(v: NumericInterval[I]): NumericInterval[I] = {
+    try {
+      if (v.low >= numeric.fromInt(0)) {
+        v
+      } else if (v.high <= numeric.fromInt(0)) {
+        NumericInterval.safe(strictIntegerOps.neg(v.high), strictIntegerOps.neg(v.low))
+      } else {
+        NumericInterval.safe(numeric.fromInt(0), integerOps.max(strictIntegerOps.neg(v.low), v.high))
+      }
+    } catch {
+      case _: ArithmeticException => top
+    }
+  }
+
+  override def div(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    val a = integerOps.div(v1.low, v2.low)
+    val b = integerOps.div(v1.low, v2.high)
+    val c = integerOps.div(v1.high, v2.low)
+    val d = integerOps.div(v1.high, v2.high)
+    val res = NumericInterval(List(a, b, c, d).reduce(integerOps.min), List(a, b, c, d).reduce(integerOps.max))
+    if(v2.containsNum(numeric.fromInt(0))) {
+      j.joinWithFailure{
+        res
+      } {
+        f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+      }
+    } else {
+      res
+    }
+
+  override def divUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def remainder(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    val v2Max = integerOps.max(integerOps.absolute(v2.low), integerOps.absolute(v2.high))
+    val low = if(v1.low >= numeric.fromInt(0)) numeric.fromInt(0) else integerOps.max(v1.low, integerOps.sub(numeric.fromInt(1), v2Max))
+    val high = if(v1.high <= numeric.fromInt(0)) numeric.fromInt(0) else integerOps.min(v1.high, integerOps.sub(v2Max, numeric.fromInt(1)))
+    NumericInterval(low, high)
+
+
+  override def remainderUnsigned(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def modulo(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def gcd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    NumericInterval(numeric.fromInt(1), integerOps.min(v1.high,v2.high))
+
+  override def bitAnd(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    if(v1.low >= numeric.fromInt(0) && v2.low >= numeric.fromInt(0))
+      NumericInterval(numeric.fromInt(0), integerOps.min(v1.high, v2.high))
+    else
+      top
+
+  override def bitOr(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] =
+    if (v1.low >= numeric.fromInt(0) && v2.low >= numeric.fromInt(0))
+      NumericInterval(integerOps.max(v1.low, v2.low), integerOps.min(v1.high, v2.high))
+    else
+      top
+
+  override def bitXor(v1: NumericInterval[I], v2: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def shiftLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def shiftRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def shiftRightUnsigned(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def rotateLeft(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def rotateRight(v: NumericInterval[I], shift: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def countLeadingZeros(v: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def countTrailingZeros(v: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def nonzeroBitCount(v: NumericInterval[I]): NumericInterval[I] = ???
+
+  override def invertBits(v: NumericInterval[I]): NumericInterval[I] = ???
+}
+
+
+/*
 
 given StandardIntervalIntegerOps[I](using Ordering[I], IntegerOps[I, I], StrictIntegerOps[I, I, NoJoin], Numeric[I], Top[NumericInterval[I]])
   (using Failure, EffectStack): NumericIntervalIntegerOps[I] =
@@ -1147,6 +1278,9 @@ class NumericIntervalIntegerOps[I]
        and of course these bounds are tight for x=l and x=h
     */
     NumericInterval.safe(ops.invertBits(v.high), ops.invertBits(v.low))
+
+ */
+
 
 given TopNumericIntervalInt: Top[NumericInterval[Int]] with
   def top: NumericInterval[Int] = NumericInterval.safe(Integer.MIN_VALUE, Integer.MAX_VALUE)

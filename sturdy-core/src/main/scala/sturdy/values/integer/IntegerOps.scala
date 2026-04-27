@@ -86,10 +86,18 @@ trait OverflowIntegers[V]:
   def wasOverflown(v: V): Topped[Boolean]
 
 /** Overflow-aware integer operations for base type B, represented as V */
-trait StrictIntegerOps[B, V, J[_] <: MayJoin[_]]:
-  def addStrict(v1: V, v2: V): JOption[J, V]
-  def subStrict(v1: V, v2: V): JOption[J, V]
-  def mulStrict(v1: V, v2: V): JOption[J, V]
+trait StrictIntegerOps[I]:
+  @throws[ArithmeticException]
+  def add(x: I, y: I): I
+
+  @throws[ArithmeticException]
+  def sub(x: I, y: I): I
+
+  @throws[ArithmeticException]
+  def mul(x: I, y: I): I
+
+  @throws[ArithmeticException]
+  def neg(x: I): I
 
 type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.BitSign]
 type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.BitSign]

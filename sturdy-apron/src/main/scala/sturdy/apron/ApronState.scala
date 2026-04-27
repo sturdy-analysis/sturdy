@@ -266,6 +266,7 @@ class ApronRecencyState
        expr.addrs.exists(virt =>
          relationalStore.physicalAddresses(virt.ctx, virt.n, state).iterator.exists(phys =>
            !state.abs1.getEnvironment.hasVar(ApronVar(phys))
+             // &&!state.nonRelationalStoreState.contains(phys)
          ))
     )
       Topped.Actual(true)

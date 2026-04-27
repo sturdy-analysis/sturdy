@@ -79,16 +79,15 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
   def invertBits(v: Long): Long = ~v
 
-given ConcreteStrictLongOps: StrictIntegerOps[Long, Long, NoJoin] with
-  override def addStrict(v1: Long, v2: Long): JOptionC[Long] =
-    try JOptionC.Some(StrictMath.addExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
-  def subStrict(v1: Long, v2: Long): JOptionC[Long] =
-    try JOptionC.Some(StrictMath.subtractExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
-  def mulStrict(v1: Long, v2: Long): JOptionC[Long] =
-    try JOptionC.Some(StrictMath.multiplyExact(v1, v2))
-    catch { case _: ArithmeticException => JOptionC.none }
+given ConcreteStrictLongOps: StrictIntegerOps[Long] with
+  override def add(v1: Long, v2: Long): Long =
+    StrictMath.addExact(v1, v2)
+  def sub(v1: Long, v2: Long): Long =
+    StrictMath.subtractExact(v1, v2)
+  def mul(v1: Long, v2: Long): Long =
+    StrictMath.multiplyExact(v1, v2)
+  def neg(v1: Long): Long =
+    StrictMath.negateExact(v1)
 
 given EqOps[Long, Boolean] with
   override def equ(v1: Long, v2: Long): Boolean = v1 == v2
