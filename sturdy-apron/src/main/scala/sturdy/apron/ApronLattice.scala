@@ -60,8 +60,8 @@ object ApronJoins:
         } else {
 
           val lce = env1.lce(env2)
-          val s1ExtEnv = if (lce.isEqual(env1)) s1 else s1.changeEnvironmentCopy(manager, lce, false)
-          val s2ExtEnv = if (lce.isEqual(env2)) s2 else s2.changeEnvironmentCopy(manager, lce, false)
+          val s1ExtEnv = if (lce.isEqual(env1)) Abstract1(manager,s1) else s1.changeEnvironmentCopy(manager, lce, false)
+          val s2ExtEnv = if (lce.isEqual(env2)) Abstract1(manager,s2) else s2.changeEnvironmentCopy(manager, lce, false)
 
           lazy val model1 = getModel(manager, s1)
           lazy val model2 = getModel(manager, s2)

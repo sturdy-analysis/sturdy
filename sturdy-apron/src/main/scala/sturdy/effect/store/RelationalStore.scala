@@ -188,8 +188,10 @@ final class RelationalStore
       (env.hasVar(from), env.hasVar(to)) match
         case (true, true) =>
           state.abs1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
+          state = state.copy(wideningThresholds = state.wideningThresholds ++ state.wideningThresholds.flatMap(moveLinCons1(from,to)))
         case (true, false) =>
           state.abs1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
+          state = state.copy(wideningThresholds = state.wideningThresholds ++ state.wideningThresholds.flatMap(moveLinCons1(from,to)))
         case (false, true) | (false, false) => // Nothing to do
 
     } else {
@@ -198,6 +200,21 @@ final class RelationalStore
     }
     state
   }
+
+  private def moveLinCons1(from: ApronVar[PhysicalAddress[Context]], to: ApronVar[PhysicalAddress[Context]])(cons: Lincons1): Option[Lincons1] =
+    val fromEnv = cons.getEnvironment
+    if (fromEnv.hasVar(from)) {
+      val toEnv = if(fromEnv.hasVar(to)) fromEnv.remove(Array[Var](from)) else fromEnv.rename(Array[Var](from), Array[Var](to))
+      val perm = Dimperm(fromEnv.getVars.map[Int](x => if (x == from) toEnv.dimOfVar(to) else toEnv.dimOfVar(x)))
+      val newCons = Lincons1(toEnv, cons.getLincons0Ref.permuteDimensionsCopy(perm))
+      val vars = newCons.getLinterms.map(_.getVariable)
+      if(newCons.isUnsat() || vars.size != vars.toSet.size)
+        None
+      else
+        Some(newCons)
+    } else {
+      None
+    }
 
 
   /**
@@ -414,9 +431,10 @@ final class RelationalStore
   def addConstraintsToWideningThresholdsPure(state: State, constraints: ApronCons[PhysicalAddress[Context], Type]*): State =
     constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
 
-  def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State =
+  def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State = {
     withWideningThresholds match
       case WithWideningThresholds.Yes =>
+
         val resolvedConstraint = replaceMissingAddrs(constraint, state)
         val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
         tconsToLincons(state.abs1, cons) match {
@@ -428,6 +446,7 @@ final class RelationalStore
         }
       case WithWideningThresholds.No =>
         state
+  }
 
   private def tconsToLincons(abs1: Abstract1, tcons: Tcons1): Option[Lincons1] =
     for {

@@ -107,14 +107,15 @@ final class RelationalCallFrame
     apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Val]].toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
-    val virtAddrs = vars.map((variable, _) =>
+    val virtAddrs = vars.map((variable, exprOption) =>
       val ctx = localVariableAllocator.alloc((variable, d))
-      val virt = apronState.recencyStore.alloc(ctx)
-      (variable, Some(PowVirtualAddress(virt)))
+      val virt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
+      exprOption.foreach(value =>
+        apronState.recencyStore.write(virt, value)
+      )
+      (variable, Some(virt))
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
-      for ((variable, exprOption) <- vars; expr <- exprOption)
-        setLocalByName(variable, expr)
       f
     }
 
