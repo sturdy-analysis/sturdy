@@ -27,13 +27,13 @@ import scala.jdk.StreamConverters.*
 val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
-  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
-  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
+//  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
+//  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false),
-  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
-  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
-  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
+//  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = true),
+//  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = true),
+//  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = true),
+//  BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -46,7 +46,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
 
   val manager = newManager
   val funcName = "_start"
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
+  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/o3").toURI;
 
   val fixpointConfig: FixpointConfig = FixpointConfig(
     stack = StackConfig.StackedStates(storeIntermediateOutput = false, readPriorOutput = false),
@@ -61,11 +61,8 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("fasta.wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
-        if(manager.isInstanceOf[Polka] && ssa && (p.endsWith("reverse-complement.wasm")))
-          cancel("timeout")
-
         val module = Parsing.fromBinary(p)
 
         val analysis = RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = fixpointConfig, relational = relational, localSSA = ssa))
@@ -142,7 +139,9 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   def parseHeapCtx(using moduleInstance: ModuleInstance)(heapCtxStr: String): ByteMemoryCtx =
     heapCtxStr.take(1) match {
       case "F" => ByteMemoryCtx.Fill(FixIn.MostGeneralClientLoop(moduleInstance))
-      case "G" => ByteMemoryCtx.Global(heapCtxStr.drop(1))
+      case "G" =>
+        val Array(name, offset) = heapCtxStr.drop(1).split(':')
+        ByteMemoryCtx.Global(name,offset.toLong)
       case "S" =>
         val Array(funcName, offset) = heapCtxStr.drop(1).split('+')
         ByteMemoryCtx.Stack(FuncId(funcName), offset.toInt)

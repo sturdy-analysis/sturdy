@@ -133,14 +133,32 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
         case _ => f.fail(TypeError, s"Expected reference, but got $v")
 
     override def refToVal(r: RefV): Value = Ref(r)
-    override def liftBytes(b: Seq[Byte]): Bytes =
+    override def liftBytes(b: Seq[Byte]): Bytes = {
+      val strings = splitByByte(b, '\u0000'.toByte)
       BTS.StoredBytes(
-        value = b.map(x =>
-          (Num(Int32(NumExpr(ApronExpr.lit(byteToUnsignedInt(x), I8Type)))), 1)
+        value = strings.map(string =>
+          val unsignedString = string.map(byteToUnsignedInt)
+          (Num(Int32(NumExpr(ApronExpr.interval(unsignedString.min, unsignedString.max, I8Type)))), string.size)
         ).toList,
         byteOrder = Topped.Actual(ByteOrder.LITTLE_ENDIAN)
       )
-    private def byteToUnsignedInt(b: Byte): Int = b & 0xff
+    }
+
+    private def splitByByte(bytes: Seq[Byte], separator: Byte): Seq[Seq[Byte]] = {
+      if(bytes.isEmpty) {
+        Seq.empty
+      } else {
+        val separatorIdx = bytes.indexOf(separator)
+        if (separatorIdx < 0) {
+          Seq(bytes)
+        } else {
+          val (head, tail) = bytes.splitAt(separatorIdx + 1)
+          head +: splitByByte(tail, separator)
+        }
+      }
+
+    }
+    private inline def byteToUnsignedInt(b: Byte): Int = b & 0xff
 
   class Instance(val apronManager: apron.Manager, val rootFrameData: FrameData, val rootFrameValues: Iterable[Value], val config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:

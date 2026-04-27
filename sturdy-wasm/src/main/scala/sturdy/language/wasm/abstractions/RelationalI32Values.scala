@@ -27,7 +27,7 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
   enum RelI32:
     case NumExpr(expr: ApronExpr[VirtAddr, Type])
     case BoolExpr(expr: Bool)
-    case GlobalAddr(nameAndStart: Powerset[(String,Int)], offset: ApronExpr[VirtAddr,Type])
+    case GlobalAddr(nameAndStart: Powerset[(String,Long)], offset: ApronExpr[VirtAddr,Type])
     case StackAddr(function: Powerset[FuncId], frameSize: ApronExpr[VirtAddr,Type], stackPointer: ApronExpr[VirtAddr,Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
     case HeapAddr(sites: AbstractReference[PowVirtAddr], size: ApronExpr[VirtAddr, Type], initialOffset: Powerset[Int], otherOffset: ApronExpr[VirtAddr,Type])
 
@@ -240,8 +240,9 @@ trait RelationalI32Values extends Interpreter with RelationalAddresses:
         globals.find((name, iv) => Interval(i,i).isLeq(iv)) match
           case Some((name,iv)) =>
             val offset = apronState.getInterval(ApronExpr.intSub(ApronExpr.lit(i, I32Type), ApronExpr.constant(iv.inf(), I32Type), I32Type))
-            GlobalAddr(Powerset((name,ApronExpr.toInt(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
-          case None => super.integerLit(i)
+            GlobalAddr(Powerset((name,ApronExpr.toLong(iv.inf()).get)), ApronExpr.constant(offset.inf(), I32Type))
+          case None =>
+            GlobalAddr(Powerset(("",i.toLong)), ApronExpr.lit(0, I32Type))
       }
 
       override def add(v1: I32, v2: I32): I32 =

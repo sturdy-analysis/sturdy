@@ -5,6 +5,7 @@ import sturdy.values.Join
 
 trait AddressOffset[Addr]:
   def addOffsetToAddr(offset: Int, addr: Addr): Addr
+  def addOffsetToBaseAddr(offset: Int, addr: Addr): Addr = addOffsetToAddr(offset, addr)
   def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr
 
 trait AddressLimits[Addr, Size, J[_] <: MayJoin[_]]:

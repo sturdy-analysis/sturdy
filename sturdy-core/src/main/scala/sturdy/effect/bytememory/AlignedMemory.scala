@@ -31,7 +31,7 @@ enum AlignedRead:
 trait LanguageSpecificMemOps[Context, Addr, Size, Val]:
   def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, alignment: Int, mems: Mem[Context, Addr, Timestamp, Val, Size]): Iterable[(PhysicalAddress[Context], MemoryRegion[Addr, Size, Timestamp, Val], AlignedRead)]
   def isSummaryRegion[Timestamp: PartialOrder](ctx: Context, newRegion: MemoryRegion[Addr, Size, Timestamp, Val]): Boolean
-  def computeStartAddrAndSize(ctx: Context, startAddr: Addr, byteSize: Int): (Addr,Size)
+  def normalizeStartAddrAndSize(ctx: Context, startAddr: Addr, byteSize: Size): (Addr,Size)
 
 trait SizeOps[Size]:
   def fromInt(size: Int): Size
@@ -45,6 +45,7 @@ enum ByteMemoryAllocationContext:
   case Write
   case Copy
   case Fill
+  case Init
 
 final class AlignedMemory
   [
@@ -110,10 +111,10 @@ final class AlignedMemory
 
   override def write(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 0): JOption[WithJoin, Unit] =
     Profiler.addTime("AlignedMemory.write") {
-      write0(key, addr, bytes, alignment)
+      write0(key, addr, bytes, alignment = alignment)
     }
 
-  private def write0(key: Key, addr: Addr, bytes: Bytes[Val], alignment: Int = 0): JOption[WithJoin, Unit] =
+  private def write0(key: Key, addr: Addr, bytes: Bytes[Val], allocationCtx: ByteMemoryAllocationContext = ByteMemoryAllocationContext.Write, alignment: Int = 0): JOption[WithJoin, Unit] =
     bytes match
       case StoredBytes((value, byteSize) :: rest, byteOrder) =>
         val Mem(store0, numPages, pageLimit) = memories(key)
@@ -121,14 +122,14 @@ final class AlignedMemory
         addressLimits.ifAddrLeSize(addr, sizeOps.sub(sizeOps.mul(numPages, pageSize), sizeOps.fromInt(byteSize))) {
 
           var store = store0
-          for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Write, key, addr)) {
+          for (ctx <- memLocAllocator(allocationCtx, key, addr)) {
             increment(ctx)
-            val (knownStartAddr,knownSize) = memOps.computeStartAddrAndSize(ctx, addr, byteSize)
+            val (normalizedStartAddr,normalizeSize) = memOps.normalizeStartAddrAndSize(ctx, addr, sizeOps.fromInt(byteSize))
             val newRegion = MemoryRegion(
-              startAddr = knownStartAddr,
+              startAddr = normalizedStartAddr,
               alignment = Powerset(alignment),
               elementByteSize = Topped.Actual(byteSize),
-              regionByteSize = knownSize,
+              regionByteSize = normalizeSize,
               timestamp = this.timestamp,
               value = value,
               byteOrder = byteOrder
@@ -199,11 +200,12 @@ final class AlignedMemory
           val (joinedValue, joinedElementByteSize) = values.map((value,elementByteSize) => (value, Topped.Actual(elementByteSize))).reduce(Join(_, _).get)
           for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Fill, key, startAddr)) {
             increment(ctx)
+            val (normalizedStartAddr, normalizedSize) = memOps.normalizeStartAddrAndSize(ctx, startAddr, byteAmount)
             val newRegion = MemoryRegion(
-              startAddr = startAddr,
+              startAddr = normalizedStartAddr,
               alignment = Powerset(0),
               elementByteSize = joinedElementByteSize,
-              regionByteSize = byteAmount,
+              regionByteSize = normalizedSize,
               value = joinedValue,
               byteOrder = byteOrder,
               timestamp = this.timestamp
@@ -221,25 +223,43 @@ final class AlignedMemory
     Profiler.addTime("AlignedMemory.init") {
       dataBytes match
         case StoredBytes(valueList, byteOrder) =>
+          val Mem(store0,  numPages, pageLimit) = memories(key)
+          var store = store0
+
           var offset = 0
           var byteAmount = byteAmount0
           var result = JOptionA.Some[Unit](())
 
-          for (atom@(value, byteSize) <- valueList) {
+          for (atom@(value, regionSize) <- valueList) {
             addressLimits.ifSizeLeLimit(byteAmount, sizeOps.fromInt(0)) {
               // if byteAmount is 0, we are done writing.
             } {
-              val effectiveSourceAddr = addressOffset.addOffsetToAddr(-offset, sourceAddr)
+              val effectiveSourceAddr = addressOffset.addOffsetToBaseAddr(-offset, sourceAddr)
               addressLimits.ifAddrLeSize(effectiveSourceAddr, sizeOps.fromInt(0)) {
-                val effectiveTargetAddr = addressOffset.addOffsetToAddr(offset, targetAddr)
-                result = Join(result, write(key, effectiveTargetAddr, StoredBytes(List(atom), byteOrder)).asInstanceOf[JOptionA[Unit]]).get
+                val effectiveTargetAddr = addressOffset.addOffsetToBaseAddr(offset, targetAddr)
 
-                offset += byteSize
-                byteAmount = sizeOps.sub(byteAmount, sizeOps.fromInt(byteSize))
+                for (ctx <- memLocAllocator(ByteMemoryAllocationContext.Init, key, effectiveTargetAddr)) {
+                  increment(ctx)
+                  val newRegion = MemoryRegion(
+                    startAddr = effectiveTargetAddr,
+                    alignment = Powerset(0),
+                    elementByteSize = Topped.Actual(1),
+                    regionByteSize = sizeOps.fromInt(regionSize),
+                    value = value,
+                    byteOrder = byteOrder,
+                    timestamp = this.timestamp
+                  )
+                  store = writeRegion(ctx, newRegion, store)
+                }
+
+                offset += regionSize
+                byteAmount = sizeOps.sub(byteAmount, sizeOps.fromInt(regionSize))
               }
               ()
             }
           }
+
+          memories += key -> Mem(store, numPages, pageLimit)
 
           result
 

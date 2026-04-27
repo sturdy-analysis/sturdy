@@ -102,6 +102,11 @@ trait ApronState[Addr: Ordering: ClassTag,Type]:
   def simplify(expr: ApronExpr[Addr, Type])(using ResolveState): ApronExpr[Addr, Type] =
     expr match
 
+      // (lit1 + lit2) ~> |lit1+lit2|
+      // (lit1 * lit2) ~> |lit1*lit2|
+      case Binary(op: (BinOp.Add.type | BinOp.Mul.type), e1: Constant[Addr,Type], e2: Constant[Addr,Type], rdt, rdd, sp, tpe) =>
+        ApronExpr.constant(getInterval(expr), tpe)
+
       // (lit + e) ~> (e + lit)
       // (lit * e) ~> (e * lit)
       case Binary(op: (BinOp.Add.type | BinOp.Mul.type), e1: Constant[Addr,Type], e2: (ApronExpr.Addr[Addr,Type] | Unary[Addr,Type] | Binary[Addr,Type]), rdt, rdd, sp, tpe) =>

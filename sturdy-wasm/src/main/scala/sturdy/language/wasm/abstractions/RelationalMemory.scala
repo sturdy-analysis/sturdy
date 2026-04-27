@@ -13,12 +13,15 @@ import sturdy.fix.DomLogger
 import sturdy.language.wasm.analyses.RelationalAnalysis.{Bool, I32, VirtAddr}
 import sturdy.language.wasm.generic.WasmFailure.MemoryAccessOutOfBounds
 import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, FuncId, InstLoc, MemoryAddr, ModuleInstance}
-import sturdy.language.wasm.generic as generic
+import sturdy.language.wasm.generic
 import sturdy.util.Lazy
 import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
+
+import scala.math.Fractional.Implicits.infixFractionalOps
+import scala.math.Integral.Implicits.infixIntegralOps
 
 trait RelationalMemory extends RelationalValues:
   import RelI32.*
@@ -116,11 +119,32 @@ trait RelationalMemory extends RelationalValues:
             f.fail(MemoryAccessOutOfBounds, s"$addr + $newOffset")
           })
         case glob:GlobalAddr =>
-          glob.addOffset(ApronExpr.lit(newOffset, I32Type))
+          if(glob.nameAndStart.set.forall((_,baseAddr) => baseAddr == 0))
+            addOffsetToBaseAddr(newOffset, addr)
+          else
+            glob.addOffset(ApronExpr.lit(newOffset, I32Type))
         case stackAddr: StackAddr =>
-          stackAddr.addOffset(ApronExpr.lit(newOffset, I32Type))
+          if(stackAddr.initialOffset.set.forall(_ == 0))
+            addOffsetToBaseAddr(newOffset, addr)
+          else
+            stackAddr.addOffset(ApronExpr.lit(newOffset, I32Type))
         case heapAddr: HeapAddr =>
-          heapAddr.addOffset(ApronExpr.lit(newOffset, I32Type))
+          if(heapAddr.initialOffset.set.forall(_ == 0))
+            addOffsetToBaseAddr(newOffset, addr)
+          else
+            heapAddr.addOffset(ApronExpr.lit(newOffset, I32Type))
+    }
+
+    override def addOffsetToBaseAddr(newOffset: Int, addr: Addr): Addr = {
+      addr match
+        case NumExpr(baseAddr) =>
+          addOffsetToAddr(newOffset, addr)
+        case glob: GlobalAddr =>
+          glob.copy(nameAndStart = glob.nameAndStart.map((name, baseOffset) => (name, baseOffset + newOffset)))
+        case stackAddr: StackAddr =>
+          stackAddr.copy(initialOffset = stackAddr.initialOffset.map(_ + newOffset))
+        case heapAddr: HeapAddr =>
+          heapAddr.copy(initialOffset = heapAddr.initialOffset.map(_ + newOffset))
     }
 
     override def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr =
@@ -168,8 +192,122 @@ trait RelationalMemory extends RelationalValues:
     }
   }
 
+  trait RelationalLanguageSpecificOps(
+     using apronState: ApronState[VirtAddr, Type],
+           refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]],
+           sizeOps: SizeOps[Size],
+           globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value],
+           heapAlloc: HeapAlloc
+  ) extends LanguageSpecificMemOps[ByteMemoryCtx, Addr, Size, Value]:
 
-  given RelationalLanguageSpecificMemOps(using apronState: ApronState[VirtAddr, Type], refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]], sizeOps: SizeOps[Size], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value], heapAlloc: HeapAlloc): LanguageSpecificMemOps[ByteMemoryCtx, Addr, Size, Value] with
+    override def isSummaryRegion[Timestamp: PartialOrder](ctx: ByteMemoryCtx, region: MemoryRegion[Addr, Size, Timestamp, Value]): Boolean =
+      ctx match {
+        case _: ByteMemoryCtx.Fill | _: ByteMemoryCtx.Dynamic => true
+        case _: ByteMemoryCtx.Stack | _: ByteMemoryCtx.Global =>
+          region.elementByteSize match
+            case Topped.Top => true
+            case Topped.Actual(byteSize) =>
+              apronState.assert(ApronCons.eq(ApronExpr.lit(byteSize, I32Type), region.regionByteSize)) != Topped.Actual(true)
+        case _: ByteMemoryCtx.Heap => false // TODO: We do not support malloc-allocated arrays for now.
+      }
+
+    override def normalizeStartAddrAndSize(ctx: ByteMemoryCtx, startAddr: Addr, byteSize: Size): (Addr, Size) =
+      val default = (startAddr, byteSize)
+      (ctx, startAddr) match
+        case (_: ByteMemoryCtx.Fill, _) => (startAddr, byteSize)
+        case (ByteMemoryCtx.Global(name, offset), _) =>
+          optionStaticMemoryLayout.flatMap(_.getGlobalRange(name)).map(iv =>
+              (GlobalAddr(Powerset((name,offset)), ApronExpr.lit(0, I32Type)): Addr,
+                ApronExpr.constant(apronState.getInterval(
+                  ApronExpr.intAdd(
+                    ApronExpr.lit(1, I32Type),
+                    ApronExpr.intSub(
+                      ApronExpr.constant(iv.sup(), I32Type),
+                      ApronExpr.constant(iv.inf(), I32Type),
+                      I32Type),
+                    I32Type)),
+                  I32Type))
+            )
+            .getOrElse(default)
+        case (_, stackAddr: StackAddr) =>
+          (
+            stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
+            apronState.toNonRelational(ApronExpr.intAdd(stackAddr.otherOffset, byteSize, I32Type))
+          )
+        case (_, heapAddr: HeapAddr) =>
+          (
+            heapAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
+            apronState.toNonRelational(ApronExpr.intAdd(heapAddr.otherOffset, byteSize, I32Type))
+          )
+        case _ => default
+
+  given BaseOffsetMatching(
+    using apronState: ApronState[VirtAddr, Type],
+          refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]],
+          sizeOps: SizeOps[Size],
+          globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value],
+          heapAlloc: HeapAlloc
+  ): RelationalLanguageSpecificOps with
+
+    override def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, alignment: Int, mem: Mem[ByteMemoryCtx, Addr, Timestamp, Value, Size]): Iterable[(PhysicalAddress[ByteMemoryCtx], MemoryRegion[Addr, Size, Timestamp, Value], AlignedRead)] = {
+      addr match
+        case globAddr@GlobalAddr(baseOffsets, otherOffset) =>
+
+          val matchingRegions = for {
+            case (physAddr@PhysicalAddress(ctx:(ByteMemoryCtx.Fill | ByteMemoryCtx.Global | ByteMemoryCtx.Dynamic), _),region) <- mem.store
+            if readRangeOverlapsGlobalRegion(globAddr, ctx, region) != Topped.Actual(false)
+          } yield (physAddr, region)
+
+          val result = matchingRegions.map{(phys,region) =>
+            val aligned =
+              if(baseOffsets.set.forall { case (_, baseOffset) => alignedRead(phys.ctx, ApronExpr.lit(baseOffset, I32Type), alignment, region) == AlignedRead.Aligned })
+                AlignedRead.Aligned
+              else
+                AlignedRead.MaybeAligned
+            (phys,region,aligned)
+          }
+
+          result
+        case StackAddr(_,_,_,_,_) => ???
+        case HeapAddr(_,_,_,_) => ???
+        case NumExpr(_) => ???
+    }
+
+    private def readRangeOverlapsGlobalRegion[Timestamp]( globalAddr: GlobalAddr,
+                                                          ctx: (ByteMemoryCtx.Fill | ByteMemoryCtx.Global | ByteMemoryCtx.Dynamic),
+                                                          region: MemoryRegion[Addr, Size, Timestamp, Value]
+                                                        ): Topped[Boolean] = {
+      val baseOffsets = globalAddr.nameAndStart.map(_._2).set
+      ctx match
+        case (_: (ByteMemoryCtx.Fill | ByteMemoryCtx.Dynamic)) => Topped.Top
+        case ByteMemoryCtx.Global(_,storedOffset) => if(baseOffsets.contains(storedOffset)) Topped.Top else Topped.Actual(false)
+    }
+
+    private def alignedRead[Timestamp, Val](ctx: ByteMemoryCtx, readStart: ApronExpr[VirtAddr, Type], alignment: Int, memoryRegion: MemoryRegion[Addr, Size, Timestamp, Val]): AlignedRead =
+      //      if(memoryRegion.alignment.set.forall(_ == alignment))
+      //        AlignedRead.Aligned
+      //      else if(memoryRegion.alignment.set.head == 0)
+      //        AlignedRead.Aligned
+      //      else
+      val alignment = ApronExpr.lit[VirtAddr, Type](scala.math.pow(2, memoryRegion.alignment.set.head).toInt, I32Type)
+      // aligned if readStart ≡ regionStart (mod 2^memoryRegion.alignment)
+      val res = apronState.assert(
+        ApronBool.And(
+          ApronBool.Constraint(ApronCons.eq(ApronExpr.intMod(readStart, alignment, I32Type), ApronExpr.lit(0, I32Type))),
+          ApronBool.Constraint(ApronCons.eq(ApronExpr.intMod(memoryRegion.startAddr.asNumExpr, alignment, I32Type), ApronExpr.lit(0, I32Type)))
+        )) match
+        case Topped.Actual(true) => AlignedRead.Aligned
+        case _ => AlignedRead.MaybeAligned
+      res
+
+
+  final class IntervalOverlapMatching(
+      using apronState: ApronState[VirtAddr, Type],
+            refOps: ReferenceOps[PowVirtAddr, AbstractReference[PowVirtAddr]],
+            sizeOps: SizeOps[Size],
+            globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value],
+            heapAlloc: HeapAlloc
+  ) extends RelationalLanguageSpecificOps:
     override def matchRegion[Timestamp: PartialOrder](addr: Addr, size: Size, alignment: Int, mem: Mem[ByteMemoryCtx, Addr, Timestamp, Value, Size]): Iterable[(PhysicalAddress[ByteMemoryCtx], MemoryRegion[Addr, Size, Timestamp, Value], AlignedRead)] =
       addr match
         case NumExpr(readStart) =>
@@ -302,9 +440,7 @@ trait RelationalMemory extends RelationalValues:
       val regionEnd = ApronExpr.intAdd(regionStart, region.regionByteSize, regionStart._type)
 
       (ctx, optionStaticMemoryLayout) match {
-        case (ByteMemoryCtx.Static(i), _) =>
-          overlaps(readStart,readEnd, regionStart, regionEnd)
-        case (ByteMemoryCtx.Global(name), Some(staticMemoryLayout)) =>
+        case (ByteMemoryCtx.Global(name, offset), Some(staticMemoryLayout)) =>
           val globalIv = staticMemoryLayout.getGlobalRange(name).get
           if (readEndIv.sup().cmp(globalIv.inf()) <= 0 || globalIv.sup().cmp(readStartIv.inf()) < 0) {
             Topped.Actual(false)
@@ -328,7 +464,7 @@ trait RelationalMemory extends RelationalValues:
                                                           region: MemoryRegion[Addr, Size, Timestamp, Value]
     ): Topped[Boolean] =
       ctx match {
-        case ByteMemoryCtx.Global(name) =>
+        case ByteMemoryCtx.Global(name, offset) =>
           Topped.Actual(readStartsEnds.contains(name))
         case _: ByteMemoryCtx.Fill | _: ByteMemoryCtx.Dynamic =>
           val regionStart = region.startAddr.asInstanceOf[NumExpr].expr
@@ -405,50 +541,6 @@ trait RelationalMemory extends RelationalValues:
         ApronBool.Constraint(ApronCons.lt(regionStart, readEnd))
       ))
 
-    override def computeStartAddrAndSize(ctx: ByteMemoryCtx, startAddr: Addr, byteSize: Int): (Addr, Size) =
-      val default = (startAddr, ApronExpr.lit(byteSize, I32Type): Size)
-      optionStaticMemoryLayout match
-        case Some(staticMemoryLayout) =>
-          (ctx,startAddr) match
-            case (ByteMemoryCtx.Global(name),_) =>
-              staticMemoryLayout.getGlobalRange(name).map(iv =>
-                (NumExpr(ApronExpr.constant(iv.inf(), I32Type)): Addr,
-                 ApronExpr.constant(apronState.getInterval(
-                   ApronExpr.intAdd(
-                     ApronExpr.lit(1, I32Type),
-                     ApronExpr.intSub(
-                       ApronExpr.constant(iv.sup(), I32Type),
-                       ApronExpr.constant(iv.inf(), I32Type),
-                       I32Type),
-                     I32Type)),
-                   I32Type))
-                )
-                .getOrElse(default)
-            case (_, stackAddr: StackAddr) =>
-              (
-                stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
-                apronState.toNonRelational(ApronExpr.intAdd(stackAddr.otherOffset, ApronExpr.lit(byteSize, I32Type), I32Type))
-              )
-            case (_, heapAddr: HeapAddr) =>
-              (
-                heapAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
-                apronState.toNonRelational(ApronExpr.intAdd(heapAddr.otherOffset, ApronExpr.lit(byteSize, I32Type), I32Type))
-              )
-            case _ => default
-        case None => default
-
-
-    override def isSummaryRegion[Timestamp: PartialOrder](ctx: ByteMemoryCtx, region: MemoryRegion[Addr, Size, Timestamp, Value]): Boolean =
-      ctx match {
-        case _: ByteMemoryCtx.Fill | _: ByteMemoryCtx.Dynamic => true
-        case _: ByteMemoryCtx.Static | _: ByteMemoryCtx.Stack | _: ByteMemoryCtx.Global =>
-          region.elementByteSize match
-            case Topped.Top => true
-            case Topped.Actual(byteSize) =>
-              apronState.assert(ApronCons.eq(ApronExpr.lit(byteSize, I32Type), region.regionByteSize)) != Topped.Actual(true)
-        case _: ByteMemoryCtx.Heap => false // TODO: We do not support malloc-allocated arrays for now.
-      }
-
     private def alignedRead[Timestamp,Val](ctx: ByteMemoryCtx, readStart: ApronExpr[VirtAddr, Type], alignment: Int, memoryRegion: MemoryRegion[Addr, Size, Timestamp, Val]): AlignedRead =
 //      if(memoryRegion.alignment.set.forall(_ == alignment))
 //        AlignedRead.Aligned
@@ -488,9 +580,9 @@ trait RelationalMemory extends RelationalValues:
       addr match
         case NumExpr(effectiveAddr) =>
           val (l, u) = apronState.getIntInterval(effectiveAddr)
-          val defaultAddr =
+          val defaultCtx =
             if (l == u)
-              ByteMemoryCtx.Static(u)
+              ByteMemoryCtx.Global("", l)
             else
               ByteMemoryCtx.Dynamic(loc)
 
@@ -498,20 +590,24 @@ trait RelationalMemory extends RelationalValues:
             case (ByteMemoryAllocationContext.Fill, _, _) =>
               Iterable(ByteMemoryCtx.Fill(loc))
             case (ByteMemoryAllocationContext.Write, ApronExpr.Binary(BinOp.Add, baseAddr, offset,_, _, _, _), Some(staticMemoryLayout)) =>
-              val ctx = getHeapCtx(staticMemoryLayout, loc, effectiveAddr, baseAddr, apronState.getInterval(offset)).getOrElse(defaultAddr)
+              val ctx = getHeapCtx(staticMemoryLayout, loc, effectiveAddr, baseAddr, apronState.getInterval(offset)).getOrElse(defaultCtx)
               Iterable(ctx)
             case (ByteMemoryAllocationContext.Copy, ApronExpr.Binary(BinOp.Add, _, destAddr, _, _, _, _), Some(staticMemoryLayout)) =>
               val offset = Interval(DoubleScalar(0), DoubleScalar(0))
-              val ctx = getHeapCtx(staticMemoryLayout, loc, ApronExpr.intAdd(destAddr, ApronExpr.constant(offset, I32Type), I32Type), destAddr, offset).getOrElse(defaultAddr)
+              val ctx = getHeapCtx(staticMemoryLayout, loc, ApronExpr.intAdd(destAddr, ApronExpr.constant(offset, I32Type), I32Type), destAddr, offset).getOrElse(defaultCtx)
               Iterable(ctx)
             case _ =>
-              Iterable(defaultAddr)
+              Iterable(defaultCtx)
           }
 
-        case GlobalAddr(glob, offset) =>
-          for {
-            (name,_) <- glob.set
-          } yield(ByteMemoryCtx.Global(name))
+        case GlobalAddr(glob, otherOffset) =>
+          byteMemoryAllocationContext match {
+            case ByteMemoryAllocationContext.Fill =>
+              Iterable(ByteMemoryCtx.Fill(loc))
+            case _ =>
+              glob.set.map(ByteMemoryCtx.Global)
+          }
+
 
         case StackAddr(functions, frameSize, stackPointer, initialOffset, _) =>
           for {
@@ -536,7 +632,7 @@ trait RelationalMemory extends RelationalValues:
       val offsetMatchesGlobal = for {
         (globalName, globalRange) <- staticMemoryLayout.globalRanges
         if offset.isLeq(globalRange) || effectiveAddrIv.isLeq(globalRange)
-      } yield ByteMemoryCtx.Global(globalName)
+      } yield ByteMemoryCtx.Global(globalName, ApronExpr.toLong(globalRange.inf()).get)
 
       if(offsetMatchesGlobal.size == 1) {
         offsetMatchesGlobal.headOption
@@ -547,7 +643,7 @@ trait RelationalMemory extends RelationalValues:
           const <- baseAddr.constants
           (globalName, globalRange) <- staticMemoryLayout.globalRanges
           if const.cmp(globalRange) == 0 || const.cmp(globalRange) == 1 // if const is equal or included in globalRange
-        } yield ByteMemoryCtx.Global(globalName)
+        } yield ByteMemoryCtx.Global(globalName, ApronExpr.toLong(globalRange.inf()).get)
 
         if(constantMatchesGlobal.size == 1) {
           constantMatchesGlobal.headOption
@@ -559,7 +655,7 @@ trait RelationalMemory extends RelationalValues:
             iv = apronState.getInterval(ApronExpr.addr(addr, I32Type))
             (globalName, globalRange) <- staticMemoryLayout.globalRanges
             if iv.isLeq(globalRange)
-          } yield ByteMemoryCtx.Global(globalName)
+          } yield ByteMemoryCtx.Global(globalName, ApronExpr.toLong(globalRange.inf()).get)
           if(addrMatchesGlobal.size == 1) {
             addrMatchesGlobal.headOption
           } else {

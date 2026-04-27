@@ -929,7 +929,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         val sizeLimit = max.map(i => valToSize(i32ops.integerLit(i)))
         val memAddr = MemoryAddr(memCount)
         memory.putNew(memAddr, initSize, sizeLimit)
-        memory.fill(memAddr, valToAddr(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min * 65536)), liftBytes(Seq(0)))
+        memory.fill(memAddr, valToAddr(i32ops.integerLit(0)), valToSize(i32ops.integerLit(min * 65536)), liftBytes(ByteVector(0).toSeq))
         memCount += 1
         memAddr
     }

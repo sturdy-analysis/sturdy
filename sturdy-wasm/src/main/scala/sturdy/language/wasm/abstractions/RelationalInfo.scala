@@ -29,7 +29,7 @@ object RelationalInfo:
   enum UnconstrainedInfo:
     case Numeric(interval: FloatInterval, tpe: Any, constrained: IsConstrained)
     case Boolean(value: Topped[scala.Boolean], constrained: IsConstrained)
-    case GlobalAddr(sites: Powerset[(String,Int)], offset: IsConstrained)
+    case GlobalAddr(sites: Powerset[(String,Long)], offset: IsConstrained)
     case StackAddr(function: Powerset[FuncId], frameSize: IsConstrained, initialOffset: Powerset[Int], otherOffset: IsConstrained)
     case HeapAddr(sites: AbstractReference[Powerset[PhysicalAddress[Any]]], size: IsConstrained, otherOffset: IsConstrained)
     case Top
