@@ -24,16 +24,12 @@ import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
-val writer: CSVWriter = CSVWriter.open(File("benchmarks-game-precision-test.csv"))
+val writer: CSVWriter = CSVWriter.open(File("minimaltestsuite-precision.csv"))
 
 class SimpleExampleRelationalTest extends Suites(
   //MinimalExampleRelationalTest(newManager = Polka(true), relational = true, ssa = false),
   //MinimalExampleRelationalTest(newManager = Octagon(), relational = true, ssa = false),
   MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = false), //<-run this
-  //MinimalExampleRelationalTest(newManager = Polka(true), relational = true, ssa = true),
-  //MinimalExampleRelationalTest(newManager = Octagon(), relational = true, ssa = true),
-  //MinimalExampleRelationalTest(newManager = Box(), relational = true, ssa = true),
-  //MinimalExampleRelationalTest(newManager = Box(), relational = false)
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -54,7 +50,7 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
   )
 
   // These programs are not analyzed
-  val excludedDirs: Set[String] = Set(
+  val testfiles: Set[String] = Set(
     //"subprogramBody",
     //"nestedfunction",
     //"functionWithFlexibleArrayMember",
@@ -62,20 +58,30 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
     //"functionWithVLA",
     //"functionWithStructParameter",
     //"nestedFunctionReference",
+    //"functionWithArrayLocal",
+    //"functionwitharrayparam",
+    "globalbasetypevar",
+    "globalarrayvar",
+    "globalstructvar",
+    "globalthroughpointer",
+    "globalarraythroughpointer",
+    "globalstructthroughpointer",
   )
   
   // Only run the following optimization levels
   val optimizationLevels = Set(
     "O0",
     "O3",
+    "O0_nodebug",
+    "O3_nodebug",
   )
 
-  val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}, rel: $relational, ssa: $ssa" else "non-relational"
+  val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}" else "non-relational"
 
   describe(analysisName) {
     Files.list(Paths.get(uri)).toScala(List)
       .filter(Files.isDirectory(_))
-      .filterNot(dir => excludedDirs.contains(dir.getFileName.toString))
+      .filter(dir => testfiles.contains(dir.getFileName.toString))
       .flatMap { dir => Files.list(dir).toScala(List) }
       .filter(p => optimizationLevels.exists(opt => p.toString.endsWith(s"$opt.wasm")))
       .sorted
@@ -105,11 +111,11 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
           
           Profiler.printLastMeasured()
           Profiler.reset()
+
+          println(memoryLogger.toString)
+          val expected = parseMemOpsCSV(p, moduleInst)
           
-          //csv files do not exist (yet)
-          //val expected = parseMemOpsCSV(p, moduleInst)
-          
-          //writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
+          writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
       }
     }
   }
@@ -127,21 +133,20 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
     val impreciseLoads = filterLoads(precision.imprecise)
     val preciseStores = filterStores(precision.precise)
     val impreciseStores= filterStores(precision.imprecise)
-
-    writer.writeRow(
-      List(
-        program,
-        analysisName,
-        s"$ssa",
-        s"${preciseLoads.size}",
-        s"${impreciseLoads.size}",
-        s"${preciseStores.size}",
-        s"${impreciseStores.size}",
-        s"${abstractDomainSizeLogger.getEnvSize}",
-        s"${abstractDomainSizeLogger.getByteSize}",
-        s"${time}"
-      )
-    )
+    val result = List(
+          program,
+          analysisName,
+          s"$ssa",
+          s"${preciseLoads.size}",
+          s"${impreciseLoads.size}",
+          s"${preciseStores.size}",
+          s"${impreciseStores.size}",
+          s"${abstractDomainSizeLogger.getEnvSize}",
+          s"${abstractDomainSizeLogger.getByteSize}",
+          s"${time}"
+        )
+    println(result)
+    writer.writeRow(result)
 
   inline def filterLoads(map: SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]): SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
     map.filter { case (key, (_: (LoadInst | LoadNInst), _)) => true; case _ => false }
@@ -151,8 +156,26 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
 
 
   def parseMemOpsCSV(p: java.nio.file.Path, moduleInstance: ModuleInstance): SortedMap[InstLoc, Set[ByteMemoryCtx]] =
-    val reader = CSVReader.open(p.toString + ".memops.csv")
-    SortedMap.from(reader.iterator.drop(1).map(parseLoadsCSVLine(using moduleInstance)))
+    val originalPath = Path.of(p.toString + ".memops.csv")
+
+    val filePath =
+      if Files.exists(originalPath) then originalPath
+      else if originalPath.toString.contains("_nodebug") then
+        val fallback = Path.of(originalPath.toString.replace("_nodebug", ""))
+        if Files.exists(fallback) then fallback
+        else
+          println(s"[warn] Neither nodebug nor fallback file found: $originalPath")
+          return SortedMap.empty
+      else
+        println(s"[warn] File not found: $originalPath — returning empty result")
+        return SortedMap.empty
+
+    if !Files.exists(filePath) then
+      println(s"[warn] File not found: $filePath — returning empty result")
+      SortedMap.empty
+    else
+      val reader = CSVReader.open(filePath.toString)
+      SortedMap.from(reader.iterator.drop(1).map(parseLoadsCSVLine(using moduleInstance)))
 
   def parseLoadsCSVLine(using moduleInstance: ModuleInstance)(line: Seq[String]): (InstLoc, Set[ByteMemoryCtx]) =
     val Seq(instLocStr, _memOp, heapCtxStr) = line

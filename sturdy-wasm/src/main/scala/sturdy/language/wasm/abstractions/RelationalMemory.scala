@@ -36,9 +36,9 @@ trait RelationalMemory extends RelationalValues:
   final type Bytes = sturdy.effect.bytememory.Bytes[Value]
 
   var optionStaticMemoryLayout: Option[StaticMemoryLayout] = None
+  var debuginformation_present: Boolean = false
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
-    //println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     val functions = parseFunctionFrames
     for{
       tableBase <- intervalOfExport("__table_base")
@@ -75,10 +75,12 @@ trait RelationalMemory extends RelationalValues:
                              "__stack_high", "__global_base", "__heap_base", "__heap_end")
     
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
-      println("DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
+      println("[info] DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
+      debuginformation_present = true
       //println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     } else {
-      println("DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
+      println("[info] DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
+      debuginformation_present = false
     }
     
     moduleInstance.dwarfSyntaxTree match {
@@ -96,19 +98,19 @@ trait RelationalMemory extends RelationalValues:
             interval = new apron.Interval(currGlobalStartAddr, currGlobalStartAddr + currGlobalSize - 1)
           } yield (name, interval, cType)
           ).toVector
-        //globals = globals.prepended((".rodata", dataStart, unknownType))
-        //globals = globals.prepended(("__data_end", dataEnd, unknownType))
+        globals = globals.prepended((".rodata", dataStart, UnknownType))
+        globals = globals.prepended(("__data_end", dataEnd, UnknownType))
 
         globals = globals.sortBy((_name, interval, cType) => interval.inf())
 
-        //if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && iv.isBottom))
-        //  globals = globals.tail
+        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && (iv.isBottom || iv.isScalar)))
+          globals = globals.tail
 
         if (globals.headOption.exists(_._1 == "__data_end")) {
           println(s"parseglobalranges: <empty>")
           Vector()
         } else {
-          println(s"parseglobalranges: $globals")
+          println(s"parseglobalranges: ${globals.mkString("\n    - ")}")
           globals
         }
       case None =>
@@ -134,10 +136,10 @@ trait RelationalMemory extends RelationalValues:
           globalRanges = globalRanges.tail
 
         if(globalRanges.headOption.exists(_._1 == "__data_end")) {
-          println("<empty>")
+          println("parseglobalranges: <empty>")
           Vector()
         } else {
-          println(globalRanges)
+          println(s"parseglobalranges: ${globalRanges.mkString("\n    - ")}")
           globalRanges
         }
       //moduleInstance
@@ -204,7 +206,9 @@ trait RelationalMemory extends RelationalValues:
             FuncId(name) -> Frame(frameBase, frameEntries)
         } //end of collect
           .toMap
-      case None => sys.error(s"cannot parse function frames when no dwarf information is supplied")
+      case None =>
+        println(s"[WARNING] cannot parse function frames when no dwarf information is supplied")
+        Map.empty
     }
   }
 
@@ -539,7 +543,7 @@ trait RelationalMemory extends RelationalValues:
                 .getOrElse(default)
             case (_, stackAddr: StackAddr) =>
               //TODO add global flag for better testing
-              val _FLAG_normalizeComputeStartAddrAndSize = true
+              val _FLAG_normalizeComputeStartAddrAndSize = debuginformation_present
               val stackAddrdefault =
                 (
                   stackAddr.copy(otherOffset = ApronExpr.lit(0, I32Type)),
@@ -678,7 +682,7 @@ trait RelationalMemory extends RelationalValues:
 
         case StackAddr(functions, frameSize, stackPointer, initialOffset, _) =>
           //TODO: add global flag to enable/disable normalization for Alloc0
-          val _FLAG_normalizeAlloc0 = true
+          val _FLAG_normalizeAlloc0 = debuginformation_present
 
 
           if !_FLAG_normalizeAlloc0 then { //Original Code
@@ -703,7 +707,14 @@ trait RelationalMemory extends RelationalValues:
                               function = fun, offset = lower
                             )
                           )
-                        case Nil => Iterator.empty //TODO alternative here: return non normalized offset
+                        case Nil =>
+                          println("[warn] no matching stack slot, falling back to unnormalized offset")
+                          Iterator(
+                            ByteMemoryCtx.Stack(
+                              function = fun,
+                              offset = offset
+                            )
+                          )
                         case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
                       }
                     case None => sys.error(s"no stack frame for function $fun found.")

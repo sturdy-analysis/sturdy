@@ -19,6 +19,16 @@ for file in src/*.c; do
           -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
           -o "$outdir/$base.O0.wasm" \
           "$file"
+
+    clang --target=wasm32 -nostdlib -O3 \
+              -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
+              -o "$outdir/$base.O3_nodebug.wasm" \
+              "$file"
+
+    clang --target=wasm32 -nostdlib -O0 \
+              -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
+              -o "$outdir/$base.O0_nodebug.wasm" \
+              "$file"
 done
 
 echo "====Converting from .wasm to .wast===="

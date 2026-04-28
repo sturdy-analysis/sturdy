@@ -11,6 +11,6 @@ int functionWithArrayLocal(int *array, int size) {
 }
 
 int _start() {
-    int array[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    return functionWithArrayLocal(array, 8);
+    int array[2] = {6, 2};
+    return functionWithArrayLocal(array, 2);
 }

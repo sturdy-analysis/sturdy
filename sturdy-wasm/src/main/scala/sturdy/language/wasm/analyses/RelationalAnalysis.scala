@@ -921,7 +921,18 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = ()
 
       override def toString: String =
-        s"MemoryLogger(loads: $loads, stores: $stores)"
+        def formatMap[T](name: String, m: SortedMap[InstLoc, List[T]]): String = {
+          val entries = m.map { case (loc, infos) =>
+            val formattedInfos = infos.map(i => s"    - $i").mkString("\n")
+            s"  $loc:\n$formattedInfos"
+          }.mkString("\n")
+          s"$name:\n$entries"
+        }
+
+        s"""MemoryLogger begin:
+          |${formatMap("Loads", loads)}
+          |${formatMap("Stores", stores)}
+          |MemoryLogger end""".stripMargin
 
     def constrainedInstructionsLogger: ConstrainedInstructionsLogger =
       val intervalLogger = new ConstrainedInstructionsLogger
