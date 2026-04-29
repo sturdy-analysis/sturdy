@@ -921,10 +921,14 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit = ()
 
       override def toString: String =
+        val maxInfosPerInstruction = 3
         def formatMap[T](name: String, m: SortedMap[InstLoc, List[T]]): String = {
           val entries = m.map { case (loc, infos) =>
-            val formattedInfos = infos.map(i => s"    - $i").mkString("\n")
-            s"  $loc:\n$formattedInfos"
+            val count = infos.size
+            val limitedInfos = infos.take(maxInfosPerInstruction)
+            val formattedlimitedInfos = limitedInfos.map(i => s"    - $i").mkString("\n")
+            val trailing = if (infos.size > maxInfosPerInstruction) "\n    ..." else ""
+            s"  $loc:\n$formattedlimitedInfos$trailing"
           }.mkString("\n")
           s"$name:\n$entries"
         }

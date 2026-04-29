@@ -25,7 +25,7 @@ import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
-val writer: CSVWriter = CSVWriter.open(File(s"nodebug_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
+val writer: CSVWriter = CSVWriter.open(File(s"o0_nodebugtemp_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
@@ -40,10 +40,15 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
     writer.close
 
 class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
+  val optimizationLevel = "o0" //either "o0" or "o3"
 
   val manager = newManager
   val funcName = "_start"
-  val uri: URI = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
+  val uri: URI = optimizationLevel match {
+    case "o0" => this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src/o0_debug_export_all").toURI
+    case "o3" => this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src/").toURI
+    case _ => sys.error(s"expected valid optimizationLevel but got '$optimizationLevel' instead")
+  }
 
   val fixpointConfig: FixpointConfig = FixpointConfig(
     stack = StackConfig.StackedStates(storeIntermediateOutput = false, readPriorOutput = false),
@@ -51,7 +56,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   )
 
   // These programs contain structs, which our analysis does not yet support.
-  val excluded: Set[Path] = Set("binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
+  val excluded: Set[Path] = Set("fankuchredux.wasm", "fasta.wasm", "nbody.wasm", "spectral-norm.wasm", "binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
     Paths.get(uri).resolve(prog)
   )
 
@@ -99,6 +104,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   ): Unit =
     val program = programPath.getFileName
     val precision: memoryLogger.Precision = memoryLogger.computePrecision(expected)
+    println(precision)
     val preciseLoads = filterLoads(precision.precise)
     val impreciseLoads = filterLoads(precision.imprecise)
     val preciseStores = filterStores(precision.precise)

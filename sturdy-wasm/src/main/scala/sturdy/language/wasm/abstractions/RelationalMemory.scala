@@ -103,7 +103,7 @@ trait RelationalMemory extends RelationalValues:
 
         globals = globals.sortBy((_name, interval, cType) => interval.inf())
 
-        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && (iv.isBottom || iv.isScalar)))
+        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && (iv.isBottom)))
           globals = globals.tail
 
         if (globals.headOption.exists(_._1 == "__data_end")) {
