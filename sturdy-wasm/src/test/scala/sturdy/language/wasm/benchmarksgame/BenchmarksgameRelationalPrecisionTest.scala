@@ -42,7 +42,7 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
 class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
   val optimizationLevel = "o0" //either "o0" or "o3"
 
-  val manager = newManager
+  val manager: Manager = newManager
   val funcName = "_start"
   val uri: URI = optimizationLevel match {
     case "o0" => this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src/o0_debug_export_all").toURI
@@ -65,7 +65,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   describe(analysisName) {
     Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
-        if(manager.isInstanceOf[Polka] && ssa && (p.endsWith("reverse-complement.wasm")))
+        if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm"))
           cancel("timeout")
 
         val module = Parsing.fromBinary(p)
@@ -120,7 +120,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
       s"${impreciseStores.size}",
       s"${abstractDomainSizeLogger.getEnvSize}",
       s"${abstractDomainSizeLogger.getByteSize}",
-      s"${time}"
+      s"$time"
     )
     println(result)
     writer.writeRow(result)
