@@ -25,7 +25,7 @@ import java.nio.file.{Files, Path, Paths}
 import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
-val writer: CSVWriter = CSVWriter.open(File(s"o0_nodebugtemp_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
+val writer: CSVWriter = CSVWriter.open(File(s"o0_temp_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
@@ -56,7 +56,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   )
 
   // These programs contain structs, which our analysis does not yet support.
-  val excluded: Set[Path] = Set("fankuchredux.wasm", "fasta.wasm", "nbody.wasm", "spectral-norm.wasm", "binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
+  val excluded: Set[Path] = Set("fankuchredux.wasm", "fasta.wasm", "mandelbrot.wasm", "spectral-norm.wasm", "binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
     Paths.get(uri).resolve(prog)
   )
 
