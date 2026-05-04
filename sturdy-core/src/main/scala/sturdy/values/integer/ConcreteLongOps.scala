@@ -82,12 +82,22 @@ given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
 given ConcreteStrictLongOps: StrictIntegerOps[Long] with
   override def add(v1: Long, v2: Long): Long =
     StrictMath.addExact(v1, v2)
-  def sub(v1: Long, v2: Long): Long =
+  override def sub(v1: Long, v2: Long): Long =
     StrictMath.subtractExact(v1, v2)
-  def mul(v1: Long, v2: Long): Long =
+  override def mul(v1: Long, v2: Long): Long =
     StrictMath.multiplyExact(v1, v2)
-  def neg(v1: Long): Long =
+  override def neg(v1: Long): Long =
     StrictMath.negateExact(v1)
+  override def abs(x: Long): Long =
+    StrictMath.absExact(x)
+  override def pow(base: Long, exponent: Long): Long =
+    BigDecimal(math.pow(base, exponent)).toLongExact
+  override def shiftLeft(x: Long, shift: Long): Long =
+    val res = x << shift
+    if (res >> shift != x)
+      throw ArithmeticException()
+    else
+      res
 
 given EqOps[Long, Boolean] with
   override def equ(v1: Long, v2: Long): Boolean = v1 == v2

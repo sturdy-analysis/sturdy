@@ -37,6 +37,24 @@ class IntegerOpsTest
     }
   }
 
+  test("shiftLeft(1,1)") {
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.shiftLeft(
+      ivOps.interval(integral.fromInt(1), integral.fromInt(1)),
+      ivOps.interval(integral.fromInt(1), integral.fromInt(1))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.shiftLeft(integral.fromInt(1), integral.fromInt(1)), actual))
+  }
+
+  test("shiftRight(-1,-1)") {
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.shiftRight(
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(-1)),
+      ivOps.interval(integral.fromInt(-1), integral.fromInt(-1))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.shiftRight(integral.fromInt(-1), integral.fromInt(-1)), actual))
+  }
+
   binOpTest(
     testName = "add",
     precondition = (_, _) => true,

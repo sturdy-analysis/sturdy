@@ -87,6 +87,16 @@ given ConcreteStrictIntegerOps: StrictIntegerOps[Int] with
     StrictMath.multiplyExact(v1, v2)
   override def neg(x: Int): Int =
     StrictMath.negateExact(x)
+  override def abs(x: Int): Int =
+    StrictMath.absExact(x)
+  override def pow(base: Int, exponent: Int): Int =
+    BigDecimal(math.pow(base, exponent)).toIntExact
+  override def shiftLeft(x: Int, shift: Int): Int =
+    val res = x << shift
+    if(res >> shift != x)
+      throw ArithmeticException()
+    else
+      res
 
 given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2

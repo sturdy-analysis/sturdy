@@ -99,6 +99,15 @@ trait StrictIntegerOps[I]:
   @throws[ArithmeticException]
   def neg(x: I): I
 
+  @throws[ArithmeticException]
+  def abs(x: I): I
+
+  @throws[ArithmeticException]
+  def pow(base: I, exponent: I): I
+
+  @throws[ArithmeticException]
+  def shiftLeft(x: I, shift: I): I
+
 type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.BitSign]
 type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.BitSign]
 type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.BitSign]
