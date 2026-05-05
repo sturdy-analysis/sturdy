@@ -1,4 +1,4 @@
-{ lib, keepBuildTree, stdenv, binutils, fetchFromGitHub, llvmPackages, gmp, mpfr, ppl, jdk21_headless, zip }:
+{ lib, keepBuildTree, stdenv, binutils, fetchFromGitHub, clang, gmp, mpfr, ppl, jdk21_headless, zip }:
 
 stdenv.mkDerivation rec {
   name = "apron";
@@ -18,7 +18,7 @@ stdenv.mkDerivation rec {
   '';
 
   configurePhase = ''
-    CC=${llvmPackages.clang}/bin/clang CFLAGS=-flto LDFLAGS="-flto -fuse-ld=gold -Wl,-plugin-opt=save-temps" ./configure -prefix $out -no-cxx -ppl-prefix ${ppl}/lib/
+    CC=${clang}/bin/clang CFLAGS=-flto LDFLAGS="-flto -fuse-ld=gold -Wl,-plugin-opt=save-temps" ./configure -prefix $out -no-cxx -ppl-prefix ${ppl}/lib/
   '';
 
   buildInputs = [ gmp mpfr ppl jdk21_headless ];

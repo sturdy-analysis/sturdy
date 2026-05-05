@@ -7,7 +7,7 @@ import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{ConcreteCallFrame, JoinableDecidableCallFrame, MutableCallFrame}
-import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, given}
+import sturdy.effect.store.{RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, WithWideningThresholds, given}
 import sturdy.fix.DomLogger
 import sturdy.util.{Lazy, lazily}
 import sturdy.values.{*, given}
@@ -107,14 +107,15 @@ final class RelationalCallFrame
     apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Val]].toJOptionC
 
   override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
-    val virtAddrs = vars.map((variable, _) =>
+    val virtAddrs = vars.map((variable, exprOption) =>
       val ctx = localVariableAllocator.alloc((variable, d))
-      val virt = apronState.recencyStore.alloc(ctx)
-      (variable, Some(PowVirtualAddress(virt)))
+      val virt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
+      exprOption.foreach(value =>
+        apronState.recencyStore.write(virt, value)
+      )
+      (variable, Some(virt))
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
-      for ((variable, exprOption) <- vars; expr <- exprOption)
-        setLocalByName(variable, expr)
       f
     }
 
@@ -212,7 +213,8 @@ object RelationalCallFrame:
      combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
      localVariableAllocator: Allocator[Ctx, (Var, Data)],
      apronManager: Manager,
-     effectStack: EffectStack
+     effectStack: EffectStack,
+     withWideningThresholds: WithWideningThresholds
    ): (RelationalCallFrame[Data, Var, ApronExpr[VirtualAddress[Ctx], Type], CallSite, Ctx, Type], ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]]) =
     val state = RecencyRelationalStore[Ctx,Type]
     given Lazy[ApronState[VirtualAddress[Ctx],Type]] = lazily(state)

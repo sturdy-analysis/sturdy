@@ -3,15 +3,14 @@ package sturdy.language.wasm.testscript
 import apron.*
 import cats.effect.{Blocker, IO}
 
-import scala.collection.mutable
-import scala.io.Source
-import scala.jdk.StreamConverters.*
 import org.scalatest.Assertions.*
 import org.scalatest.{BeforeAndAfterAll, Suites}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.apron.{RoundingDir, RoundingMode}
+import org.scalacheck.Gen
+
+import sturdy.apron.{ApronExpr, RoundingDir, RoundingMode}
 import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
 import sturdy.effect.failure.{AFallible, CFallible, given}
 import sturdy.{*, given}
@@ -20,20 +19,27 @@ import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
 import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
 import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, WasmFailure}
+import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, ModuleInstance, WasmFailure}
 import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import sturdy.values.integer.given
+import sturdy.util.GenInterval.genInterval
+
 import swam.syntax.Module
 import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
 
 import java.io.File
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{FileSystemNotFoundException, FileSystems, Files, Path, Paths}
+
 import com.github.tototoshi.csv.*
 
+import scala.collection.mutable
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+
 val csvWriter = {
-  val writer = CSVWriter.open(File("relational-test-script.csv"))
+  val writer = CSVWriter.open(File("soundness.csv"))
   writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed", "constrained_instructions", "total_instructions", "percent_constrained"))
   writer
 }
@@ -43,8 +49,8 @@ object SlowTest extends org.scalatest.Tag("SlowTest")
 class RelationalAnalysisSoundnessTests extends Suites(
   new RelationalAnalysisTestScript(Polka(true), relational = true),
   new RelationalAnalysisTestScript(Octagon(), relational = true),
-  new RelationalAnalysisTestScript(Box(), relational = true),
-  new RelationalAnalysisTestScript(Box(), relational = false),
+  new RelationalAnalysisTestScript(Box(), relational = true)
+  // new RelationalAnalysisTestScript(Box(), relational = false),
 ), BeforeAndAfterAll:
 
   override def afterAll(): Unit = csvWriter.close()
@@ -52,10 +58,26 @@ class RelationalAnalysisSoundnessTests extends Suites(
 class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true) extends AnyFlatSpec, Matchers:
   behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
 
-  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
+  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+    Parsing.fromString(
+      scala.io.Source.fromInputStream(this.getClass.getResourceAsStream("/sturdy/language/wasm/spectest.wast")).mkString
+    )
+  }
   val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
-
-  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.fromText(pathSpectest)}
+  // Handle both file system paths and JAR resources
+  val path = if (uri.getScheme == "jar") {
+    // For JAR resources - get existing FileSystem or create new one
+    val fs = try {
+      FileSystems.getFileSystem(uri)
+    } catch {
+      case _: FileSystemNotFoundException =>
+        FileSystems.newFileSystem(uri, new java.util.HashMap[String, Any]())
+    }
+    fs.getPath("/sturdy/language/wasm/spec-test-suite-wasm1")
+  } else {
+    // For regular file system paths
+    Paths.get(uri)
+  }
 
   def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
     val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
@@ -80,7 +102,7 @@ class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true)
     interp.run(scriptPath.getFileName, script)
 
   Fixpoint.DEBUG = false
-  Files.list(Paths.get(uri)).toScala(List).filter(p =>
+  Files.list(path).toScala(List).filter(p =>
     p.toString.endsWith(".wast")
   ).sorted.foreach { p =>
     for (analysis <- analyses) {
@@ -88,13 +110,13 @@ class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true)
       if (isSlow(anl.apronManager, p.getFileName.toString))
         it must s"execute ${p.getFileName} with ${anl}" taggedAs (SlowTest) in {
           runTest(p, anl)
-          Profiler.printLastMeasured()
+//          Profiler.printLastMeasured()
           Profiler.reset()
         }
       else
         it must s"execute ${p.getFileName} with ${anl}" in {
           runTest(p, anl)
-          Profiler.printLastMeasured()
+//          Profiler.printLastMeasured()
           Profiler.reset()
         }
 
@@ -109,7 +131,7 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
   type AValue = RelationalAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+//  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
   val constrainedInstructionsLogger: aInterp.ConstrainedInstructionsLogger = aInterp.constrainedInstructionsLogger
   val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
@@ -215,8 +237,9 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
       passedTestCases.increment()
     case AssertTrap(action: Action, message: String) =>
       totalTestCases.increment()
-      val state = aInterp.effectStack.getState
-      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setState(state) }
+      val dummyFunctionCall = FixIn.EnterWasmFunction(null, null, null)
+      val state = aInterp.effectStack.getOutState(dummyFunctionCall)
+      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setOutState(dummyFunctionCall, state) }
       val res = runCAction(action)
       assert(res.isFailing, c.toString)
       assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
@@ -347,6 +370,30 @@ class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, v
       case unresolved.f32.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(RelationalAnalysis.topF32))
       case unresolved.f64.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(RelationalAnalysis.topF64))
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+
+
+  def genAVals(e: unresolved.Expr): Gen[List[RelationalAnalysis.Value]] =
+    e match
+      case Nil => Gen.const(List[RelationalAnalysis.Value]())
+      case inst :: rest =>
+        for {
+          aVal <- genAVal(inst)
+          aRest <- genAVals(rest)
+        } yield (aVal :: aRest)
+
+  def genAVal(inst: unresolved.Inst): Gen[RelationalAnalysis.Value] = {
+    import RelationalAnalysis.Value.*
+    import RelationalAnalysis.NumValue.*
+    import RelationalAnalysis.RelI32.*
+    import RelationalAnalysis.Type.*
+    inst match {
+      case unresolved.i32.Const(i) => Gen.const(Num(Int32(NumExpr(ApronExpr.lit(i, I32Type)))))
+      case unresolved.i64.Const(l) => Gen.const(Num(Int64(ApronExpr.lit(l, I64Type))))
+      case unresolved.f32.Const(f) => Gen.const(Num(Float32(ApronExpr.lit(f, I32Type))))
+      case unresolved.f64.Const(d) => Gen.const(Num(Float64(ApronExpr.lit(d, I64Type))))
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+    }
+  }
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =
     value match

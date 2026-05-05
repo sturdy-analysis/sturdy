@@ -232,7 +232,7 @@ class WASMBenchRunner extends AnyFunSpec :
             if (t.isAlive) {
               t.interrupt()
               t.join()
-              t.stop()
+              //t.stop()
             }
 
             result match {
@@ -274,7 +274,7 @@ class WASMBenchRunner extends AnyFunSpec :
             if (t.isAlive) {
               t.interrupt()
               t.join()
-              t.stop()
+              //t.stop()
             }
           } catch {
             case e: InterruptedException => // nothing

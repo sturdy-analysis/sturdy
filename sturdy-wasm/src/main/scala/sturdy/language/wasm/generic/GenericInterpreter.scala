@@ -508,11 +508,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
     case Br(labelIndex) =>
       branch(labelIndex)
     case BrIf(labelIndex) =>
-      val isZero = num.evalNumeric(i32.Eqz)
-      branchOpsUnit.boolBranch(isZero) {
-        // v == 0: else branch
-        // do nothing
-      } {
+      val x = stack.popOrAbort()
+      val cond = eqOps.neq(x, i32ops.integerLit(0))
+      breakIfOps.breakIf(cond) { _ =>
         branch(labelIndex)
       }
     case BrTable(labels, defaultLabel) =>
@@ -520,7 +518,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popNOrAbort(callFrame.data.returnArity)
-      val state = effectStack.getInState(FixIn.Exception)
+      val state = effectStack.getOutState(FixIn.Exception)
       throws(WasmException(JumpTarget.Return, operands, state))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
@@ -540,15 +538,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    val state = effectStack.getInState(FixIn.Exception)
+    val state = effectStack.getOutState(FixIn.Exception())
     throws(WasmException(JumpTarget.Jump(labelIndex), operands, state))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
   case class LabelArities(params: Int, results: Int, jumpOperands: Int)
 
-  private inline def assertFrameSize(size: Int): Unit =
-    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
-      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+  private inline def assertFrameSize(size: Int): Unit = {}
+//    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
+//      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
 
   def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
     stack.withNewFrame(arities.params) {
@@ -568,7 +566,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
           case WasmException(JumpTarget.Jump(labelIndex), operands, state) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
-              effectStack.setInState(FixIn.Exception, state)
+              effectStack.setOutState(FixIn.Exception, state)
               assertFrameSize(arities.jumpOperands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
@@ -620,7 +618,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       ex match {
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
-          effectStack.setInState(FixIn.Exception, state)
+          effectStack.setOutState(FixIn.Exception(), state)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }

@@ -21,7 +21,8 @@ object RecencyRelationalStore:
     ]
     (using
      apronManager: Manager,
-     virtRelationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
+     virtRelationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type],
+     withWideningThresholds: WithWideningThresholds
     ):
     (
       RecencyStore[Ctx, PowVirtualAddress[Ctx], Val],
@@ -59,7 +60,8 @@ object RecencyRelationalStore:
       temporaryVariableAllocator: Allocator[Ctx, Type],
       combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
       apronManager: Manager,
-      effectStack: EffectStack
+      effectStack: EffectStack,
+      withWideningThresholds: WithWideningThresholds
     ):
     ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] =
       var apronState: ApronRecencyState[Ctx, Type, ApronExpr[VirtualAddress[Ctx], Type]] = null

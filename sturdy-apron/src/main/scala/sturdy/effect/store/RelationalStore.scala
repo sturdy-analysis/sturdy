@@ -14,9 +14,10 @@ import scala.annotation.tailrec
 import scala.collection.immutable.{BitSet, HashMap}
 import scala.reflect.ClassTag
 
-/**
-Example on https://docs.google.com/document/d/1d-o3OSZRHowwXaXAtdW1cN2Day6gtpMqu0Pmk9Q2DuM/edit
- **/
+enum WithWideningThresholds:
+  case Yes
+  case No
+
 final class RelationalStore
   [
     Context: Ordering: Finite,
@@ -26,10 +27,12 @@ final class RelationalStore
   ]
   (initAddrTrans: Map[Context, RecencyRegion],
    initialAbs1: Abstract1,
-   initialNonRelationalStore: Map[PhysicalAddress[Context], Val])
+   initialNonRelationalStore: Map[PhysicalAddress[Context], Val]
+  )
   (using
    manager: Manager,
-   relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]]
+   relationalValue: StatefullRelationalExprT[Val, PhysicalAddress[Context], Type, RelationalStoreState[Context, Val]],
+   withWideningThresholds: WithWideningThresholds
   )
   extends StoreWithPureOps[PowAddr, Val, WithJoin] with AddressTranslation[Context]:
 
@@ -185,8 +188,10 @@ final class RelationalStore
       (env.hasVar(from), env.hasVar(to)) match
         case (true, true) =>
           state.abs1.fold(manager, Iterable(to,from).map[Var](ApronVar(_)).toArray)
+          state = state.copy(wideningThresholds = state.wideningThresholds ++ state.wideningThresholds.flatMap(moveLinCons1(from,to)))
         case (true, false) =>
           state.abs1.rename(manager, Array[Var](ApronVar(from)), Array[Var](ApronVar(to)))
+          state = state.copy(wideningThresholds = state.wideningThresholds ++ state.wideningThresholds.flatMap(moveLinCons1(from,to)))
         case (false, true) | (false, false) => // Nothing to do
 
     } else {
@@ -195,6 +200,21 @@ final class RelationalStore
     }
     state
   }
+
+  private def moveLinCons1(from: ApronVar[PhysicalAddress[Context]], to: ApronVar[PhysicalAddress[Context]])(cons: Lincons1): Option[Lincons1] =
+    val fromEnv = cons.getEnvironment
+    if (fromEnv.hasVar(from)) {
+      val toEnv = if(fromEnv.hasVar(to)) fromEnv.remove(Array[Var](from)) else fromEnv.rename(Array[Var](from), Array[Var](to))
+      val perm = Dimperm(fromEnv.getVars.map[Int](x => if (x == from) toEnv.dimOfVar(to) else toEnv.dimOfVar(x)))
+      val newCons = Lincons1(toEnv, cons.getLincons0Ref.permuteDimensionsCopy(perm))
+      val vars = newCons.getLinterms.map(_.getVariable)
+      if(newCons.isUnsat() || vars.size != vars.toSet.size)
+        None
+      else
+        Some(newCons)
+    } else {
+      None
+    }
 
 
   /**
@@ -412,15 +432,20 @@ final class RelationalStore
     constraints.foldRight(state)(addConstraintToWideningThresholdsPure)
 
   def addConstraintToWideningThresholdsPure(constraint: ApronCons[PhysicalAddress[Context], Type], state: State): State = {
-    val resolvedConstraint = replaceMissingAddrs(constraint, state)
-    val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
-    tconsToLincons(state.abs1, cons) match {
-      // Don't save constant constraints.
-      // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
-      case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
-        state.copy(wideningThresholds = state.wideningThresholds + minimizeEnvironment(lincons) + minimizeEnvironment(toOld(lincons)))
-      case _ => state
-    }
+    withWideningThresholds match
+      case WithWideningThresholds.Yes =>
+
+        val resolvedConstraint = replaceMissingAddrs(constraint, state)
+        val cons = resolvedConstraint.toApron(state.abs1.getEnvironment)
+        tconsToLincons(state.abs1, cons) match {
+          // Don't save constant constraints.
+          // Don't save constraints with large bounds. These occur during integer bounds checking and likely do not contribute to finding loop bounds.
+          case Some(lincons) if(lincons.getLincons0Ref.getSize != 0 && lincons.getCst.cmp(DoubleScalar(2_000_000_000)) <= 0 && lincons.getCst.cmp(DoubleScalar(-2_000_000_000)) >= 0) =>
+            state.copy(wideningThresholds = state.wideningThresholds + minimizeEnvironment(lincons) + minimizeEnvironment(toOld(lincons)))
+          case _ => state
+        }
+      case WithWideningThresholds.No =>
+        state
   }
 
   private def tconsToLincons(abs1: Abstract1, tcons: Tcons1): Option[Lincons1] =

@@ -12,7 +12,7 @@ import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
 import sturdy.effect.print.{PrintBound, given}
-import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, RelationalStoreState, Store}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, RelationalStoreState, Store, WithWideningThresholds}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
@@ -153,6 +153,8 @@ object RelationalAnalysis extends Interpreter,
         getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
 
     given StatefullRelationalExprT[Value, PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, AddrCtx, RelType].asInstanceOf
+
+    given WithWideningThresholds = WithWideningThresholds.Yes
 
     val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] = new RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] (
       initAddrTrans = Map(),
