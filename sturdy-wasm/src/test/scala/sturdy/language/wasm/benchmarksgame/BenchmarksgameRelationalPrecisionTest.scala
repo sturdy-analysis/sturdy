@@ -56,7 +56,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   )
 
   // These programs contain structs, which our analysis does not yet support.
-  val excluded: Set[Path] = Set("fankuchredux.wasm", "fasta.wasm", "mandelbrot.wasm", "spectral-norm.wasm", "binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
+  val excluded: Set[Path] = Set("fankuchredux.wasm", "binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
     Paths.get(uri).resolve(prog)
   )
 
