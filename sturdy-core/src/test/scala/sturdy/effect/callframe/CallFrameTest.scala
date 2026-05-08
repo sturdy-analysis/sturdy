@@ -20,7 +20,7 @@ class CallFrameTest extends AnyFunSuite:
   given effectStack: EffectStack = EffectStack(callFrame)
 
   test("join correctly") {
-    callFrame.withNew((), List(("x", Some(Powerset(1)))), ()) {
+    callFrame.withNew((), List(("x", Powerset(1))), ()) {
       effectStack.joinComputations {
         callFrame.setLocalByName("x", Powerset(2))
         ()

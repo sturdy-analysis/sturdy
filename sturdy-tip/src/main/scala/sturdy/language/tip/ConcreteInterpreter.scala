@@ -1,6 +1,6 @@
 package sturdy.language.tip
 
-import sturdy.data.{NoJoin, noJoin, unit}
+import sturdy.data.{JOptionC, NoJoin, noJoin}
 import sturdy.effect.allocation.CAllocatorIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.failure.{ConcreteFailure, Failure}
@@ -9,16 +9,15 @@ import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
 import sturdy.fix
 import sturdy.fix.{Combinator, Contextual}
-import sturdy.language.tip.Function
-import sturdy.language.tip.*
 import sturdy.values.booleans.{*, given}
-import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.ordering.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
-import sturdy.values.ordering.{*, given}
 import sturdy.values.{*, given}
-import sturdy.util.Label
+
+import scala.reflect.ClassTag
 
 object ConcreteInterpreter extends Interpreter:
   override type J[A] = NoJoin[A]
@@ -57,6 +56,8 @@ object ConcreteInterpreter extends Interpreter:
     def newInstance: Instance = new Instance(nextInput)
     override def jv: NoJoin[Value] = implicitly
 
+    override type JOptionT[A] = JOptionC[A]
+
     override val failure: ConcreteFailure = new ConcreteFailure
     given Failure = failure
 
@@ -68,11 +69,15 @@ object ConcreteInterpreter extends Interpreter:
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: ConcreteCallFrame[String, String, Value, Exp.Call] = new ConcreteCallFrame("$main", Iterable.empty)
+    override val callFrame: ConcreteCallFrame[String, String, JOptionC[Value], Exp.Call] = new ConcreteCallFrame("$main", Iterable.empty)
     override val store: CStore[Addr, Value] = new CStore(Map.empty)
     override val alloc: CAllocatorIntIncrement[AllocationSite] = new CAllocatorIntIncrement
     override val print: CPrint[Value] = new CPrint
     override val input: CUserInput[Value] = new CUserInput(nextInput)
+
+    override def some(v: Value): JOptionC[Value] = JOptionC.some(v)
+
+    override def none(): JOptionC[Value] = JOptionC.none
 
     override val fixpoint = new fix.ConcreteFixpoint[FixIn, FixOut[Value]] {
       override protected def contextInsensitive: Contextual[Ctx, FixIn, FixOut[Value]] ?=> Combinator[FixIn, FixOut[Value]] =

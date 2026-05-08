@@ -588,9 +588,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
 
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-        val vars = args.view.map(Some.apply) ++ func.locals.map {
-          case VecType.V128 => Some(simd.defaultValue())
-          case ty@(i: ValType) => Some(num.defaultValue(ty))
+        val vars = args.view ++ func.locals.map {
+          case VecType.V128 => simd.defaultValue()
+          case ty@(i: ValType) => num.defaultValue(ty)
         }
         labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.zipWithIndex.map(_.swap), loc) {
           enterFunction(FuncId(mod, ix), func, funcType)
@@ -1003,7 +1003,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
         func match
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(None, funcType.t.size, mod)
-            val vars = func.locals.map(ty => Some(num.defaultValue(ty)))
+            val vars = func.locals.map(ty => num.defaultValue(ty))
             val loc = InstLoc.InvokeExported(mod, "$start")
             labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap), loc) {
               enterFunction(FuncId(mod, ix), func, funcType)

@@ -27,7 +27,7 @@ final class RelationalCallFrame
   ]
   (
     initData: Data,
-    initVars: Iterable[(Var, Option[Val])],
+    initVars: Iterable[(Var, Val)],
     val localVariableAllocator: Allocator[Ctx, (Var,Data)],
     val apronState: ApronRecencyState[Ctx, Type, Val],
     ssa: Boolean = false
@@ -54,16 +54,15 @@ final class RelationalCallFrame
 
   def getAddressTranslation: AddressTranslation[Ctx] = apronState.recencyStore.addressTranslation
 
-  def setVars(newVars: Iterable[(Var, Option[Val])]) =
+  def setVars(newVars: Iterable[(Var, Val)]) =
     addressCallFrame.setVars(
       newVars.map((variable, _) =>
         val ctx = localVariableAllocator.alloc((variable, addressCallFrame.data))
-        (variable, Some(PowVirtualAddress(apronState.recencyStore.alloc(ctx))))
+        (variable, PowVirtualAddress(apronState.recencyStore.alloc(ctx)))
       )
     )
 
-    for((variable, exprOption) <- newVars;
-        expr <- exprOption)
+    for((variable, expr) <- newVars)
       setLocalByName(variable, expr)
 
   setVars(initVars)
@@ -106,14 +105,12 @@ final class RelationalCallFrame
   private def getByVirt(virts: PowVirtAddr): JOptionC[Val] =
     apronState.recencyStore.read(virts).asInstanceOf[JOptionA[Val]].toJOptionC
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Option[Val])], site: CallSite)(f: => A): A =
+  override def withNew[A](d: Data, vars: Iterable[(Var, Val)], site: CallSite)(f: => A): A =
     val virtAddrs = vars.map((variable, exprOption) =>
       val ctx = localVariableAllocator.alloc((variable, d))
       val virt = PowVirtualAddress(apronState.recencyStore.alloc(ctx))
-      exprOption.foreach(value =>
-        apronState.recencyStore.write(virt, value)
-      )
-      (variable, Some(virt))
+      apronState.recencyStore.write(virt, exprOption)
+      (variable, virt)
     )
     addressCallFrame.withNew(d, virtAddrs, site) {
       f
@@ -129,7 +126,7 @@ final class RelationalCallFrame
   case class RelationalCallFrameState(addressCallFrameState: addressCallFrame.State):
     override def equals(obj: Any): Boolean =
       obj match {
-        case other: RelationalCallFrameState => MapEquals(this.addressCallFrameState, other.addressCallFrameState)
+        case other: RelationalCallFrameState => this.addressCallFrameState == other.addressCallFrameState
         case _ => false
       }
 
@@ -160,7 +157,7 @@ final class RelationalCallFrame
 
   def combineCallFrame[W <: Widening]: Combine[State, W] = (s1: State, s2: State) =>
     var changed = false
-    val joined = s1.addressCallFrameState.unionWith(s2.addressCallFrameState, (idx, virts1, virts2) =>
+    val joined = for (virts1, virts2, idx) <- s1.addressCallFrameState.lazyZip(s2.addressCallFrameState).lazyZip(s1.addressCallFrameState.indices) yield
       val variable = addressCallFrame.getFrameNames.find(_._2 == idx).get._1
       val phys1 = apronState.relationalStore.withLeftState(st => (virts1.physicalAddressesPure(st.addressTranslationState),st))
       val phys2 = apronState.relationalStore.withRightState(st => (virts2.physicalAddressesPure(st.addressTranslationState),st))
@@ -185,9 +182,8 @@ final class RelationalCallFrame
         changed ||= joined.hasChanged
         joined.get
       }
-    )
     
-    MaybeChanged(RelationalCallFrameState(joined), changed)
+    MaybeChanged(RelationalCallFrameState(ArraySeq.from(joined)), changed)
 
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     addressCallFrame.getState.iterator.flatMap(valueIterator)
@@ -198,7 +194,7 @@ final class RelationalCallFrame
       return dataIsSound
     if (addressCallFrame.getFrameNames != c.getFrameNames)
       return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$addressCallFrame.getFrameNames")
-    val cVals: Array[cVal] = c.getVars
+    val cVals: ArraySeq[cVal] = c.getVars
     val aVals: ArraySeq[Val] = getVars
     seqIsSound.isSound(cVals, aVals)
 
@@ -214,7 +210,7 @@ object RelationalCallFrame:
     Type: ApronType : Join : Widen
   ](
      initData: Data,
-     initVars: Iterable[(Var, Option[ApronExpr[VirtualAddress[Ctx], Type]])]
+     initVars: Iterable[(Var, ApronExpr[VirtualAddress[Ctx], Type])]
    )(using
      temporaryVariableAllocator: Allocator[Ctx, Type],
      combineExpressionAllocator: Allocator[Ctx, (ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type])],
