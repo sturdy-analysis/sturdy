@@ -39,22 +39,14 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
-    if (ix >= 0 && ix < vars.size) {
-      val v = vars(ix)
-      if (v == null)
-        JOptionC.none
-      else
-        JOptionC.Some(v)
-    }
-    else
-      JOptionC.none
+      JOptionC(vars.get(ix))
 
   def getLocalByName(x: Var): JOptionC[V] = names.get(x) match
     case Some(ix) => getLocal(ix)
     case None => JOptionC.none
 
   def setLocal(ix: Int, v: V): JOptionC[Unit] =
-    if (ix >= 0 && ix < vars.size) {
+    if (ix >= 0 && ix < names.size) {
       vars += ix -> v
       JOptionC.Some(())
     } else {
@@ -118,9 +110,7 @@ class JoinableDecidableCallFrame[Data, Var, V, Site](initData: Data, initVars: I
     override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (vars.size != afterFirst.size)
-        throw IllegalStateException()
-      vars = Join(vars,afterFirst).get
+      vars = Join(vars, afterFirst).get
   }
 
   override def toString: String =
