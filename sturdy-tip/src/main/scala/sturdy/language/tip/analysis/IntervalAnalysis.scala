@@ -10,6 +10,7 @@ import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.JoinableDecidableCallFrame
 import sturdy.effect.except.ObservableExcept
 import sturdy.effect.failure.{CollectedFailures, Failure, ObservableFailure}
+import sturdy.effect.location.{CFGLocation, EffectLocation, InstType, Location}
 import sturdy.effect.print.Print
 import sturdy.effect.print.PrintBound
 import sturdy.effect.print.given
@@ -62,6 +63,17 @@ object IntervalAnalysis extends Interpreter,
     )
     override val print: PrintBound[Value] = new PrintBound
     override val input: AUserInput[Value] = new AUserInput(Value.IntValue(NumericInterval(Int.MinValue, Int.MaxValue)))
+
+    given Finite[Stm] with {}
+
+    val f = (s : Stm | Exp) => s match {
+      case Stm.Block(body) => InstType.Block
+      case _ : Stm => InstType.Atomic
+      case Exp.Call(_, _) => InstType.Block
+      case _ => InstType.Ignore
+    }
+
+    override val location: CFGLocation[Stm | Exp, J] = new CFGLocation(f)//new EffectLogger(callFrame)
 
     var bounds: Set[Int] = Set()
     given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)

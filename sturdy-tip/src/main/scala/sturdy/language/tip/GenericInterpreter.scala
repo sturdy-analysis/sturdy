@@ -5,6 +5,7 @@ import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{DecidableCallFrame, MutableCallFrame}
 import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
+import sturdy.effect.location.{Location, NoLocation}
 import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
@@ -107,18 +108,20 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   val input: UserInput[V]
   implicit val failure: Failure
 
+  val location: Location[Stm | Exp, J] = new NoLocation
+
   // Factory method for effect stacks
   def newEffectStack(effects: => Effect,
                      inEffects: PartialFunction[Any, Effect],
                      outEffects: PartialFunction[Any, Effect]): EffectStack =
     new EffectStack(effects, inEffects, outEffects)
 
-  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure), {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
-    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure)
+  val effectStack: EffectStack = newEffectStack(EffectList(callFrame, store, alloc, print, input, failure, location), {
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, location)
+    case _: FixIn.Eval => EffectList(callFrame, store, alloc, input, failure, location)
   }, {
-    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure)
-    case _: FixIn.Eval => EffectList(callFrame, alloc, failure)
+    case _: FixIn.Run | _: FixIn.EnterFunction => EffectList(callFrame, store, print, failure, location)
+    case _: FixIn.Eval => EffectList(callFrame, alloc, failure, location)
   })
 
   given EffectStack = effectStack
@@ -127,48 +130,51 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
-  def eval_open(e: Exp)(using Fixed): V = e match {
-    case Exp.NumLit(n) => integerLit(n)
-    case Exp.Input() => input.read()
-    case Exp.Var(x) => functions.get(x) match
-      case Some(fun) => funValue(fun)
-      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-    case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
-    case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
-    case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
-    case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
-    case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
-    case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
-    case site@Exp.Call(fun, args) =>
-      invokeFun(eval(fun), args.map(eval(_)))(call(site))
-    case a@Exp.Alloc(e) =>
-      val addr = alloc(AllocationSite.Alloc(a))
-      store.write(addr, eval(e))
-      mkManagedRef(addr)
-    case Exp.VarRef(x) =>
-      failure(VariableReferencesNotSupported, s"&$x")
-//      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
-//      unmanagedRefValue(addr)
-    case Exp.Deref(e) =>
-      val addr = deref(eval(e))
-      val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
-      result
-    case Exp.NullRef() =>
-      mkNullRef
-    case r@Exp.Record(fields) =>
-      // represents record as a reference to a record value
-      val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
-      val rec = makeRecord(fieldVals)
-      val addr = alloc(AllocationSite.Record(r))
-      store.write(addr, rec)
-      mkManagedRef(addr)
-    case Exp.FieldAccess(rec, field) =>
-      val addr = deref(eval(rec))
-      val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
-      lookupRecordField(recVal, Field(field))
+  def eval_open(e: Exp)(using Fixed): V = location.withLoc(e) {
+    e match {
+      case Exp.NumLit(n) => integerLit(n)
+      case Exp.Input() => input.read()
+      case Exp.Var(x) => functions.get(x) match
+        case Some(fun) => funValue(fun)
+        case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
+      case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
+      case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
+      case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
+      case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
+      case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
+      case site@Exp.Call(fun, args) =>
+        invokeFun(eval(fun), args.map(eval(_)))(call(site))
+      case a@Exp.Alloc(e) =>
+        val addr = alloc(AllocationSite.Alloc(a))
+        store.write(addr, eval(e))
+        mkManagedRef(addr)
+      case Exp.VarRef(x) =>
+        failure(VariableReferencesNotSupported, s"&$x")
+      //      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      //      unmanagedRefValue(addr)
+      case Exp.Deref(e) =>
+        val addr = deref(eval(e))
+        val result = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+        result
+      case Exp.NullRef() =>
+        mkNullRef
+      case r@Exp.Record(fields) =>
+        // represents record as a reference to a record value
+        val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
+        val rec = makeRecord(fieldVals)
+        val addr = alloc(AllocationSite.Record(r))
+        store.write(addr, rec)
+        mkManagedRef(addr)
+      case Exp.FieldAccess(rec, field) =>
+        val addr = deref(eval(rec))
+        val recVal = store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
+        lookupRecordField(recVal, Field(field))
+    }
   }
 
-  def run_open(s: Stm)(using Fixed): Unit = s match
+  def run_open(s: Stm)(using Fixed): Unit = location.withLoc(s) {
+    s match
     case Stm.Assign(lhs: Assignable, e: Exp) =>
       val v = eval(e)
       assign(lhs, v)
@@ -184,6 +190,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       assert(eval(e), a)
     case Stm.Error(e) =>
       failure(UserError, eval(e).toString)
+  }
 
   def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
     case Assignable.AVar(x) =>
