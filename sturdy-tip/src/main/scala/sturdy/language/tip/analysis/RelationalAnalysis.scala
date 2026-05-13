@@ -168,12 +168,12 @@ object RelationalAnalysis extends Interpreter,
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState
     given defaultResolveState: ResolveState = ResolveState.Internal
 
-    val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, AddrCtx, RelType] = new RelationalCallFrame(
+    val callFrame: RelationalCallFrame[String, String, JOptionT[Value], Exp.Call, AddrCtx, RelType] = ??? /*new RelationalCallFrame(
       initData = "$main",
       initVars = Iterable.empty,
       localVariableAllocator = localRelationaAlloc,
       apronState
-    )
+    )*/
 
 //    Sven: Currently Unsound. No time to debug the issue.
 //    val baseCallFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
@@ -260,6 +260,12 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
+    override type JOptionT[A] = JOptionA[A]
+
+    override def some(v: Value): JOptionA[Value] = JOptionA.some(v)
+
+    override def none(): JOptionA[Value] = JOptionA.none
+
     var currentProgram: Program = _
     override def execute(p: Program): Value =
       currentProgram = p
@@ -298,12 +304,12 @@ object RelationalAnalysis extends Interpreter,
           case FixIn.EnterFunction(Function(name, params, locals, body, ret)) =>
             val args = params.indices.flatMap {
               i =>
-                callFrame.getLocal(i).map(v => (v, getInterval(v))).option(None)(Some(_))
+                callFrame.getLocal(i).map(v => (v, getInterval(v.get))).option(None)(Some(_))
             }
             val state = effectStack.getState
             Predef.print("  ".repeat(stack.size))
             println(s"CALL   $name(${args.mkString(",")}) @ ${state.hashCode()}")
-            stack.push((dom, args, state))
+            stack.push((dom, IndexedSeq.empty, state))
           case _ => {}
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =

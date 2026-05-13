@@ -50,30 +50,29 @@ class SplitCallFrame[Data, Var, V, Site]
   override def setLocalByName(x: Var, v: V): JOption[NoJoin, Unit] =
     names.get(x).map(setLocal(_, v)).getOrElse(JOptionC.none)
 
-  def setVars(newVars: Iterable[(Var, Option[V])], site: Site): Unit =
+  def setVars(newVars: Iterable[(Var, V)], site: Site): Unit =
     val newVarsNames = newVars.view.map(_._1)
-    delegatedToSpecial = newVars.map(p => p._2.nonEmpty && useSpecial(p._1, p._2.get, site)).toVector
+    delegatedToSpecial = newVars.map(p => useSpecial(p._1, p._2, site)).toVector
     names = newVarsNames.zipWithIndex.toMap
     namesRev = newVarsNames.toVector
     _callSite = site
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])], site: Site)(f: => A): A =
+  override def withNew[A](d: Data, vars: Iterable[(Var, V)], site: Site)(f: => A): A =
     val wasDelegatedToSpecial = delegatedToSpecial
     val wasNames = names
     val wasNamesRev = namesRev
     val wasCallSite = _callSite
     setVars(vars, site)
     val baseVars = vars.map {
-      case (name, None) => (name, None)
-      case (name, Some(v)) if useSpecial(name, v, site) => (name, None)
-      case (name, Some(v)) => (name, Some(v))
+      case (name, v) if useSpecial(name, v, site) => (name, None)
+      case (name, v) => (name, v)
     }
     val specialVars = vars.map {
       case (name, None) => (name, None)
-      case (name, Some(v)) if !useSpecial(name, v, site) => (name, None)
+      // case (name, Some(v)) if !useSpecial(name, v, site) => (name, None)
       case (name, Some(v)) => (name, Some(v))
     }
-    try base.withNew(d, baseVars, site) {
+/*    try base.withNew(d, baseVars, site) {
       special.withNew(d, specialVars, site) {
         f
       }
@@ -82,7 +81,8 @@ class SplitCallFrame[Data, Var, V, Site]
       names = wasNames
       namesRev = wasNamesRev
       _callSite = wasCallSite
-    }
+    }*/
+    ???
 
   override type State = (base.State, special.State)
   override def getState: (base.State, special.State) = (base.getState, special.getState)

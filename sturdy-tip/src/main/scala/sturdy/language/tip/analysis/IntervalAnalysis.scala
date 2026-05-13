@@ -2,8 +2,7 @@ package sturdy.language.tip.analysis
 
 import sturdy.control.ControlObservable
 import sturdy.{Executor, data, fix}
-import sturdy.data.MayJoin
-import sturdy.data.{WithJoin, given}
+import sturdy.data.{CombineJOptionA, JOption, JOptionA, MayJoin, WithJoin, given}
 import sturdy.effect.given
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.allocation.Allocator
@@ -42,6 +41,8 @@ object IntervalAnalysis extends Interpreter,
                  stackConfig: StackConfig, callSites: Int, 
                  iterConfig: fix.iter.Config = fix.iter.Config.Innermost) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
+    
+    override type JOptionT[A] = JOptionA[A]
 
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures with ObservableFailure(this)
     private given Failure = failure
@@ -55,7 +56,7 @@ object IntervalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    override val callFrame: JoinableDecidableCallFrame[String, String, JOptionA[Value], Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site))
@@ -66,6 +67,10 @@ object IntervalAnalysis extends Interpreter,
     var bounds: Set[Int] = Set()
     given Widen[VInt] = new NumericIntervalWiden[Int](bounds, Int.MinValue, Int.MaxValue)
     given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
+
+    override def some(v: Value): JOptionA[Value] = JOptionA.some(v)
+
+    override def none(): JOptionA[Value] = JOptionA.none
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals

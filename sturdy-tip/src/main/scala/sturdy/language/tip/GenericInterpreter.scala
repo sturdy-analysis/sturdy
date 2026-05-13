@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.data.MayJoin.NoJoin
-import sturdy.data.{MayJoin, noJoin}
+import sturdy.data.{JOption, MayJoin, SomeJOption, noJoin}
 import sturdy.effect.allocation.Allocator
 import sturdy.effect.callframe.{DecidableCallFrame, MutableCallFrame}
 import sturdy.effect.failure.{DivergingKind, Failure, FailureKind, assert}
@@ -29,6 +29,7 @@ given Finite[Field] with {}
 
 enum TipFailure extends FailureKind:
   case UnboundVariable
+  case UninitializedVariable
   case UnboundAddr
   case UserError
   case TypeError
@@ -92,6 +93,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   // fixpoint
   val fixpoint: EffectStack ?=> fix.Fixpoint[FixIn, FixOut[V]]
   type Fixed = FixIn => FixOut[V]
+  type JOptionT[A] <: JOption[J, A]
 
   implicit def jv: J[V]
 
@@ -105,7 +107,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   implicit val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   // effect components
-  val callFrame: DecidableCallFrame[String, String, V, Exp.Call] with MutableCallFrame[String, String, V, Exp.Call, NoJoin]
+  val callFrame: DecidableCallFrame[String, String, JOptionT[V], Exp.Call] with MutableCallFrame[String, String, JOptionT[V], Exp.Call, NoJoin]
   val store: Store[Addr, V, J]
   val alloc: Allocator[Addr, AllocationSite]
   val print: Print[V]
@@ -132,12 +134,15 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
+  def some(v: V): JOptionT[V]
+  def none(): JOptionT[V]
+
   def eval_open(e: Exp)(using Fixed): V = e match {
     case Exp.NumLit(n) => integerLit(n)
     case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
-      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      case None => callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x)).getOrElse(failure(UninitializedVariable, x))
     case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
     case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -193,7 +198,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
 
   def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
     case Assignable.AVar(x) =>
-      callFrame.setLocalByName(x, v).getOrElse(failure(UnboundVariable, x))
+      callFrame.setLocalByName(x, some(v)).getOrElse(failure(UnboundVariable, x))
     case Assignable.ADeref(e) =>
       val addr = deref(eval(e))
       store.write(addr, v)
@@ -211,9 +216,9 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
       store.write(recAddr, updated)
 
   def call(site: Exp.Call)(fun: Function, args: Seq[V])(using Fixed): V =
-    val locals: Iterable[(String, Option[V])] =
-      fun.params.zip(args.map(Some.apply)) ++
-      fun.locals.map(x => (x, None))
+    val locals: Iterable[(String, JOptionT[V])] =
+      fun.params.zip(args.map(a => some(a))) ++
+      fun.locals.map(x => (x, none()))
     callFrame.withNew(fun.name, locals, site) {
       enterFunction(fun)
     }

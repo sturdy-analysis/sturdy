@@ -14,6 +14,7 @@ import sturdy.values.{*, given}
 import sturdy.{*, given}
 import _root_.apron.*
 import _root_.gmp.Mpz
+import sturdy.IsSound.NotSound
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState}
 
 class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
@@ -54,8 +55,8 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
           IsSound.NotSound(s"Abstract value $a does not overapproximate concrete value $c due to a type mismatch")
 
   given Soundness[ConcreteInterpreter.Instance, RelationalAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound =
-      a.callFrame.isSound(c.callFrame) && a.store.isSound(c.store) && a.print.isSound(c.print)
+    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound = NotSound("not implemented")
+      // a.callFrame.isSound(c.callFrame) && a.store.isSound(c.store) && a.print.isSound(c.print)
       // concrete environment is sound by construction
 //      a.store.isSound(c.store) &&
 //      a.print.isSound(c.print) /* &&

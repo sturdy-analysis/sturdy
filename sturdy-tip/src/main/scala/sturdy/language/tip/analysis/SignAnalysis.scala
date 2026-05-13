@@ -1,7 +1,7 @@
 package sturdy.language.tip.analysis
 
 import sturdy.control.{ControlEvent, ControlObservable, RecordingControlObserver}
-import sturdy.data.{WithJoin, given}
+import sturdy.data.{JOptionA, WithJoin, given}
 import sturdy.effect.given
 import sturdy.effect.allocation.AAllocatorFromContext
 import sturdy.effect.callframe.JoinableDecidableCallFrame
@@ -38,6 +38,8 @@ object SignAnalysis extends Interpreter,
   class Instance(initEnvironment: Environment, initStore: InitStore, stackConfig: StackConfig) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
     override def jv: WithJoin[Value] = implicitly
 
+    override type JOptionT[A] = JOptionA[A]
+
     override val failure: CollectedFailures[TipFailure] = new CollectedFailures
     private given Failure = failure
 
@@ -50,7 +52,7 @@ object SignAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
-    override val callFrame: JoinableDecidableCallFrame[String, String, Value, Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
+    override val callFrame: JoinableDecidableCallFrame[String, String, JOptionA[Value], Exp.Call] = new JoinableDecidableCallFrame("$main", Iterable.empty)
     override val store: AStoreThreaded[AllocationSiteAddr, Addr, Value] = new AStoreThreaded(initStore)
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] = new AAllocatorFromContext(site =>
       PowersetAddr(References.allocationSiteAddr(site))
@@ -61,7 +63,11 @@ object SignAnalysis extends Interpreter,
     given Lazy[Finite[Value]] = lazily(FiniteValue)
 
     val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
-    
+
+    override def some(v: Value): JOptionA[Value] = JOptionA.some(v)
+
+    override def none(): JOptionA[Value] = JOptionA.none
+
     override val fixpoint =
       fix.log(controlEventLogger(this),
         fix.filter((dom: FixIn) => isFunOrWhile(dom) >= 0,
