@@ -2,13 +2,19 @@
 // Created by flo on 2/5/26.
 //
 
+#include "../../stdlib.h"
+
+int aseed = 4;
+
+__attribute__((noinline))
 int functionWithArrayLocal() {
-    int sum = 0;
-    int array[8] = {0, 1, 2, 3, 4, 5, 6, 7};
-    for (int i = 0; i < 8; i++) {
-        sum += array[i];
+    const int size = 8;
+    volatile int array[size];
+    for (int i = 0; i < size; i++) {
+        array[i] = i + aseed * (i % aseed);
     }
-    return sum;
+    blackhole_void_p(array);
+    return array[aseed % size];
 }
 
 int _start() {

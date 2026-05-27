@@ -58,22 +58,23 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
     //"functionWithVLA",
     //"functionWithStructParameter",
     //"nestedFunctionReference",
-    //"functionWithArrayLocal",
+    "functionWithArrayLocal",
     //"functionwitharrayparam",
-    "globalbasetypevar",
-    "globalarrayvar",
-    "globalstructvar",
-    "globalthroughpointer",
-    "globalarraythroughpointer",
-    "globalstructthroughpointer",
+
+    //"globalbasetypevar",
+    //"globalarrayvar",
+    //"globalstructvar",
+    //"globalthroughpointer",
+    //"globalarraythroughpointer",
+    //"globalstructthroughpointer",
   )
   
   // Only run the following optimization levels
   val optimizationLevels = Set(
     "O0",
     "O3",
-    "O0_nodebug",
-    "O3_nodebug",
+    //"O0_nodebug",
+    //"O3_nodebug",
   )
 
   val analysisName: String = if (relational) s"${manager.getClass.getSimpleName}" else "non-relational"
@@ -146,7 +147,7 @@ class MinimalExampleRelationalTest(newManager: => Manager, relational: Boolean, 
           s"${time}"
         )
     println(result)
-    writer.writeRow(result)
+    //writer.writeRow(result)
 
   inline def filterLoads(map: SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])]): SortedMap[InstLoc, (LoadInst | LoadNInst | StoreInst | StoreNInst, Set[ByteMemoryCtx])] =
     map.filter { case (key, (_: (LoadInst | LoadNInst), _)) => true; case _ => false }

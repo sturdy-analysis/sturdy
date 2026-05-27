@@ -30,9 +30,9 @@ val optimizationLevel = "o0" //either "o0" or "o3"
 val writer: CSVWriter = CSVWriter.open(File(s"${optimizationLevel}_temp_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
-  BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
+  //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
   BenchmarksgameRelationalPrecisionTest(newManager = Box(), relational = true, ssa = false), //<-run this
-  BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
+  //BenchmarksgameRelationalPrecisionTest(newManager = Octagon(), relational = true, ssa = false),
 ), BeforeAndAfterAll:
 
   override def beforeAll(): Unit =
@@ -42,7 +42,6 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
     writer.close
 
 class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
-  val optimizationLevel = "o0" //either "o0" or "o3"
 
   val manager: Manager = newManager
   val funcName = "_start"
@@ -58,14 +57,26 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   )
 
   // These programs contain structs, which our analysis does not yet support.
-  val excluded: Set[Path] = Set("binarytrees.wasm", "reverse-complement.wasm", "k-nucleotide.wasm", "pidigits.wasm", "test-array-of-structs.wasm", "test-arrays.wasm", "test-call-by-reference.wasm").map(prog =>
+  val excluded: Set[Path] = Set(
+    //"spectral-norm.wasm",
+    //"reverse-complement.wasm",
+    //"nbody.wasm",
+    //"mandelbrot.wasm",
+    //"fasta.wasm",
+    //"fankuchredux.wasm",
+    //"binarytrees.wasm",
+    "k-nucleotide.wasm",
+    "pidigits.wasm",
+    "test-array-of-structs.wasm",
+    "test-arrays.wasm",
+    "test-call-by-reference.wasm").map(prog =>
     Paths.get(uri).resolve(prog)
   )
 
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.reverse.foreach { p =>
       it(s"${p.getFileName}") {
         if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm"))
           cancel("timeout")

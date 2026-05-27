@@ -61,4 +61,12 @@ class CanBuildAST extends AnyFunSuite {
       case None => fail(s"could not make AST fromBinary")
     }
   }
+
+  test(s"can build ast for spectral-norm fromBinary") {
+    tryToMakeASTFromBinary(getTestFile(SpectralNorm)) match {
+      case Some(ast) =>
+        if (DEBUG) println(DwarfLogging.formatAST(ast))
+      case None => fail(s"could not make AST fromBinary")
+    }
+  }
 }

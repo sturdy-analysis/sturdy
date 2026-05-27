@@ -10,7 +10,7 @@ for file in src/*.c; do
 
     echo "Compiling $file -> $outdir"
 
-    clang --target=wasm32 -nostdlib -O3 -g \
+    clang --target=wasm32 -nostdlib -O3 -g -fno-omit-frame-pointer \
           -Wl,--allow-undefined,--export-all,--no-gc-sections,--no-entry \
           -o "$outdir/$base.O3.wasm" \
           "$file"

@@ -19,8 +19,8 @@ import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
-import swam.binary.custom.dwarf.{CConcept, CType, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, UnknownType, Variable}
-import swam.binary.custom.dwarf.llvm.DWARFContext
+import swam.binary.custom.dwarf.{CConcept, CType, UnsupportedDynamicCountException, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, DwarfOperationSequence, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, UnknownType, Variable}
+import swam.binary.custom.dwarf.llvm.{DWARFAddressRange, DWARFContext}
 
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
 
@@ -39,7 +39,7 @@ trait RelationalMemory extends RelationalValues:
   var debuginformation_present: Boolean = false
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
-    val functions = parseFunctionFrames
+    //val functions = parseFunctionFrames
     for{
       tableBase <- intervalOfExport("__table_base")
       globalBase <- intervalOfExport("__global_base")
@@ -56,7 +56,7 @@ trait RelationalMemory extends RelationalValues:
       stackRange = Interval(stackLow.inf(), stackHigh.sup()),
       stackPointer = generic.GlobalAddr(0),
       heapRange = Interval(heapBase.inf(), heapEnd.sup()),
-      functionFrames = functions
+      functionFrames = parseFunctionFrames
     )
   }
 
@@ -77,7 +77,7 @@ trait RelationalMemory extends RelationalValues:
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
       println("[info] DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
       debuginformation_present = true
-      //println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
+      println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
     } else {
       println("[info] DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
       debuginformation_present = false
@@ -146,51 +146,58 @@ trait RelationalMemory extends RelationalValues:
     }
   }
 
+  //TODO: this implementation does not consider variables that are not in the stackframe present in wasm's bytememory.
+  //      this includes variables that are optimized to be inlined into the code but also functions that are stored in
+  //      wasm function locals. Variables that are split into pieces are also not considered (side note: I only ever saw
+  //      variables broken up into pieces being stored in wasm function locals and not directly in bytememory anyway).
   private def parseFunctionFrames(using moduleInstance: ModuleInstance): Map[FuncId, Frame] = {
     moduleInstance.dwarfSyntaxTree match {
       case Some(dwarfSyntaxTree) =>
         dwarfSyntaxTree.functions.toList.collect {
           case Subprogram(name, frameBase, returnType, parameters, body) =>
-            //map parameters to stack frame entries where possible
-            val paramEntries = parameters
-              .map { case FormalParameter(name, paramType, location) =>
-                if (location.isEmpty) {
-                  None //parameter does not exist in the stackframe itself. only exists as a name and potentially constant value
-                } else if (location.length >= 2) {
-                  sys.error(s"parameter has multiple locations which are currently not handled") 
-                } else {
-                  DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
-                    case Some(DW_OP_fbreg(offset)) =>                   
-                      val size = dwarfSyntaxTree.getTypeSize(paramType)
-                      Some((name, Interval(offset, offset + size - 1), paramType))
-                    case None => //parameter exists, has a location, but the location does not describe an address in the functions stack frame (usually a wasm local instead)
-                      None
-                  }
+
+            // Helper to interpret a list of DWARF operations into a vector of valid Intervals
+            def extractIntervalAsFrameBaseOffset(
+                                                  locations: List[DwarfOperationSequence],
+                                                  typeSize: Int
+                                                ): (Vector[Option[DWARFAddressRange]], Vector[Interval]) = {
+              val result: Vector[(Option[DWARFAddressRange], Interval)] = locations.toVector.flatMap { locSeq =>
+                DwarfOperationExprInterpreter.interpAsFrameBaseOffset(locSeq) match {
+                  case Some(DW_OP_fbreg(offset)) => Some(locSeq.range, Interval(offset, offset + typeSize - 1))
+                  case None => None
                 }
               }
-              .filter(_.isDefined)
-              .map(_.get)
+              result.unzip
+            }
+            
+            //map parameters to stack frame entries where possible
+            val paramEntries: Seq[FrameEntry] = parameters.map { case FormalParameter(name, paramType, location) =>
+                if (location.isEmpty) {
+                  None //parameter does not exist in the stackframe itself. only exists as a name and potentially constant value
+                } else {
+                  val size = dwarfSyntaxTree.getTypeSize(paramType)
+                  val (ranges, intervals) = extractIntervalAsFrameBaseOffset(location, size)
+                  Some(FrameEntry(name, ranges, intervals, paramType))
+                }
+              }.flatten()
             //map function body to stack frame entries where possible
-            def makeStackFrameFromBody(body: List[CConcept]): List[(String, Interval, CType)] = {
+            def makeStackFrameFromBody(body: List[CConcept]): List[FrameEntry] = {
               body match {
                 case Nil => Nil
                 case variable@(Variable(name, varType, location)) :: rest =>
+                  println(variable)
                   if (location.isEmpty) {
                     makeStackFrameFromBody(rest)
-                  } else if (location.length >= 2) {
-                    makeStackFrameFromBody(rest)
-                    //this usually also means the variable is not stored in the stack frame but instead in a wasm local and or inlined into the code
-                    //sys.error(s"variable <$name> in function body has multiple locations: $location, this is not a fatal error but instead an extra case that still needs to be implemented")
                   } else {
-                    DwarfOperationExprInterpreter.interpAsFrameBaseOffset(location.head) match {
-                      case Some(DW_OP_fbreg(offset)) =>
-                        println(variable)
-                        val size = CType.getTypeSize(varType)
-                        (name, Interval(offset, offset + size - 1), varType) :: makeStackFrameFromBody(rest)
-                      case None => makeStackFrameFromBody(rest)
+                    val size = CType.getTypeSize(varType)
+                    val (ranges, intervals) = extractIntervalAsFrameBaseOffset(location, size)
+                    if (intervals.isEmpty) {
+                      makeStackFrameFromBody(rest)
+                    } else {
+                      FrameEntry(name, ranges, intervals, varType) :: makeStackFrameFromBody(rest)
                     }
                   }
-                case LexicalBlock(body) :: rest =>
+                case LexicalBlock(ranges, body) :: rest =>
                   makeStackFrameFromBody(body.toList)
                     .concat(makeStackFrameFromBody(rest))
                 case other :: rest =>
@@ -199,10 +206,8 @@ trait RelationalMemory extends RelationalValues:
               }
             }
             val bodyEntries = makeStackFrameFromBody(body.toList)
-            val frameEntries = (paramEntries ++ bodyEntries)
-              .sortBy((name, interval, ctype) => interval.inf())
-              .toVector
-            println(s"Frame Entries of function $name: $frameEntries")
+            val frameEntries = (paramEntries ++ bodyEntries).toVector
+            println(s"Frame Entries of function $name: \n    -${frameEntries.mkString("\n    -")}")
             FuncId(name) -> Frame(frameBase, frameEntries)
         } //end of collect
           .toMap
@@ -569,29 +574,45 @@ trait RelationalMemory extends RelationalValues:
                   optionStaticMemoryLayout match {
                     case Some(sml) => sml.functionFrames.get(fun) match {
                       case Some(functionframe) =>
-                        val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(intervalBounds(iv), offset))
-                        candidates.toList match {
-                          case (_, iv, cType) :: Nil =>
-                            val (lower, upper) = intervalBounds(iv)
-                            val typesize = CType.getTypeSize(cType)
-                            (
-                              stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
-                              apronState.toNonRelational(
-                                ApronExpr.lit(typesize, I32Type)
-                              )
-                            )
-                          case Nil =>
-                            print("WARNING: (computeStartAddrAndSize) no matching stackframe entry found. falling back to stackAddrdefault")
-                            stackAddrdefault
-                          case head :: tail =>
-                            //TODO handle case of multiple variables in the same location
-                            sys.error(s"overlapping stackframe variables for $fun, offset $offset")
+                        if (functionframe.frame.forall(frameentry => frameentry.location.size == 1)) {
+                          
+                          //all candidates where the offset fits in at least 1 of their intervals
+                          val candidates = functionframe.frame.filter { frameentry =>
+                            frameentry.location.exists(interval => intervalContains(intervalBounds(interval), offset))
+                          }
+                          
+                          candidates.toList match {
+                            case FrameEntry(name, range, location, cType) :: Nil =>
+                              if (location.size > 1) {
+                                println(s"[warning] Variable $name has multiple location fragments. no access to program counter; falling back to default")
+                                stackAddrdefault
+                              } else {
+                                val (lower, upper) = intervalBounds(location.head)
+                                val typesize = CType.getTypeSize(cType)
+                                (
+                                  stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
+                                  apronState.toNonRelational(ApronExpr.lit(typesize, I32Type))
+                                )
+                              }
+                            case Nil =>
+                              print("[warning] (computeStartAddrAndSize) no matching stackframe entry found. falling back to stackAddrdefault")
+                              //this should only occur when debug information is corrupted or incomplete.
+                              // correction: this can also happen when there are store operations on memory addresses that have no assigned debug information
+                              // one case where this happens is the stackframe acting as a memory buffer for a printf call.
+                              //sys.error(s"suspected debug information corruption or incompleteness")
+                              stackAddrdefault
+                            case head :: tail =>
+                              //TODO handle case of multiple variables in the same location: need access to program counter/current instruction to evaluate range
+                              println(s"[warning] overlapping stackframe variables for $fun, offset $offset")
+                              stackAddrdefault
+                          }
+                        } else {
+                          stackAddrdefault
                         }
                       case None => sys.error(s"no stack frame for function $fun found.")
                     }
                     case None =>
                       stackAddrdefault
-
                     //print("staticmemorylayout not present but normalize computeStartAddrAndSize is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
                   }
               }
@@ -698,24 +719,27 @@ trait RelationalMemory extends RelationalValues:
                 optionStaticMemoryLayout match {
                   case Some(sml) => sml.functionFrames.get(fun) match {
                     case Some(functionframe) =>
-                      val candidates = functionframe.frame.filter((_, iv, _) => intervalContains(intervalBounds(iv), offset))
+                      val candidates = functionframe.frame.filter { frameentry =>
+                        frameentry.location.exists(interval => intervalContains(intervalBounds(interval), offset))
+                      }
                       candidates.toList match {
-                        case (_, iv, _) :: Nil =>
-                          val (lower, upper) = intervalBounds(iv)
-                          Iterator(
-                            ByteMemoryCtx.Stack(
-                              function = fun, offset = lower
-                            )
-                          )
+                        case FrameEntry(name, range, location, cType) :: Nil =>
+                          // If the variable has multiple location fragments,
+                          // fall back to the unnormalized address.
+                          if (location.size > 1) {
+                            Iterator(ByteMemoryCtx.Stack(function = fun, offset = offset))
+                          } else {
+                            //change from default behavior
+                            val (lower, upper) = intervalBounds(location.head)
+                            Iterator(ByteMemoryCtx.Stack(function = fun, offset = lower))
+                          }
                         case Nil =>
                           println("[warn] no matching stack slot, falling back to unnormalized offset")
-                          Iterator(
-                            ByteMemoryCtx.Stack(
-                              function = fun,
-                              offset = offset
-                            )
-                          )
-                        case head :: tail => sys.error(s"overlapping stackframe variables for $fun, offset $offset")
+                          Iterator(ByteMemoryCtx.Stack(function = fun, offset = offset))
+                        case head :: tail =>
+                          // Multiple variables mapped to the same layout offset slot
+                          println(s"[warning] overlapping stackframe variables for $fun, offset $offset")
+                          Iterator(ByteMemoryCtx.Stack(function = fun, offset = offset))
                       }
                     case None => sys.error(s"no stack frame for function $fun found.")
                   }

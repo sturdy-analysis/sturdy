@@ -3,11 +3,12 @@ package sturdy.language.wasm.abstractions
 import apron.Interval
 import sturdy.language.wasm.generic
 import sturdy.language.wasm.generic.FuncId
-import swam.binary.custom.dwarf.llvm.DWARFLocationExpression
+import swam.binary.custom.dwarf.llvm.{DWARFAddressRange, DWARFLocationExpression}
 import swam.binary.custom.dwarf.{CType, DwarfOperationSequence, FunctionConcept, Subprogram}
 
 //describes a stackframe of a Function
-case class Frame(frame_base: DwarfOperationSequence, frame: Vector[(String, Interval, CType)])
+case class Frame(frame_base: DwarfOperationSequence, frame: Vector[FrameEntry])
+case class FrameEntry(name: String, range: Vector[Option[DWARFAddressRange]], location: Vector[Interval], _type: CType)
 
 /**
  *
