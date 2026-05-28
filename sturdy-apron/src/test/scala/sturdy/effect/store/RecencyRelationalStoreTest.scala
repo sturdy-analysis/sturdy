@@ -30,6 +30,7 @@ class RecencyRelationalStoreTest extends RecencyAbstractionTest({
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
+  given WithWideningThresholds = WithWideningThresholds.No
 
   var exprConverter: ApronExprConverter[Ctx, Type, Value] = null
   given lazyExprConverter: Lazy[ApronExprConverter[Ctx, Type, Value]] = lazily(exprConverter)

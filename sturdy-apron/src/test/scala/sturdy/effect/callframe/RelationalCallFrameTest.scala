@@ -10,7 +10,7 @@ import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
-import sturdy.effect.store.RecencyClosure
+import sturdy.effect.store.{RecencyClosure, WithWideningThresholds}
 import sturdy.values.Finite
 import sturdy.values.references.{AddressTranslation, PhysicalAddress, VirtualAddress}
 import sturdy.values.integer.BaseTypeIntegerOps
@@ -32,7 +32,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
   given defaultResolveState: ResolveState = ResolveState.Internal
-
+  given WithWideningThresholds = WithWideningThresholds.No
   given Manager = new apron.Polka(true)
 
   test("getLocal") {
