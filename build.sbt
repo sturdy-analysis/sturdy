@@ -129,47 +129,35 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   )
 
 val swam = file("sturdy-wasm/swam")
-val checkSwamSubmodule = taskKey[Unit]("Check that the swam submodule is present")
 
-lazy val sturdy_wasm = (project in file("sturdy-wasm"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .dependsOn(sturdy_apron % "compile->compile")
-  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
-  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile;test->test")
-  .settings(
+lazy val sturdy_wasm = {
+  val base = (project in file("sturdy-wasm"))
+    .dependsOn(sturdy_core % "compile->compile;test->test")
+    .dependsOn(sturdy_apron % "compile->compile")
+    .settings(
+      name := "sturdy_wasm",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+      )
+    )
+  if (!(swam / "core").exists() || !(swam / "text").exists()) {
+    println(
+      """
+        |[Error] SWAM submodule not found.
+        |
+        |Run:
+        |  git submodule update --init --recursive
+        |
+        |or clone with:
+        |  git clone --recursive <repo-url>
+        |
+        |""".stripMargin)
+  }
+
+    base.dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
+        .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile;test->test")
+}.settings(
     name := "sturdy_wasm",
-
-    checkSwamSubmodule := {
-      val swamDir = baseDirectory.value / "swam"
-
-      val core = swamDir / "swam-core"
-      val text = swamDir / "swam-text"
-
-      def missing(dir: File): Boolean =
-        !dir.exists() || dir.listFiles() == null || dir.listFiles().isEmpty
-
-      if (missing(core) || missing(text)) {
-        println(
-          s"""
-             |The SWAM submodule does not seem to be initialized.
-             |
-             |Expected directories:
-             |  - ${core.getAbsolutePath}
-             |  - ${text.getAbsolutePath}
-             |
-             |Fix:
-             |  git submodule update --init --recursive
-             |
-             |Or clone with:
-             |  git clone --recursive <repo-url>
-             |
-             |""".stripMargin
-        )
-      }
-    },
-
-    Compile / compile := (Compile / compile).dependsOn(checkSwamSubmodule).value,
-
     libraryDependencies ++= Seq(
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
