@@ -129,6 +129,7 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
   )
 
 val swam = file("sturdy-wasm/swam")
+val checkSwamSubmodule = taskKey[Unit]("Check that the swam submodule is present")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
@@ -137,6 +138,38 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile;test->test")
   .settings(
     name := "sturdy_wasm",
+
+    checkSwamSubmodule := {
+      val swamDir = baseDirectory.value / "swam"
+
+      val core = swamDir / "swam-core"
+      val text = swamDir / "swam-text"
+
+      def missing(dir: File): Boolean =
+        !dir.exists() || dir.listFiles() == null || dir.listFiles().isEmpty
+
+      if (missing(core) || missing(text)) {
+        println(
+          s"""
+             |The SWAM submodule does not seem to be initialized.
+             |
+             |Expected directories:
+             |  - ${core.getAbsolutePath}
+             |  - ${text.getAbsolutePath}
+             |
+             |Fix:
+             |  git submodule update --init --recursive
+             |
+             |Or clone with:
+             |  git clone --recursive <repo-url>
+             |
+             |""".stripMargin
+        )
+      }
+    },
+
+    Compile / compile := (Compile / compile).dependsOn(checkSwamSubmodule).value,
+
     libraryDependencies ++= Seq(
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
