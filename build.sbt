@@ -79,9 +79,9 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
       }
       val files = Seq() ++ nativeDir.listFiles().filter(_.name.endsWith(ext))
       for (source <- files) {
-        val target = baseDirectory.value / source.name
+        val target = baseDirectory.value.toPath.getParent / source.name
         println(s"Copies $source to $target")
-        java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
     Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
