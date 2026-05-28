@@ -53,7 +53,7 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     assembly / assemblyJarName := "sturdy-core.jar"
   )
 
-val copyApronBinaries = taskKey[Unit]("Copies the pqlatform-dependent Apron binaries to the project root, so that sbt loads them automatically")
+val copyApronBinaries = taskKey[Unit]("Copies the platform-dependent Apron binaries to the project root, so that sbt loads them automatically")
 
 lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
   .dependsOn(sturdy_core % "compile->compile; test->test")
@@ -84,7 +84,7 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
         java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-//    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
+    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
     assembly / assemblyJarName := "sturdy-apron.jar"
   )
 
