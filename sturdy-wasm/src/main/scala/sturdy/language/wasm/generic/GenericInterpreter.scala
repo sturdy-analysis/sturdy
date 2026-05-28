@@ -171,6 +171,7 @@ given Ordering[FixIn] = {
 
 enum FixOut[V]:
   case Eval()
+  case Exception()
   case ExitWasmFunction(vals: List[V])
   case ExitHostFunction(vals: List[V])
   case MostGeneralClient()
@@ -536,7 +537,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity = labelStack.lookupReturnArity(labelIndex)
     val operands = stack.popNOrAbort(returnArity)
-    val state = effectStack.getOutState(FixIn.Exception())
+    val state = effectStack.getOutState(FixIn.Exception)
     throws(WasmException(JumpTarget.Jump(labelIndex), operands, state))
 
   /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
@@ -616,7 +617,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, Index, FunV, RefV, J[_] <: 
       ex match {
         case WasmException(JumpTarget.Return, operands, state) =>
           stack.pushN(operands)
-          effectStack.setOutState(FixIn.Exception(), state)
+          effectStack.setOutState(FixIn.Exception, state)
         case WasmException(JumpTarget.Jump(_), _, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
