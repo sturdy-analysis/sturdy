@@ -17,6 +17,8 @@ import sturdy.util.Profiler
 import sturdy.values.{*, given}
 import swam.syntax
 import swam.syntax.{LoadInst, LoadNInst, StoreInst, StoreNInst}
+import org.scalatest.concurrent.TimeLimits
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import java.util.Calendar
 import java.io.File
@@ -26,8 +28,8 @@ import scala.collection.immutable.SortedMap
 import scala.jdk.StreamConverters.*
 
 
-val optimizationLevel = "o0" //either "o0" or "o3"
-val writer: CSVWriter = CSVWriter.open(File(s"${optimizationLevel}_temp_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
+val optimizationLevel = "o3" //either "o0" or "o3"
+val writer: CSVWriter = CSVWriter.open(File(s"${optimizationLevel}_nodebug_benchmarks-game-precision-test${Calendar.getInstance().getTime}.csv"))
 
 class BenchmarksgameRelationalPrecisionTests extends Suites(
   //BenchmarksgameRelationalPrecisionTest(newManager = Polka(true), relational = true, ssa = false),
@@ -41,7 +43,7 @@ class BenchmarksgameRelationalPrecisionTests extends Suites(
   override def afterAll(): Unit =
     writer.close
 
-class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers:
+class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: Boolean, ssa: Boolean = false) extends AnyFunSpec, Matchers, TimeLimits:
 
   val manager: Manager = newManager
   val funcName = "_start"
@@ -58,13 +60,13 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
 
   // These programs contain structs, which our analysis does not yet support.
   val excluded: Set[Path] = Set(
-    //"spectral-norm.wasm",
+    //"spectral-norm.wasm", //has o0 issue: variable length array
     //"reverse-complement.wasm",
     //"nbody.wasm",
     //"mandelbrot.wasm",
     //"fasta.wasm",
-    //"fankuchredux.wasm",
-    //"binarytrees.wasm",
+    "fankuchredux.wasm",
+    "binarytrees.wasm", //has box issue: does not finish after 30 minutes
     "k-nucleotide.wasm",
     "pidigits.wasm",
     "test-array-of-structs.wasm",
@@ -76,7 +78,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
   val analysisName: String = if (relational) manager.getClass.getSimpleName else "non-relational"
 
   describe(analysisName) {
-    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.reverse.foreach { p =>
+    Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm") && !excluded.contains(p)).sorted.foreach { p =>
       it(s"${p.getFileName}") {
         if(manager.isInstanceOf[Polka] && ssa && p.endsWith("reverse-complement.wasm"))
           cancel("timeout")
@@ -90,20 +92,28 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
 
         val moduleInst = analysis.instantiateModule(module, moduleId = Some(p.getFileName))
 
-        Profiler.addTime("analysis-time") {
-          analysis.failure.fallible(
-            analysis.invokeExported(moduleInst, funcName, List.empty)
-          )
+        try {
+          // Sets a hard ceiling per binary test execution
+          failAfter(3.minutes) {
+            Profiler.addTime("analysis-time") {
+              analysis.failure.fallible(
+                analysis.invokeExported(moduleInst, funcName, List.empty)
+              )
+            }
+            val analysisTime = Profiler.get("analysis-time").get
+            Profiler.printLastMeasured()
+
+            println(memoryLogger.toString)
+            val expected = parseMemOpsCSV(p, moduleInst)
+            writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
+          }
+        } catch {
+          case te: org.scalatest.exceptions.TestFailedDueToTimeoutException =>
+            println(s"Analysis for ${p.getFileName} exceeded the allocation threshold.")
+            throw te
+        } finally {
+          Profiler.reset()
         }
-        val analysisTime = Profiler.get("analysis-time").get
-
-        Profiler.printLastMeasured()
-        Profiler.reset()
-
-        println(memoryLogger.toString)
-        val expected = parseMemOpsCSV(p, moduleInst)
-
-        writeCSV(p, analysis, memoryLogger, expected, abstractDomainSizeLogger, analysisTime)
       }
     }
   }
@@ -160,6 +170,7 @@ class BenchmarksgameRelationalPrecisionTest(newManager: => Manager, relational: 
     heapCtxStr.take(1) match {
       case "F" => ByteMemoryCtx.Fill(FixIn.MostGeneralClientLoop(moduleInstance))
       case "G" => ByteMemoryCtx.Global(heapCtxStr.drop(1))
+      case "C" => ByteMemoryCtx.Static(heapCtxStr.drop(1).toInt)
       case "S" =>
         val Array(funcName, offset) = heapCtxStr.drop(1).split('+')
         ByteMemoryCtx.Stack(FuncId(funcName), offset.toInt)

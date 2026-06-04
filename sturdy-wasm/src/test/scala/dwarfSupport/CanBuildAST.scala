@@ -21,7 +21,7 @@ class CanBuildAST extends AnyFunSuite {
           val astBuilder = new DwarfTreeBuilder()
           val ast = astBuilder.makeAST(unit)
           if (DEBUG) {
-            println(DwarfLogging.formatAST(ast))
+            println(DwarfLogging.formatDST(ast))
           }
 
         case None =>
@@ -32,21 +32,21 @@ class CanBuildAST extends AnyFunSuite {
   test(s"can build ast for test-arrays fromBinary") {
     tryToMakeASTFromBinary(getTestFile(TestArrays)) match {
       case Some(ast) =>
-        if (DEBUG) println(DwarfLogging.formatAST(ast))
+        if (DEBUG) println(DwarfLogging.formatDST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }
   test(s"can build ast for test-array-of-structs fromBinary") {
     tryToMakeASTFromBinary(getTestFile(TestArrayOfStructs)) match {
       case Some(ast) =>
-        if (DEBUG) println(DwarfLogging.formatAST(ast))
+        if (DEBUG) println(DwarfLogging.formatDST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }
   test(s"can build ast for test-call-by-reference fromBinary") {
     tryToMakeASTFromBinary(getTestFile(TestCallByReference)) match {
       case Some(ast) =>
-        if (DEBUG) println(DwarfLogging.formatAST(ast))
+        if (DEBUG) println(DwarfLogging.formatDST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }
@@ -54,7 +54,7 @@ class CanBuildAST extends AnyFunSuite {
     tryToMakeASTFromBinary(getTestFile(Pidigits)) match {
       case Some(ast) =>
         if (DEBUG)
-          println(DwarfLogging.formatAST(ast))
+          println(DwarfLogging.formatDST(ast))
           for (global <- ast.globals) {
             println(s"${global.name} has size: ${ast.getTypeSize(global.varType)}")
           }
@@ -65,7 +65,7 @@ class CanBuildAST extends AnyFunSuite {
   test(s"can build ast for spectral-norm fromBinary") {
     tryToMakeASTFromBinary(getTestFile(SpectralNorm)) match {
       case Some(ast) =>
-        if (DEBUG) println(DwarfLogging.formatAST(ast))
+        if (DEBUG) println(DwarfLogging.formatDST(ast))
       case None => fail(s"could not make AST fromBinary")
     }
   }

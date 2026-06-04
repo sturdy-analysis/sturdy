@@ -1,5 +1,0 @@
-package dwarfSupport
-
-class normalizationTest {
-  
-}

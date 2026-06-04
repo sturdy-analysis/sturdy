@@ -23,7 +23,7 @@ class dwarfTest extends AnyFunSuite{
             println("======================")
             println(file.getFileName)
             println("======================")
-            println(DwarfLogging.formatAST(syntaxTree))
+            println(DwarfLogging.formatDST(syntaxTree))
           }
         case None =>
           fail(s"could not read dwarf sections from ${file.getFileName}")

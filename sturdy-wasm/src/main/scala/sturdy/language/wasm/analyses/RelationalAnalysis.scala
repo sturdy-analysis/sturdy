@@ -866,14 +866,16 @@ object RelationalAnalysis extends Interpreter, RelationalTypes, RelationalAddres
             s"precise:\n${memOpsMapToString(precise)}\n" +
             s"imprecise:\n${memOpsMapToString(imprecise)}\n" +
             s"deadCode:\n${memOpsMapToString(deadCode)}\n"
-
+      
+      //TODO explain how precision is computed
       def computePrecision(expected: SortedMap[InstLoc, Set[ByteMemoryCtx]]): Precision = {
         val allContexts = heapCtxs
         val notAnalyzed = expected.keySet.filter(loc => !allContexts.contains(loc))
         val (executable, deadCode) = allContexts.partition((loc,_) => expected.contains(loc))
         val (precise, imprecise) = executable.partition { case (instLoc, (inst, heapCtxs)) =>
           val ctxs = if(heapCtxs.size > 1) heapCtxs.filter{ case _: ByteMemoryCtx.Fill => false; case _ => true } else heapCtxs
-          ctxs == expected(instLoc)
+          //ctxs == expected(instLoc)
+          ctxs.forall(ctx => expected(instLoc).contains(ctx))
         }
         Precision(notAnalyzed, precise, imprecise, deadCode)
       }

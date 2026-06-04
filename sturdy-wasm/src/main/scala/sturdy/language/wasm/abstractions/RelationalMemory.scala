@@ -1,3 +1,4 @@
+//noinspection DuplicatedCode
 package sturdy.language.wasm.abstractions
 
 import apron.*
@@ -19,8 +20,8 @@ import sturdy.values.addresses.{AddressLimits, AddressOffset}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.{*, given}
 import sturdy.values.references.{*, given}
-import swam.binary.custom.dwarf.{CConcept, CType, UnsupportedDynamicCountException, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationExprParser, DwarfOperationSequence, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramSignature, UnknownType, Variable}
-import swam.binary.custom.dwarf.llvm.{DWARFAddressRange, DWARFContext}
+import swam.binary.custom.dwarf.{CConcept, CType, DW_OP_addr, DW_OP_fbreg, DwarfLogging, DwarfOperationExprInterpreter, DwarfOperationSequence, FormalParameter, GlobalVariable, LexicalBlock, Subprogram, SubprogramDeclaration, SubprogramInstance, SubprogramOrigin, UnknownType, Variable}
+import swam.binary.custom.dwarf.llvm.DWARFAddressRange
 
 import scala.collection.immutable.{AbstractSeq, LinearSeq}
 
@@ -39,7 +40,7 @@ trait RelationalMemory extends RelationalValues:
   var debuginformation_present: Boolean = false
 
   def parseStaticMemoryLayout(using moduleInstance: ModuleInstance, failure: Failure, apronState: ApronState[VirtAddr, Type], globals: DecidableSymbolTable[Unit, generic.GlobalAddr, Value]): Option[StaticMemoryLayout] = {
-    //val functions = parseFunctionFrames
+    //return None
     for{
       tableBase <- intervalOfExport("__table_base")
       globalBase <- intervalOfExport("__global_base")
@@ -77,7 +78,7 @@ trait RelationalMemory extends RelationalValues:
     if (moduleInstance.dwarfSyntaxTree.isDefined) {
       println("[info] DWARF INFORMATION IS AVAILABLE FOR GLOBALRANGES")
       debuginformation_present = true
-      println(DwarfLogging.formatAST(moduleInstance.dwarfSyntaxTree.get))
+      println(DwarfLogging.formatDST(moduleInstance.dwarfSyntaxTree.get))
     } else {
       println("[info] DWARF INFORMATION IS >>NOT<< AVAILABLE FOR GLOBALRANGES")
       debuginformation_present = false
@@ -103,7 +104,7 @@ trait RelationalMemory extends RelationalValues:
 
         globals = globals.sortBy((_name, interval, cType) => interval.inf())
 
-        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && (iv.isBottom)))
+        if (globals.headOption.exists((name, iv, cType) => name == ".rodata" && (iv.isBottom || iv.isScalar)))
           globals = globals.tail
 
         if (globals.headOption.exists(_._1 == "__data_end")) {
@@ -185,7 +186,7 @@ trait RelationalMemory extends RelationalValues:
               body match {
                 case Nil => Nil
                 case variable@(Variable(name, varType, location)) :: rest =>
-                  println(variable)
+                  //println(variable)
                   if (location.isEmpty) {
                     makeStackFrameFromBody(rest)
                   } else {
@@ -562,59 +563,40 @@ trait RelationalMemory extends RelationalValues:
                   )
                 )
 
-              if !_FLAG_normalizeComputeStartAddrAndSize then { // Original Code
+              if !debuginformation_present then { // Original behavior
                 stackAddrdefault
-              } else { // Code with normalization
-                assert(stackAddr.function.size == stackAddr.initialOffset.size)
-                if (stackAddr.function.size != 1)
+              } else if (stackAddr.function.size != 1 || stackAddr.initialOffset.size != 1) {
                   stackAddrdefault
-                else
-                  val fun = stackAddr.function.set.head
-                  val offset = stackAddr.initialOffset.set.head
-                  optionStaticMemoryLayout match {
-                    case Some(sml) => sml.functionFrames.get(fun) match {
-                      case Some(functionframe) =>
-                        if (functionframe.frame.forall(frameentry => frameentry.location.size == 1)) {
-                          
-                          //all candidates where the offset fits in at least 1 of their intervals
-                          val candidates = functionframe.frame.filter { frameentry =>
-                            frameentry.location.exists(interval => intervalContains(intervalBounds(interval), offset))
+              } else { //attempt to normalize
+                val fun = stackAddr.function.set.head
+                val offset = stackAddr.initialOffset.set.head
+                optionStaticMemoryLayout match {
+                  case Some(sml) => sml.functionFrames.get(fun) match {
+                    case Some(functionframe) =>
+                      val candidates = functionframe.frame.filter { frameentry =>
+                        frameentry.location.exists(interval => intervalContains(intervalBounds(interval), offset))
+                      }
+                      candidates.toList match {
+                        case FrameEntry(name, range, location, cType) :: Nil =>
+                          if (location.size > 1) {
+                            stackAddrdefault
+                          } else {
+                            val (lower, upper) = intervalBounds(location.head)
+                            val typesize = CType.getTypeSize(cType)
+                            (
+                              stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
+                              apronState.toNonRelational(ApronExpr.lit(typesize, I32Type))
+                            )
                           }
-                          
-                          candidates.toList match {
-                            case FrameEntry(name, range, location, cType) :: Nil =>
-                              if (location.size > 1) {
-                                println(s"[warning] Variable $name has multiple location fragments. no access to program counter; falling back to default")
-                                stackAddrdefault
-                              } else {
-                                val (lower, upper) = intervalBounds(location.head)
-                                val typesize = CType.getTypeSize(cType)
-                                (
-                                  stackAddr.copy(initialOffset = Powerset(lower), otherOffset = ApronExpr.lit(0, I32Type)),
-                                  apronState.toNonRelational(ApronExpr.lit(typesize, I32Type))
-                                )
-                              }
-                            case Nil =>
-                              print("[warning] (computeStartAddrAndSize) no matching stackframe entry found. falling back to stackAddrdefault")
-                              //this should only occur when debug information is corrupted or incomplete.
-                              // correction: this can also happen when there are store operations on memory addresses that have no assigned debug information
-                              // one case where this happens is the stackframe acting as a memory buffer for a printf call.
-                              //sys.error(s"suspected debug information corruption or incompleteness")
-                              stackAddrdefault
-                            case head :: tail =>
-                              //TODO handle case of multiple variables in the same location: need access to program counter/current instruction to evaluate range
-                              println(s"[warning] overlapping stackframe variables for $fun, offset $offset")
-                              stackAddrdefault
-                          }
-                        } else {
+                        case Nil =>
                           stackAddrdefault
-                        }
-                      case None => sys.error(s"no stack frame for function $fun found.")
-                    }
-                    case None =>
-                      stackAddrdefault
-                    //print("staticmemorylayout not present but normalize computeStartAddrAndSize is enabled. please make sure that staticmemorylayout is available. (i.e. the analyzed file should contain DWARF debug sections")
+                        case head :: tail =>
+                          stackAddrdefault
+                      }
+                    case None => sys.error(s"no stack frame for function $fun found.")
                   }
+                  case None => stackAddrdefault
+                }
               }
 
             case (_, heapAddr: HeapAddr) =>
