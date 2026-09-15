@@ -90,6 +90,16 @@ object MaybeChanged:
 inline def Changed[A](a: A) = MaybeChanged.Changed(a)
 inline def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
 
+final class CannotJoinException(message: String) extends RuntimeException(message)
+
+final class CombineCheckTermination[V, W <: Widening](using combine: Combine[V,W]) extends Combine[V,W]:
+  override def apply(v1: V, v2: V): MaybeChanged[V] =
+    val result = combine(v1, v2)
+    if(result.get.equals(v1) || v1.equals(result.get)) {
+        assert(! result.hasChanged, s"In combine($v1,$v2), result ${result.get} equal to $v1, but result indicates change.")
+    }
+    result
+
 /** If `V` a lattice of finite height, then there is no need to widen. */
 given finitely[V](using Join[V], Finite[V]): Widen[V] with
   def apply(v1: V, v2: V) = Join(v1, v2)

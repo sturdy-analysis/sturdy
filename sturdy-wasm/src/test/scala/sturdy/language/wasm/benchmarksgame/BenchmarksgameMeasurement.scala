@@ -106,7 +106,7 @@ object BenchmarksgameMeasurement:
     println("\tStart warmup...")
     for (i <- 0.until(warmups)) {
       val interp = instantiateInterp(config)
-      val modInst = interp.initializeModule(module)
+      val modInst = interp.instantiateModule(module)
 
       interp.failure.asInstanceOf[CollectedFailures[?]].fallible(
         interp.invokeExported(modInst, funcName, List.empty)
@@ -119,7 +119,7 @@ object BenchmarksgameMeasurement:
     println("\tMeasure...")
     val res = for (i <- 0.until(runs)) yield {
       val interp = instantiateInterp(config)
-      val modInst = interp.initializeModule(module)
+      val modInst = interp.instantiateModule(module)
 
       val optStart = System.currentTimeMillis()
       interp.failure.asInstanceOf[CollectedFailures[?]].fallible(

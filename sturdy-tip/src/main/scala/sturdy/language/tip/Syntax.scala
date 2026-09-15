@@ -16,6 +16,7 @@ enum Exp extends Labeled:
   case Mul(e1: Exp, e2: Exp)
   case Div(e1: Exp, e2: Exp)
   case Gt(e1: Exp, e2: Exp)
+  case Ge(e1: Exp, e2: Exp)
   case Eq(e1: Exp, e2: Exp)
   case Call(fun: Exp, args: Seq[Exp])
   case Alloc(e: Exp)
@@ -35,6 +36,7 @@ enum Exp extends Labeled:
     case Mul(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Div(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Gt(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Ge(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Eq(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
     case Call(fun, args) => m.combine(f(this), m.combine(fun.fold, m.combineAll(args.view.map(f))))
     case Alloc(e) => m.combine(f(this), e.fold)
@@ -53,6 +55,7 @@ enum Exp extends Labeled:
     case Mul(e1, e2) => s"Mul@${this.label}"
     case Div(e1, e2) => s"Div@${this.label}"
     case Gt(e1, e2) => s"Gt@${this.label}"
+    case Ge(e1, e2) => s"Ge@${this.label}"
     case Eq(e1, e2) => s"Eq@${this.label}"
     case Call(Var(fun), args) => s"Call($fun)@${this.label}"
     case Call(fun, args) => s"Call@${this.label}"

@@ -77,3 +77,12 @@ given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Toppe
     case (_, Topped.Top) => Changed(Topped.Top)
     case (Topped.Actual(x1), Topped.Actual(x2)) => j(x1, x2).map(Topped.Actual.apply)
 
+given OrderingTopped[V](using orderingV: Ordering[V]): Ordering[Topped[V]] with
+  override def compare(x: Topped[V], y: Topped[V]): Int =
+    (x,y) match
+      case (Topped.Top, Topped.Top) => 0
+      case (Topped.Actual(i), Topped.Actual(j)) => orderingV.compare(i,j)
+      case _ => Ordering.by[Topped[V], Int] {
+        case Topped.Top => 1
+        case _: Topped.Actual[V] => 2
+      }.compare(x,y)

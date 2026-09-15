@@ -55,6 +55,20 @@ object Parsing:
       case e: TimeoutException => throw new WasmParseError(s"Parsing of $path timed out")
     }
 
+  def fromString(module: String): Module =
+    implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+    implicit val timer: Timer[IO] = cats.effect.IO.timer(scala.concurrent.ExecutionContext.global)
+    try {
+      Blocker[IO].use { blocker =>
+        for {
+          compiler <- Compiler[IO](blocker)
+          mod <- compiler.compile(module)
+        } yield mod
+      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+    } catch {
+      case e: TimeoutException => throw new WasmParseError(s"Parsing of $module timed out")
+    }
+
   def fromBytes(bytes: Array[Byte]): Module =
     implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
     implicit val timer: Timer[IO] = cats.effect.IO.timer(scala.concurrent.ExecutionContext.global)
@@ -66,7 +80,7 @@ object Parsing:
           binaryParser = new ModuleParser[IO](validator)
           mod <- binaryParser.parse(loader.sections(bytes))
         } yield mod
-      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(10000, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing timed out")
     }
@@ -80,12 +94,38 @@ object Parsing:
           compiler <- Compiler[IO](blocker)
           mod <- compiler.compile(mod)
         } yield mod
-      }.timeout(FiniteDuration(10, "s")).unsafeRunSync()
+      }.timeout(FiniteDuration(10000, "s")).unsafeRunSync()
     } catch {
       case e: TimeoutException => throw new WasmParseError(s"Parsing of ${mod.id} timed out")
     }
 
-  def testscript(path: Path): Seq[Command] =
-    val script = _root_.fastparse.parse(new FileInputStream(path.toFile), TestScriptParser.script(_))
+  def offsetToLineCol(input: String, offset: Int): (Int, Int) = {
+    val lines = input.take(offset).split("\n")
+    val line = lines.length
+    val col = if (lines.isEmpty) 1 else lines.last.length + 1
+    (line, col)
+  }
+
+  def testscript(path: Path): Seq[Command] = {
+    import java.nio.file.Files
+    import java.nio.charset.StandardCharsets
+
+    val bytes = Files.readAllBytes(path)
+    val input = new String(bytes, StandardCharsets.UTF_8)
+
+    val script = fastparse.parse(input, TestScriptParser.script(_))
+    script match {
+      case f: fastparse.Parsed.Failure =>
+        println(f.trace().longMsg)
+        val (line, col) = offsetToLineCol(input, f.index)
+        val lines = input.split("\n")
+        val contextLine = lines.lift(line - 1).getOrElse("")
+        val start = (col - 200).max(0)
+        val end = (col + 200).min(contextLine.length)
+        println(s"Context around error (line $line, col $col):")
+        println(contextLine.slice(start, end))
+      case _ =>
+    }
     assert(script.isSuccess)
     script.get.value
+  }

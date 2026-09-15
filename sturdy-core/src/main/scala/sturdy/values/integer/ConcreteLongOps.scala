@@ -6,7 +6,7 @@ import sturdy.data.MayJoin.NoJoin
 import scala.util.Random
 import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, Topped, config}
-import sturdy.values.config.{Bits, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{BitSign, UnsupportedConfiguration, unsupportedConfiguration}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 
@@ -107,15 +107,15 @@ given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
 
 given ConcreteConvertLongFloat(using failure: Failure): ConvertLongFloat[Long, Float] with
   private val convC = JFloat.parseFloat("0x1p12")
-  override def apply(l: Long, conf: Bits): Float = conf match
-    case config.Bits.Signed =>
+  override def apply(l: Long, conf: BitSign): Float = conf match
+    case config.BitSign.Signed =>
       if (Math.abs(l) < 0X10000000000000L) {
         l.toFloat
       } else {
         val r = if ((l & 0XFFFL) == 0L) 0L else 1L
         ((l >> 12) | r).toFloat * convC
       }
-    case config.Bits.Unsigned =>
+    case config.BitSign.Unsigned =>
       if (JLong.compareUnsigned(l, 0X10000000000000L) < 0) {
         l.toFloat
       } else {
@@ -125,14 +125,14 @@ given ConcreteConvertLongFloat(using failure: Failure): ConvertLongFloat[Long, F
     case _ => unsupportedConfiguration(conf, this)
 
 given ConcreteConvertLongDouble: ConvertLongDouble[Long, Double] with
-  override def apply(l: Long, conf: Bits): Double = conf match
-    case config.Bits.Signed => l.toDouble
-    case config.Bits.Unsigned =>
+  override def apply(l: Long, conf: BitSign): Double = conf match
+    case config.BitSign.Signed => l.toDouble
+    case config.BitSign.Unsigned =>
       if (l >= 0L)
         l.toDouble
       else
         ((l >>> 1) | (l & 1L)) * 2.0d
-    case config.Bits.Raw => JDouble.longBitsToDouble(l)
+    case config.BitSign.Raw => JDouble.longBitsToDouble(l)
 
 given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
   override def apply(from: Long, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =
@@ -146,16 +146,16 @@ given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
     collection.immutable.ArraySeq.unsafeWrapArray(buf.array())
 
 given ConcreteConvertBytesLong(using failure: Failure): ConvertBytesLong[Seq[Byte], Long] with
-  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Long =
+  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.BitSign): Long =
     val buf = ByteBuffer.wrap(from.toArray)
     buf.order(conf.c1.c2.t)
     (conf.c1.c1, conf.c2) match
-      case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toLong
-      case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFFL
-      case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toLong
-      case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFFL
-      case (config.BytesSize.Int, config.Bits.Signed) => buf.getInt.toLong
-      case (config.BytesSize.Int, config.Bits.Unsigned) => buf.getInt & 0xFFFFFFFFL
+      case (config.BytesSize.Byte, config.BitSign.Signed) => buf.get.toLong
+      case (config.BytesSize.Byte, config.BitSign.Unsigned) => buf.get & 0xFFL
+      case (config.BytesSize.Short, config.BitSign.Signed) => buf.getShort.toLong
+      case (config.BytesSize.Short, config.BitSign.Unsigned) => buf.getShort & 0xFFFFL
+      case (config.BytesSize.Int, config.BitSign.Signed) => buf.getInt.toLong
+      case (config.BytesSize.Int, config.BitSign.Unsigned) => buf.getInt & 0xFFFFFFFFL
       case (config.BytesSize.Long, _) => buf.getLong()
       case _ => unsupportedConfiguration(conf, this)
 

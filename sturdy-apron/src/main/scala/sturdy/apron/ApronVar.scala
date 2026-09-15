@@ -14,7 +14,6 @@ case class ApronVar[Addr](addr: Addr)(using Ordering[Addr], ClassTag[Addr]) exte
   override def toString: String = addr.toString
   def mapAddr(f: Addr => Addr): ApronVar[Addr] = ApronVar(f(addr))
 
-
 given ConvertToApronVar[Addr : Ordering : ClassTag]: Conversion[Addr, ApronVar[Addr]] = ApronVar(_)
 given ConvertFromApronVar[Addr : Ordering : ClassTag]: Conversion[ApronVar[Addr], Addr] = _.addr
 

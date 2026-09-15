@@ -155,12 +155,8 @@ object StackedStatesMinimal:
     minimalStackToStack(
       new StackedStatesMinimal[(Dom,state.In), (TrySturdy[Codom],state.Out)](
         inStateWideningMinimal(inStateWidening),
-        (in: (Dom,state.In)) => new Widen[(TrySturdy[Codom], state.Out)] {
-          override def apply(v1: (TrySturdy[Codom], state.Out), v2: (TrySturdy[Codom], state.Out)): MaybeChanged[(TrySturdy[Codom], state.Out)] = {
-            val MaybeChanged(newResult, resChanged) = Widen(v1._1, v2._1)
-            val MaybeChanged(newOut, outChanged) = state.widenOut(in._1)(v1._2, v2._2)
-            MaybeChanged((newResult, newOut), resChanged || outChanged)
-          }
+        (in: (Dom,state.In)) => (v1: (TrySturdy[Codom], state.Out), v2: (TrySturdy[Codom], state.Out)) => {
+          state.widenOut[TrySturdy[Codom]](in._1)(v1, v2)
         }
       )
     )

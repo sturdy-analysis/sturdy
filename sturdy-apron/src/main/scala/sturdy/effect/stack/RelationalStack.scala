@@ -2,7 +2,7 @@ package sturdy.effect.stack
 
 import apron.*
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, RelationalExpr, given}
+import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState, ApronState, ApronType, ApronVar, IntApronType, StatelessRelationalExpr, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, NoJoin, WithJoin, given}
 import sturdy.effect.{ComputationJoiner, EffectStack, TrySturdy}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
@@ -26,7 +26,7 @@ final class RelationalStack
   )
   (using
     apronState: ApronRecencyState[Ctx, Type, Val],
-    relationalValue: RelationalExpr[Val, VirtualAddress[Ctx], Type]
+    relationalValue: StatelessRelationalExpr[Val, VirtualAddress[Ctx], Type]
   )
   extends JoinableDecidableOperandStack[Val]:
 
@@ -35,6 +35,9 @@ final class RelationalStack
 
   private def combineFrames(widen: Boolean, ops1: List[Val], ops2: List[Val]): MaybeChanged[List[Val]] =
     var hasChanged = false
+//  In WebAssembly this can happen when stack-widening two loop states with different stack heights.
+//    if(ops1.length != ops2.length)
+//      throw CannotJoinException(s"stack frames $ops1 and $ops2 need to have the same length")
     val joinedFrame = ops1.zipAll[Val, Val](ops2, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
       case ((v1, null),_) => v1
       case ((null, v2),_) => v2
@@ -48,9 +51,11 @@ final class RelationalStack
   private def combineValues(widen: Boolean, idx: Int, v1: Val, v2: Val): MaybeChanged[Val] =
     (relationalValue.getRelationalExpr(v1), relationalValue.getRelationalExpr(v2)) match
       case (Some(e1), Some(e2)) =>
-        val allocator = AAllocatorFromContext[Type, Ctx](
-          (tpe: Type) => stackAllocator((idx, tpe))
-        )
+        val allocator = AAllocatorFromContext[(ApronExpr[VirtualAddress[Ctx], Type], ApronExpr[VirtualAddress[Ctx],Type]), Ctx] {
+          case (e1, e2) =>
+            val tpe = Join(e1._type, e2._type).get
+            stackAllocator((idx, tpe))
+        }
         apronState.combineExpr(widen, allocator)(e1, e2).map(relationalValue.makeRelationalExpr)
       case (Some(_), None) | (None, Some(_)) | (None, None) =>
         if(widen)
@@ -58,12 +63,15 @@ final class RelationalStack
         else
           Join(v1,v2)
 
-  override def joinWith(other: List[Val]): List[Val] =
-    val (frame, rest) = stack.splitAt(stack.size - framePointer)
-    val otherFrame = other.take(stack.size - framePointer)
-    val joinedFrame = frame.zipAll[Val, Val](otherFrame, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
+  override def joinWith(first: List[Val]): List[Val] =
+    val firstFrame = first.take(stack.size - framePointer)
+    val (secondFrame, rest) = stack.splitAt(stack.size - framePointer)
+    val joinedFrame = firstFrame.zipAll[Val, Val](secondFrame, null.asInstanceOf[Val], null.asInstanceOf[Val]).zipWithIndex.map {
       case ((v1, null),_) => v1
       case ((null, v2),_) => v2
       case ((v1, v2),idx) => combineValues(false, idx, v1, v2).get
     }
     joinedFrame ++ rest
+
+  override def toString: String =
+    stack.toString()

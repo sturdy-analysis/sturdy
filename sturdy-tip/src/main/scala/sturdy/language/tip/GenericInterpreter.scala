@@ -59,6 +59,11 @@ given Ordering[FixIn] = {
   case (FixIn.Eval(e1), FixIn.Eval(e2)) => Ordering[Label].compare(e1.label, e2.label)
   case (FixIn.Run(s1), FixIn.Run(s2)) => Ordering[Label].compare(s1.label, s2.label)
   case (FixIn.EnterFunction(f1), FixIn.EnterFunction(f2)) => Ordering[Function].compare(f1,f2)
+  case (in1, in2) => Ordering.by[FixIn, Int]{
+      case _: FixIn.Eval => 1
+      case _: FixIn.Run => 2
+      case _: FixIn.EnterFunction => 3
+    }.compare(in1, in2)
 }
 
 given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
@@ -66,7 +71,7 @@ given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V]
     case (FixOut.Eval(v1), FixOut.Eval(v2)) => Combine[V, W](v1, v2).map(FixOut.Eval.apply)
     case (FixOut.Run(), FixOut.Run()) => Unchanged(FixOut.Run())
     case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
-    case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
+    case _ => throw new CannotJoinException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
 /**
  * The generic interpreter for the Tip language (https://github.com/cs-au-dk/TIP).
@@ -138,6 +143,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]] extends sturdy.Executor:
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
     case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
     case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
+    case Exp.Ge(e1, e2) => ge(eval(e1), eval(e2))
     case Exp.Eq(e1, e2) => equ(eval(e1), eval(e2))
     case site@Exp.Call(fun, args) =>
       invokeFun(eval(fun), args.map(eval(_)))(call(site))

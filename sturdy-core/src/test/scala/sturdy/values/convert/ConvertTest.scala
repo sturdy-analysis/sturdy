@@ -16,7 +16,7 @@ import sturdy.effect.failure.{*, given}
 import sturdy.util.{Bounded, IsInterval, *, given}
 import sturdy.util.GenInterval.{*, given}
 import sturdy.values.Finite
-import sturdy.values.config.{AllConfigs, Bits, Overflow, UnsupportedConfiguration}
+import sturdy.values.config.{AllConfigs, BitSign, Overflow, UnsupportedConfiguration}
 
 import scala.util.{Success, Try}
 

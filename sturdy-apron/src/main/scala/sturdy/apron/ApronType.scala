@@ -1,7 +1,8 @@
 package sturdy.apron
 
-import apron.Texpr1Node
+import apron.{Interval, Texpr1Node}
 import fenv.FEnv
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.types.BaseType
 
 
@@ -11,6 +12,7 @@ trait ApronType[Type]:
     def roundingDir: RoundingDir
     def roundingType: RoundingType
     def byteSize: Int
+    def signedTop: FloatInterval
 
 enum ApronRepresentation:
   case Int
@@ -87,6 +89,7 @@ given ByteApronType: ApronType[BaseType[Byte]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Zero
     override inline def roundingType: RoundingType = RoundingType.Int
     override inline def byteSize: Int = java.lang.Byte.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Byte.MinValue, scala.Byte.MaxValue, FloatSpecials.Integer)
 
 given ShortApronType: ApronType[BaseType[Short]] with
   extension(t: BaseType[Short])
@@ -94,6 +97,7 @@ given ShortApronType: ApronType[BaseType[Short]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Zero
     override inline def roundingType: RoundingType = RoundingType.Int
     override inline def byteSize: Int = java.lang.Short.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Short.MinValue, scala.Short.MaxValue, FloatSpecials.Integer)
 
 given IntApronType: ApronType[BaseType[Int]] with
   extension(t: BaseType[Int])
@@ -101,7 +105,7 @@ given IntApronType: ApronType[BaseType[Int]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Zero
     override inline def roundingType: RoundingType = RoundingType.Int
     override inline def byteSize: Int = java.lang.Integer.BYTES
-
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Int.MinValue, scala.Int.MaxValue, FloatSpecials.Integer)
 
 given LongApronType: ApronType[BaseType[Long]] with
   extension(t: BaseType[Long])
@@ -109,6 +113,7 @@ given LongApronType: ApronType[BaseType[Long]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Zero
     override inline def roundingType: RoundingType = RoundingType.Int
     override inline def byteSize: Int = java.lang.Long.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Long.MinValue, scala.Long.MaxValue, FloatSpecials.Integer)
 
 given BooleanApronType: ApronType[BaseType[Boolean]] with
   extension (t: BaseType[Boolean])
@@ -116,6 +121,7 @@ given BooleanApronType: ApronType[BaseType[Boolean]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Zero
     override inline def roundingType: RoundingType = RoundingType.Int
     override inline def byteSize: Int = java.lang.Byte.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(0, 1, FloatSpecials.Bottom)
 
 given FloatApronType: ApronType[BaseType[Float]] with
   extension (t: BaseType[Float])
@@ -123,6 +129,7 @@ given FloatApronType: ApronType[BaseType[Float]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Rnd
     override inline def roundingType: RoundingType = RoundingType.Single
     override inline def byteSize: Int = java.lang.Float.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Float.MinValue, scala.Float.MaxValue, FloatSpecials.Top)
 
 given DoubleApronType: ApronType[BaseType[Double]] with
   extension (t: BaseType[Double])
@@ -130,3 +137,4 @@ given DoubleApronType: ApronType[BaseType[Double]] with
     override inline def roundingDir: RoundingDir = RoundingDir.Rnd
     override inline def roundingType: RoundingType = RoundingType.Double
     override inline def byteSize: Int = java.lang.Double.BYTES
+    override inline def signedTop: FloatInterval = FloatInterval(scala.Double.MinValue, scala.Double.MaxValue, FloatSpecials.Top)

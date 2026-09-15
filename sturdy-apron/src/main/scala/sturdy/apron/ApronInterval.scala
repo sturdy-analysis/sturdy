@@ -8,6 +8,7 @@ import sturdy.values.{*,given}
 
 given intervalOrdering: PartialOrder[Interval] with
   override def lteq(iv1: Interval, iv2: Interval): Boolean = iv1.isLeq(iv2)
+  override def tryCompare(iv1: Interval, iv2: Interval): Option[Int] = Some(iv1.cmp(iv2))
 
 given JoinInterval: Join[Interval] with
   def apply(iv1: Interval, iv2: Interval): MaybeChanged[Interval] =
@@ -59,8 +60,8 @@ given Top[Interval] with
     iv.setTop()
     iv
 
-given IntervalRange[Interval] =
-  (iv: Interval) =>
+given IntervalRange[Interval] with
+  override def range(iv: Interval): Option[Range] =
     val maybeLower =
       if (iv.inf().isInfty() != 0)
         None
@@ -88,3 +89,13 @@ given IntervalRange[Interval] =
     for(lower <- maybeLower;
         upper <- maybeUpper)
       yield(Range.inclusive(lower,upper))
+
+  override def fromInt(l: Int, h: Int): Interval = Interval(l,h)
+
+  override def fromTop(t: Topped[Int]): Interval =
+    t match
+      case Topped.Actual(i) => Interval(i,i)
+      case Topped.Top =>
+        val iv = Interval()
+        iv.setTop()
+        iv

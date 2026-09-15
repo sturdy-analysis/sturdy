@@ -236,10 +236,10 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
       addParentDependency(outCacheEntry)
       PopResult.Unstable(result, None)
     case Some(outCacheEntry@OutCacheEntry(previousResult, previousOut)) =>
-      val newResult: MaybeChanged[TrySturdy[Codom]] = if (widen) Widen(previousResult, result) else Join(previousResult, result)
       LinearStateOperationCounter.wideningCounter += 1
-      val newOut = if (widen) state.widenOut(frame._1)(previousOut, out) else state.joinOut(frame._1)(previousOut, out)
-      val changed = newResult.hasChanged || newOut.hasChanged
+      val joined = (if (widen) state.widenOut[TrySturdy[Codom]](frame._1) else state.joinOut[TrySturdy[Codom]](frame._1))((previousResult,previousOut), (result,out))
+      val (newResult,newOut) = joined.get
+      val changed = joined.hasChanged
       if (Fixpoint.DEBUG)
         println(s"${stackHeightMinusOneIndent}POP  $frame \n${stackHeightMinusOneIndent}  <- $newResult:$newOut (changed=$changed)")
       if (changed) {
@@ -247,13 +247,13 @@ final class StackedStates[Dom, Codom, In, Out](val state: StateT[In, Out])
           throw new IllegalStateException(s"Stable out cache entry may not be written again. $frame ($changed) <- $outCacheEntry")
         }
         outCacheEntry.stability = Stability.Unstable
-        outCacheEntry.result = newResult.get
-        outCacheEntry.out = newOut.get
+        outCacheEntry.result = newResult
+        outCacheEntry.out = newOut
         if (storeIntermediateOutput) {
           outCacheEntry.dependencies ++= deps
           addParentDependency(outCacheEntry)
         }
-        PopResult.Unstable(newResult.get, Some(newOut.get))
+        PopResult.Unstable(newResult, Some(newOut))
       } else {
         outCacheEntry.stability = Stability.Unstable // in case it was invalid
         if (storeIntermediateOutput) {

@@ -38,7 +38,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           case Some(MayMust.Must(entry)) => JOptionA.some(entry)
           case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
 
-  override def set(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Topped[Symbol], newEntry: Entry): JOptionA[Unit] =
     dirtyTables += key
     tables(key) match
       case Right(entry) =>
@@ -48,6 +48,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Finite[Key], Join[Entry]) ex
           tables += key -> Right((tab.entries + newEntry).reduce(Join(_, _).get))
         case Topped.Actual(sym) =>
           tables += key -> Left(tab.updated(sym, newEntry))
+    JOptionA.Some(())
 
   override def putNew(key: Key): Unit =
     tables += key -> Left(Table(Map(), Set()))

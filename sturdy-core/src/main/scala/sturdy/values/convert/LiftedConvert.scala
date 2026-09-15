@@ -1,6 +1,6 @@
 package sturdy.values.convert
 
-final class LiftedConvert[From, To, VFrom, VTo, UFrom, UTo, Config <: ConvertConfig[_]]
+class LiftedConvert[From, To, VFrom, VTo, UFrom, UTo, Config <: ConvertConfig[_]]
   (extract: VFrom => UFrom, inject: UTo => VTo)
   (using c: Convert[From, To, UFrom, UTo, Config])
   extends Convert[From, To, VFrom, VTo, Config]:

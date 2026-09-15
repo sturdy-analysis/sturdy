@@ -22,7 +22,7 @@ class BinaryenMetricsCollector(set: Either[Throwable, RRecord] => Unit,
 
     val originalModule = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
     val originalInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-    val originalModInst = originalInterp.initializeModule(originalModule)
+    val originalModInst = originalInterp.instantiateModule(originalModule)
     val allNodes = ControlFlow.allCfgNodes(List(originalModInst))
     val allInstructions = allNodes.filter(_.isInstruction)
 
@@ -34,7 +34,7 @@ class BinaryenMetricsCollector(set: Either[Throwable, RRecord] => Unit,
 
     val binaryenModule = if (binary) Parsing.fromBinary(binaryenPath) else wasm.Parsing.fromText(binaryenPath)
     val binaryenInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-    val binaryenModInst = binaryenInterp.initializeModule(binaryenModule)
+    val binaryenModInst = binaryenInterp.instantiateModule(binaryenModule)
     val binaryenAllNodes = ControlFlow.allCfgNodes(List(binaryenModInst))
     val binaryenAllInstructions = binaryenAllNodes.filter(_.isInstruction)
 

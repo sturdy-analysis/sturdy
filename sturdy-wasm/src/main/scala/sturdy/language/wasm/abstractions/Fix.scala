@@ -6,11 +6,10 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
-import sturdy.values.Finite
-import sturdy.values.{Combine, MaybeChanged, Widening, Unchanged}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, InstLoc}
+import sturdy.values.{CannotJoinException, Combine, Finite, MaybeChanged, Unchanged, Widening}
 import swam.FuncIdx
-import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
+import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
 
 object Fix:
   final def isFunOrLoop(dom: FixIn): Boolean = isFunOrLoopToIndex(dom) > -1
@@ -37,4 +36,4 @@ object Fix:
     override def apply(out1: FixOut[V], out2: FixOut[V]): MaybeChanged[FixOut[V]] = (out1, out2) match
       case (FixOut.Eval(), FixOut.Eval()) => Unchanged(FixOut.Eval())
       case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => Combine[List[V], W](vs1, vs2).map(FixOut.ExitWasmFunction.apply)
-      case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
+      case _ => throw new CannotJoinException(s"Cannot join outputs of different kind, $out1 and $out2")

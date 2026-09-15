@@ -5,12 +5,12 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers.*
 import apron.*
 import gmp.*
-import sturdy.apron.{ApronExpr, given}
+import sturdy.apron.{ApronExpr, ResolveState, given}
 import sturdy.data.{*, given}
 import sturdy.effect.{EffectStack, Stateless, callframe}
 import sturdy.effect.allocation.{AAllocatorFromContext, Allocator}
 import sturdy.effect.failure.{CollectedFailures, Failure, FailureKind}
-import sturdy.effect.store.RecencyClosure
+import sturdy.effect.store.{RecencyClosure, WithWideningThresholds}
 import sturdy.values.Finite
 import sturdy.values.references.{AddressTranslation, PhysicalAddress, VirtualAddress}
 import sturdy.values.integer.BaseTypeIntegerOps
@@ -31,7 +31,8 @@ class RelationalCallFrameTest extends AnyFunSuite:
   given failure: Failure = new CollectedFailures[FailureKind]
   given effectState: EffectStack = EffectStack(failure)
   given Finite[FailureKind] with {}
-
+  given defaultResolveState: ResolveState = ResolveState.Internal
+  given WithWideningThresholds = WithWideningThresholds.No
   given Manager = new apron.Polka(true)
 
   test("getLocal") {
@@ -120,7 +121,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
     val joined = closure.join(state1, state2)
     joined.hasChanged shouldBe true
 
-    closure.setState(joined.get)
+    closure.setStateNonMonotonically(joined.get)
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getInterval(xExpr) shouldBe Interval(0, 15)
@@ -142,7 +143,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
 
     val joinedStates = closure.join(state1, state2)
     joinedStates.hasChanged shouldBe true
-    closure.setState(joinedStates.get)
+    closure.setStateNonMonotonically(joinedStates.get)
 
     var xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getInterval(xExpr) shouldBe Interval(0, 5)

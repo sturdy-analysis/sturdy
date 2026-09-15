@@ -4,6 +4,7 @@
   (table funcref
     (elem
       $noop $const
+      $noop2 $const
     )
   )
 
@@ -23,6 +24,10 @@
     (local.get 1)
   )
 
+  (func $third (export "third") (param i32 i32 i32) (result i32 i32)
+    (local.get 0)(local.get 1)
+  )
+
   (func (export "call-first") (result i32)
     i32.const 0
     i32.const 1
@@ -33,7 +38,11 @@
     (i32.const 0)
   )
 
-  (func $test1 (result i32)
+  (func $noop2 (export "noop2") (result i32 i32)
+     (i32.const 0)(i32.const 1)
+  )
+
+  (func $test1 (export "test1") (result i32)
     (i32.const 1)
     (call $noop)
     (i32.add)
@@ -364,6 +373,7 @@
           (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
           (local.set 1 (i32.sub (local.get 1) (i32.const 5)))
           (local.set 1 (i32.mul (local.get 1) (i32.const 7)))
+          ;; x := ((x * 3) - 5) * 7
           (br 0)
           (local.set 1 (i32.mul (local.get 1) (i32.const 100)))
         )
@@ -371,6 +381,7 @@
           (local.set 1 (i32.mul (local.get 1) (i32.const 5)))
           (local.set 1 (i32.sub (local.get 1) (i32.const 7)))
           (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
+          ;; x := ((x * 5) - 7) * 3
           (br 0)
           (local.set 1 (i32.mul (local.get 1) (i32.const 1000)))
         )
@@ -410,5 +421,14 @@
         )
     )
     (return (local.get $x))
+  )
+
+  (func (export "abs") (param $x i32) (result i32)
+    (block $exit (result i32)
+        local.get $x
+        (br_if $exit (i32.le_s (i32.const 0) (local.get $x)))
+        drop
+        (i32.sub (i32.const 0) (local.get $x))
+    )
   )
 )

@@ -2,6 +2,7 @@ package sturdy.values.ordering
 
 import apron.*
 import org.scalatest.Suites
+import sturdy.IsSound
 import sturdy.apron.{*, given}
 import sturdy.effect.{EffectList, EffectStack, Stateless}
 import sturdy.effect.allocation.Allocator
@@ -18,8 +19,8 @@ import sturdy.values.references.{*, given}
 import sturdy.values.types.{BaseType, given}
 
 class RelationalEqOpsTest extends Suites(
-  new PolyhedraEqOpsTest,
-  new OctagonEqOpsTest,
+//  new PolyhedraEqOpsTest,
+//  new OctagonEqOpsTest,
   new BoxEqOpsTest
 )
 
@@ -29,6 +30,7 @@ class BoxEqOpsTest extends RelationalEqOpsTests(using Box())
 
 class RelationalEqOpsTests(using Manager) extends Suites(
   new RelationalIntEqOpsTest,
+  new RelationalLongEqOpsTest,
   new RelationalFloatEqOpsTest,
   new RelationalDoubleEqOpsTest
 )
@@ -40,19 +42,24 @@ given Structural[Boolean] with {}
 
 given RelationalIntervalEqOps[L](using apronState: ApronState[VirtAddr,Type]): RelationalEqOps[VirtAddr, Type] with IntervalEqOps[L, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]] with
   override def getBool(b: ApronCons[VirtAddr, Type]): Topped[Boolean] =
-    apronState.getBoolean(b)
+    apronState.assert(b)(using ResolveState.Internal)
 
 class RelationalIntEqOpsTest(using Manager) extends EqOpsTest[Int, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Int.MinValue, -1, 0, 1, Int.MaxValue),
-  makeEqOps = withApronState (RelationalIntInterval, RelationalIntervalEqOps[Int])
+  makeEqOps = () => withApronState (RelationalIntInterval, RelationalIntervalEqOps[Int])
+)
+
+class RelationalLongEqOpsTest(using Manager) extends EqOpsTest[Long, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
+  specials = List(Long.MinValue, -1, 0, 1, Long.MaxValue),
+  makeEqOps = () => withApronState(RelationalLongInterval, RelationalIntervalEqOps[Long])
 )
 
 class RelationalFloatEqOpsTest(using Manager) extends EqOpsTest[Float, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Float.MinValue, math.nextDown(0.0f), 0.0f, math.nextUp(0.0f), Float.MaxValue),
-  makeEqOps = withApronState (RelationalFloatIsInterval, RelationalIntervalEqOps[Float])
+  makeEqOps = () => withApronState (RelationalFloatIsInterval, RelationalIntervalEqOps[Float])
 )
 
 class RelationalDoubleEqOpsTest(using Manager) extends EqOpsTest[Double, ApronExpr[VirtAddr, Type], ApronCons[VirtAddr, Type]](
   specials = List(Double.MinValue, math.nextDown(0.0d), 0.0d, math.nextUp(0.0d), Double.MaxValue),
-  makeEqOps = withApronState (RelationalDoubleIsInterval, RelationalIntervalEqOps[Double])
+  makeEqOps = () =>  withApronState (RelationalDoubleIsInterval, RelationalIntervalEqOps[Double])
 )

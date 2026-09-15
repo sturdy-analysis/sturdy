@@ -23,11 +23,11 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
 
   protected var memories: Map[Key, Mem[B]] = Map()
 
-  override def read(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
+  override def read(key: Key, addr: Topped[Int], length: Int, alignment: Int): JOptionA[Seq[B]] = addr match
     case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
     case Topped.Actual(a) => memories(key).read(a, length)
 
-  override def write(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
+  override def write(key: Key, addr: Topped[Int], bytes: Seq[B], alignment: Int): JOptionA[Unit] =
     val (newMem, res) = memories(key).store(addr, bytes)
     newMem.foreach(memories += key -> _)
     res
@@ -41,6 +41,57 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B])(using
     val (newMem, res) = memories(key).grow(delta, emptyB)
     newMem.foreach(memories += key -> _)
     res
+
+  override def fill(key: Key, addr: Topped[Int], byteAmount: Topped[Int], value: Seq[B]): JOption[WithJoin, Unit] =
+    val mem = memories(key)
+    if (byteAmount.isTop) {
+      mem match
+        case _: TopMem[B] => return JOptionA.noneSome(())
+        case m: SizeMem[B] => memories += key -> SizeMem(m.size, m.sizeLimit, isDefinite = true, m.newBound(value).get)
+        case m: ImmutableByteMem[B] => memories += key -> SizeMem(m.size, m.sizeLimit, isDefinite = true, m.newBound(value).get)
+
+      return JOptionA.noneSome(())
+    }
+    
+    val fillBytes: Seq[B] = Seq.fill[B](byteAmount.get)(value.head)
+    val (m, res) = mem.store(addr, fillBytes)
+    boundary:
+      memories += key -> m.getOrElse(break(JOptionA.none))
+      res
+
+  override def copy(key: Key, srcAddr: Topped[Int], dstAddr: Topped[Int], byteAmount: Topped[Int]): JOption[WithJoin, Unit] =
+    val mem = memories(key)
+    var noneSome = false
+    var copyBytes: Seq[B] = Seq(mem.upperBound)
+    if (srcAddr.isActual && byteAmount.isActual) {
+      copyBytes = mem.read(srcAddr.get, byteAmount.get) match
+        case JOptionA.Some(bytes) => bytes
+        case JOptionA.None() => return JOptionA.none // out of bounds
+        case JOptionA.NoneSome(bytes) =>
+          noneSome = true
+          bytes
+    }
+    val (m, res) = mem.store(dstAddr, copyBytes)
+    boundary:
+      memories += key -> m.getOrElse(break(JOptionA.none))
+      if (noneSome) JOptionA.noneSome(()) else res
+
+  override def init(key: Key, tableAddr: Topped[Int], dataAddr: Topped[Int], byteAmount: Topped[Int], dataBytes: Seq[B]): JOption[WithJoin, Unit] =
+    val mem = memories(key)
+    var noneSome = false
+    var initBytes: Seq[B] = dataBytes
+    if(dataAddr.isActual && byteAmount.isActual) {
+      if (dataAddr.get + byteAmount.get > dataBytes.size) {
+        return JOptionA.none
+      }
+      initBytes = dataBytes.slice(dataAddr.get, dataAddr.get + byteAmount.get)
+    } else {
+      noneSome = true
+    }
+    val (m, res) = mem.store(tableAddr, initBytes)
+    boundary:
+      memories += key -> m.getOrElse(break(JOptionA.none))
+      if (noneSome) JOptionA.noneSome(()) else res
 
   override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     initSize match
@@ -171,7 +222,7 @@ object ConstantAddressMemory:
 
   sealed trait Mem[B: ClassTag]:
     def upperBound: B
-    protected def newBound(bs: Iterable[B])(using Join[B]): MaybeChanged[B] =
+    def newBound(bs: Iterable[B])(using Join[B]): MaybeChanged[B] =
       var bound = upperBound
       var changed = false
       for (b <- bs)
@@ -288,7 +339,7 @@ object ConstantAddressMemory:
       for (wordAddr <- 0 until (size / 4); b <- words.getOrElse(wordAddr, emptyWord).toIterable)
         yield b
     override def read(a: Int, length: Int): JOptionA[Seq[B]] =
-      if (a < 0 || a + length > size)
+      if (a < 0 || length < 0 || a + length > size)
         return JOptionA.none
 
       val buf = ListBuffer[B]()

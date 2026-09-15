@@ -1,31 +1,23 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
+import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.{DecidableOperandStack, OperandStack}
 import sturdy.values.config
 import sturdy.values.convert.*
-import sturdy.values.floating.*
 import sturdy.values.integer.*
-import sturdy.values.ordering.*
-import swam.ValType
 import swam.syntax.*
+import swam.{NumType, ReferenceType, ValType, VecType}
+
 
 class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
-  (stack: OperandStack[V,MayJoin.NoJoin], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
+  (stack: OperandStack[V,MayJoin.NoJoin], wasmOps: WasmOps[V, _, _, _, _, _, _, _, J])
   (using Failure):
 
   import wasmOps.*
-  import eqOps.*
   import compareOps.*
+  import eqOps.*
   import unsignedCompareOps.*
-  import convert_i32_i64.*
-  import convert_i32_f64.*
-  import convert_i64_f64.*
-  import convert_i32_f32.*
-  import convert_i64_f32.*
-  import convert_f32_f64.*
 
   def evalNumeric(inst: Inst): V =
     inst match
@@ -212,44 +204,45 @@ class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
 
   inline def evalConvertop(op: Convertop, v: V): V = op match
     case i32.WrapI64 => convert_i64_i32(v, NilCC)
-    case i32.TruncSF32 => convert_f32_i32(v, (config.Overflow.Fail && config.Bits.Signed))
-    case i32.TruncUF32 => convert_f32_i32(v, (config.Overflow.Fail && config.Bits.Unsigned))
-    case i32.TruncSF64 => convert_f64_i32(v, (config.Overflow.Fail && config.Bits.Signed))
-    case i32.TruncUF64 => convert_f64_i32(v, (config.Overflow.Fail && config.Bits.Unsigned))
-    case i32.ReinterpretF32 => convert_f32_i32(v, (config.Overflow.Allow && config.Bits.Raw))
-    case i64.ExtendSI32 => convert_i32_i64(v, config.Bits.Signed)
-    case i64.ExtendUI32 => convert_i32_i64(v, config.Bits.Unsigned)
-    case i64.TruncSF32 => convert_f32_i64(v, (config.Overflow.Fail && config.Bits.Signed))
-    case i64.TruncUF32 => convert_f32_i64(v, (config.Overflow.Fail && config.Bits.Unsigned))
-    case i64.TruncSF64 => convert_f64_i64(v, (config.Overflow.Fail && config.Bits.Signed))
-    case i64.TruncUF64 => convert_f64_i64(v, (config.Overflow.Fail && config.Bits.Unsigned))
-    case i64.ReinterpretF64 => convert_f64_i64(v, (config.Overflow.Allow && config.Bits.Raw))
+    case i32.TruncSF32 => convert_f32_i32(v, (config.Overflow.Fail && config.BitSign.Signed))
+    case i32.TruncUF32 => convert_f32_i32(v, (config.Overflow.Fail && config.BitSign.Unsigned))
+    case i32.TruncSF64 => convert_f64_i32(v, (config.Overflow.Fail && config.BitSign.Signed))
+    case i32.TruncUF64 => convert_f64_i32(v, (config.Overflow.Fail && config.BitSign.Unsigned))
+    case i32.ReinterpretF32 => convert_f32_i32(v, (config.Overflow.Allow && config.BitSign.Raw))
+    case i64.ExtendSI32 => convert_i32_i64(v, config.BitSign.Signed)
+    case i64.ExtendUI32 => convert_i32_i64(v, config.BitSign.Unsigned)
+    case i64.TruncSF32 => convert_f32_i64(v, (config.Overflow.Fail && config.BitSign.Signed))
+    case i64.TruncUF32 => convert_f32_i64(v, (config.Overflow.Fail && config.BitSign.Unsigned))
+    case i64.TruncSF64 => convert_f64_i64(v, (config.Overflow.Fail && config.BitSign.Signed))
+    case i64.TruncUF64 => convert_f64_i64(v, (config.Overflow.Fail && config.BitSign.Unsigned))
+    case i64.ReinterpretF64 => convert_f64_i64(v, (config.Overflow.Allow && config.BitSign.Raw))
 
     case f32.DemoteF64 => convert_f64_f32(v, NilCC)
-    case f32.ConvertSI32 => convert_i32_f32(v, config.Bits.Signed)
-    case f32.ConvertUI32 => convert_i32_f32(v, config.Bits.Unsigned)
-    case f32.ConvertSI64 => convert_i64_f32(v, config.Bits.Signed)
-    case f32.ConvertUI64 => convert_i64_f32(v, config.Bits.Unsigned)
-    case f32.ReinterpretI32 => convert_i32_f32(v, config.Bits.Raw)
+    case f32.ConvertSI32 => convert_i32_f32(v, config.BitSign.Signed)
+    case f32.ConvertUI32 => convert_i32_f32(v, config.BitSign.Unsigned)
+    case f32.ConvertSI64 => convert_i64_f32(v, config.BitSign.Signed)
+    case f32.ConvertUI64 => convert_i64_f32(v, config.BitSign.Unsigned)
+    case f32.ReinterpretI32 => convert_i32_f32(v, config.BitSign.Raw)
     case f64.PromoteF32 => convert_f32_f64(v, NilCC)
-    case f64.ConvertSI32 => convert_i32_f64(v, config.Bits.Signed)
-    case f64.ConvertUI32 => convert_i32_f64(v, config.Bits.Unsigned)
-    case f64.ConvertSI64 => convert_i64_f64(v, config.Bits.Signed)
-    case f64.ConvertUI64 => convert_i64_f64(v, config.Bits.Unsigned)
-    case f64.ReinterpretI64 => convert_i64_f64(v, config.Bits.Raw)
+    case f64.ConvertSI32 => convert_i32_f64(v, config.BitSign.Signed)
+    case f64.ConvertUI32 => convert_i32_f64(v, config.BitSign.Unsigned)
+    case f64.ConvertSI64 => convert_i64_f64(v, config.BitSign.Signed)
+    case f64.ConvertUI64 => convert_i64_f64(v, config.BitSign.Unsigned)
+    case f64.ReinterpretI64 => convert_i64_f64(v, config.BitSign.Raw)
 
-  inline def evalMiscop(op: Miscop, v: V): V = op match
-    case i32.TruncSatSF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
-    case i32.TruncSatUF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
-    case i32.TruncSatSF64 => convert_f64_i32(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
-    case i32.TruncSatUF64 => convert_f64_i32(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
-    case i64.TruncSatSF32 => convert_f32_i64(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
-    case i64.TruncSatUF32 => convert_f32_i64(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
-    case i64.TruncSatSF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
-    case i64.TruncSatUF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
+  inline def evalSatConvertop(op: SatConvertop, v: V): V = op match
+    case i32.TruncSatSF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.BitSign.Signed))
+    case i32.TruncSatUF32 => convert_f32_i32(v, (config.Overflow.JumpToBounds && config.BitSign.Unsigned))
+    case i32.TruncSatSF64 => convert_f64_i32(v, (config.Overflow.JumpToBounds && config.BitSign.Signed))
+    case i32.TruncSatUF64 => convert_f64_i32(v, (config.Overflow.JumpToBounds && config.BitSign.Unsigned))
+    case i64.TruncSatSF32 => convert_f32_i64(v, (config.Overflow.JumpToBounds && config.BitSign.Signed))
+    case i64.TruncSatUF32 => convert_f32_i64(v, (config.Overflow.JumpToBounds && config.BitSign.Unsigned))
+    case i64.TruncSatSF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.BitSign.Signed))
+    case i64.TruncSatUF64 => convert_f64_i64(v, (config.Overflow.JumpToBounds && config.BitSign.Unsigned))
 
   def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => evalNumeric(i32.Const(0))
-    case ValType.I64 => evalNumeric(i64.Const(0))
-    case ValType.F32 => evalNumeric(f32.Const(0))
-    case ValType.F64 => evalNumeric(f64.Const(0))
+    case NumType.I32 => evalNumeric(i32.Const(0))
+    case NumType.I64 => evalNumeric(i64.Const(0))
+    case NumType.F32 => evalNumeric(f32.Const(0))
+    case NumType.F64 => evalNumeric(f64.Const(0))
+    case ReferenceType.FuncRef => evalNumeric(i32.Const(0))

@@ -43,6 +43,9 @@ trait ComputationJoiner[A]:
    */
   def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit
 
+  /** Optional method that may be called after `retainBoth`. Used to clean up after join of other effects. */
+  def afterJoin(): Unit = {}
+
   def compose(snd: ComputationJoiner[A]): ComputationJoiner[A] =
     val fst = this
     new ComputationJoiner[A] {
@@ -65,16 +68,21 @@ trait ComputationJoiner[A]:
       override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
         fst.retainBoth(fRes, gRes)
         snd.retainBoth(fRes, gRes)
+
+      override def afterJoin(): Unit =
+        fst.afterJoin()
+        snd.afterJoin()
     }
 
 
-final class EffectListJoiner[A](effects: Seq[Effect]) extends ComputationJoiner[A]:
+class EffectListJoiner[A](effects: Seq[Effect]) extends ComputationJoiner[A]:
   val joiners: Seq[ComputationJoiner[A]] = effects.flatMap(_.makeComputationJoiner[A])
   override def inbetween(fFailed: Boolean): Unit = joiners.foreach(_.inbetween(fFailed))
   override def retainNone(): Unit = joiners.foreach(_.retainNone())
   override def retainFirst(fRes: TrySturdy[A]): Unit = joiners.foreach(_.retainFirst(fRes))
   override def retainSecond(gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainSecond(gRes))
   override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiners.foreach(_.retainBoth(fRes, gRes))
+  override def afterJoin(): Unit = joiners.foreach(_.afterJoin())
 
 final class RetainBoth[A](joiner: ComputationJoiner[A]) extends ComputationJoiner[A]:
   override def inbetween(fFailed: Boolean): Unit = joiner.inbetween(fFailed)
@@ -82,3 +90,4 @@ final class RetainBoth[A](joiner: ComputationJoiner[A]) extends ComputationJoine
   override def retainFirst(fRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, null)
   override def retainSecond(gRes: TrySturdy[A]): Unit = joiner.retainBoth(null, gRes)
   override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, gRes)
+  override def afterJoin(): Unit = joiner.afterJoin()

@@ -27,6 +27,22 @@ given CombineMayMust[T, W <: Widening](using j: Combine[T, W]): Combine[MayMust[
     case (MayMust.Must(t1), MayMust.Must(t2)) => j(t1, t2).map(MayMust.Must.apply)
     case _ => j(v1.get, v2.get).map(MayMust.May.apply)
 
+final class CombineMayMustMap[K: Finite, V, W <: Widening](using j: Combine[V, W]) extends Combine[Map[K, MayMust[V]], W]:
+  override def apply(m1: Map[K, MayMust[V]], m2: Map[K, MayMust[V]]): MaybeChanged[Map[K, MayMust[V]]] =
+    var joined = m1
+    var changed = false
+    for ((f, v2) <- m2)
+      joined.get(f) match
+        case None =>
+          joined += f -> MayMust.May(v2.get)
+          changed = true
+        case Some(v1) =>
+          Combine[MayMust[V], W](v1, v2).ifChanged { changedV =>
+            joined += f -> changedV
+            changed = true
+          }
+    MaybeChanged(joined, changed)
+
 given mayMustPO[T](using po: PartialOrder[T]): PartialOrder[MayMust[T]] with
   override def lteq(x: MayMust[T], y: MayMust[T]): Boolean =
     if (!x.isMust && y.isMust)

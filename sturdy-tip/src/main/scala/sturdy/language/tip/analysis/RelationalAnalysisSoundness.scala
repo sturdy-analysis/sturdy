@@ -29,34 +29,10 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
   given Abstractly[ConcreteInterpreter.Addr, Addr] =
     (cAddr: ConcreteInterpreter.Addr) =>
       val ctx = Abstractly[ConcreteInterpreter.Addr, AddrCtx](cAddr)
-      addrTrans.mapping.get(ctx) match
+      addrTrans.region(ctx) match
         case None => throw new IllegalStateException(s"Address Translation $addrTrans does not contain context $ctx")
         case Some(region) =>
           PowVirtualAddress(VirtualAddress(ctx, region.recent.max, addrTrans))
-
-//  given Abstractly[ConcreteInterpreter.Value, Value] with
-//    override def apply(c: ConcreteInterpreter.Value): Value = c match
-//      case ConcreteInterpreter.Value.TopValue => Value.TopValue
-//      case ConcreteInterpreter.Value.BoolValue(b) => Value.BoolValue(ApronCons.from[RelAddr,RelType](b))
-//      case ConcreteInterpreter.Value.IntValue(i) => Value.IntValue(ApronExpr.intLit[RelAddr,RelType](i))
-//      case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
-//        case Reference.Null => Value.RefValue(AbstractReference.Null)
-//        case Reference.Addr(ca, m) => Value.RefValue(AbstractReference.Addr(Abstractly(ca), m))
-//      case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
-//      case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord.Map(rec.view.mapValues(v => apply(v)).toMap))
-//
-//  given po: PartialOrder[Value] with
-//    override def lteq(x: Value, y: Value): Boolean = (x, y) match
-//      case (_, Value.TopValue) => true
-//      case (Value.IntValue(i1), Value.IntValue(i2)) =>
-//        val iv1 = apronState.getBound(i1)
-//        val iv2 = apronState.getBound(i2)
-//        iv1.isLeq(iv2)
-//      case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[VRef].lteq(r1, r2)
-//      case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
-//      case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
-//      case _ => false
-//  given Lazy[PartialOrder[Value]] = lazily(po)
 
   given Soundness[ConcreteInterpreter.Value, RelationalAnalysis.Value] with
     def isSound(c: ConcreteInterpreter.Value, a: RelationalAnalysis.Value): IsSound =

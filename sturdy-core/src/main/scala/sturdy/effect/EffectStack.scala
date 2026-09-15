@@ -47,8 +47,8 @@ class EffectStack(_effects: => Effect,
 
   private lazy val effects: Effect = _effects
 
-  private def inEffects(dom: Any): Effect = _inEffects.applyOrElse(dom, _ => effects)
-  private def outEffects(dom: Any): Effect = _outEffects.applyOrElse(dom, _ => effects)
+  def inEffects(dom: Any): Effect = _inEffects.applyOrElse(dom, _ => effects)
+  def outEffects(dom: Any): Effect = _outEffects.applyOrElse(dom, _ => effects)
 
   final override type All = Any
   final override type In = Any
@@ -58,20 +58,23 @@ class EffectStack(_effects: => Effect,
   override def getInState(dom: Any): In = inEffects(dom).getState
   override def getOutState(dom: Any): Out = outEffects(dom).getState
   override def setAllState(st: All): Unit = 
-    effects.setState(st.asInstanceOf)
+    effects.setStateNonMonotonically(st.asInstanceOf)
     repeating()
-  override def setInState(dom: Any, in: In): Unit = inEffects(dom).setState(in.asInstanceOf)
+  override def setInState(dom: Any, in: In): Unit = inEffects(dom).setStateNonMonotonically(in.asInstanceOf)
   override def setOutState(dom: Any, out: Out): Unit = outEffects(dom).setState(out.asInstanceOf)
-  
+  override def setOutStateNonMonotonically(dom: Any, out: Out): Unit = outEffects(dom).setStateNonMonotonically(out.asInstanceOf)
+
   final override type State = All
   override def getState: State = getAllState
   override def setState(st: State): Unit = setAllState(st)
+  override def setStateNonMonotonically(st: State): Unit =
+    effects.setStateNonMonotonically(st.asInstanceOf)
 
-  override def joinIn(dom: Any): Join[In] = (in1: In, in2: In) => inEffects(dom).join(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
-  override def widenIn(dom: Any): Widen[In] = (in1: In, in2: In) => inEffects(dom).widen(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def joinIn[Body](using Join[Body])(dom: Any): Join[(Body,In)] = (in1: (Body,In), in2: (Body,In)) => inEffects(dom).joinClosingOver(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
+  override def widenIn[Body](using Widen[Body])(dom: Any): Widen[(Body,In)] = (in1: (Body,In), in2: (Body,In)) => inEffects(dom).widenClosingOver(in1.asInstanceOf, in2.asInstanceOf).asInstanceOf
   override def stackWiden(dom: Any): StackWidening[In] = (stack:List[In], call: In) => inEffects(dom).stackWiden(stack.asInstanceOf, call.asInstanceOf).asInstanceOf
-  override def joinOut(dom: Any): Join[Out] = (out1: Out, out2: Out) => outEffects(dom).join(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
-  override def widenOut(dom: Any): Widen[Out] = (out1: Out, out2: Out) => outEffects(dom).widen(out1.asInstanceOf, out2.asInstanceOf).asInstanceOf
+  override def joinOut[Body](using Join[Body])(dom: Any): Join[(Body,Out)] = (v1: (Body,Out), v2: (Body,Out)) => outEffects(dom).joinClosingOver[Body](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
+  override def widenOut[Body](using Widen[Body])(dom: Any): Widen[(Body,Out)] = (v1: (Body,Out), v2: (Body,Out)) => outEffects(dom).widenClosingOver[Body](v1.asInstanceOf, v2.asInstanceOf).asInstanceOf
 
   override def join: Join[State] = (state1: State, state2: State) => effects.join(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
   override def widen: Widen[State] = (state1: State, state2: State) => effects.widen(state1.asInstanceOf, state2.asInstanceOf).asInstanceOf
@@ -107,7 +110,11 @@ class EffectStack(_effects: => Effect,
       case (true, false) => joiner.retainSecond(triedG)
       case (true, true) => joiner.retainNone()
 
-    Join(triedF, triedG).get.getOrThrow
+    val joinedTried = Join(triedF, triedG).get
+
+    joiner.afterJoin()
+
+    joinedTried.getOrThrow
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {

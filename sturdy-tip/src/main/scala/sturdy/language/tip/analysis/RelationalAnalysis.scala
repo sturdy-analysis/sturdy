@@ -11,15 +11,16 @@ import sturdy.effect.callframe.{DecidableCallFrame, DecidableMutableCallFrame, J
 import sturdy.effect.callframe.RelationalCallFrame.given
 import sturdy.effect.failure.CollectedFailures
 import sturdy.effect.failure.Failure
-import sturdy.effect.print.{PrintBound,  given}
-import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, Store}
+import sturdy.effect.print.{PrintBound, given}
+import sturdy.effect.store.{AStoreThreaded, RecencyClosure, RecencyRelationalStore, RecencyStore, RelationalStore, RelationalStoreState, Store, WithWideningThresholds}
 import sturdy.effect.userinput.{AUserInput, AUserInputFun}
 import sturdy.fix.{DomLogger, Logger, StackConfig, State, context}
 import sturdy.language.tip
 import sturdy.language.tip.AllocationSite
 import sturdy.language.tip.*
 import sturdy.language.tip.abstractions.{CfgConfig, Control, ControlFlow, Fix, Functions, Records, References, isFunOrWhile}
-import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, RelType, AddrCtx}
+import sturdy.language.tip.analysis.IntervalAnalysis.{callSiteSensitive, controlEventLogger}
+import sturdy.language.tip.analysis.RelationalAnalysis.{Addr, AddrCtx, RelType}
 import sturdy.util.Lazy
 import sturdy.util.lazily
 import sturdy.values.{*, given}
@@ -31,6 +32,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.ordering.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
+import sturdy.values.floating.FloatSpecials
 import sturdy.values.types.{BaseType, given}
 
 import scala.collection.immutable.BitSet
@@ -113,10 +115,17 @@ object RelationalAnalysis extends Interpreter,
     val addrs = self.store.virtualAddresses
     AbstractReference.NullAddr(addrs, false)
 
-  class Instance(apronManager: Manager, initStore: InitStore, stackConfig: StackConfig, callSites: Int) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
+  class Instance(
+    apronManager: Manager,
+    initStore: InitStore,
+    stackConfig: StackConfig,
+    callSites: Int,
+    iterConfig: fix.iter.Config = fix.iter.Config.Outermost
+  ) extends GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]:
 
-    implicit val tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
-    implicit val localRelationaAlloc: AAllocatorFromContext[(String, String, Option[Any]), AddrCtx] = AAllocatorFromContext((v, fun, _) => AddrCtx.Local(v,fun))
+    given tempRelationalAlloc: AAllocatorFromContext[RelType, AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
+    given combineExprAlloc: AAllocatorFromContext[(ApronExpr[VirtAddr,RelType],ApronExpr[VirtAddr,RelType]), AddrCtx] = AAllocatorFromContext(_ => AddrCtx.Temp(domLogger.currentDom.getOrElse(FixIn.EnterFunction(functions("main")))))
+    given localRelationaAlloc: AAllocatorFromContext[(String, String), AddrCtx] = AAllocatorFromContext((v, fun) => AddrCtx.Local(v,fun))
 
     given Manager = apronManager
 
@@ -126,31 +135,38 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
-    val addressTranslation: AddressTranslation[AddrCtx] = AddressTranslation.empty
     var exprConverter: ApronExprConverter[AddrCtx, RelType, Value] = null
     var apronState: ApronRecencyState[AddrCtx, RelType, Value] = null
     given lazyApronState: Lazy[ApronState[VirtualAddress[AddrCtx], RelType]] = lazily(apronState)
     given lazyExprConverter: Lazy[ApronExprConverter[AddrCtx, RelType, Value]] = lazily(exprConverter)
 
-    given relationalValue: RelationalExpr[Value, VirtAddr, RelType] with
+    given StatelessRelationalExpr[Value, VirtAddr, RelType] with
       override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
         v match
           case Value.IntValue(expr) => Some(expr)
           case _ => None
 
-      override def makeRelationalExpr(expr: ApronExpr[VirtAddr, RelType]): Value =
+      override inline def makeRelationalExpr(expr: ApronExpr[VirtAddr, RelType]): Value =
         Value.IntValue(expr)
 
+      override def getMetaData(v: Value): Option[(FloatSpecials, RelType)] =
+        getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
+
+    given StatefullRelationalExprT[Value, PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, AddrCtx, RelType].asInstanceOf
+
+    given WithWideningThresholds = WithWideningThresholds.Yes
 
     val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] = new RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] (
-      manager = apronManager,
-      initialState = apron.Abstract1(apronManager, new apron.Environment()),
-      initialMetaData = Map()
+      initAddrTrans = Map(),
+      initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
+      initialNonRelationalStore = Map()
     )
-    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore, addressTranslation)
+    import relationalStore.given
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
-    apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, recencyStore, relationalStore)
+    apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, combineExprAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState
+    given defaultResolveState: ResolveState = ResolveState.Internal
 
     val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, AddrCtx, RelType] = new RelationalCallFrame(
       initData = "$main",
@@ -258,6 +274,22 @@ object RelationalAnalysis extends Interpreter,
         case Value.IntValue(expr) => Value.IntValue(ApronExpr.constant(apronState.getInterval(expr), expr._type))
         case v => v
 
+    val cfgLogger = controlLogger[CallString](callSites > 0)
+    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
+
+    final override val fixpoint =
+      fix.log(controlEventLogger(this),
+        callSiteSensitive(callSites,
+          fix.log(domLogger,
+            fix.log(cfgLogger.logger,
+              fix.dispatch(isFunOrWhile, Seq(
+                iterConfig.get(observedStackConfig), iterConfig.get(observedStackConfig)
+              ))
+            )
+          )
+        )
+      ).fixpoint
+
     class FunctionCallLogger extends Logger[FixIn, FixOut[Value]]:
       val stack: mutable.Stack[(FixIn, IndexedSeq[(Value, Value)], effectStack.State)] = mutable.Stack.empty
 
@@ -291,17 +323,5 @@ object RelationalAnalysis extends Interpreter,
 
     val funLogger: FunctionCallLogger = new FunctionCallLogger
     val domLogger: DomLogger[FixIn] = new DomLogger
-    val observedStackConfig = stackConfig.withObservers(Seq(this.triggerControlEvent))
-
-    final override val fixpoint =
-      fix.log(controlEventLogger(this),
-        callSiteSensitive(callSites,
-          fix.log(fix.manyLogger(List(domLogger)),
-            fix.dispatch(isFunOrWhile, Seq(
-              fix.iter.topmost(observedStackConfig), fix.iter.topmost(observedStackConfig))
-            )
-          )
-        )
-      ).fixpoint
 
     override def newInstance: sturdy.Executor = new Instance(apronManager, initStore, stackConfig, callSites)

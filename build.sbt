@@ -10,6 +10,24 @@ ThisBuild / Test / parallelExecution := false
 ThisBuild / Test / testForkedParallel := false
 ThisBuild / Test / logBuffered := false
 
+ThisBuild / assemblyMergeStrategy := {
+  // Discard empty/directory entries that cause ZipFileSystem issues
+  case "" => MergeStrategy.discard
+  case PathList("META-INF", xs @ _*) =>
+    xs match {
+      case "MANIFEST.MF" :: Nil => MergeStrategy.discard
+      case "services" :: _      => MergeStrategy.concat
+      case _                    => MergeStrategy.discard
+    }
+  case "module-info.class"    => MergeStrategy.discard
+  case PathList("META-INF", "versions", xs @ _*) => MergeStrategy.first
+  case PathList("shapeless", xs @ _*) if xs.exists(_.contains("?")) =>
+    MergeStrategy.discard
+  case PathList("shapeless", xs @ _*) if xs.exists(x =>
+    x.contains("\u003f") || x.matches(".*\\$qmark.*")) => MergeStrategy.discard
+  case x => MergeStrategy.last
+}
+
 lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
@@ -32,7 +50,8 @@ lazy val sturdy_core = (project in file("sturdy-core"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0" % "test"
-    )
+    ),
+    assembly / assemblyJarName := "sturdy-core.jar"
   )
 
 val copyApronBinaries = taskKey[Unit]("Copies the platform-dependent Apron binaries to the project root, so that sbt loads them automatically")
@@ -61,12 +80,13 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
       }
       val files = Seq() ++ nativeDir.listFiles().filter(_.name.endsWith(ext))
       for (source <- files) {
-        val target = baseDirectory.value / source.name
+        val target = baseDirectory.value.toPath.getParent / source.name
         println(s"Copies $source to $target")
-        java.nio.file.Files.copy(source.file.toPath, target.file.toPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-//    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value
+    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
+    assembly / assemblyJarName := "sturdy-apron.jar"
   )
 
 lazy val sturdy_apron_bench: Project = (project in file("sturdy-apron-bench"))
@@ -92,7 +112,8 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
       "org.typelevel" %% "cats-core" % "2.13.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
+    ),
+    assembly / assemblyJarName := "sturdy-tip.jar"
   )
 
 lazy val sturdy_pcf = (project in file("sturdy-pcf"))
@@ -104,18 +125,39 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
       "org.typelevel" %% "cats-core" % "2.13.0",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
+    ),
+    assembly / assemblyJarName := "sturdy-pcf.jar"
   )
 
-val swamCommit = "580bdb83208e63cbdb2bcec86fc5432db288fd21"
-val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
+val swam = file("sturdy-wasm/swam")
 
-lazy val sturdy_wasm = (project in file("sturdy-wasm"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .dependsOn(sturdy_apron % "compile->compile")
-  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
-  .dependsOn(ProjectRef(swam, "swam_text") % "test->test")
-  .settings(
+lazy val sturdy_wasm = {
+  val base = (project in file("sturdy-wasm"))
+    .dependsOn(sturdy_core % "compile->compile;test->test")
+    .dependsOn(sturdy_apron % "compile->compile")
+    .settings(
+      name := "sturdy_wasm",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+      )
+    )
+  if (!(swam / "core").exists() || !(swam / "text").exists()) {
+    println(
+      """
+        |[Error] SWAM submodule not found.
+        |
+        |Run:
+        |  git submodule update --init --recursive
+        |
+        |or clone with:
+        |  git clone --recursive <repo-url>
+        |
+        |""".stripMargin)
+  }
+
+    base.dependsOn(ProjectRef(swam, "swam_core") % "compile->compile;test->test")
+        .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile;test->test")
+}.settings(
     name := "sturdy_wasm",
     libraryDependencies ++= Seq(
       // test
@@ -125,7 +167,15 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       ("org.typelevel" %% "cats-parse" % "1.1.0").cross(CrossVersion.for3Use2_13) % "test",
       "org.xerial" % "sqlite-jdbc" % "3.36.0.3" % "test",
       ("io.circe" %% "circe-yaml" % "0.16.0").cross(CrossVersion.for3Use2_13) % "test"
-    )
+    ),
+    dependencyOverrides ++= Seq(
+      "org.typelevel" %% "cats-core"   % "2.12.0",
+      "org.typelevel" %% "cats-kernel" % "2.12.0",
+      "org.typelevel" %% "cats-free"   % "2.12.0"
+    ),
+    // Include test dependencies in main assembly
+    assembly / fullClasspath ++= (Test / fullClasspath).value,
+    assembly / assemblyJarName := "sturdy-wasm.jar"
   )
 
 lazy val sturdy_tutorial = (project in file("sturdy-tutorial"))

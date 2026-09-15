@@ -32,17 +32,22 @@ object GenInterval:
   def genInterval[N: Numeric: Choose](minValue: N, maxValue: N, specials: N*): Gen[Interval[N]] =
     for {
       included <- genConstant(minValue, maxValue, specials*)
-      d = Numeric[N].toDouble(included)
+      iv <- genInterval(included, minValue, maxValue, specials*)
+    } yield iv
+
+  def genInterval[N: Numeric: Choose](included: N, minValue: N, maxValue: N, specials: N*): Gen[Interval[N]] =
+    val d = Numeric[N].toDouble(included)
+    for {
       low <-
-        if(d.isInfinity || d.isNaN)
-          Gen.chooseNum(minValue, maxValue, specials*)
+        if (d.isInfinity || d.isNaN)
+          Gen.chooseNum(minValue, maxValue, specials *)
         else
-          Gen.chooseNum(minValue, included, specials*)
+          Gen.chooseNum(minValue, included, specials *)
       high <-
-        if(d.isInfinity || d.isNaN)
-          Gen.chooseNum(low, maxValue, specials*)
+        if (d.isInfinity || d.isNaN)
+          Gen.chooseNum(low, maxValue, specials *)
         else
-          Gen.chooseNum(included, maxValue, specials*)
+          Gen.chooseNum(included, maxValue, specials *)
       specials <- genFloatSpecials(d)
     }
     yield Interval(low, included, high, specials)

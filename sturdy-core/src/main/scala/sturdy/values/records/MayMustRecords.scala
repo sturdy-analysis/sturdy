@@ -29,21 +29,9 @@ given mayMustRecordOps[F, V](using Failure, Join[V])(using j: EffectStack): Reco
     case Some(MayMust.Must(v)) => MayMustRecord(rec.m + (field -> MayMust.Must(newval)))
     case Some(MayMust.May(v)) => j.joinWithFailure(MayMustRecord(rec.m + (field -> MayMust.Must(newval))))(UnboundRecordField(field).failedUpdate(rec))
 
-given CombineMayMustRecord[F, V, W <: Widening](using j: Combine[V, W]): Combine[MayMustRecord[F, V], W] with
+given CombineMayMustRecord[F: Finite, V, W <: Widening](using j: Combine[V, W]): Combine[MayMustRecord[F, V], W] with
   override def apply(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MaybeChanged[MayMustRecord[F, V]] =
-    var joined =  rec1.m
-    var changed = false
-    for ((f, v2) <- rec2.m)
-      joined.get(f) match
-        case None =>
-          joined += f -> MayMust.May(v2.get)
-          changed = true
-        case Some(v1) =>
-          Combine[MayMust[V], W](v1, v2).ifChanged { changedV =>
-            joined += f -> changedV
-            changed = true
-          }
-    MaybeChanged(MayMustRecord(joined), changed)
+    (new CombineMayMustMap[F, V, W]()).apply(rec1.m, rec2.m).map(MayMustRecord(_))
 
 given MayMustRecordPO[F, V](using PartialOrder[V]): PartialOrder[MayMustRecord[F, V]] with
   override def lteq(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): Boolean = boundary:

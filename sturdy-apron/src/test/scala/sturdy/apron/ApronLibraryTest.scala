@@ -49,6 +49,32 @@ class ApronLibraryTest extends AnyFunSuite:
     asItvs.foreach(println)
   }
 
+  test("{0 <= x <= 10, z = x} ⊔ {10 <= y <= 20, z = y}") {
+
+    val manager = new Polka(false)
+
+    val abs1 = Abstract1(manager, new Environment(Array("x", "z"), Array[String]()))
+    val abs2 = Abstract1(manager, new Environment(Array("y", "z"), Array[String]()))
+
+    abs1.assign(manager, "x", Texpr1Intern(abs1.getEnvironment, Texpr1CstNode(Interval(0,10))), null)
+    abs1.assign(manager, "z", Texpr1Intern(abs1.getEnvironment, Texpr1VarNode("x")), null)
+
+    abs2.assign(manager, "y", Texpr1Intern(abs2.getEnvironment, Texpr1CstNode(Interval(10, 20))), null)
+    abs2.assign(manager, "z", Texpr1Intern(abs2.getEnvironment, Texpr1VarNode("y")), null)
+
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, Set(), widen=false).get
+
+    joined.getBound(manager, "x") shouldBe Interval(0, 10)
+    joined.getBound(manager, "y") shouldBe Interval(10, 20)
+    joined.getBound(manager, "z") shouldBe Interval(0, 20)
+
+    // z <= x
+    joined.getBound(manager, Texpr1Intern(joined.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1VarNode("z"), Texpr1VarNode("x")))) shouldBe Interval(0,20)
+
+    // y <= z
+    joined.getBound(manager, Texpr1Intern(joined.getEnvironment, Texpr1BinNode(Texpr1BinNode.OP_SUB, Texpr1VarNode("y"), Texpr1VarNode("z")))) shouldBe Interval(0,10)
+  }
+
   test("{x ∈ [1,2], y ∈ [3,4], z ∈ [6,7]}.fold([x,y,z]) = { x ∈ [1,7] }") {
 
     val x = ApronVar("x")
@@ -79,7 +105,6 @@ class ApronLibraryTest extends AnyFunSuite:
     a2.isEqual(manager,a1) shouldBe true
     a1.hashCode(manager) shouldEqual (a2.hashCode(manager))
     a2.hashCode(manager) shouldEqual (a1.hashCode(manager))
-
 
   test("{x = y, y ∈ [0,100]}.assign(x, x+1) = { x = y+1, y ∈ [0,100] }") {
 
@@ -189,4 +214,52 @@ class ApronLibraryTest extends AnyFunSuite:
       compare(manager, a1, a2)
       a1_v3_hashcode shouldBe a2_v3_hashcode
     }
+  }
+
+  test("{x ∈ [1,2], y = x}.unify(z ∈ [2,3], y = z) = [x = y = z = 2]") {
+    val manager: Manager = new Polka(false)
+
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val z = ApronVar("z")
+
+    val env1 = new Environment(Array[Var](x, y), Array[Var]())
+    val abs1 = new Abstract1(manager, env1)
+    abs1.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env1), null)
+    abs1.assign(manager, y, ApronExpr.addr("x", BaseType[Int]).toIntern(env1), null)
+
+
+    val env2 = new Environment(Array[Var](z, y), Array[Var]())
+    val abs2 = new Abstract1(manager, env2)
+    abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
+    abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
+
+    val unified = abs1.unifyCopy(manager, abs2)
+    unified.isBottom(manager) shouldBe false
+  }
+
+
+  test("{x ∈ [1,2], y = x}.join(z ∈ [2,3], y = z) = [x ∈ [1,2], z ∈ [2,3], ]") {
+    val manager: Manager = new Polka(false)
+
+    val x = ApronVar("x")
+    val y = ApronVar("y")
+    val z = ApronVar("z")
+
+    val env1 = new Environment(Array[Var](x, y), Array[Var]())
+    val abs1 = new Abstract1(manager, env1)
+    abs1.assign(manager, x, ApronExpr.constant(Interval(1, 2), BaseType[Int]).toIntern(env1), null)
+    abs1.assign(manager, y, ApronExpr.addr("x", BaseType[Int]).toIntern(env1), null)
+
+
+    val env2 = new Environment(Array[Var](z, y), Array[Var]())
+    val abs2 = new Abstract1(manager, env2)
+    abs2.assign(manager, z, ApronExpr.constant(Interval(2, 3), BaseType[Int]).toIntern(env2), null)
+    abs2.assign(manager, y, ApronExpr.addr("z", BaseType[Int]).toIntern(env2), null)
+
+    val joined = ApronJoins.combineAbstract1(manager, abs1, abs2, Set(), widen=false).get
+
+    joined.getBound(manager, x) shouldBe Interval(1,2)
+    joined.getBound(manager, y) shouldBe Interval(1,3)
+    joined.getBound(manager, z) shouldBe Interval(2,3)
   }

@@ -52,6 +52,24 @@ class RelationalIntOpsTest(using Manager) extends IntegerOpsTest[Int, ApronExpr[
       (RelationalIntInterval, new RelationalIntOps[VirtAddr, Type], implicitly)
     }
 ):
+  test("add([233886076,2147483647],[-40746874,323133476])") {
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.add(
+      ivOps.interval(integral.fromInt(233886076), integral.fromInt(2147483647)),
+      ivOps.interval(integral.fromInt(-40746874), integral.fromInt(323133476))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.add(integral.fromInt(233886076), integral.fromInt(1)), actual))
+  }
+
+  test("max([-2147483648,2147483647],[-1853936221,1863658670])") {
+    implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
+    val actual = integerOps.max(
+      ivOps.interval(integral.fromInt(-2147483648), integral.fromInt(2147483647)),
+      ivOps.interval(integral.fromInt(-1853936221), integral.fromInt(1863658670))
+    )
+    assertResult(IsSound.Sound)(soundness.isSound(concreteIntegerOps.max(integral.fromInt(2147483647), integral.fromInt(-1635461115)), actual))
+  }
+
   test("div([1,1],[-1,1])") {
     implicit val (ivOps, integerOps, soundness) = makeIntegerOps()
     val actual = integerOps.div(

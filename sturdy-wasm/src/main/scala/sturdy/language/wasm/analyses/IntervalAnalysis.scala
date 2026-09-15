@@ -11,8 +11,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.{JoinableDecidableOperandStack, given}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
-import sturdy.effect.symboltable.IntervalSymbolTable
-import sturdy.effect.symboltable.{ConstantSymbolTable, JoinableDecidableSymbolTable}
+import sturdy.effect.symboltable.{ConstantSymbolTable, FiniteSymbolTableWithDrop, IntervalMappedSymbolTable, IntervalSymbolTable, JoinableDecidableSymbolTable, SymbolTableWithDrop}
 import sturdy.effect.EffectStack
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
@@ -28,8 +27,9 @@ import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.ordering.{*, given}
+import sturdy.values.simd.{*, given}
 import sturdy.values.{*, given}
-import swam.FuncType
+import swam.{FuncType, ReferenceType}
 import swam.syntax.*
 import swam.traversal.Traverser
 
@@ -37,20 +37,45 @@ import java.nio.{ByteBuffer, ByteOrder}
 import scala.collection.IndexedSeqView
 import WasmFailure.*
 import sturdy.control.{ControlObservable, RecordingControlObserver}
+import sturdy.language.wasm.analyses.IntervalAnalysis.typedTop
+import sturdy.values.addresses.AddressOffset
 
 object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, ControlFlow, Control:
   type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[NumericInterval[Byte]]
   type Size = Topped[Int]
-  type FuncIx = I32
-  type FunV = Powerset[FunctionInstance]
+  type Index = I32
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
+  given ConstantSpecialWasmOperations(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Bytes, Size, Index, FunV, RefV, WithJoin] with
+    override def valToAddr(v: Value): Addr = v.asInt32
+    override def valToIdx(v: Value): Index = v.asInt32
     override def valToSize(v: Value): Size = Convert.apply(v.asInt32, NilCC)
-    override def sizeToVal(sz: Size): Value = Value.Int32(Convert.apply(sz, NilCC))
+    override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(Convert.apply(sz, NilCC)))
+    override def valToRef(v: IntervalAnalysis.Value, funcs: Vector[FunctionInstance]): RefV =
+      v match
+        case Value.Ref(f) => f
+        case Value.TopValue =>
+          Powerset[FunctionInstance | ExternReference](funcs *) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
+        case _ => f.fail(TypeError, s"Expected reference, but got $v")
+    override def refToVal(r: RefV): IntervalAnalysis.Value = Value.Ref(r)
+    override def liftBytes(bytes: Seq[Byte]): Seq[NumericInterval[Byte]] = bytes.map(byte => NumericInterval(byte, byte))
+    override def isNullRef(r: Value): IntervalAnalysis.Value =  {
+      r match {
+        case Value.Ref(f) =>
+          if (f.set.contains(ExternReference.Null) || f.set.contains(FunctionInstance.Null))
+            if (f.set.filter(_ == ExternReference.Null) ++ f.set.filter(_ == FunctionInstance.Null) == f.set)
+              makeI32(NumericInterval(1,1))
+            else
+              makeI32(NumericInterval(0,1))
+          else
+            makeI32(NumericInterval(0,0))
+        case Value.TopValue => makeI32(NumericInterval(0,1))
+        case _ => Value.Num(NumValue.Int32(NumericInterval(0,0)))
+      }
+    }
+
+    override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       val NumericInterval(l, h) = ix.asInt32
@@ -67,21 +92,29 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         JOptionPowerset.NoneSome(Powerset(elems.toSet))
       }
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
-      case "proc_exit" =>
-        val exitCode = args.head
-        f.fail(ProcExit, s"Exiting program with exit code $exitCode")
-      case _ =>
-        val result = hostFunc.funcType.t.map(typedTop).toList
-        eff.joinWithFailure(result)(f.fail(FileError, s"in ${hostFunc.name}"))
+  given IntervalAddressOffset(using intOps: IntegerOps[Int, NumericInterval[Int]], f: Failure, eff: EffectStack): AddressOffset[Addr] with
+    override def addOffsetToAddr(offset: Int, addr: NumericInterval[Int]): NumericInterval[Int] =
+      val resAddr = intOps.add(addr, intOps.integerLit(offset))
+      if(Integer.compareUnsigned(resAddr.low, offset) < 0 || Integer.compareUnsigned(resAddr.high, offset) < 0) {
+        eff.joinWithFailure {
+          NumericInterval(math.max(0, resAddr.low), math.max(0, resAddr.high))
+        } {
+          f.fail(MemoryAccessOutOfBounds, s"$addr + $offset")
+        }
+      } else {
+        resAddr
+      }
+
+    override def moveAddress(addr: NumericInterval[Int], srcOffset: NumericInterval[Int], dstOffset: NumericInterval[Int]): NumericInterval[Int] =
+      NumericInterval(addr.low - srcOffset.low + dstOffset.low, addr.high - srcOffset.high + dstOffset.high)
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def apply(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(NumericInterval.constant(i))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(NumericInterval.constant(l))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i)) => Value.Num(NumValue.Int32(NumericInterval.constant(i)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(NumericInterval.constant(l)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(Topped.Actual(d)))
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
       GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -92,15 +125,19 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
     var dummy: List[Value] = List()
 
     override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvBytes: WithJoin[Bytes] = implicitly
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
+    override def jvRefV: WithJoin[RefV] = implicitly
+    override def jvElem: WithJoin[Elem] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
     val rangeLimit = 100
     val stack: JoinableDecidableOperandStack[Value] = new JoinableDecidableOperandStack
     val memory: IntervalAddressMemory[MemoryAddr, NumericInterval[Byte]] = new IntervalAddressMemory(NumericInterval(0, 0), rangeLimit)
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
-    val funTable: IntervalSymbolTable[TableAddr, NumericInterval[Int], Powerset[FunctionInstance]] = new IntervalSymbolTable
+    val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
+    val tables: IntervalMappedSymbolTable[TableAddr, RefV] = new IntervalMappedSymbolTable[TableAddr, RefV](rangeLimit)
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
@@ -140,8 +177,7 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
         val bytes: Seq[Topped[Byte]] = from.map(Convert.apply(_, NilCC))
         Convert(bytes, conf)
       }
-
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, Index, FunV, RefV, WithJoin] = implicitly
 
     var intIntervalBounds: Set[Int] = Set(-1, 0, 1)
     var longIntervalBounds: Set[Long] = Set(-1, 0, 1)
@@ -154,11 +190,19 @@ object IntervalAnalysis extends Interpreter, IntervalValues, ExceptionByTarget, 
       override val i32ConstTraverse = (_, c) => IO(intIntervalBounds += c.v)
       override val i64ConstTraverse = (_, c) => IO(longIntervalBounds += c.v)
     }
-    override def initializeModule(module: Module, imports: Imports, moduleId: Option[Any], hostModules: HostModules): ModuleInstance = {
+    override def instantiateModule(module: Module, imports: Imports, moduleId: Option[Any], hostModules: HostModules): ModuleInstance = {
       module.funcs.foreach(f => f.body.foreach(boundCollector.run((), _)))
       module.globals.foreach(g => g.init.foreach(boundCollector.run((), _)))
-      super.initializeModule(module, imports, moduleId, hostModules)
+      super.instantiateModule(module, imports, moduleId, hostModules)
     }
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[IntervalAnalysis.Value]): List[IntervalAnalysis.Value] = hostFunc.name match
+      case "proc_exit" =>
+        val exitCode = args.head
+        failure.fail(ProcExit, s"Exiting program with exit code $exitCode")
+      case _ =>
+        val result = hostFunc.funcType.t.map(typedTop).toList
+        effectStack.joinWithFailure(result)(failure.fail(FileError, s"in ${hostFunc.name}"))
 
     val observedConfig = config.withObservers(Seq(this.triggerControlEvent))
     override val fixpoint: fix.ContextualFixpoint[FixIn, FixOut[IntervalAnalysis.Value]] = new fix.ContextualFixpoint {

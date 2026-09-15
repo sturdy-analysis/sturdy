@@ -112,7 +112,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
 
     val res_baseline = Profiler.addTimeBestOf("baseline", bestOf) {
       val interp_baseline = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
-      val mod_inst = interp_baseline.initializeModule(module)
+      val mod_inst = interp_baseline.instantiateModule(module)
       interp_baseline.failure.fallible(interp_baseline.invokeExported(mod_inst, funcName, List.empty))
     }
 
@@ -120,7 +120,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     val res_event = Profiler.addTimeBestOf("event_run", bestOf) {
       val interp_event = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
       val graphBuilder = interp_event.addControlObserver(new ControlEventGraphBuilder)
-      val modInst_event = interp_event.initializeModule(module)
+      val modInst_event = interp_event.instantiateModule(module)
       hash_event = modInst_event.toString
       interp_event.failure.fallible(interp_event.invokeExported(modInst_event, funcName, List.empty))
       graphBuilder.get
@@ -130,7 +130,7 @@ class BenchmarksgamePerfControlEventTest extends AnyFlatSpec, Matchers:
     val res_tree = Profiler.addTimeBestOf("tree_run", bestOf) {
       val interp_tree = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, config)
       val parser = interp_tree.addControlObserver(new ControlEventParser)
-      val modInst_tree = interp_tree.initializeModule(module)
+      val modInst_tree = interp_tree.instantiateModule(module)
       hash_tree = modInst_tree.toString
       interp_tree.failure.fallible(interp_tree.invokeExported(modInst_tree, funcName, List.empty))
       parser.getFinalTree.toGraph

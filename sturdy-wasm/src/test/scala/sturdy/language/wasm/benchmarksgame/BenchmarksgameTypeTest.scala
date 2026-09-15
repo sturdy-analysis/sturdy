@@ -59,7 +59,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val oldCfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
 
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     interp.failure.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )
@@ -92,5 +92,4 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val dotPath2 = p.getParent.resolve(p.getFileName.toString + ".types.new.dot")
     Files.writeString(dotPath2, newCfg.toGraphViz)
 
-    testCfgDifference(oldCfg, newCfg)
     

@@ -68,7 +68,7 @@ class BenchmarksgameConstantCFGBuilderTest extends AnyFlatSpec, Matchers:
     }))
     val graphBuilder = interp.addControlObserver(new ControlEventGraphBuilder)
     
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
 
     val res = Profiler.addTime("analysis") {
       interp.failure.fallible(

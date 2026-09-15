@@ -16,6 +16,16 @@ enum AbstractReference[+Addr]:
     case Addr(_, m) => m
     case NullAddr(_, m) => m
 
+  def containsNull: Boolean = this match
+    case Null => true
+    case NullAddr(_,_) => true
+    case Addr(_,_) => false
+
+  def mapAddr[OtherAddr](f: Addr => OtherAddr): AbstractReference[OtherAddr] = this match
+    case Null => Null
+    case Addr(addrs, managed) => Addr(f(addrs),managed)
+    case NullAddr(addrs,managed) => NullAddr(f(addrs), managed)
+
 given abstractReferenceOps[Addr] (using f: Failure, effects: EffectStack): ReferenceOps[Addr, AbstractReference[Addr]] with
   override def mkNullRef: AbstractReference[Addr] = AbstractReference.Null
   override def mkManagedRef(addr: Addr): AbstractReference[Addr] = AbstractReference.Addr(addr, true)

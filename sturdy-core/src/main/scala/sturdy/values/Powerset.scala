@@ -9,19 +9,22 @@ import sturdy.values.ordering.EqOps
 import scala.util.boundary, boundary.break
 
 case class Powerset[A](set: Set[A]) extends AnyVal {
-  def size: Int = set.size
-  def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
-  def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
-  def mapJoin[B](f: A => B)(using EffectStack): Powerset[B] =
+  inline def isEmpty: Boolean = set.isEmpty
+  inline def size: Int = set.size
+  inline def contains(elem: A) = set.contains(elem)
+  inline def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
+  inline def intersect(other: Powerset[A]): Powerset[A] = Powerset(this.set.intersect(other.set))
+  inline def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
+  inline def mapJoin[B](f: A => B)(using EffectStack): Powerset[B] =
     sturdy.data.mapJoin(set, b => Powerset(f(b)))
-  def foldJoin[B](f: A => B)(using EffectStack, Join[B]): B =
+  inline def foldJoin[B](f: A => B)(using EffectStack, Join[B]): B =
     sturdy.data.mapJoin(set, b => f(b))
-  def foreach(f: A => Unit): Unit = set.foreach(f)
-  override def toString: String = s"Powerset(${set.mkString(", ")})"
+  inline def foreach(f: A => Unit): Unit = set.foreach(f)
+  override inline def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
-  def empty[A]: Powerset[A] = new Powerset[A](Set.empty[A])
-  def apply[A](as: A*): Powerset[A] = new Powerset(Set.from(as))
+  inline def empty[A]: Powerset[A] = new Powerset[A](Set.empty[A])
+  inline def apply[A](as: A*): Powerset[A] = new Powerset(Set.from(as))
 }
 
 given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}

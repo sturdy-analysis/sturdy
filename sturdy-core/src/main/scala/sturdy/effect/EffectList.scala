@@ -18,6 +18,11 @@ case class EffectList(effects: ArraySeq[Effect]) extends Effect:
     effects.view.zip(st).foreach((effect,state) =>
       effect.setState(state.asInstanceOf)
     )
+
+  override def setStateNonMonotonically(st: State): Unit =
+    effects.view.zip(st).foreach((effect,state) =>
+      effect.setStateNonMonotonically(state.asInstanceOf)
+    )
     
   override def join: Join[State] = combine((effect) => (s1, s2) => effect.join(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)
   override def widen: Widen[State] = combine((effect) => (s1, s2) => effect.widen(s1.asInstanceOf, s2.asInstanceOf).asInstanceOf)

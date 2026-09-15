@@ -18,7 +18,7 @@ import sturdy.values.integer.NumericInterval
 import swam.binary.ModuleParser
 import swam.syntax.{Func, Module}
 import swam.validation.Validator
-import swam.{FuncType, ModuleLoader, ValType}
+import swam.{FuncType, ModuleLoader, NumType, ValType}
 
 import java.nio.file.{Files, Path, Paths}
 import scala.collection.mutable
@@ -85,7 +85,7 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
   val noGlobalInit: GlobalInit = _ => ()
 
   private val imports: Map[String, (ModuleInstance, GlobalInit)] = Map(
-    "direct-call-imported-func" -> makeHostModule(new HostFunction("print", FuncType(Vector(ValType.I32), Vector()))),
+    "direct-call-imported-func" -> makeHostModule(new HostFunction("print", FuncType(Vector(NumType.I32), Vector()))),
     "host-callbacks-exports" -> makeHostModule(new HostFunction("imported", FuncType(Vector(), Vector()))),
     "host-reachable-table-export" -> makeHostModule(new HostFunction("imported", FuncType(Vector(), Vector()))),
     "host-reachable-table-import" -> makeHostModule(new HostFunction("imported", FuncType(Vector(), Vector()))),
@@ -93,13 +93,13 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
       val (mod, _) = makeHostModule()
       mod.exports :+= "data_offset" -> ExternalValue.Global(0)
       mod.globalAddrs :+= GlobalAddr(0)
-      mod -> (globals => globals.set((), GlobalAddr(0), IntervalAnalysis.Value.Int32(NumericInterval.constant(1337))))
+      mod -> (globals => globals.set((), GlobalAddr(0), IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Int32(NumericInterval.constant(1337)))))
     },
     "table-init-offset-imported-global" -> {
       val (mod, _) = makeHostModule()
       mod.exports :+= "element_offset" -> ExternalValue.Global(0)
       mod.globalAddrs :+= GlobalAddr(0)
-      mod -> (globals => globals.set((), GlobalAddr(0), IntervalAnalysis.Value.Int32(NumericInterval.constant(1))))
+      mod -> (globals => globals.set((), GlobalAddr(0), IntervalAnalysis.Value.Num(IntervalAnalysis.NumValue.Int32(NumericInterval.constant(1)))))
     }
   )
 
@@ -141,7 +141,7 @@ class ToughCallIntervalControlEventTest extends AnyFlatSpec, Matchers:
     val res = interp.failure.fallible {
       interp.initializeThis()
       host.foreach(_._2(interp.globals))
-      val modInst = interp.initializeModule(module, host.map(m => "host" -> m._1).toMap)
+      val modInst = interp.instantiateModule(module, host.map(m => "host" -> m._1).toMap)
       if (modInst.exportedFunctions.contains("main")) {
         interp.invokeExported(modInst, "main", List())
       } else {

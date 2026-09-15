@@ -1,0 +1,409 @@
+package sturdy.language.wasm.testscript
+
+import apron.*
+import cats.effect.{Blocker, IO}
+
+import org.scalatest.Assertions.*
+import org.scalatest.{BeforeAndAfterAll, Suites}
+import org.scalatest.exceptions.TestFailedException
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalacheck.Gen
+
+import sturdy.apron.{ApronExpr, RoundingDir, RoundingMode}
+import sturdy.control.{ControlEventChecker, ControlEventGraphBuilder, PrintingControlObserver}
+import sturdy.effect.failure.{AFallible, CFallible, given}
+import sturdy.{*, given}
+import sturdy.fix.{Fixpoint, StackConfig}
+import sturdy.language.wasm.{ConcreteInterpreter, Parsing}
+import ConcreteInterpreter.{constExprToVal, constExprToVals, eqVals}
+import sturdy.language.wasm.analyses.{RelationalAnalysis, *}
+import sturdy.language.wasm.generic.ExternalValue.Global
+import sturdy.language.wasm.generic.{ExternalValue, FixIn, FrameData, ModuleInstance, WasmFailure}
+import sturdy.util.Profiler
+import sturdy.values.{*, given}
+import sturdy.values.integer.given
+import sturdy.util.GenInterval.genInterval
+
+import swam.syntax.Module
+import swam.text.*
+import swam.text.unresolved.{FreshId, NoId, SomeId}
+
+import java.io.File
+import java.nio.file.{FileSystemNotFoundException, FileSystems, Files, Path, Paths}
+
+import com.github.tototoshi.csv.*
+
+import scala.collection.mutable
+import scala.io.Source
+import scala.jdk.StreamConverters.*
+
+val csvWriter = {
+  val writer = CSVWriter.open(File("soundness.csv"))
+  writer.writeRow(List("filename", "abstract_domain", "passed_cases", "test_cases", "percent_passed", "constrained_instructions", "total_instructions", "percent_constrained"))
+  writer
+}
+
+object SlowTest extends org.scalatest.Tag("SlowTest")
+
+class RelationalAnalysisSoundnessTests extends Suites(
+  new RelationalAnalysisTestScript(Polka(true), relational = true),
+  new RelationalAnalysisTestScript(Octagon(), relational = true),
+  new RelationalAnalysisTestScript(Box(), relational = true)
+  // new RelationalAnalysisTestScript(Box(), relational = false),
+), BeforeAndAfterAll:
+
+  override def afterAll(): Unit = csvWriter.close()
+
+class RelationalAnalysisTestScript(manager: Manager, relational: Boolean = true) extends AnyFlatSpec, Matchers:
+  behavior of ("TestScript relational analysis with " + manager.getClass.getSimpleName)
+
+  val spectest = RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+    Parsing.fromString(
+      scala.io.Source.fromInputStream(this.getClass.getResourceAsStream("/sturdy/language/wasm/spectest.wast")).mkString
+    )
+  }
+  val uri = this.getClass.getResource("/sturdy/language/wasm/spec-test-suite-wasm1").toURI;
+  // Handle both file system paths and JAR resources
+  val path = if (uri.getScheme == "jar") {
+    // For JAR resources - get existing FileSystem or create new one
+    val fs = try {
+      FileSystems.getFileSystem(uri)
+    } catch {
+      case _: FileSystemNotFoundException =>
+        FileSystems.newFileSystem(uri, new java.util.HashMap[String, Any]())
+    }
+    fs.getPath("/sturdy/language/wasm/spec-test-suite-wasm1")
+  } else {
+    // For regular file system paths
+    Paths.get(uri)
+  }
+
+  def analyses: IterableOnce[() => RelationalAnalysis.Instance] =
+    val stackedStates = StackConfig.StackedStates(readPriorOutput = false, storeNonrecursiveOutput = false, observers = Seq())
+    Iterator(
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost(stackedStates)), ctx = Insensitive)),
+      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(), ctx = Insensitive, relational = relational)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(stackedStates)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(StackConfig.StackedCfgNodes())), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost(false)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(true)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(manager, FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Outermost(false)), ctx = Insensitive)),
+//      () => new RelationalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Innermost), ctx = CallSites(1))),
+//      () => new RelationalAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = fix.iter.Config.Topmost), ctx = CallSites(1))),
+    )
+
+  def isSlow(manager: Manager, script: String): Boolean =
+    script.contains("float_exprs.wast")
+
+  def runTest(scriptPath: Path, analysis: RelationalAnalysis.Instance): Unit =
+    val script = RoundingMode.withRoundingMode(RoundingDir.Nearest) {Parsing.testscript(scriptPath)}
+    val interp = RelationalAnalysisTestScriptInterpreter(Some(spectest), analysis)
+    interp.run(scriptPath.getFileName, script)
+
+  Fixpoint.DEBUG = false
+  Files.list(path).toScala(List).filter(p =>
+    p.toString.endsWith(".wast")
+  ).sorted.foreach { p =>
+    for (analysis <- analyses) {
+      val anl = analysis()
+      if (isSlow(anl.apronManager, p.getFileName.toString))
+        it must s"execute ${p.getFileName} with ${anl}" taggedAs (SlowTest) in {
+          runTest(p, anl)
+//          Profiler.printLastMeasured()
+          Profiler.reset()
+        }
+      else
+        it must s"execute ${p.getFileName} with ${anl}" in {
+          runTest(p, anl)
+//          Profiler.printLastMeasured()
+          Profiler.reset()
+        }
+
+    }
+  }
+
+class RelationalAnalysisTestScriptInterpreter(spectest: Option[Module] = None, val aInterp: RelationalAnalysis.Instance, useTop: Boolean = false):
+  import aInterp.given
+  import sturdy.language.wasm.analyses.RelationalAnalysisSoundness.given
+
+  type CValue = ConcreteInterpreter.Value
+  type AValue = RelationalAnalysis.Value
+
+  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+//  aInterp.addControlObserver(new PrintingControlObserver("  ", "\n")(println))
+  val constrainedInstructionsLogger: aInterp.ConstrainedInstructionsLogger = aInterp.constrainedInstructionsLogger
+  val cfg = aInterp.addControlObserver(new ControlEventGraphBuilder)
+  val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
+  val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cCurrent: ModuleInstance = null
+  var aCurrent: ModuleInstance = null
+  var cImports: Map[String, ModuleInstance] = Map()
+  var aImports: Map[String, ModuleInstance] = Map()
+  val convertVals: unresolved.Expr => List[RelationalAnalysis.Value] =
+    if (useTop)
+      constExprToTops
+    else
+      constExprToAVals
+  val passedTestCases = new NumTestCases
+  val totalTestCases = new NumTestCases
+
+  spectest.foreach{ mod =>
+    val modInst = cInterp.instantiateModule(mod)
+    cCurrent = modInst
+    cImports += "spectest" -> modInst
+
+    val amodInst = aInterp.instantiateModule(mod)
+    aCurrent = amodInst
+    aImports += "spectest" -> amodInst
+  }
+
+
+  type CResult = CFallible[List[CValue]]
+  type AResult = AFallible[List[AValue]]
+
+  def run(filename: Path, commands: Seq[Command]): Unit =
+    try {
+      commands.foreach { command =>
+        eval(command)
+        aInterp.garbageCollect()
+      }
+    } finally {
+      val percentPassed = if(totalTestCases.n == 0) 100d else passedTestCases.n.toDouble / totalTestCases.n.toDouble * 100d
+      val constrainedInstructions = constrainedInstructionsLogger.getConstrained.size
+      val totalInstructions = constrainedInstructionsLogger.getAllInstructionInfos.size
+      val percentConstrained = if(totalInstructions == 0) 100d else constrainedInstructions.toDouble / totalInstructions.toDouble * 100d
+      csvWriter.writeRow(List(
+        filename.toString,
+        aInterp.apronManager.getClass.getSimpleName,
+        passedTestCases.toString,
+        totalTestCases.toString,
+        f"$percentPassed%.1f",
+        constrainedInstructions.toString,
+        totalInstructions.toString,
+        f"$percentConstrained%.1f"
+      ))
+    }
+
+  def getCModule(module: Option[String]): ModuleInstance = module match
+    case None => cCurrent
+    case Some(name) => cModules(name)
+
+  def getAModule(module: Option[String]): ModuleInstance = module match
+    case None => aCurrent
+    case Some(name) => aModules(name)
+
+  def eval(c: Command): Unit =
+    c match
+    case ValidModule(m) =>
+      // validate and compile module
+      val mod = Parsing.fromUnresolved(m)
+      val id = m.id match
+        case SomeId(name) => Some(name)
+        case _ => None
+      loadModule(id, mod)
+    case Register(s, id) =>
+      cImports += s -> getCModule(id)
+      aImports += s -> getAModule(id)
+    case BinaryModule(id, bytes) =>
+      val mod = Parsing.fromBytes(bytes)
+      loadModule(id, mod)
+    case QuotedModule(id, text) => {}
+    case AssertReturn(action, expectedRes) =>
+      totalTestCases.increment()
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      assert(!res.isFailing)
+      val expected = constExprToVals(expectedRes)
+      assert(eqVals(expected, res.get), c.toString + s", expected $expected, but got ${res.get}")
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      passedTestCases.increment()
+    case AssertReturnCanonicalNaN(action) =>
+      totalTestCases.increment()
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      checkNaN(res, c.toString)
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      passedTestCases.increment()
+    case AssertReturnArithmeticNaN(action) =>
+      totalTestCases.increment()
+      val aRes = runAAction(action, convertVals)
+      val res = runCAction(action)
+      checkNaN(res, c.toString)
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      passedTestCases.increment()
+    case AssertTrap(action: Action, message: String) =>
+      totalTestCases.increment()
+      val dummyFunctionCall = FixIn.EnterWasmFunction(null, null, null)
+      val state = aInterp.effectStack.getOutState(dummyFunctionCall)
+      val aRes = try { runAAction(action, convertVals) } finally { aInterp.effectStack.setOutState(dummyFunctionCall, state) }
+      val res = runCAction(action)
+      assert(res.isFailing, c.toString)
+      assertResult(IsSound.Sound, s"result $aRes on assertion $c (top = $useTop)")(Soundness.isSound(res, aRes))
+//      assertResult(IsSound.Sound, s"interpreter states after running action $action (top = $useTop)")(Soundness.isSound(cInterp, aInterp))
+      passedTestCases.increment()
+    case AssertModuleTrap(mod,_) =>
+      totalTestCases.increment()
+      val aRes = aInstantiate(mod)
+      val res = instantiate(mod)
+      assert(res.isFailing, c.toString)
+      //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
+      assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
+      passedTestCases.increment()
+    case _: AssertUnlinkable => // skip
+    case _: AssertInvalid => // skip
+    case _: AssertMalformed => // skip
+    case _: AssertExhaustion => // skip
+    case action: Action =>
+      runAAction(action, convertVals)
+      runCAction(action)
+    case _: Meta => // skip
+
+  def loadModule(id: Option[String], mod: Module): Unit =
+    RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+      val cModInst = cInterp.instantiateModule(mod, cImports)
+      id match
+        case None => // nothing
+        case Some(name) => cModules += name -> cModInst
+      cCurrent = cModInst
+      val aModInst = aInterp.instantiateModule(mod, aImports)
+      id match
+        case None => // nothing
+        case Some(name) => aModules += name -> aModInst
+      aCurrent = aModInst
+      // check for soundness of the interpreter states after initialization
+      assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
+    }
+
+  def instantiate(t: TestModule): CFallible[ModuleInstance] =
+    t match
+      case ValidModule(m) =>
+        val mod = Parsing.fromUnresolved(m)
+        RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+          cInterp.failure.fallible {
+            cInterp.instantiateModule(mod, cImports)
+          }
+        }
+      case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
+      case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
+
+  def aInstantiate(t: TestModule): AFallible[ModuleInstance] =
+    t match
+      case ValidModule(m) =>
+        val mod = Parsing.fromUnresolved(m)
+        aInterp.failure.fallible {
+          aInterp.instantiateModule(mod, aImports)
+        }
+      case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
+      case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
+
+  def runCAction(a: Action): CResult = RoundingMode.withRoundingMode(RoundingDir.Nearest) {
+    a match {
+      case Invoke(modName, fun, expr) => evalCInvoke(modName, fun, constExprToVals(expr))
+      case Get(modName, name) => evalCGet(modName, name)
+    }
+  }
+
+  def runAAction(a: Action, convertVals: unresolved.Expr => List[RelationalAnalysis.Value]): AResult = a match {
+    case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
+    case Get(modName, name) => evalAGet(modName, name)
+  }
+
+  def evalCInvoke(module: Option[String], fun: String, vals: List[CValue]): CResult =
+    val modInst = getCModule(module)
+    cInterp.failure.fallible {
+      cInterp.invokeExported(modInst, fun, vals)
+    }
+
+  def evalAInvoke(module: Option[String], fun: String, vals: List[AValue]): AResult =
+    val modInst = getAModule(module)
+    aInterp.failure.fallible {
+      aInterp.invokeExported(modInst, fun, vals)
+    }
+
+  def evalCGet(module: Option[String], name: String): CResult =
+    val modInst = getCModule(module)
+    val exp = modInst.exports.find(_._1 == name)
+    assert(exp.isDefined, s"export $name not found in ${module.getOrElse("current")}")
+    exp.get._2 match
+      case Global(addr) =>
+        val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
+        val value = cInterp.getGlobalValue(globalIdx)
+        CFallible.Unfailing(List(value))
+      case ext =>
+        throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
+
+  def evalAGet(module: Option[String], name: String): AResult =
+    val modInst = getAModule(module)
+    val exp = modInst.exports.find(_._1 == name)
+    assert(exp.isDefined, s"export $name not found in ${module.getOrElse("current")}")
+    exp.get._2 match
+      case Global(addr) =>
+        val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
+        val value = aInterp.getGlobalValue(globalIdx)
+        AFallible.Unfailing(List(value))
+      case ext =>
+        throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
+
+  def checkNaN(res: CResult, clue: String) =
+    assert(!res.isFailing)
+    val resClean: List[CValue] = res.get
+    assert(resClean.size == 1, clue)
+    val h = resClean.head
+    assert(isNaN(h), clue)
+
+  def constExprToAVals(e: unresolved.Expr): List[RelationalAnalysis.Value] =
+    e.map(constExprToAVal).toList
+
+  def constExprToAVal(inst: unresolved.Inst): RelationalAnalysis.Value = Abstractly(constExprToVal(inst))
+
+  def constExprToTops(e: unresolved.Expr): List[RelationalAnalysis.Value] =
+    e.map(constExprToTop).toList
+
+  def constExprToTop(inst: unresolved.Inst): RelationalAnalysis.Value =
+    inst match
+      case unresolved.i32.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int32(RelationalAnalysis.topI32))
+      case unresolved.i64.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Int64(RelationalAnalysis.topI64))
+      case unresolved.f32.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float32(RelationalAnalysis.topF32))
+      case unresolved.f64.Const(_) => RelationalAnalysis.Value.Num(RelationalAnalysis.NumValue.Float64(RelationalAnalysis.topF64))
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+
+
+  def genAVals(e: unresolved.Expr): Gen[List[RelationalAnalysis.Value]] =
+    e match
+      case Nil => Gen.const(List[RelationalAnalysis.Value]())
+      case inst :: rest =>
+        for {
+          aVal <- genAVal(inst)
+          aRest <- genAVals(rest)
+        } yield (aVal :: aRest)
+
+  def genAVal(inst: unresolved.Inst): Gen[RelationalAnalysis.Value] = {
+    import RelationalAnalysis.Value.*
+    import RelationalAnalysis.NumValue.*
+    import RelationalAnalysis.RelI32.*
+    import RelationalAnalysis.Type.*
+    inst match {
+      case unresolved.i32.Const(i) => Gen.const(Num(Int32(NumExpr(ApronExpr.lit(i, I32Type)))))
+      case unresolved.i64.Const(l) => Gen.const(Num(Int64(ApronExpr.lit(l, I64Type))))
+      case unresolved.f32.Const(f) => Gen.const(Num(Float32(ApronExpr.lit(f, I32Type))))
+      case unresolved.f64.Const(d) => Gen.const(Num(Float64(ApronExpr.lit(d, I64Type))))
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+    }
+  }
+
+  def isNaN(value: ConcreteInterpreter.Value): Boolean =
+    value match
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => f.isNaN
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => d.isNaN
+      case _ => false
+
+class NumTestCases:
+  var n: Int = 0
+
+  def increment(): Unit = n += 1
+
+  override def toString: String = n.toString

@@ -15,12 +15,13 @@ trait State:
 
   def getOutState(dom: Any): Out
   def setOutState(dom: Any, out: Out): Unit
+  def setOutStateNonMonotonically(dom: Any, out: Out): Unit
 
-  def joinIn(dom: Any): Join[In]
-  def widenIn(dom: Any): Widen[In]
+  def joinIn[Body](using Join[Body])(dom: Any): Join[(Body,In)]
+  def widenIn[Body](using Widen[Body])(dom: Any): Widen[(Body,In)]
   def stackWiden(dom: Any): StackWidening[In]
   
-  def joinOut(dom: Any): Join[Out]
-  def widenOut(dom: Any): Widen[Out]
+  def joinOut[Body](using Join[Body])(dom: Any): Join[(Body,Out)]
+  def widenOut[Body](using Widen[Body])(dom: Any): Widen[(Body,Out)]
 
 type StateT[I, O] = State { type In = I; type Out = O}

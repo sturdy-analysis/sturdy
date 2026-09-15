@@ -1,12 +1,12 @@
 package sturdy.values.types
 
-import sturdy.data.{MakeJoined, WithJoin, joinComputations, joinWithFailure}
+import sturdy.data.{*, given}
 import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
 import sturdy.values.*
-import sturdy.values.booleans.{BooleanBranching, BooleanOps}
+import sturdy.values.booleans.{BooleanBranching, BooleanOps, BreakIf}
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
@@ -59,6 +59,18 @@ given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](us
 given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)
+
+given BaseTypeBreakIf[B](using effectStack: EffectStack): BreakIf[BaseType[Boolean]] with
+  override type State = Unit
+
+  override def break(br: State => Unit): Unit = br(())
+  override def breakIf(cond: BaseType[Boolean])(break: State => Unit): Unit =
+    joinComputations { } { break(()) }
+
+  override def assertCondition(cond: BaseType[Boolean], state: State): Unit = {}
+
+  override def joinClosingOver[Body](using Join[Body]): Join[(Body, State)] = (v1,v2) => Join(v1._1,v2._1).map((_,()))
+  override def widenClosingOver[Body](using Widen[Body]): Widen[(Body, State)] = (v1,v2) => Widen(v1._1,v2._1).map((_,()))
 
 given BaseTypeOrdering[B: ClassTag]: Ordering[BaseType[B]] =
   (t1: BaseType[B], t2: BaseType[B]) =>

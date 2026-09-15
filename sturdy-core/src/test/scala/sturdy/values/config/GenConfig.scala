@@ -14,8 +14,8 @@ given AllConfigsOverflow: AllConfigs[Overflow] with
   def allConfigs: Seq[Overflow] = List(Overflow.Allow, Overflow.Fail, Overflow.JumpToBounds)
 
 
-given AllConfigsBits: AllConfigs[Bits] with
-  override def allConfigs: Seq[Bits] = List(Bits.Signed, Bits.Unsigned, Bits.Raw)
+given AllConfigsBitSign: AllConfigs[BitSign] with
+  override def allConfigs: Seq[BitSign] = List(BitSign.Signed, BitSign.Unsigned, BitSign.Raw)
 
 given AllConfigsByteSize: AllConfigs[BytesSize] with
   override def allConfigs: Seq[BytesSize] = List(BytesSize.Byte, BytesSize.Short, BytesSize.Int, BytesSize.Long)

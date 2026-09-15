@@ -50,11 +50,11 @@ class RelationalAnalysisTest(manager: Manager) extends AnyFlatSpec, Matchers:
 
    Fixpoint.DEBUG = true
    Files.list(Paths.get(uri)).toScala(List).filter(p =>
-//     p.toString.endsWith(".tip")
-    p.endsWith("ssa_comparison.tip")
+     p.toString.endsWith("gauss_sum.tip")
+//    p.endsWith("cfgloop.tip")
    ).sorted.foreach { p =>
      it must s"soundly analyze ${p.getFileName} with stacked states" in {
-       runRelationalAnalysis(p, StackConfig.StackedStates(readPriorOutput = false))
+       runRelationalAnalysis(p, StackConfig.StackedStatesMinimal)
      }
    }
 
@@ -115,18 +115,18 @@ class RelationalAnalysisTest(manager: Manager) extends AnyFlatSpec, Matchers:
      val tempInt = Temp(FixIn.Eval(sturdy.language.tip.Exp.Var("y")))
      val localX = Local("x","fun")
 
-     Ordering[RelationalAnalysis.AddrCtx].compare(input, alloc1) shouldBe -1
-     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, input) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, alloc1) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, input) shouldBe -1
 
-     Ordering[RelationalAnalysis.AddrCtx].compare(input, tempInt) shouldBe -1
-     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, input) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, tempInt) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, input) shouldBe -1
 
-     Ordering[RelationalAnalysis.AddrCtx].compare(input, localX) shouldBe -1
-     Ordering[RelationalAnalysis.AddrCtx].compare(localX, input) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(input, localX) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(localX, input) shouldBe -1
 
-     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, tempInt) shouldBe -1
-     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, alloc1) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, tempInt) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(tempInt, alloc1) shouldBe -1
 
-     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, localX) shouldBe -1
-     Ordering[RelationalAnalysis.AddrCtx].compare(localX, alloc1) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(alloc1, localX) shouldBe 1
+     Ordering[RelationalAnalysis.AddrCtx].compare(localX, alloc1) shouldBe -1
    }

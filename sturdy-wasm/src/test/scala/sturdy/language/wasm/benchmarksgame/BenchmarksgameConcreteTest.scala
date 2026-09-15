@@ -56,7 +56,7 @@ class BenchmarksgameConcreteTest extends AnyFlatSpec, Matchers:
     val controlRecorder = interp.addControlObserver(new RecordingControlObserver)
 
     println(s"Running $p")
-    val modInst = interp.initializeModule(module)
+    val modInst = interp.instantiateModule(module)
     val res = interp.failure.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )

@@ -1,134 +1,148 @@
-/* The Computer Language Benchmarks Game
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- *
- * contributed by Ledrug Katz
- *
- *   compile: gcc -Wall -O3 -fomit-frame-pointer -lm -mfpmath=sse
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+//
+// contributed by Shakhno DV, Shakhno AV
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "../../stdlib.h"
 
 #define pi 3.141592653589793
 #define solar_mass (4 * pi * pi)
-#define year 365.24
-#define for_k for(k = 0; k < 3; k++)
+#define days_per_year 365.24
+#define NBODIES 5
+#define DT 0.01
 
-typedef struct planet { double x[3], v[3], mass; } planet;
+double x[NBODIES], y[NBODIES], z[NBODIES];
+double vx[NBODIES], vy[NBODIES], vz[NBODIES];
+double mass[NBODIES];
 
-void advance(int nbodies, struct planet *bodies, double dt, int steps)
+__attribute__((noinline))
+void advance(int n)
 {
-   int i, j;
-   register planet *a, *b;
-   double d[3], d2, mag;
+    double dx;
+    double x1;
+    double y1;
+    double z1;
+    double dy;
+    double dz;
+    double R;
+    double mag;
+    for (int k = 1; k <= n; ++k)
+    {
+        for (int i = 0; i < NBODIES; ++i)
+        {
+            x1 = x[i];
+            y1 = y[i];
+            z1 = z[i];
+            for (int j = i + 1; j < NBODIES; ++j)
+            {
+                dx = x1 - x[j];
+                R = dx * dx;
+                dy = y1 - y[j];
+                R += dy * dy;
+                dz = z1 - z[j];
+                R += dz * dz;
+                R = sqrt(R);
+                mag = DT / (R * R * R);
+                vx[i] -= dx * mass[j] * mag;
+                vy[i] -= dy * mass[j] * mag;
+                vz[i] -= dz * mass[j] * mag;
+                vx[j] += dx * mass[i] * mag;
+                vy[j] += dy * mass[i] * mag;
+                vz[j] += dz * mass[i] * mag;
+            }
+        }
 
-   while (steps--) {
-      for (a = bodies, i = 0; i < nbodies; a++, i++) {
-         for (b = a + 1, j = i + 1; j < nbodies; b++, j++) {
-            d[0] = a->x[0] - b->x[0];
-            d[1] = a->x[1] - b->x[1];
-            d[2] = a->x[2] - b->x[2];
-
-            d2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
-            mag = dt / (d2 * sqrt(d2));
-
-            a->v[0] -= d[0] * b->mass * mag;
-            a->v[1] -= d[1] * b->mass * mag;
-            a->v[2] -= d[2] * b->mass * mag;
-
-            b->v[0] += d[0] * a->mass * mag;
-            b->v[1] += d[1] * a->mass * mag;
-            b->v[2] += d[2] * a->mass * mag;
-         }
-      }
-
-      for (a = bodies, i = 0; i < nbodies; i++, a++) {
-         a->x[0] += dt * a->v[0];
-         a->x[1] += dt * a->v[1];
-         a->x[2] += dt * a->v[2];
-      }
-   }
+        for (int i = 0; i < NBODIES; ++i)
+        {
+            x[i] += DT * vx[i];
+            y[i] += DT * vy[i];
+            z[i] += DT * vz[i];
+        }
+    }
 }
 
-double energy(int nbodies, planet *bodies)
+__attribute__((noinline))
+double energy()
 {
-   double e, d[3];
-   int i, j, k;
-   planet *a, *b;
-
-   e = 0.0;
-   for (i = 0, a = bodies; i < nbodies; a++, i++) {
-      for_k { e += a->mass * a->v[k] * a->v[k] / 2; }
-
-      for (j = i + 1, b = a + 1; j < nbodies; b++, j++) {
-         for_k { d[k] = a->x[k] - b->x[k]; }
-         e -= (a->mass * b->mass) /
-            sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-      }
-   }
-   return e;
+    double e = 0.0;
+    for (int i = 0; i < NBODIES; ++i)
+    {
+        e += 0.5 *mass[i] * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]);
+        for (int j = i + 1; j < NBODIES; ++j)
+        {
+            double dx = x[i] - x[j];
+            double dy = y[i] - y[j];
+            double dz = z[i] - z[j];
+            double distance = sqrt(dx * dx + dy * dy + dz * dz);
+            e -= (mass[i] * mass[j]) / distance;
+        }
+    }
+    return e;
 }
 
-void offset_momentum(int nbodies, planet *bodies)
+__attribute__((noinline))
+void offset_momentum()
 {
-   int i, k;
-   for (i = 0; i < nbodies; i++)
-      for_k { bodies[0].v[k] -= bodies[i].v[k] * bodies[i].mass / solar_mass; }
+    double px = 0.0, py = 0.0, pz = 0.0;
+    for (int i = 0; i < NBODIES; ++i)
+    {
+        px += vx[i] * mass[i];
+        py += vy[i] * mass[i];
+        pz += vz[i] * mass[i];
+    }
+    vx[0] = -px / solar_mass;
+    vy[0] = -py / solar_mass;
+    vz[0] = -pz / solar_mass;
 }
 
-struct planet bodies[] = {
-   {   /* sun */
-      {0, 0, 0},
-      {0, 0, 0},
-      solar_mass
-   }, {   /* jupiter */
-      { 4.84143144246472090e+00, -1.16032004402742839e+00, -1.03622044471123109e-01 },
-      {
-         1.66007664274403694e-03 * year,
-         7.69901118419740425e-03 * year,
-         -6.90460016972063023e-05 * year
-      },
-      9.54791938424326609e-04 * solar_mass
-   }, {   /* saturn */
-      { 8.34336671824457987e+00, 4.12479856412430479e+00, -4.03523417114321381e-01 },
-      {
-         -2.76742510726862411e-03 * year,
-         4.99852801234917238e-03 * year,
-         2.30417297573763929e-05 * year
-      },
-      2.85885980666130812e-04 * solar_mass
-   }, {   /* uranus */
-      { 1.28943695621391310e+01, -1.51111514016986312e+01, -2.23307578892655734e-01 },
-      {
-         2.96460137564761618e-03 * year,
-         2.37847173959480950e-03 * year,
-         -2.96589568540237556e-05 * year
-      },
-      4.36624404335156298e-05 * solar_mass
-   }, {   /* neptune */
-      { 1.53796971148509165e+01, -2.59193146099879641e+01, 1.79258772950371181e-01 },
-      {
-         2.68067772490389322e-03 * year,
-         1.62824170038242295e-03 * year,
-         -9.51592254519715870e-05 * year
-      },
-      5.15138902046611451e-05 * solar_mass
-   }
-};
-
-#define N sizeof(bodies)/sizeof(planet)
-
-int main()
+__attribute__((noinline))
+void init()
 {
-   //int n = 5000;
-   int n = 10;
+    x[0] = 0;
+    y[0] = 0;
+    z[0] = 0;
+    vx[0] = 0;
+    vy[0] = 0;
+    vz[0] = 0;
+    mass[0] = solar_mass;
+    x[1] = 4.84143144246472090e+00;
+    y[1] = -1.16032004402742839e+00;
+    z[1] = -1.03622044471123109e-01;
+    vx[1] = 1.66007664274403694e-03 * days_per_year;
+    vy[1] = 7.69901118419740425e-03 * days_per_year;
+    vz[1] = -6.90460016972063023e-05 * days_per_year;
+    mass[1] = 9.54791938424326609e-04 * solar_mass;
+    x[2] = 8.34336671824457987e+00;
+    y[2] = 4.12479856412430479e+00;
+    z[2] = -4.03523417114321381e-01;
+    vx[2] = -2.76742510726862411e-03 * days_per_year;
+    vy[2] = 4.99852801234917238e-03 * days_per_year;
+    vz[2] = 2.30417297573763929e-05 * days_per_year;
+    mass[2] = 2.85885980666130812e-04 * solar_mass;
+    x[3] = 1.28943695621391310e+01;
+    y[3] = -1.51111514016986312e+01;
+    z[3] = -2.23307578892655734e-01;
+    vx[3] = 2.96460137564761618e-03 * days_per_year;
+    vy[3] = 2.37847173959480950e-03 * days_per_year;
+    vz[3] = -2.96589568540237556e-05 * days_per_year;
+    mass[3] = 4.36624404335156298e-05 * solar_mass;
+    x[4] = 1.53796971148509165e+01;
+    y[4] = -2.59193146099879641e+01;
+    z[4] = 1.79258772950371181e-01;
+    vx[4] = 2.68067772490389322e-03 * days_per_year;
+    vy[4] = 1.62824170038242295e-03 * days_per_year;
+    vz[4] = -9.51592254519715870e-05 * days_per_year;
+    mass[4] = 5.15138902046611451e-05 * solar_mass;
+}
 
-   offset_momentum(N, bodies);
-//   printf("%.9f\n", energy(N, bodies));
-
-   advance(N, bodies, 0.01, n);
-
- //  printf("%.9f\n", energy(N, bodies));
-   return 0;
+__attribute__((noinline))
+int _start()
+{
+    int n = __VERIFIER_nondet_int();
+    init();
+    offset_momentum();
+    printf("%.9f\n", energy());
+    advance(n);
+    printf("%.9f\n", energy());
+    return 0;
 }

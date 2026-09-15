@@ -14,6 +14,7 @@ given Structural[Int] with {}
 given Structural[Label] with {}
 given Structural[Byte] with {}
 given Structural[ByteOrder] with {}
+given Structural[Array[Byte]] with {}
 
 given StructuralOption[A](using Structural[A]): Structural[Option[A]] with {}
 given StructuralMap[K, V](using Structural[K], Structural[V]): Structural[Map[K, V]] with {}

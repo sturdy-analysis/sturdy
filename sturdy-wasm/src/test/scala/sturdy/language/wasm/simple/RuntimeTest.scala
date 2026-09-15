@@ -20,16 +20,16 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
   val path = Paths.get(uri)
 
   testExitCodeConcrete(path, "_start_orig", List.empty, 42)
-  testExitCodeConcrete(path, "_start2", List(ConcreteInterpreter.Value.Int32(1)), 42)
-  testExitCodeConcrete(path, "_start2", List(ConcreteInterpreter.Value.Int32(0)), 0)
-  testExitCodeConcrete(path, "_start3", List(ConcreteInterpreter.Value.Int32(1)), 42)
-  testExitCodeConcrete(path, "_start3", List(ConcreteInterpreter.Value.Int32(0)), 0)
+  testExitCodeConcrete(path, "_start2", List(ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(1))), 42)
+  testExitCodeConcrete(path, "_start2", List(ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(0))), 0)
+  testExitCodeConcrete(path, "_start3", List(ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(1))), 42)
+  testExitCodeConcrete(path, "_start3", List(ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(0))), 0)
 
 
   testExitCodeConstant(path, "_start_orig", List.empty, Topped.Actual(42))
-  testExitCodeConstant(path, "_start2", List(ConstantAnalysis.Value.Int32(Topped.Top)), Topped.Top)
-  testExitCodeConstant(path, "_start3", List(ConstantAnalysis.Value.Int32(Topped.Top)), Topped.Actual(42))
-  testExitCodeConstant(path, "_start3", List(ConstantAnalysis.Value.Int32(Topped.Top)), Topped.Actual(0))
+  testExitCodeConstant(path, "_start2", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))), Topped.Top)
+  testExitCodeConstant(path, "_start3", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))), Topped.Actual(42))
+  testExitCodeConstant(path, "_start3", List(ConstantAnalysis.Value.Num(ConstantAnalysis.NumValue.Int32(Topped.Top))), Topped.Actual(0))
   
 
   def testExitCodeConcrete(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], exitCode: Int) =
@@ -40,7 +40,7 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
       val kind = res.asInstanceOf[CFallible.Failing[_]].kind
       val msg = res.asInstanceOf[CFallible.Failing[_]].msg
       assert(kind == WasmFailure.ProcExit)
-      assert(msg.endsWith(ConcreteInterpreter.Value.Int32(exitCode).toString))
+      assert(msg.endsWith(ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(exitCode)).toString))
     }
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
