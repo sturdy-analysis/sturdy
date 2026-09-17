@@ -52,11 +52,15 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     override def sizeToVal(sz: Size): Value = Value.Num(NumValue.Int32(sz))
 
     // TODO: implement this for the TypeAnalysis
-    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = ???
-    override def refToVal(r: RefV): TypeAnalysis.Value = ???
-    override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = ???
-    override def funcInstToRefV(f: FunctionInstance): RefV = ???
-    override def isNullRef(r: Value): TypeAnalysis.Value = ???
+    override def valToRef(v: TypeAnalysis.Value, funcs: Vector[FunctionInstance]): RefV = v match
+      case Value.Ref(f) => f
+      case Value.TopValue =>
+        Powerset[FunctionInstance | ExternReference](funcs*) ++ Powerset[FunctionInstance | ExternReference](ExternReference.ExternReference, ExternReference.Null)
+      case _ => f.fail(TypeError, s"Expected reference, but got $v")
+    override def refToVal(r: RefV): TypeAnalysis.Value = Value.Ref(r)
+    override def liftBytes(b: Seq[Byte]): BaseType[Seq[Byte]] = BaseType[Seq[Byte]]()
+    override def funcInstToRefV(f: FunctionInstance): RefV = Powerset[FunctionInstance | ExternReference](f)
+    override def isNullRef(r: Value): TypeAnalysis.Value = makeI32(BaseType[Int])
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
@@ -73,6 +77,19 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
       }
 
     override def moveAddress(addr: Addr, srcOffset: Addr, dstOffset: Addr): Addr = BaseType[Int]
+
+
+  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
+    override def apply(c: ConcreteInterpreter.Value): Value = c match
+      case ConcreteInterpreter.Value.TopValue => Value.TopValue
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int32(i)) => Value.Num(NumValue.Int32(BaseType[Int]))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Int64(l)) => Value.Num(NumValue.Int64(BaseType[Long]))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float32(f)) => Value.Num(NumValue.Float32(BaseType[Float]))
+      case ConcreteInterpreter.Value.Num(ConcreteInterpreter.NumValue.Float64(d)) => Value.Num(NumValue.Float64(BaseType[Double]))
+      case ConcreteInterpreter.Value.Ref(r: FunctionInstance) => Value.Ref(Powerset(r))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.Null) => Value.Ref(Powerset(ExternReference.Null))
+      case ConcreteInterpreter.Value.Ref(ConcreteInterpreter.ExternReference.ExternReference) => Value.Ref(Powerset(ExternReference.ExternReference))
+      case ConcreteInterpreter.Value.Vec(v) => Value.Vec(BaseType[Array[Byte]])
 
   class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], config: WasmConfig) extends
     GenericInstance, ControlObservable[Control.Atom, Control.Section, Control.Exc, Control.Fx]
@@ -102,7 +119,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ExceptionByTarget, ControlF
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinableDecidableSymbolTable[Unit, GlobalAddr, Value] = new JoinableDecidableSymbolTable
     val elems: SymbolTableWithDrop[Unit, ElemAddr, Elem, J] = FiniteSymbolTableWithDrop[Unit, ElemAddr, Elem](Seq.empty)(using CombineEquiSeq, CombineEquiSeq, implicitly, implicitly)
-    val tables: SizedUpperBoundSymbolTable[TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable(Powerset())
+    val tables: SizedUpperBoundSymbolTable[TableAddr, Index, RefV] = new SizedUpperBoundSymbolTable()
     val callFrame: JoinableDecidableCallFrame[FrameData, Int, Value, InstLoc] = new JoinableDecidableCallFrame(FrameData.empty, Iterable.empty)
     val except: JoinedExcept[WasmException[Value], ExcV] = new JoinedExcept
     val failure: CollectedFailures[WasmFailure] = new CollectedFailures with ObservableFailure(this)
