@@ -33,7 +33,7 @@ object TestCases:
   // all test cases
   lazy val allTestCases: ArraySeq[ArraySeq[Path]] =
     // flatten nested files
-    val files = Files.list(testRootPath).flatMap:
+    val files = Files.list(testRootPath).filter(Files.isDirectory(_)).flatMap:
       Files.list(_).flatMap:
         Files.list
     // sorting here is really important for the grouping

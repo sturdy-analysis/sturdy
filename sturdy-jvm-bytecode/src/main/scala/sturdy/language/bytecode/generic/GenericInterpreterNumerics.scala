@@ -98,15 +98,15 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
     case ISHL =>
       i32ops.shiftLeft(v1, v2)
     case LSHL =>
-      i64ops.shiftLeft(v1, convert_i32_i64(v2, config.Bits.Signed))
+      i64ops.shiftLeft(v1, convert_i32_i64(v2, config.BitSign.Signed))
     case ISHR =>
       i32ops.shiftRight(v1, v2)
     case LSHR =>
-      i64ops.shiftRight(v1, convert_i32_i64(v2, config.Bits.Signed))
+      i64ops.shiftRight(v1, convert_i32_i64(v2, config.BitSign.Signed))
     case IUSHR =>
       i32ops.shiftRightUnsigned(v1, v2)
     case LUSHR =>
-      i64ops.shiftRightUnsigned(v1, convert_i32_i64(v2, config.Bits.Signed))
+      i64ops.shiftRightUnsigned(v1, convert_i32_i64(v2, config.BitSign.Signed))
     case IAND =>
       i32ops.bitAnd(v1, v2)
     case LAND =>
@@ -156,27 +156,27 @@ class GenericInterpreterNumerics[V, TypeRep](bytecodeOps: BytecodeOps[V, TypeRep
 
   def evalConvertOp(inst: Instruction, v: V): V = inst match
     case I2L =>
-      convert_i32_i64(v, config.Bits.Signed)
+      convert_i32_i64(v, config.BitSign.Signed)
     case I2F =>
-      convert_i32_f32(v, config.Bits.Signed)
+      convert_i32_f32(v, config.BitSign.Signed)
     case I2D =>
-      convert_i32_f64(v, config.Bits.Signed)
+      convert_i32_f64(v, config.BitSign.Signed)
     case L2I =>
       convert_i64_i32(v, NilCC)
     case L2F =>
-      convert_i64_f32(v, config.Bits.Signed)
+      convert_i64_f32(v, config.BitSign.Signed)
     case L2D =>
-      convert_i64_f64(v, config.Bits.Signed)
+      convert_i64_f64(v, config.BitSign.Signed)
     case F2I =>
-      convert_f32_i32(v, config.Overflow.Fail && config.Bits.Signed)
+      convert_f32_i32(v, config.Overflow.Fail && config.BitSign.Signed)
     case F2L =>
-      convert_f32_i64(v, config.Overflow.Fail && config.Bits.Signed)
+      convert_f32_i64(v, config.Overflow.Fail && config.BitSign.Signed)
     case F2D =>
       convert_f32_f64(v, NilCC)
     case D2I =>
-      convert_f64_i32(v, config.Overflow.Fail && config.Bits.Signed)
+      convert_f64_i32(v, config.Overflow.Fail && config.BitSign.Signed)
     case D2L =>
-      convert_f64_i64(v, config.Overflow.Fail && config.Bits.Signed)
+      convert_f64_i64(v, config.Overflow.Fail && config.BitSign.Signed)
     case D2F =>
       convert_f64_f32(v, NilCC)
     case I2B =>

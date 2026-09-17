@@ -6,7 +6,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.{Structural, config}
 import sturdy.values.convert.*
 import sturdy.values.ordering.{EqOps, OrderingOps, UnsignedOrderingOps}
-import sturdy.values.config.{Bits, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
+import sturdy.values.config.{BitSign, Overflow, UnsupportedConfiguration, unsupportedConfiguration}
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -96,16 +96,16 @@ given OrderingOps[Int, Boolean] with
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
 
 given ConcreteConvertByteInt(using failure: Failure): ConvertByteInt[Byte, Int] with
-  override def apply(from: Byte, conf: Bits): Int = conf match
-    case Bits.Signed => from.toInt
-    case Bits.Unsigned => from.toInt & 0X000000FF
+  override def apply(from: Byte, conf: BitSign): Int = conf match
+    case BitSign.Signed => from.toInt
+    case BitSign.Unsigned => from.toInt & 0X000000FF
     case _ =>
       unsupportedConfiguration(conf, this)
 
 given ConcreteConvertShortInt(using failure: Failure): ConvertShortInt[Short, Int] with
-  override def apply(from: Short, conf: Bits): Int = conf match
-    case Bits.Signed => from.toInt
-    case Bits.Unsigned => from.toInt & 0X0000FFFF
+  override def apply(from: Short, conf: BitSign): Int = conf match
+    case BitSign.Signed => from.toInt
+    case BitSign.Unsigned => from.toInt & 0X0000FFFF
     case _ =>
       unsupportedConfiguration(conf, this)
 

@@ -284,16 +284,16 @@ object ConcreteInterpreter extends Interpreter:
     // adjust the given instances, the current sturdy-core implementation does not reflect the required semantics
     // config can be ignored here
     given ConcreteConvertFloatInt: ConcreteConvertFloatInt with
-      override def apply(f: Float, conf: config.Overflow && config.Bits): Int = f.toInt
+      override def apply(f: Float, conf: config.Overflow && config.BitSign): Int = f.toInt
 
     given ConcreteConvertFloatLong: ConcreteConvertFloatLong with
-      override def apply(f: Float, conf: config.Overflow && config.Bits): Long = f.toLong
+      override def apply(f: Float, conf: config.Overflow && config.BitSign): Long = f.toLong
 
     given ConcreteConvertDoubleInt: ConcreteConvertDoubleInt with
-      override def apply(d: Double, conf: config.Overflow && config.Bits): Int = d.toInt
+      override def apply(d: Double, conf: config.Overflow && config.BitSign): Int = d.toInt
 
     given ConcreteConvertDoubleLong: ConcreteConvertDoubleLong with
-      override def apply(d: Double, conf: config.Overflow && config.Bits): Long = d.toLong
+      override def apply(d: Double, conf: config.Overflow && config.BitSign): Long = d.toLong
 
     // jvm floating point remainder is different from IEEE754 remainder, the current standard implementation of the concrete float ops
     // delegate the calculation to the jvm this code is running on

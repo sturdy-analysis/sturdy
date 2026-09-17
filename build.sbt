@@ -196,12 +196,12 @@ lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
   .dependsOn(sturdy_core % "compile->compile")
   // https://github.com/opalj/opal/pull/143 introduced support for class file version 65 (java 21)
   // however, using commit e4bd7f58a9c0698285e325e3c80d339af951dc8d causes issues, so we just use the latest commit on the default branch as of writing
-  .dependsOn(ProjectRef(opal, "BytecodeRepresentation") % "compile->compile")
+  // TODO this is most likely unneeded now .dependsOn(ProjectRef(opal, "BytecodeRepresentation") % "compile->compile")
   .settings(
     name := "sturdy_jvm_bytecode",
     libraryDependencies ++= Seq(
       // there has been no release that supports class file version 65 as of 7.7.25, so we depend on the commit that introduced support for it.
-      // "de.opal-project" % "framework_2.13" % "5.0.0"
+      "de.opal-project" % "framework_2.13" % "6.0.0",
       // testing
       "org.scalatest" %% "scalatest" % "3.2.19" % "test"
     ),

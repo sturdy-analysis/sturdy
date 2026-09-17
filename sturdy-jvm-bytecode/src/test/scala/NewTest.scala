@@ -1,11 +1,13 @@
-import org.opalj.br.{ClassFile, DoubleType, FloatType, IntegerType, LongType, Method}
+import org.opalj.br.{ArrayType, ClassFile, ClassType, DoubleType, FieldType, FloatType, IntegerType, LongType, Method, ReferenceType}
 import org.opalj.br.analyses.Project
 import org.opalj.io.process
 import org.scalatest.funsuite.AnyFunSuite
+import sturdy.effect.SturdyException
 
 import java.io.{DataInputStream, FileInputStream}
 import java.nio.file.Paths
 import sturdy.language.bytecode.ConcreteInterpreter
+import sturdy.language.bytecode.abstractions.Site.External
 
 import scala.language.postfixOps
 
@@ -27,7 +29,7 @@ class NewTest extends AnyFunSuite:
         org.opalj.br.reader.Java17Framework.ClassFile(in)
       }.head
 
-    val testMths = methodsPlain.methodsWithBody.filter(mth => mth.name != "<clinit>")
+    val testMths = methodsPlain.methodsWithBody.filter(mth => !mth.name.startsWith("<"))
 
     println("ConstantAnalysis Test Results")
     println("- - - - - - - - - - - - - - -")
@@ -35,33 +37,41 @@ class NewTest extends AnyFunSuite:
       try {
         val interp = new ConcreteInterpreter.Instance(pWithLibrary, Map())
         //val constInterp = new ConstantAnalysis.Instance(pWithLibrary, projectPath, Map())
-        if (mth.parameterTypes.nonEmpty)
+        if (mth.parameterTypes.nonEmpty || mth.isNotStatic)
           val args = InitParams(mth, interp)
           interp.stack.pushN(args.toList)
-          println("Executing Method: " ++ mth.name)
-          println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
-        else
-          println("Executing Method: " ++ mth.name)
-          println("Concrete Interpretation: " ++ interp.invokeExternal(mth).toString)
+        println("Executing Method: " ++ mth.name)
+        println("Concrete Interpretation: " ++ interp.failure.fallible(interp.invokeExternal(mth)).toString)
         //println("Abstract Interpretation Constant Analysis: " ++ constInterp.invokeExternal(mth, true).toString)
         println("- - - - - - - - - - - - - - -")
       } catch {
         case e: Exception => println(e.toString)
+        case e: SturdyException => println(e.getMessage)
       }
 
     }
 
-def InitParams(mth: Method, concreteInterpreter: ConcreteInterpreter.Instance): Seq[ConcreteInterpreter.Value] =
-  val args = mth.descriptor.parameterTypes
-  val initArgs = args.map:
+def argForType(instance: ConcreteInterpreter.Instance, x: FieldType): ConcreteInterpreter.Value = {
+  x match
     case IntegerType =>
-      concreteInterpreter.bytecodeOps.i32ops.randomInteger()
+      instance.bytecodeOps.i32ops.randomInteger()
     case LongType =>
-      concreteInterpreter.bytecodeOps.i64ops.randomInteger()
+      instance.bytecodeOps.i64ops.randomInteger()
     case FloatType =>
-      concreteInterpreter.bytecodeOps.f32ops.randomFloat()
+      instance.bytecodeOps.f32ops.randomFloat()
     case DoubleType =>
-      concreteInterpreter.bytecodeOps.f64ops.randomFloat()
+      instance.bytecodeOps.f64ops.randomFloat()
+    case r: ClassType =>
+      instance.createObject(r)(using External)
+    case r: ArrayType =>
+      instance.createArray(instance.bytecodeOps.i32ops.integerLit(5), r.componentType)(using External)
     case _ =>
       ???
+}
+def InitParams(mth: Method, concreteInterpreter: ConcreteInterpreter.Instance): Seq[ConcreteInterpreter.Value] =
+  val args = mth.descriptor.parameterTypes
+  val initArgs = args.map(argForType(concreteInterpreter, _))
+  if (mth.isNotStatic) {
+    return initArgs.prepended(argForType(concreteInterpreter, mth.classFile.thisType))
+  }
   initArgs

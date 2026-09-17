@@ -6,7 +6,7 @@ import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.config.BitSign
-import sturdy.values.config.{Bits, Overflow}
+import sturdy.values.config.Overflow
 import sturdy.values.convert.*
 import sturdy.values.ordering.*
 
@@ -1214,10 +1214,10 @@ given NumericIntervalEqOps[I](using Ordering[I]): EqOps[NumericInterval[I], Topp
     else Topped.Top
 
 given ConvertNumericIntervalsByteInt[B, I](using convert: ConvertByteInt[B, I])(using Numeric[B], Ordering[B], Numeric[I], Ordering[I]): ConvertByteInt[NumericInterval[B], NumericInterval[I]] with
-  override def apply(from: NumericInterval[B], conf: Bits): NumericInterval[I] = ??? // TODO
+  override def apply(from: NumericInterval[B], conf: BitSign): NumericInterval[I] = ??? // TODO
 
 given ConvertNumericIntervalsShortInt[S, I](using convert: ConvertShortInt[S, I])(using Numeric[S], Ordering[S], Numeric[I], Ordering[I]): ConvertShortInt[NumericInterval[S], NumericInterval[I]] with
-  override def apply(from: NumericInterval[S], conf: Bits): NumericInterval[I] = ??? // TODO
+  override def apply(from: NumericInterval[S], conf: BitSign): NumericInterval[I] = ??? // TODO
 
 given ConvertNumericIntervalsCharInt[C, I](using convert: ConvertCharInt[C, I])(using Numeric[C], Ordering[C], Numeric[I], Ordering[I]): ConvertCharInt[NumericInterval[C], NumericInterval[I]] with
   override def apply(from: NumericInterval[C], conf: NilCC.type): NumericInterval[I] = ??? // TODO
