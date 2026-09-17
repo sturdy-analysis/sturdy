@@ -148,8 +148,8 @@ case class RecencyClosure[Context: Ordering, Virt <: AbstractAddr[VirtualAddress
   override def addressIterator[Addr: ClassTag](valueIterator: Any => Iterator[Addr]): Iterator[Addr] =
     recencyStore.addressIterator(valueIterator) ++ effect.addressIterator(valueIterator)
 
-  override def join: Join[State] = (state1, state2) => combine[Unit,Widening.No](recencyStore.joinClosingOver(using effect.joinClosingOver))((unit,state1), (unit,state2)).map(_._2)
-  override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.widenClosingOver(using effect.widenClosingOver))((unit,state1),(unit,state2)).map(_._2)
+  override def join: Join[State] = (state1, state2) => combine[Unit,Widening.No](recencyStore.joinClosingOver(using effect.joinClosingOver))(((), state1), ((), state2)).map(_._2)
+  override def widen: Widen[State] = (state1, state2) => combine[Unit,Widening.Yes](recencyStore.widenClosingOver(using effect.widenClosingOver))(((), state1),((), state2)).map(_._2)
   override def joinClosingOver[Codom](using Join[Codom]): Join[(Codom, State)] = combine[Codom,Widening.No](recencyStore.joinClosingOver(using effect.joinClosingOver))
   override def widenClosingOver[Codom](using Widen[Codom]): Widen[(Codom, State)] = combine[Codom,Widening.Yes](recencyStore.widenClosingOver(using effect.widenClosingOver))
   override def stackWiden: StackWidening[State] = (stack: List[State], call: State) =>

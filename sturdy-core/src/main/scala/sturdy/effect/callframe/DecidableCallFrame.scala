@@ -35,6 +35,8 @@ abstract class DecidableMutableCallFrame[Data, Var, V, Site](initData: Data, ini
   def getVars: ArraySeq[V] = vars
 
   def data: Data = _data
+  def setData(d: Data): Unit =
+    _data = d
   def callSite: Option[Site] = _callSite
   def getFrameNames: Map[Var, Int] = names
 

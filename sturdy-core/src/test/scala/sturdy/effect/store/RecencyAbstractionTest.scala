@@ -164,7 +164,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, PowVAddr, NumericI
 
       store.free(PowVirtualAddress(a3))
 
-      unit
+      ()
     }
 
     a1.physical shouldBe PowersetAddr(PhysicalAddress(ctx1, Old))
@@ -283,7 +283,7 @@ class RecencyAbstractionTest(emptyStore: => RecencyStore[Ctx, PowVAddr, NumericI
           store.read(PowVirtualAddress(a1)) should be(JOptionA.Some(NumericInterval(1, 6)))
           store.read(PowVirtualAddress(a2)) should be(JOptionA.Some(NumericInterval(1, 6)))
           store.read(PowVirtualAddress(a3)) should be(JOptionA.Some(NumericInterval(8, 9)))
-          unit
+          ()
         } {
           // When condition is false, exit loop
         }
