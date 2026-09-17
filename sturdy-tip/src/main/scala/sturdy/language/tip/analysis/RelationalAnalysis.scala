@@ -112,7 +112,8 @@ object RelationalAnalysis extends Interpreter,
     ApronCons.top(BaseType[Int])
 
   override def topReference(using self: Instance): VRef =
-    val addrs = self.store.virtualAddresses
+    val recencyStore = self.store.asInstanceOf[RecencyStore[AddrCtx, Addr, JOptionA[Value]]]
+    val addrs = recencyStore.virtualAddresses
     AbstractReference.NullAddr(addrs, false)
 
   class Instance(
@@ -135,10 +136,10 @@ object RelationalAnalysis extends Interpreter,
     type PowPhysAddr = PowersetAddr[PhysAddr,PhysAddr]
     type ApronExprPhysAddr = ApronExpr[PhysAddr, RelType]
 
-    var exprConverter: ApronExprConverter[AddrCtx, RelType, Value] = null
-    var apronState: ApronRecencyState[AddrCtx, RelType, Value] = null
+    var exprConverter: ApronExprConverter[AddrCtx, RelType, JOptionT[Value]] = null
+    var apronState: ApronRecencyState[AddrCtx, RelType, JOptionT[Value]] = null
     given lazyApronState: Lazy[ApronState[VirtualAddress[AddrCtx], RelType]] = lazily(apronState)
-    given lazyExprConverter: Lazy[ApronExprConverter[AddrCtx, RelType, Value]] = lazily(exprConverter)
+    given lazyExprConverter: Lazy[ApronExprConverter[AddrCtx, RelType, JOptionT[Value]]] = lazily(exprConverter)
 
     given StatelessRelationalExpr[Value, VirtAddr, RelType] with
       override def getRelationalExpr(v: Value): Option[ApronExpr[VirtAddr, RelType]] =
@@ -152,23 +153,23 @@ object RelationalAnalysis extends Interpreter,
       override def getMetaData(v: Value): Option[(FloatSpecials, RelType)] =
         getRelationalExpr(v).map(expr => (expr.floatSpecials, expr._type))
 
-    given StatefullRelationalExprT[Value, PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, Value]]] = RelationalValueApronExprPhysicalAddress[Value, AddrCtx, RelType].asInstanceOf
+    given StatefullRelationalExprT[JOptionT[Value], PhysAddr, RelType, RelationalStoreState[AddrCtx, Map[PhysAddr, JOptionT[Value]]]] = RelationalValueApronExprPhysicalAddress[JOptionT[Value], AddrCtx, RelType].asInstanceOf
 
     given WithWideningThresholds = WithWideningThresholds.Yes
 
-    val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] = new RelationalStore[AddrCtx, RelType, PowPhysAddr,Value] (
+    val relationalStore: RelationalStore[AddrCtx, RelType, PowPhysAddr, JOptionT[Value]] = new RelationalStore[AddrCtx, RelType, PowPhysAddr, JOptionT[Value]] (
       initAddrTrans = Map(),
       initialAbs1 = apron.Abstract1(apronManager, new apron.Environment()),
       initialNonRelationalStore = Map()
     )
     import relationalStore.given
-    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, Value] = new RecencyStore(relationalStore)
+    val recencyStore: RecencyStore[AddrCtx, PowVirtAddr, JOptionT[Value]] = new RecencyStore(relationalStore)
     exprConverter = ApronExprConverter(recencyStore, relationalStore)
-    apronState = new ApronRecencyState[AddrCtx, RelType, Value](tempRelationalAlloc, combineExprAlloc, recencyStore, relationalStore)
+    apronState = new ApronRecencyState[AddrCtx, RelType, JOptionT[Value]](tempRelationalAlloc, combineExprAlloc, recencyStore, relationalStore)
     given ApronState[VirtualAddress[AddrCtx], RelType] = apronState
     given defaultResolveState: ResolveState = ResolveState.Internal
 
-    val callFrame: RelationalCallFrame[String, String, Value, Exp.Call, AddrCtx, RelType] = new RelationalCallFrame(
+    val callFrame: RelationalCallFrame[String, String, JOptionT[Value], Exp.Call, AddrCtx, RelType] = new RelationalCallFrame(
       initData = "$main",
       initVars = Iterable.empty,
       localVariableAllocator = localRelationaAlloc,
@@ -196,7 +197,7 @@ object RelationalAnalysis extends Interpreter,
 //        case Value.BoolValue(b) => loopVar || isRecursive || tooManyLocals
 //        case _ => false
 
-    override val store: RecencyStore[AddrCtx, Addr, Value] = recencyStore
+    override val store: Store[Addr, Value, J] = recencyStore.asInstanceOf[Store[Addr, Value, J]]
 
     override val alloc: AAllocatorFromContext[AllocationSite, Addr] =
       new AAllocatorFromContext(site =>
@@ -212,7 +213,7 @@ object RelationalAnalysis extends Interpreter,
       domLogger.currentDom match
         case Some(FixIn.Eval(e: Exp.Input)) =>
           val virt = recencyStore.alloc(AddrCtx.Input(e))
-          recencyStore.write(PowVirtualAddress(virt), Value.IntValue(ApronExpr.top(BaseType[Int])))
+          recencyStore.write(PowVirtualAddress(virt), JOptionA.some(Value.IntValue(ApronExpr.top(BaseType[Int]))))
           Value.IntValue(ApronExpr.addr(virt, BaseType[Int]))
         case other => throw IllegalStateException(s"Expected input expression, but got $other")
     })
@@ -260,6 +261,12 @@ object RelationalAnalysis extends Interpreter,
     override val recOps: RecordOps[Field, Value, Value] = implicitly
     override val branchOps: BooleanBranching[Value, Unit] = implicitly
 
+    override type JOptionT[A] = JOptionA[A]
+
+    override def some(v: Value): JOptionA[Value] = JOptionA.some(v)
+
+    override def none(): JOptionA[Value] = JOptionA.none
+
     var currentProgram: Program = _
     override def execute(p: Program): Value =
       currentProgram = p
@@ -298,12 +305,12 @@ object RelationalAnalysis extends Interpreter,
           case FixIn.EnterFunction(Function(name, params, locals, body, ret)) =>
             val args = params.indices.flatMap {
               i =>
-                callFrame.getLocal(i).map(v => (v, getInterval(v))).option(None)(Some(_))
+                callFrame.getLocal(i).map(v => (v, getInterval(v.get))).option(None)(Some(_))
             }
             val state = effectStack.getState
             Predef.print("  ".repeat(stack.size))
             println(s"CALL   $name(${args.mkString(",")}) @ ${state.hashCode()}")
-            stack.push((dom, args, state))
+            stack.push((dom, IndexedSeq.empty, state))
           case _ => {}
 
       override def exit(dom: FixIn, codom: TrySturdy[FixOut[Value]]): Unit =

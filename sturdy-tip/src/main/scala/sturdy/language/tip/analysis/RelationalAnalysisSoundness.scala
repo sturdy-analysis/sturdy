@@ -1,6 +1,7 @@
 package sturdy.language.tip.analysis
 
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocatorIntIncrement}
+import sturdy.effect.store.RecencyStore
 import sturdy.language.tip.analysis.RelationalAnalysis.*
 import sturdy.language.tip.{AllocationSite, ConcreteInterpreter, Field, Function}
 import sturdy.util.{*, given}
@@ -14,7 +15,9 @@ import sturdy.values.{*, given}
 import sturdy.{*, given}
 import _root_.apron.*
 import _root_.gmp.Mpz
+import sturdy.IsSound.NotSound
 import sturdy.apron.{ApronCons, ApronExpr, ApronRecencyState}
+import sturdy.data.{JOptionA, JOptionC}
 
 class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
   import analysis.given
@@ -54,9 +57,17 @@ class RelationalAnalysisSoundness(analysis: RelationalAnalysis.Instance):
           IsSound.NotSound(s"Abstract value $a does not overapproximate concrete value $c due to a type mismatch")
 
   given Soundness[ConcreteInterpreter.Instance, RelationalAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound =
-      a.callFrame.isSound(c.callFrame) && a.store.isSound(c.store) && a.print.isSound(c.print)
-      // concrete environment is sound by construction
+    def isSound(c: ConcreteInterpreter.Instance, a: RelationalAnalysis.Instance): IsSound = {
+      given Soundness[ConcreteInterpreter.Value, JOptionA[RelationalAnalysis.Value]] with
+        def isSound(v: ConcreteInterpreter.Value, abs: JOptionA[RelationalAnalysis.Value]): IsSound = abs match
+          case JOptionA.None() => IsSound.NotSound(s"Concrete value $v is not stored in the abstract store")
+          case JOptionA.NoneSome(av) => Soundness.isSound(v, av)
+          case JOptionA.Some(av) => Soundness.isSound(v, av)
+
+      val recencyStore = a.store.asInstanceOf[RecencyStore[AddrCtx, Addr, JOptionA[RelationalAnalysis.Value]]]
+      a.callFrame.isSound(c.callFrame) && recencyStore.isSound(c.store) && a.print.isSound(c.print)
+    }
+// concrete environment is sound by construction
 //      a.store.isSound(c.store) &&
 //      a.print.isSound(c.print) /* &&
 //      a.assert.isSound(c.assert) */

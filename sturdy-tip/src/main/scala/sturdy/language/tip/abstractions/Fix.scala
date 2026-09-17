@@ -1,7 +1,6 @@
 package sturdy.language.tip.abstractions
 
-import sturdy.data.MayJoin
-import sturdy.data.noJoin
+import sturdy.data.{JOption, MayJoin, noJoin}
 import sturdy.effect.EffectStack
 import sturdy.language.tip.{Program, Stm}
 import sturdy.language.tip.{FixIn, FixOut}
@@ -17,7 +16,7 @@ import sturdy.fix.context.FiniteCallString
 import sturdy.fix.context.Parameters
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
-import sturdy.values.{Widen, Finite, Join}
+import sturdy.values.{Finite, Join, Widen}
 
 def isFunOrWhile(dom: FixIn): Int = dom match
   case FixIn.EnterFunction(_) => 0
@@ -33,9 +32,9 @@ trait Fix extends Interpreter:
   type CallString = context.CallString[Exp.Call]
   given Finite[CallString] = context.FiniteCallString
 
-  final def parameters(callFrame: DecidableCallFrame[String, String, Value, Exp.Call]): context.Sensitivity[FixIn, Parameters[String, Value]] =
+  final def parameters[J[_] <: MayJoin[_]](callFrame: DecidableCallFrame[String, String, JOption[J, Value], Exp.Call])(using J[Value]): context.Sensitivity[FixIn, Parameters[String, Value]] =
     context.parameters[FixIn, String, Value] {
-      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).getOrElse(null)).toMap)
+      case FixIn.EnterFunction(f) => Some(f.params.map(x => x -> callFrame.getLocalByName(x).getOrElse(null).get).toMap)
       case _ => None
     }
 
@@ -53,7 +52,7 @@ trait Fix extends Interpreter:
     notContextSensitive(phi)
 
   def parameterSensitive(analysis: Instance, phi: (Contextual[Parameters[String, Value], FixIn, FixOut[Value]]) ?=> Combinator[FixIn, FixOut[Value]])(using J[Value]): Combinator[FixIn, FixOut[Value]] =
-    contextSensitive(parameters(analysis.callFrame), phi)
+    contextSensitive(parameters(analysis.callFrame.asInstanceOf), phi)
 
   def callSiteSensitive(k: Int, phi: (Contextual[CallString, FixIn, FixOut[Value]], Finite[CallString]) ?=> Combinator[FixIn, FixOut[Value]]): Combinator[FixIn, FixOut[Value]] =
     val callSites = callSitesLogger()

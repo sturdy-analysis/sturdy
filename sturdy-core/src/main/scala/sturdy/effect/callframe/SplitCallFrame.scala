@@ -5,13 +5,15 @@ import sturdy.data.MayJoin.NoJoin
 import sturdy.data.{CombineTuple2, JOption, JOptionC, MayJoin, noJoin}
 import sturdy.values.{Join, Widen}
 
+import scala.collection.immutable.BitSet
+
 class SplitCallFrame[Data, Var, V, Site]
     (val base: DecidableCallFrame[Data, Var, V, Site] with MutableCallFrame[Data, Var, V, Site, NoJoin],
      val special: DecidableCallFrame[Data, Var, V, Site] with MutableCallFrame[Data, Var, V, Site, NoJoin],
      useSpecial : (Var, V, Site) => Boolean
     ) extends DecidableCallFrame[Data, Var, V, Site] with MutableCallFrame[Data, Var, V, Site, NoJoin]:
 
-  protected var delegatedToSpecial: Vector[Boolean] = Vector.empty
+  protected var delegatedToSpecial: BitSet = BitSet.empty
   protected var names: Map[Var, Int] = Map.empty
   protected var namesRev: Vector[Var] = Vector.empty
   protected var _callSite: Site = _
@@ -21,7 +23,7 @@ class SplitCallFrame[Data, Var, V, Site]
   def callSite: Site = _callSite
 
   override def getLocal(x: Int): JOption[NoJoin, V] =
-    if (delegatedToSpecial.indices.contains(x)) {
+    if (delegatedToSpecial.contains(x)) {
       if (delegatedToSpecial(x))
         special.getLocal(x)
       else
@@ -34,11 +36,11 @@ class SplitCallFrame[Data, Var, V, Site]
     names.get(x).map(getLocal).getOrElse(JOptionC.none)
 
   override def setLocal(x: Int, v: V): JOption[NoJoin, Unit] =
-    if (delegatedToSpecial.indices.contains(x)) {
+    if (delegatedToSpecial.contains(x)) {
       if (delegatedToSpecial(x)) {
         special.setLocal(x, v)
       } else if (useSpecial(namesRev(x), v, callSite)) {
-        delegatedToSpecial = delegatedToSpecial.updated(x, true)
+        delegatedToSpecial = delegatedToSpecial + x
         special.setLocal(x, v)
       } else {
         base.setLocal(x, v)
@@ -50,31 +52,21 @@ class SplitCallFrame[Data, Var, V, Site]
   override def setLocalByName(x: Var, v: V): JOption[NoJoin, Unit] =
     names.get(x).map(setLocal(_, v)).getOrElse(JOptionC.none)
 
-  def setVars(newVars: Iterable[(Var, Option[V])], site: Site): Unit =
+  def setVars(newVars: Iterable[(Var, V)], site: Site): Unit =
     val newVarsNames = newVars.view.map(_._1)
-    delegatedToSpecial = newVars.map(p => p._2.nonEmpty && useSpecial(p._1, p._2.get, site)).toVector
+    delegatedToSpecial = BitSet.fromSpecific(newVars.toIndexedSeq.map(p => useSpecial(p._1, p._2, site)).indices)
     names = newVarsNames.zipWithIndex.toMap
     namesRev = newVarsNames.toVector
     _callSite = site
 
-  override def withNew[A](d: Data, vars: Iterable[(Var, Option[V])], site: Site)(f: => A): A =
+  override def withNew[A](d: Data, vars: Iterable[(Var, V)], site: Site)(f: => A): A =
     val wasDelegatedToSpecial = delegatedToSpecial
     val wasNames = names
     val wasNamesRev = namesRev
     val wasCallSite = _callSite
     setVars(vars, site)
-    val baseVars = vars.map {
-      case (name, None) => (name, None)
-      case (name, Some(v)) if useSpecial(name, v, site) => (name, None)
-      case (name, Some(v)) => (name, Some(v))
-    }
-    val specialVars = vars.map {
-      case (name, None) => (name, None)
-      case (name, Some(v)) if !useSpecial(name, v, site) => (name, None)
-      case (name, Some(v)) => (name, Some(v))
-    }
-    try base.withNew(d, baseVars, site) {
-      special.withNew(d, specialVars, site) {
+    try base.withNew(d, vars, site) {
+      special.withNew(d, vars, site) {
         f
       }
     } finally {

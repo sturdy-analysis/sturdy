@@ -1,5 +1,6 @@
 package sturdy.apron
 
+import sturdy.data.{JOption, JOptionA, MayJoin}
 import sturdy.util.Lazy
 import sturdy.values.floating.FloatSpecials
 import sturdy.values.references.{AddressTranslationState, PhysicalAddress, VirtualAddress}
@@ -23,6 +24,14 @@ given RelationalValueApronExpr[Addr, Type]: StatelessRelationalExpr[ApronExpr[Ad
   override inline def getRelationalExpr(v: ApronExpr[Addr, Type]): Option[ApronExpr[Addr, Type]] = Some(v)
   override inline def makeRelationalExpr(expr: ApronExpr[Addr, Type]): ApronExpr[Addr, Type] = expr
   override def getMetaData(v: ApronExpr[Addr, Type]): Option[(FloatSpecials, Type)] = Some((v.floatSpecials,v._type))
+
+given RelationJOptionExpr[Val, Addr, Type](using s: StatelessRelationalExpr[Val, Addr, Type]): StatelessRelationalExpr[JOptionA[Val], Addr, Type] with {
+  override def getRelationalExpr(v: JOptionA[Val]): Option[ApronExpr[Addr, Type]] = v.map(s.getRelationalExpr).toOption.flatten
+
+  override def makeRelationalExpr(expr: ApronExpr[Addr, Type]): JOptionA[Val] = JOptionA.some(s.makeRelationalExpr(expr))
+
+  override def getMetaData(v: JOptionA[Val]): Option[(FloatSpecials, Type)] = v.map(s.getMetaData).toOption.flatten
+}
 
 given RelationalValueApronExprPhysicalAddress[Val, Ctx, Type]
   (using

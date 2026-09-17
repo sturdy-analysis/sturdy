@@ -175,7 +175,7 @@ object ConcreteInterpreter extends Interpreter, ConcreteReference, Control:
     override val callFrame: ConcreteCallFrame[FrameData, Int, Value, InstLoc] =
       new ConcreteCallFrame[FrameData, Int, Value, InstLoc](
         rootFrameData,
-        rootFrameValues.view.map(Some(_)).zipWithIndex.map(_.swap)
+        rootFrameValues.view.zipWithIndex.map(_.swap)
       )
     override val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     override val failure: ConcreteFailure = new ConcreteFailure

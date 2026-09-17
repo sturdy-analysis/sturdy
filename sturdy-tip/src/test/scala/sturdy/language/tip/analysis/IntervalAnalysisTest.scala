@@ -106,12 +106,12 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //      println(graphBuilder.get.toGraphViz)
 
       val interp = ConcreteInterpreter(() => ConcreteInterpreter.Value.IntValue(0))
-//      val cresult = interp.failure.fallible(interp.execute(program))
+      val cresult = interp.failure.fallible(interp.execute(program))
       given CAllocatorIntIncrement[AllocationSite] = interp.alloc
-//      println(cresult)
+      println(cresult)
       println(aresult)
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
-//      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
+      assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
       println(aresult)
 //      println(rec)
       (aresult, analysis)

@@ -1,5 +1,6 @@
 package sturdy
 
+import sturdy.data.{JOptionA, JOptionC}
 import sturdy.values.*
 
 import scala.util.Try
@@ -45,6 +46,17 @@ given AbstractlySound[C, A](using abs: Abstractly[C, A], po: PartialOrder[A]): S
     else {
       IsSound.NotSound(s"Value $c abstracts to ${abs.apply(c)} but was not less-than-eq the abstract value $a")
     }
+    
+given JOptionSound[C, A](using sound: Soundness[C, A]): Soundness[JOptionC[C], JOptionA[A]] with {
+  override def isSound(c: JOptionC[C], a: JOptionA[A]): IsSound = (c, a) match {
+    case (_: JOptionC.None[C], _: JOptionA.None[A]) => IsSound.Sound
+    case (_: JOptionC.None[C], _: JOptionA.NoneSome[A]) => IsSound.Sound
+    case (_: JOptionC.None[C], _: JOptionA.Some[A]) => IsSound.NotSound("none not included")
+    case (JOptionC.Some(_), _: JOptionA.None[A]) => IsSound.NotSound("value not included")
+    case (JOptionC.Some(cv), JOptionA.NoneSome(av)) => sound.isSound(cv, av)
+    case (JOptionC.Some(cv), JOptionA.Some(av)) => sound.isSound(cv, av)
+  }
+}
 
 def seqIsSound[v1,v2](using vSoundness: Soundness[v1,v2]): Soundness[Seq[v1], Seq[v2]] = new Soundness[Seq[v1], Seq[v2]] {
   override def isSound(c: Seq[v1], a: Seq[v2]): IsSound =

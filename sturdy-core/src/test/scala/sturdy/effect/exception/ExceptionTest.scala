@@ -27,7 +27,7 @@ class ExceptionTest extends AnyFunSuite:
   given EffectStack = effectStack
 
   test("Exceptions join correct states") {
-    callFrame.withNew((), List(("x", Some(Powerset(1)))), ()) {
+    callFrame.withNew((), List(("x", Powerset(1))), ()) {
       exceptions.tryCatch {
         callFrame.setLocalByName("x", Powerset(2))
         effectStack.joinComputations {
@@ -46,7 +46,7 @@ class ExceptionTest extends AnyFunSuite:
   }
 
   test("Nested try-catch blocks") {
-    callFrame.withNew((), List(("x", Some(Powerset(1)))), ()) {
+    callFrame.withNew((), List(("x", Powerset(1))), ()) {
       exceptions.tryCatch {
         callFrame.setLocalByName("x", Powerset(2))
         exceptions.tryCatch {

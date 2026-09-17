@@ -38,7 +38,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("getLocal") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType)))
+      initVars = List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
@@ -48,7 +48,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("setLocal") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> None)
+      initVars = List.empty[(Var, ApronExpr[VirtualAddress[Ctx], Type])]
     )
 
     callFrame.setLocalByName("x", ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType))
@@ -60,7 +60,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("strong update") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> None)
+      initVars = List.empty[(Var, ApronExpr[VirtualAddress[Ctx], Type])]
     )
 
     callFrame.setLocalByName("x", ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType))
@@ -73,11 +73,11 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("weak update") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](0, 2, intType)))
+      initVars = List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](0, 2, intType))
     )
 
-    callFrame.withNew((), List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](4, 5, intType))), "f") {}
-    callFrame.withNew((), List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](7, 8, intType))), "f") {}
+    callFrame.withNew((), List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](4, 5, intType)), "f") {}
+    callFrame.withNew((), List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](7, 8, intType)), "f") {}
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     state.getInterval(xExpr) shouldBe Interval(0, 5)
@@ -87,13 +87,13 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("withNew") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType)))
+      initVars = List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType))
     )
 
     val xExpr = callFrame.getLocalByName("x").getOrElse(fail(s"Variable x not bound in ${callFrame}"))
     val xIv = state.getInterval(xExpr)
 
-    callFrame.withNew((), List("y" -> Some(xExpr)), "f") {
+    callFrame.withNew((), List("y" -> xExpr), "f") {
       val yExpr = callFrame.getLocalByName("y").getOrElse(fail(s"Variable y not bound in ${callFrame}"))
       state.getInterval(yExpr) shouldBe xIv
 
@@ -107,7 +107,7 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("join") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType)))
+      initVars = List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](0, 10, intType))
     )
 
     val closure = RecencyClosure(state.recencyStore, callFrame)
@@ -130,14 +130,14 @@ class RelationalCallFrameTest extends AnyFunSuite:
   test("join recent against old") {
     val (callFrame, state) = RelationalCallFrame[Data, Var, CallSite, Ctx, Type](
       initData = (),
-      initVars = List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](0, 2, intType)))
+      initVars = List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](0, 2, intType))
     )
 
     val closure = RecencyClosure(state.recencyStore, callFrame)
 
     val state1 = closure.getState
 
-    val state2 = callFrame.withNew((), List("x" -> Some(ApronExpr.interval[VirtualAddress[Ctx],Type](4, 5, intType))), "f") {
+    val state2 = callFrame.withNew((), List("x" -> ApronExpr.interval[VirtualAddress[Ctx],Type](4, 5, intType)), "f") {
       closure.getState
     }
 
