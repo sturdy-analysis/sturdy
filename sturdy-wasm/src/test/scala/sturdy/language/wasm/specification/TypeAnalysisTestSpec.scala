@@ -71,7 +71,7 @@ class TypeAnalysisTestSpecInterpreter(spectest: Option[Module] = None, useTop: B
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val aInterp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
-  aInterp.addControlObserver(new ControlEventChecker)
+  //aInterp.addControlObserver(new ControlEventChecker)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

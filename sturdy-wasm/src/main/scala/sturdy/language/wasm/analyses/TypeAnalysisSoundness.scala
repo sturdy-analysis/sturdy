@@ -1,27 +1,15 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.{*,given}
+import sturdy.{*, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.generic.{FunctionInstance, given}
 import TypeAnalysis.*
-import sturdy.values.given
-import sturdy.values.Abstractly
-import sturdy.values.PartialOrder
-import sturdy.values.Topped
-import sturdy.values.toppedPartialOrder
-import sturdy.values.concretePO
+import sturdy.values.{Abstractly, PartialOrder, Powerset, Topped, concretePO, toppedPartialOrder, given}
 import sturdy.values.integer.{*, given}
-import sturdy.values.floating.{*,given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.types.BaseType
 
 object TypeAnalysisSoundness {
-
-  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
-    override def apply(c: ConcreteInterpreter.Value): Value = c match
-      case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Num(NumValue.Int32(i)) => Value.Num(NumValue.Int32(topI32))
-      case ConcreteInterpreter.Value.Num(NumValue.Int64(l)) => Value.Num(NumValue.Int64(topI64))
-      case ConcreteInterpreter.Value.Num(NumValue.Float32(f)) => Value.Num(NumValue.Float32(topF32))
-      case ConcreteInterpreter.Value.Num(NumValue.Float64(d)) => Value.Num(NumValue.Float64(topF64))
 
   given poFloat: PartialOrder[Float] with
     override def lteq(f1: Float, f2: Float): Boolean =
