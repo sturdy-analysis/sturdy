@@ -5,7 +5,7 @@ ThisBuild / version := "0.1"
 
 ThisBuild / scalaVersion := "3.3.5"
 
-ThisBuild / Test / fork := false
+ThisBuild / Test / fork := true
 ThisBuild / Test / parallelExecution := false
 ThisBuild / Test / testForkedParallel := false
 ThisBuild / Test / logBuffered := false
@@ -43,6 +43,7 @@ lazy val root = (project in file("."))
 
 lazy val sturdy_core = (project in file("sturdy-core"))
   .settings(
+    javaOptions += s"-Djava.library.path=${baseDirectory.value}/sturdy-apron/result/lib/",
     name := "sturdy_core",
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
@@ -82,10 +83,10 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
       for (source <- files) {
         val target = baseDirectory.value.toPath.getParent / source.name
         println(s"Copies $source to $target")
-        java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        // java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
+    // Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
     assembly / assemblyJarName := "sturdy-apron.jar"
   )
 
