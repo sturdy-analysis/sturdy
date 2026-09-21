@@ -1,13 +1,8 @@
-image: hseeberger/scala-sbt:16.0.1_1.5.5_3.0.1
-
 stages:
-  - test
+  - compile
 
-before_script:
-  - sbt sbtVersion
-  - sbt update
-
-test:
-  stage: test
+compile:
+  stage: compile
+  image: nixos/nix:2.28.5
   script:
-    - SBT_OPTS="-Xss128m -Xmx3g" sbt test -DSTURDY_DEBUG_FIXPOINT="false" -J-Xss128m -J-Xmx3g
+    - nix --extra-experimental-features "nix-command flakes" develop .#ci -c ci-compile
