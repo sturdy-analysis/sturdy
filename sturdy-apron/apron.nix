@@ -11,14 +11,20 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-32dm22P2RAFtRTOCmETaBS9rstv80lq3hvl4He9IgsY=";
   };
 
+  # TODO is the -Wl part needed?
   patchPhase = ''
     substituteInPlace configure \
-      --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\"" \
+      --replace "strip=\"strip --strip-unneeded\"" "strip=\"${binutils}/bin/strip --strip-unneeded\""
+  '' + lib.optionalString (!stdenv.isDarwin) ''
+    substituteInPlace configure \
       --replace 'acc=""' 'acc="-Wl,-plugin-opt=save-temps"'
   '';
 
+  # TODO is gold and the -Wl part needed?
   configurePhase = ''
-    CC=${clang}/bin/clang CFLAGS=-flto LDFLAGS="-flto -fuse-ld=gold -Wl,-plugin-opt=save-temps" ./configure -prefix $out -no-cxx -ppl-prefix ${ppl}/lib/
+    CC=${clang}/bin/clang CFLAGS=-flto \
+    LDFLAGS="-flto${lib.optionalString (!stdenv.isDarwin) " -fuse-ld=gold -Wl,-plugin-opt=save-temps"}" \
+    ./configure -prefix $out -no-cxx -ppl-prefix ${ppl}/lib/
   '';
 
   buildInputs = [ gmp mpfr ppl jdk21_headless ];

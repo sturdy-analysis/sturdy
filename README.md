@@ -35,6 +35,7 @@ A static analysis is sound if it predicts all possible results of a program. Onl
 
 Build the complete project using `sbt compile`, test the complete project with `sbt test`. Use `sturdy_wasm / test` to run tests of individual languages  (here `wasm`).
 
+For CI-style local compilation, run `nix build .#sturdy`.
 
 
 ### Publications
@@ -58,4 +59,3 @@ _Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)_. AC
 **Compositional Soundness Proofs of Abstract Interpreters**  
 Sven Keidel, Casper Bach Poulsen and Sebastian Erdweg.  
 _International Conference on Functional Programming (ICFP)_. ACM, 2018 [[pdf](https://doi.org/10.1145/3236767)] [[Talk](https://www.youtube.com/watch?v=zOqSlHAMGt4)]
-
