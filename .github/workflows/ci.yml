@@ -8,7 +8,10 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,3 +26,20 @@ jobs:
 
       - name: Compile via Nix shell command
         run: nix develop .#ci -c ci-compile
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+      - uses: DeterminateSystems/magic-nix-cache-action@v14 # v14
+      - name: Check Nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@v13 # v13
+
+      - name: Build docker image
+        run: nix build .#docker

@@ -40,6 +40,30 @@
             ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
             sbt compile
           '';
+          sturdy = sbt.lib.mkSbtDerivation {
+            pkgs = pkgs;
+            pname = "sturdy";
+            version = "0.1";
+            src = ./.;
+            depsWarmupCommand = ''
+              rm -rf sturdy-apron/lib
+              ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
+              sbt compile
+            '';
+            nativeBuildInputs = [ numerical-analysis-libraries ];
+            depsSha256 = "sha256-ZllRXxIE6qomVoRj0t8pBPLH9sslLUmU9Dxc6pv0eew=";
+
+            buildPhase = ''
+              rm -rf sturdy-apron/lib
+              ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
+              sbt sturdy_wasm/Test/assembly
+            '';
+
+            installPhase = ''
+              mkdir -p $out/sturdy
+              cp -r ./* $out/sturdy/
+            '';
+          };
         in {
           apps = rec {
             ci-compile = {
@@ -56,7 +80,7 @@
               packages = [ jdk pkgs.sbt numerical-analysis-libraries ciCompileScript ];
             };
           };
-          packages = rec {
+          packages = {
             pyenv = pkgs.python3.withPackages (ps: with ps; [
               jupyter
               ipython
@@ -67,30 +91,10 @@
             elina = pkgs.elina;
             fenv = pkgs.fenv;
             inherit numerical-analysis-libraries;
-            sturdy = sbt.lib.mkSbtDerivation {
-              pkgs = pkgs;
-              pname = "sturdy";
-              version = "0.1";
-              src = ./.;
-              depsWarmupCommand = ''
-                rm -rf sturdy-apron/lib
-                ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
-                sbt compile
-              '';
-              nativeBuildInputs = [ numerical-analysis-libraries ];
-              depsSha256 = "sha256-ZllRXxIE6qomVoRj0t8pBPLH9sslLUmU9Dxc6pv0eew=";
-
-              buildPhase = ''
-                rm -rf sturdy-apron/lib
-                ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
-                sbt sturdy_wasm/Test/assembly
-              '';
-
-              installPhase = ''
-                mkdir -p $out/sturdy
-                cp -r ./* $out/sturdy/
-              '';
-            };
+            inherit sturdy;
+          } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+            # dockerTools images can only be built on Linux (busybox etc. aren't
+            # packaged for Darwin); build one on a Linux machine/CI instead.
             docker = pkgs.dockerTools.buildLayeredImage {
               name = "sturdy";
               tag = "latest";
