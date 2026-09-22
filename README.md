@@ -35,7 +35,7 @@ A static analysis is sound if it predicts all possible results of a program. Onl
 
 Build the complete project using `sbt compile`, test the complete project with `sbt test`. Use `sturdy_wasm / test` to run tests of individual languages  (here `wasm`).
 
-For CI-style local compilation, run `nix run .#ci-compile`.
+For CI-style local compilation, run `nix build .#sturdy`.
 
 
 ### Publications
