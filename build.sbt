@@ -131,7 +131,7 @@ lazy val sturdy_pcf = (project in file("sturdy-pcf"))
 val swam = file("sturdy-wasm/swam")
 
 lazy val sturdy_wasm = {
-  val base = (project in file("sturdy-wasm"))
+  val base = Project(id = "sturdy_wasm", base = file("sturdy-wasm"))
     .dependsOn(sturdy_core % "compile->compile;test->test")
     .dependsOn(sturdy_apron % "compile->compile")
     .settings(
@@ -209,6 +209,7 @@ lazy val sturdy_jvm_bytecode = (project in file("sturdy-jvm-bytecode"))
       ExclusionRule("org.scala-lang.modules", "scala-xml_2.13")
     ),
     scalacOptions += "-deprecation",
+    assembly / assemblyJarName := "sturdy-bytecode.jar"
   )
 
 //lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))

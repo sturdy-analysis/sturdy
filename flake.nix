@@ -49,22 +49,70 @@
             src = ./.;
             depsWarmupCommand = ''
               ${linkApronLib}
-              sbt update
+              sbt compile
             '';
             nativeBuildInputs = [ numerical-analysis-libraries ];
             depsSha256 = "sha256-QTg0xFFBjIZ8Bt5+HMMEq8nMYY8HYDgk9tmUDEX8lws=";
 
             buildPhase = ''
               ${linkApronLib}
-              sbt compile
+              sbt \
+                sturdy_core/assembly \
+                sturdy_apron/assembly \
+                sturdy_tip/assembly \
+                sturdy_wasm/assembly \
+                sturdy_jvm_bytecode/assembly
             '';
 
             installPhase = ''
               mkdir -p $out/sturdy
-              cp -r ./* $out/sturdy/
+              cp ./sturdy-*/target/scala-*/sturdy-*.jar $out/sturdy/
             '';
           };
+          # `depsSha256` is a fixed-output-derivation hash: once a given hash
+          # has been built successfully, Nix trusts that store path forever
+          # and never re-fetches/re-hashes it, even if the *declared* hash is
+          # later changed to something else. That means a local `nix build`
+          # can silently "succeed" with a stale/wrong depsSha256 as long as
+          # you've ever built it before - hiding the exact hash-mismatch that
+          # CI hits on its clean store.
+          #
+          # Building against a throwaway store (`--store local?root=...`)
+          # would be the cleanest way to force a genuine re-fetch, but Nix
+          # doesn't support *building* against a diverted/non-default local
+          # store ("building using a diverted store is not supported on this
+          # platform"). Instead, this script finds the sbt-dependencies FOD
+          # derivation that `sturdy` depends on and deletes its cached output
+          # (if present) so the next build is forced to re-run
+          # `depsWarmupCommand` and re-hash the result, matching what a clean
+          # CI store experiences.
+          checkDepsHashScript = pkgs.writeShellScriptBin "check-deps-hash" ''
+            set -euo pipefail
+            drv="$(nix path-info --derivation "$PWD#sturdy")"
+            deps_drv="$(nix-store -q --requisites "$drv" | grep -m1 -- '-sbt-dependencies\.tar\.zst\.drv$')"
+            if [ -z "$deps_drv" ]; then
+              echo "Could not find the sbt-dependencies FOD derivation" >&2
+              exit 1
+            fi
+            deps_out="$(nix-store -q "$deps_drv")"
+            if [ -e "$deps_out" ]; then
+              # Anything still referencing the deps output (e.g. a leftover
+              # extract-dependencies output from a prior build) keeps it
+              # "alive" and blocks deletion, so delete referrers first.
+              referrers="$(nix-store --query --referrers "$deps_out" || true)"
+              echo "Deleting cached deps output to force re-fetch: $deps_out"
+              nix-store --delete $referrers "$deps_out"
+            fi
+            echo "Rebuilding .#sturdy so depsWarmupCommand is genuinely re-run and re-hashed..."
+            nix build "$PWD#sturdy" "$@"
+          '';
         in {
+          apps = {
+            check-deps-hash = {
+              type = "app";
+              program = "${checkDepsHashScript}/bin/check-deps-hash";
+            };
+          };
           devShells = {
             default = pkgs.mkShell {
               packages = [ jdk pkgs.sbt numerical-analysis-libraries ];
@@ -100,6 +148,7 @@
           };
         };
     in {
+      apps = forAllSystems (system: (perSystem system).apps);
       devShells = forAllSystems (system: (perSystem system).devShells);
       packages = forAllSystems (system: (perSystem system).packages);
     };
