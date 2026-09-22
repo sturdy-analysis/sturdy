@@ -1,7 +1,7 @@
 package sturdy.apron
 
-import apron.{Interval, Texpr1Node}
-import fenv.FEnv
+import apron.Texpr1Node
+import sturdy.fenv.{FEnv, RoundingMode => RM}
 import sturdy.values.floating.FloatSpecials
 import sturdy.values.types.BaseType
 
@@ -52,24 +52,21 @@ enum RoundingDir:
 
 object RoundingMode:
   def getRoundingMode: RoundingDir =
-    val roundingMode = FEnv.getRoundingMode
-    if (roundingMode == FEnv.FE_TONEAREST)
-      RoundingDir.Nearest
-    else if (roundingMode == FEnv.FE_DOWNWARD)
-      RoundingDir.Down
-    else if (roundingMode == FEnv.FE_UPWARD)
-      RoundingDir.Up
-    else if (roundingMode == FEnv.FE_TOWARDZERO)
-      RoundingDir.Zero
-    else
-      throw new IllegalStateException(s"Unknown Rounding Mode $roundingMode")
+    val roundingMode = FEnv.getRoundingMode match {
+      case Some(RM.ToNearest) => RoundingDir.Nearest
+      case Some(RM.Downward) => RoundingDir.Down
+      case Some(RM.Upward) => RoundingDir.Up
+      case Some(RM.TowardZero) => RoundingDir.Zero
+      case None => throw new IllegalStateException(s"Unknown Rounding Mode")
+    }
+    roundingMode
 
-  def setRoundingMode(roundingDir: RoundingDir) =
+  def setRoundingMode(roundingDir: RoundingDir): Boolean =
     roundingDir match
-      case RoundingDir.Down => FEnv.setRoundingMode(FEnv.FE_DOWNWARD)
-      case RoundingDir.Zero => FEnv.setRoundingMode(FEnv.FE_TOWARDZERO)
-      case RoundingDir.Up => FEnv.setRoundingMode(FEnv.FE_UPWARD)
-      case RoundingDir.Nearest => FEnv.setRoundingMode(FEnv.FE_TONEAREST)
+      case RoundingDir.Down => FEnv.setRoundingMode(RM.Downward)
+      case RoundingDir.Zero => FEnv.setRoundingMode(RM.TowardZero)
+      case RoundingDir.Up => FEnv.setRoundingMode(RM.Upward)
+      case RoundingDir.Nearest => FEnv.setRoundingMode(RM.ToNearest)
       case RoundingDir.Rnd => throw IllegalArgumentException(s"Unsupported FPU rounding mode $roundingDir")
 
   def withRoundingMode[A](roundingMode: RoundingDir)(f: => A): A =

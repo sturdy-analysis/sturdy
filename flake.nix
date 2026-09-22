@@ -19,22 +19,21 @@
           overlay = final: prev: {
             apron = final.callPackage sturdy-apron/apron.nix {};
             elina = final.callPackage sturdy-apron/elina.nix {};
-            fenv = final.callPackage sturdy-apron/fenv.nix {};
+            jre = prev.openjdk25; # make sure sbt picks up the JDK we want
           };
           pkgs = import nixpkgs {
             inherit system;
             overlays = [ overlay ];
           };
-          jdk = pkgs.jdk21_headless;
+          jdk = pkgs.jre; # as defined in the overlay above
           numerical-analysis-libraries = pkgs.buildEnv {
             name = "numerical-analysis-libraries";
             paths = [
               pkgs.apron
 #            elina doesn't build on mac
-              pkgs.fenv
             ];
           };
-          # Native apron/fenv libs must be re-linked in every sandboxed phase:
+          # Native apron libs must be re-linked in every sandboxed phase:
           # depsWarmupCommand and buildPhase each run against their own fresh
           # checkout of the source, so the symlink from one phase is never
           # visible in another.
@@ -127,7 +126,6 @@
             ]);
             apron = pkgs.apron;
             elina = pkgs.elina;
-            fenv = pkgs.fenv;
             inherit numerical-analysis-libraries;
             inherit sturdy;
           } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
