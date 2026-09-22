@@ -19,12 +19,13 @@
           overlay = final: prev: {
             apron = final.callPackage sturdy-apron/apron.nix {};
             elina = final.callPackage sturdy-apron/elina.nix {};
+            jre = prev.openjdk25; # make sure sbt picks up the JDK we want
           };
           pkgs = import nixpkgs {
             inherit system;
             overlays = [ overlay ];
           };
-          jdk = pkgs.jdk25;
+          jdk = pkgs.jre; # as defined in the overlay above
           numerical-analysis-libraries = pkgs.buildEnv {
             name = "numerical-analysis-libraries";
             paths = [
