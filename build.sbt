@@ -85,7 +85,6 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
         java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
       }
     },
-    Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
     assembly / assemblyJarName := "sturdy-apron.jar"
   )
 

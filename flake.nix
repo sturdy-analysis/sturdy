@@ -34,11 +34,13 @@
               pkgs.fenv
             ];
           };
-          ciCompileScript = pkgs.writeShellScriptBin "ci-compile" ''
-            set -euo pipefail
+          # Native apron/fenv libs must be re-linked in every sandboxed phase:
+          # depsWarmupCommand and buildPhase each run against their own fresh
+          # checkout of the source, so the symlink from one phase is never
+          # visible in another.
+          linkApronLib = ''
             rm -rf sturdy-apron/lib
             ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
-            sbt compile
           '';
           sturdy = sbt.lib.mkSbtDerivation {
             pkgs = pkgs;
@@ -46,17 +48,15 @@
             version = "0.1";
             src = ./.;
             depsWarmupCommand = ''
-              rm -rf sturdy-apron/lib
-              ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
-              sbt compile
+              ${linkApronLib}
+              sbt update
             '';
             nativeBuildInputs = [ numerical-analysis-libraries ];
             depsSha256 = "sha256-QTg0xFFBjIZ8Bt5+HMMEq8nMYY8HYDgk9tmUDEX8lws=";
 
             buildPhase = ''
-              rm -rf sturdy-apron/lib
-              ln -s ${numerical-analysis-libraries}/lib sturdy-apron/lib
-              sbt sturdy_wasm/Test/assembly
+              ${linkApronLib}
+              sbt compile
             '';
 
             installPhase = ''
@@ -65,19 +65,9 @@
             '';
           };
         in {
-          apps = rec {
-            ci-compile = {
-              type = "app";
-              program = "${ciCompileScript}/bin/ci-compile";
-            };
-            default = ci-compile;
-          };
           devShells = {
             default = pkgs.mkShell {
-              packages = [ jdk pkgs.sbt numerical-analysis-libraries ciCompileScript ];
-            };
-            ci = pkgs.mkShell {
-              packages = [ jdk pkgs.sbt numerical-analysis-libraries ciCompileScript ];
+              packages = [ jdk pkgs.sbt numerical-analysis-libraries ];
             };
           };
           packages = {
@@ -110,7 +100,6 @@
           };
         };
     in {
-      apps = forAllSystems (system: (perSystem system).apps);
       devShells = forAllSystems (system: (perSystem system).devShells);
       packages = forAllSystems (system: (perSystem system).packages);
     };
