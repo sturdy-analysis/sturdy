@@ -51,7 +51,7 @@
               sbt compile
             '';
             nativeBuildInputs = [ numerical-analysis-libraries ];
-            depsSha256 = "sha256-ZllRXxIE6qomVoRj0t8pBPLH9sslLUmU9Dxc6pv0eew=";
+            depsSha256 = "sha256-QTg0xFFBjIZ8Bt5+HMMEq8nMYY8HYDgk9tmUDEX8lws=";
 
             buildPhase = ''
               rm -rf sturdy-apron/lib
