@@ -25,7 +25,7 @@
             inherit system;
             overlays = [ overlay ];
           };
-          jdk = pkgs.jdk21_headless;
+          jdk = pkgs.jdk25;
           numerical-analysis-libraries = pkgs.buildEnv {
             name = "numerical-analysis-libraries";
             paths = [

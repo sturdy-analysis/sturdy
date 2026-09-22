@@ -1,13 +1,12 @@
 package sturdy.apron;
 
 import apron.*;
-import fenv.FEnv;
-
-import java.util.Arrays;
+import sturdy.fenv.FEnv;
+import sturdy.fenv.RoundingMode;
 
 public class ApronOctagonConstraintBug {
     public static void main(String[] args) throws ApronException {
-        FEnv.setRoundingMode(FEnv.FE_TONEAREST());
+        FEnv.setRoundingMode(RoundingMode.ToNearest);
         String[] vars = {"x", "y"};
         Environment env = new Environment(vars, new String[]{});
         Manager manager = new Octagon();

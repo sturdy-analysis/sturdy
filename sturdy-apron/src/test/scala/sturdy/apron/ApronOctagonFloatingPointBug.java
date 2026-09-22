@@ -1,13 +1,14 @@
 package sturdy.apron;
 
 import apron.*;
-import fenv.FEnv;
+import sturdy.fenv.FEnv;
+import sturdy.fenv.RoundingMode;
 
 import java.util.Arrays;
 
 public class ApronOctagonFloatingPointBug {
     public static void main(String[] args) throws ApronException {
-        FEnv.setRoundingMode(FEnv.FE_TONEAREST());
+        FEnv.setRoundingMode(RoundingMode.ToNearest);
         String[] vars = {"a", "b", "c", "d"};
         Environment env = new Environment(new String[]{}, vars);
         Interval top = new Interval(); top.setTop();
