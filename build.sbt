@@ -55,8 +55,6 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     assembly / assemblyJarName := "sturdy-core.jar"
   )
 
-val copyApronBinaries = taskKey[Unit]("Copies the platform-dependent Apron binaries to the project root, so that sbt loads them automatically")
-
 lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
   .dependsOn(sturdy_core % "compile->compile; test->test")
   .settings(
@@ -65,28 +63,6 @@ lazy val sturdy_apron: Project = (project in file("sturdy-apron"))
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     ),
-    copyApronBinaries := {
-      println("Copies Apron binaries")
-      val (os, ext) = System.getProperty("os.name").toLowerCase match {
-        case s if s.contains("darwin") || s.contains("mac") => ("darwin", "dylib")
-        case s if s.contains("win") => ("win", "dll")
-        case s if s.contains("nix") || s.contains("linux") => ("unix", "so")
-      }
-      val arch = System.getProperty("os.arch")
-      val nativeDir = baseDirectory.value / "lib_extra" / s"$os-$arch"
-      if (!nativeDir.exists) {
-        println(s"No Apron binaries for $os on $arch available in ${baseDirectory.value / "lib_extra"}.")
-        println(s"Please create $nativeDir and add Apron binaries there.")
-        throw new FeedbackProvidedException {}
-      }
-      val files = Seq() ++ nativeDir.listFiles().filter(_.name.endsWith(ext))
-      for (source <- files) {
-        val target = baseDirectory.value.toPath.getParent / source.name
-        println(s"Copies $source to $target")
-        // java.nio.file.Files.copy(source.file.toPath, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-      }
-    },
-    // Compile / compile  := ((Compile / compile) dependsOn copyApronBinaries).value,
     assembly / assemblyJarName := "sturdy-apron.jar"
   )
 
@@ -94,7 +70,6 @@ lazy val sturdy_apron_bench: Project = (project in file("sturdy-apron-bench"))
   .dependsOn(sturdy_apron % "compile->compile; test->test")
   .enablePlugins(JmhPlugin)
   .settings(
-    javaOptions += "-Djava.library.path=/home/sven/sturdy.scala/sturdy-apron/result/lib/",
     Jmh / sourceDirectory := (Test / sourceDirectory).value,
     Jmh / classDirectory := (Test / classDirectory).value,
     Jmh / dependencyClasspath := (Test / dependencyClasspath).value,
