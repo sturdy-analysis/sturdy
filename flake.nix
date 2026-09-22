@@ -19,7 +19,6 @@
           overlay = final: prev: {
             apron = final.callPackage sturdy-apron/apron.nix {};
             elina = final.callPackage sturdy-apron/elina.nix {};
-            fenv = final.callPackage sturdy-apron/fenv.nix {};
           };
           pkgs = import nixpkgs {
             inherit system;
@@ -31,10 +30,9 @@
             paths = [
               pkgs.apron
 #            elina doesn't build on mac
-              pkgs.fenv
             ];
           };
-          # Native apron/fenv libs must be re-linked in every sandboxed phase:
+          # Native apron libs must be re-linked in every sandboxed phase:
           # depsWarmupCommand and buildPhase each run against their own fresh
           # checkout of the source, so the symlink from one phase is never
           # visible in another.
@@ -127,7 +125,6 @@
             ]);
             apron = pkgs.apron;
             elina = pkgs.elina;
-            fenv = pkgs.fenv;
             inherit numerical-analysis-libraries;
             inherit sturdy;
           } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
